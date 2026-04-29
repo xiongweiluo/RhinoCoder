@@ -1,0 +1,112 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+.installed.cfg
+MANIFEST
+
+# === Virtual environments ===
+.venv/
+venv/
+env/
+ENV/
+.env/
+.python-version
+
+# === Environment & secrets ===
+.env
+.env.*
+!.env.example
+*.secret
+rhinocoder.yaml.local
+
+# === Model weights & large binaries ===
+*.gguf
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.onnx
+rhinocoder-7b*/
+rhinocoder-7b-awq/
+rhinocoder-7b-mlx*/
+
+# === Data & training artifacts ===
+data/
+!data/.gitkeep
+*.jsonl
+*.parquet
+*.arrow
+*.db
+*.sqlite
+*.sqlite3
+
+# === Logs & monitoring ===
+logs/
+*.log
+*.log.*
+
+# === Test & coverage ===
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.hypothesis/
+
+# === Type checking & linting ===
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+dmypy.json
+
+# === macOS ===
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# === Windows ===
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === Rhino / McNeel ===
+*.rui
+*.rhp
+*.3dm
+*.gh
+*.ghx
+RhinoCode/
+
+# === vLLM / inference ===
+vllm_cache/
+ray_results/
+wandb/
+mlruns/
