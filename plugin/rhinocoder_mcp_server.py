@@ -162,12 +162,17 @@ async def _call_rhino_listener(
             guids = data.get("guids", [])
             logger.info("%s 请求成功，GUIDs=%s", endpoint, guids)
             return True, guids
-        guid = data.get("guid", "unknown")
-        logger.info("%s 请求成功，GUID=%s", endpoint, guid)
-        return True, guid
+        if "guid" in data:
+            guid = data.get("guid")
+            logger.info("%s 请求成功，GUID=%s", endpoint, guid)
+            return True, guid
+        # 数据型响应（get_object_info / get_bounding_box / get_selected_objects 等）
+        # 响应体中没有 "guid" key，直接返回完整 dict
+        logger.info("%s 请求成功，data=%s", endpoint, data)
+        return True, data
 
     # 4xx / 5xx 错误
-    error_detail = data.get("error", response.text[:300])
+    error_detail = data.get("message") or data.get("error", response.text[:300])
     logger.error(
         "Rhino Listener 返回错误 HTTP %d: %s",
         response.status_code,
@@ -632,6 +637,252 @@ async def create_circle(
     )
 
 
+@mcp.tool()
+async def get_selected_objects() -> str:
+    """
+    返回 Rhino 8 当前文档中所有已被用户选中对象的 GUID 列表。
+
+    【空间推理基础工具】
+    这是 Agent 进行空间推理的起点：先用此工具获知用户当前关注的对象，
+    再调用 get_object_info / get_bounding_box 深入分析，避免盲目操作。
+
+    行为说明：
+      - 若用户当前未选中任何对象，返回空列表 []，不报错。
+      - 返回的每个 GUID 可直接传入 get_object_info、get_bounding_box、
+        move_object、boolean_difference 等工具。
+
+    Returns:
+        成功时返回 JSON 格式字典，包含键 "object_ids"（GUID 字符串列表）；
+        失败时返回详细错误描述。
+        示例（有选中）：{"object_ids": ["3f2a1c4b-...", "7b4e8d2a-..."]}
+        示例（无选中）：{"object_ids": []}
+    """
+    logger.info("get_selected_objects 调用")
+    ok, result = await _call_rhino_listener("/get_selected_objects", {})
+    if not ok:
+        return result
+    object_ids = result.get("object_ids", []) if isinstance(result, dict) else []
+    return (
+        f"当前选中 {len(object_ids)} 个对象。\n"
+        f"object_ids = {object_ids}"
+    )
+
+
+@mcp.tool()
+async def get_objects_by_name(name: str) -> str:
+    """
+    通过物体名称获取 GUID，用于精准定位场景中已命名的几何体。
+
+    【语义寻址工具】
+    相比 get_selected_objects（依赖用户手动选择），此工具通过 Rhino 对象的
+    Name 属性进行精确匹配，无需用户交互，是最健壮的对象定位方式。
+
+    行为说明：
+      - 精确匹配（区分大小写）：仅返回 Attributes.Name 与 name 完全相同的对象。
+      - 支持多重匹配：若场景中存在多个同名对象，全部返回。
+      - 若无匹配，返回空列表 []，不报错。
+
+    给对象命名的方式：
+      - 在 Rhino 中选中对象 → Properties 面板 → Name 字段
+      - 或通过 set_object_name 工具（若已注册）
+
+    使用场景示例：
+      - "获取名为 'wall_01' 的物体 GUID"
+        → name="wall_01"
+      - "找到场景中所有命名为 'column' 的柱子"
+        → name="column"，返回全部匹配 GUID
+
+    典型工作流：
+      1. get_objects_by_name("base_plate")      → ["guid1"]
+      2. get_bounding_box("guid1")              → 获取尺寸和位置
+      3. move_object("guid1", ...)              → 精准移动
+
+    Args:
+        name: 要搜索的对象名称字符串，与 Rhino 对象的 Name 属性完全匹配。
+
+    Returns:
+        成功时返回包含匹配对象 GUID 列表的描述；失败时返回详细错误描述。
+        示例（有匹配）：找到 2 个名为 'column' 的对象。object_ids = [...]
+        示例（无匹配）：未找到名为 'column' 的对象。object_ids = []
+    """
+    logger.info("get_objects_by_name 调用，name=%r", name)
+
+    if not isinstance(name, str):
+        return "参数错误：name 必须是字符串"
+
+    ok, result = await _call_rhino_listener("/get_objects_by_name", {"name": name})
+    if not ok:
+        return result
+
+    object_ids = result.get("object_ids", []) if isinstance(result, dict) else []
+    if object_ids:
+        return (
+            f"找到 {len(object_ids)} 个名为 {name!r} 的对象。\n"
+            f"object_ids = {object_ids}"
+        )
+    return f"未找到名为 {name!r} 的对象。object_ids = []"
+
+
+@mcp.tool()
+async def get_object_info(object_id: str) -> str:
+    """
+    获取 Rhino 8 文档中指定对象的元数据：类型、名称和图层。
+
+    【空间推理基础工具】
+    在执行任何修改操作（移动、布尔运算等）之前，Agent 应先调用此工具
+    确认目标对象的类型和所在图层，避免对错误类型的对象执行无效操作。
+
+    类型字段语义（"type" 字段为人类可读字符串，非原始整数）：
+      Point / PointCloud / Curve / Surface / Polysurface / Mesh /
+      Light / Annotation / InstanceReference / ...
+
+    典型工作流：
+      1. get_selected_objects()            → ["guid1"]
+      2. get_object_info("guid1")          → type="Polysurface", layer="Default"
+      3. 确认类型后再执行 boolean_difference 等操作
+
+    Args:
+        object_id: 目标对象的 GUID 字符串（由创建工具或 get_selected_objects 返回）。
+
+    Returns:
+        成功时返回包含 object_id、type、name、layer 的 JSON 字典描述；
+        失败时返回详细错误描述。
+    """
+    logger.info("get_object_info 调用，object_id=%s", object_id)
+
+    if not object_id or not isinstance(object_id, str):
+        return "参数错误：object_id 必须是非空字符串 GUID"
+
+    ok, result = await _call_rhino_listener("/get_object_info", {"object_id": object_id})
+    if not ok:
+        return result
+
+    if isinstance(result, dict):
+        info = result
+    else:
+        return f"意外响应格式: {result}"
+
+    return (
+        f"对象信息：\n"
+        f"  object_id = {info.get('object_id')}\n"
+        f"  type      = {info.get('type')}\n"
+        f"  name      = {info.get('name') or '(未命名)'}\n"
+        f"  layer     = {info.get('layer')}"
+    )
+
+
+@mcp.tool()
+async def get_bounding_box(object_id: str) -> str:
+    """
+    获取 Rhino 8 文档中指定对象的世界坐标系包围盒（Axis-Aligned Bounding Box）。
+
+    【空间推理基础工具】
+    这是 Agent 进行精确空间推理不可或缺的工具：
+      - 通过 center 判断对象当前位置，计算平移向量
+      - 通过 vertices 获取尺寸（max-min），判断是否需要缩放
+      - 通过 vertices[0]（min角）和 vertices[6]（max角）快速推断包围盒范围
+      - 配合 move_object 实现精确对齐和布局
+
+    坐标精度：所有数值统一保留 4 位小数，兼顾建模精度与 Token 效率。
+
+    返回结构：
+      {
+        "object_id": "<GUID>",
+        "vertices": [[x,y,z], ...],   # 8 个角点，世界坐标系
+        "center":   [cx, cy, cz]      # 包围盒中心点
+      }
+    vertices 顺序（Rhino 标准）：
+      [0] = (min_x, min_y, min_z)  [1] = (max_x, min_y, min_z)
+      [2] = (max_x, max_y, min_z)  [3] = (min_x, max_y, min_z)
+      [4] = (min_x, min_y, max_z)  [5] = (max_x, min_y, max_z)
+      [6] = (max_x, max_y, max_z)  [7] = (min_x, max_y, max_z)
+
+    Args:
+        object_id: 目标对象的 GUID 字符串（由创建工具或 get_selected_objects 返回）。
+
+    Returns:
+        成功时返回格式化的包围盒信息（8 顶点 + 中心点，坐标保留 4 位小数）；
+        失败时返回详细错误描述。
+    """
+    logger.info("get_bounding_box 调用，object_id=%s", object_id)
+
+    if not object_id or not isinstance(object_id, str):
+        return "参数错误：object_id 必须是非空字符串 GUID"
+
+    ok, result = await _call_rhino_listener("/get_bounding_box", {"object_id": object_id})
+    if not ok:
+        return result
+
+    if isinstance(result, dict):
+        bbox = result
+    else:
+        return f"意外响应格式: {result}"
+
+    vertices = bbox.get("vertices", [])
+    center   = bbox.get("center", [])
+    min_pt   = vertices[0] if vertices else "N/A"
+    max_pt   = vertices[6] if len(vertices) > 6 else "N/A"
+    return (
+        f"包围盒信息（object_id={bbox.get('object_id')}）：\n"
+        f"  min 角点 = {min_pt}\n"
+        f"  max 角点 = {max_pt}\n"
+        f"  center   = {center}\n"
+        f"  全部 8 顶点 = {vertices}"
+    )
+
+
+@mcp.tool()
+async def set_object_layer(object_id: str, layer_name: str) -> str:
+    """
+    修改 Rhino 8 文档中指定对象的图层归属。如果目标图层不存在，则自动创建。
+
+    【重要】本工具需要依赖其他工具返回的 GUID：
+      - object_id 必须是 Rhino 文档中现有对象的真实 GUID 字符串。
+      - 通常来源于：create_sphere / create_box / get_selected_objects 等工具的返回值。
+      - 切勿凭空捏造 GUID，必须使用之前工具调用实际返回的字符串。
+
+    图层说明：
+      - layer_name 支持 Rhino 图层全路径格式（如 "Parent::Child"）。
+      - 若图层不存在，自动以该名称创建新图层（默认颜色）。
+      - 同一对象只能属于一个图层，操作会覆盖原图层归属。
+
+    使用场景示例：
+      - "把这个球体移到 'Structure' 图层"
+        → object_id=<sphere_guid>, layer_name="Structure"
+      - "将刚创建的长方体归入 'Walls' 图层（若不存在则创建）"
+        → object_id=<box_guid>, layer_name="Walls"
+
+    典型工作流：
+      1. create_box(10, 10, 5)                     → box_guid
+      2. set_object_layer(box_guid, "Structure")   → 自动创建图层并归入
+
+    Args:
+        object_id:  要修改的对象 GUID（由其他创建工具或 get_selected_objects 返回的字符串）。
+        layer_name: 目标图层名称，不存在时自动创建。支持全路径格式（"Parent::Child"）。
+
+    Returns:
+        成功时返回确认消息，包含对象 ID、图层名称和图层索引；失败时返回详细错误描述。
+    """
+    logger.info("set_object_layer 调用，object_id=%s, layer_name=%r", object_id, layer_name)
+
+    if not object_id or not isinstance(object_id, str):
+        return "参数错误：object_id 必须是非空字符串 GUID"
+    if not layer_name or not isinstance(layer_name, str) or not layer_name.strip():
+        return "参数错误：layer_name 必须是非空字符串"
+
+    payload = {"object_id": object_id, "layer_name": layer_name}
+    ok, result = await _call_rhino_listener("/set_object_layer", payload)
+    if not ok:
+        return result
+
+    if isinstance(result, dict):
+        return (
+            f"成功：已将对象 {result.get('object_id')} 移至图层 {result.get('layer_name')!r}。\n"
+            f"layer_index = {result.get('layer_index')}"
+        )
+    return f"成功（原始响应）: {result}"
+
+
 # ---------------------------------------------------------------------------
 # 入口
 # ---------------------------------------------------------------------------
@@ -639,7 +890,9 @@ if __name__ == "__main__":
     logger.info("RhinoCoder MCP Server 启动（stdio transport）")
     logger.info(
         "已注册工具: create_sphere, create_box, create_cylinder, create_line, "
-        "move_object, extrude_curve_straight, boolean_difference, create_circle"
+        "move_object, extrude_curve_straight, boolean_difference, create_circle, "
+        "get_selected_objects, get_objects_by_name, get_object_info, get_bounding_box, "
+        "set_object_layer"
     )
     logger.info("等待 MCP 客户端连接…")
     mcp.run(transport="stdio")

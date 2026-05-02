@@ -68,6 +68,26 @@ LISTEN_PORT = 8080
 REQUEST_TIMEOUT = 12.0  # 等待主线程执行的最长秒数
 
 # ---------------------------------------------------------------------------
+# Rhino 对象类型语义化映射（rs.ObjectType() 返回值 → 人类可读字符串）
+# ---------------------------------------------------------------------------
+_OBJECT_TYPE_MAP: dict[int, str] = {
+    1:      "Point",
+    2:      "PointCloud",
+    4:      "Curve",
+    8:      "Surface",
+    16:     "Polysurface",
+    32:     "Mesh",
+    256:    "Light",
+    512:    "Annotation",
+    4096:   "InstanceReference",
+    8192:   "TextDot",
+    32768:  "Grip",
+    65536:  "Detail",
+    131072: "Hatch",
+    262144: "MorphControl",
+}
+
+# ---------------------------------------------------------------------------
 # 跨线程工作单元
 # ---------------------------------------------------------------------------
 @dataclass
@@ -77,6 +97,7 @@ class _PendingWork:
     params: dict            # 操作所需参数，由各路由处理器填充
     result_guid: Optional[str] = None
     result_guids: Optional[list] = None
+    result_data: Optional[dict] = None
     error: Optional[str] = None
     # 主线程完成后调用 done.set()，请求处理线程在此等待
     done: threading.Event = field(default_factory=threading.Event)
@@ -89,12 +110,17 @@ class _PendingWork:
 # ---------------------------------------------------------------------------
 _work_queue: queue.Queue = queue.Queue()
 
-
 # ---------------------------------------------------------------------------
 # rhinoscriptsyntax 调度 —— 根据操作类型调用对应的 rs.Add* 函数
 # 仅在 Rhino 主线程（Idle 回调）中被调用，因此可以安全使用 rs.*
 # ---------------------------------------------------------------------------
 def _dispatch_rhinoscript(rs, operation: str, params: dict):
+    # 强制重置 rhinoscriptsyntax 的全局文档上下文，防止 Idle 回调中
+    # 出现"线程上下文丢失"导致 rs.* 读不到正确活动文档的问题。
+    import scriptcontext as sc  # noqa: PLC0415
+    import Rhino as _Rhino      # noqa: PLC0415
+    sc.doc = _Rhino.RhinoDoc.ActiveDoc
+
     if operation == "create_sphere":
         return rs.AddSphere([0.0, 0.0, 0.0], params["radius"])
 
@@ -156,6 +182,130 @@ def _dispatch_rhinoscript(rs, operation: str, params: dict):
     elif operation == "create_circle":
         return rs.AddCircle(params["center"], params["radius"])
 
+    elif operation == "get_selected_objects":
+        # 即时暴力扫盘：直接遍历内存中所有对象检查底层 IsSelected 状态，
+        # 绕过 Mac UI 选择集缓存和焦点依赖，是 Mac 环境下最稳妥的方式。
+        doc = _Rhino.RhinoDoc.ActiveDoc
+        if doc is None:
+            open_docs = _Rhino.RhinoDoc.OpenDocuments()
+            if open_docs and len(open_docs) > 0:
+                doc = open_docs[0]
+
+        ids = []
+        if doc is not None:
+            for obj in doc.Objects:
+                if obj.IsSelected(False) > 0:
+                    ids.append(str(obj.Id))
+
+        if not ids:
+            logger.info("扫盘完毕，未发现选中状态的对象")
+        return {"object_ids": ids}
+
+    elif operation == "get_object_info":
+        obj_id = params["object_id"]
+        type_int = rs.ObjectType(obj_id)
+        type_name = _OBJECT_TYPE_MAP.get(type_int, f"Unknown({type_int})")
+        return {
+            "object_id": obj_id,
+            "type":  type_name,
+            "name":  rs.ObjectName(obj_id) or "",
+            "layer": rs.ObjectLayer(obj_id) or "",
+        }
+
+    elif operation == "get_objects_by_name":
+        name = params["name"]
+        search_name = name.strip()
+        matched = []
+        # 优先使用 rs.AllObjects()：在 Mac 版 Rhino 上比直接遍历 doc.Objects 更可靠，
+        # 能正确扫描所有图层（包括锁定/隐藏图层）的对象。
+        try:
+            import rhinoscriptsyntax as _rs_local  # noqa: PLC0415
+            all_ids = _rs_local.AllObjects(select=False, include_lights=False, include_grips=False)
+            if all_ids:
+                for oid in all_ids:
+                    obj_name = _rs_local.ObjectName(oid)
+                    if obj_name and obj_name.strip() == search_name:
+                        matched.append(str(oid))
+        except Exception as _e:
+            logger.warning("rs.AllObjects() 扫描失败，回退到 doc.Objects: %s", _e)
+            doc = _Rhino.RhinoDoc.ActiveDoc
+            if doc is None:
+                open_docs = _Rhino.RhinoDoc.OpenDocuments()
+                if open_docs and len(open_docs) > 0:
+                    doc = open_docs[0]
+            if doc is not None:
+                for obj in doc.Objects:
+                    attr_name = obj.Attributes.Name if obj.Attributes else None
+                    if attr_name and attr_name.strip() == search_name:
+                        matched.append(str(obj.Id))
+
+        logger.debug("get_objects_by_name('%s') 共找到 %d 个匹配对象", search_name, len(matched))
+        return {"object_ids": matched}
+
+    elif operation == "get_bounding_box":
+        obj_id = params["object_id"]
+        # rs.BoundingBox 对 Brep/Surface 有效，但 Extrusion 对象可能返回 None。
+        # 失败时直接访问 .Geometry.GetBoundingBox(True) 作为兜底。
+        bbox = rs.BoundingBox(obj_id)
+        if bbox is None:
+            rh_guid = rs.coerceguid(obj_id)
+            rh_obj = _Rhino.RhinoDoc.ActiveDoc.Objects.FindId(rh_guid) if rh_guid else None
+            if rh_obj is not None and rh_obj.Geometry is not None:
+                bb = rh_obj.Geometry.GetBoundingBox(True)
+                if bb.IsValid:
+                    mn, mx = bb.Min, bb.Max
+                    bbox = [
+                        (mn.X, mn.Y, mn.Z), (mx.X, mn.Y, mn.Z),
+                        (mx.X, mx.Y, mn.Z), (mn.X, mx.Y, mn.Z),
+                        (mn.X, mn.Y, mx.Z), (mx.X, mn.Y, mx.Z),
+                        (mx.X, mx.Y, mx.Z), (mn.X, mx.Y, mx.Z),
+                    ]
+        if bbox is None:
+            raise ValueError(
+                f"无法获取对象 {obj_id} 的包围盒（对象不存在或几何无效）"
+            )
+        def _r4(v):
+            return round(float(v), 4)
+        vertices = [[_r4(pt[0]), _r4(pt[1]), _r4(pt[2])] for pt in bbox]
+        center = [round(sum(v[i] for v in vertices) / 8, 4) for i in range(3)]
+        return {
+            "object_id": obj_id,
+            "vertices":  vertices,
+            "center":    center,
+        }
+
+    elif operation == "set_object_layer":
+        obj_id = params["object_id"]
+        layer_name = params["layer_name"].strip()
+
+        rh_guid = rs.coerceguid(obj_id)
+        if rh_guid is None:
+            raise ValueError(f"无法解析 GUID: {obj_id!r}")
+
+        doc = _Rhino.RhinoDoc.ActiveDoc
+        rh_obj = doc.Objects.FindId(rh_guid)
+        if rh_obj is None:
+            raise ValueError(f"对象不存在: {obj_id}")
+
+        # FindByFullPath 返回图层 index，不存在时返回 -1
+        layer_index = doc.Layers.FindByFullPath(layer_name, True)
+        if layer_index < 0:
+            new_layer = _Rhino.DocObjects.Layer()
+            new_layer.Name = layer_name
+            layer_index = doc.Layers.Add(new_layer)
+            if layer_index < 0:
+                raise ValueError(f"无法创建图层: {layer_name!r}")
+
+        rh_obj.Attributes.LayerIndex = layer_index
+        if not rh_obj.CommitChanges():
+            raise ValueError("CommitChanges() 失败，图层修改可能未生效")
+
+        return {
+            "object_id": obj_id,
+            "layer_name": layer_name,
+            "layer_index": layer_index,
+        }
+
     else:
         raise ValueError(f"未知操作类型: {operation!r}")
 
@@ -193,6 +343,9 @@ def _idle_handler(sender, e) -> None:  # type: ignore[override]
                     "（可能原因：文档处于锁定状态，或参数被 Rhino 拒绝）"
                 )
                 logger.error(work.error)
+            elif isinstance(result, dict):
+                work.result_data = result
+                logger.info("%s 成功，data=%s", work.operation, work.result_data)
             elif isinstance(result, list):
                 work.result_guids = result
                 logger.info("%s 成功，GUIDs=%s", work.operation, work.result_guids)
@@ -232,15 +385,28 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             "/move_object":            self._handle_move_object,
             "/extrude_curve_straight": self._handle_extrude_curve_straight,
             "/boolean_difference":     self._handle_boolean_difference,
+            "/get_selected_objects":   self._handle_get_selected_objects,
+            "/get_object_info":        self._handle_get_object_info,
+            "/get_bounding_box":       self._handle_get_bounding_box,
+            "/get_objects_by_name":    self._handle_get_objects_by_name,
+            "/set_object_layer":       self._handle_set_object_layer,
         }
         handler = _routes.get(self.path)
-        if handler:
-            handler()
-        else:
-            self._send_json(404, {
-                "error": f"Unknown endpoint: {self.path!r}",
-                "registered_endpoints": sorted(_routes.keys()),
-            })
+        try:
+            if handler:
+                handler()
+            else:
+                self._send_json(404, {
+                    "status": "error",
+                    "message": f"Unknown endpoint: {self.path!r}",
+                    "registered_endpoints": sorted(_routes.keys()),
+                })
+        except Exception as exc:
+            logger.exception("do_POST 未捕获异常 path=%s: %s", self.path, exc)
+            try:
+                self._send_json(500, {"status": "error", "message": str(exc)})
+            except Exception:
+                pass
 
     # ------------------------------------------------------------------
     # 公共辅助方法
@@ -250,20 +416,20 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
         try:
             content_length = int(self.headers.get("Content-Length", 0))
         except (TypeError, ValueError):
-            self._send_json(400, {"error": "Invalid Content-Length header"})
+            self._send_json(400, {"status": "error", "message": "Invalid Content-Length header"})
             return None
 
         if content_length == 0:
-            self._send_json(400, {"error": "Empty request body"})
+            self._send_json(400, {"status": "error", "message": "Empty request body"})
             return None
 
         try:
             raw = self.rfile.read(content_length)
             return json.loads(raw)
         except json.JSONDecodeError as exc:
-            self._send_json(400, {"error": f"Invalid JSON: {exc}"})
+            self._send_json(400, {"status": "error", "message": f"Invalid JSON: {exc}"})
         except Exception as exc:
-            self._send_json(400, {"error": f"Failed to read request body: {exc}"})
+            self._send_json(400, {"status": "error", "message": f"Failed to read request body: {exc}"})
         return None
 
     def _enqueue_and_wait(self, operation: str, params: dict) -> None:
@@ -288,17 +454,21 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             self._send_json(
                 504,
                 {
-                    "error": (
+                    "status": "error",
+                    "message": (
                         f"Timeout: Rhino main thread did not respond "
                         f"within {REQUEST_TIMEOUT}s"
-                    )
+                    ),
                 },
             )
             return
 
         if work.error:
             logger.error("%s 执行失败: %s", operation, work.error)
-            self._send_json(500, {"error": work.error})
+            self._send_json(500, {"status": "error", "message": work.error})
+        elif work.result_data is not None:
+            logger.info("%s 完成，data=%s", operation, work.result_data)
+            self._send_json(200, {"status": "ok", **work.result_data})
         elif work.result_guids is not None:
             logger.info("%s 完成，GUIDs=%s", operation, work.result_guids)
             self._send_json(200, {"status": "ok", "guids": work.result_guids})
@@ -317,15 +487,15 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
         try:
             radius = float(data["radius"])
         except KeyError:
-            self._send_json(400, {"error": "Missing field: radius"})
+            self._send_json(400, {"status": "error", "message": "Missing field: radius"})
             return
         except (TypeError, ValueError) as exc:
-            self._send_json(400, {"error": f"Invalid radius value: {exc}"})
+            self._send_json(400, {"status": "error", "message": f"Invalid radius value: {exc}"})
             return
 
         if radius <= 0:
             self._send_json(
-                400, {"error": f"radius must be positive, got {radius}"}
+                400, {"status": "error", "message": f"radius must be positive, got {radius}"}
             )
             return
 
@@ -341,14 +511,14 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             try:
                 val = float(data[fname])
             except KeyError:
-                self._send_json(400, {"error": f"Missing field: {fname}"})
+                self._send_json(400, {"status": "error", "message": f"Missing field: {fname}"})
                 return
             except (TypeError, ValueError) as exc:
-                self._send_json(400, {"error": f"Invalid {fname} value: {exc}"})
+                self._send_json(400, {"status": "error", "message": f"Invalid {fname} value: {exc}"})
                 return
             if val <= 0:
                 self._send_json(
-                    400, {"error": f"{fname} must be positive, got {val}"}
+                    400, {"status": "error", "message": f"{fname} must be positive, got {val}"}
                 )
                 return
             params[fname] = val
@@ -365,14 +535,14 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             try:
                 val = float(data[fname])
             except KeyError:
-                self._send_json(400, {"error": f"Missing field: {fname}"})
+                self._send_json(400, {"status": "error", "message": f"Missing field: {fname}"})
                 return
             except (TypeError, ValueError) as exc:
-                self._send_json(400, {"error": f"Invalid {fname} value: {exc}"})
+                self._send_json(400, {"status": "error", "message": f"Invalid {fname} value: {exc}"})
                 return
             if val <= 0:
                 self._send_json(
-                    400, {"error": f"{fname} must be positive, got {val}"}
+                    400, {"status": "error", "message": f"{fname} must be positive, got {val}"}
                 )
                 return
             params[fname] = val
@@ -388,21 +558,21 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
         for pt_name in ("start", "end"):
             raw_pt = data.get(pt_name)
             if raw_pt is None:
-                self._send_json(400, {"error": f"Missing field: {pt_name}"})
+                self._send_json(400, {"status": "error", "message": f"Missing field: {pt_name}"})
                 return
             try:
                 pt = [float(raw_pt[0]), float(raw_pt[1]), float(raw_pt[2])]
             except (TypeError, IndexError, ValueError) as exc:
                 self._send_json(
                     400,
-                    {"error": f"Invalid {pt_name} (expected [x, y, z]): {exc}"},
+                    {"status": "error", "message": f"Invalid {pt_name} (expected [x, y, z]): {exc}"},
                 )
                 return
             params[pt_name] = pt
 
         if params["start"] == params["end"]:
             self._send_json(
-                400, {"error": "start and end points must be different"}
+                400, {"status": "error", "message": "start and end points must be different"}
             )
             return
 
@@ -417,19 +587,19 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
         if not object_id or not isinstance(object_id, str):
             self._send_json(
                 400,
-                {"error": "Missing or invalid field: object_id (expected non-empty string GUID)"},
+                {"status": "error", "message": "Missing or invalid field: object_id (expected non-empty string GUID)"},
             )
             return
 
         raw_t = data.get("translation")
         if raw_t is None:
-            self._send_json(400, {"error": "Missing field: translation"})
+            self._send_json(400, {"status": "error", "message": "Missing field: translation"})
             return
         try:
             translation = [float(raw_t[0]), float(raw_t[1]), float(raw_t[2])]
         except (TypeError, IndexError, ValueError) as exc:
             self._send_json(
-                400, {"error": f"Invalid translation (expected [x, y, z]): {exc}"}
+                400, {"status": "error", "message": f"Invalid translation (expected [x, y, z]): {exc}"}
             )
             return
 
@@ -446,7 +616,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
         if not curve_id or not isinstance(curve_id, str):
             self._send_json(
                 400,
-                {"error": "Missing or invalid field: curve_id (expected non-empty string GUID)"},
+                {"status": "error", "message": "Missing or invalid field: curve_id (expected non-empty string GUID)"},
             )
             return
 
@@ -454,21 +624,21 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
         for pt_name in ("start_point", "end_point"):
             raw_pt = data.get(pt_name)
             if raw_pt is None:
-                self._send_json(400, {"error": f"Missing field: {pt_name}"})
+                self._send_json(400, {"status": "error", "message": f"Missing field: {pt_name}"})
                 return
             try:
                 pt = [float(raw_pt[0]), float(raw_pt[1]), float(raw_pt[2])]
             except (TypeError, IndexError, ValueError) as exc:
                 self._send_json(
                     400,
-                    {"error": f"Invalid {pt_name} (expected [x, y, z]): {exc}"},
+                    {"status": "error", "message": f"Invalid {pt_name} (expected [x, y, z]): {exc}"},
                 )
                 return
             params[pt_name] = pt
 
         if params["start_point"] == params["end_point"]:
             self._send_json(
-                400, {"error": "start_point and end_point must be different"}
+                400, {"status": "error", "message": "start_point and end_point must be different"}
             )
             return
 
@@ -485,7 +655,8 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
                 self._send_json(
                     400,
                     {
-                        "error": (
+                        "status": "error",
+                        "message": (
                             f"Missing or invalid field: {field_name} "
                             "(expected non-empty list of GUID strings)"
                         )
@@ -495,7 +666,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             if not all(isinstance(g, str) and g for g in val):
                 self._send_json(
                     400,
-                    {"error": f"All elements in {field_name} must be non-empty GUID strings"},
+                    {"status": "error", "message": f"All elements in {field_name} must be non-empty GUID strings"},
                 )
                 return
 
@@ -511,32 +682,104 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
 
         raw_center = data.get("center")
         if raw_center is None:
-            self._send_json(400, {"error": "Missing field: center"})
+            self._send_json(400, {"status": "error", "message": "Missing field: center"})
             return
         try:
             center = [float(raw_center[0]), float(raw_center[1]), float(raw_center[2])]
         except (TypeError, IndexError, ValueError) as exc:
             self._send_json(
-                400, {"error": f"Invalid center (expected [x, y, z]): {exc}"}
+                400, {"status": "error", "message": f"Invalid center (expected [x, y, z]): {exc}"}
             )
             return
 
         try:
             radius = float(data["radius"])
         except KeyError:
-            self._send_json(400, {"error": "Missing field: radius"})
+            self._send_json(400, {"status": "error", "message": "Missing field: radius"})
             return
         except (TypeError, ValueError) as exc:
-            self._send_json(400, {"error": f"Invalid radius value: {exc}"})
+            self._send_json(400, {"status": "error", "message": f"Invalid radius value: {exc}"})
             return
 
         if radius <= 0:
             self._send_json(
-                400, {"error": f"radius must be positive, got {radius}"}
+                400, {"status": "error", "message": f"radius must be positive, got {radius}"}
             )
             return
 
         self._enqueue_and_wait("create_circle", {"center": center, "radius": radius})
+
+    def _handle_get_selected_objects(self) -> None:
+        # 无需请求体：直接派发查询，返回当前选中对象的 GUID 列表（可能为空）
+        self._enqueue_and_wait("get_selected_objects", {})
+
+    def _handle_get_object_info(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        object_id = data.get("object_id")
+        if not object_id or not isinstance(object_id, str):
+            self._send_json(
+                400,
+                {"status": "error", "message": "Missing or invalid field: object_id (expected non-empty string GUID)"},
+            )
+            return
+
+        self._enqueue_and_wait("get_object_info", {"object_id": object_id})
+
+    def _handle_get_bounding_box(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        object_id = data.get("object_id")
+        if not object_id or not isinstance(object_id, str):
+            self._send_json(
+                400,
+                {"status": "error", "message": "Missing or invalid field: object_id (expected non-empty string GUID)"},
+            )
+            return
+
+        self._enqueue_and_wait("get_bounding_box", {"object_id": object_id})
+
+    def _handle_get_objects_by_name(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        name = data.get("name")
+        if name is None or not isinstance(name, str):
+            self._send_json(
+                400,
+                {"status": "error", "message": "Missing or invalid field: name (expected non-empty string)"},
+            )
+            return
+
+        self._enqueue_and_wait("get_objects_by_name", {"name": name})
+
+    def _handle_set_object_layer(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        object_id = data.get("object_id")
+        if not object_id or not isinstance(object_id, str):
+            self._send_json(
+                400,
+                {"status": "error", "message": "Missing or invalid field: object_id (expected non-empty string GUID)"},
+            )
+            return
+
+        layer_name = data.get("layer_name")
+        if layer_name is None or not isinstance(layer_name, str) or not layer_name.strip():
+            self._send_json(
+                400,
+                {"status": "error", "message": "Missing or invalid field: layer_name (expected non-empty string)"},
+            )
+            return
+
+        self._enqueue_and_wait("set_object_layer", {"object_id": object_id, "layer_name": layer_name})
 
     # ------------------------------------------------------------------
     def _send_json(self, status: int, data: dict) -> None:
@@ -629,8 +872,14 @@ def start_listener() -> None:
     logger.info('  /move_object             POST {"object_id": "<GUID>", "translation": [x,y,z]}')
     logger.info('  /extrude_curve_straight  POST {"curve_id": "<GUID>", "start_point": [x,y,z], "end_point": [x,y,z]}')
     logger.info('  /boolean_difference      POST {"input0_ids": ["<GUID>",...], "input1_ids": ["<GUID>",...]}')
+    logger.info('  /get_selected_objects    POST {} → {"object_ids": ["<GUID>",...]}')
+    logger.info('  /get_object_info         POST {"object_id": "<GUID>"} → {"object_id","type","name","layer"}')
+    logger.info('  /get_bounding_box        POST {"object_id": "<GUID>"} → {"object_id","vertices"[8],"center"}')
+    logger.info('  /get_objects_by_name     POST {"name": "<string>"}    → {"object_ids": ["<GUID>",...]}')
+    logger.info('  /set_object_layer        POST {"object_id": "<GUID>", "layer_name": "<string>"} → {"object_id","layer_name","layer_index"}')
     logger.info("  单体操作返回  {\"status\": \"ok\", \"guid\": \"<GUID>\"}")
     logger.info("  多体操作返回  {\"status\": \"ok\", \"guids\": [\"<GUID>\",...]} (boolean_difference)")
+    logger.info("  感知操作返回  {\"status\": \"ok\", <operation-specific fields>}")
     logger.info("=" * 68)
 
 
@@ -658,6 +907,7 @@ def stop_listener() -> None:
             logger.info("已注销 Rhino.RhinoApp.Idle 处理器")
         except Exception as exc:
             logger.warning("注销 Idle 处理器时出错（可忽略）: %s", exc)
+
 
     _server_thread = None
     logger.info("HTTP Listener 已停止")
