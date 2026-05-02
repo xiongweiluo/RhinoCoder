@@ -31,7 +31,7 @@ MCP_SERVER_SCRIPT = PROJECT_ROOT / "plugin" / "rhinocoder_mcp_server.py"
 
 DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1"
 DEEPSEEK_MODEL = "deepseek-chat"
-MAX_TOOL_ROUNDS = 5   # 防止工具调用无限循环
+MAX_TOOL_ROUNDS = 10  # 防止工具调用无限循环
 
 
 # ---------------------------------------------------------------------------

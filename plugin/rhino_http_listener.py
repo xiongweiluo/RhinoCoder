@@ -76,6 +76,7 @@ class _PendingWork:
     operation: str          # 操作类型，如 "draw_sphere"、"draw_box" 等
     params: dict            # 操作所需参数，由各路由处理器填充
     result_guid: Optional[str] = None
+    result_guids: Optional[list] = None
     error: Optional[str] = None
     # 主线程完成后调用 done.set()，请求处理线程在此等待
     done: threading.Event = field(default_factory=threading.Event)
@@ -94,20 +95,18 @@ _work_queue: queue.Queue = queue.Queue()
 # 仅在 Rhino 主线程（Idle 回调）中被调用，因此可以安全使用 rs.*
 # ---------------------------------------------------------------------------
 def _dispatch_rhinoscript(rs, operation: str, params: dict):
-    if operation == "draw_sphere":
+    if operation == "create_sphere":
         return rs.AddSphere([0.0, 0.0, 0.0], params["radius"])
 
-    elif operation == "draw_box":
+    elif operation == "create_box":
         w, d, h = params["width"], params["depth"], params["height"]
-        # AddBox 需要按顺序传入 8 个角点：先底面四顶点，再顶面四顶点
         corners = [
             [0, 0, 0], [w, 0, 0], [w, d, 0], [0, d, 0],
             [0, 0, h], [w, 0, h], [w, d, h], [0, d, h],
         ]
         return rs.AddBox(corners)
 
-    elif operation == "draw_cylinder":
-        # 传入原点作为底面圆心，Rhino 将以世界 Z 轴为圆柱轴向
+    elif operation == "create_cylinder":
         return rs.AddCylinder(
             [0.0, 0.0, 0.0],
             params["height"],
@@ -115,8 +114,47 @@ def _dispatch_rhinoscript(rs, operation: str, params: dict):
             cap=True,
         )
 
-    elif operation == "draw_line":
+    elif operation == "create_line":
         return rs.AddLine(params["start"], params["end"])
+
+    elif operation == "move_object":
+        obj = params["object_id"]
+        t = params["translation"]
+        return rs.MoveObject(obj, t)
+
+    elif operation == "extrude_curve_straight":
+        curve_id = params["curve_id"]
+        sp = params["start_point"]
+        ep = params["end_point"]
+        ext_id = rs.ExtrudeCurveStraight(curve_id, sp, ep)
+        if ext_id is None:
+            raise ValueError(
+                "rs.ExtrudeCurveStraight 返回 None（曲线无效或起止点相同）"
+            )
+        if rs.IsCurveClosed(curve_id):
+            rs.CapPlanarHoles(ext_id)  # 原地封盖，GUID 不变，不接收返回值
+        return ext_id
+
+    elif operation == "boolean_difference":
+        input0_ids = params["input0_ids"]
+        input1_ids = params["input1_ids"]
+        # 强制将字符串 GUID 转换为 Rhino 内部 GUID 对象，提升兼容性
+        obj0 = [rs.coerceguid(i) for i in input0_ids]
+        obj1 = [rs.coerceguid(i) for i in input1_ids]
+        if any(g is None for g in obj0):
+            raise ValueError(f"input0_ids 中存在无法解析的 GUID: {input0_ids}")
+        if any(g is None for g in obj1):
+            raise ValueError(f"input1_ids 中存在无法解析的 GUID: {input1_ids}")
+        new_ids = rs.BooleanDifference(obj0, obj1, delete_input=True)
+        if not new_ids:
+            raise ValueError(
+                "BooleanDifference 返回空结果"
+                "（可能原因：实体未相交、几何无效，或运算本身失败）"
+            )
+        return [str(g) for g in new_ids]
+
+    elif operation == "create_circle":
+        return rs.AddCircle(params["center"], params["radius"])
 
     else:
         raise ValueError(f"未知操作类型: {operation!r}")
@@ -148,15 +186,18 @@ def _idle_handler(sender, e) -> None:  # type: ignore[override]
         logger.debug("主线程：执行 %s params=%s", work.operation, work.params)
         try:
             import rhinoscriptsyntax as rs  # noqa: PLC0415
-            guid = _dispatch_rhinoscript(rs, work.operation, work.params)
-            if guid is None:
+            result = _dispatch_rhinoscript(rs, work.operation, work.params)
+            if result is None:
                 work.error = (
                     f"{work.operation} 返回 None"
                     "（可能原因：文档处于锁定状态，或参数被 Rhino 拒绝）"
                 )
                 logger.error(work.error)
+            elif isinstance(result, list):
+                work.result_guids = result
+                logger.info("%s 成功，GUIDs=%s", work.operation, work.result_guids)
             else:
-                work.result_guid = str(guid)
+                work.result_guid = str(result)
                 logger.info("%s 成功，GUID=%s", work.operation, work.result_guid)
         except Exception as exc:
             work.error = str(exc)
@@ -182,17 +223,24 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
     """处理所有 POST 路由请求，将几何体创建任务派发至 Rhino 主线程。"""
 
     def do_POST(self) -> None:
-        handler = {
-            "/draw_sphere":   self._handle_draw_sphere,
-            "/draw_box":      self._handle_draw_box,
-            "/draw_cylinder": self._handle_draw_cylinder,
-            "/draw_line":     self._handle_draw_line,
-        }.get(self.path)
-
+        _routes = {
+            "/create_sphere":          self._handle_create_sphere,
+            "/create_box":             self._handle_create_box,
+            "/create_cylinder":        self._handle_create_cylinder,
+            "/create_line":            self._handle_create_line,
+            "/create_circle":          self._handle_create_circle,
+            "/move_object":            self._handle_move_object,
+            "/extrude_curve_straight": self._handle_extrude_curve_straight,
+            "/boolean_difference":     self._handle_boolean_difference,
+        }
+        handler = _routes.get(self.path)
         if handler:
             handler()
         else:
-            self._send_json(404, {"error": f"Unknown endpoint: {self.path}"})
+            self._send_json(404, {
+                "error": f"Unknown endpoint: {self.path!r}",
+                "registered_endpoints": sorted(_routes.keys()),
+            })
 
     # ------------------------------------------------------------------
     # 公共辅助方法
@@ -251,6 +299,9 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
         if work.error:
             logger.error("%s 执行失败: %s", operation, work.error)
             self._send_json(500, {"error": work.error})
+        elif work.result_guids is not None:
+            logger.info("%s 完成，GUIDs=%s", operation, work.result_guids)
+            self._send_json(200, {"status": "ok", "guids": work.result_guids})
         else:
             logger.info("%s 完成，GUID=%s", operation, work.result_guid)
             self._send_json(200, {"status": "ok", "guid": work.result_guid})
@@ -258,7 +309,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
     # ------------------------------------------------------------------
     # 各路由处理方法
     # ------------------------------------------------------------------
-    def _handle_draw_sphere(self) -> None:
+    def _handle_create_sphere(self) -> None:
         data = self._parse_body()
         if data is None:
             return
@@ -278,9 +329,9 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             )
             return
 
-        self._enqueue_and_wait("draw_sphere", {"radius": radius})
+        self._enqueue_and_wait("create_sphere", {"radius": radius})
 
-    def _handle_draw_box(self) -> None:
+    def _handle_create_box(self) -> None:
         data = self._parse_body()
         if data is None:
             return
@@ -302,9 +353,9 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
                 return
             params[fname] = val
 
-        self._enqueue_and_wait("draw_box", params)
+        self._enqueue_and_wait("create_box", params)
 
-    def _handle_draw_cylinder(self) -> None:
+    def _handle_create_cylinder(self) -> None:
         data = self._parse_body()
         if data is None:
             return
@@ -326,9 +377,9 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
                 return
             params[fname] = val
 
-        self._enqueue_and_wait("draw_cylinder", params)
+        self._enqueue_and_wait("create_cylinder", params)
 
-    def _handle_draw_line(self) -> None:
+    def _handle_create_line(self) -> None:
         data = self._parse_body()
         if data is None:
             return
@@ -355,7 +406,137 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             )
             return
 
-        self._enqueue_and_wait("draw_line", params)
+        self._enqueue_and_wait("create_line", params)
+
+    def _handle_move_object(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        object_id = data.get("object_id")
+        if not object_id or not isinstance(object_id, str):
+            self._send_json(
+                400,
+                {"error": "Missing or invalid field: object_id (expected non-empty string GUID)"},
+            )
+            return
+
+        raw_t = data.get("translation")
+        if raw_t is None:
+            self._send_json(400, {"error": "Missing field: translation"})
+            return
+        try:
+            translation = [float(raw_t[0]), float(raw_t[1]), float(raw_t[2])]
+        except (TypeError, IndexError, ValueError) as exc:
+            self._send_json(
+                400, {"error": f"Invalid translation (expected [x, y, z]): {exc}"}
+            )
+            return
+
+        self._enqueue_and_wait(
+            "move_object", {"object_id": object_id, "translation": translation}
+        )
+
+    def _handle_extrude_curve_straight(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        curve_id = data.get("curve_id")
+        if not curve_id or not isinstance(curve_id, str):
+            self._send_json(
+                400,
+                {"error": "Missing or invalid field: curve_id (expected non-empty string GUID)"},
+            )
+            return
+
+        params: dict = {"curve_id": curve_id}
+        for pt_name in ("start_point", "end_point"):
+            raw_pt = data.get(pt_name)
+            if raw_pt is None:
+                self._send_json(400, {"error": f"Missing field: {pt_name}"})
+                return
+            try:
+                pt = [float(raw_pt[0]), float(raw_pt[1]), float(raw_pt[2])]
+            except (TypeError, IndexError, ValueError) as exc:
+                self._send_json(
+                    400,
+                    {"error": f"Invalid {pt_name} (expected [x, y, z]): {exc}"},
+                )
+                return
+            params[pt_name] = pt
+
+        if params["start_point"] == params["end_point"]:
+            self._send_json(
+                400, {"error": "start_point and end_point must be different"}
+            )
+            return
+
+        self._enqueue_and_wait("extrude_curve_straight", params)
+
+    def _handle_boolean_difference(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        for field_name in ("input0_ids", "input1_ids"):
+            val = data.get(field_name)
+            if not val or not isinstance(val, list):
+                self._send_json(
+                    400,
+                    {
+                        "error": (
+                            f"Missing or invalid field: {field_name} "
+                            "(expected non-empty list of GUID strings)"
+                        )
+                    },
+                )
+                return
+            if not all(isinstance(g, str) and g for g in val):
+                self._send_json(
+                    400,
+                    {"error": f"All elements in {field_name} must be non-empty GUID strings"},
+                )
+                return
+
+        self._enqueue_and_wait(
+            "boolean_difference",
+            {"input0_ids": data["input0_ids"], "input1_ids": data["input1_ids"]},
+        )
+
+    def _handle_create_circle(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        raw_center = data.get("center")
+        if raw_center is None:
+            self._send_json(400, {"error": "Missing field: center"})
+            return
+        try:
+            center = [float(raw_center[0]), float(raw_center[1]), float(raw_center[2])]
+        except (TypeError, IndexError, ValueError) as exc:
+            self._send_json(
+                400, {"error": f"Invalid center (expected [x, y, z]): {exc}"}
+            )
+            return
+
+        try:
+            radius = float(data["radius"])
+        except KeyError:
+            self._send_json(400, {"error": "Missing field: radius"})
+            return
+        except (TypeError, ValueError) as exc:
+            self._send_json(400, {"error": f"Invalid radius value: {exc}"})
+            return
+
+        if radius <= 0:
+            self._send_json(
+                400, {"error": f"radius must be positive, got {radius}"}
+            )
+            return
+
+        self._enqueue_and_wait("create_circle", {"center": center, "radius": radius})
 
     # ------------------------------------------------------------------
     def _send_json(self, status: int, data: dict) -> None:
@@ -440,19 +621,16 @@ def start_listener() -> None:
 
     logger.info("=" * 68)
     logger.info("  Rhino HTTP Listener 已启动")
-    logger.info(
-        '  /draw_sphere    POST {"radius": <float>}'
-    )
-    logger.info(
-        '  /draw_box       POST {"width": <float>, "depth": <float>, "height": <float>}'
-    )
-    logger.info(
-        '  /draw_cylinder  POST {"radius": <float>, "height": <float>}'
-    )
-    logger.info(
-        '  /draw_line      POST {"start": [x,y,z], "end": [x,y,z]}'
-    )
-    logger.info("  所有端点均返回  {\"status\": \"ok\", \"guid\": \"<GUID>\"}")
+    logger.info('  /create_sphere           POST {"radius": <float>}')
+    logger.info('  /create_box              POST {"width": <float>, "depth": <float>, "height": <float>}')
+    logger.info('  /create_cylinder         POST {"radius": <float>, "height": <float>}')
+    logger.info('  /create_line             POST {"start": [x,y,z], "end": [x,y,z]}')
+    logger.info('  /create_circle           POST {"center": [x,y,z], "radius": <float>}')
+    logger.info('  /move_object             POST {"object_id": "<GUID>", "translation": [x,y,z]}')
+    logger.info('  /extrude_curve_straight  POST {"curve_id": "<GUID>", "start_point": [x,y,z], "end_point": [x,y,z]}')
+    logger.info('  /boolean_difference      POST {"input0_ids": ["<GUID>",...], "input1_ids": ["<GUID>",...]}')
+    logger.info("  单体操作返回  {\"status\": \"ok\", \"guid\": \"<GUID>\"}")
+    logger.info("  多体操作返回  {\"status\": \"ok\", \"guids\": [\"<GUID>\",...]} (boolean_difference)")
     logger.info("=" * 68)
 
 
