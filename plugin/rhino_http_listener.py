@@ -4,7 +4,10 @@ plugin/rhino_http_listener.py  —  运行在 Rhino 8 内部（Python 3.9，纯�
 架构
 ────────────────────────────────────────────────────────────────────
 [外部 MCP Server]
-      │  POST http://127.0.0.1:8080/draw_sphere  {"radius": 15.0}
+      │  POST http://127.0.0.1:8080/draw_sphere    {"radius": 15.0}
+      │  POST http://127.0.0.1:8080/draw_box       {"width": 10.0, "depth": 5.0, "height": 3.0}
+      │  POST http://127.0.0.1:8080/draw_cylinder  {"radius": 4.0, "height": 8.0}
+      │  POST http://127.0.0.1:8080/draw_line      {"start": [0,0,0], "end": [10,0,0]}
       ▼
 [后台线程: ThreadedHTTPServer  —  _RhinoHTTPHandler.do_POST()]
       │  _PendingWork 入队 _work_queue
@@ -13,7 +16,7 @@ plugin/rhino_http_listener.py  —  运行在 Rhino 8 内部（Python 3.9，纯�
 [_work_queue: queue.Queue]
       │  Rhino.RhinoApp.Idle 主线程消费
       ▼
-[Rhino 主线程: rs.AddSphere()  →  work.result_guid / work.error]
+[Rhino 主线程: rs.Add*()  →  work.result_guid / work.error]
       │  work.done.set()  → 请求处理线程解除等待
       ▼
 [_RhinoHTTPHandler 返回 JSON 响应给 MCP Server]
@@ -69,8 +72,9 @@ REQUEST_TIMEOUT = 12.0  # 等待主线程执行的最长秒数
 # ---------------------------------------------------------------------------
 @dataclass
 class _PendingWork:
-    """一次 draw_sphere 请求在主线程和请求处理线程之间共享的状态。"""
-    radius: float
+    """一次几何体操作请求在主线程和请求处理线程之间共享的状态。"""
+    operation: str          # 操作类型，如 "draw_sphere"、"draw_box" 等
+    params: dict            # 操作所需参数，由各路由处理器填充
     result_guid: Optional[str] = None
     error: Optional[str] = None
     # 主线程完成后调用 done.set()，请求处理线程在此等待
@@ -83,6 +87,39 @@ class _PendingWork:
 # 工作队列 —— 请求处理线程 put，主线程（Idle 事件）get
 # ---------------------------------------------------------------------------
 _work_queue: queue.Queue = queue.Queue()
+
+
+# ---------------------------------------------------------------------------
+# rhinoscriptsyntax 调度 —— 根据操作类型调用对应的 rs.Add* 函数
+# 仅在 Rhino 主线程（Idle 回调）中被调用，因此可以安全使用 rs.*
+# ---------------------------------------------------------------------------
+def _dispatch_rhinoscript(rs, operation: str, params: dict):
+    if operation == "draw_sphere":
+        return rs.AddSphere([0.0, 0.0, 0.0], params["radius"])
+
+    elif operation == "draw_box":
+        w, d, h = params["width"], params["depth"], params["height"]
+        # AddBox 需要按顺序传入 8 个角点：先底面四顶点，再顶面四顶点
+        corners = [
+            [0, 0, 0], [w, 0, 0], [w, d, 0], [0, d, 0],
+            [0, 0, h], [w, 0, h], [w, d, h], [0, d, h],
+        ]
+        return rs.AddBox(corners)
+
+    elif operation == "draw_cylinder":
+        # 传入原点作为底面圆心，Rhino 将以世界 Z 轴为圆柱轴向
+        return rs.AddCylinder(
+            [0.0, 0.0, 0.0],
+            params["height"],
+            params["radius"],
+            cap=True,
+        )
+
+    elif operation == "draw_line":
+        return rs.AddLine(params["start"], params["end"])
+
+    else:
+        raise ValueError(f"未知操作类型: {operation!r}")
 
 
 # ---------------------------------------------------------------------------
@@ -100,27 +137,30 @@ def _idle_handler(sender, e) -> None:  # type: ignore[override]
         except queue.Empty:
             break
 
-        # 若 HTTP 请求已超时，跳过执行，避免在 Rhino 中产生"幽灵球体"
+        # 若 HTTP 请求已超时，跳过执行，避免在 Rhino 中产生"幽灵对象"
         if work.cancelled:
-            logger.warning("跳过已超时取消的任务 (radius=%.4f)", work.radius)
+            logger.warning(
+                "跳过已超时取消的任务 (op=%s, params=%s)",
+                work.operation, work.params,
+            )
             continue
 
-        logger.debug("主线程：执行 rs.AddSphere(radius=%.4f)", work.radius)
+        logger.debug("主线程：执行 %s params=%s", work.operation, work.params)
         try:
             import rhinoscriptsyntax as rs  # noqa: PLC0415
-            guid = rs.AddSphere([0.0, 0.0, 0.0], work.radius)
+            guid = _dispatch_rhinoscript(rs, work.operation, work.params)
             if guid is None:
                 work.error = (
-                    "rs.AddSphere 返回 None"
-                    "（可能原因：文档处于锁定状态，或 radius 被 Rhino 拒绝）"
+                    f"{work.operation} 返回 None"
+                    "（可能原因：文档处于锁定状态，或参数被 Rhino 拒绝）"
                 )
                 logger.error(work.error)
             else:
                 work.result_guid = str(guid)
-                logger.info("球体创建成功，GUID=%s", work.result_guid)
+                logger.info("%s 成功，GUID=%s", work.operation, work.result_guid)
         except Exception as exc:
             work.error = str(exc)
-            logger.exception("主线程执行 rs.AddSphere 失败: %s", exc)
+            logger.exception("主线程执行 %s 失败: %s", work.operation, exc)
         finally:
             # 无论成功或失败，都通知等待中的 HTTP 处理线程
             work.done.set()
@@ -139,64 +179,58 @@ class _ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 
 
 class _RhinoHTTPHandler(BaseHTTPRequestHandler):
-    """处理 POST /draw_sphere 请求。"""
+    """处理所有 POST 路由请求，将几何体创建任务派发至 Rhino 主线程。"""
 
     def do_POST(self) -> None:
-        if self.path == "/draw_sphere":
-            self._handle_draw_sphere()
+        handler = {
+            "/draw_sphere":   self._handle_draw_sphere,
+            "/draw_box":      self._handle_draw_box,
+            "/draw_cylinder": self._handle_draw_cylinder,
+            "/draw_line":     self._handle_draw_line,
+        }.get(self.path)
+
+        if handler:
+            handler()
         else:
             self._send_json(404, {"error": f"Unknown endpoint: {self.path}"})
 
     # ------------------------------------------------------------------
-    def _handle_draw_sphere(self) -> None:
-        # 1. 解析请求体
+    # 公共辅助方法
+    # ------------------------------------------------------------------
+    def _parse_body(self) -> Optional[dict]:
+        """读取并解析请求体 JSON。解析失败时自动发送 4xx 响应并返回 None。"""
         try:
             content_length = int(self.headers.get("Content-Length", 0))
         except (TypeError, ValueError):
             self._send_json(400, {"error": "Invalid Content-Length header"})
-            return
+            return None
 
         if content_length == 0:
             self._send_json(400, {"error": "Empty request body"})
-            return
+            return None
 
         try:
             raw = self.rfile.read(content_length)
-            data = json.loads(raw)
+            return json.loads(raw)
         except json.JSONDecodeError as exc:
             self._send_json(400, {"error": f"Invalid JSON: {exc}"})
-            return
         except Exception as exc:
             self._send_json(400, {"error": f"Failed to read request body: {exc}"})
-            return
+        return None
 
-        # 2. 校验 radius
-        try:
-            radius = float(data["radius"])
-        except KeyError:
-            self._send_json(400, {"error": "Missing field: radius"})
-            return
-        except (TypeError, ValueError) as exc:
-            self._send_json(400, {"error": f"Invalid radius value: {exc}"})
-            return
-
-        if radius <= 0:
-            self._send_json(
-                400, {"error": f"radius must be positive, got {radius}"}
-            )
-            return
-
-        # 3. 入队并等待主线程执行
-        work = _PendingWork(radius=radius)
+    def _enqueue_and_wait(self, operation: str, params: dict) -> None:
+        """
+        将工作单元入队并等待 Rhino 主线程完成，最后发送 JSON 响应。
+        超时返回 504；执行失败返回 500；成功返回 200 + GUID。
+        """
+        work = _PendingWork(operation=operation, params=params)
         _work_queue.put(work)
         logger.info(
-            "请求入队 draw_sphere(radius=%.4f)，等待 Rhino 主线程（超时 %.1fs）…",
-            radius,
-            REQUEST_TIMEOUT,
+            "请求入队 %s(params=%s)，等待 Rhino 主线程（超时 %.1fs）…",
+            operation, params, REQUEST_TIMEOUT,
         )
 
         if not work.done.wait(timeout=REQUEST_TIMEOUT):
-            # 超时：标记取消，防止主线程事后仍然执行
             work.cancelled = True
             logger.error(
                 "等待 Rhino 主线程超时（%.1fs）。"
@@ -214,13 +248,114 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             )
             return
 
-        # 4. 返回结果
         if work.error:
-            logger.error("draw_sphere 执行失败: %s", work.error)
+            logger.error("%s 执行失败: %s", operation, work.error)
             self._send_json(500, {"error": work.error})
         else:
-            logger.info("draw_sphere 完成，GUID=%s", work.result_guid)
+            logger.info("%s 完成，GUID=%s", operation, work.result_guid)
             self._send_json(200, {"status": "ok", "guid": work.result_guid})
+
+    # ------------------------------------------------------------------
+    # 各路由处理方法
+    # ------------------------------------------------------------------
+    def _handle_draw_sphere(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        try:
+            radius = float(data["radius"])
+        except KeyError:
+            self._send_json(400, {"error": "Missing field: radius"})
+            return
+        except (TypeError, ValueError) as exc:
+            self._send_json(400, {"error": f"Invalid radius value: {exc}"})
+            return
+
+        if radius <= 0:
+            self._send_json(
+                400, {"error": f"radius must be positive, got {radius}"}
+            )
+            return
+
+        self._enqueue_and_wait("draw_sphere", {"radius": radius})
+
+    def _handle_draw_box(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        params: dict = {}
+        for fname in ("width", "depth", "height"):
+            try:
+                val = float(data[fname])
+            except KeyError:
+                self._send_json(400, {"error": f"Missing field: {fname}"})
+                return
+            except (TypeError, ValueError) as exc:
+                self._send_json(400, {"error": f"Invalid {fname} value: {exc}"})
+                return
+            if val <= 0:
+                self._send_json(
+                    400, {"error": f"{fname} must be positive, got {val}"}
+                )
+                return
+            params[fname] = val
+
+        self._enqueue_and_wait("draw_box", params)
+
+    def _handle_draw_cylinder(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        params: dict = {}
+        for fname in ("radius", "height"):
+            try:
+                val = float(data[fname])
+            except KeyError:
+                self._send_json(400, {"error": f"Missing field: {fname}"})
+                return
+            except (TypeError, ValueError) as exc:
+                self._send_json(400, {"error": f"Invalid {fname} value: {exc}"})
+                return
+            if val <= 0:
+                self._send_json(
+                    400, {"error": f"{fname} must be positive, got {val}"}
+                )
+                return
+            params[fname] = val
+
+        self._enqueue_and_wait("draw_cylinder", params)
+
+    def _handle_draw_line(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        params: dict = {}
+        for pt_name in ("start", "end"):
+            raw_pt = data.get(pt_name)
+            if raw_pt is None:
+                self._send_json(400, {"error": f"Missing field: {pt_name}"})
+                return
+            try:
+                pt = [float(raw_pt[0]), float(raw_pt[1]), float(raw_pt[2])]
+            except (TypeError, IndexError, ValueError) as exc:
+                self._send_json(
+                    400,
+                    {"error": f"Invalid {pt_name} (expected [x, y, z]): {exc}"},
+                )
+                return
+            params[pt_name] = pt
+
+        if params["start"] == params["end"]:
+            self._send_json(
+                400, {"error": "start and end points must be different"}
+            )
+            return
+
+        self._enqueue_and_wait("draw_line", params)
 
     # ------------------------------------------------------------------
     def _send_json(self, status: int, data: dict) -> None:
@@ -303,12 +438,22 @@ def start_listener() -> None:
     )
     _server_thread.start()
 
-    logger.info("=" * 58)
+    logger.info("=" * 68)
     logger.info("  Rhino HTTP Listener 已启动")
-    logger.info("  端点 : POST http://%s:%d/draw_sphere", LISTEN_HOST, LISTEN_PORT)
-    logger.info("  请求体: {\"radius\": <float>}")
-    logger.info("  响应体: {\"status\": \"ok\", \"guid\": \"<GUID>\"}")
-    logger.info("=" * 58)
+    logger.info(
+        '  /draw_sphere    POST {"radius": <float>}'
+    )
+    logger.info(
+        '  /draw_box       POST {"width": <float>, "depth": <float>, "height": <float>}'
+    )
+    logger.info(
+        '  /draw_cylinder  POST {"radius": <float>, "height": <float>}'
+    )
+    logger.info(
+        '  /draw_line      POST {"start": [x,y,z], "end": [x,y,z]}'
+    )
+    logger.info("  所有端点均返回  {\"status\": \"ok\", \"guid\": \"<GUID>\"}")
+    logger.info("=" * 68)
 
 
 def stop_listener() -> None:
