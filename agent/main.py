@@ -2,11 +2,14 @@
 agent/main.py  —  RhinoCoder Agent 主控入口
 
 Sprint 2 : --test-draw   直连 MCP 物理链路，不经过 LLM
-Sprint 3+: --prompt <指令>  LLM + Router + MCP 完整循环（预留结构）
+Sprint 3 : --prompt <指令>  DeepSeek LLM + MCP 工具调用完整循环
 
 用法:
     # 链路测试（需先在 Rhino 中执行 start_listener()）
     python agent/main.py --test-draw
+
+    # LLM 完整链路（需设置 DEEPSEEK_API_KEY 并启动 Rhino Listener）
+    python agent/main.py --prompt "帮我在原点画一个半径为 50 的球"
 
     # 查看帮助
     python agent/main.py --help
@@ -20,15 +23,22 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+# 确保无论从哪里调用，PROJECT_ROOT 都在 sys.path 中（以便 `from agent.llm import ...` 能找到模块）
+_HERE = Path(__file__).resolve()
+PROJECT_ROOT = _HERE.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 import typer
+from dotenv import load_dotenv
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 # ---------------------------------------------------------------------------
-# 路径
+# 路径 & 环境变量
 # ---------------------------------------------------------------------------
-_HERE = Path(__file__).resolve()
-PROJECT_ROOT = _HERE.parent.parent
+# 从项目根目录的 .env 文件加载环境变量（不覆盖已有 shell 变量）
+load_dotenv(PROJECT_ROOT / ".env", override=False)
 MCP_SERVER_SCRIPT = PROJECT_ROOT / "plugin" / "rhinocoder_mcp_server.py"
 
 # ---------------------------------------------------------------------------
@@ -178,20 +188,19 @@ class RhinoCoderAgent:
         """
         return await _run_test_draw_session()
 
-    # ── Sprint 3+ 预留：LLM + Router + MCP 完整循环 ─────────────────────
-    async def run(self, prompt: str) -> str:
+    # ── Sprint 3: DeepSeek LLM + MCP 完整循环 ───────────────────────────
+    async def run(self, prompt: str) -> int:
         """
-        完整 Agent 循环（Sprint 3+ 实现）:
-          Step 1  router.py  —— 两阶段意图路由（规则 + Qwen 分类头）
-          Step 2  agent.py   —— LLM 代码生成（本地 vLLM / 云端 API）
-          Step 3  MCP tools  —— create_sphere 等工具执行
-          Step 4  agent.py   —— 自愈 Debug 循环（最多重试 2 次）
+        完整 Agent 循环:
+          Step 1  MCP 握手 + 工具发现
+          Step 2  DeepSeek LLM 推理（含工具调用）
+          Step 3  MCP call_tool 执行
+          Step 4  将工具结果反馈 LLM，生成最终自然语言回复
+
+        返回 exit code: 0 = 成功, 非 0 = 失败
         """
-        # TODO Sprint 3: 接入 router.Router + agent.AgentLoop
-        raise NotImplementedError(
-            "Sprint 3: LLM Agent loop 尚未实现。\n"
-            "实现入口: agent/agent.py → AgentLoop.run(prompt)"
-        )
+        from agent.llm import run_agent
+        return await run_agent(prompt)
 
 
 # ---------------------------------------------------------------------------
@@ -248,13 +257,22 @@ def main(
         typer.echo("=" * 55)
         raise typer.Exit(exit_code)
 
-    # ── --prompt（Sprint 3+ 预留）────────────────────────────────────────
+    # ── --prompt（Sprint 3）──────────────────────────────────────────────
     if prompt is not None:
-        typer.echo(
-            "[Sprint 3+] LLM Agent loop 尚未实现，请关注后续 Sprint。",
-            err=True,
-        )
-        raise typer.Exit(1)
+        typer.echo("=" * 55)
+        typer.echo("  RhinoCoder  Sprint 3  LLM + MCP 完整链路")
+        typer.echo(f"  Prompt : {prompt}")
+        typer.echo(f"  前提   : Rhino 已运行 start_listener()")
+        typer.echo(f"           DEEPSEEK_API_KEY 已设置")
+        typer.echo("=" * 55)
+
+        exit_code = asyncio.run(agent.run(prompt))
+
+        typer.echo("=" * 55)
+        status = "✓ 完成" if exit_code == 0 else "✗ 失败"
+        typer.echo(f"  结果   : {status}")
+        typer.echo("=" * 55)
+        raise typer.Exit(exit_code)
 
     # ── 无参数：提示用法 ──────────────────────────────────────────────────
     typer.echo("未指定任何命令，请使用 --help 查看选项。")
