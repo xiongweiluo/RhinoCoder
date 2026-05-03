@@ -422,6 +422,72 @@ def _dispatch_rhinoscript(rs, operation: str, params: dict):
             "target_val": round(target_val, 4),
         }
 
+    elif operation == "distribute_objects":
+        object_ids = params["object_ids"]
+        axis       = params["axis"]     # "X" | "Y" | "Z"（已大写）
+        spacing    = params["spacing"]  # float, >= 0
+
+        axis_idx = {"X": 0, "Y": 1, "Z": 2}[axis]
+
+        # ── 一次性采集所有包围盒 ──────────────────────────────────────────
+        bboxes = []
+        for oid in object_ids:
+            bbox = rs.BoundingBox(oid)
+            if bbox is None:
+                raise ValueError(
+                    f"无法获取对象 {oid} 的包围盒"
+                    "（对象不存在、类型不支持，或几何无效）"
+                )
+            bboxes.append(bbox)
+
+        # ── 按 axis 方向中心点升序排列，保证分布顺序符合空间自然顺序 ────
+        # bbox[0] = min 角点，bbox[6] = max 角点；用 getattr 读 Point3d 属性
+        def _center_on_axis(bbox):
+            return (getattr(bbox[0], axis) + getattr(bbox[6], axis)) / 2.0
+
+        order          = sorted(range(len(object_ids)), key=lambda i: _center_on_axis(bboxes[i]))
+        sorted_ids     = [object_ids[i] for i in order]
+        sorted_bboxes  = [bboxes[i]     for i in order]
+
+        # ── 动态游标：第一个物体不动，从其 Max 边界开始建立游标 ──────────
+        first_max = getattr(sorted_bboxes[0][6], axis)
+        current_target_min = first_max + spacing
+
+        moved_count = 1  # 第一个不动，但计入总数
+        for oid, bbox in zip(sorted_ids[1:], sorted_bboxes[1:]):
+            obj_min = getattr(bbox[0], axis)
+            obj_max = getattr(bbox[6], axis)
+
+            delta = current_target_min - obj_min
+            if abs(delta) >= 1e-9:
+                translation = [0.0, 0.0, 0.0]
+                translation[axis_idx] = delta
+                result = rs.MoveObject(oid, translation)
+                if result is None:
+                    raise ValueError(
+                        f"rs.MoveObject 返回 None（对象 {oid} 移动失败，"
+                        "请检查 GUID 是否有效或文档是否处于锁定状态）"
+                    )
+
+            # 游标推进：新 Max = 原 Max + delta，再加净间距
+            current_target_min = obj_max + delta + spacing
+            moved_count += 1
+
+        return {
+            "moved":   moved_count,
+            "total":   len(object_ids),
+            "axis":    axis,
+            "spacing": spacing,
+        }
+
+    elif operation == "undo_last_action":
+        rs.Command("! _Undo ", False)
+                
+        # 3. 强制刷新屏幕
+        rs.Redraw()
+                
+        return {"status": "ok", "message": "已成功撤销上一步操作"}
+
     elif operation == "set_object_layer":
         obj_id = params["object_id"]
         layer_name = params["layer_name"].strip()
@@ -565,6 +631,8 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             "/rotate_object":          self._handle_rotate_object,
             "/scale_object":           self._handle_scale_object,
             "/align_objects":          self._handle_align_objects,
+            "/distribute_objects":     self._handle_distribute_objects,
+            "/undo_last_action":       self._handle_undo_last_action,
         }
         handler = _routes.get(self.path)
         try:
@@ -1115,6 +1183,65 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             {"object_ids": object_ids, "axis": axis, "alignment": alignment},
         )
 
+    @api_error_handler
+    def _handle_distribute_objects(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        object_ids = data.get("object_ids")
+        if not isinstance(object_ids, list) or len(object_ids) < 2:
+            self._send_json(
+                400,
+                {
+                    "status": "error",
+                    "message": (
+                        "Missing or invalid field: object_ids "
+                        "(expected list with at least 2 GUID strings)"
+                    ),
+                },
+            )
+            return
+        if not all(isinstance(g, str) and g for g in object_ids):
+            self._send_json(
+                400,
+                {"status": "error", "message": "All elements in object_ids must be non-empty GUID strings"},
+            )
+            return
+
+        axis = str(data.get("axis", "X")).upper()
+        if axis not in ("X", "Y", "Z"):
+            self._send_json(
+                400,
+                {"status": "error", "message": f"Invalid axis {axis!r}: must be 'X', 'Y', or 'Z'"},
+            )
+            return
+
+        raw_spacing = data.get("spacing")
+        if raw_spacing is None:
+            self._send_json(400, {"status": "error", "message": "Missing field: spacing"})
+            return
+        try:
+            spacing = float(raw_spacing)
+        except (TypeError, ValueError) as exc:
+            self._send_json(400, {"status": "error", "message": f"Invalid spacing value: {exc}"})
+            return
+        if spacing < 0:
+            self._send_json(
+                400,
+                {"status": "error", "message": f"spacing must be non-negative, got {spacing}"},
+            )
+            return
+
+        self._enqueue_and_wait(
+            "distribute_objects",
+            {"object_ids": object_ids, "axis": axis, "spacing": spacing},
+        )
+
+    @api_error_handler
+    def _handle_undo_last_action(self) -> None:
+        self._enqueue_and_wait("undo_last_action", {})
+
     # ------------------------------------------------------------------
     def _send_json(self, status: int, data: dict) -> None:
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
@@ -1214,6 +1341,8 @@ def start_listener() -> None:
     logger.info('  /rotate_object           POST {"object_id": "<GUID>", "angle_degrees": <float>, "axis"?: [x,y,z], "center_point"?: [x,y,z]}')
     logger.info('  /scale_object            POST {"object_id": "<GUID>", "scale_factor": [sx,sy,sz], "center_point"?: [x,y,z]}')
     logger.info('  /align_objects           POST {"object_ids": ["<GUID>",...], "axis"?: "X|Y|Z", "alignment"?: "min|center|max"} → {"moved","total","axis","alignment","target_val"}')
+    logger.info('  /distribute_objects      POST {"object_ids": ["<GUID>",...], "spacing": <float>, "axis"?: "X|Y|Z"} → {"moved","total","axis","spacing"}')
+    logger.info('  /undo_last_action        POST {} → {"message": "已成功撤销上一步操作"}')
     logger.info("  单体操作返回  {\"status\": \"ok\", \"guid\": \"<GUID>\"}")
     logger.info("  多体操作返回  {\"status\": \"ok\", \"guids\": [\"<GUID>\",...]} (boolean_difference)")
     logger.info("  感知操作返回  {\"status\": \"ok\", <operation-specific fields>}")

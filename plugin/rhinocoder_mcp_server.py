@@ -1202,6 +1202,105 @@ async def scale_object(
     )
 
 
+@mcp.tool()
+async def distribute_objects(
+    object_ids: list[str],
+    spacing: float,
+    axis: str = "X",
+) -> str:
+    """
+    将多个 Rhino 8 对象沿指定坐标轴以固定净间距进行等距分布（阵列）。
+
+    【本工具的意义】
+    等距分布是空间布局最常见操作之一（均匀排列柱子、家具等）。手动实现需要
+    逐个计算每个对象的尺寸和位置，本工具将排序、计算偏移、逐个移动的全套
+    逻辑封装为一次调用，底层采用动态游标算法，避免重复查询坐标。
+
+    分布语义：
+      - 按 axis 方向中心点升序排列后，第一个物体位置保持不动。
+      - 后续物体依次紧靠前一个物体，保持指定净间距（包围盒边界之间的距离）。
+      - spacing 是相邻两物体包围盒边界之间的净空，不是中心距。
+
+    【重要】所有 GUID 必须来自 Rhino 文档中真实存在的对象，切勿凭空捏造。
+
+    使用场景示例：
+      - "将这 3 根柱子沿 X 轴以 5 单位净间距均匀排列"
+        → object_ids=[c1,c2,c3], axis="X", spacing=5
+      - "沿 Y 轴以 10 单位净间距分布这些盒子"
+        → axis="Y", spacing=10
+      - "紧密排列（无间隙）：spacing=0"
+        → spacing=0
+
+    典型工作流：
+      1. create_box(10,10,10) → g1；create_box(5,5,5) → g2；create_box(8,8,8) → g3
+      2. distribute_objects([g1,g2,g3], spacing=5, axis="X")
+
+    Args:
+        object_ids: 需要分布的对象 GUID 列表，至少包含 2 个元素。
+        spacing:    相邻两物体包围盒边界之间的净间距，必须为非负数（0 表示紧密贴合）。
+        axis:       分布参考轴，只能是 "X"、"Y" 或 "Z"（不区分大小写）。默认 "X"。
+
+    Returns:
+        成功时返回分布摘要（物体数量、轴向、间距）；失败时返回详细错误描述。
+    """
+    logger.info(
+        "distribute_objects 调用，count=%d, axis=%r, spacing=%.4f",
+        len(object_ids) if object_ids else 0, axis, spacing,
+    )
+
+    if not object_ids or len(object_ids) < 2:
+        return "参数错误：object_ids 至少需要包含 2 个 GUID"
+
+    axis_upper = axis.upper()
+    if axis_upper not in ("X", "Y", "Z"):
+        return f"参数错误：axis 必须是 'X'、'Y' 或 'Z'，收到 {axis!r}"
+
+    if not isinstance(spacing, (int, float)) or spacing < 0:
+        return f"参数错误：spacing 必须为非负数，收到 {spacing!r}"
+
+    payload = {
+        "object_ids": object_ids,
+        "axis": axis_upper,
+        "spacing": float(spacing),
+    }
+    ok, result = await _call_rhino_listener("/distribute_objects", payload)
+    if not ok:
+        return result
+
+    if isinstance(result, dict):
+        moved = result.get("moved", len(object_ids))
+        return (
+            f"成功：已将 {moved} 个对象沿 {axis_upper} 轴"
+            f"以净间距 {spacing} 完成等距分布。"
+        )
+    return f"成功（原始响应）: {result}"
+
+
+@mcp.tool()
+async def undo_last_action() -> str:
+    """
+    撤销 Rhino 8 中的上一步操作（等同于 Ctrl+Z）。
+
+    当用户表示操作有误、要求撤销或返回上一步时调用此工具。
+    本工具无需任何参数，直接触发 Rhino 内置 Undo 命令。
+
+    使用场景示例：
+      - "撤销在 Rhino 中的上一步操作。注意：该工具一次只能撤销一个原子的 Rhino 步骤。如果用户要求撤销『刚才的一系列操作』（比如刚刚连续执行了移动和缩放），你需要在思考后，根据你刚才调用的工具次数，连续多次调用此工具，直到恢复原状。"
+      - "不对，回退一步"
+      - "undo"
+
+    Returns:
+        成功时返回确认消息；失败时返回详细错误描述。
+    """
+    logger.info("undo_last_action 调用")
+    ok, result = await _call_rhino_listener("/undo_last_action", {})
+    if not ok:
+        return result
+    if isinstance(result, dict):
+        return result.get("message", "已成功撤销上一步操作")
+    return "已成功撤销上一步操作"
+
+
 # ---------------------------------------------------------------------------
 # 入口
 # ---------------------------------------------------------------------------
@@ -1209,10 +1308,10 @@ if __name__ == "__main__":
     logger.info("RhinoCoder MCP Server 启动（stdio transport）")
     logger.info(
         "已注册工具: create_sphere, create_box, create_cylinder, create_line, "
-        "move_object, rotate_object, scale_object, align_objects, "
+        "move_object, rotate_object, scale_object, align_objects, distribute_objects, "
         "extrude_curve_straight, boolean_difference, create_circle, "
         "get_selected_objects, get_objects_by_name, "
-        "get_object_info, get_bounding_box, set_object_layer"
+        "get_object_info, get_bounding_box, set_object_layer, undo_last_action"
     )
     logger.info("等待 MCP 客户端连接…")
     mcp.run(transport="stdio")
