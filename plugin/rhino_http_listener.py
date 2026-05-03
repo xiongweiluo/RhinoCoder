@@ -528,6 +528,100 @@ def _dispatch_rhinoscript(rs, operation: str, params: dict):
         rs.Redraw()
         return {"changed": len(object_ids)}
 
+    elif operation == "place_on_at":
+        target_id    = params["target_id"]
+        reference_id = params["reference_id"]
+        side         = params["side"]   # 已小写，由 handler 保证
+
+        # ── 安全获取包围盒（兼容 Extrusion 等 rs.BoundingBox 可能返回 None 的类型）──
+        def _safe_bbox(oid):
+            bbox = rs.BoundingBox(oid)
+            if bbox is None:
+                rh_guid = rs.coerceguid(oid)
+                rh_obj = (
+                    _Rhino.RhinoDoc.ActiveDoc.Objects.FindId(rh_guid)
+                    if rh_guid else None
+                )
+                if rh_obj is not None and rh_obj.Geometry is not None:
+                    bb = rh_obj.Geometry.GetBoundingBox(True)
+                    if bb.IsValid:
+                        mn, mx = bb.Min, bb.Max
+                        bbox = [
+                            (mn.X, mn.Y, mn.Z), (mx.X, mn.Y, mn.Z),
+                            (mx.X, mx.Y, mn.Z), (mn.X, mx.Y, mn.Z),
+                            (mn.X, mn.Y, mx.Z), (mx.X, mn.Y, mx.Z),
+                            (mx.X, mx.Y, mx.Z), (mn.X, mx.Y, mx.Z),
+                        ]
+            return bbox
+
+        # rs.BoundingBox 返回 Point3d 对象列表；fallback 路径返回 tuple 列表。
+        # 统一用 _c() 读取坐标，兼容两种类型。
+        def _c(pt, idx):
+            return float(getattr(pt, ("X", "Y", "Z")[idx]) if hasattr(pt, "X") else pt[idx])
+
+        bbox_t = _safe_bbox(target_id)
+        if bbox_t is None:
+            raise ValueError(f"无法获取目标对象 {target_id} 的包围盒（对象不存在或几何无效）")
+
+        bbox_r = _safe_bbox(reference_id)
+        if bbox_r is None:
+            raise ValueError(f"无法获取参考对象 {reference_id} 的包围盒（对象不存在或几何无效）")
+
+        # bbox[0] = min 角点，bbox[6] = max 角点
+        t_min = [_c(bbox_t[0], i) for i in range(3)]
+        t_max = [_c(bbox_t[6], i) for i in range(3)]
+        t_cen = [(t_min[i] + t_max[i]) / 2.0 for i in range(3)]
+
+        r_min = [_c(bbox_r[0], i) for i in range(3)]
+        r_max = [_c(bbox_r[6], i) for i in range(3)]
+        r_cen = [(r_min[i] + r_max[i]) / 2.0 for i in range(3)]
+
+        # ── 计算三维平移向量 ──────────────────────────────────────────────────
+        # 贴合轴方向的分量 + 垂直截面两轴方向居中分量
+        tx, ty, tz = 0.0, 0.0, 0.0
+
+        if side == "top":
+            tz = r_max[2] - t_min[2]   # Target 底面 → Reference 顶面
+            tx = r_cen[0] - t_cen[0]   # XY 居中
+            ty = r_cen[1] - t_cen[1]
+        elif side == "bottom":
+            tz = r_min[2] - t_max[2]   # Target 顶面 → Reference 底面
+            tx = r_cen[0] - t_cen[0]
+            ty = r_cen[1] - t_cen[1]
+        elif side == "right":
+            tx = r_max[0] - t_min[0]   # Target 左面 → Reference 右面
+            ty = r_cen[1] - t_cen[1]   # YZ 居中
+            tz = r_cen[2] - t_cen[2]
+        elif side == "left":
+            tx = r_min[0] - t_max[0]   # Target 右面 → Reference 左面
+            ty = r_cen[1] - t_cen[1]
+            tz = r_cen[2] - t_cen[2]
+        elif side == "back":
+            ty = r_max[1] - t_min[1]   # Target 前面 → Reference 后面
+            tx = r_cen[0] - t_cen[0]   # XZ 居中
+            tz = r_cen[2] - t_cen[2]
+        elif side == "front":
+            ty = r_min[1] - t_max[1]   # Target 后面 → Reference 前面
+            tx = r_cen[0] - t_cen[0]
+            tz = r_cen[2] - t_cen[2]
+        else:
+            raise ValueError(f"未知方位: {side!r}")
+
+        translation = [tx, ty, tz]
+        result = rs.MoveObject(target_id, translation)
+        if result is None:
+            raise ValueError(
+                f"rs.MoveObject 返回 None（对象 {target_id} 移动失败，"
+                "请检查 GUID 是否有效或文档是否处于锁定状态）"
+            )
+
+        rs.Redraw()
+        return {
+            "message": f"已将目标物体吸附至参考物体的 '{side}' 方位，并完成截面居中对齐",
+            "target_id":   target_id,
+            "translation": [round(v, 4) for v in translation],
+        }
+
     else:
         raise ValueError(f"未知操作类型: {operation!r}")
 
@@ -642,6 +736,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             "/distribute_objects":     self._handle_distribute_objects,
             "/undo_last_action":       self._handle_undo_last_action,
             "/set_object_color":       self._handle_set_object_color,
+            "/place_on_at":            self._handle_place_on_at,
         }
         handler = _routes.get(self.path)
         try:
@@ -1301,6 +1396,50 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
 
         self._enqueue_and_wait("set_object_color", params)
 
+    @api_error_handler
+    def _handle_place_on_at(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        target_id = data.get("target_id")
+        if not target_id or not isinstance(target_id, str):
+            self._send_json(
+                400,
+                {"status": "error", "message": "Missing or invalid field: target_id (expected non-empty string GUID)"},
+            )
+            return
+
+        reference_id = data.get("reference_id")
+        if not reference_id or not isinstance(reference_id, str):
+            self._send_json(
+                400,
+                {"status": "error", "message": "Missing or invalid field: reference_id (expected non-empty string GUID)"},
+            )
+            return
+
+        side = data.get("side")
+        if not side or not isinstance(side, str):
+            self._send_json(
+                400,
+                {"status": "error", "message": 'Missing or invalid field: side (expected one of "top","bottom","left","right","front","back")'},
+            )
+            return
+
+        side = side.lower()
+        valid_sides = ("top", "bottom", "left", "right", "front", "back")
+        if side not in valid_sides:
+            self._send_json(
+                400,
+                {"status": "error", "message": f"Invalid side {side!r}: must be one of {valid_sides}"},
+            )
+            return
+
+        self._enqueue_and_wait(
+            "place_on_at",
+            {"target_id": target_id, "reference_id": reference_id, "side": side},
+        )
+
     # ------------------------------------------------------------------
     def _send_json(self, status: int, data: dict) -> None:
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
@@ -1403,6 +1542,7 @@ def start_listener() -> None:
     logger.info('  /distribute_objects      POST {"object_ids": ["<GUID>",...], "spacing": <float>, "axis"?: "X|Y|Z"} → {"moved","total","axis","spacing"}')
     logger.info('  /undo_last_action        POST {} → {"message": "已成功撤销上一步操作"}')
     logger.info('  /set_object_color        POST {"object_ids": ["<GUID>",...], "r": 0-255, "g": 0-255, "b": 0-255} → {"changed": <int>}')
+    logger.info('  /place_on_at             POST {"target_id": "<GUID>", "reference_id": "<GUID>", "side": "top|bottom|left|right|front|back"} → {"message","target_id","translation"}')
     logger.info("  单体操作返回  {\"status\": \"ok\", \"guid\": \"<GUID>\"}")
     logger.info("  多体操作返回  {\"status\": \"ok\", \"guids\": [\"<GUID>\",...]} (boolean_difference)")
     logger.info("  感知操作返回  {\"status\": \"ok\", <operation-specific fields>}")

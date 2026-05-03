@@ -1277,6 +1277,85 @@ async def distribute_objects(
 
 
 @mcp.tool()
+async def place_on_at(
+    target_id: str,
+    reference_id: str,
+    side: str,
+) -> str:
+    """
+    将目标物体（Target）精准吸附放置在参考物体（Reference）的指定方位。
+
+    不仅在指定方向上贴合包围盒边界，同时在垂直截面上自动居中对齐：
+      - "top" / "bottom" → Z 轴贴合，XY 中心同时对齐到 Reference 中心
+      - "left" / "right" → X 轴贴合，YZ 中心同时对齐到 Reference 中心
+      - "front" / "back" → Y 轴贴合，XZ 中心同时对齐到 Reference 中心
+
+    【重要】两个 GUID 均必须来自 Rhino 文档中真实存在的对象，切勿凭空捏造。
+
+    side 枚举值（不区分大小写）：
+      "top"    — Target 放置于 Reference 正上方，Target 底面紧贴 Reference 顶面
+      "bottom" — Target 放置于 Reference 正下方，Target 顶面紧贴 Reference 底面
+      "right"  — Target 放置于 Reference 右侧（+X），Target 左面紧贴 Reference 右面
+      "left"   — Target 放置于 Reference 左侧（−X），Target 右面紧贴 Reference 左面
+      "back"   — Target 放置于 Reference 后侧（+Y），Target 前面紧贴 Reference 后面
+      "front"  — Target 放置于 Reference 前侧（−Y），Target 后面紧贴 Reference 前面
+
+    使用场景示例：
+      - "把小球放到盒子上面，并居中"
+        → target_id=<sphere_guid>, reference_id=<box_guid>, side="top"
+      - "将圆柱贴靠到平板右侧，并与平板 YZ 方向居中对齐"
+        → target_id=<cyl_guid>, reference_id=<plate_guid>, side="right"
+
+    典型工作流：
+      1. create_box(20, 20, 5)                             → base_guid
+      2. create_sphere(3)                                  → sphere_guid
+      3. place_on_at(sphere_guid, base_guid, "top")        → 球体吸附至盒顶面中心
+
+    Args:
+        target_id:    要移动的目标对象 GUID（由创建工具或 get_selected_objects 返回）。
+        reference_id: 作为放置基准的参考对象 GUID。
+        side:         放置方位，枚举值（不区分大小写）：
+                      "top" | "bottom" | "left" | "right" | "front" | "back"
+
+    Returns:
+        成功时返回吸附结果确认消息（含实际平移向量）；失败时返回详细错误描述。
+    """
+    logger.info(
+        "place_on_at 调用，target_id=%s, reference_id=%s, side=%r",
+        target_id, reference_id, side,
+    )
+
+    if not target_id or not isinstance(target_id, str):
+        return "参数错误：target_id 必须是非空字符串 GUID"
+    if not reference_id or not isinstance(reference_id, str):
+        return "参数错误：reference_id 必须是非空字符串 GUID"
+
+    valid_sides = ("top", "bottom", "left", "right", "front", "back")
+    side_lower = side.lower() if isinstance(side, str) else ""
+    if side_lower not in valid_sides:
+        return f"参数错误：side 必须是 {valid_sides} 之一，收到 {side!r}"
+
+    payload = {
+        "target_id": target_id,
+        "reference_id": reference_id,
+        "side": side_lower,
+    }
+    ok, result = await _call_rhino_listener("/place_on_at", payload)
+    if not ok:
+        return result
+
+    if isinstance(result, dict):
+        msg   = result.get("message", "吸附完成")
+        trans = result.get("translation", [])
+        return (
+            f"成功：{msg}\n"
+            f"target_id  = {target_id}\n"
+            f"平移向量   = {trans}"
+        )
+    return f"成功（原始响应）: {result}"
+
+
+@mcp.tool()
 async def undo_last_action() -> str:
     """
     撤销 Rhino 8 中的上一步操作（等同于 Ctrl+Z）。
@@ -1369,7 +1448,8 @@ if __name__ == "__main__":
         "move_object, rotate_object, scale_object, align_objects, distribute_objects, "
         "extrude_curve_straight, boolean_difference, create_circle, "
         "get_selected_objects, get_objects_by_name, "
-        "get_object_info, get_bounding_box, set_object_layer, set_object_color, undo_last_action"
+        "get_object_info, get_bounding_box, set_object_layer, set_object_color, "
+        "place_on_at, undo_last_action"
     )
     logger.info("等待 MCP 客户端连接…")
     mcp.run(transport="stdio")
