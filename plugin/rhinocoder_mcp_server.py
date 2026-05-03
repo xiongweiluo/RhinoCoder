@@ -158,6 +158,13 @@ async def _call_rhino_listener(
         return False, msg
 
     if response.status_code == 200:
+        # api_error_handler 会将内部异常包装成 HTTP 200 + {"status":"error"}，
+        # 需要在这里将其转换为 (False, msg) 让调用方走错误处理分支。
+        if data.get("status") == "error":
+            error_msg = data.get("message", "未知内部错误")
+            logger.error("%s 返回应用层错误（HTTP 200）: %s", endpoint, error_msg)
+            return False, f"失败：{error_msg}"
+
         if "guids" in data:
             guids = data.get("guids", [])
             logger.info("%s 请求成功，GUIDs=%s", endpoint, guids)

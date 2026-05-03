@@ -34,6 +34,7 @@ plugin/rhino_http_listener.py  —  运行在 Rhino 8 内部（Python 3.9，纯�
 
 from __future__ import annotations
 
+import functools
 import json
 import logging
 import queue
@@ -372,6 +373,30 @@ class _ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
 
+def api_error_handler(fn):
+    """
+    路由 handler 防护装饰器。
+
+    捕获 handler 内部抛出的任何异常，强制返回 HTTP 200 +
+    {"status": "error", "message": "..."} 而非裸 HTTP 500，
+    让 LLM Agent 能从 message 中读取错误并触发自我修正。
+    """
+    @functools.wraps(fn)
+    def wrapper(self, *args, **kwargs):
+        try:
+            return fn(self, *args, **kwargs)
+        except Exception as exc:
+            logger.exception("api_error_handler 捕获未处理异常 [%s]: %s", fn.__name__, exc)
+            try:
+                self._send_json(200, {
+                    "status": "error",
+                    "message": f"发生了内部错误: {exc}",
+                })
+            except Exception:
+                pass
+    return wrapper
+
+
 class _RhinoHTTPHandler(BaseHTTPRequestHandler):
     """处理所有 POST 路由请求，将几何体创建任务派发至 Rhino 主线程。"""
 
@@ -479,6 +504,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
     # ------------------------------------------------------------------
     # 各路由处理方法
     # ------------------------------------------------------------------
+    @api_error_handler
     def _handle_create_sphere(self) -> None:
         data = self._parse_body()
         if data is None:
@@ -501,6 +527,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
 
         self._enqueue_and_wait("create_sphere", {"radius": radius})
 
+    @api_error_handler
     def _handle_create_box(self) -> None:
         data = self._parse_body()
         if data is None:
@@ -525,6 +552,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
 
         self._enqueue_and_wait("create_box", params)
 
+    @api_error_handler
     def _handle_create_cylinder(self) -> None:
         data = self._parse_body()
         if data is None:
@@ -549,6 +577,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
 
         self._enqueue_and_wait("create_cylinder", params)
 
+    @api_error_handler
     def _handle_create_line(self) -> None:
         data = self._parse_body()
         if data is None:
@@ -578,6 +607,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
 
         self._enqueue_and_wait("create_line", params)
 
+    @api_error_handler
     def _handle_move_object(self) -> None:
         data = self._parse_body()
         if data is None:
@@ -607,6 +637,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             "move_object", {"object_id": object_id, "translation": translation}
         )
 
+    @api_error_handler
     def _handle_extrude_curve_straight(self) -> None:
         data = self._parse_body()
         if data is None:
@@ -644,6 +675,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
 
         self._enqueue_and_wait("extrude_curve_straight", params)
 
+    @api_error_handler
     def _handle_boolean_difference(self) -> None:
         data = self._parse_body()
         if data is None:
@@ -675,6 +707,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             {"input0_ids": data["input0_ids"], "input1_ids": data["input1_ids"]},
         )
 
+    @api_error_handler
     def _handle_create_circle(self) -> None:
         data = self._parse_body()
         if data is None:
@@ -709,10 +742,12 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
 
         self._enqueue_and_wait("create_circle", {"center": center, "radius": radius})
 
+    @api_error_handler
     def _handle_get_selected_objects(self) -> None:
         # 无需请求体：直接派发查询，返回当前选中对象的 GUID 列表（可能为空）
         self._enqueue_and_wait("get_selected_objects", {})
 
+    @api_error_handler
     def _handle_get_object_info(self) -> None:
         data = self._parse_body()
         if data is None:
@@ -728,6 +763,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
 
         self._enqueue_and_wait("get_object_info", {"object_id": object_id})
 
+    @api_error_handler
     def _handle_get_bounding_box(self) -> None:
         data = self._parse_body()
         if data is None:
@@ -743,6 +779,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
 
         self._enqueue_and_wait("get_bounding_box", {"object_id": object_id})
 
+    @api_error_handler
     def _handle_get_objects_by_name(self) -> None:
         data = self._parse_body()
         if data is None:
@@ -758,6 +795,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
 
         self._enqueue_and_wait("get_objects_by_name", {"name": name})
 
+    @api_error_handler
     def _handle_set_object_layer(self) -> None:
         data = self._parse_body()
         if data is None:
