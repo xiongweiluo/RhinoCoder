@@ -72,20 +72,21 @@ REQUEST_TIMEOUT = 12.0  # 等待主线程执行的最长秒数
 # Rhino 对象类型语义化映射（rs.ObjectType() 返回值 → 人类可读字符串）
 # ---------------------------------------------------------------------------
 _OBJECT_TYPE_MAP: dict[int, str] = {
-    1:      "Point",
-    2:      "PointCloud",
-    4:      "Curve",
-    8:      "Surface",
-    16:     "Polysurface",
-    32:     "Mesh",
-    256:    "Light",
-    512:    "Annotation",
-    4096:   "InstanceReference",
-    8192:   "TextDot",
-    32768:  "Grip",
-    65536:  "Detail",
-    131072: "Hatch",
-    262144: "MorphControl",
+    1:          "Point",
+    2:          "PointCloud",
+    4:          "Curve",
+    8:          "Surface",
+    16:         "Polysurface",
+    32:         "Mesh",
+    256:        "Light",
+    512:        "Annotation",
+    4096:       "InstanceReference",
+    8192:       "TextDot",
+    32768:      "Grip",
+    65536:      "Detail",
+    131072:     "Hatch",
+    262144:     "MorphControl",
+    1073741824: "Extrusion",
 }
 
 # ---------------------------------------------------------------------------
@@ -729,6 +730,70 @@ def _dispatch_rhinoscript(rs, operation: str, params: dict):
             "translation": [round(v, 4) for v in translation],
         }
 
+    elif operation == "get_scene_summary":
+        objs = rs.NormalObjects() or []
+        total = len(objs)
+        capped = total > 50
+        objs = objs[:50]
+
+        def _pt_val(pt, i):
+            return float(getattr(pt, ("X", "Y", "Z")[i]) if hasattr(pt, "X") else pt[i])
+
+        result_list = []
+        for obj in objs:
+            obj_id = str(obj)
+            name = rs.ObjectName(obj) or "Unnamed"
+            type_int = rs.ObjectType(obj)
+            type_str = _OBJECT_TYPE_MAP.get(type_int, f"Unknown({type_int})")
+
+            bbox = rs.BoundingBox(obj)
+            if bbox is not None:
+                try:
+                    mn, mx = bbox[0], bbox[6]
+                    center = [
+                        round((_pt_val(mn, 0) + _pt_val(mx, 0)) / 2.0, 2),
+                        round((_pt_val(mn, 1) + _pt_val(mx, 1)) / 2.0, 2),
+                        round((_pt_val(mn, 2) + _pt_val(mx, 2)) / 2.0, 2),
+                    ]
+                    size = [
+                        round(abs(_pt_val(mx, 0) - _pt_val(mn, 0)), 2),
+                        round(abs(_pt_val(mx, 1) - _pt_val(mn, 1)), 2),
+                        round(abs(_pt_val(mx, 2) - _pt_val(mn, 2)), 2),
+                    ]
+                except Exception:
+                    center = [0.0, 0.0, 0.0]
+                    size   = [0.0, 0.0, 0.0]
+            else:
+                center = [0.0, 0.0, 0.0]
+                size   = [0.0, 0.0, 0.0]
+
+            layer = rs.ObjectLayer(obj) or ""
+
+            try:
+                c = rs.ObjectColor(obj)
+                color = [int(c.R), int(c.G), int(c.B)]
+            except Exception:
+                color = [0, 0, 0]
+
+            groups = list(rs.ObjectGroups(obj) or [])
+
+            result_list.append({
+                "object_id": obj_id,
+                "name":      name,
+                "type":      type_str,
+                "center":    center,
+                "layer":     layer,
+                "color":     color,
+                "groups":    groups,
+                "size":      size,
+            })
+
+        return {
+            "objects": result_list,
+            "total":   total,
+            "capped":  capped,
+        }
+
     else:
         raise ValueError(f"未知操作类型: {operation!r}")
 
@@ -845,6 +910,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             "/set_object_color":       self._handle_set_object_color,
             "/place_on_at":            self._handle_place_on_at,
             "/group_objects":          self._handle_group_objects,
+            "/get_scene_summary":      self._handle_get_scene_summary,
         }
         handler = _routes.get(self.path)
         try:
@@ -1587,6 +1653,11 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
 
         self._enqueue_and_wait("group_objects", params)
 
+    @api_error_handler
+    def _handle_get_scene_summary(self) -> None:
+        # 无需请求体：直接派发查询，返回场景中所有可见对象的摘要列表
+        self._enqueue_and_wait("get_scene_summary", {})
+
     # ------------------------------------------------------------------
     def _send_json(self, status: int, data: dict) -> None:
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
@@ -1691,6 +1762,7 @@ def start_listener() -> None:
     logger.info('  /set_object_color        POST {"object_ids": ["<GUID>",...], "r": 0-255, "g": 0-255, "b": 0-255} → {"changed": <int>}')
     logger.info('  /place_on_at             POST {"target_id": "<GUID>", "reference_id": "<GUID>", "side": "top|bottom|left|right|front|back"} → {"message","target_id","translation"}')
     logger.info('  /group_objects           POST {"object_ids": ["<GUID>",...], "group_name"?: "<string>"} → {"group_name","count"}')
+    logger.info('  /get_scene_summary       POST {} → {"objects": [...], "total": <int>, "capped": <bool>}')
     logger.info("  单体操作返回  {\"status\": \"ok\", \"guid\": \"<GUID>\"}")
     logger.info("  多体操作返回  {\"status\": \"ok\", \"guids\": [\"<GUID>\",...]} (boolean_difference)")
     logger.info("  感知操作返回  {\"status\": \"ok\", <operation-specific fields>}")

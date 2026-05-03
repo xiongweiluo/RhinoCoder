@@ -1506,6 +1506,55 @@ async def group_objects(
     return f"成功（原始响应）: {result}"
 
 
+@mcp.tool()
+async def get_scene_summary() -> str:
+    """
+    获取当前 Rhino 场景中所有可见物体的精简信息列表。
+
+    【场景审计员 — 闭环视觉感知核心工具】
+    当你不确定场景状态、找不到物体、需要获取物体尺寸/颜色/群组，
+    或者用户让你基于现有场景进行修改时，请务必先调用此工具『看一眼』。
+
+    行为说明：
+      - 仅返回可见（非隐藏、非锁定）的普通对象，忽略灯光、注释等辅助对象。
+      - 每个物体返回：object_id、name、type、center、layer、color、groups、size。
+      - 最多返回前 50 个对象，防止 Token 爆炸。
+
+    返回字段说明：
+      - object_id: Rhino 对象的 GUID 字符串，可直接传入其他工具使用。
+      - name:      对象名称，未命名时为 "Unnamed"。
+      - type:      对象类型的人类可读字符串（如 "Polysurface"、"Extrusion"、"Curve"）。
+      - center:    包围盒中心点 [x, y, z]，保留 2 位小数。
+      - layer:     对象所在图层名。
+      - color:     显示颜色 [R, G, B]，ByLayer 时自动解析为图层实际颜色。
+      - groups:    对象所属群组名称列表，不属于任何组时为 []。
+      - size:      包围盒尺寸 [长, 宽, 高]（XYZ 方向），保留 2 位小数。
+
+    使用场景示例：
+      - "帮我看看场景里有什么" → 调用此工具
+      - "找到所有红色的物体" → 调用此工具后按 color 筛选
+      - "在现有场景基础上添加一个盖板" → 先调用此工具了解现有物体尺寸和位置
+
+    Returns:
+        成功时返回包含场景摘要的描述（对象数量 + 详细列表）；失败时返回详细错误描述。
+    """
+    logger.info("get_scene_summary 调用")
+    ok, result = await _call_rhino_listener("/get_scene_summary", {})
+    if not ok:
+        return result
+
+    if isinstance(result, dict):
+        objects = result.get("objects", [])
+        total   = result.get("total", len(objects))
+        capped  = result.get("capped", False)
+        cap_note = f"（场景共有 {total} 个对象，已截取前 50 个）" if capped else ""
+        return (
+            f"场景中共有 {len(objects)} 个可见对象{cap_note}。\n"
+            f"objects = {objects}"
+        )
+    return f"成功（原始响应）: {result}"
+
+
 # ---------------------------------------------------------------------------
 # 入口
 # ---------------------------------------------------------------------------
@@ -1517,7 +1566,7 @@ if __name__ == "__main__":
         "extrude_curve_straight, boolean_difference, create_circle, "
         "get_selected_objects, get_objects_by_name, "
         "get_object_info, get_bounding_box, set_object_layer, set_object_color, "
-        "place_on_at, undo_last_action, group_objects"
+        "place_on_at, undo_last_action, group_objects, get_scene_summary"
     )
     logger.info("等待 MCP 客户端连接…")
     mcp.run(transport="stdio")
