@@ -147,6 +147,17 @@ def _dispatch_rhinoscript(rs, operation: str, params: dict):
     elif operation == "move_object":
         obj = params["object_id"]
         t = params["translation"]
+        if rs.IsGroup(obj):
+            members = rs.ObjectsByGroup(obj) or []
+            if not members:
+                raise ValueError(f"群组 '{obj}' 不含任何成员对象，无法移动")
+            results = rs.MoveObjects(members, t)
+            if results is None:
+                raise ValueError(
+                    f"rs.MoveObjects 返回 None（群组 '{obj}' 移动失败，"
+                    "请检查群组成员是否有效或文档是否处于锁定状态）"
+                )
+            return obj  # 返回群组名称，保持接口一致
         return rs.MoveObject(obj, t)
 
     elif operation == "extrude_curve_straight":
@@ -245,26 +256,60 @@ def _dispatch_rhinoscript(rs, operation: str, params: dict):
 
     elif operation == "get_bounding_box":
         obj_id = params["object_id"]
-        # rs.BoundingBox 对 Brep/Surface 有效，但 Extrusion 对象可能返回 None。
-        # 失败时直接访问 .Geometry.GetBoundingBox(True) 作为兜底。
-        bbox = rs.BoundingBox(obj_id)
-        if bbox is None:
-            rh_guid = rs.coerceguid(obj_id)
-            rh_obj = _Rhino.RhinoDoc.ActiveDoc.Objects.FindId(rh_guid) if rh_guid else None
-            if rh_obj is not None and rh_obj.Geometry is not None:
-                bb = rh_obj.Geometry.GetBoundingBox(True)
-                if bb.IsValid:
-                    mn, mx = bb.Min, bb.Max
-                    bbox = [
-                        (mn.X, mn.Y, mn.Z), (mx.X, mn.Y, mn.Z),
-                        (mx.X, mx.Y, mn.Z), (mn.X, mx.Y, mn.Z),
-                        (mn.X, mn.Y, mx.Z), (mx.X, mn.Y, mx.Z),
-                        (mx.X, mx.Y, mx.Z), (mn.X, mx.Y, mx.Z),
-                    ]
-        if bbox is None:
-            raise ValueError(
-                f"无法获取对象 {obj_id} 的包围盒（对象不存在或几何无效）"
-            )
+
+        if rs.IsGroup(obj_id):
+            # ── 群组路径：联合所有成员的包围盒 ──────────────────────────
+            members = rs.ObjectsByGroup(obj_id) or []
+            if not members:
+                raise ValueError(f"群组 '{obj_id}' 不含任何成员对象，无法计算包围盒")
+            bbox = rs.BoundingBox(members)
+            if bbox is None:
+                combined_bb = None
+                for mid in members:
+                    rh_guid = rs.coerceguid(mid)
+                    rh_obj = (
+                        _Rhino.RhinoDoc.ActiveDoc.Objects.FindId(rh_guid)
+                        if rh_guid else None
+                    )
+                    if rh_obj is not None and rh_obj.Geometry is not None:
+                        bb = rh_obj.Geometry.GetBoundingBox(True)
+                        if bb.IsValid:
+                            combined_bb = (
+                                bb if combined_bb is None
+                                else _Rhino.Geometry.BoundingBox.Union(combined_bb, bb)
+                            )
+                if combined_bb is None:
+                    raise ValueError(
+                        f"无法计算群组 '{obj_id}' 的联合包围盒（成员几何全部无效）"
+                    )
+                mn, mx = combined_bb.Min, combined_bb.Max
+                bbox = [
+                    (mn.X, mn.Y, mn.Z), (mx.X, mn.Y, mn.Z),
+                    (mx.X, mx.Y, mn.Z), (mn.X, mx.Y, mn.Z),
+                    (mn.X, mn.Y, mx.Z), (mx.X, mn.Y, mx.Z),
+                    (mx.X, mx.Y, mx.Z), (mn.X, mx.Y, mx.Z),
+                ]
+        else:
+            # ── 单体路径：原有逻辑，Extrusion 兜底 ──────────────────────
+            bbox = rs.BoundingBox(obj_id)
+            if bbox is None:
+                rh_guid = rs.coerceguid(obj_id)
+                rh_obj = _Rhino.RhinoDoc.ActiveDoc.Objects.FindId(rh_guid) if rh_guid else None
+                if rh_obj is not None and rh_obj.Geometry is not None:
+                    bb = rh_obj.Geometry.GetBoundingBox(True)
+                    if bb.IsValid:
+                        mn, mx = bb.Min, bb.Max
+                        bbox = [
+                            (mn.X, mn.Y, mn.Z), (mx.X, mn.Y, mn.Z),
+                            (mx.X, mx.Y, mn.Z), (mn.X, mx.Y, mn.Z),
+                            (mn.X, mn.Y, mx.Z), (mx.X, mn.Y, mx.Z),
+                            (mx.X, mx.Y, mx.Z), (mn.X, mx.Y, mx.Z),
+                        ]
+            if bbox is None:
+                raise ValueError(
+                    f"无法获取对象 {obj_id} 的包围盒（对象不存在或几何无效）"
+                )
+
         def _r4(v):
             return round(float(v), 4)
         vertices = [[_r4(pt[0]), _r4(pt[1]), _r4(pt[2])] for pt in bbox]
@@ -356,26 +401,68 @@ def _dispatch_rhinoscript(rs, operation: str, params: dict):
         object_ids = params["object_ids"]
         axis       = params["axis"]       # "X" | "Y" | "Z"（已大写）
         alignment  = params["alignment"]  # "min" | "center" | "max"（已小写）
+        axis_idx   = {"X": 0, "Y": 1, "Z": 2}[axis]
 
-        # ── 一次性采集所有包围盒 ────────────────────────────────────────
-        bboxes = []
-        for oid in object_ids:
-            bbox = rs.BoundingBox(oid)
+        # ── 辅助：从 Point3d 或 tuple 统一读取轴向坐标 ─────────────────
+        def _get_axis_val(pt):
+            return float(getattr(pt, axis) if hasattr(pt, axis) else pt[axis_idx])
+
+        # ── 辅助：安全获取一组对象的联合包围盒 ────────────────────────
+        def _safe_bbox_for_ids(ids):
+            bbox = rs.BoundingBox(ids)
+            if bbox is not None:
+                return bbox
+            # rs.BoundingBox 对 Extrusion 等类型可能返回 None，逐个取并集作为兜底
+            combined_bb = None
+            for mid in ids:
+                rh_guid = rs.coerceguid(mid)
+                rh_obj = (
+                    _Rhino.RhinoDoc.ActiveDoc.Objects.FindId(rh_guid)
+                    if rh_guid else None
+                )
+                if rh_obj is not None and rh_obj.Geometry is not None:
+                    bb = rh_obj.Geometry.GetBoundingBox(True)
+                    if bb.IsValid:
+                        combined_bb = (
+                            bb if combined_bb is None
+                            else _Rhino.Geometry.BoundingBox.Union(combined_bb, bb)
+                        )
+            if combined_bb is None:
+                return None
+            mn, mx = combined_bb.Min, combined_bb.Max
+            return [
+                (mn.X, mn.Y, mn.Z), (mx.X, mn.Y, mn.Z),
+                (mx.X, mx.Y, mn.Z), (mn.X, mx.Y, mn.Z),
+                (mn.X, mn.Y, mx.Z), (mx.X, mn.Y, mx.Z),
+                (mx.X, mx.Y, mx.Z), (mn.X, mx.Y, mx.Z),
+            ]
+
+        # ── 构建对齐单元列表（每个群组/对象算一个刚体单元）───────────
+        # unit = {"is_group": bool, "id": str, "members": [str], "bbox": [...]}
+        units = []
+        for item in object_ids:
+            if rs.IsGroup(item):
+                members = rs.ObjectsByGroup(item) or []
+                if not members:
+                    raise ValueError(f"群组 '{item}' 不含任何成员对象，无法对齐")
+                bbox = _safe_bbox_for_ids(members)
+                is_group = True
+            else:
+                members = [item]
+                bbox = _safe_bbox_for_ids([item])
+                is_group = False
+
             if bbox is None:
                 raise ValueError(
-                    f"无法获取对象 {oid} 的包围盒"
-                    "（对象不存在、类型不支持，或几何无效）"
+                    f"无法获取 '{item}' 的包围盒"
+                    "（对象/群组不存在、类型不支持，或几何无效）"
                 )
-            bboxes.append(bbox)
+            units.append({"is_group": is_group, "id": item,
+                          "members": members, "bbox": bbox})
 
-        # ── 从 Point3d 对象读取坐标：必须用 .X / .Y / .Z 属性 ─────────
-        # rs.BoundingBox 返回 8 个 Rhino.Geometry.Point3d 实例；
-        # bbox[0] 固定为 (min_x, min_y, min_z)，bbox[6] 为 (max_x, max_y, max_z)。
-        def _get_axis_val(pt):
-            return getattr(pt, axis)  # axis 已是 "X"/"Y"/"Z"
-
-        overall_min = min(_get_axis_val(bbox[0]) for bbox in bboxes)
-        overall_max = max(_get_axis_val(bbox[6]) for bbox in bboxes)
+        # ── 计算对齐目标值（群组作为整体参与，权重 = 1）──────────────
+        overall_min = min(_get_axis_val(u["bbox"][0]) for u in units)
+        overall_max = max(_get_axis_val(u["bbox"][6]) for u in units)
 
         if alignment == "min":
             target_val = overall_min
@@ -384,10 +471,10 @@ def _dispatch_rhinoscript(rs, operation: str, params: dict):
         else:  # center
             target_val = (overall_min + overall_max) / 2.0
 
-        # ── 逐对象平移 ──────────────────────────────────────────────────
-        axis_idx = {"X": 0, "Y": 1, "Z": 2}[axis]
+        # ── 逐单元平移 ──────────────────────────────────────────────────
         moved_count = 0
-        for oid, bbox in zip(object_ids, bboxes):
+        for unit in units:
+            bbox = unit["bbox"]
             obj_min = _get_axis_val(bbox[0])
             obj_max = _get_axis_val(bbox[6])
 
@@ -406,12 +493,19 @@ def _dispatch_rhinoscript(rs, operation: str, params: dict):
             translation = [0.0, 0.0, 0.0]
             translation[axis_idx] = delta
 
-            result = rs.MoveObject(oid, translation)
-            if result is None:
-                raise ValueError(
-                    f"rs.MoveObject 返回 None（对象 {oid} 移动失败，"
-                    "请检查 GUID 是否有效或文档是否处于锁定状态）"
-                )
+            if unit["is_group"]:
+                results = rs.MoveObjects(unit["members"], translation)
+                if results is None:
+                    raise ValueError(
+                        f"rs.MoveObjects 返回 None（群组 '{unit['id']}' 移动失败）"
+                    )
+            else:
+                result = rs.MoveObject(unit["id"], translation)
+                if result is None:
+                    raise ValueError(
+                        f"rs.MoveObject 返回 None（对象 {unit['id']} 移动失败，"
+                        "请检查 GUID 是否有效或文档是否处于锁定状态）"
+                    )
             moved_count += 1
 
         return {
@@ -527,6 +621,19 @@ def _dispatch_rhinoscript(rs, operation: str, params: dict):
             rs.ObjectColor(oid, [r, g, b])
         rs.Redraw()
         return {"changed": len(object_ids)}
+
+    elif operation == "group_objects":
+        import uuid as _uuid  # noqa: PLC0415
+        object_ids = params["object_ids"]
+        group_name = params.get("group_name") or _uuid.uuid4().hex[:8]
+
+        rs.AddGroup(group_name)
+        rs.AddObjectsToGroup(object_ids, group_name)
+        rs.Redraw()
+        return {
+            "group_name": group_name,
+            "count": len(object_ids),
+        }
 
     elif operation == "place_on_at":
         target_id    = params["target_id"]
@@ -737,6 +844,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             "/undo_last_action":       self._handle_undo_last_action,
             "/set_object_color":       self._handle_set_object_color,
             "/place_on_at":            self._handle_place_on_at,
+            "/group_objects":          self._handle_group_objects,
         }
         handler = _routes.get(self.path)
         try:
@@ -1440,6 +1548,45 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             {"target_id": target_id, "reference_id": reference_id, "side": side},
         )
 
+    @api_error_handler
+    def _handle_group_objects(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        object_ids = data.get("object_ids")
+        if not isinstance(object_ids, list) or len(object_ids) < 2:
+            self._send_json(
+                400,
+                {
+                    "status": "error",
+                    "message": "打组失败：至少需要提供 2 个物体 ID",
+                },
+            )
+            return
+        if not all(isinstance(g, str) and g for g in object_ids):
+            self._send_json(
+                400,
+                {"status": "error", "message": "All elements in object_ids must be non-empty GUID strings"},
+            )
+            return
+
+        group_name = data.get("group_name")
+        if group_name is not None:
+            if not isinstance(group_name, str) or not group_name.strip():
+                self._send_json(
+                    400,
+                    {"status": "error", "message": "group_name must be a non-empty string if provided"},
+                )
+                return
+            group_name = group_name.strip()
+
+        params: dict = {"object_ids": object_ids}
+        if group_name:
+            params["group_name"] = group_name
+
+        self._enqueue_and_wait("group_objects", params)
+
     # ------------------------------------------------------------------
     def _send_json(self, status: int, data: dict) -> None:
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
@@ -1543,6 +1690,7 @@ def start_listener() -> None:
     logger.info('  /undo_last_action        POST {} → {"message": "已成功撤销上一步操作"}')
     logger.info('  /set_object_color        POST {"object_ids": ["<GUID>",...], "r": 0-255, "g": 0-255, "b": 0-255} → {"changed": <int>}')
     logger.info('  /place_on_at             POST {"target_id": "<GUID>", "reference_id": "<GUID>", "side": "top|bottom|left|right|front|back"} → {"message","target_id","translation"}')
+    logger.info('  /group_objects           POST {"object_ids": ["<GUID>",...], "group_name"?: "<string>"} → {"group_name","count"}')
     logger.info("  单体操作返回  {\"status\": \"ok\", \"guid\": \"<GUID>\"}")
     logger.info("  多体操作返回  {\"status\": \"ok\", \"guids\": [\"<GUID>\",...]} (boolean_difference)")
     logger.info("  感知操作返回  {\"status\": \"ok\", <operation-specific fields>}")

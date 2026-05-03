@@ -989,35 +989,39 @@ async def align_objects(
     alignment: str = "center",
 ) -> str:
     """
-    将多个 Rhino 8 对象沿指定坐标轴对齐，一键完成多对象空间对齐布局。
+    将多个 Rhino 8 对象或群组沿指定坐标轴对齐，一键完成多对象空间对齐布局。
 
-    【本工具的意义】
-    手动对齐多个物体需要 Agent 对每个物体调用 get_bounding_box + 计算偏移 + move_object，
-    步骤繁琐且误差易积累。本工具将全套逻辑封装为一次调用，极大降低计算负担。
+    【群组感知（Group-Aware）】
+    object_ids 中可直接传入群组名称（Group Name）。底层会将该群组视为一个刚体整体：
+      - 群组的联合包围盒（所有成员的并集）参与目标值计算，权重 = 1（不会因成员多而放大权重）。
+      - 对齐时整个群组一起平移，群组内各成员的相对位置保持不变。
+    可混用单体 GUID 与群组名称，例如 ["guid1", "group_name_A", "guid2"]。
 
     对齐语义（以 axis="X" 为例）：
-      - "min"：所有物体的 X 轴最小边（左端面）对齐到同一 X 坐标（最小值中的最小值）。
-      - "center"：所有物体的 X 轴包围盒中心对齐到同一 X 坐标（各中心的平均值）。
-      - "max"：所有物体的 X 轴最大边（右端面）对齐到同一 X 坐标（最大值中的最大值）。
+      - "min"：所有物体/群组的 X 轴最小边对齐到同一 X 坐标（取各单元最小值中的最小值）。
+      - "center"：所有物体/群组的 X 轴包围盒中心对齐到同一 X 坐标（整体范围的中点）。
+      - "max"：所有物体/群组的 X 轴最大边对齐到同一 X 坐标（取各单元最大值中的最大值）。
 
-    【重要】所有 GUID 必须来自 Rhino 文档中真实存在的对象（创建工具或 get_selected_objects
-    的返回值），切勿凭空捏造。
+    【重要】单体 GUID 必须来自 Rhino 文档中真实存在的对象；群组名称必须是已通过
+    group_objects 工具或 Rhino 内部命令创建的有效群组名，切勿凭空捏造。
 
     使用场景示例：
       - "让这 4 根柱子左对齐"
         → object_ids=[c1,c2,c3,c4], axis="X", alignment="min"
-      - "将这些盒子在 Y 轴方向居中对齐"
-        → object_ids=[b1,b2,b3], axis="Y", alignment="center"
-      - "所有物体顶面对齐到同一高度"
-        → axis="Z", alignment="max"
+      - "将 'frame_A' 和 'frame_B' 两个群组底面对齐"
+        → object_ids=["frame_A","frame_B"], axis="Z", alignment="min"
+      - "单体与群组混合：guid1 和 group_B 顶面对齐"
+        → object_ids=["guid1","group_B"], axis="Z", alignment="max"
 
     典型工作流：
-      1. create_box(10,10,10)  → g1；create_box(5,5,5) → g2；create_box(8,8,8) → g3
-      2. move_object(g2, 30, 0, 0)；move_object(g3, 60, 0, 0)   ← 先散开
-      3. align_objects([g1,g2,g3], axis="Z", alignment="min")    ← 底面对齐
+      1. create_box(10,10,10) → g1；create_box(5,5,5) → g2；create_box(8,8,8) → g3
+      2. group_objects([g1, g2], group_name="left_group")    ← 打组
+      3. align_objects(["left_group", g3], axis="Z", alignment="min")  ← 群组+单体对齐
 
     Args:
-        object_ids: 需要对齐的对象 GUID 列表，至少包含 2 个元素。
+        object_ids: 需要对齐的对象 GUID 或群组名称列表，至少包含 2 个元素。
+                    传入群组名称时，底层将该群组作为刚体整体对齐（成员不会被拆散）。
+                    可混用单体 GUID 与群组名称。
         axis:       对齐参考轴，只能是 "X"、"Y" 或 "Z"（不区分大小写）。默认 "X"。
         alignment:  对齐方式：
                       "min"    — 最小端对齐（靠左/靠下/靠前）
@@ -1026,7 +1030,7 @@ async def align_objects(
                     默认 "center"。
 
     Returns:
-        成功时返回每个对象的移动摘要（原始中心 → 新位置）；失败时返回详细错误描述。
+        成功时返回对齐单元数量和目标基准值的确认消息；失败时返回详细错误描述。
     """
     logger.info(
         "align_objects 调用，count=%d, axis=%r, alignment=%r",
@@ -1438,6 +1442,70 @@ async def set_object_color(
     )
 
 
+@mcp.tool()
+async def group_objects(
+    object_ids: list[str],
+    group_name: Optional[str] = None,
+) -> str:
+    """
+    将 Rhino 8 文档中的多个对象组合成一个群组（Group）。
+
+    群组是 Rhino 中一种非破坏性的空间层级结构：
+      - 群组内各对象保留各自的几何形态和属性，不会被合并。
+      - 选中群组中任意成员时，整个群组默认一起被选中。
+      - 支持嵌套：群组可以再次被打入更大的群组。
+      - 可通过 Rhino 的 Ungroup 命令解散群组，不影响几何体本身。
+
+    【命名规则】
+      - 若提供 group_name，使用指定名称；若不提供，底层自动生成 8 位十六进制唯一名称。
+
+    【重要】所有 GUID 必须来自 Rhino 文档中真实存在的对象，切勿凭空捏造。
+
+    使用场景示例：
+      - "把这三根柱子打成一组"
+        → object_ids=[c1, c2, c3]
+      - "将底板和四根柱子编成名为 'frame_01' 的群组"
+        → object_ids=[base, p1, p2, p3, p4], group_name="frame_01"
+
+    典型工作流：
+      1. create_box(20, 20, 5)   → base_guid
+      2. create_cylinder(2, 10)  → col1_guid
+      3. create_cylinder(2, 10)  → col2_guid
+      4. group_objects([base_guid, col1_guid, col2_guid], group_name="structure")
+
+    Args:
+        object_ids:  需要打组的对象 GUID 列表，至少包含 2 个元素。
+        group_name:  群组名称（可选）。省略时底层自动生成唯一名称。
+
+    Returns:
+        成功时返回群组名称及成员数量的确认消息；失败时返回详细错误描述。
+    """
+    logger.info(
+        "group_objects 调用，count=%d, group_name=%r",
+        len(object_ids) if object_ids else 0, group_name,
+    )
+
+    if not object_ids or len(object_ids) < 2:
+        return "参数错误：object_ids 至少需要包含 2 个 GUID"
+
+    payload: dict[str, Any] = {"object_ids": object_ids}
+    if group_name:
+        payload["group_name"] = group_name.strip()
+
+    ok, result = await _call_rhino_listener("/group_objects", payload)
+    if not ok:
+        return result
+
+    if isinstance(result, dict):
+        name = result.get("group_name", "")
+        count = result.get("count", len(object_ids))
+        return (
+            f"成功：已将 {count} 个对象组合为群组。\n"
+            f"group_name = {name!r}"
+        )
+    return f"成功（原始响应）: {result}"
+
+
 # ---------------------------------------------------------------------------
 # 入口
 # ---------------------------------------------------------------------------
@@ -1449,7 +1517,7 @@ if __name__ == "__main__":
         "extrude_curve_straight, boolean_difference, create_circle, "
         "get_selected_objects, get_objects_by_name, "
         "get_object_info, get_bounding_box, set_object_layer, set_object_color, "
-        "place_on_at, undo_last_action"
+        "place_on_at, undo_last_action, group_objects"
     )
     logger.info("等待 MCP 客户端连接…")
     mcp.run(transport="stdio")
