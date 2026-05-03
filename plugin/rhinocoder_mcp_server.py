@@ -36,7 +36,7 @@ from __future__ import annotations
 
 import logging
 import sys
-from typing import Any, Tuple
+from typing import Any, Optional, Tuple
 
 # ---------------------------------------------------------------------------
 # Logging —— 必须输出到 stderr
@@ -890,6 +890,192 @@ async def set_object_layer(object_id: str, layer_name: str) -> str:
     return f"成功（原始响应）: {result}"
 
 
+@mcp.tool()
+async def rotate_object(
+    object_id: str,
+    angle_degrees: float,
+    axis: Optional[list[float]] = None,
+    center_point: Optional[list[float]] = None,
+) -> str:
+    """
+    将 Rhino 8 文档中的一个已有对象绕指定轴旋转指定角度。
+
+    【智能默认值策略 — 重要】
+    - axis 默认 Z 轴 [0, 0, 1]：绕 Z 轴旋转是最常见的 2D 布局场景（俯视平面内的旋转），
+      无需显式传入。若需绕 X 轴或 Y 轴旋转，必须显式指定。
+    - center_point 默认几何中心：底层自动计算对象的包围盒中心作为旋转基准点，
+      从而实现"原地旋转"。只有当旋转基准需要是其他特定坐标时，才需显式传入。
+
+    【重要】object_id 必须是 Rhino 文档中现有对象的真实 GUID，
+    来源于 create_sphere / create_box / create_cylinder 等创建工具的返回值。
+    切勿凭空捏造 GUID 字符串。
+
+    旋转方向遵循右手定则：拇指指向旋转轴正方向，四指弯曲方向为正角度方向。
+      - 绕 Z 轴（[0,0,1]）angle_degrees=+90 → 逆时针旋转（俯视图）
+      - 绕 Z 轴（[0,0,1]）angle_degrees=-90 → 顺时针旋转（俯视图）
+
+    使用场景示例：
+      - "将长方体原地旋转 45°"（绕自身中心、Z 轴旋转）
+        → object_id=<box_guid>, angle_degrees=45
+        （axis 和 center_point 均省略，自动使用 Z 轴 + 几何中心）
+      - "将圆柱体绕 X 轴倾斜 30°"
+        → axis=[1, 0, 0], angle_degrees=30
+      - "以世界原点为中心，将对象绕 Z 轴旋转 60°"
+        → center_point=[0, 0, 0], angle_degrees=60
+
+    典型工作流：
+      1. create_box(10, 5, 3)                            → box_guid
+      2. rotate_object(box_guid, 45)                     → 绕自身中心、Z 轴旋转 45°
+
+    Args:
+        object_id:     要旋转的对象 GUID（由创建工具返回的字符串，不可为空）。
+        angle_degrees: 旋转角度（角度制，非弧度）。正值=右手定则正方向，负值=反方向。
+                       取值范围不限，可超过 360°（会继续旋转）。
+        axis:          旋转轴方向向量，长度为 3 的浮点数列表，如 [0, 0, 1]。
+                       向量长度不影响结果（底层自动归一化）。
+                       【省略时默认 Z 轴 [0, 0, 1]】，适用于绝大多数俯视平面旋转场景。
+                       常用值：X 轴=[1,0,0]，Y 轴=[0,1,0]，Z 轴=[0,0,1]（默认）。
+        center_point:  旋转基准点，长度为 3 的浮点数列表，格式 [x, y, z]。
+                       【省略时底层自动使用对象包围盒几何中心】，实现原地旋转效果。
+                       若需绕世界原点旋转，显式传入 [0, 0, 0]。
+
+    Returns:
+        成功时返回旋转后对象 GUID 的确认消息（GUID 不变）；失败时返回详细错误描述。
+    """
+    logger.info(
+        "rotate_object 调用，object_id=%s, angle=%.4f, axis=%s, center=%s",
+        object_id, angle_degrees, axis, center_point,
+    )
+
+    if not object_id or not isinstance(object_id, str):
+        return "参数错误：object_id 必须是非空字符串 GUID"
+
+    if axis is not None:
+        if not isinstance(axis, list) or len(axis) != 3:
+            return "参数错误：axis 必须是长度为 3 的浮点数列表，如 [0, 0, 1]"
+        if all(v == 0 for v in axis):
+            return "参数错误：axis 不能是零向量 [0, 0, 0]"
+
+    if center_point is not None:
+        if not isinstance(center_point, list) or len(center_point) != 3:
+            return "参数错误：center_point 必须是长度为 3 的浮点数列表，如 [0, 0, 0]"
+
+    payload: dict[str, Any] = {
+        "object_id": object_id,
+        "angle_degrees": angle_degrees,
+    }
+    if axis is not None:
+        payload["axis"] = axis
+    if center_point is not None:
+        payload["center_point"] = center_point
+
+    ok, result = await _call_rhino_listener("/rotate_object", payload)
+    if not ok:
+        return result
+
+    axis_desc = axis if axis is not None else "[0, 0, 1]（默认 Z 轴）"
+    center_desc = center_point if center_point is not None else "对象几何中心（自动计算）"
+    return (
+        f"成功：已将对象 {object_id} 绕轴 {axis_desc}、"
+        f"以 {center_desc} 为基准旋转 {angle_degrees}°。\n"
+        f"GUID = {result}"
+    )
+
+
+@mcp.tool()
+async def scale_object(
+    object_id: str,
+    scale_factor: list[float],
+    center_point: Optional[list[float]] = None,
+) -> str:
+    """
+    将 Rhino 8 文档中的一个已有对象沿 XYZ 三个方向进行非均匀（或均匀）缩放。
+
+    【智能默认值策略 — 重要】
+    - center_point 默认几何中心：底层自动计算对象的包围盒中心作为缩放基准点，
+      从而实现"原地缩放"（对象中心位置不变，向四周扩大/缩小）。
+      只有当缩放基准需要固定在某个特定坐标时，才需显式传入（如以原点为锚点缩放）。
+
+    【重要】object_id 必须是 Rhino 文档中现有对象的真实 GUID，
+    来源于 create_sphere / create_box / create_cylinder 等创建工具的返回值。
+
+    scale_factor 三个分量分别对应 X / Y / Z 方向的缩放比例：
+      - 值 > 1.0：沿该轴方向放大。例如 [2.0, 2.0, 2.0] = 整体等比放大 2 倍。
+      - 0 < 值 < 1.0：沿该轴方向缩小。例如 [0.5, 0.5, 1.0] = XY 平面缩小为一半，Z 不变。
+      - 值 = 1.0：该轴方向不变。
+      - 【禁止】值 ≤ 0：零或负值会导致几何退化或翻转，操作将被拒绝。
+
+    使用场景示例：
+      - "将球体均匀放大为原来的 2 倍"
+        → scale_factor=[2.0, 2.0, 2.0]
+        （center_point 省略，以自身中心为基准）
+      - "将长方体 X 方向拉伸为原来的 1.5 倍，Y/Z 不变"
+        → scale_factor=[1.5, 1.0, 1.0]
+      - "将对象压扁：Z 方向缩小为一半"
+        → scale_factor=[1.0, 1.0, 0.5]
+      - "以世界原点为锚点，将对象整体缩小为原来的 0.8 倍"
+        → scale_factor=[0.8, 0.8, 0.8], center_point=[0, 0, 0]
+
+    典型工作流：
+      1. create_cylinder(radius=5, height=10)              → cyl_guid
+      2. scale_object(cyl_guid, [1.0, 1.0, 2.0])          → 圆柱高度翻倍，半径不变
+
+    Args:
+        object_id:    要缩放的对象 GUID（由创建工具返回的字符串，不可为空）。
+        scale_factor: XYZ 三个方向的缩放比例，长度为 3 的正浮点数列表。
+                      格式：[scale_x, scale_y, scale_z]，每个值必须 > 0。
+                      均匀缩放示例：[2.0, 2.0, 2.0]；
+                      非均匀缩放示例：[1.5, 1.0, 0.5]。
+        center_point: 缩放基准点，长度为 3 的浮点数列表，格式 [x, y, z]。
+                      【省略时底层自动使用对象包围盒几何中心】，对象将以自身中心原地缩放。
+                      若需以原点为锚点缩放，显式传入 [0, 0, 0]。
+
+    Returns:
+        成功时返回缩放后对象 GUID 的确认消息（GUID 不变）；失败时返回详细错误描述。
+    """
+    logger.info(
+        "scale_object 调用，object_id=%s, scale_factor=%s, center=%s",
+        object_id, scale_factor, center_point,
+    )
+
+    if not object_id or not isinstance(object_id, str):
+        return "参数错误：object_id 必须是非空字符串 GUID"
+
+    if not isinstance(scale_factor, list) or len(scale_factor) != 3:
+        return "参数错误：scale_factor 必须是长度为 3 的浮点数列表，如 [1.5, 1.5, 1.0]"
+
+    for i, v in enumerate(scale_factor):
+        if not isinstance(v, (int, float)) or v <= 0:
+            axis_name = ["X", "Y", "Z"][i]
+            return (
+                f"参数错误：scale_factor[{i}]（{axis_name} 轴）必须为正数，"
+                f"收到 {v!r}。零或负值会导致几何退化，不允许使用。"
+            )
+
+    if center_point is not None:
+        if not isinstance(center_point, list) or len(center_point) != 3:
+            return "参数错误：center_point 必须是长度为 3 的浮点数列表，如 [0, 0, 0]"
+
+    payload: dict[str, Any] = {
+        "object_id": object_id,
+        "scale_factor": scale_factor,
+    }
+    if center_point is not None:
+        payload["center_point"] = center_point
+
+    ok, result = await _call_rhino_listener("/scale_object", payload)
+    if not ok:
+        return result
+
+    center_desc = center_point if center_point is not None else "对象几何中心（自动计算）"
+    sx, sy, sz = scale_factor
+    return (
+        f"成功：已将对象 {object_id} 以 {center_desc} 为基准，"
+        f"按 X×{sx} / Y×{sy} / Z×{sz} 完成缩放。\n"
+        f"GUID = {result}"
+    )
+
+
 # ---------------------------------------------------------------------------
 # 入口
 # ---------------------------------------------------------------------------
@@ -897,9 +1083,9 @@ if __name__ == "__main__":
     logger.info("RhinoCoder MCP Server 启动（stdio transport）")
     logger.info(
         "已注册工具: create_sphere, create_box, create_cylinder, create_line, "
-        "move_object, extrude_curve_straight, boolean_difference, create_circle, "
-        "get_selected_objects, get_objects_by_name, get_object_info, get_bounding_box, "
-        "set_object_layer"
+        "move_object, rotate_object, scale_object, extrude_curve_straight, "
+        "boolean_difference, create_circle, get_selected_objects, get_objects_by_name, "
+        "get_object_info, get_bounding_box, set_object_layer"
     )
     logger.info("等待 MCP 客户端连接…")
     mcp.run(transport="stdio")

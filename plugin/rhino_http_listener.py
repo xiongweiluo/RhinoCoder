@@ -275,6 +275,83 @@ def _dispatch_rhinoscript(rs, operation: str, params: dict):
             "center":    center,
         }
 
+    elif operation == "rotate_object":
+        obj_id = params["object_id"]
+        angle_degrees = params["angle_degrees"]
+        axis = params.get("axis", [0.0, 0.0, 1.0])
+
+        if "center_point" in params:
+            center = params["center_point"]
+        else:
+            bbox = rs.BoundingBox(obj_id)
+            if bbox is None:
+                rh_guid = rs.coerceguid(obj_id)
+                rh_obj = _Rhino.RhinoDoc.ActiveDoc.Objects.FindId(rh_guid) if rh_guid else None
+                if rh_obj is not None and rh_obj.Geometry is not None:
+                    bb = rh_obj.Geometry.GetBoundingBox(True)
+                    if bb.IsValid:
+                        mn, mx = bb.Min, bb.Max
+                        bbox = [
+                            (mn.X, mn.Y, mn.Z), (mx.X, mn.Y, mn.Z),
+                            (mx.X, mx.Y, mn.Z), (mn.X, mx.Y, mn.Z),
+                            (mn.X, mn.Y, mx.Z), (mx.X, mn.Y, mx.Z),
+                            (mx.X, mx.Y, mx.Z), (mn.X, mx.Y, mx.Z),
+                        ]
+            if bbox is None:
+                raise ValueError(f"无法获取对象 {obj_id} 的包围盒，无法计算几何中心")
+            min_pt, max_pt = bbox[0], bbox[6]
+            center = [
+                (min_pt[0] + max_pt[0]) / 2.0,
+                (min_pt[1] + max_pt[1]) / 2.0,
+                (min_pt[2] + max_pt[2]) / 2.0,
+            ]
+
+        result = rs.RotateObject(obj_id, center, angle_degrees, axis)
+        if result is None:
+            raise ValueError(
+                f"rs.RotateObject 返回 None（对象 {obj_id} 旋转失败，"
+                "请检查 GUID 是否有效或文档是否处于锁定状态）"
+            )
+        return result
+
+    elif operation == "scale_object":
+        obj_id = params["object_id"]
+        scale_factor = params["scale_factor"]
+
+        if "center_point" in params:
+            center = params["center_point"]
+        else:
+            bbox = rs.BoundingBox(obj_id)
+            if bbox is None:
+                rh_guid = rs.coerceguid(obj_id)
+                rh_obj = _Rhino.RhinoDoc.ActiveDoc.Objects.FindId(rh_guid) if rh_guid else None
+                if rh_obj is not None and rh_obj.Geometry is not None:
+                    bb = rh_obj.Geometry.GetBoundingBox(True)
+                    if bb.IsValid:
+                        mn, mx = bb.Min, bb.Max
+                        bbox = [
+                            (mn.X, mn.Y, mn.Z), (mx.X, mn.Y, mn.Z),
+                            (mx.X, mx.Y, mn.Z), (mn.X, mx.Y, mn.Z),
+                            (mn.X, mn.Y, mx.Z), (mx.X, mn.Y, mx.Z),
+                            (mx.X, mx.Y, mx.Z), (mn.X, mx.Y, mx.Z),
+                        ]
+            if bbox is None:
+                raise ValueError(f"无法获取对象 {obj_id} 的包围盒，无法计算几何中心")
+            min_pt, max_pt = bbox[0], bbox[6]
+            center = [
+                (min_pt[0] + max_pt[0]) / 2.0,
+                (min_pt[1] + max_pt[1]) / 2.0,
+                (min_pt[2] + max_pt[2]) / 2.0,
+            ]
+
+        result = rs.ScaleObject(obj_id, center, scale_factor)
+        if result is None:
+            raise ValueError(
+                f"rs.ScaleObject 返回 None（对象 {obj_id} 缩放失败，"
+                "请检查 GUID 是否有效或 scale_factor 是否含零值）"
+            )
+        return result
+
     elif operation == "set_object_layer":
         obj_id = params["object_id"]
         layer_name = params["layer_name"].strip()
@@ -415,6 +492,8 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             "/get_bounding_box":       self._handle_get_bounding_box,
             "/get_objects_by_name":    self._handle_get_objects_by_name,
             "/set_object_layer":       self._handle_set_object_layer,
+            "/rotate_object":          self._handle_rotate_object,
+            "/scale_object":           self._handle_scale_object,
         }
         handler = _routes.get(self.path)
         try:
@@ -819,6 +898,105 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
 
         self._enqueue_and_wait("set_object_layer", {"object_id": object_id, "layer_name": layer_name})
 
+    @api_error_handler
+    def _handle_rotate_object(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        object_id = data.get("object_id")
+        if not object_id or not isinstance(object_id, str):
+            self._send_json(
+                400,
+                {"status": "error", "message": "Missing or invalid field: object_id (expected non-empty string GUID)"},
+            )
+            return
+
+        try:
+            angle_degrees = float(data["angle_degrees"])
+        except KeyError:
+            self._send_json(400, {"status": "error", "message": "Missing field: angle_degrees"})
+            return
+        except (TypeError, ValueError) as exc:
+            self._send_json(400, {"status": "error", "message": f"Invalid angle_degrees value: {exc}"})
+            return
+
+        params: dict = {"object_id": object_id, "angle_degrees": angle_degrees}
+
+        raw_axis = data.get("axis")
+        if raw_axis is not None:
+            try:
+                axis = [float(raw_axis[0]), float(raw_axis[1]), float(raw_axis[2])]
+            except (TypeError, IndexError, ValueError) as exc:
+                self._send_json(
+                    400, {"status": "error", "message": f"Invalid axis (expected [x, y, z]): {exc}"}
+                )
+                return
+            if all(v == 0.0 for v in axis):
+                self._send_json(400, {"status": "error", "message": "axis cannot be a zero vector [0, 0, 0]"})
+                return
+            params["axis"] = axis
+
+        raw_center = data.get("center_point")
+        if raw_center is not None:
+            try:
+                params["center_point"] = [float(raw_center[0]), float(raw_center[1]), float(raw_center[2])]
+            except (TypeError, IndexError, ValueError) as exc:
+                self._send_json(
+                    400, {"status": "error", "message": f"Invalid center_point (expected [x, y, z]): {exc}"}
+                )
+                return
+
+        self._enqueue_and_wait("rotate_object", params)
+
+    @api_error_handler
+    def _handle_scale_object(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        object_id = data.get("object_id")
+        if not object_id or not isinstance(object_id, str):
+            self._send_json(
+                400,
+                {"status": "error", "message": "Missing or invalid field: object_id (expected non-empty string GUID)"},
+            )
+            return
+
+        raw_scale = data.get("scale_factor")
+        if raw_scale is None:
+            self._send_json(400, {"status": "error", "message": "Missing field: scale_factor"})
+            return
+        try:
+            scale_factor = [float(raw_scale[0]), float(raw_scale[1]), float(raw_scale[2])]
+        except (TypeError, IndexError, ValueError) as exc:
+            self._send_json(
+                400, {"status": "error", "message": f"Invalid scale_factor (expected [sx, sy, sz]): {exc}"}
+            )
+            return
+        for i, v in enumerate(scale_factor):
+            if v <= 0:
+                axis_name = ["X", "Y", "Z"][i]
+                self._send_json(
+                    400,
+                    {"status": "error", "message": f"scale_factor[{i}] ({axis_name}) must be positive, got {v}"},
+                )
+                return
+
+        params: dict = {"object_id": object_id, "scale_factor": scale_factor}
+
+        raw_center = data.get("center_point")
+        if raw_center is not None:
+            try:
+                params["center_point"] = [float(raw_center[0]), float(raw_center[1]), float(raw_center[2])]
+            except (TypeError, IndexError, ValueError) as exc:
+                self._send_json(
+                    400, {"status": "error", "message": f"Invalid center_point (expected [x, y, z]): {exc}"}
+                )
+                return
+
+        self._enqueue_and_wait("scale_object", params)
+
     # ------------------------------------------------------------------
     def _send_json(self, status: int, data: dict) -> None:
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
@@ -915,6 +1093,8 @@ def start_listener() -> None:
     logger.info('  /get_bounding_box        POST {"object_id": "<GUID>"} → {"object_id","vertices"[8],"center"}')
     logger.info('  /get_objects_by_name     POST {"name": "<string>"}    → {"object_ids": ["<GUID>",...]}')
     logger.info('  /set_object_layer        POST {"object_id": "<GUID>", "layer_name": "<string>"} → {"object_id","layer_name","layer_index"}')
+    logger.info('  /rotate_object           POST {"object_id": "<GUID>", "angle_degrees": <float>, "axis"?: [x,y,z], "center_point"?: [x,y,z]}')
+    logger.info('  /scale_object            POST {"object_id": "<GUID>", "scale_factor": [sx,sy,sz], "center_point"?: [x,y,z]}')
     logger.info("  单体操作返回  {\"status\": \"ok\", \"guid\": \"<GUID>\"}")
     logger.info("  多体操作返回  {\"status\": \"ok\", \"guids\": [\"<GUID>\",...]} (boolean_difference)")
     logger.info("  感知操作返回  {\"status\": \"ok\", <operation-specific fields>}")
