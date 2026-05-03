@@ -1301,6 +1301,64 @@ async def undo_last_action() -> str:
     return "已成功撤销上一步操作"
 
 
+@mcp.tool()
+async def set_object_color(
+    object_ids: list[str],
+    r: int,
+    g: int,
+    b: int,
+) -> str:
+    """
+    修改 Rhino 8 文档中一个或多个对象的显示颜色（RGB）。
+
+    颜色立即应用并刷新视口，无需手动 Redraw。
+
+    【重要】所有 GUID 必须来自 Rhino 文档中真实存在的对象，切勿凭空捏造。
+
+    使用场景示例：
+      - "把这个球体改成红色"
+        → object_ids=[sphere_guid], r=255, g=0, b=0
+      - "将选中的柱子全部改为蓝色"
+        → object_ids=[c1, c2, c3], r=0, g=0, b=255
+      - "把长方体改成半透明灰（RGB 128,128,128）"
+        → r=128, g=128, b=128
+
+    典型工作流：
+      1. create_box(10, 10, 10)                         → box_guid
+      2. set_object_color([box_guid], r=255, g=165, b=0) → 橙色
+
+    Args:
+        object_ids: 需要改色的对象 GUID 列表，至少包含 1 个元素。
+        r: 红色通道，整数，范围 0–255。
+        g: 绿色通道，整数，范围 0–255。
+        b: 蓝色通道，整数，范围 0–255。
+
+    Returns:
+        成功时返回已改色对象数量的确认消息；失败时返回详细错误描述。
+    """
+    logger.info(
+        "set_object_color 调用，count=%d, rgb=(%d,%d,%d)",
+        len(object_ids) if object_ids else 0, r, g, b,
+    )
+
+    if not object_ids:
+        return "参数错误：object_ids 不能为空列表"
+
+    for ch_name, val in (("r", r), ("g", g), ("b", b)):
+        if not isinstance(val, int) or not 0 <= val <= 255:
+            return f"参数错误：{ch_name} 必须是 0–255 的整数，收到 {val!r}"
+
+    payload = {"object_ids": object_ids, "r": r, "g": g, "b": b}
+    ok, result = await _call_rhino_listener("/set_object_color", payload)
+    if not ok:
+        return result
+
+    changed = result.get("changed", len(object_ids)) if isinstance(result, dict) else len(object_ids)
+    return (
+        f"成功：已将 {changed} 个对象的颜色设置为 RGB({r}, {g}, {b})。"
+    )
+
+
 # ---------------------------------------------------------------------------
 # 入口
 # ---------------------------------------------------------------------------
@@ -1311,7 +1369,7 @@ if __name__ == "__main__":
         "move_object, rotate_object, scale_object, align_objects, distribute_objects, "
         "extrude_curve_straight, boolean_difference, create_circle, "
         "get_selected_objects, get_objects_by_name, "
-        "get_object_info, get_bounding_box, set_object_layer, undo_last_action"
+        "get_object_info, get_bounding_box, set_object_layer, set_object_color, undo_last_action"
     )
     logger.info("等待 MCP 客户端连接…")
     mcp.run(transport="stdio")

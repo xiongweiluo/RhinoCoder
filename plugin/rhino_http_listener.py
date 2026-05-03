@@ -520,6 +520,14 @@ def _dispatch_rhinoscript(rs, operation: str, params: dict):
             "layer_index": layer_index,
         }
 
+    elif operation == "set_object_color":
+        object_ids = params["object_ids"]
+        r, g, b = int(params["r"]), int(params["g"]), int(params["b"])
+        for oid in object_ids:
+            rs.ObjectColor(oid, [r, g, b])
+        rs.Redraw()
+        return {"changed": len(object_ids)}
+
     else:
         raise ValueError(f"未知操作类型: {operation!r}")
 
@@ -633,6 +641,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             "/align_objects":          self._handle_align_objects,
             "/distribute_objects":     self._handle_distribute_objects,
             "/undo_last_action":       self._handle_undo_last_action,
+            "/set_object_color":       self._handle_set_object_color,
         }
         handler = _routes.get(self.path)
         try:
@@ -1242,6 +1251,56 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
     def _handle_undo_last_action(self) -> None:
         self._enqueue_and_wait("undo_last_action", {})
 
+    @api_error_handler
+    def _handle_set_object_color(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        object_ids = data.get("object_ids")
+        if not isinstance(object_ids, list) or not object_ids:
+            self._send_json(
+                400,
+                {
+                    "status": "error",
+                    "message": (
+                        "Missing or invalid field: object_ids "
+                        "(expected non-empty list of GUID strings)"
+                    ),
+                },
+            )
+            return
+        if not all(isinstance(g, str) and g for g in object_ids):
+            self._send_json(
+                400,
+                {"status": "error", "message": "All elements in object_ids must be non-empty GUID strings"},
+            )
+            return
+
+        params: dict = {"object_ids": object_ids}
+        for ch in ("r", "g", "b"):
+            raw = data.get(ch)
+            if raw is None:
+                self._send_json(400, {"status": "error", "message": f"Missing field: {ch}"})
+                return
+            try:
+                val = int(raw)
+            except (TypeError, ValueError) as exc:
+                self._send_json(
+                    400,
+                    {"status": "error", "message": f"Invalid {ch} value (expected integer 0-255): {exc}"},
+                )
+                return
+            if not 0 <= val <= 255:
+                self._send_json(
+                    400,
+                    {"status": "error", "message": f"{ch} must be in range 0-255, got {val}"},
+                )
+                return
+            params[ch] = val
+
+        self._enqueue_and_wait("set_object_color", params)
+
     # ------------------------------------------------------------------
     def _send_json(self, status: int, data: dict) -> None:
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
@@ -1343,6 +1402,7 @@ def start_listener() -> None:
     logger.info('  /align_objects           POST {"object_ids": ["<GUID>",...], "axis"?: "X|Y|Z", "alignment"?: "min|center|max"} → {"moved","total","axis","alignment","target_val"}')
     logger.info('  /distribute_objects      POST {"object_ids": ["<GUID>",...], "spacing": <float>, "axis"?: "X|Y|Z"} → {"moved","total","axis","spacing"}')
     logger.info('  /undo_last_action        POST {} → {"message": "已成功撤销上一步操作"}')
+    logger.info('  /set_object_color        POST {"object_ids": ["<GUID>",...], "r": 0-255, "g": 0-255, "b": 0-255} → {"changed": <int>}')
     logger.info("  单体操作返回  {\"status\": \"ok\", \"guid\": \"<GUID>\"}")
     logger.info("  多体操作返回  {\"status\": \"ok\", \"guids\": [\"<GUID>\",...]} (boolean_difference)")
     logger.info("  感知操作返回  {\"status\": \"ok\", <operation-specific fields>}")
