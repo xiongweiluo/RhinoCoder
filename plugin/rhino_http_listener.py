@@ -352,6 +352,76 @@ def _dispatch_rhinoscript(rs, operation: str, params: dict):
             )
         return result
 
+    elif operation == "align_objects":
+        object_ids = params["object_ids"]
+        axis       = params["axis"]       # "X" | "Y" | "Z"（已大写）
+        alignment  = params["alignment"]  # "min" | "center" | "max"（已小写）
+
+        # ── 一次性采集所有包围盒 ────────────────────────────────────────
+        bboxes = []
+        for oid in object_ids:
+            bbox = rs.BoundingBox(oid)
+            if bbox is None:
+                raise ValueError(
+                    f"无法获取对象 {oid} 的包围盒"
+                    "（对象不存在、类型不支持，或几何无效）"
+                )
+            bboxes.append(bbox)
+
+        # ── 从 Point3d 对象读取坐标：必须用 .X / .Y / .Z 属性 ─────────
+        # rs.BoundingBox 返回 8 个 Rhino.Geometry.Point3d 实例；
+        # bbox[0] 固定为 (min_x, min_y, min_z)，bbox[6] 为 (max_x, max_y, max_z)。
+        def _get_axis_val(pt):
+            return getattr(pt, axis)  # axis 已是 "X"/"Y"/"Z"
+
+        overall_min = min(_get_axis_val(bbox[0]) for bbox in bboxes)
+        overall_max = max(_get_axis_val(bbox[6]) for bbox in bboxes)
+
+        if alignment == "min":
+            target_val = overall_min
+        elif alignment == "max":
+            target_val = overall_max
+        else:  # center
+            target_val = (overall_min + overall_max) / 2.0
+
+        # ── 逐对象平移 ──────────────────────────────────────────────────
+        axis_idx = {"X": 0, "Y": 1, "Z": 2}[axis]
+        moved_count = 0
+        for oid, bbox in zip(object_ids, bboxes):
+            obj_min = _get_axis_val(bbox[0])
+            obj_max = _get_axis_val(bbox[6])
+
+            if alignment == "min":
+                current_val = obj_min
+            elif alignment == "max":
+                current_val = obj_max
+            else:
+                current_val = (obj_min + obj_max) / 2.0
+
+            delta = target_val - current_val
+            if abs(delta) < 1e-9:
+                moved_count += 1
+                continue
+
+            translation = [0.0, 0.0, 0.0]
+            translation[axis_idx] = delta
+
+            result = rs.MoveObject(oid, translation)
+            if result is None:
+                raise ValueError(
+                    f"rs.MoveObject 返回 None（对象 {oid} 移动失败，"
+                    "请检查 GUID 是否有效或文档是否处于锁定状态）"
+                )
+            moved_count += 1
+
+        return {
+            "moved":      moved_count,
+            "total":      len(object_ids),
+            "axis":       axis,
+            "alignment":  alignment,
+            "target_val": round(target_val, 4),
+        }
+
     elif operation == "set_object_layer":
         obj_id = params["object_id"]
         layer_name = params["layer_name"].strip()
@@ -494,6 +564,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             "/set_object_layer":       self._handle_set_object_layer,
             "/rotate_object":          self._handle_rotate_object,
             "/scale_object":           self._handle_scale_object,
+            "/align_objects":          self._handle_align_objects,
         }
         handler = _routes.get(self.path)
         try:
@@ -997,6 +1068,53 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
 
         self._enqueue_and_wait("scale_object", params)
 
+    @api_error_handler
+    def _handle_align_objects(self) -> None:
+        data = self._parse_body()
+        if data is None:
+            return
+
+        object_ids = data.get("object_ids")
+        if not isinstance(object_ids, list) or len(object_ids) < 2:
+            self._send_json(
+                400,
+                {
+                    "status": "error",
+                    "message": (
+                        "Missing or invalid field: object_ids "
+                        "(expected list with at least 2 GUID strings)"
+                    ),
+                },
+            )
+            return
+        if not all(isinstance(g, str) and g for g in object_ids):
+            self._send_json(
+                400,
+                {"status": "error", "message": "All elements in object_ids must be non-empty GUID strings"},
+            )
+            return
+
+        axis = str(data.get("axis", "X")).upper()
+        if axis not in ("X", "Y", "Z"):
+            self._send_json(
+                400,
+                {"status": "error", "message": f"Invalid axis {axis!r}: must be 'X', 'Y', or 'Z'"},
+            )
+            return
+
+        alignment = str(data.get("alignment", "center")).lower()
+        if alignment not in ("min", "center", "max"):
+            self._send_json(
+                400,
+                {"status": "error", "message": f"Invalid alignment {alignment!r}: must be 'min', 'center', or 'max'"},
+            )
+            return
+
+        self._enqueue_and_wait(
+            "align_objects",
+            {"object_ids": object_ids, "axis": axis, "alignment": alignment},
+        )
+
     # ------------------------------------------------------------------
     def _send_json(self, status: int, data: dict) -> None:
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
@@ -1095,6 +1213,7 @@ def start_listener() -> None:
     logger.info('  /set_object_layer        POST {"object_id": "<GUID>", "layer_name": "<string>"} → {"object_id","layer_name","layer_index"}')
     logger.info('  /rotate_object           POST {"object_id": "<GUID>", "angle_degrees": <float>, "axis"?: [x,y,z], "center_point"?: [x,y,z]}')
     logger.info('  /scale_object            POST {"object_id": "<GUID>", "scale_factor": [sx,sy,sz], "center_point"?: [x,y,z]}')
+    logger.info('  /align_objects           POST {"object_ids": ["<GUID>",...], "axis"?: "X|Y|Z", "alignment"?: "min|center|max"} → {"moved","total","axis","alignment","target_val"}')
     logger.info("  单体操作返回  {\"status\": \"ok\", \"guid\": \"<GUID>\"}")
     logger.info("  多体操作返回  {\"status\": \"ok\", \"guids\": [\"<GUID>\",...]} (boolean_difference)")
     logger.info("  感知操作返回  {\"status\": \"ok\", <operation-specific fields>}")

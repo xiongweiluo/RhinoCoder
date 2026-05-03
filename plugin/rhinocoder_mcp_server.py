@@ -983,6 +983,132 @@ async def rotate_object(
 
 
 @mcp.tool()
+async def align_objects(
+    object_ids: list[str],
+    axis: str = "X",
+    alignment: str = "center",
+) -> str:
+    """
+    将多个 Rhino 8 对象沿指定坐标轴对齐，一键完成多对象空间对齐布局。
+
+    【本工具的意义】
+    手动对齐多个物体需要 Agent 对每个物体调用 get_bounding_box + 计算偏移 + move_object，
+    步骤繁琐且误差易积累。本工具将全套逻辑封装为一次调用，极大降低计算负担。
+
+    对齐语义（以 axis="X" 为例）：
+      - "min"：所有物体的 X 轴最小边（左端面）对齐到同一 X 坐标（最小值中的最小值）。
+      - "center"：所有物体的 X 轴包围盒中心对齐到同一 X 坐标（各中心的平均值）。
+      - "max"：所有物体的 X 轴最大边（右端面）对齐到同一 X 坐标（最大值中的最大值）。
+
+    【重要】所有 GUID 必须来自 Rhino 文档中真实存在的对象（创建工具或 get_selected_objects
+    的返回值），切勿凭空捏造。
+
+    使用场景示例：
+      - "让这 4 根柱子左对齐"
+        → object_ids=[c1,c2,c3,c4], axis="X", alignment="min"
+      - "将这些盒子在 Y 轴方向居中对齐"
+        → object_ids=[b1,b2,b3], axis="Y", alignment="center"
+      - "所有物体顶面对齐到同一高度"
+        → axis="Z", alignment="max"
+
+    典型工作流：
+      1. create_box(10,10,10)  → g1；create_box(5,5,5) → g2；create_box(8,8,8) → g3
+      2. move_object(g2, 30, 0, 0)；move_object(g3, 60, 0, 0)   ← 先散开
+      3. align_objects([g1,g2,g3], axis="Z", alignment="min")    ← 底面对齐
+
+    Args:
+        object_ids: 需要对齐的对象 GUID 列表，至少包含 2 个元素。
+        axis:       对齐参考轴，只能是 "X"、"Y" 或 "Z"（不区分大小写）。默认 "X"。
+        alignment:  对齐方式：
+                      "min"    — 最小端对齐（靠左/靠下/靠前）
+                      "center" — 包围盒中心对齐（居中）
+                      "max"    — 最大端对齐（靠右/靠上/靠后）
+                    默认 "center"。
+
+    Returns:
+        成功时返回每个对象的移动摘要（原始中心 → 新位置）；失败时返回详细错误描述。
+    """
+    logger.info(
+        "align_objects 调用，count=%d, axis=%r, alignment=%r",
+        len(object_ids) if object_ids else 0, axis, alignment,
+    )
+
+    # ── 参数校验 ──────────────────────────────────────────────────────────────
+    if not object_ids or len(object_ids) < 2:
+        return "参数错误：object_ids 至少需要包含 2 个 GUID"
+
+    axis = axis.upper()
+    if axis not in ("X", "Y", "Z"):
+        return f"参数错误：axis 必须是 'X'、'Y' 或 'Z'，收到 {axis!r}"
+
+    alignment = alignment.lower()
+    if alignment not in ("min", "center", "max"):
+        return f"参数错误：alignment 必须是 'min'、'center' 或 'max'，收到 {alignment!r}"
+
+    axis_idx = {"X": 0, "Y": 1, "Z": 2}[axis]
+
+    # ── 逐个获取包围盒 ────────────────────────────────────────────────────────
+    bboxes: list[dict] = []
+    for oid in object_ids:
+        ok, result = await _call_rhino_listener("/get_bounding_box", {"object_id": oid})
+        if not ok:
+            return f"获取对象 {oid} 的包围盒失败：{result}"
+        if not isinstance(result, dict):
+            return f"对象 {oid} 返回了意外的包围盒格式：{result}"
+        bboxes.append(result)
+
+    # ── 计算对齐目标值 ────────────────────────────────────────────────────────
+    #  vertices[0] = min 角点，vertices[6] = max 角点，center = 包围盒中心
+    mins    = [bb["vertices"][0][axis_idx] for bb in bboxes]
+    maxs    = [bb["vertices"][6][axis_idx] for bb in bboxes]
+    centers = [bb["center"][axis_idx]      for bb in bboxes]
+
+    if alignment == "min":
+        target = min(mins)
+    elif alignment == "max":
+        target = max(maxs)
+    else:  # center
+        target = sum(centers) / len(centers)
+
+    # ── 逐个移动到对齐位置 ───────────────────────────────────────────────────
+    results: list[str] = []
+    for oid, bb, obj_min, obj_max, obj_center in zip(
+        object_ids, bboxes, mins, maxs, centers
+    ):
+        if alignment == "min":
+            delta = target - obj_min
+        elif alignment == "max":
+            delta = target - obj_max
+        else:
+            delta = target - obj_center
+
+        if abs(delta) < 1e-9:
+            results.append(f"  {oid}: 无需移动（已对齐）")
+            continue
+
+        translation = [0.0, 0.0, 0.0]
+        translation[axis_idx] = delta
+
+        ok, move_result = await _call_rhino_listener(
+            "/move_object",
+            {"object_id": oid, "translation": translation},
+        )
+        if not ok:
+            results.append(f"  {oid}: 移动失败 — {move_result}")
+        else:
+            results.append(
+                f"  {oid}: {axis} 轴偏移 {delta:+.4f} → 对齐完成"
+            )
+
+    summary = "\n".join(results)
+    return (
+        f"成功：已将 {len(object_ids)} 个对象沿 {axis} 轴执行 '{alignment}' 对齐。\n"
+        f"目标基准值 = {target:.4f}\n"
+        f"{summary}"
+    )
+
+
+@mcp.tool()
 async def scale_object(
     object_id: str,
     scale_factor: list[float],
@@ -1083,8 +1209,9 @@ if __name__ == "__main__":
     logger.info("RhinoCoder MCP Server 启动（stdio transport）")
     logger.info(
         "已注册工具: create_sphere, create_box, create_cylinder, create_line, "
-        "move_object, rotate_object, scale_object, extrude_curve_straight, "
-        "boolean_difference, create_circle, get_selected_objects, get_objects_by_name, "
+        "move_object, rotate_object, scale_object, align_objects, "
+        "extrude_curve_straight, boolean_difference, create_circle, "
+        "get_selected_objects, get_objects_by_name, "
         "get_object_info, get_bounding_box, set_object_layer"
     )
     logger.info("等待 MCP 客户端连接…")
