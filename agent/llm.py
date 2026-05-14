@@ -27,7 +27,7 @@ logger = logging.getLogger("rhinocoder.llm")
 # ---------------------------------------------------------------------------
 _HERE = Path(__file__).resolve()
 PROJECT_ROOT = _HERE.parent.parent
-MCP_SERVER_SCRIPT = PROJECT_ROOT / "plugin" / "rhinocoder_mcp_server.py"
+MCP_SERVER_SCRIPT = PROJECT_ROOT / "plugin" /  "mcp_server" / "main.py"
 
 DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1"
 DEEPSEEK_MODEL = "deepseek-chat"

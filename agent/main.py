@@ -39,7 +39,7 @@ from mcp.client.stdio import stdio_client
 # ---------------------------------------------------------------------------
 # 从项目根目录的 .env 文件加载环境变量（不覆盖已有 shell 变量）
 load_dotenv(PROJECT_ROOT / ".env", override=False)
-MCP_SERVER_SCRIPT = PROJECT_ROOT / "plugin" / "rhinocoder_mcp_server.py"
+MCP_SERVER_SCRIPT = PROJECT_ROOT / "plugin" / "mcp_server" / "main.py"
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -86,7 +86,7 @@ async def _run_test_draw_session() -> int:
     # ── 前置检查 ─────────────────────────────────────────────────────────
     if not MCP_SERVER_SCRIPT.exists():
         _echo("SETUP", f"MCP Server 脚本不存在: {MCP_SERVER_SCRIPT}", err=True)
-        _echo("SETUP", "请确认 plugin/rhinocoder_mcp_server.py 已创建。", err=True)
+        _echo("SETUP", "请确认 plugin/mcp_server/main.py 已创建。", err=True)
         return 1
 
     server_params = StdioServerParameters(
@@ -96,7 +96,7 @@ async def _run_test_draw_session() -> int:
     )
 
     _echo("SETUP", f"Python      : {sys.executable}")
-    _echo("SETUP", f"MCP Server  : plugin/rhinocoder_mcp_server.py")
+    _echo("SETUP", f"MCP Server  : plugin/mcp_server/main.py")
 
     # ── 建立连接 ─────────────────────────────────────────────────────────
     try:
