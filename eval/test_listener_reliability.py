@@ -1,0 +1,91 @@
+from __future__ import annotations
+
+from plugin.rhino_listener import listener_main, tools_transform
+
+
+class _Handler:
+    def __init__(self, token: str = "") -> None:
+        self.headers = {"X-RhinoCoder-Eval-Token": token}
+        self.sent = []
+        self.enqueued = []
+
+    def _send_json(self, status, payload):
+        self.sent.append((status, payload))
+
+    def _enqueue_and_wait(self, operation, params):
+        self.enqueued.append((operation, params))
+
+
+def test_reset_environment_disabled_without_server_token(monkeypatch):
+    monkeypatch.delenv("RHINOCODER_EVAL_TOKEN", raising=False)
+    handler = _Handler("provided")
+    tools_transform._route_reset_environment(handler)
+    assert handler.sent[0][0] == 503
+    assert handler.sent[0][1]["error"]["code"] == "eval.reset_disabled"
+    assert not handler.enqueued
+
+
+def test_reset_environment_rejects_wrong_token(monkeypatch):
+    monkeypatch.setenv("RHINOCODER_EVAL_TOKEN", "expected-token")
+    handler = _Handler("wrong-token")
+    tools_transform._route_reset_environment(handler)
+    assert handler.sent[0][0] == 403
+    assert not handler.enqueued
+
+
+def test_reset_environment_accepts_matching_token(monkeypatch):
+    monkeypatch.setenv("RHINOCODER_EVAL_TOKEN", "expected-token")
+    handler = _Handler("expected-token")
+    tools_transform._route_reset_environment(handler)
+    assert handler.enqueued == [("reset_environment", {})]
+
+
+def test_delete_objects_reports_partial_failure():
+    class FakeRS:
+        @staticmethod
+        def DeleteObject(object_id):
+            return object_id == "ok"
+
+        @staticmethod
+        def Redraw():
+            return None
+
+    result = tools_transform._exec_delete_objects(FakeRS, {"object_ids": ["ok", "missing"]})
+    assert result == {"deleted": ["ok"], "failed": ["missing"], "count": 1}
+
+
+def test_idempotency_cache_replays_same_request_and_rejects_conflict():
+    class Dummy:
+        def __init__(self):
+            self.headers = {"Idempotency-Key": "12345678"}
+            self.sent = []
+
+        def _send_json(self, status, payload):
+            self.sent.append((status, payload))
+
+    listener_main._idempotency_cache.clear()
+    listener_main._idempotency_cache["12345678"] = (
+        'create_box:{"height": 2}',
+        {"status": "ok", "guid": "existing"},
+    )
+
+    same = Dummy()
+    listener_main._RhinoHTTPHandler._enqueue_and_wait(same, "create_box", {"height": 2})
+    assert same.sent == [(200, {"status": "ok", "guid": "existing"})]
+
+    conflict = Dummy()
+    listener_main._RhinoHTTPHandler._enqueue_and_wait(conflict, "create_box", {"height": 3})
+    assert conflict.sent[0][0] == 409
+    assert conflict.sent[0][1]["error"]["code"] == "http.idempotency_conflict"
+    listener_main._idempotency_cache.clear()
+
+
+def test_legacy_route_errors_receive_standard_error_code():
+    payload = listener_main._normalize_response(
+        400,
+        {"status": "error", "message": "Missing field: object_id"},
+    )
+    assert payload["error"] == {
+        "code": "http.invalid_argument",
+        "recoverable": False,
+    }

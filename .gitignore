@@ -46,14 +46,23 @@ rhinocoder-7b-awq/
 rhinocoder-7b-mlx*/
 
 # === Data & training artifacts ===
-data/
+data/*
 !data/.gitkeep
 *.jsonl
+!eval/tasks/*.jsonl
 *.parquet
 *.arrow
 *.db
 *.sqlite
 *.sqlite3
+
+# 运行轨迹、评测结果和本地前端产物
+eval/results/
+eval/reports/generated/
+agent/ui/dist/
+agent/ui/node_modules/
+*.tsbuildinfo
+tmp/
 
 # === Logs & monitoring ===
 logs/

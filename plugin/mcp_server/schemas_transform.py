@@ -3,11 +3,12 @@ mcp_server/schemas_transform.py  —  运行在外部 Python 3.10+ 环境
 
 四大家族 · 变换（transform）家族的 MCP 工具 Schema 注册：
   move_object, rotate_object, scale_object, align_objects,
-  distribute_objects, group_objects, place_on_at, undo_last_action
+  distribute_objects, group_objects, place_on_at, undo_last_action,
+  delete_objects
 
 公开接口：
   register(mcp, call_rhino) -> None
-    将本家族全部 8 个工具注册到传入的 FastMCP 实例。
+    将本家族全部 9 个工具注册到传入的 FastMCP 实例。
     call_rhino 为异步 HTTP 调用函数：
       async def call_rhino(endpoint: str, payload: dict) -> Tuple[bool, Any]
 
@@ -627,7 +628,52 @@ def register(mcp, call_rhino) -> None:
             )
         return f"成功（原始响应）: {result}"
 
-    # ── 8. undo_last_action ─────────────────────────────────────────────────
+    # ── 8. delete_objects ───────────────────────────────────────────────────
+
+    @mcp.tool()
+    async def delete_objects(object_ids: list[str]) -> str:
+        """
+        删除场景中指定 ID 的对象。比撤销更精准。
+
+        【与 undo_last_action 的区别】
+        - undo_last_action 按时间线回退，会撤销掉该步之后的所有操作，存在误伤风险。
+        - delete_objects 按空间维度精准定位并删除指定 GUID，不影响其他对象。
+
+        【重要】所有 GUID 必须来自 Rhino 文档中真实存在的对象，切勿凭空捏造。
+        已被删除或不存在的 GUID 会出现在返回结果的 failed 列表中，不会导致整体失败。
+
+        使用场景示例：
+          - "删除刚才创建的那个球体"
+            → object_ids=[<sphere_guid>]
+          - "把 A、B、C 三个对象都删掉"
+            → object_ids=[guid_A, guid_B, guid_C]
+
+        Args:
+            object_ids: 要删除的对象 GUID 字符串列表，至少 1 个元素。
+
+        Returns:
+            成功时返回删除数量及失败列表；失败时返回详细错误描述。
+        """
+        logger.info("delete_objects 调用，count=%d", len(object_ids) if object_ids else 0)
+
+        if not object_ids or not isinstance(object_ids, list):
+            return "参数错误：object_ids 必须是非空列表"
+
+        payload = {"object_ids": list(object_ids)}
+        ok, result = await call_rhino("/delete_objects", payload)
+        if not ok:
+            return result
+
+        if isinstance(result, dict):
+            count  = result.get("count", 0)
+            failed = result.get("failed", [])
+            msg = f"成功：已删除 {count} 个对象。"
+            if failed:
+                msg += f"\n以下对象删除失败（GUID 不存在或已删除）：{failed}"
+            return msg
+        return f"成功（原始响应）: {result}"
+
+    # ── 9. undo_last_action ─────────────────────────────────────────────────
 
     @mcp.tool()
     async def undo_last_action() -> str:

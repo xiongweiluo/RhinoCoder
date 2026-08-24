@@ -48,6 +48,7 @@ import logging
 import queue
 import sys
 import threading
+from collections import OrderedDict
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from socketserver import ThreadingMixIn
 from typing import Optional
@@ -87,6 +88,37 @@ if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
 LISTEN_HOST     = "127.0.0.1"
 LISTEN_PORT     = 8080
 REQUEST_TIMEOUT = 12.0  # 等待主线程执行的最长秒数
+IDEMPOTENCY_CACHE_SIZE = 256
+
+_idempotency_cache: "OrderedDict[str, tuple[str, dict]]" = OrderedDict()
+_idempotency_lock = threading.Lock()
+
+
+def _error_payload(code: str, message: str, recoverable: bool = False) -> dict:
+    return {
+        "status": "error",
+        "message": message,
+        "error": {"code": code, "recoverable": recoverable},
+    }
+
+
+def _normalize_response(status: int, data: dict) -> dict:
+    """为旧路由生成的错误响应补齐统一错误信封。"""
+    if status < 400 or data.get("status") != "error" or data.get("error"):
+        return data
+    code = {
+        400: "http.invalid_argument",
+        401: "http.unauthorized",
+        403: "http.forbidden",
+        404: "http.not_found",
+        409: "http.conflict",
+        429: "http.rate_limited",
+        504: "rhino.main_thread_timeout",
+    }.get(status, "http.server_error" if status >= 500 else "http.request_error")
+    return {
+        **data,
+        "error": {"code": code, "recoverable": status in {429, 502, 503, 504}},
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -105,10 +137,10 @@ def api_error_handler(fn):
         except Exception as exc:
             logger.exception("api_error_handler 捕获未处理异常 [%s]: %s", fn.__name__, exc)
             try:
-                h._send_json(200, {
-                    "status":  "error",
-                    "message": f"发生了内部错误: {exc}",
-                })
+                h._send_json(
+                    200,
+                    _error_payload("listener.internal", f"发生了内部错误: {exc}"),
+                )
             except Exception:
                 pass
     return wrapper
@@ -228,6 +260,20 @@ class _ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 class _RhinoHTTPHandler(BaseHTTPRequestHandler):
     """处理所有 POST 路由请求，将操作任务派发至 Rhino 主线程。"""
 
+    def do_GET(self) -> None:
+        if self.path == "/health":
+            self._send_json(
+                200,
+                {
+                    "status": "ok",
+                    "service": "rhinocoder-rhino-listener",
+                    "queue_size": _work_queue.qsize(),
+                    "registered_endpoints": len(_ROUTE_TABLE),
+                },
+            )
+            return
+        self._send_json(404, _error_payload("http.not_found", f"Unknown endpoint: {self.path!r}"))
+
     def do_POST(self) -> None:
         handler = _ROUTE_TABLE.get(self.path)
         if handler:
@@ -236,8 +282,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             self._send_json(
                 404,
                 {
-                    "status": "error",
-                    "message": f"Unknown endpoint: {self.path!r}",
+                    **_error_payload("http.not_found", f"Unknown endpoint: {self.path!r}"),
                     "registered_endpoints": sorted(_ROUTE_TABLE.keys()),
                 },
             )
@@ -250,20 +295,20 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
         try:
             content_length = int(self.headers.get("Content-Length", 0))
         except (TypeError, ValueError):
-            self._send_json(400, {"status": "error", "message": "Invalid Content-Length header"})
+            self._send_json(400, _error_payload("http.invalid_content_length", "Invalid Content-Length header"))
             return None
 
         if content_length == 0:
-            self._send_json(400, {"status": "error", "message": "Empty request body"})
+            self._send_json(400, _error_payload("http.empty_body", "Empty request body"))
             return None
 
         try:
             raw = self.rfile.read(content_length)
             return json.loads(raw)
         except json.JSONDecodeError as exc:
-            self._send_json(400, {"status": "error", "message": f"Invalid JSON: {exc}"})
+            self._send_json(400, _error_payload("http.invalid_json", f"Invalid JSON: {exc}"))
         except Exception as exc:
-            self._send_json(400, {"status": "error", "message": f"Failed to read request body: {exc}"})
+            self._send_json(400, _error_payload("http.read_failed", f"Failed to read request body: {exc}"))
         return None
 
     def _enqueue_and_wait(self, operation: str, params: dict) -> None:
@@ -271,6 +316,32 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
         将工作单元入队并阻塞等待 Rhino 主线程完成，最后发送 JSON 响应。
         超时返回 504；执行失败返回 200+error；成功返回 200+data/guids/guid。
         """
+        idempotency_key = self.headers.get("Idempotency-Key", "").strip()
+        request_signature = operation + ":" + json.dumps(params, ensure_ascii=False, sort_keys=True)
+        if idempotency_key:
+            if not 8 <= len(idempotency_key) <= 128:
+                self._send_json(
+                    400,
+                    _error_payload("http.invalid_idempotency_key", "Idempotency-Key 长度必须为 8-128"),
+                )
+                return
+            with _idempotency_lock:
+                cached = _idempotency_cache.get(idempotency_key)
+                if cached is not None:
+                    cached_signature, cached_payload = cached
+                    if cached_signature != request_signature:
+                        self._send_json(
+                            409,
+                            _error_payload(
+                                "http.idempotency_conflict",
+                                "同一 Idempotency-Key 不能用于不同请求",
+                            ),
+                        )
+                        return
+                    _idempotency_cache.move_to_end(idempotency_key)
+                    self._send_json(200, cached_payload)
+                    return
+
         work = _PendingWork(operation=operation, params=params)
         _work_queue.put(work)
         logger.info(
@@ -287,30 +358,47 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             )
             self._send_json(
                 504,
-                {
-                    "status":  "error",
-                    "message": (
+                _error_payload(
+                    "rhino.main_thread_timeout",
+                    (
                         f"Timeout: Rhino main thread did not respond "
                         f"within {REQUEST_TIMEOUT}s"
                     ),
-                },
+                    recoverable=True,
+                ),
             )
             return
 
         if work.error:
             logger.error("%s 执行失败: %s", operation, work.error)
-            self._send_json(200, {"status": "error", "message": work.error})
+            self._send_json(
+                200,
+                _error_payload("rhino.execution_failed", work.error, recoverable=True),
+            )
         elif work.result_data is not None:
             logger.info("%s 完成，data=%s", operation, work.result_data)
-            self._send_json(200, {"status": "ok", **work.result_data})
+            payload = {"status": "ok", **work.result_data}
+            self._cache_and_send(idempotency_key, request_signature, payload)
         elif work.result_guids is not None:
             logger.info("%s 完成，GUIDs=%s", operation, work.result_guids)
-            self._send_json(200, {"status": "ok", "guids": work.result_guids})
+            payload = {"status": "ok", "guids": work.result_guids}
+            self._cache_and_send(idempotency_key, request_signature, payload)
         else:
             logger.info("%s 完成，GUID=%s", operation, work.result_guid)
-            self._send_json(200, {"status": "ok", "guid": work.result_guid})
+            payload = {"status": "ok", "guid": work.result_guid}
+            self._cache_and_send(idempotency_key, request_signature, payload)
+
+    def _cache_and_send(self, idempotency_key: str, request_signature: str, payload: dict) -> None:
+        if idempotency_key:
+            with _idempotency_lock:
+                _idempotency_cache[idempotency_key] = (request_signature, payload)
+                _idempotency_cache.move_to_end(idempotency_key)
+                while len(_idempotency_cache) > IDEMPOTENCY_CACHE_SIZE:
+                    _idempotency_cache.popitem(last=False)
+        self._send_json(200, payload)
 
     def _send_json(self, status: int, data: dict) -> None:
+        data = _normalize_response(status, data)
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")

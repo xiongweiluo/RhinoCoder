@@ -1,0 +1,13 @@
+{
+  "name": "Basic stack",
+  "sample": true,
+  "events": [
+    {"type":"run.started","run_id":"replay-basic","seq":1,"timestamp":"2026-08-24T00:00:00Z","payload":{"prompt":"创建基座并在顶面放置红色球体","closed_loop":true}},
+    {"type":"planning.started","run_id":"replay-basic","seq":2,"timestamp":"2026-08-24T00:00:01Z","payload":{"round":1}},
+    {"type":"tool.started","run_id":"replay-basic","seq":3,"timestamp":"2026-08-24T00:00:02Z","payload":{"name":"create_box","arguments":{"width":20,"depth":20,"height":2}}},
+    {"type":"tool.completed","run_id":"replay-basic","seq":4,"timestamp":"2026-08-24T00:00:03Z","payload":{"name":"create_box","success":true,"duration_ms":120}},
+    {"type":"tool.completed","run_id":"replay-basic","seq":5,"timestamp":"2026-08-24T00:00:04Z","payload":{"name":"create_sphere","success":true,"duration_ms":90}},
+    {"type":"scene.checked","run_id":"replay-basic","seq":6,"timestamp":"2026-08-24T00:00:05Z","payload":{"scene_summary":{"total":2,"objects":[{"object_id":"sample-base","name":"Base","type":"Polysurface","center":[0,0,1],"size":[20,20,2],"color":[80,88,92],"layer":"Default","groups":[]},{"object_id":"sample-sphere","name":"Sphere","type":"Surface","center":[0,0,10],"size":[16,16,16],"color":[255,0,0],"layer":"Default","groups":[]}]}}},
+    {"type":"run.completed","run_id":"replay-basic","seq":7,"timestamp":"2026-08-24T00:00:06Z","payload":{"status":"completed","metrics":{"duration_ms":6000,"tool_rounds":2,"tool_calls":5,"total_tokens":820,"estimated_cost_usd":0}}}
+  ]
+}

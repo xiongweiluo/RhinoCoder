@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Install UI dependencies
+        run: npm ci --prefix agent/ui
+      - name: Compile
+        run: python -m compileall -q agent data_pipeline eval plugin tools
+      - name: Unit tests
+        run: python -m pytest -q
+      - name: Build UI
+        run: npm run build --prefix agent/ui
+      - name: Validate benchmark tasks
+        run: python eval/run_eval.py --dry-run
+      - name: Scan secrets
+        run: python tools/check_secrets.py

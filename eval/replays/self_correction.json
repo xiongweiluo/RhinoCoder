@@ -1,0 +1,14 @@
+{
+  "name": "Self correction",
+  "sample": true,
+  "events": [
+    {"type":"run.started","run_id":"replay-correction","seq":1,"timestamp":"2026-08-24T00:00:00Z","payload":{"prompt":"创建并校正一个蓝色球体","closed_loop":true}},
+    {"type":"tool.completed","run_id":"replay-correction","seq":2,"timestamp":"2026-08-24T00:00:01Z","payload":{"name":"create_sphere","success":true,"duration_ms":90}},
+    {"type":"scene.checked","run_id":"replay-correction","seq":3,"timestamp":"2026-08-24T00:00:02Z","payload":{"scene_summary":{"total":1,"objects":[{"object_id":"sphere-before","name":"Sphere","type":"Surface","center":[0,0,0],"size":[40,40,40],"color":[255,255,255],"layer":"Default","groups":[]}]}}},
+    {"type":"correction.started","run_id":"replay-correction","seq":4,"timestamp":"2026-08-24T00:00:03Z","payload":{"tool":"scale_object","round":2}},
+    {"type":"tool.completed","run_id":"replay-correction","seq":5,"timestamp":"2026-08-24T00:00:04Z","payload":{"name":"scale_object","success":true,"duration_ms":110}},
+    {"type":"tool.completed","run_id":"replay-correction","seq":6,"timestamp":"2026-08-24T00:00:05Z","payload":{"name":"set_object_color","success":true,"duration_ms":65}},
+    {"type":"scene.checked","run_id":"replay-correction","seq":7,"timestamp":"2026-08-24T00:00:06Z","payload":{"scene_summary":{"total":1,"objects":[{"object_id":"sphere-after","name":"Sphere","type":"Surface","center":[0,0,0],"size":[24,24,24],"color":[0,0,255],"layer":"Default","groups":[]}]}}},
+    {"type":"run.completed","run_id":"replay-correction","seq":8,"timestamp":"2026-08-24T00:00:07Z","payload":{"status":"completed","metrics":{"duration_ms":9000,"tool_rounds":3,"tool_calls":5,"total_tokens":1100,"estimated_cost_usd":0}}}
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "Grouped table",
+  "sample": true,
+  "events": [
+    {"type":"run.started","run_id":"replay-table","seq":1,"timestamp":"2026-08-24T00:00:00Z","payload":{"prompt":"搭建桌面和四条桌腿并分组","closed_loop":true}},
+    {"type":"planning.started","run_id":"replay-table","seq":2,"timestamp":"2026-08-24T00:00:01Z","payload":{"round":1}},
+    {"type":"tool.completed","run_id":"replay-table","seq":3,"timestamp":"2026-08-24T00:00:02Z","payload":{"name":"create_box","success":true,"duration_ms":130}},
+    {"type":"tool.completed","run_id":"replay-table","seq":4,"timestamp":"2026-08-24T00:00:03Z","payload":{"name":"group_objects","success":true,"duration_ms":70}},
+    {"type":"scene.checked","run_id":"replay-table","seq":5,"timestamp":"2026-08-24T00:00:04Z","payload":{"scene_summary":{"total":5,"objects":[{"object_id":"table-top","name":"TableTop","type":"Polysurface","center":[0,0,32],"size":[60,40,4],"color":[160,120,80],"layer":"Furniture","groups":["桌子"]},{"object_id":"leg-1","name":"Leg","type":"Polysurface","center":[-28,-18,15],"size":[4,4,30],"color":[160,120,80],"layer":"Furniture","groups":["桌子"]}]}}},
+    {"type":"run.completed","run_id":"replay-table","seq":6,"timestamp":"2026-08-24T00:00:05Z","payload":{"status":"completed","metrics":{"duration_ms":11500,"tool_rounds":3,"tool_calls":8,"total_tokens":1430,"estimated_cost_usd":0}}}
+  ]
+}

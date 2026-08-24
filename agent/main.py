@@ -1,9 +1,6 @@
 """
 agent/main.py  —  RhinoCoder Agent 主控入口
 
-Sprint 2 : --test-draw   直连 MCP 物理链路，不经过 LLM
-Sprint 3 : --prompt <指令>  DeepSeek LLM + MCP 工具调用完整循环
-
 用法:
     # 链路测试（需先在 Rhino 中执行 start_listener()）
     python agent/main.py --test-draw
@@ -189,7 +186,7 @@ class RhinoCoderAgent:
         return await _run_test_draw_session()
 
     # ── Sprint 3: DeepSeek LLM + MCP 完整循环 ───────────────────────────
-    async def run(self, prompt: str) -> int:
+    async def run(self, prompt: str, *, closed_loop: bool = True):
         """
         完整 Agent 循环:
           Step 1  MCP 握手 + 工具发现
@@ -197,10 +194,10 @@ class RhinoCoderAgent:
           Step 3  MCP call_tool 执行
           Step 4  将工具结果反馈 LLM，生成最终自然语言回复
 
-        返回 exit code: 0 = 成功, 非 0 = 失败
+        返回结构化 AgentRunResult。
         """
         from agent.llm import run_agent
-        return await run_agent(prompt)
+        return await run_agent(prompt, closed_loop=closed_loop)
 
 
 # ---------------------------------------------------------------------------
@@ -221,7 +218,7 @@ def main(
         False,
         "--test-draw",
         help=(
-            "[Sprint 2] 直连测试：以子进程启动 MCP Server，"
+            "直连测试：以子进程启动 MCP Server，"
             "调用 create_sphere(radius=20.0)，不经过任何 LLM。"
             "需先在 Rhino 中执行 rhino_http_listener.start_listener()。"
         ),
@@ -229,12 +226,17 @@ def main(
     prompt: Optional[str] = typer.Option(
         None,
         "--prompt", "-p",
-        help="[Sprint 3+] 向 Agent 发送自然语言指令，触发完整 LLM + Router + MCP 循环。",
+        help="向 Agent 发送自然语言指令，触发完整 LLM + MCP + Rhino 循环。",
     ),
     verbose: bool = typer.Option(
         False,
         "--verbose", "-v",
         help="输出 DEBUG 级别日志（包含 MCP SDK 内部日志）。",
+    ),
+    closed_loop: bool = typer.Option(
+        True,
+        "--closed-loop/--no-closed-loop",
+        help="是否强制执行 get_scene_summary 场景自检与纠错。",
     ),
 ) -> None:
     """RhinoCoder Agent — Rhino 8 AI 编程助手。"""
@@ -244,7 +246,7 @@ def main(
     # ── --test-draw ──────────────────────────────────────────────────────
     if test_draw:
         typer.echo("=" * 55)
-        typer.echo("  RhinoCoder  Sprint 2  MCP 链路测试")
+        typer.echo("  RhinoCoder  MCP 链路测试")
         typer.echo(f"  目标工具 : create_sphere(radius=20.0)")
         typer.echo(f"  前提     : Rhino 已运行 start_listener()")
         typer.echo("=" * 55)
@@ -260,19 +262,22 @@ def main(
     # ── --prompt（Sprint 3）──────────────────────────────────────────────
     if prompt is not None:
         typer.echo("=" * 55)
-        typer.echo("  RhinoCoder  Sprint 3  LLM + MCP 完整链路")
+        typer.echo("  RhinoCoder  LLM + MCP 完整链路")
         typer.echo(f"  Prompt : {prompt}")
         typer.echo(f"  前提   : Rhino 已运行 start_listener()")
         typer.echo(f"           DEEPSEEK_API_KEY 已设置")
         typer.echo("=" * 55)
 
-        exit_code = asyncio.run(agent.run(prompt))
+        result = asyncio.run(agent.run(prompt, closed_loop=closed_loop))
 
         typer.echo("=" * 55)
-        status = "✓ 完成" if exit_code == 0 else "✗ 失败"
+        status = "✓ 完成" if result.exit_code == 0 else f"✗ {result.status.value}"
         typer.echo(f"  结果   : {status}")
+        typer.echo(f"  Run ID : {result.run_id}")
+        typer.echo(f"  耗时   : {result.metrics.duration_ms:.0f} ms")
+        typer.echo(f"  工具   : {result.metrics.tool_calls} 次")
         typer.echo("=" * 55)
-        raise typer.Exit(exit_code)
+        raise typer.Exit(result.exit_code)
 
     # ── 无参数：提示用法 ──────────────────────────────────────────────────
     typer.echo("未指定任何命令，请使用 --help 查看选项。")

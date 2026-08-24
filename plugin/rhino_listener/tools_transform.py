@@ -352,6 +352,63 @@ def _route_undo_last_action(h) -> None:
     h._enqueue_and_wait("undo_last_action", {})
 
 
+def _route_delete_objects(h) -> None:
+    data = h._parse_body()
+    if data is None:
+        return
+
+    object_ids = data.get("object_ids")
+    if not isinstance(object_ids, list) or not object_ids:
+        h._send_json(
+            400,
+            {
+                "status": "error",
+                "message": (
+                    "Missing or invalid field: object_ids "
+                    "(expected non-empty list of GUID strings)"
+                ),
+            },
+        )
+        return
+    if not all(isinstance(g, str) and g for g in object_ids):
+        h._send_json(
+            400,
+            {"status": "error", "message": "All elements in object_ids must be non-empty GUID strings"},
+        )
+        return
+
+    h._enqueue_and_wait("delete_objects", {"object_ids": object_ids})
+
+
+def _route_reset_environment(h) -> None:
+    import os  # noqa: PLC0415
+
+    expected = os.environ.get("RHINOCODER_EVAL_TOKEN", "").strip()
+    provided = h.headers.get("X-RhinoCoder-Eval-Token", "").strip()
+    if not expected or expected.startswith("<"):
+        h._send_json(
+            503,
+            {
+                "status": "error",
+                "message": "评测清场端点未启用：Rhino 进程未配置 RHINOCODER_EVAL_TOKEN",
+                "error": {"code": "eval.reset_disabled", "recoverable": True},
+            },
+        )
+        return
+    if provided != expected:
+        h._send_json(
+            403,
+            {
+                "status": "error",
+                "message": "评测令牌无效，拒绝清空场景",
+                "error": {"code": "eval.invalid_token", "recoverable": False},
+            },
+        )
+        return
+    # 仅显式评测请求可进入主线程执行清场。
+    h._enqueue_and_wait("reset_environment", {})
+
+
 # ===========================================================================
 # Rhino 主线程执行层 — rhinoscriptsyntax 调用（零逻辑改动）
 # ===========================================================================
@@ -755,19 +812,54 @@ def _exec_undo_last_action(rs, params: dict):
     return {"status": "ok", "message": "已成功撤销上一步操作"}
 
 
+def _exec_delete_objects(rs, params: dict):
+    object_ids = params["object_ids"]
+    deleted: list[str] = []
+    failed: list[str] = []
+    for oid in object_ids:
+        if rs.DeleteObject(oid):
+            deleted.append(oid)
+        else:
+            failed.append(oid)
+    rs.Redraw()
+    return {
+        "deleted": deleted,
+        "failed":  failed,
+        "count":   len(deleted),
+    }
+
+
+def _exec_reset_environment(rs, params: dict):
+    import scriptcontext as sc  # noqa: PLC0415
+
+    # 物理层删除：直接操作文档数据库，不依赖 UI 命令行
+    all_objs = rs.AllObjects()
+    if all_objs:
+        rs.DeleteObjects(all_objs)
+
+    # 时空层抹除：调用 RhinoCommon 原生方法清空撤销内存
+    if sc.doc:
+        sc.doc.ClearUndoRecords()
+
+    rs.Redraw()
+    return {"message": "场景已清空，撤销栈已清除"}
+
+
 # ===========================================================================
 # 公开双表接口
 # ===========================================================================
 
 ROUTE_HANDLERS = {
-    "/move_object":        _route_move_object,
-    "/rotate_object":      _route_rotate_object,
-    "/scale_object":       _route_scale_object,
-    "/align_objects":      _route_align_objects,
-    "/distribute_objects": _route_distribute_objects,
-    "/group_objects":      _route_group_objects,
-    "/place_on_at":        _route_place_on_at,
-    "/undo_last_action":   _route_undo_last_action,
+    "/move_object":         _route_move_object,
+    "/rotate_object":       _route_rotate_object,
+    "/scale_object":        _route_scale_object,
+    "/align_objects":       _route_align_objects,
+    "/distribute_objects":  _route_distribute_objects,
+    "/group_objects":       _route_group_objects,
+    "/place_on_at":         _route_place_on_at,
+    "/undo_last_action":    _route_undo_last_action,
+    "/delete_objects":      _route_delete_objects,
+    "/reset_environment":   _route_reset_environment,
 }
 
 DISPATCH_HANDLERS = {
@@ -779,4 +871,6 @@ DISPATCH_HANDLERS = {
     "group_objects":      _exec_group_objects,
     "place_on_at":        _exec_place_on_at,
     "undo_last_action":   _exec_undo_last_action,
+    "delete_objects":     _exec_delete_objects,
+    "reset_environment":  _exec_reset_environment,
 }

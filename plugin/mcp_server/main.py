@@ -10,7 +10,7 @@ RhinoCoder MCP Server 主入口。
       ▼
 [本文件: FastMCP("RhinoCoder")]
       │  动态加载四大家族 schemas_*.register(mcp, call_rhino)
-      │  共 22 个 @mcp.tool() 工具挂载完毕
+      │  共 23 个 @mcp.tool() 工具挂载完毕
       │  POST http://127.0.0.1:8080/<endpoint>  via call_rhino()
       ▼
 [rhino_listener/listener_main.py  —  Rhino 内部 HTTP Listener]
@@ -114,7 +114,8 @@ def _log_startup_banner() -> None:
         ],
         "transform":  [
             "move_object", "rotate_object", "scale_object", "align_objects",
-            "distribute_objects", "group_objects", "place_on_at", "undo_last_action",
+            "distribute_objects", "group_objects", "place_on_at",
+            "undo_last_action", "delete_objects",
         ],
         "property":   ["set_object_layer", "set_object_color"],
         "perception": [

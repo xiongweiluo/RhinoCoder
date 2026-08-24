@@ -24,8 +24,10 @@ MCP 侧唯一的 HTTP 客户端，封装对 Rhino HTTP Listener 的所有网络�
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import sys
+import uuid
 from typing import Any, Tuple
 
 # ---------------------------------------------------------------------------
@@ -64,6 +66,14 @@ HTTP_CONNECT_TIMEOUT = 3.0
 # 读取超时：需略大于 rhino_listener 中的 REQUEST_TIMEOUT（12s），
 # 避免 httpx 在 Rhino 主线程完成前就先断开连接。
 HTTP_READ_TIMEOUT = 20.0
+QUERY_ENDPOINTS = {
+    "/get_selected_objects",
+    "/get_objects_by_name",
+    "/get_object_info",
+    "/get_bounding_box",
+    "/get_scene_summary",
+}
+QUERY_MAX_RETRIES = 1
 
 
 # ---------------------------------------------------------------------------
@@ -93,13 +103,25 @@ async def call_rhino(endpoint: str, payload: dict) -> Tuple[bool, Any]:
         pool=5.0,
     )
 
-    # ── 发送请求 ────────────────────────────────────────────────────────────
-    try:
-        async with httpx.AsyncClient() as client:
-            logger.debug("POST %s  payload=%s", url, payload)
-            response = await client.post(url, json=payload, timeout=timeout)
+    is_query = endpoint in QUERY_ENDPOINTS
+    headers = {} if is_query else {"Idempotency-Key": str(uuid.uuid4())}
+    response = None
+    last_error: Exception | None = None
+    attempts = 1 + (QUERY_MAX_RETRIES if is_query else 0)
 
-    except httpx.ConnectError:
+    # 查询操作可有限重试；变更操作不在客户端自动重试，但始终携带幂等键。
+    async with httpx.AsyncClient() as client:
+        for attempt in range(attempts):
+            try:
+                logger.debug("POST %s payload=%s attempt=%d", url, payload, attempt + 1)
+                response = await client.post(url, json=payload, headers=headers, timeout=timeout)
+                break
+            except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout, httpx.RequestError) as exc:
+                last_error = exc
+                if attempt + 1 < attempts:
+                    await asyncio.sleep(0.15)
+
+    if response is None and isinstance(last_error, httpx.ConnectError):
         msg = (
             f"无法连接到 Rhino HTTP Listener（{url}）。\n"
             "请检查：\n"
@@ -110,25 +132,22 @@ async def call_rhino(endpoint: str, payload: dict) -> Tuple[bool, Any]:
         )
         logger.error(msg)
         return False, msg
-
-    except httpx.ConnectTimeout:
+    if response is None and isinstance(last_error, httpx.ConnectTimeout):
         msg = (
             f"连接 Rhino Listener 超时（>{HTTP_CONNECT_TIMEOUT}s）。"
             "端口 8080 无响应。"
         )
         logger.error(msg)
         return False, msg
-
-    except httpx.ReadTimeout:
+    if response is None and isinstance(last_error, httpx.ReadTimeout):
         msg = (
             f"等待 Rhino 主线程响应超时（>{HTTP_READ_TIMEOUT}s）。"
             "Rhino 可能正在执行其他长时间操作，请稍后重试。"
         )
         logger.error(msg)
         return False, msg
-
-    except httpx.RequestError as exc:
-        msg = f"HTTP 请求错误（{type(exc).__name__}）: {exc}"
+    if response is None:
+        msg = f"HTTP 请求错误（{type(last_error).__name__}）: {last_error}"
         logger.error(msg)
         return False, msg
 
@@ -149,8 +168,9 @@ async def call_rhino(endpoint: str, payload: dict) -> Tuple[bool, Any]:
         # 在此处将其转换为 (False, msg) 让调用方统一走错误处理分支。
         if data.get("status") == "error":
             error_msg = data.get("message", "未知内部错误")
+            error_code = (data.get("error") or {}).get("code", "rhino.application_error")
             logger.error("%s 返回应用层错误（HTTP 200）: %s", endpoint, error_msg)
-            return False, f"失败：{error_msg}"
+            return False, f"失败 [{error_code}]：{error_msg}"
 
         # 多体操作（boolean_difference 等）：响应包含 "guids" 列表
         if "guids" in data:
@@ -169,7 +189,8 @@ async def call_rhino(endpoint: str, payload: dict) -> Tuple[bool, Any]:
         return True, data
 
     # ── HTTP 4xx / 5xx ──────────────────────────────────────────────────────
-    error_detail = data.get("message") or data.get("error", response.text[:300])
+    error_detail = data.get("message") or response.text[:300]
+    error_code = (data.get("error") or {}).get("code", f"http.{response.status_code}")
     logger.error(
         "Rhino Listener 返回错误 HTTP %d: %s",
         response.status_code,
@@ -183,10 +204,24 @@ async def call_rhino(endpoint: str, payload: dict) -> Tuple[bool, Any]:
             "建议：检查 Rhino 是否处于模态对话框或长时间阻塞操作中。"
         )
     elif response.status_code == 400:
-        msg = f"失败：请求参数错误（HTTP 400）：{error_detail}"
+        msg = f"失败 [{error_code}]：请求参数错误（HTTP 400）：{error_detail}"
     elif response.status_code == 500:
-        msg = f"失败：Rhino 内部错误（HTTP 500）：{error_detail}"
+        msg = f"失败 [{error_code}]：Rhino 内部错误（HTTP 500）：{error_detail}"
     else:
-        msg = f"失败（HTTP {response.status_code}）：{error_detail}"
+        msg = f"失败 [{error_code}]（HTTP {response.status_code}）：{error_detail}"
 
     return False, msg
+
+
+async def health_check() -> Tuple[bool, Any]:
+    """读取 Listener 健康状态，不触发 Rhino 主线程操作。"""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{RHINO_BASE_URL}/health",
+                timeout=httpx.Timeout(connect=HTTP_CONNECT_TIMEOUT, read=5.0, write=5.0, pool=5.0),
+            )
+        response.raise_for_status()
+        return True, response.json()
+    except httpx.HTTPError as exc:
+        return False, f"Listener 健康检查失败: {type(exc).__name__}: {exc}"
