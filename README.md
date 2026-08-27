@@ -126,6 +126,8 @@ python tools/check_secrets.py
 ./scripts/benchmark.sh
 ```
 
+最近一次脱敏汇总见 [30 题基准报告](docs/benchmark-report.md)。完整 JSON、工具轨迹和场景快照仅保留在本地。
+
 ## 安全边界
 
 - Listener 仅绑定 `127.0.0.1`。

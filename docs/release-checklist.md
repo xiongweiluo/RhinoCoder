@@ -4,24 +4,24 @@
 
 ## 1. 安全与版本
 
-- [ ] 在 API 提供方控制台轮换仓库历史中出现过的凭证。
-- [ ] `python tools/check_secrets.py` 通过。
-- [ ] `.env`、真实 Trace、评测明细和项目数据均未进入提交。
+- [x] 在 API 提供方控制台轮换仓库历史中出现过的凭证。
+- [x] `python tools/check_secrets.py` 通过。
+- [x] `.env`、真实 Trace、评测明细和项目数据均未进入提交。
 - [ ] 应用、Prompt、工具 Schema 与 Trace 版本固定。
 
 ## 2. 自动检查
 
-- [ ] `./scripts/check.sh` 全部通过。
-- [ ] CI 的编译、单元测试、任务格式、前端构建和密钥扫描通过。
-- [ ] 工作区不存在与发布无关的未提交改动。
+- [x] `./scripts/check.sh` 全部通过。
+- [x] CI 的编译、单元测试、任务格式、前端构建和密钥扫描通过。
+- [x] 工作区不存在与发布无关的未提交改动。
 
 ## 3. 真实环境验收
 
-- [ ] Rhino 8 已打开，Listener 健康检查通过。
+- [x] Rhino 8 已打开，Listener 健康检查通过。
 - [ ] Agent、MCP Server 与 UI 可由 `./scripts/start.sh` 启动。
-- [ ] `./scripts/benchmark.sh` 完成 30 题 Baseline / Closed-loop，各重复 3 次。
-- [ ] 30 题全部进入报告，基础设施错误保留在失败分母。
-- [ ] Closed-loop Pass@1 不低于 70%。
+- [x] `./scripts/benchmark.sh` 完成 30 题 Baseline / Closed-loop，各重复 3 次。
+- [x] 30 题全部进入报告，基础设施错误保留在失败分母。
+- [x] Closed-loop Pass@1 不低于 70%。
 - [ ] 报告包含任务级结果、均值、标准差、稳定性、延迟、token、成本和失败分类。
 
 ## 4. 交互与恢复
