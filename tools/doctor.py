@@ -17,7 +17,9 @@ load_dotenv(ROOT / ".env", override=False)
 
 def _http_json(url: str) -> tuple[bool, str]:
     try:
-        with urllib.request.urlopen(url, timeout=3) as response:  # noqa: S310 - localhost only
+        # 健康检查只访问固定 localhost 地址，不应继承系统代理设置。
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        with opener.open(url, timeout=3) as response:  # noqa: S310 - localhost only
             payload = json.loads(response.read().decode("utf-8"))
         return True, json.dumps(payload, ensure_ascii=False)
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:

@@ -65,7 +65,7 @@ def _eval_headers() -> dict[str, str]:
 
 
 async def _reset_rhino_environment() -> None:
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(trust_env=False) as client:
         response = await client.post(
             f"{RHINO_BASE_URL}/reset_environment",
             json={},
@@ -79,7 +79,7 @@ async def _reset_rhino_environment() -> None:
 
 
 async def _scene_summary() -> dict:
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(trust_env=False) as client:
         response = await client.post(
             f"{RHINO_BASE_URL}/get_scene_summary",
             json={},

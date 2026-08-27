@@ -171,7 +171,7 @@ async def eval_one(
     caught: BaseException | None = None
 
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(trust_env=False) as client:
             phase = time.monotonic()
             await reset_environment(client)
             timings["reset_ms"] = round((time.monotonic() - phase) * 1000, 2)

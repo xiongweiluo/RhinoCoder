@@ -169,7 +169,7 @@ RUN_MANAGER_KEY = web.AppKey("run_manager", RunManager)
 
 
 async def _rhino_post(endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(trust_env=False) as client:
         response = await client.post(
             f"{RHINO_BASE_URL}{endpoint}",
             json=payload,
@@ -184,7 +184,7 @@ async def _rhino_post(endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
 
 async def _health(_: web.Request) -> web.Response:
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(trust_env=False) as client:
             response = await client.get(f"{RHINO_BASE_URL}/health", timeout=3.0)
             rhino = response.json()
     except Exception as exc:
