@@ -21,6 +21,8 @@ from __future__ import annotations
 
 import logging
 
+from .validation import are_guids, is_guid
+
 logger = logging.getLogger("rhinocoder.http_listener")
 
 
@@ -35,7 +37,7 @@ def _route_set_object_layer(h) -> None:
         return
 
     object_id = data.get("object_id")
-    if not object_id or not isinstance(object_id, str):
+    if not is_guid(object_id):
         h._send_json(
             400,
             {"status": "error", "message": "Missing or invalid field: object_id (expected non-empty string GUID)"},
@@ -71,7 +73,7 @@ def _route_set_object_color(h) -> None:
             },
         )
         return
-    if not all(isinstance(g, str) and g for g in object_ids):
+    if not are_guids(object_ids):
         h._send_json(
             400,
             {"status": "error", "message": "All elements in object_ids must be non-empty GUID strings"},

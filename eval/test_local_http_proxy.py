@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import uuid
 
 import agent.ui_server as ui_server
 import plugin.mcp_server._client as mcp_client
@@ -71,3 +72,45 @@ def test_doctor_builds_proxy_free_opener(monkeypatch):
     ok, detail = doctor._http_json("http://127.0.0.1:8080/health")
     assert ok
     assert json.loads(detail)["status"] == "ok"
+
+
+def test_mutation_network_retry_reuses_idempotency_key(monkeypatch):
+    seen_headers = []
+
+    class Response:
+        status_code = 200
+        text = ""
+
+        def json(self):
+            return {"status": "ok", "guid": "created-once"}
+
+    class Client:
+        calls = 0
+
+        def __init__(self, **_kwargs):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_args):
+            return None
+
+        async def post(self, url, **kwargs):
+            seen_headers.append(kwargs["headers"])
+            self.calls += 1
+            if self.calls == 1:
+                raise mcp_client.httpx.ReadTimeout("lost response")
+            return Response()
+
+    async def no_sleep(_delay):
+        return None
+
+    monkeypatch.setattr(mcp_client.httpx, "AsyncClient", Client)
+    monkeypatch.setattr(mcp_client.asyncio, "sleep", no_sleep)
+    ok, result = asyncio.run(mcp_client.call_rhino("/create_box", {"width": 1}))
+
+    assert ok and result == "created-once"
+    assert len(seen_headers) == 2
+    assert seen_headers[0]["Idempotency-Key"] == seen_headers[1]["Idempotency-Key"]
+    uuid.UUID(seen_headers[0]["Idempotency-Key"])

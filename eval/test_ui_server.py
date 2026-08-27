@@ -48,13 +48,19 @@ async def test_run_manager_cancel_stops_task(monkeypatch):
     manager = ui_server.RunManager()
     started = asyncio.Event()
 
-    async def fake_run_agent(_prompt, **_kwargs):
+    async def fake_run_agent(_prompt, **kwargs):
+        await kwargs["event_callback"](
+            AgentEvent("planning.started", kwargs["run_id"], 1, "now", {"round": 1})
+        )
         started.set()
         await asyncio.sleep(60)
 
     monkeypatch.setattr(ui_server, "run_agent", fake_run_agent)
     run_id = await manager.start("long task")
     await started.wait()
+    snapshot = manager.snapshot()
+    assert snapshot["active"][0]["run_id"] == run_id
+    assert snapshot["active"][0]["events"][0]["type"] == "planning.started"
     await manager.cancel(run_id)
     await asyncio.gather(manager.runs[run_id].task, return_exceptions=True)
     assert manager.runs[run_id].token.cancelled

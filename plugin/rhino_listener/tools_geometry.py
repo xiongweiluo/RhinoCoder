@@ -22,6 +22,8 @@ from __future__ import annotations
 
 import logging
 
+from .validation import are_guids, is_guid
+
 logger = logging.getLogger("rhinocoder.http_listener")
 
 
@@ -174,7 +176,7 @@ def _route_extrude_curve_straight(h) -> None:
         return
 
     curve_id = data.get("curve_id")
-    if not curve_id or not isinstance(curve_id, str):
+    if not is_guid(curve_id):
         h._send_json(
             400,
             {"status": "error", "message": "Missing or invalid field: curve_id (expected non-empty string GUID)"},
@@ -225,7 +227,7 @@ def _route_boolean_difference(h) -> None:
                 },
             )
             return
-        if not all(isinstance(g, str) and g for g in val):
+        if not are_guids(val):
             h._send_json(
                 400,
                 {"status": "error", "message": f"All elements in {field_name} must be non-empty GUID strings"},

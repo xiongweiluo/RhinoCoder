@@ -21,7 +21,13 @@ from typing import Any, Optional
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
-from openai import AsyncOpenAI, AuthenticationError, APIConnectionError, APIStatusError
+from openai import (
+    AsyncOpenAI,
+    AuthenticationError,
+    APIConnectionError,
+    APIStatusError,
+    APITimeoutError,
+)
 
 from agent.pricing import calculate_cost, resolve_model_pricing
 from agent.runtime import (
@@ -46,7 +52,12 @@ logger = logging.getLogger("rhinocoder.llm")
 # ---------------------------------------------------------------------------
 _HERE = Path(__file__).resolve()
 PROJECT_ROOT = _HERE.parent.parent
-MCP_SERVER_SCRIPT = PROJECT_ROOT / "plugin" /  "mcp_server" / "main.py"
+MCP_SERVER_SCRIPT = Path(
+    os.environ.get(
+        "RHINOCODER_MCP_SERVER_SCRIPT",
+        str(PROJECT_ROOT / "plugin" / "mcp_server" / "main.py"),
+    )
+).expanduser().resolve()
 
 DEEPSEEK_BASE_URL = os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
 DEEPSEEK_MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-pro")
@@ -65,6 +76,7 @@ CREATE_TOOLS = {
 GUID_PATTERN = re.compile(
     r"\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}\b"
 )
+ERROR_CODE_PATTERN = re.compile(r"\[([a-z][a-z0-9_.-]+)\]", re.IGNORECASE)
 
 
 # ---------------------------------------------------------------------------
@@ -236,6 +248,52 @@ def _parse_scene_output(output: str) -> Optional[dict[str, Any]]:
     return {"objects": objects, "total": len(objects), "capped": "已截取前 50 个" in output}
 
 
+def _tool_output_error_code(output: str) -> Optional[str]:
+    """识别 FastMCP 正常文本帧中承载的业务失败。"""
+    text = output.strip()
+    match = ERROR_CODE_PATTERN.search(text)
+    if match:
+        return match.group(1).lower()
+    if text.startswith(("参数错误", "请求参数错误", "Missing field", "Invalid ")):
+        return "tool.invalid_argument"
+    if text.startswith(("失败", "错误")):
+        return "tool.execution_failed"
+    return None
+
+
+def _flatten_exception_names(exc: BaseException) -> set[str]:
+    names = {type(exc).__name__}
+    nested = getattr(exc, "exceptions", None)
+    if isinstance(nested, tuple):
+        for item in nested:
+            if isinstance(item, BaseException):
+                names.update(_flatten_exception_names(item))
+    cause = exc.__cause__ or exc.__context__
+    if isinstance(cause, BaseException):
+        names.update(_flatten_exception_names(cause))
+    return names
+
+
+def _classify_outer_exception(exc: BaseException) -> RunError:
+    """把 stdio/MCP 进程退出从普通未捕获异常中分离出来。"""
+    names = _flatten_exception_names(exc)
+    mcp_exit_types = {
+        "BrokenResourceError",
+        "ClosedResourceError",
+        "EndOfStream",
+        "IncompleteReadError",
+        "McpError",
+        "ProcessLookupError",
+    }
+    if names & mcp_exit_types:
+        return RunError(
+            "mcp.process_exit",
+            "MCP Server 连接已中断或子进程提前退出，请重试任务；若持续失败，请检查 MCP Server 日志。",
+            recoverable=True,
+        )
+    return RunError("agent.unexpected", f"{type(exc).__name__}: {exc}", recoverable=False)
+
+
 # ---------------------------------------------------------------------------
 # 主 Agent 循环
 # ---------------------------------------------------------------------------
@@ -359,6 +417,7 @@ async def run_agent(
                 # ── 4. 工具调用循环 ────────────────────────────────────────
                 scene_is_current = False
                 awaiting_recheck = False
+                unresolved_tool_error: Optional[RunError] = None
                 for round_idx in range(1, max_tool_rounds + 1):
                     token.raise_if_cancelled()
                     metrics.tool_rounds = round_idx
@@ -379,6 +438,16 @@ async def run_agent(
                         return await finish(
                             RunStatus.FAILED,
                             error=RunError("llm.authentication", message, recoverable=True),
+                        )
+                    except APITimeoutError:
+                        message = (
+                            f"DeepSeek 响应超时（>{LLM_TIMEOUT_SECONDS:g}s）。"
+                            "本轮未执行新的工具调用，可以安全重试任务。"
+                        )
+                        _echo("LLM", message, err=True)
+                        return await finish(
+                            RunStatus.FAILED,
+                            error=RunError("llm.timeout", message, recoverable=True),
                         )
                     except APIConnectionError as exc:
                         message = f"无法连接到 DeepSeek API: {exc}"
@@ -433,6 +502,13 @@ async def run_agent(
                             )
                             _echo("VERIFY", "尚无有效的最终场景自检，继续执行闭环…")
                             continue
+                        if unresolved_tool_error is not None and not scene_is_current:
+                            _echo("RESULT", "工具错误尚未恢复，任务标记为失败。", err=True)
+                            return await finish(
+                                RunStatus.FAILED,
+                                error=unresolved_tool_error,
+                                final_text=final_text,
+                            )
                         _echo("RESULT", "✓ LLM 回复:")
                         for line in final_text.splitlines():
                             _echo("RESULT", f"  {line}")
@@ -513,10 +589,16 @@ async def run_agent(
                             metrics.tool_execution_ms + tool_record.duration_ms,
                             2,
                         )
-                        tool_record.success = not bool(call_result.isError)
+                        semantic_error_code = _tool_output_error_code(tool_output)
+                        tool_record.success = not bool(call_result.isError) and semantic_error_code is None
                         tool_record.output = tool_output
-                        if call_result.isError:
-                            tool_record.error_code = "tool.execution_failed"
+                        if not tool_record.success:
+                            tool_record.error_code = semantic_error_code or "tool.execution_failed"
+                            unresolved_tool_error = RunError(
+                                tool_record.error_code,
+                                tool_output,
+                                recoverable=True,
+                            )
 
                         if call_result.isError:
                             _echo("INVOKE", f"  ✗ 工具执行失败: {tool_output}", err=True)
@@ -532,6 +614,8 @@ async def run_agent(
                                 "success": tool_record.success,
                                 "duration_ms": tool_record.duration_ms,
                                 "output": tool_output,
+                                "error_code": tool_record.error_code,
+                                "error": tool_output if not tool_record.success else None,
                             },
                         )
 
@@ -553,6 +637,8 @@ async def run_agent(
                             )
                             scene_is_current = bool(tool_record.success and parsed_scene is not None)
                             awaiting_recheck = not scene_is_current
+                            if scene_is_current:
+                                unresolved_tool_error = None
                             await emitter.emit("scene.checked", check)
 
                         if fn_name in CREATE_TOOLS and tool_record.success:
@@ -603,10 +689,10 @@ async def run_agent(
             error=RunError("mcp.connection", message, recoverable=True),
         )
     except Exception as exc:
-        message = f"{type(exc).__name__}: {exc}"
-        _echo("ERROR", message, err=True)
+        run_error = _classify_outer_exception(exc)
+        _echo("ERROR", run_error.message, err=True)
         logger.exception("run_agent 意外异常")
         return await finish(
             RunStatus.FAILED,
-            error=RunError("agent.unexpected", message, recoverable=False),
+            error=run_error,
         )

@@ -21,7 +21,9 @@ textarea { width: 100%; resize: vertical; border: 0; outline: 0; color: #f0f5f6;
 .button-row, .examples { display: flex; gap: 8px; flex-wrap: wrap; }
 .examples { margin-top: 12px; }
 .examples button { padding: 5px 9px; color: #8fa0a5; background: #171e21; border: 1px solid #293438; font-size: 11px; }
-.error { margin-top: 12px; color: #ffb8ae; background: #301c1b; border-radius: 8px; padding: 10px; }
+.recovery-error { margin-top: 12px; display: flex; align-items: center; justify-content: space-between; gap: 16px; color: #ffb8ae; background: #301c1b; border: 1px solid #6c302a; border-radius: 10px; padding: 12px 14px; }
+.recovery-error p { margin: 4px 0; color: #ffe0dc; }
+.recovery-error small { color: #c99d97; }
 .metrics { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin: 14px 0; }
 .metric { padding: 14px 16px; display: flex; flex-direction: column; gap: 5px; }
 .metric span, .section-title span { color: #7f9095; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
@@ -37,6 +39,7 @@ textarea { width: 100%; resize: vertical; border: 0; outline: 0; color: #f0f5f6;
 .event-head { display: flex; justify-content: space-between; }
 .event-head time, .event p { color: #78888d; font-size: 11px; }
 .event p { margin: 2px 0 6px; }
+.event-error { display: block; margin-top: 6px; color: #ffb8ae; white-space: pre-wrap; }
 code { color: #abc2c7; font-family: "SFMono-Regular", Consolas, monospace; font-size: 11px; word-break: break-all; }
 .right-column { display: flex; flex-direction: column; gap: 14px; }
 .objects { display: grid; gap: 8px; max-height: 430px; overflow: auto; }

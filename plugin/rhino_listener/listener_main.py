@@ -44,6 +44,7 @@ rhino_listener/listener_main.py  —  运行在 Rhino 8 内部（Python 3.9，�
 from __future__ import annotations
 
 import functools
+import datetime
 import io
 import json
 import logging
@@ -51,6 +52,7 @@ import os
 import queue
 import sys
 import threading
+import uuid
 from collections import OrderedDict
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from socketserver import ThreadingMixIn
@@ -92,6 +94,8 @@ LISTEN_HOST     = "127.0.0.1"
 LISTEN_PORT     = 8080
 REQUEST_TIMEOUT = 12.0  # 等待主线程执行的最长秒数
 IDEMPOTENCY_CACHE_SIZE = 256
+LISTENER_INSTANCE_ID = str(uuid.uuid4())
+LISTENER_STARTED_AT = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
 
 _idempotency_cache: "OrderedDict[str, tuple[str, dict]]" = OrderedDict()
 _idempotency_lock = threading.Lock()
@@ -301,6 +305,8 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
                 {
                     "status": "ok",
                     "service": "rhinocoder-rhino-listener",
+                    "instance_id": LISTENER_INSTANCE_ID,
+                    "started_at": LISTENER_STARTED_AT,
                     "queue_size": _work_queue.qsize(),
                     "registered_endpoints": len(_ROUTE_TABLE),
                     "eval_reset_enabled": _eval_reset_enabled(),
@@ -391,17 +397,17 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
                 "请确认 Rhino 未处于模态对话框或长时间阻塞操作中。",
                 REQUEST_TIMEOUT,
             )
-            self._send_json(
-                504,
-                _error_payload(
-                    "rhino.main_thread_timeout",
-                    (
-                        f"Timeout: Rhino main thread did not respond "
-                        f"within {REQUEST_TIMEOUT}s"
-                    ),
-                    recoverable=True,
+            payload = _error_payload(
+                "rhino.main_thread_timeout",
+                (
+                    f"Timeout: Rhino main thread did not respond "
+                    f"within {REQUEST_TIMEOUT}s"
                 ),
+                recoverable=True,
             )
+            # 即使客户端没有收到 504，使用同一幂等键重试也只会重放失败结果，
+            # 不会再次入队并产生重复对象。
+            self._cache_and_send(idempotency_key, request_signature, payload, status=504)
             return
 
         if work.error:
@@ -423,14 +429,21 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             payload = {"status": "ok", "guid": work.result_guid}
             self._cache_and_send(idempotency_key, request_signature, payload)
 
-    def _cache_and_send(self, idempotency_key: str, request_signature: str, payload: dict) -> None:
+    def _cache_and_send(
+        self,
+        idempotency_key: str,
+        request_signature: str,
+        payload: dict,
+        *,
+        status: int = 200,
+    ) -> None:
         if idempotency_key:
             with _idempotency_lock:
                 _idempotency_cache[idempotency_key] = (request_signature, payload)
                 _idempotency_cache.move_to_end(idempotency_key)
                 while len(_idempotency_cache) > IDEMPOTENCY_CACHE_SIZE:
                     _idempotency_cache.popitem(last=False)
-        self._send_json(200, payload)
+        self._send_json(status, payload)
 
     def _send_json(self, status: int, data: dict) -> None:
         data = _normalize_response(status, data)

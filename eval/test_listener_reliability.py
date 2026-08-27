@@ -4,14 +4,18 @@ import os
 import sys
 from types import SimpleNamespace
 
-from plugin.rhino_listener import listener_main, tools_transform
+from plugin.rhino_listener import listener_main, tools_geometry, tools_transform
 
 
 class _Handler:
-    def __init__(self, token: str = "") -> None:
+    def __init__(self, token: str = "", body=None) -> None:
         self.headers = {"X-RhinoCoder-Eval-Token": token}
+        self.body = body
         self.sent = []
         self.enqueued = []
+
+    def _parse_body(self):
+        return self.body
 
     def _send_json(self, status, payload):
         self.sent.append((status, payload))
@@ -67,6 +71,11 @@ def test_idempotency_cache_replays_same_request_and_rejects_conflict():
         def _send_json(self, status, payload):
             self.sent.append((status, payload))
 
+        def _cache_and_send(self, key, signature, payload, *, status=200):
+            listener_main._RhinoHTTPHandler._cache_and_send(
+                self, key, signature, payload, status=status
+            )
+
     listener_main._idempotency_cache.clear()
     listener_main._idempotency_cache["12345678"] = (
         'create_box:{"height": 2}',
@@ -93,6 +102,57 @@ def test_legacy_route_errors_receive_standard_error_code():
         "code": "http.invalid_argument",
         "recoverable": False,
     }
+
+
+def test_invalid_guid_and_empty_parameters_never_enter_main_thread():
+    invalid_guid = _Handler(body={"object_id": "not-a-guid", "translation": [1, 2, 3]})
+    tools_transform._route_move_object(invalid_guid)
+    assert invalid_guid.sent[0][0] == 400
+    assert "GUID" in invalid_guid.sent[0][1]["message"]
+    assert not invalid_guid.enqueued
+
+    empty_box = _Handler(body={})
+    tools_geometry._route_create_box(empty_box)
+    assert empty_box.sent[0][0] == 400
+    assert empty_box.sent[0][1]["message"] == "Missing field: width"
+    assert not empty_box.enqueued
+
+
+def test_timeout_response_is_cached_to_prevent_duplicate_enqueue(monkeypatch):
+    class Queue:
+        def __init__(self):
+            self.items = []
+
+        def put(self, item):
+            self.items.append(item)
+
+    queue = Queue()
+    monkeypatch.setattr(listener_main, "_work_queue", queue)
+    monkeypatch.setattr(listener_main, "REQUEST_TIMEOUT", 0)
+    listener_main._idempotency_cache.clear()
+
+    class Dummy:
+        def __init__(self):
+            self.headers = {"Idempotency-Key": "timeout-key-123"}
+            self.sent = []
+
+        def _send_json(self, status, payload):
+            self.sent.append((status, payload))
+
+        def _cache_and_send(self, key, signature, payload, *, status=200):
+            listener_main._RhinoHTTPHandler._cache_and_send(
+                self, key, signature, payload, status=status
+            )
+
+    first = Dummy()
+    listener_main._RhinoHTTPHandler._enqueue_and_wait(first, "create_box", {"width": 1})
+    second = Dummy()
+    listener_main._RhinoHTTPHandler._enqueue_and_wait(second, "create_box", {"width": 1})
+
+    assert len(queue.items) == 1
+    assert first.sent[0][0] == 504
+    assert second.sent[0][1]["error"]["code"] == "rhino.main_thread_timeout"
+    listener_main._idempotency_cache.clear()
 
 
 def test_listener_loads_eval_token_from_project_env(monkeypatch, tmp_path):

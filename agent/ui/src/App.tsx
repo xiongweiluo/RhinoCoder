@@ -12,6 +12,9 @@ function wsUrl() {
   return `${scheme}://${location.host}/ws`;
 }
 
+type RunErrorPayload = {code?: string; message?: string; recoverable?: boolean};
+type ActiveRun = {run_id: string; events: AgentEvent[]};
+
 export default function App() {
   const [connected, setConnected] = useState(false);
   const [prompt, setPrompt] = useState(examples[0]);
@@ -23,6 +26,12 @@ export default function App() {
   const [replays, setReplays] = useState<string[]>([]);
   const socketRef = useRef<WebSocket | null>(null);
   const retryRef = useRef(0);
+  const currentRunRef = useRef("");
+
+  const chooseRun = (runId: string) => {
+    currentRunRef.current = runId;
+    setCurrentRun(runId);
+  };
 
   useEffect(() => {
     let disposed = false;
@@ -34,17 +43,27 @@ export default function App() {
       socket.onmessage = (message) => {
         const data = JSON.parse(message.data);
         if (data.type === "snapshot") {
-          setHistory(data.history ?? []);
-          const activeEvents = (data.active ?? []).flatMap((run: {events: AgentEvent[]}) => run.events);
-          setEvents(activeEvents);
+          const nextHistory = (data.history ?? []) as HistoryItem[];
+          const active = (data.active ?? []) as ActiveRun[];
+          const selected = currentRunRef.current;
+          const restored = active.find((run) => run.run_id === selected)
+            ?? nextHistory.find((run) => run.run_id === selected)
+            ?? active.at(-1)
+            ?? nextHistory.at(0);
+          setHistory(nextHistory);
+          setEvents(restored?.events ?? []);
+          if (restored?.run_id) chooseRun(restored.run_id);
           return;
         }
         if (data.type === "history.updated") {
-          setHistory(data.history ?? []);
+          const nextHistory = (data.history ?? []) as HistoryItem[];
+          setHistory(nextHistory);
+          const restored = nextHistory.find((run) => run.run_id === currentRunRef.current);
+          if (restored) setEvents(restored.events ?? []);
           return;
         }
         if (data.type === "control.accepted") {
-          setCurrentRun(data.run_id);
+          chooseRun(data.run_id);
           if (data.action === "start" || data.action === "retry") {
             setEvents((previous) => previous.filter((event) => event.run_id === data.run_id));
           }
@@ -56,7 +75,7 @@ export default function App() {
         }
         if (typeof data.type === "string" && data.run_id) {
           const event = data as AgentEvent;
-          setCurrentRun(event.run_id);
+          chooseRun(event.run_id);
           setEvents((previous) => [...previous.filter((item) => !(item.run_id === event.run_id && item.seq === event.seq)), event]);
         }
       };
@@ -89,7 +108,7 @@ export default function App() {
   };
 
   const selectHistory = (item: HistoryItem) => {
-    setCurrentRun(item.run_id);
+    chooseRun(item.run_id);
     setEvents(item.events ?? []);
   };
 
@@ -113,6 +132,12 @@ export default function App() {
   const estimatedCost = metricNumber("estimated_cost_usd");
   const costStatus = String(metrics.cost_estimate_status ?? "");
   const canControl = Boolean(currentRun && !latest?.replay);
+  const terminalError = terminal?.type === "run.failed"
+    ? (terminal.payload.error as RunErrorPayload | undefined)
+    : undefined;
+  const visibleError: RunErrorPayload | undefined = terminalError?.message
+    ? terminalError
+    : error ? {message: error, recoverable: true} : undefined;
 
   return (
     <main className="shell">
@@ -134,7 +159,10 @@ export default function App() {
           </div>
         </form>
         <div className="examples">{examples.map((item, index) => <button key={item} onClick={() => setPrompt(item)}>示例 {index + 1}</button>)}</div>
-        {error && <div className="error">{error}</div>}
+        {visibleError && <div className="recovery-error" role="alert">
+          <div><strong>{visibleError.code ?? "操作失败"}</strong><p>{visibleError.message}</p><small>{recoveryGuidance(visibleError.code)}</small></div>
+          {visibleError.recoverable !== false && <button type="button" className="danger" disabled={!canControl} onClick={() => send({type: "retry", run_id: currentRun})}>重试任务</button>}
+        </div>}
       </section>
 
       <section className="metrics">
@@ -196,7 +224,18 @@ function EventRow({event}: {event: AgentEvent}) {
   const payload = event.payload as Record<string, unknown>;
   const title = String(payload.name ?? payload.tool ?? event.type);
   const success = payload.success;
-  return <article className={`event ${success === false ? "failed" : ""}`}><span className="event-dot" /><div><div className="event-head"><strong>{title}</strong><time>#{event.seq}</time></div><p>{event.type}</p>{payload.arguments ? <code>{JSON.stringify(payload.arguments)}</code> : null}</div></article>;
+  const failed = success === false || event.type === "run.failed";
+  const rawError = failed ? payload.error ?? payload.output ?? "" : "";
+  const errorText = typeof rawError === "string" ? rawError : rawError ? JSON.stringify(rawError) : "";
+  return <article className={`event ${failed ? "failed" : ""}`}><span className="event-dot" /><div><div className="event-head"><strong>{title}</strong><time>#{event.seq}</time></div><p>{event.type}</p>{payload.arguments ? <code>{JSON.stringify(payload.arguments)}</code> : null}{errorText ? <code className="event-error">{errorText}</code> : null}</div></article>;
+}
+
+function recoveryGuidance(code?: string) {
+  if (code === "llm.timeout") return "模型本轮未产生新的工具调用；可直接重试。";
+  if (code?.startsWith("mcp.")) return "确认 MCP Server 可启动后重试，无需重启 UI。";
+  if (code?.startsWith("rhino.")) return "确认 Rhino Listener 健康后重试；幂等键会防止网络重试产生重复对象。";
+  if (code?.includes("invalid") || code?.includes("argument")) return "修正 GUID 或必填参数后重新执行。";
+  return "检查错误原因后可从此处重新运行相同任务。";
 }
 
 function ObjectCard({object}: {object: SceneObject}) {

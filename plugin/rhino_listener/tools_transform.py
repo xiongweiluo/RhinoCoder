@@ -28,6 +28,8 @@ from __future__ import annotations
 
 import logging
 
+from .validation import are_guids, is_guid
+
 logger = logging.getLogger("rhinocoder.http_listener")
 
 
@@ -42,7 +44,7 @@ def _route_move_object(h) -> None:
         return
 
     object_id = data.get("object_id")
-    if not object_id or not isinstance(object_id, str):
+    if not is_guid(object_id):
         h._send_json(
             400,
             {"status": "error", "message": "Missing or invalid field: object_id (expected non-empty string GUID)"},
@@ -72,7 +74,7 @@ def _route_rotate_object(h) -> None:
         return
 
     object_id = data.get("object_id")
-    if not object_id or not isinstance(object_id, str):
+    if not is_guid(object_id):
         h._send_json(
             400,
             {"status": "error", "message": "Missing or invalid field: object_id (expected non-empty string GUID)"},
@@ -123,7 +125,7 @@ def _route_scale_object(h) -> None:
         return
 
     object_id = data.get("object_id")
-    if not object_id or not isinstance(object_id, str):
+    if not is_guid(object_id):
         h._send_json(
             400,
             {"status": "error", "message": "Missing or invalid field: object_id (expected non-empty string GUID)"},
@@ -309,7 +311,7 @@ def _route_place_on_at(h) -> None:
         return
 
     target_id = data.get("target_id")
-    if not target_id or not isinstance(target_id, str):
+    if not is_guid(target_id):
         h._send_json(
             400,
             {"status": "error", "message": "Missing or invalid field: target_id (expected non-empty string GUID)"},
@@ -317,7 +319,7 @@ def _route_place_on_at(h) -> None:
         return
 
     reference_id = data.get("reference_id")
-    if not reference_id or not isinstance(reference_id, str):
+    if not is_guid(reference_id):
         h._send_json(
             400,
             {"status": "error", "message": "Missing or invalid field: reference_id (expected non-empty string GUID)"},
@@ -370,7 +372,7 @@ def _route_delete_objects(h) -> None:
             },
         )
         return
-    if not all(isinstance(g, str) and g for g in object_ids):
+    if not are_guids(object_ids):
         h._send_json(
             400,
             {"status": "error", "message": "All elements in object_ids must be non-empty GUID strings"},

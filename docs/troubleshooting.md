@@ -46,7 +46,18 @@ npm run build --prefix agent/ui
 
 - 检查 Rhino 是否打开了模态对话框。
 - 检查是否有长时间几何操作阻塞主线程。
-- 查询操作可安全重试；变更操作应先读取场景，确认没有产生结果后再重试。
+- LLM 超时会显示 `llm.timeout`；该轮没有产生新工具调用，可直接从 UI 重试。
+- Rhino 主线程超时会显示 `rhino.main_thread_timeout`。查询和变更操作均只做有限网络重试；变更操作的全部尝试复用同一幂等键，Listener 会跳过已超时任务并重放超时结果，不会重复创建对象。
+
+## MCP 子进程退出
+
+UI 显示 `mcp.process_exit` 时，先点击“重试任务”。每次任务都会启动新的 MCP 子进程，瞬时退出通常无需重启 UI。若持续失败，运行 `python tools/doctor.py`，并检查 `plugin/mcp_server/main.py` 是否存在、Python 依赖是否完整。
+
+## 参数或 GUID 无效
+
+- `http.invalid_argument` 表示 GUID 格式或 Listener 请求参数不合法。
+- `tool.invalid_argument` / `tool.execution_failed` 表示 MCP Schema 已拒绝缺失字段或错误类型。
+- 修正 UI 指令中的对象来源和必填参数后重试；无效 GUID 与空参数会在进入 Rhino 主线程前被拒绝。
 
 ## 评测退出码为 3
 

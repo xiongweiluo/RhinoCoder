@@ -107,9 +107,10 @@ async def call_rhino(endpoint: str, payload: dict) -> Tuple[bool, Any]:
     headers = {} if is_query else {"Idempotency-Key": str(uuid.uuid4())}
     response = None
     last_error: Exception | None = None
-    attempts = 1 + (QUERY_MAX_RETRIES if is_query else 0)
+    attempts = 1 + QUERY_MAX_RETRIES
 
-    # 查询操作可有限重试；变更操作不在客户端自动重试，但始终携带幂等键。
+    # 查询操作可有限重试；变更操作也只重试网络层失败，并在全部尝试中复用
+    # 同一个幂等键，避免响应丢失后重复创建或变换对象。
     # Rhino Listener 只位于本机回环地址；忽略系统 HTTP(S)_PROXY，避免代理
     # 将 127.0.0.1 请求转发后返回 502 或非 JSON 页面。
     async with httpx.AsyncClient(trust_env=False) as client:
