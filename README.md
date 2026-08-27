@@ -110,7 +110,7 @@ python tools/check_secrets.py
 ./scripts/check.sh
 ```
 
-真实端到端评测需要 Rhino Listener、有效模型配置以及与 Rhino 进程一致的 `RHINOCODER_EVAL_TOKEN`。
+真实端到端评测需要 Rhino Listener、有效模型配置以及 `.env` 中的 `RHINOCODER_EVAL_TOKEN`。配置或更换令牌后必须在 Rhino 中重新启动 Listener；可通过 `python tools/doctor.py` 确认 `Rhino eval reset` 已启用。
 
 完整 Baseline / Closed-loop 对照：
 

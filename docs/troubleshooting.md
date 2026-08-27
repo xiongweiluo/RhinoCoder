@@ -17,7 +17,9 @@ python tools/doctor.py
 
 ## reset_environment 被拒绝
 
-该端点只允许评测流程调用。在启动 Rhino 前设置 `RHINOCODER_EVAL_TOKEN`，并确保运行评测器的终端使用相同值。普通 UI 不应调用该端点。
+该端点只允许评测流程调用。项目根目录 `.env` 中配置 `RHINOCODER_EVAL_TOKEN` 后，需要在 Rhino 中重新启动 Listener；启动过程会只读取该令牌，不会记录令牌值。运行评测器的终端必须读取同一份 `.env`。普通 UI 不应调用该端点。
+
+运行 `python tools/doctor.py` 时应看到 `Rhino eval reset enabled`。如果仍显示 disabled，确认 Rhino 执行的是当前项目中的 `plugin/start_rhinocoder_listener.py`，然后重新启动 Listener。
 
 ## UI 显示尚未构建
 

@@ -45,11 +45,13 @@ from __future__ import annotations
 import functools
 import json
 import logging
+import os
 import queue
 import sys
 import threading
 from collections import OrderedDict
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from pathlib import Path
 from socketserver import ThreadingMixIn
 from typing import Optional
 
@@ -92,6 +94,34 @@ IDEMPOTENCY_CACHE_SIZE = 256
 
 _idempotency_cache: "OrderedDict[str, tuple[str, dict]]" = OrderedDict()
 _idempotency_lock = threading.Lock()
+
+
+def _eval_reset_enabled() -> bool:
+    token = os.environ.get("RHINOCODER_EVAL_TOKEN", "").strip()
+    return bool(token and not token.startswith("<"))
+
+
+def _load_eval_token_from_project_env(env_path: Optional[Path] = None) -> bool:
+    """在 Rhino 内嵌 Python 中从项目 .env 加载评测令牌，不引入第三方依赖。"""
+    if _eval_reset_enabled():
+        return True
+    path = env_path or Path(__file__).resolve().parents[2] / ".env"
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeError):
+        return False
+    for raw_line in lines:
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        if key.strip() != "RHINOCODER_EVAL_TOKEN":
+            continue
+        value = value.strip().strip("\"'")
+        if value and not value.startswith("<"):
+            os.environ["RHINOCODER_EVAL_TOKEN"] = value
+            return True
+    return False
 
 
 def _error_payload(code: str, message: str, recoverable: bool = False) -> dict:
@@ -269,6 +299,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
                     "service": "rhinocoder-rhino-listener",
                     "queue_size": _work_queue.qsize(),
                     "registered_endpoints": len(_ROUTE_TABLE),
+                    "eval_reset_enabled": _eval_reset_enabled(),
                 },
             )
             return
@@ -438,6 +469,10 @@ def start_listener() -> None:
     """
     global _server_instance, _server_thread, _idle_registered
 
+    # Rhino 从 GUI 启动时通常不会继承终端环境变量，主动读取项目 .env。
+    # 仅加载评测令牌且不记录其值。
+    _load_eval_token_from_project_env()
+
     if _server_thread is not None and _server_thread.is_alive():
         logger.warning("HTTP Listener 已在运行（端口 %d），忽略重复启动", LISTEN_PORT)
         return
@@ -516,6 +551,7 @@ def _log_startup_banner() -> None:
     logger.info(sep)
     logger.info("  Rhino HTTP Listener 已启动  %s:%d", LISTEN_HOST, LISTEN_PORT)
     logger.info("  已注册端点（共 %d 个）：", len(_ROUTE_TABLE))
+    logger.info("  评测清场端点：%s", "已启用" if _eval_reset_enabled() else "未启用")
     for path in sorted(_ROUTE_TABLE.keys()):
         logger.info("    POST %s", path)
     logger.info("  单体操作返回  {\"status\": \"ok\", \"guid\": \"<GUID>\"}")

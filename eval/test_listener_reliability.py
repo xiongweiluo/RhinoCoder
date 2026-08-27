@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 from plugin.rhino_listener import listener_main, tools_transform
 
 
@@ -89,3 +91,22 @@ def test_legacy_route_errors_receive_standard_error_code():
         "code": "http.invalid_argument",
         "recoverable": False,
     }
+
+
+def test_listener_loads_eval_token_from_project_env(monkeypatch, tmp_path):
+    monkeypatch.delenv("RHINOCODER_EVAL_TOKEN", raising=False)
+    env_path = tmp_path / ".env"
+    env_path.write_text(
+        "DEEPSEEK_API_KEY=not-loaded\nRHINOCODER_EVAL_TOKEN='local-eval-token'\n",  # secret-scan: allow
+        encoding="utf-8",
+    )
+    assert listener_main._load_eval_token_from_project_env(env_path)
+    assert os.environ["RHINOCODER_EVAL_TOKEN"] == "local-eval-token"
+
+
+def test_listener_does_not_enable_placeholder_eval_token(monkeypatch, tmp_path):
+    monkeypatch.delenv("RHINOCODER_EVAL_TOKEN", raising=False)
+    env_path = tmp_path / ".env"
+    env_path.write_text("RHINOCODER_EVAL_TOKEN=<placeholder>\n", encoding="utf-8")
+    assert not listener_main._load_eval_token_from_project_env(env_path)
+    assert not listener_main._eval_reset_enabled()

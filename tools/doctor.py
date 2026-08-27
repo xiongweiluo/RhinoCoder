@@ -40,6 +40,18 @@ def main() -> int:
     rhino_ok, rhino_detail = _http_json("http://127.0.0.1:8080/health")
     ui_ok, ui_detail = _http_json("http://127.0.0.1:7860/api/health")
     checks.append(("Rhino Listener", rhino_ok, rhino_detail))
+    try:
+        rhino_payload = json.loads(rhino_detail) if rhino_ok else {}
+    except json.JSONDecodeError:
+        rhino_payload = {}
+    reset_enabled = bool(rhino_payload.get("eval_reset_enabled"))
+    checks.append(
+        (
+            "Rhino eval reset",
+            reset_enabled,
+            "enabled" if reset_enabled else "disabled; restart Listener after configuring .env",
+        )
+    )
     checks.append(("UI Server", ui_ok, ui_detail))
 
     for name, ok, detail in checks:
