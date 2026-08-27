@@ -14,14 +14,14 @@ RhinoCoder 是一个基于 MCP 的 Rhino 8 空间设计 Agent。系统把自然�
 - 精准删除、评测环境重置与基础错误接管。
 - 结构化 `AgentRunResult`、统一事件流与任务级 Trace。
 - Baseline / Closed-loop 多轮对照评测与 JSON/Markdown 报告生成。
+- 30 题、两种模式、各重复 3 次的真实基准已完成，Pass@1 均为 100%。
+- DeepSeek 缓存命中、未命中与输出 token 的版本化成本核算。
 - React + TypeScript WebSocket 交互面板与三份脱敏 Replay。
 - 停止、重试、Undo、精准回滚和三类用户反馈。
 - 用户反馈、敏感字段脱敏和黄金样本准入规则。
 
 ### 待真实环境验收
 
-- macOS + Rhino 8 + DeepSeek 兼容 API 的 30 题重复基准。
-- Closed-loop Pass@1 不低于 70% 的发布门槛。
 - 三个核心场景在真实 Rhino 环境中连续 3 次成功。
 - 新环境首次安装、Rhino 重连与 WebSocket 断线恢复演练。
 
@@ -127,6 +127,12 @@ python tools/check_secrets.py
 ```
 
 最近一次脱敏汇总见 [30 题基准报告](docs/benchmark-report.md)。完整 JSON、工具轨迹和场景快照仅保留在本地。
+
+DeepSeek 官方模型会按版本化的缓存命中、缓存未命中和输出单价自动估算成本；历史结果可在不重新调用 Rhino 或 LLM 的情况下重算：
+
+```bash
+python tools/recalculate_benchmark_cost.py eval/results/<benchmark>.json
+```
 
 ## 安全边界
 

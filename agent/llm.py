@@ -23,6 +23,7 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from openai import AsyncOpenAI, AuthenticationError, APIConnectionError, APIStatusError
 
+from agent.pricing import calculate_cost, resolve_model_pricing
 from agent.runtime import (
     AgentRunResult,
     CancellationToken,
@@ -48,7 +49,7 @@ PROJECT_ROOT = _HERE.parent.parent
 MCP_SERVER_SCRIPT = PROJECT_ROOT / "plugin" /  "mcp_server" / "main.py"
 
 DEEPSEEK_BASE_URL = os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
-DEEPSEEK_MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")
+DEEPSEEK_MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-pro")
 MAX_TOOL_ROUNDS = 30  # 防止工具调用无限循环
 LLM_TIMEOUT_SECONDS = float(os.environ.get("LLM_TIMEOUT_SECONDS", "90"))
 LLM_MAX_RETRIES = int(os.environ.get("LLM_MAX_RETRIES", "1"))
@@ -161,18 +162,65 @@ def _update_usage(metrics: RunMetrics, response: Any) -> None:
     usage = getattr(response, "usage", None)
     if usage is None:
         return
+    usage_data = usage.model_dump() if hasattr(usage, "model_dump") else {}
     prompt_tokens = int(getattr(usage, "prompt_tokens", 0) or 0)
     completion_tokens = int(getattr(usage, "completion_tokens", 0) or 0)
+    direct_hit = getattr(
+        usage,
+        "prompt_cache_hit_tokens",
+        usage_data.get("prompt_cache_hit_tokens"),
+    )
+    direct_miss = getattr(
+        usage,
+        "prompt_cache_miss_tokens",
+        usage_data.get("prompt_cache_miss_tokens"),
+    )
+    prompt_details = getattr(
+        usage,
+        "prompt_tokens_details",
+        usage_data.get("prompt_tokens_details"),
+    )
+    if isinstance(prompt_details, dict):
+        nested_hit = prompt_details.get("cached_tokens")
+    else:
+        nested_hit = getattr(prompt_details, "cached_tokens", None) if prompt_details else None
+    cache_hit_tokens = int(direct_hit if direct_hit is not None else nested_hit or 0)
+    if direct_miss is not None:
+        cache_miss_tokens = int(direct_miss or 0)
+    elif nested_hit is not None:
+        cache_miss_tokens = max(prompt_tokens - cache_hit_tokens, 0)
+    else:
+        cache_miss_tokens = 0
     metrics.prompt_tokens += prompt_tokens
+    metrics.prompt_cache_hit_tokens += cache_hit_tokens
+    metrics.prompt_cache_miss_tokens += cache_miss_tokens
     metrics.completion_tokens += completion_tokens
     metrics.total_tokens += int(getattr(usage, "total_tokens", 0) or prompt_tokens + completion_tokens)
-    input_price = float(os.environ.get("LLM_INPUT_COST_PER_M_TOKENS", "0"))
-    output_price = float(os.environ.get("LLM_OUTPUT_COST_PER_M_TOKENS", "0"))
-    metrics.estimated_cost_usd = round(
-        metrics.prompt_tokens * input_price / 1_000_000
-        + metrics.completion_tokens * output_price / 1_000_000,
-        8,
+    pricing = resolve_model_pricing(DEEPSEEK_MODEL, DEEPSEEK_BASE_URL)
+    if pricing is None:
+        metrics.prompt_cache_unknown_tokens = max(
+            metrics.prompt_tokens
+            - metrics.prompt_cache_hit_tokens
+            - metrics.prompt_cache_miss_tokens,
+            0,
+        )
+        metrics.cost_estimate_status = "unconfigured"
+        return
+    cost = calculate_cost(
+        prompt_tokens=metrics.prompt_tokens,
+        completion_tokens=metrics.completion_tokens,
+        cache_hit_tokens=metrics.prompt_cache_hit_tokens,
+        cache_miss_tokens=metrics.prompt_cache_miss_tokens,
+        pricing=pricing,
     )
+    metrics.prompt_cache_unknown_tokens = cost.cache_unknown_tokens
+    metrics.input_cost_lower_bound_usd = cost.input_cost_lower_bound_usd
+    metrics.input_cost_upper_bound_usd = cost.input_cost_upper_bound_usd
+    metrics.output_cost_usd = cost.output_cost_usd
+    metrics.estimated_cost_lower_bound_usd = cost.total_cost_lower_bound_usd
+    metrics.estimated_cost_upper_bound_usd = cost.total_cost_upper_bound_usd
+    metrics.estimated_cost_usd = cost.estimated_cost_usd
+    metrics.cost_estimate_status = cost.status
 
 
 def _parse_scene_output(output: str) -> Optional[dict[str, Any]]:

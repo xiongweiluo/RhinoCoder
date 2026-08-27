@@ -310,7 +310,23 @@ def _mode_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
         task_runs[result["id"]].append(result)
     stable = sum(1 for runs in task_runs.values() if runs and all(item["passed"] for item in runs))
     durations = [float(result["timings"]["total_ms"]) for result in attempted_results]
-    costs = [float(((result.get("run") or {}).get("metrics") or {}).get("estimated_cost_usd", 0)) for result in attempted_results]
+    metrics_rows = [((result.get("run") or {}).get("metrics") or {}) for result in attempted_results]
+    costs = [float(metrics.get("estimated_cost_usd", 0)) for metrics in metrics_rows]
+    cost_lower_bounds = [
+        float(metrics.get("estimated_cost_lower_bound_usd", metrics.get("estimated_cost_usd", 0)))
+        for metrics in metrics_rows
+    ]
+    cost_upper_bounds = [
+        float(metrics.get("estimated_cost_upper_bound_usd", metrics.get("estimated_cost_usd", 0)))
+        for metrics in metrics_rows
+    ]
+    cost_statuses = {str(metrics.get("cost_estimate_status", "unconfigured")) for metrics in metrics_rows}
+    if cost_statuses == {"exact"}:
+        cost_status = "exact"
+    elif "range" in cost_statuses:
+        cost_status = "range"
+    else:
+        cost_status = "unconfigured"
     scores = [float(result["score"]) for result in attempted_results]
     return {
         "scheduled": scheduled,
@@ -324,6 +340,9 @@ def _mode_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
         "score_stddev": round(statistics.pstdev(scores), 4) if len(scores) > 1 else 0.0,
         "average_duration_ms": round(statistics.mean(durations), 2) if durations else 0.0,
         "average_cost_usd": round(statistics.mean(costs), 8) if costs else 0.0,
+        "total_cost_lower_bound_usd": round(sum(cost_lower_bounds), 8),
+        "total_cost_upper_bound_usd": round(sum(cost_upper_bounds), 8),
+        "cost_estimate_status": cost_status,
         "stable_tasks": stable,
         "unique_tasks": len(task_runs),
         "failure_categories": dict(
@@ -411,6 +430,21 @@ def build_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
             "pass_rate_delta": round(closed["pass_rate"] - baseline["pass_rate"], 4),
             "duration_ms_delta": round(closed["average_duration_ms"] - baseline["average_duration_ms"], 2),
             "cost_usd_delta": round(closed["average_cost_usd"] - baseline["average_cost_usd"], 8),
+            "total_cost_lower_bound_usd_delta": round(
+                closed["total_cost_lower_bound_usd"] - baseline["total_cost_lower_bound_usd"],
+                8,
+            ),
+            "total_cost_upper_bound_usd_delta": round(
+                closed["total_cost_upper_bound_usd"] - baseline["total_cost_upper_bound_usd"],
+                8,
+            ),
+            "cost_estimate_status": (
+                "exact"
+                if baseline["cost_estimate_status"] == closed["cost_estimate_status"] == "exact"
+                else "range"
+                if "range" in {baseline["cost_estimate_status"], closed["cost_estimate_status"]}
+                else "unconfigured"
+            ),
         }
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -425,18 +459,42 @@ def build_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
 
 def render_markdown(summary: dict[str, Any], results: list[dict[str, Any]]) -> str:
     lines = ["# RhinoCoder Benchmark Report", "", f"Generated: {summary['generated_at']}", ""]
+    pricing = summary.get("pricing")
+    if pricing:
+        lines.extend([
+            "## Pricing",
+            "",
+            f"- Model: `{pricing['model']}`",
+            f"- Input cache hit: ${pricing['input_cache_hit_per_m_tokens']}/1M tokens",
+            f"- Input cache miss: ${pricing['input_cache_miss_per_m_tokens']}/1M tokens",
+            f"- Output: ${pricing['output_per_m_tokens']}/1M tokens",
+            f"- Schedule: {pricing['schedule']}",
+            f"- Checked at: {pricing['checked_at']}",
+            f"- Source: {pricing['source']}",
+            "",
+        ])
     lines.extend([
         "## Modes",
         "",
-        "| Mode | Attempted / scheduled | Skipped | Pass@1 | Partial | Avg score | Stable tasks | Avg latency | Avg cost |",
+        "| Mode | Attempted / scheduled | Skipped | Pass@1 | Partial | Avg score | Stable tasks | Avg latency | Total cost |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ])
     for mode, data in summary["modes"].items():
+        cost_status = data.get("cost_estimate_status", "unconfigured")
+        if cost_status == "exact":
+            cost_text = f"${data['total_cost_upper_bound_usd']:.6f}"
+        elif cost_status == "range":
+            cost_text = (
+                f"${data['total_cost_lower_bound_usd']:.6f}–"
+                f"${data['total_cost_upper_bound_usd']:.6f}"
+            )
+        else:
+            cost_text = "unconfigured"
         lines.append(
             f"| {mode} | {data['attempts']}/{data['scheduled']} | {data['skipped']} | "
             f"{data['pass_rate']:.1%} | {data['partial_rate']:.1%} | "
             f"{data['average_score']:.3f} | {data['stable_tasks']}/{data['unique_tasks']} | "
-            f"{data['average_duration_ms']:.0f} ms | ${data['average_cost_usd']:.6f} |"
+            f"{data['average_duration_ms']:.0f} ms | {cost_text} |"
         )
     if summary["comparison"]:
         comparison = summary["comparison"]
@@ -446,7 +504,14 @@ def render_markdown(summary: dict[str, Any], results: list[dict[str, Any]]) -> s
             "",
             f"- Pass@1: {comparison['pass_rate_delta']:+.1%}",
             f"- Average latency: {comparison['duration_ms_delta']:+.0f} ms",
-            f"- Average cost: ${comparison['cost_usd_delta']:+.6f}",
+            (
+                f"- Total cost: ${comparison['total_cost_lower_bound_usd_delta']:+.6f} to "
+                f"${comparison['total_cost_upper_bound_usd_delta']:+.6f}"
+                if comparison.get("cost_estimate_status") == "range"
+                else f"- Total cost: ${comparison['total_cost_upper_bound_usd_delta']:+.6f}"
+                if comparison.get("cost_estimate_status") == "exact"
+                else "- Total cost: unconfigured"
+            ),
         ])
     elif not summary.get("comparable", True):
         lines.extend([
@@ -586,6 +651,12 @@ async def _amain(args: argparse.Namespace, tasks: list[dict[str, Any]]) -> int:
     modes = ["baseline", "closed_loop"] if args.mode == "both" else [args.mode]
     results = await run_benchmark(tasks, modes=modes, repeats=args.runs)
     summary = build_summary(results)
+    from agent.llm import DEEPSEEK_BASE_URL, DEEPSEEK_MODEL
+    from agent.pricing import resolve_model_pricing
+
+    pricing = resolve_model_pricing(DEEPSEEK_MODEL, DEEPSEEK_BASE_URL)
+    if pricing is not None:
+        summary["pricing"] = pricing.to_dict()
     json_path, report_path = write_outputs(
         results,
         summary,

@@ -57,9 +57,18 @@ class RunMetrics:
     scene_checks: int = 0
     corrections: int = 0
     prompt_tokens: int = 0
+    prompt_cache_hit_tokens: int = 0
+    prompt_cache_miss_tokens: int = 0
+    prompt_cache_unknown_tokens: int = 0
     completion_tokens: int = 0
     total_tokens: int = 0
+    input_cost_lower_bound_usd: float = 0.0
+    input_cost_upper_bound_usd: float = 0.0
+    output_cost_usd: float = 0.0
+    estimated_cost_lower_bound_usd: float = 0.0
+    estimated_cost_upper_bound_usd: float = 0.0
     estimated_cost_usd: float = 0.0
+    cost_estimate_status: str = "unconfigured"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

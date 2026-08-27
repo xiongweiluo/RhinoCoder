@@ -55,3 +55,7 @@ npm run build --prefix agent/ui
 ## 评测退出码为 4
 
 这表示余额耗尽、鉴权失败、配额不足或模型不可用等全局致命基础设施错误触发了熔断。报告会保留已经尝试的任务，并将剩余计划项标记为未运行；此时 Baseline 与 Closed-loop 不可比较。恢复模型服务后应重新运行完整基准。
+
+## 成本显示为区间
+
+DeepSeek 会在响应中提供缓存命中和未命中 token。新运行会保存这两个字段并精确计费；旧报告或不提供缓存拆分的兼容 API 只能根据总输入 token 计算严格上下界。可运行 `python tools/recalculate_benchmark_cost.py <result.json>` 重算历史报告，不会连接 Rhino 或模型。
