@@ -70,6 +70,12 @@ def check_release_consistency(root: Path = ROOT) -> list[str]:
         elif _sha256(path) != lock.get("sha256"):
             findings.append(f"dependency_locks.{label}: SHA-256 不一致")
 
+    workflow = (root / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    for action, pin in (manifest.get("ci_actions") or {}).items():
+        expected_use = f"uses: {action}@{pin.get('sha')} # {pin.get('version')}"
+        if expected_use not in workflow:
+            findings.append(f"ci_actions.{action}: CI 未使用清单中的精确 SHA 与版本")
+
     schema_files = sorted((root / "plugin" / "mcp_server").glob("schemas_*.py"))
     tool_count = sum(path.read_text(encoding="utf-8").count("@mcp.tool()") for path in schema_files)
     if interfaces.get("mcp_tool_count") != tool_count:

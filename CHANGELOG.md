@@ -27,6 +27,7 @@
 - `reset_environment` 仅接受本地评测令牌，普通 UI 不暴露清场入口。
 - 真实轨迹和生成的评测报告默认不纳入 Git。
 - Python 依赖使用发布锁文件，前端依赖继续由 `package-lock.json` 固定；官方 MCP SDK 固定为 `mcp 1.29.1` 并限制在 1.x 兼容范围。
+- GitHub Actions 固定到 Node 24 兼容版本的发布提交 SHA。
 - 安装脚本创建独立虚拟环境，启动脚本默认使用项目 `.venv`。
 
 ### Security

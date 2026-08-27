@@ -114,6 +114,9 @@ $RECYCLE.BIN/
 *.ghx
 RhinoCode/
 
+# 本地只读参考仓库，不属于 RhinoCoder 发布内容
+raw_api_source/
+
 # === vLLM / inference ===
 vllm_cache/
 ray_results/

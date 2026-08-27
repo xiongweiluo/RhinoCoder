@@ -36,5 +36,15 @@
       "path": "agent/ui/package-lock.json",
       "sha256": "ae3ebc263e176c48e37a57afbec78f9291291a8558057b2fc6b8ac3d31c69047"
     }
+  },
+  "ci_actions": {
+    "actions/checkout": {
+      "version": "v7.0.1",
+      "sha": "3d3c42e5aac5ba805825da76410c181273ba90b1"
+    },
+    "actions/setup-python": {
+      "version": "v7.0.0",
+      "sha": "5fda3b95a4ea91299a34e894583c3862153e4b97"
+    }
   }
 }

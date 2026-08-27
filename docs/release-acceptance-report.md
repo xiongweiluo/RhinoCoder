@@ -9,6 +9,7 @@
 - 应用版本固定为 `0.2.0`，Prompt 固定为 `closed-loop-v1`，工具 Schema 与 Trace Schema 固定为 `1.0`。
 - Python 依赖由 `requirements-lock.txt` 固定，前端依赖由 `package-lock.json` 固定；两份锁文件的 SHA-256 写入版本清单。官方 MCP Python SDK 固定为 `mcp 1.29.1`，并在意图依赖中限制为 `mcp>=1.0,<2.0`，避免安装不兼容的同名 2.x 包。
 - MCP 工具数量固定为 23，版本、工具数量和依赖锁漂移会使 CI 失败。
+- GitHub CI 的 `actions/checkout v7.0.1` 与 `actions/setup-python v7.0.0` 固定到发布提交 SHA，避免浮动标签漂移并消除旧 Node 20 Action 告警。
 - macOS clean-room 从不含 `.env`、虚拟环境、`node_modules`、构建产物和本地 Trace 的公开工作区副本完成安装。
 - clean-room 完成 Python 虚拟环境创建、锁定依赖安装、前端安装与构建、全量测试、30 题格式检查、版本一致性检查和三份 Replay 发现。
 - 离线首次任务通过 WebSocket 重放 `basic_stack.json`，完整收到严格递增事件并以 `run.completed` 结束。
@@ -35,7 +36,7 @@
 | Rhino | 8 |
 | 首要平台 | macOS 14+ |
 
-`tools/check_release_consistency.py` 同时验证 Python 常量、UI `package.json`、`package-lock.json`、版本清单、架构文档、README、CHANGELOG、发布清单、MCP 装饰器数量、依赖锁哈希和 Markdown 本地链接。
+`tools/check_release_consistency.py` 同时验证 Python 常量、UI `package.json`、`package-lock.json`、版本清单、CI Action 精确 SHA、架构文档、README、CHANGELOG、发布清单、MCP 装饰器数量、依赖锁哈希和 Markdown 本地链接。
 
 ## clean-room 安装验收
 
