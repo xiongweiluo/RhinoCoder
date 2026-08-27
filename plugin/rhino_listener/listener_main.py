@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_listener/listener_main.py  —  运行在 Rhino 8 内部（Python 3.9，纯标准库）
 
@@ -43,6 +44,7 @@ rhino_listener/listener_main.py  —  运行在 Rhino 8 内部（Python 3.9，�
 from __future__ import annotations
 
 import functools
+import io
 import json
 import logging
 import os
@@ -51,7 +53,6 @@ import sys
 import threading
 from collections import OrderedDict
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from pathlib import Path
 from socketserver import ThreadingMixIn
 from typing import Optional
 
@@ -101,13 +102,16 @@ def _eval_reset_enabled() -> bool:
     return bool(token and not token.startswith("<"))
 
 
-def _load_eval_token_from_project_env(env_path: Optional[Path] = None) -> bool:
+def _load_eval_token_from_project_env(env_path: Optional[str] = None) -> bool:
     """在 Rhino 内嵌 Python 中从项目 .env 加载评测令牌，不引入第三方依赖。"""
     if _eval_reset_enabled():
         return True
-    path = env_path or Path(__file__).resolve().parents[2] / ".env"
+    path = env_path or os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", ".env")
+    )
     try:
-        lines = path.read_text(encoding="utf-8").splitlines()
+        with io.open(str(path), "r", encoding="utf-8") as stream:
+            lines = stream.read().splitlines()
     except (OSError, UnicodeError):
         return False
     for raw_line in lines:

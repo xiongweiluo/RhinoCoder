@@ -67,6 +67,14 @@ cp .env.example .env
 
 在 Rhino Script Editor 中启动 Listener：
 
+```text
+_-ScriptEditor _Run "/absolute/path/to/RhinoCoder/plugin/start_rhinocoder_listener.py"
+```
+
+该命令使用 Rhino 8 的新脚本基础设施，并支持在 Listener 已运行时安全热重载。也可以在 Script Editor 中直接打开并运行该文件。旧的 `RunPythonScript` 命令可能调用不兼容的旧 Python 引擎，不应用于此入口。
+
+底层等价导入方式：
+
 ```python
 import sys
 sys.path.insert(0, "/absolute/path/to/RhinoCoder/plugin")

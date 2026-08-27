@@ -839,7 +839,8 @@ def _exec_reset_environment(rs, params: dict):
 
     # 时空层抹除：调用 RhinoCommon 原生方法清空撤销内存
     if sc.doc:
-        sc.doc.ClearUndoRecords()
+        # RhinoCommon 5+ 公开的最小重载需要 purgeDeletedObjects 布尔参数。
+        sc.doc.ClearUndoRecords(True)
 
     rs.Redraw()
     return {"message": "场景已清空，撤销栈已清除"}

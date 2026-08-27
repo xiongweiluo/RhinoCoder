@@ -41,6 +41,15 @@ FAILURE_CATEGORIES = {
     "recovery_error",
     "infra_error",
 }
+FATAL_INFRASTRUCTURE_MARKERS = (
+    "insufficient balance",
+    "insufficient quota",
+    "quota exceeded",
+    "credit balance",
+    "invalid api key",
+    "authentication",
+    "model not found",
+)
 
 
 def load_tasks(path: Path) -> list[dict[str, Any]]:
@@ -149,6 +158,68 @@ def classify_failure(
     return None
 
 
+def infrastructure_error_code(run_result: AgentRunResult | None) -> str | None:
+    """Return a stable infrastructure subtype without changing the top-level taxonomy."""
+    if run_result is None or run_result.error is None:
+        return None
+    code = run_result.error.code
+    message = run_result.error.message.lower()
+    if code == "llm.api_status" and "insufficient balance" in message:
+        return "llm.insufficient_balance"
+    if code == "llm.api_status" and any(word in message for word in ("quota", "credit balance")):
+        return "llm.quota_exhausted"
+    if code == "llm.api_status" and any(word in message for word in ("invalid api key", "authentication")):
+        return "llm.authentication_failed"
+    if code == "llm.api_status" and "model not found" in message:
+        return "llm.model_unavailable"
+    return code or None
+
+
+def is_fatal_infrastructure_result(result: dict[str, Any]) -> bool:
+    """Detect global failures for which continuing would only create false benchmark data."""
+    if result.get("failure_category") != "infra_error":
+        return False
+    error = ((result.get("run") or {}).get("error") or {})
+    if error.get("recoverable", True):
+        return False
+    code = str(error.get("code", ""))
+    message = str(error.get("message", "")).lower()
+    if code.startswith(("config.", "setup.")):
+        return True
+    return code == "llm.api_status" and any(marker in message for marker in FATAL_INFRASTRUCTURE_MARKERS)
+
+
+def skipped_result(
+    task: dict[str, Any],
+    *,
+    mode: str,
+    repeat_index: int,
+    cause: dict[str, Any],
+) -> dict[str, Any]:
+    error_code = cause.get("infrastructure_error_code") or "fatal_infrastructure_error"
+    return {
+        "id": task["id"],
+        "instruction": task["instruction"],
+        "tags": task["tags"],
+        "difficulty": task["difficulty"],
+        "mode": mode,
+        "repeat": repeat_index,
+        "attempted": False,
+        "passed": False,
+        "partial": False,
+        "score": 0.0,
+        "assertions": [],
+        "failed_reasons": [f"未运行：基准已因致命基础设施错误熔断 ({error_code})"],
+        "failure_category": None,
+        "infrastructure_error_code": "benchmark.skipped_after_fatal_infrastructure",
+        "scene_summary": {"objects": [], "total": 0, "capped": False},
+        "scene_check_count": 0,
+        "correction_count": 0,
+        "timings": {"total_ms": 0.0},
+        "run": None,
+    }
+
+
 async def eval_one(
     task: dict[str, Any],
     *,
@@ -208,12 +279,14 @@ async def eval_one(
         "difficulty": task["difficulty"],
         "mode": "closed_loop" if closed_loop else "baseline",
         "repeat": repeat_index,
+        "attempted": True,
         "passed": passed,
         "partial": partial,
         "score": verification.get("score", 0.0),
         "assertions": verification.get("results", []),
         "failed_reasons": verification.get("failed_reasons", []),
         "failure_category": failure_category,
+        "infrastructure_error_code": infrastructure_error_code(run_result),
         "scene_summary": summary,
         "scene_check_count": len(run_result.scene_checks) if run_result else 0,
         "correction_count": correction_count,
@@ -226,18 +299,23 @@ async def eval_one(
 
 
 def _mode_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
-    attempts = len(results)
-    passed = sum(1 for result in results if result["passed"])
-    partial = sum(1 for result in results if result["partial"])
+    scheduled = len(results)
+    attempted_results = [result for result in results if result.get("attempted", True)]
+    attempts = len(attempted_results)
+    skipped = scheduled - attempts
+    passed = sum(1 for result in attempted_results if result["passed"])
+    partial = sum(1 for result in attempted_results if result["partial"])
     task_runs: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for result in results:
         task_runs[result["id"]].append(result)
     stable = sum(1 for runs in task_runs.values() if runs and all(item["passed"] for item in runs))
-    durations = [float(result["timings"]["total_ms"]) for result in results]
-    costs = [float(((result.get("run") or {}).get("metrics") or {}).get("estimated_cost_usd", 0)) for result in results]
-    scores = [float(result["score"]) for result in results]
+    durations = [float(result["timings"]["total_ms"]) for result in attempted_results]
+    costs = [float(((result.get("run") or {}).get("metrics") or {}).get("estimated_cost_usd", 0)) for result in attempted_results]
+    scores = [float(result["score"]) for result in attempted_results]
     return {
+        "scheduled": scheduled,
         "attempts": attempts,
+        "skipped": skipped,
         "passed": passed,
         "partial": partial,
         "pass_rate": round(passed / attempts, 4) if attempts else 0.0,
@@ -248,7 +326,16 @@ def _mode_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
         "average_cost_usd": round(statistics.mean(costs), 8) if costs else 0.0,
         "stable_tasks": stable,
         "unique_tasks": len(task_runs),
-        "failure_categories": dict(Counter(r["failure_category"] for r in results if r["failure_category"])),
+        "failure_categories": dict(
+            Counter(r["failure_category"] for r in attempted_results if r["failure_category"])
+        ),
+        "infrastructure_error_codes": dict(
+            Counter(
+                r["infrastructure_error_code"]
+                for r in attempted_results
+                if r.get("infrastructure_error_code")
+            )
+        ),
     }
 
 
@@ -316,7 +403,8 @@ def build_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
         for difficulty in sorted({result["difficulty"] for result in results})
     }
     comparison = None
-    if "baseline" in by_mode and "closed_loop" in by_mode:
+    comparable = all(data["skipped"] == 0 for data in by_mode.values())
+    if "baseline" in by_mode and "closed_loop" in by_mode and comparable:
         baseline = by_mode["baseline"]
         closed = by_mode["closed_loop"]
         comparison = {
@@ -331,6 +419,7 @@ def build_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
         "by_difficulty": by_difficulty,
         "by_tool": _tool_summary(results),
         "comparison": comparison,
+        "comparable": comparable,
     }
 
 
@@ -339,12 +428,13 @@ def render_markdown(summary: dict[str, Any], results: list[dict[str, Any]]) -> s
     lines.extend([
         "## Modes",
         "",
-        "| Mode | Pass@1 | Partial | Avg score | Stable tasks | Avg latency | Avg cost |",
-        "|---|---:|---:|---:|---:|---:|---:|",
+        "| Mode | Attempted / scheduled | Skipped | Pass@1 | Partial | Avg score | Stable tasks | Avg latency | Avg cost |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ])
     for mode, data in summary["modes"].items():
         lines.append(
-            f"| {mode} | {data['pass_rate']:.1%} | {data['partial_rate']:.1%} | "
+            f"| {mode} | {data['attempts']}/{data['scheduled']} | {data['skipped']} | "
+            f"{data['pass_rate']:.1%} | {data['partial_rate']:.1%} | "
             f"{data['average_score']:.3f} | {data['stable_tasks']}/{data['unique_tasks']} | "
             f"{data['average_duration_ms']:.0f} ms | ${data['average_cost_usd']:.6f} |"
         )
@@ -357,6 +447,14 @@ def render_markdown(summary: dict[str, Any], results: list[dict[str, Any]]) -> s
             f"- Pass@1: {comparison['pass_rate_delta']:+.1%}",
             f"- Average latency: {comparison['duration_ms_delta']:+.0f} ms",
             f"- Average cost: ${comparison['cost_usd_delta']:+.6f}",
+        ])
+    elif not summary.get("comparable", True):
+        lines.extend([
+            "",
+            "## Comparison unavailable",
+            "",
+            "Baseline and Closed-loop are not comparable because a fatal infrastructure error "
+            "caused scheduled attempts to be skipped.",
         ])
 
     lines.extend([
@@ -408,6 +506,11 @@ def render_markdown(summary: dict[str, Any], results: list[dict[str, Any]]) -> s
         for category, count in sorted(data["failure_categories"].items()):
             lines.append(f"| {mode} | {category} | {count} |")
 
+    lines.extend(["", "## Infrastructure error codes", "", "| Mode | Code | Count |", "|---|---|---:|"])
+    for mode, data in summary["modes"].items():
+        for code, count in sorted(data["infrastructure_error_codes"].items()):
+            lines.append(f"| {mode} | {code} | {count} |")
+
     lines.extend(["", "## Failures", "", "| Mode | Task | Repeat | Category | Reasons |", "|---|---|---:|---|---|"])
     for result in results:
         if result["passed"]:
@@ -450,15 +553,32 @@ async def run_benchmark(
     results: list[dict[str, Any]] = []
     total = len(tasks) * len(modes) * repeats
     current = 0
-    for mode in modes:
-        closed_loop = mode == "closed_loop"
-        for repeat in range(1, repeats + 1):
-            for task in tasks:
-                current += 1
-                print(f"[{current}/{total}] {mode} r{repeat} {task['id']}: {task['instruction'][:42]}…")
-                results.append(
-                    await eval_one(task, closed_loop=closed_loop, repeat_index=repeat)
-                )
+    schedule = [
+        (mode, repeat, task)
+        for mode in modes
+        for repeat in range(1, repeats + 1)
+        for task in tasks
+    ]
+    fatal_result: dict[str, Any] | None = None
+    for current, (mode, repeat, task) in enumerate(schedule, 1):
+        if fatal_result is not None:
+            results.append(
+                skipped_result(task, mode=mode, repeat_index=repeat, cause=fatal_result)
+            )
+            continue
+        print(f"[{current}/{total}] {mode} r{repeat} {task['id']}: {task['instruction'][:42]}…")
+        result = await eval_one(
+            task,
+            closed_loop=mode == "closed_loop",
+            repeat_index=repeat,
+        )
+        results.append(result)
+        if is_fatal_infrastructure_result(result):
+            fatal_result = result
+            print(
+                "基准熔断：检测到致命基础设施错误 "
+                f"{result.get('infrastructure_error_code') or 'unknown'}；剩余任务标记为未运行。"
+            )
     return results
 
 
@@ -476,6 +596,8 @@ async def _amain(args: argparse.Namespace, tasks: list[dict[str, Any]]) -> int:
     print(f"JSON: {json_path}")
     print(f"Report: {report_path}")
 
+    if not summary.get("comparable", True):
+        return 4
     if "closed_loop" in summary["modes"]:
         return 0 if summary["modes"]["closed_loop"]["pass_rate"] >= args.min_pass_rate else 3
     return 0

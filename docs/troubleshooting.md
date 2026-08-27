@@ -21,6 +21,14 @@ python tools/doctor.py
 
 运行 `python tools/doctor.py` 时应看到 `Rhino eval reset enabled`。如果仍显示 disabled，确认 Rhino 执行的是当前项目中的 `plugin/start_rhinocoder_listener.py`，然后重新启动 Listener。
 
+推荐在 Rhino 命令行运行：
+
+```text
+_-ScriptEditor _Run "/absolute/path/to/RhinoCoder/plugin/start_rhinocoder_listener.py"
+```
+
+不要使用旧的 `RunPythonScript` 命令；部分 Rhino 安装会让它进入缺少现代标准库的旧 Python 引擎。
+
 ## UI 显示尚未构建
 
 ```bash
@@ -43,3 +51,7 @@ npm run build --prefix agent/ui
 ## 评测退出码为 3
 
 这表示 Closed-loop Pass@1 低于默认 70% 发布门槛。JSON 与 Markdown 报告仍会生成，可从失败分类和断言明细定位问题。
+
+## 评测退出码为 4
+
+这表示余额耗尽、鉴权失败、配额不足或模型不可用等全局致命基础设施错误触发了熔断。报告会保留已经尝试的任务，并将剩余计划项标记为未运行；此时 Baseline 与 Closed-loop 不可比较。恢复模型服务后应重新运行完整基准。

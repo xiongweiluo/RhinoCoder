@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import os
+import sys
+from types import SimpleNamespace
 
 from plugin.rhino_listener import listener_main, tools_transform
 
@@ -110,3 +112,34 @@ def test_listener_does_not_enable_placeholder_eval_token(monkeypatch, tmp_path):
     env_path.write_text("RHINOCODER_EVAL_TOKEN=<placeholder>\n", encoding="utf-8")
     assert not listener_main._load_eval_token_from_project_env(env_path)
     assert not listener_main._eval_reset_enabled()
+
+
+def test_reset_environment_uses_supported_clear_undo_overload(monkeypatch):
+    class Doc:
+        clear_args = None
+
+        def ClearUndoRecords(self, purge_deleted_objects):
+            self.clear_args = purge_deleted_objects
+
+    doc = Doc()
+    monkeypatch.setitem(sys.modules, "scriptcontext", SimpleNamespace(doc=doc))
+
+    class FakeRS:
+        deleted = None
+
+        @staticmethod
+        def AllObjects():
+            return ["one", "two"]
+
+        @classmethod
+        def DeleteObjects(cls, object_ids):
+            cls.deleted = object_ids
+
+        @staticmethod
+        def Redraw():
+            return None
+
+    result = tools_transform._exec_reset_environment(FakeRS, {})
+    assert FakeRS.deleted == ["one", "two"]
+    assert doc.clear_args is True
+    assert "场景已清空" in result["message"]
