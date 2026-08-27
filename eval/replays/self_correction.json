@@ -1,6 +1,8 @@
 {
   "name": "Self correction",
   "sample": true,
+  "provenance": "synthetic",
+  "privacy": {"reviewed":true,"contains_real_trace_data":false,"coordinates":"synthetic","object_ids":"synthetic","layers":"generic"},
   "events": [
     {"type":"run.started","run_id":"replay-correction","seq":1,"timestamp":"2026-08-24T00:00:00Z","payload":{"prompt":"创建并校正一个蓝色球体","closed_loop":true}},
     {"type":"tool.completed","run_id":"replay-correction","seq":2,"timestamp":"2026-08-24T00:00:01Z","payload":{"name":"create_sphere","success":true,"duration_ms":90}},

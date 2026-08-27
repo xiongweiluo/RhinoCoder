@@ -6,6 +6,10 @@ import re
 from typing import Any
 
 SECRET_RE = re.compile(r"\bsk-[A-Za-z0-9_-]{12,}\b")
+GUID_RE = re.compile(
+    r"\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-"
+    r"[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}\b"
+)
 POSIX_PATH_RE = re.compile(r"(?<![\w.])/(?:Users|home|private|var|tmp)/[^\s\"']+")
 WINDOWS_PATH_RE = re.compile(r"\b[A-Za-z]:\\(?:[^\\\s]+\\)*[^\\\s]+")
 COORD_TUPLE_RE = re.compile(
@@ -29,6 +33,8 @@ COORD_KEYS = {
     "vector",
     "coordinates",
 }
+LAYER_KEYS = {"layer", "layer_name", "project_layer"}
+GROUP_KEYS = {"group", "groups", "group_name", "group_names"}
 
 
 def _is_secret_key(key: str) -> bool:
@@ -40,6 +46,7 @@ def _is_secret_key(key: str) -> bool:
 
 def sanitize_text(value: str) -> str:
     value = SECRET_RE.sub("<SECRET_REDACTED>", value)
+    value = GUID_RE.sub("<GUID_REDACTED>", value)
     value = POSIX_PATH_RE.sub("<PATH_REDACTED>", value)
     value = WINDOWS_PATH_RE.sub("<PATH_REDACTED>", value)
     value = COORD_TUPLE_RE.sub("<COORD_REDACTED>", value)
@@ -50,8 +57,18 @@ def sanitize_text(value: str) -> str:
 
 def sanitize_structure(value: Any, *, parent_key: str = "") -> Any:
     key_lc = parent_key.lower()
+    # run_id 是数据血缘主键，不是 Rhino 对象 GUID，必须保留以支持追溯。
+    if key_lc == "run_id" and isinstance(value, str):
+        return value
     if _is_secret_key(key_lc):
         return "<SECRET_REDACTED>"
+    if key_lc in LAYER_KEYS and isinstance(value, str):
+        return value if value == "Default" else "<LAYER_REDACTED>"
+    if key_lc in GROUP_KEYS:
+        if isinstance(value, str):
+            return "<GROUP_REDACTED>" if value else value
+        if isinstance(value, (list, tuple)):
+            return ["<GROUP_REDACTED>" for item in value if item]
     if key_lc in COORD_KEYS and isinstance(value, (list, tuple)) and 2 <= len(value) <= 3:
         if all(isinstance(item, (int, float)) for item in value):
             return "<COORD_REDACTED>"
@@ -79,14 +96,24 @@ def sanitize_structure(value: Any, *, parent_key: str = "") -> Any:
 
 def contains_sensitive_data(value: Any, *, parent_key: str = "") -> bool:
     key_lc = parent_key.lower()
+    if key_lc == "run_id" and isinstance(value, str):
+        return False
     if _is_secret_key(key_lc):
         return value not in (None, "", "<SECRET_REDACTED>")
+    if key_lc in LAYER_KEYS and isinstance(value, str):
+        return value not in ("", "Default", "<LAYER_REDACTED>")
+    if key_lc in GROUP_KEYS:
+        if isinstance(value, str):
+            return value not in ("", "<GROUP_REDACTED>")
+        if isinstance(value, (list, tuple)):
+            return any(item not in ("", "<GROUP_REDACTED>") for item in value)
     if key_lc in COORD_KEYS and isinstance(value, (list, tuple)) and 2 <= len(value) <= 3:
         return all(isinstance(item, (int, float)) for item in value)
     if isinstance(value, str):
-        value = re.sub(r"<(?:SECRET|PATH|COORD|LAYER)_REDACTED>", "", value)
+        value = re.sub(r"<(?:SECRET|PATH|COORD|LAYER|GROUP|GUID)_REDACTED>", "", value)
         return bool(
             SECRET_RE.search(value)
+            or GUID_RE.search(value)
             or POSIX_PATH_RE.search(value)
             or WINDOWS_PATH_RE.search(value)
             or COORD_TUPLE_RE.search(value)

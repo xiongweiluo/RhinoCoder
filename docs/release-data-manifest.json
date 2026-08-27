@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "reviewed_at": "2026-08-27",
+  "review": {
+    "method": "automated_scan_and_artifact_review",
+    "scope": "Published benchmark summary and three synthetic Replay files",
+    "checks": [
+      "api_keys_and_sensitive_config",
+      "local_paths",
+      "real_object_guids",
+      "project_layers",
+      "coordinate_provenance",
+      "event_sequence",
+      "artifact_hash_lock"
+    ]
+  },
+  "artifacts": [
+    {
+      "path": "docs/benchmark-report.md",
+      "classification": "sanitized_aggregate",
+      "sha256": "47d44193adfe0199e558eaecb72985f227690b04a4844b993a429f399f9045f7"
+    },
+    {
+      "path": "eval/replays/basic_stack.json",
+      "classification": "synthetic_replay",
+      "sha256": "2faa6cda1a722bbc5d8722e29325301ecdb3bba2c764fd87d580197db590688b"
+    },
+    {
+      "path": "eval/replays/self_correction.json",
+      "classification": "synthetic_replay",
+      "sha256": "9d47e373bf538e81da94fa8c4d6b4745204ea2c7d8acd9b8fca5f14fe35386fe"
+    },
+    {
+      "path": "eval/replays/table_group.json",
+      "classification": "synthetic_replay",
+      "sha256": "2a5e8b3ca8b7410e5351ac0acafb67e8403e11ca3e4224d5ce29c5a90edf9541"
+    }
+  ]
+}

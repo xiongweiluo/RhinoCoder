@@ -2,7 +2,7 @@
 """审计 golden_dataset：统计每条轨迹是否含 get_scene_summary 自检调用，挑出「零感知」轨迹。
 
 用法：
-    python eval/audit_perception.py                      # 审计默认 golden_dataset.jsonl
+    python eval/audit_perception.py                      # 审计默认 data/golden_traces_v2.jsonl
     python eval/audit_perception.py path/to/data.jsonl   # 审计指定文件
     python eval/audit_perception.py --dump-zero          # 把零感知轨迹导出到 *_zero_perception.jsonl
 """
@@ -97,5 +97,5 @@ def audit(path, dump_zero=False):
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     dump = "--dump-zero" in sys.argv
-    target = args[0] if args else "golden_dataset.jsonl"
+    target = args[0] if args else "data/golden_traces_v2.jsonl"
     audit(target, dump_zero=dump)

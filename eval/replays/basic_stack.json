@@ -1,6 +1,8 @@
 {
   "name": "Basic stack",
   "sample": true,
+  "provenance": "synthetic",
+  "privacy": {"reviewed":true,"contains_real_trace_data":false,"coordinates":"synthetic","object_ids":"synthetic","layers":"generic"},
   "events": [
     {"type":"run.started","run_id":"replay-basic","seq":1,"timestamp":"2026-08-24T00:00:00Z","payload":{"prompt":"创建基座并在顶面放置红色球体","closed_loop":true}},
     {"type":"planning.started","run_id":"replay-basic","seq":2,"timestamp":"2026-08-24T00:00:01Z","payload":{"round":1}},

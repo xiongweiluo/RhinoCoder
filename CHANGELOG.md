@@ -2,6 +2,18 @@
 
 本项目遵循语义化版本。尚未通过真实 Rhino 基准的内容保留在 Unreleased，不以离线测试代替发布验收。
 
+## [Unreleased]
+
+### Added
+
+- 黄金 Trace 的三层准入审计、Partial/Fail 物理分流与 legacy 数据隔离。
+- 正式基准报告和三份合成 Replay 的敏感字段扫描、来源声明和 SHA-256 内容锁。
+- 本地与 CI 的 Trace/发布数据审计命令。
+
+### Security
+
+- 轨迹脱敏新增 Rhino 对象 GUID、项目图层和群组处理，同时保留 `run_id` 数据血缘。
+
 ## [0.2.0-rc.1] - 2026-08-24
 
 ### Added

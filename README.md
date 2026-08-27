@@ -136,6 +136,15 @@ DeepSeek 官方模型会按版本化的缓存命中、缓存未命中和输出�
 python tools/recalculate_benchmark_cost.py eval/results/<benchmark>.json
 ```
 
+审计本地黄金数据准入、Partial/Fail 分流和公开报告/Replay 脱敏：
+
+```bash
+python tools/audit_trace_data.py
+python tools/audit_release_data.py
+```
+
+新黄金数据只写入 `data/golden_traces_v2.jsonl`。旧的根目录 `golden_dataset.jsonl` 缺少当前准入元数据，只作为本地 legacy 数据保留，不会进入新 SFT 正样本。完整验收证据见 [数据与脱敏验收报告](docs/data-sanitization-acceptance-report.md)。
+
 ## 安全边界
 
 - Listener 仅绑定 `127.0.0.1`。

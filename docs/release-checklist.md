@@ -36,9 +36,9 @@
 
 ## 5. 数据与交付
 
-- [ ] 黄金 Trace 同时满足断言通过、至少一次场景自检、人工确认与脱敏审计。
-- [ ] Partial Pass 和失败 Trace 只进入候选/错误分析集。
-- [ ] 正式报告与三份 Replay 已人工复核脱敏。
+- [x] 黄金 Trace 同时满足断言通过、至少一次场景自检、人工确认与脱敏审计，旧格式数据已隔离，详见 [数据与脱敏验收报告](data-sanitization-acceptance-report.md)。
+- [x] Partial Pass 和失败 Trace 已物理分流且不会进入黄金 SFT，详见 [数据与脱敏验收报告](data-sanitization-acceptance-report.md)。
+- [x] 正式报告与三份 Replay 已逐文件复核、声明合成来源并通过哈希锁定的脱敏审计，详见 [数据与脱敏验收报告](data-sanitization-acceptance-report.md)。
 - [ ] 新 macOS 环境可按 README 完成安装和首次任务。
 - [ ] 已知限制与故障排查内容和当前版本一致。
 

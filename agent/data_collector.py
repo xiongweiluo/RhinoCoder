@@ -21,11 +21,12 @@ import httpx
 import typer
 
 from agent.llm import run_agent
+from agent.runtime import utc_now
 from agent.trace_store import (
     GOLDEN_FILE,
     build_trace_record,
-    save_candidate,
     save_golden,
+    save_rejected_trace,
     save_trace,
     validate_golden_candidate,
 )
@@ -146,15 +147,23 @@ async def _collect_loop() -> None:
         if verdict == "q":
             return
 
+        record["feedback"] = {
+            "label": "accepted" if verdict == "y" else "rejected",
+            "source": "human_review",
+            "timestamp": utc_now(),
+        }
+        # 将人工反馈与同一 run_id 的脱敏 Trace 绑定，并覆盖反馈前的临时版本。
+        save_trace(record)
         gate = validate_golden_candidate(record, human_confirmed=verdict == "y")
         if gate.accepted:
             save_golden(gate)
             _echo("GOLDEN", "✅ 通过全部准入门槛，已加入黄金数据集")
         else:
-            record["gate_reasons"] = gate.reasons
-            record["human_confirmed"] = verdict == "y"
-            save_candidate(record)
-            _echo("CANDIDATE", f"未进入黄金集，原因: {', '.join(gate.reasons)}")
+            disposition, target = save_rejected_trace(record, gate)
+            _echo(
+                "REJECTED",
+                f"未进入黄金集，分流={disposition}，文件={target.name}，原因: {', '.join(gate.reasons)}",
+            )
 
 
 def main() -> None:
