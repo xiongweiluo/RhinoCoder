@@ -218,6 +218,30 @@ for _mod in _TOOL_MODULES:
 del _mod, _path, _fn, _op
 
 
+# 纯查询不应污染 Rhino 的 Undo 栈；Undo 自身和评测清场也不能再包一层事务。
+_NO_UNDO_RECORD_OPERATIONS = {
+    "get_selected_objects",
+    "get_objects_by_name",
+    "get_object_info",
+    "get_bounding_box",
+    "get_scene_summary",
+    "undo_last_action",
+    "reset_environment",
+}
+
+
+def _execute_with_undo_record(doc, operation: str, exec_fn, rs, params: dict):
+    """将一次外部写操作映射为一个可撤销的 Rhino 命令事务。"""
+    undo_serial = 0
+    if doc is not None and operation not in _NO_UNDO_RECORD_OPERATIONS:
+        undo_serial = doc.BeginUndoRecord(f"RhinoCoder: {operation}")
+    try:
+        return exec_fn(rs, params)
+    finally:
+        if undo_serial:
+            doc.EndUndoRecord(undo_serial)
+
+
 # ---------------------------------------------------------------------------
 # Rhino 主线程 Idle 回调
 # ---------------------------------------------------------------------------
@@ -258,7 +282,13 @@ def _idle_handler(sender, e) -> None:  # type: ignore[override]
                 logger.error(work.error)
                 continue
 
-            result = exec_fn(rs, work.params)
+            result = _execute_with_undo_record(
+                sc.doc,
+                work.operation,
+                exec_fn,
+                rs,
+                work.params,
+            )
 
             if result is None:
                 work.error = (

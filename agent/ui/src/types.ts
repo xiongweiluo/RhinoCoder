@@ -15,6 +15,16 @@ export type HistoryItem = {
   metrics: Record<string, number | string>;
   created_object_ids: string[];
   events: AgentEvent[];
+  control_scene?: SceneSnapshot | null;
+  feedback_labels?: string[];
+  rolled_back?: boolean;
+  undo_applied?: boolean;
+};
+
+export type SceneSnapshot = {
+  objects: SceneObject[];
+  total: number;
+  capped: boolean;
 };
 
 export type SceneObject = {

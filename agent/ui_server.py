@@ -44,6 +44,10 @@ class ManagedRun:
     task: Optional[asyncio.Task] = None
     result: Optional[AgentRunResult] = None
     events: list[dict[str, Any]] = field(default_factory=list)
+    control_scene: Optional[dict[str, Any]] = None
+    feedback_labels: list[str] = field(default_factory=list)
+    rolled_back: bool = False
+    undo_applied: bool = False
 
 
 class RunManager:
@@ -98,6 +102,10 @@ class RunManager:
                         "metrics": managed.result.to_dict()["metrics"],
                         "created_object_ids": managed.result.created_object_ids,
                         "events": list(managed.events),
+                        "control_scene": managed.control_scene,
+                        "feedback_labels": list(managed.feedback_labels),
+                        "rolled_back": managed.rolled_back,
+                        "undo_applied": managed.undo_applied,
                     }
                 )
                 await self.broadcast(
@@ -134,10 +142,62 @@ class RunManager:
         managed = self._get_run(run_id)
         if managed.result is None:
             raise ValueError("任务尚未结束，不能回滚")
+        if managed.rolled_back:
+            raise ValueError("该任务已经完成精准回滚")
         object_ids = managed.result.created_object_ids
         if not object_ids:
             raise ValueError("该任务没有可追踪的已创建对象")
-        return await _rhino_post("/delete_objects", {"object_ids": object_ids})
+        result = await _rhino_post("/delete_objects", {"object_ids": object_ids})
+        scene_summary = await self.capture_scene(run_id)
+        managed.rolled_back = not bool(result.get("failed"))
+        self._update_history(
+            run_id,
+            control_scene=scene_summary,
+            rolled_back=managed.rolled_back,
+        )
+        return {"result": result, "scene_summary": scene_summary}
+
+    async def capture_scene(self, run_id: str) -> dict[str, Any]:
+        managed = self._get_run(run_id)
+        scene = await _rhino_post("/get_scene_summary", {})
+        summary = {
+            "objects": scene.get("objects", []),
+            "total": scene.get("total", len(scene.get("objects", []))),
+            "capped": bool(scene.get("capped", False)),
+        }
+        managed.control_scene = summary
+        self._update_history(run_id, control_scene=summary)
+        return summary
+
+    def record_feedback(self, run_id: str, label: str, note: str = "") -> dict[str, Any]:
+        managed = self._get_run(run_id)
+        if managed.result is None:
+            raise ValueError("任务尚未结束，不能提交反馈")
+        record = {
+            "run_id": managed.run_id,
+            "instruction": managed.prompt,
+            "run_status": managed.result.status.value,
+            "label": label,
+            "note": note[:1000],
+            "timestamp": utc_now(),
+        }
+        save_feedback(record)
+        managed.feedback_labels.append(label)
+        self._update_history(run_id, feedback_labels=list(managed.feedback_labels))
+        return record
+
+    def mark_undo_applied(self, run_id: str) -> None:
+        managed = self._get_run(run_id)
+        if managed.undo_applied:
+            raise ValueError("该任务已经执行过 Undo")
+        managed.undo_applied = True
+        self._update_history(run_id, undo_applied=True)
+
+    def _update_history(self, run_id: str, **changes: Any) -> None:
+        for item in self.history:
+            if item.get("run_id") == run_id:
+                item.update(changes)
+                return
 
     def snapshot(self) -> dict[str, Any]:
         active = []
@@ -243,32 +303,68 @@ async def _websocket(request: web.Request) -> web.WebSocketResponse:
                     )
                     await socket.send_json({"type": "control.accepted", "action": "start", "run_id": run_id})
                 elif message_type == "cancel":
-                    await manager.cancel(str(data.get("run_id", "")))
+                    run_id = str(data.get("run_id", ""))
+                    await manager.cancel(run_id)
+                    await socket.send_json(
+                        {
+                            "type": "control.completed",
+                            "action": "cancel",
+                            "run_id": run_id,
+                            "payload": {"message": "停止请求已发送"},
+                        }
+                    )
                 elif message_type == "retry":
                     run_id = await manager.retry(str(data.get("run_id", "")))
                     await socket.send_json({"type": "control.accepted", "action": "retry", "run_id": run_id})
                 elif message_type == "undo":
-                    payload = await _rhino_post("/undo_last_action", {})
-                    await socket.send_json({"type": "control.completed", "action": "undo", "payload": payload})
+                    run_id = str(data.get("run_id", ""))
+                    managed = manager._get_run(run_id)
+                    if managed.undo_applied:
+                        raise ValueError("该任务已经执行过 Undo")
+                    result = await _rhino_post("/undo_last_action", {})
+                    manager.mark_undo_applied(run_id)
+                    scene_summary = await manager.capture_scene(run_id)
+                    await manager.broadcast(
+                        {"type": "history.updated", "history": list(manager.history)}
+                    )
+                    await socket.send_json(
+                        {
+                            "type": "control.completed",
+                            "action": "undo",
+                            "run_id": run_id,
+                            "payload": {"result": result, "scene_summary": scene_summary},
+                        }
+                    )
                 elif message_type == "rollback":
-                    payload = await manager.rollback(str(data.get("run_id", "")))
-                    await socket.send_json({"type": "control.completed", "action": "rollback", "payload": payload})
+                    run_id = str(data.get("run_id", ""))
+                    payload = await manager.rollback(run_id)
+                    await manager.broadcast(
+                        {"type": "history.updated", "history": list(manager.history)}
+                    )
+                    await socket.send_json(
+                        {"type": "control.completed", "action": "rollback", "run_id": run_id, "payload": payload}
+                    )
                 elif message_type == "feedback":
                     label = str(data.get("label", ""))
                     if label not in {"accepted", "partial", "rejected"}:
                         raise ValueError("feedback label 必须是 accepted/partial/rejected")
-                    managed = manager._get_run(str(data.get("run_id", "")))
-                    save_feedback(
+                    run_id = str(data.get("run_id", ""))
+                    record = manager.record_feedback(
+                        run_id,
+                        label,
+                        str(data.get("note", "")),
+                    )
+                    await manager.broadcast(
+                        {"type": "history.updated", "history": list(manager.history)}
+                    )
+                    await socket.send_json(
                         {
-                            "run_id": managed.run_id,
-                            "instruction": managed.prompt,
-                            "run_status": managed.result.status.value if managed.result else "running",
-                            "label": label,
-                            "note": str(data.get("note", ""))[:1000],
-                            "timestamp": utc_now(),
+                            "type": "control.completed",
+                            "action": "feedback",
+                            "run_id": run_id,
+                            "payload": {"label": record["label"], "timestamp": record["timestamp"]},
                         }
                     )
-                    await socket.send_json({"type": "control.completed", "action": "feedback"})
                 elif message_type == "replay":
                     asyncio.create_task(_stream_replay(manager, str(data.get("name", ""))))
                 elif message_type == "snapshot":

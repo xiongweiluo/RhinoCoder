@@ -28,8 +28,8 @@
 
 - [x] 三个核心任务在真实 Rhino 环境连续运行 3 次成功，详见 [UI 真实环境验收报告](ui-acceptance-report.md)。
 - [x] WebSocket 断线重连后可恢复当前任务快照，详见 [断线与故障恢复验收报告](recovery-acceptance-report.md)。
-- [ ] 停止后不再产生新工具调用。
-- [ ] 重试、Undo、任务级精准回滚和反馈均已人工演练。
+- [x] 停止后不再产生新工具调用，详见 [交互控制真实环境验收报告](interaction-control-acceptance-report.md)。
+- [x] 重试、Undo、任务级精准回滚和反馈均已人工演练，详见 [交互控制真实环境验收报告](interaction-control-acceptance-report.md)。
 - [x] Rhino Listener 重启或重连后无需重启 Agent/UI 即可开始新任务。
 - [x] 无效 GUID、空参数、LLM 超时和 MCP 退出均展示可理解的恢复入口。
 - [x] 网络层重试复用幂等键，Listener 超时不会重复入队或产生重复对象。

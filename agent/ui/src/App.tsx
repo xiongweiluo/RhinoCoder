@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import type { AgentEvent, HistoryItem, SceneObject } from "./types";
+import type { AgentEvent, HistoryItem, SceneObject, SceneSnapshot } from "./types";
 
 const examples = [
   "在原点创建一个 20x20x2 的基座，再在顶面居中放一个半径 8 的红色球体。",
@@ -23,6 +23,8 @@ export default function App() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [currentRun, setCurrentRun] = useState("");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [sceneOverride, setSceneOverride] = useState<SceneSnapshot | null>(null);
   const [replays, setReplays] = useState<string[]>([]);
   const socketRef = useRef<WebSocket | null>(null);
   const retryRef = useRef(0);
@@ -52,6 +54,11 @@ export default function App() {
             ?? nextHistory.at(0);
           setHistory(nextHistory);
           setEvents(restored?.events ?? []);
+          setSceneOverride(
+            restored && "control_scene" in restored
+              ? (restored as HistoryItem).control_scene ?? null
+              : null,
+          );
           if (restored?.run_id) chooseRun(restored.run_id);
           return;
         }
@@ -59,14 +66,24 @@ export default function App() {
           const nextHistory = (data.history ?? []) as HistoryItem[];
           setHistory(nextHistory);
           const restored = nextHistory.find((run) => run.run_id === currentRunRef.current);
-          if (restored) setEvents(restored.events ?? []);
+          if (restored) {
+            setEvents(restored.events ?? []);
+            setSceneOverride(restored.control_scene ?? null);
+          }
           return;
         }
         if (data.type === "control.accepted") {
           chooseRun(data.run_id);
           if (data.action === "start" || data.action === "retry") {
             setEvents((previous) => previous.filter((event) => event.run_id === data.run_id));
+            setSceneOverride(null);
           }
+          return;
+        }
+        if (data.type === "control.completed") {
+          const snapshot = data.payload?.scene_summary as SceneSnapshot | undefined;
+          if (snapshot?.objects) setSceneOverride(snapshot);
+          setNotice(controlNotice(data.action, data.payload));
           return;
         }
         if (data.type === "control.error") {
@@ -76,6 +93,7 @@ export default function App() {
         if (typeof data.type === "string" && data.run_id) {
           const event = data as AgentEvent;
           chooseRun(event.run_id);
+          if (event.type === "run.started") setSceneOverride(null);
           setEvents((previous) => [...previous.filter((item) => !(item.run_id === event.run_id && item.seq === event.seq)), event]);
         }
       };
@@ -95,6 +113,7 @@ export default function App() {
 
   const send = (message: Record<string, unknown>) => {
     setError("");
+    setNotice("");
     if (socketRef.current?.readyState !== WebSocket.OPEN) {
       setError("UI 服务连接尚未恢复");
       return;
@@ -110,6 +129,7 @@ export default function App() {
   const selectHistory = (item: HistoryItem) => {
     chooseRun(item.run_id);
     setEvents(item.events ?? []);
+    setSceneOverride(item.control_scene ?? null);
   };
 
   const currentEvents = useMemo(
@@ -119,7 +139,9 @@ export default function App() {
   const latest = currentEvents.at(-1);
   const toolEvents = currentEvents.filter((event) => event.type === "tool.completed");
   const sceneEvent = [...currentEvents].reverse().find((event) => event.type === "scene.checked");
-  const scene = (sceneEvent?.payload.scene_summary as {objects?: SceneObject[]} | null)?.objects ?? [];
+  const scene = sceneOverride?.objects
+    ?? (sceneEvent?.payload.scene_summary as {objects?: SceneObject[]} | null)?.objects
+    ?? [];
   const terminal = [...currentEvents].reverse().find((event) => ["run.completed", "run.failed", "run.cancelled"].includes(event.type));
   const metrics = (terminal?.payload.metrics ?? {}) as Record<string, number | string>;
   const metricNumber = (name: string) => typeof metrics[name] === "number" ? metrics[name] as number : undefined;
@@ -131,7 +153,24 @@ export default function App() {
   const cacheMissTokens = metricNumber("prompt_cache_miss_tokens");
   const estimatedCost = metricNumber("estimated_cost_usd");
   const costStatus = String(metrics.cost_estimate_status ?? "");
-  const canControl = Boolean(currentRun && !latest?.replay);
+  const currentHistory = history.find((item) => item.run_id === currentRun);
+  const isReplay = Boolean(latest?.replay);
+  const isRunning = Boolean(currentRun && !terminal && !isReplay);
+  const canRetry = Boolean(terminal && !isReplay);
+  const canUndo = Boolean(
+    connected
+    && currentHistory
+    && !isRunning
+    && !currentHistory.undo_applied
+    && !isReplay,
+  );
+  const canRollback = Boolean(
+    currentHistory?.status === "completed"
+    && currentHistory.created_object_ids?.length
+    && !currentHistory.rolled_back
+    && !isReplay,
+  );
+  const canFeedback = Boolean(terminal && !isReplay);
   const terminalError = terminal?.type === "run.failed"
     ? (terminal.payload.error as RunErrorPayload | undefined)
     : undefined;
@@ -152,16 +191,17 @@ export default function App() {
           <div className="composer-actions">
             <label><input type="checkbox" checked={closedLoop} onChange={(event) => setClosedLoop(event.target.checked)} /> 闭环场景自检</label>
             <div className="button-row">
-              <button type="button" className="ghost" disabled={!canControl} onClick={() => send({type: "cancel", run_id: currentRun})}>停止</button>
-              <button type="button" className="ghost" onClick={() => send({type: "undo"})}>Undo</button>
+              <button type="button" className="ghost" disabled={!isRunning} onClick={() => send({type: "cancel", run_id: currentRun})}>停止</button>
+              <button type="button" className="ghost" disabled={!canUndo} onClick={() => send({type: "undo", run_id: currentRun})}>Undo</button>
               <button type="submit" disabled={!connected || !prompt.trim()}>执行任务</button>
             </div>
           </div>
         </form>
         <div className="examples">{examples.map((item, index) => <button key={item} onClick={() => setPrompt(item)}>示例 {index + 1}</button>)}</div>
+        {notice && <div className="control-notice" role="status">{notice}</div>}
         {visibleError && <div className="recovery-error" role="alert">
           <div><strong>{visibleError.code ?? "操作失败"}</strong><p>{visibleError.message}</p><small>{recoveryGuidance(visibleError.code)}</small></div>
-          {visibleError.recoverable !== false && <button type="button" className="danger" disabled={!canControl} onClick={() => send({type: "retry", run_id: currentRun})}>重试任务</button>}
+          {visibleError.recoverable !== false && <button type="button" className="danger" disabled={!canRetry} onClick={() => send({type: "retry", run_id: currentRun})}>重试任务</button>}
         </div>}
       </section>
 
@@ -195,12 +235,13 @@ export default function App() {
           <div className="panel controls">
             <div className="section-title"><h2>Recovery & Feedback</h2></div>
             <div className="button-grid">
-              <button className="ghost" disabled={!canControl} onClick={() => send({type: "retry", run_id: currentRun})}>重试任务</button>
-              <button className="danger" disabled={!canControl} onClick={() => send({type: "rollback", run_id: currentRun})}>精准回滚</button>
-              <button className="ghost" disabled={!canControl} onClick={() => send({type: "feedback", run_id: currentRun, label: "accepted"})}>正确</button>
-              <button className="ghost" disabled={!canControl} onClick={() => send({type: "feedback", run_id: currentRun, label: "partial"})}>部分正确</button>
-              <button className="danger" disabled={!canControl} onClick={() => send({type: "feedback", run_id: currentRun, label: "rejected"})}>错误</button>
+              <button className="ghost" disabled={!canRetry} onClick={() => send({type: "retry", run_id: currentRun})}>重试任务</button>
+              <button className="danger" disabled={!canRollback} onClick={() => send({type: "rollback", run_id: currentRun})}>精准回滚</button>
+              <button className="ghost" disabled={!canFeedback} onClick={() => send({type: "feedback", run_id: currentRun, label: "accepted"})}>正确</button>
+              <button className="ghost" disabled={!canFeedback} onClick={() => send({type: "feedback", run_id: currentRun, label: "partial"})}>部分正确</button>
+              <button className="danger" disabled={!canFeedback} onClick={() => send({type: "feedback", run_id: currentRun, label: "rejected"})}>错误</button>
             </div>
+            {currentHistory?.feedback_labels?.length ? <p className="feedback-state">已记录反馈：{currentHistory.feedback_labels.map(feedbackLabel).join("、")}</p> : null}
             {replays.length > 0 && <select defaultValue="" onChange={(event) => event.target.value && send({type: "replay", name: event.target.value})}><option value="">加载 Replay…</option>{replays.map((name) => <option key={name}>{name}</option>)}</select>}
           </div>
         </div>
@@ -236,6 +277,21 @@ function recoveryGuidance(code?: string) {
   if (code?.startsWith("rhino.")) return "确认 Rhino Listener 健康后重试；幂等键会防止网络重试产生重复对象。";
   if (code?.includes("invalid") || code?.includes("argument")) return "修正 GUID 或必填参数后重新执行。";
   return "检查错误原因后可从此处重新运行相同任务。";
+}
+
+function feedbackLabel(label: string) {
+  return ({accepted: "正确", partial: "部分正确", rejected: "错误"} as Record<string, string>)[label] ?? label;
+}
+
+function controlNotice(action: string, payload: Record<string, unknown> = {}) {
+  if (action === "cancel") return "停止请求已发送；Agent 将不再发起新的工具调用。";
+  if (action === "feedback") return `反馈已保存：${feedbackLabel(String(payload.label ?? ""))}`;
+  if (action === "rollback") {
+    const result = (payload.result ?? {}) as {deleted?: string[]; failed?: string[]};
+    return `精准回滚完成：删除 ${result.deleted?.length ?? 0} 个对象${result.failed?.length ? `，${result.failed.length} 个对象未找到` : ""}。`;
+  }
+  if (action === "undo") return "Undo 完成，Scene Summary 已刷新。";
+  return "操作已完成。";
 }
 
 function ObjectCard({object}: {object: SceneObject}) {

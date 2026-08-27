@@ -21,6 +21,7 @@ RhinoCoder 是一个基于 MCP 的 Rhino 8 空间设计 Agent。系统把自然�
 - 用户反馈、敏感字段脱敏和黄金样本准入规则。
 - 三个核心场景已在真实 Rhino 环境中各连续运行 3 次成功，详见 [UI 真实环境验收报告](docs/ui-acceptance-report.md)。
 - WebSocket 快照恢复、Rhino Listener 热重启和四类故障恢复已完成真实验收，详见 [断线与故障恢复验收报告](docs/recovery-acceptance-report.md)。
+- 停止、重试、Undo、任务级精准回滚和三类反馈已完成真实演练，详见 [交互控制真实环境验收报告](docs/interaction-control-acceptance-report.md)。
 
 ### 待真实环境验收
 

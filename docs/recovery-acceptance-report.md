@@ -65,6 +65,6 @@ Listener 健康接口现返回 `instance_id` 和 `started_at`。连续两次启�
 - Listener 健康接口新增实例标识和启动时间。
 - MCP 网络重试统一复用幂等键，Listener 超时响应进入幂等缓存。
 
-## 剩余范围
+## 后续验收
 
-停止后无新工具调用、Undo、任务级精准回滚、三类反馈和新 macOS 环境首次安装仍按发布检查清单单独验收。
+停止、Undo、任务级精准回滚和三类反馈已在 [交互控制真实环境验收报告](interaction-control-acceptance-report.md) 中完成。新 macOS 环境首次安装仍按发布检查清单单独验收。

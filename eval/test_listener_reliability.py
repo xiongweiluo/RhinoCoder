@@ -4,6 +4,8 @@ import os
 import sys
 from types import SimpleNamespace
 
+import pytest
+
 from plugin.rhino_listener import listener_main, tools_geometry, tools_transform
 
 
@@ -203,3 +205,67 @@ def test_reset_environment_uses_supported_clear_undo_overload(monkeypatch):
     assert FakeRS.deleted == ["one", "two"]
     assert doc.clear_args is True
     assert "场景已清空" in result["message"]
+
+
+class _UndoDoc:
+    def __init__(self) -> None:
+        self.started = []
+        self.ended = []
+
+    def BeginUndoRecord(self, name):
+        self.started.append(name)
+        return 42
+
+    def EndUndoRecord(self, serial):
+        self.ended.append(serial)
+
+
+def test_mutating_operation_is_wrapped_in_rhino_undo_record():
+    doc = _UndoDoc()
+
+    result = listener_main._execute_with_undo_record(
+        doc,
+        "create_box",
+        lambda rs, params: {"created": params["width"]},
+        object(),
+        {"width": 5},
+    )
+
+    assert result == {"created": 5}
+    assert doc.started == ["RhinoCoder: create_box"]
+    assert doc.ended == [42]
+
+
+@pytest.mark.parametrize("operation", ["get_scene_summary", "undo_last_action", "reset_environment"])
+def test_query_and_undo_control_operations_do_not_create_undo_record(operation):
+    doc = _UndoDoc()
+
+    listener_main._execute_with_undo_record(
+        doc,
+        operation,
+        lambda rs, params: "ok",
+        object(),
+        {},
+    )
+
+    assert not doc.started
+    assert not doc.ended
+
+
+def test_failed_mutating_operation_closes_undo_record():
+    doc = _UndoDoc()
+
+    def fail(rs, params):
+        raise RuntimeError("boom")
+
+    with pytest.raises(RuntimeError, match="boom"):
+        listener_main._execute_with_undo_record(
+            doc,
+            "move_object",
+            fail,
+            object(),
+            {},
+        )
+
+    assert doc.started == ["RhinoCoder: move_object"]
+    assert doc.ended == [42]

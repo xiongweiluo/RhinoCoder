@@ -59,6 +59,10 @@ UI 显示 `mcp.process_exit` 时，先点击“重试任务”。每次任务都
 - `tool.invalid_argument` / `tool.execution_failed` 表示 MCP Schema 已拒绝缺失字段或错误类型。
 - 修正 UI 指令中的对象来源和必填参数后重试；无效 GUID 与空参数会在进入 Rhino 主线程前被拒绝。
 
+## Undo 提示成功但场景未变化
+
+确认 Rhino 运行的是当前仓库中的 Listener，并在 Rhino 命令行重新执行启动脚本完成热重载。当前 Listener 会为创建、变换、属性修改和精准删除建立 Rhino Undo 事务；旧进程仍可能运行未包含该修复的代码。Undo 完成后 UI 会自动刷新 Scene Summary，可用对象数量和目标对象是否消失判断是否真正生效。
+
 ## 评测退出码为 3
 
 这表示 Closed-loop Pass@1 低于默认 70% 发布门槛。JSON 与 Markdown 报告仍会生成，可从失败分类和断言明细定位问题。
