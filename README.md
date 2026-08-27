@@ -2,6 +2,8 @@
 
 RhinoCoder 是一个基于 MCP 的 Rhino 8 空间设计 Agent。系统把自然语言任务转换为可审计的工具调用，并通过场景感知和程序化断言验证真实几何结果。
 
+当前稳定原型版本：`0.2.0`。Prompt、工具 Schema、Trace Schema、运行时和依赖锁定信息见 [版本清单](docs/version-manifest.json)。
+
 ## 当前状态
 
 ### 已实现
@@ -22,10 +24,6 @@ RhinoCoder 是一个基于 MCP 的 Rhino 8 空间设计 Agent。系统把自然�
 - 三个核心场景已在真实 Rhino 环境中各连续运行 3 次成功，详见 [UI 真实环境验收报告](docs/ui-acceptance-report.md)。
 - WebSocket 快照恢复、Rhino Listener 热重启和四类故障恢复已完成真实验收，详见 [断线与故障恢复验收报告](docs/recovery-acceptance-report.md)。
 - 停止、重试、Undo、任务级精准回滚和三类反馈已完成真实演练，详见 [交互控制真实环境验收报告](docs/interaction-control-acceptance-report.md)。
-
-### 待真实环境验收
-
-- 新 macOS 环境首次安装演练。
 
 ### 后续规划
 
@@ -52,19 +50,30 @@ Scene Summary -> Eval assertions -> Trace / feedback
 
 ## 安装
 
+前置要求：
+
+- macOS 14 或更高版本。
+- Rhino 8。
+- Python 3.11–3.13；不要使用版本低于 3.11 的 macOS 系统 Python。
+- Node.js `^20.19.0` 或 `>=22.12.0`。
+
+推荐使用一键安装。脚本会创建项目 `.venv`、安装 `requirements-lock.txt` 中的固定 Python 依赖、执行 `npm ci` 并构建前端：
+
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
+RHINOCODER_PYTHON=python3 ./scripts/bootstrap.sh
 ```
 
-填写 `.env` 中的模型配置。不要提交真实密钥。
+如果 `python3 --version` 低于 3.11，请把 `RHINOCODER_PYTHON` 改成新解释器的完整路径。安装完成后填写 `.env` 中的模型配置，不要提交真实密钥。
 
-也可以使用项目脚本完成依赖安装与前端构建：
+手动等价步骤：
 
 ```bash
-./scripts/bootstrap.sh
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements-lock.txt
+npm ci --prefix agent/ui
+npm run build --prefix agent/ui
+cp .env.example .env
 ```
 
 在 Rhino Script Editor 中启动 Listener：
@@ -98,6 +107,12 @@ python agent/main.py --prompt "在原点创建一个半径为 10 的球体"
 
 然后打开 `http://127.0.0.1:7860`。离线时可从界面加载三份脱敏 Replay。
 
+首次安装建议先运行只读任务，确认 LLM、MCP 与 Rhino 链路，不改变当前场景：
+
+```bash
+.venv/bin/python agent/main.py --prompt "读取当前 Rhino 场景摘要并报告对象数量；不要创建、删除、移动或修改任何对象。"
+```
+
 ## 评测与验证
 
 仅校验30条任务格式，不连接 Rhino 或模型：
@@ -119,6 +134,14 @@ python tools/check_secrets.py
 ```bash
 ./scripts/check.sh
 ```
+
+在临时目录重建公开工作区、虚拟环境和前端，并运行 Replay 首任务；`--local-rhino` 会额外通过 localhost MCP 执行只读 Rhino 首任务，不会把场景数据发送给外部模型：
+
+```bash
+python tools/verify_clean_install.py --local-rhino
+```
+
+该脚本不复制 `.env`、`.git`、本地 Trace 或现有虚拟环境；只读 Rhino 检查不打印或保存场景内容，临时工作区在验收后删除。
 
 真实端到端评测需要 Rhino Listener、有效模型配置以及 `.env` 中的 `RHINOCODER_EVAL_TOKEN`。配置或更换令牌后必须在 Rhino 中重新启动 Listener；可通过 `python tools/doctor.py` 确认 `Rhino eval reset` 已启用。
 
@@ -154,7 +177,7 @@ python tools/audit_release_data.py
 
 ## 已知限制
 
-- 当前主要验证环境为 macOS + Rhino 8。
+- 当前主要验证环境为 macOS 15.6 arm64 + Rhino 8；clean-room 安装已在该环境完成，尚未在另一台物理 Mac 或 Intel Mac 上复验。
 - 完整30题基准需要交互式 Rhino 环境，CI 只运行离线测试。
 - 混合路由、本地微调模型和生产级并发不属于当前稳定原型。
 

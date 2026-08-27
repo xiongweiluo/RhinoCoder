@@ -76,6 +76,20 @@ QUERY_ENDPOINTS = {
 QUERY_MAX_RETRIES = 1
 
 
+def _response_shape(data: Any) -> str:
+    """返回可观测但不泄露 GUID、坐标、名称或图层的响应摘要。"""
+    if not isinstance(data, dict):
+        return type(data).__name__
+    parts = [f"keys={sorted(data.keys())}"]
+    for key in ("objects", "guids"):
+        value = data.get(key)
+        if isinstance(value, list):
+            parts.append(f"{key}_count={len(value)}")
+    if isinstance(data.get("total"), int):
+        parts.append(f"total={data['total']}")
+    return " ".join(parts)
+
+
 # ---------------------------------------------------------------------------
 # 公共 HTTP 调用函数
 # ---------------------------------------------------------------------------
@@ -116,7 +130,12 @@ async def call_rhino(endpoint: str, payload: dict) -> Tuple[bool, Any]:
     async with httpx.AsyncClient(trust_env=False) as client:
         for attempt in range(attempts):
             try:
-                logger.debug("POST %s payload=%s attempt=%d", url, payload, attempt + 1)
+                logger.debug(
+                    "POST %s payload_keys=%s attempt=%d",
+                    url,
+                    sorted(payload.keys()),
+                    attempt + 1,
+                )
                 response = await client.post(url, json=payload, headers=headers, timeout=timeout)
                 break
             except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout, httpx.RequestError) as exc:
@@ -160,7 +179,7 @@ async def call_rhino(endpoint: str, payload: dict) -> Tuple[bool, Any]:
     except Exception:
         msg = (
             f"Rhino Listener 返回了无法解析的响应"
-            f"（HTTP {response.status_code}）: {response.text[:300]}"
+            f"（HTTP {response.status_code}，body_length={len(response.content)}）"
         )
         logger.error(msg)
         return False, msg
@@ -178,17 +197,17 @@ async def call_rhino(endpoint: str, payload: dict) -> Tuple[bool, Any]:
         # 多体操作（boolean_difference 等）：响应包含 "guids" 列表
         if "guids" in data:
             guids = data.get("guids", [])
-            logger.info("%s 请求成功，GUIDs=%s", endpoint, guids)
+            logger.info("%s 请求成功，created_count=%d", endpoint, len(guids))
             return True, guids
 
         # 单体操作（create_sphere 等）：响应包含单个 "guid" 字符串
         if "guid" in data:
             guid = data.get("guid")
-            logger.info("%s 请求成功，GUID=%s", endpoint, guid)
+            logger.info("%s 请求成功，created_count=1", endpoint)
             return True, guid
 
         # 数据型操作（get_bounding_box / get_scene_summary 等）：返回完整 dict
-        logger.info("%s 请求成功，data=%s", endpoint, data)
+        logger.info("%s 请求成功，response_shape=%s", endpoint, _response_shape(data))
         return True, data
 
     # ── HTTP 4xx / 5xx ──────────────────────────────────────────────────────

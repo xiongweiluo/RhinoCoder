@@ -67,8 +67,8 @@ except ImportError:
 
 try:
     from mcp.server.fastmcp import FastMCP
-except ImportError:
-    logger.critical("缺少依赖: pip install mcp")
+except ImportError as exc:
+    logger.critical("MCP SDK 缺失或版本不兼容（需要 mcp>=1.0,<2.0）: %s", exc)
     sys.exit(1)
 
 # ---------------------------------------------------------------------------

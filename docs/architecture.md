@@ -30,12 +30,20 @@ OpenAI-compatible LLM <-> MCP ClientSession
 
 ## Interface versions
 
-- Application: `0.2.0-rc.1`
+- Application: `0.2.0`
 - Prompt: `closed-loop-v1`
 - Tool schema: `1.0`
 - Trace schema: `1.0`
 
 版本常量位于 `agent/version.py`。修改 Prompt、工具字段或 Trace 结构时必须提升对应版本。
+
+正式版本还由 `docs/version-manifest.json` 锁定以下边界：
+
+- Python `requirements-lock.txt` 与前端 `package-lock.json` 的 SHA-256。
+- macOS、Rhino、Python 和 Node.js 支持范围及真实验收环境。
+- MCP 工具数量和应用、Prompt、工具 Schema、Trace Schema 的一致性。
+
+`python tools/check_release_consistency.py` 会验证代码、两份依赖锁、版本清单、README、CHANGELOG、架构文档、发布清单和 Markdown 本地链接。版本或文档漂移会使本地检查与 CI 失败。
 
 ## Security boundaries
 
@@ -44,6 +52,7 @@ OpenAI-compatible LLM <-> MCP ClientSession
 - 完整 Trace 与评测结果默认被 Git 忽略。
 - `reset_environment` 要求 Agent 与 Rhino 进程共享本地评测令牌。
 - 黄金样本在写入前必须通过断言、自检、人工确认和脱敏。
+- 公开报告和 Replay 通过敏感字段扫描及 SHA-256 复核清单锁定。
 
 ## Failure and recovery
 

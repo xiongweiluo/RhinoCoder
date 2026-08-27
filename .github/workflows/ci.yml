@@ -15,7 +15,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install dependencies
-        run: python -m pip install -r requirements.txt
+        run: python -m pip install -r requirements-lock.txt
       - name: Install UI dependencies
         run: npm ci --prefix agent/ui
       - name: Compile
@@ -32,3 +32,5 @@ jobs:
         run: |
           python tools/audit_trace_data.py
           python tools/audit_release_data.py
+      - name: Check release versions and documentation
+        run: python tools/check_release_consistency.py

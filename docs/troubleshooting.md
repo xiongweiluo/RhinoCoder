@@ -8,6 +8,26 @@
 python tools/doctor.py
 ```
 
+## bootstrap 提示 Python 版本过低
+
+RhinoCoder 0.2.0 支持 Python 3.11–3.13。macOS 上的 `python3` 可能仍指向旧系统解释器，先运行 `python3 --version`，然后显式指定新解释器：
+
+```bash
+RHINOCODER_PYTHON=/absolute/path/to/python3.13 ./scripts/bootstrap.sh
+```
+
+不要删除或覆盖系统 Python。安装脚本只会在项目目录创建 `.venv`。
+
+## npm ci 提示 Node.js 版本不支持
+
+前端构建需要 Node.js `^20.19.0` 或 `>=22.12.0`。升级 Node.js 后重新运行 `./scripts/bootstrap.sh`；发布依赖版本由 `agent/ui/package-lock.json` 固定。
+
+## 锁定依赖安装失败
+
+确认网络可访问 Python 与 npm 包源，并确认平台为 macOS、Python 为 3.11–3.13。不要直接修改锁文件绕过冲突；依赖升级需要同步更新 `requirements-lock.txt`、`package-lock.json` 和 `docs/version-manifest.json`，再运行 `./scripts/check.sh` 与 clean-room 验收。
+
+若 MCP Server 报告 SDK 缺失或版本不兼容，运行 `python -m pip show mcp`。RhinoCoder `0.2.0` 固定使用官方 `mcp 1.29.1`，支持范围为 `>=1.0,<2.0`；同名 2.x 包不提供 `mcp.server.fastmcp`，不能用于本项目。
+
 ## 无法连接 Rhino Listener
 
 1. 确认 Rhino 8 已启动。
@@ -74,3 +94,7 @@ UI 显示 `mcp.process_exit` 时，先点击“重试任务”。每次任务都
 ## 成本显示为区间
 
 DeepSeek 会在响应中提供缓存命中和未命中 token。新运行会保存这两个字段并精确计费；旧报告或不提供缓存拆分的兼容 API 只能根据总输入 token 计算严格上下界。可运行 `python tools/recalculate_benchmark_cost.py <result.json>` 重算历史报告，不会连接 Rhino 或模型。
+
+## 文档或版本一致性检查失败
+
+运行 `python tools/check_release_consistency.py` 查看具体漂移。常见原因是只修改了 `agent/version.py`、前端版本、依赖锁或某份文档中的一处。修复所有对应声明后再更新正式版本；不要关闭该 CI 门禁。

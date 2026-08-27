@@ -10,4 +10,5 @@ python eval/run_eval.py --dry-run
 python tools/check_secrets.py
 python tools/audit_trace_data.py
 python tools/audit_release_data.py
+python tools/check_release_consistency.py
 npm run build --prefix agent/ui

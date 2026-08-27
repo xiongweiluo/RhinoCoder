@@ -114,3 +114,41 @@ def test_mutation_network_retry_reuses_idempotency_key(monkeypatch):
     assert len(seen_headers) == 2
     assert seen_headers[0]["Idempotency-Key"] == seen_headers[1]["Idempotency-Key"]
     uuid.UUID(seen_headers[0]["Idempotency-Key"])
+
+
+def test_mcp_success_logs_only_redacted_shapes(monkeypatch, caplog):
+    secret_guid = "2aee62c7-1d6e-4cd6-9a8f-803cb2f6f76d"
+    secret_name = "confidential-project-layer"
+
+    class Response:
+        status_code = 200
+
+        def json(self):
+            return {
+                "status": "ok",
+                "objects": [{"object_id": secret_guid, "name": secret_name}],
+                "total": 1,
+            }
+
+    class Client:
+        def __init__(self, **_kwargs):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_args):
+            return None
+
+        async def post(self, _url, **_kwargs):
+            return Response()
+
+    monkeypatch.setattr(mcp_client.httpx, "AsyncClient", Client)
+    ok, result = asyncio.run(
+        mcp_client.call_rhino("/get_scene_summary", {"project_name": secret_name})
+    )
+
+    assert ok and result["total"] == 1
+    assert secret_guid not in caplog.text
+    assert secret_name not in caplog.text
+    assert "objects_count=1" in caplog.text

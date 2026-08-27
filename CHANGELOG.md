@@ -4,17 +4,9 @@
 
 ## [Unreleased]
 
-### Added
+暂无。
 
-- 黄金 Trace 的三层准入审计、Partial/Fail 物理分流与 legacy 数据隔离。
-- 正式基准报告和三份合成 Replay 的敏感字段扫描、来源声明和 SHA-256 内容锁。
-- 本地与 CI 的 Trace/发布数据审计命令。
-
-### Security
-
-- 轨迹脱敏新增 Rhino 对象 GUID、项目图层和群组处理，同时保留 `run_id` 数据血缘。
-
-## [0.2.0-rc.1] - 2026-08-24
+## [0.2.0] - 2026-08-27
 
 ### Added
 
@@ -25,24 +17,30 @@
 - Listener 健康检查、标准错误码、有限重试和变更请求幂等键。
 - Trace、脱敏、黄金样本准入和人工反馈关联。
 - CI、密钥扫描、一键检查、启动、诊断和基准脚本。
+- 黄金 Trace 的三层准入审计、Partial/Fail 物理分流与 legacy 数据隔离。
+- 正式基准报告和三份合成 Replay 的敏感字段扫描、来源声明和 SHA-256 内容锁。
+- 本地与 CI 的 Trace、发布数据、版本和文档一致性审计。
 
 ### Changed
 
 - `run_agent()` 以结构化结果为主，同时保留旧式两项解包兼容性。
 - `reset_environment` 仅接受本地评测令牌，普通 UI 不暴露清场入口。
 - 真实轨迹和生成的评测报告默认不纳入 Git。
+- Python 依赖使用发布锁文件，前端依赖继续由 `package-lock.json` 固定；官方 MCP SDK 固定为 `mcp 1.29.1` 并限制在 1.x 兼容范围。
+- 安装脚本创建独立虚拟环境，启动脚本默认使用项目 `.venv`。
 
 ### Security
 
 - `.env.example` 只保留占位符。
 - 增加仓库密钥扫描与运行数据脱敏。
+- 轨迹脱敏覆盖 Rhino 对象 GUID、项目图层和群组，同时保留 `run_id` 数据血缘。
 - 仓库历史中曾出现过疑似有效凭证；发布前必须在提供方控制台完成外部轮换。
 
-### Pending stable-release gates
+### Validated
 
-- 在 Rhino 8 与有效模型环境执行 30 题双模式、各 3 次基准。
-- Closed-loop Pass@1 达到 70%，三个核心场景连续 3 次成功。
-- 完成凭证外部轮换和新环境安装演练。
+- 30 题 Baseline / Closed-loop 各重复 3 次，Pass@1 均为 100%。
+- 三个核心场景各连续 3 次成功；断线、停止、Undo、回滚和故障恢复完成真实验收。
+- 数据脱敏、clean-room macOS 安装和文档一致性门禁通过。
 
 ## [0.1.0]
 

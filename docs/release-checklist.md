@@ -7,7 +7,7 @@
 - [x] 在 API 提供方控制台轮换仓库历史中出现过的凭证。
 - [x] `python tools/check_secrets.py` 通过。
 - [x] `.env`、真实 Trace、评测明细和项目数据均未进入提交。
-- [ ] 应用、Prompt、工具 Schema 与 Trace 版本固定。
+- [x] 应用、Prompt、工具 Schema、Trace Schema、Python 和前端依赖已固定，并由 [版本清单](version-manifest.json) 与一致性检查保护。
 
 ## 2. 自动检查
 
@@ -39,7 +39,7 @@
 - [x] 黄金 Trace 同时满足断言通过、至少一次场景自检、人工确认与脱敏审计，旧格式数据已隔离，详见 [数据与脱敏验收报告](data-sanitization-acceptance-report.md)。
 - [x] Partial Pass 和失败 Trace 已物理分流且不会进入黄金 SFT，详见 [数据与脱敏验收报告](data-sanitization-acceptance-report.md)。
 - [x] 正式报告与三份 Replay 已逐文件复核、声明合成来源并通过哈希锁定的脱敏审计，详见 [数据与脱敏验收报告](data-sanitization-acceptance-report.md)。
-- [ ] 新 macOS 环境可按 README 完成安装和首次任务。
-- [ ] 已知限制与故障排查内容和当前版本一致。
+- [x] macOS clean-room 环境可按 README 完成安装、Replay 首任务和只读 Rhino 首任务，详见 [版本、安装与文档验收报告](release-acceptance-report.md)。
+- [x] README、架构、已知限制、故障排查、CHANGELOG 与当前版本一致，并由自动检查保护，详见 [版本、安装与文档验收报告](release-acceptance-report.md)。
 
-完成后将 `agent/version.py` 中的应用版本升级为发布版本，并把 `CHANGELOG.md` 的 Unreleased 内容移动到对应版本条目。
+稳定原型版本已固定为 `0.2.0`，CHANGELOG 的功能与验收记录已归入对应正式版本条目。
