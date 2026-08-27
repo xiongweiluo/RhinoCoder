@@ -12,8 +12,9 @@ export type HistoryItem = {
   prompt: string;
   closed_loop: boolean;
   status: string;
-  metrics: Record<string, number>;
+  metrics: Record<string, number | string>;
   created_object_ids: string[];
+  events: AgentEvent[];
 };
 
 export type SceneObject = {

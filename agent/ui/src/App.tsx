@@ -39,6 +39,10 @@ export default function App() {
           setEvents(activeEvents);
           return;
         }
+        if (data.type === "history.updated") {
+          setHistory(data.history ?? []);
+          return;
+        }
         if (data.type === "control.accepted") {
           setCurrentRun(data.run_id);
           if (data.action === "start" || data.action === "retry") {
@@ -84,6 +88,11 @@ export default function App() {
     send({ type: "instruction", content: prompt, closed_loop: closedLoop });
   };
 
+  const selectHistory = (item: HistoryItem) => {
+    setCurrentRun(item.run_id);
+    setEvents(item.events ?? []);
+  };
+
   const currentEvents = useMemo(
     () => events.filter((event) => !currentRun || event.run_id === currentRun).sort((a, b) => a.seq - b.seq),
     [events, currentRun],
@@ -93,7 +102,16 @@ export default function App() {
   const sceneEvent = [...currentEvents].reverse().find((event) => event.type === "scene.checked");
   const scene = (sceneEvent?.payload.scene_summary as {objects?: SceneObject[]} | null)?.objects ?? [];
   const terminal = [...currentEvents].reverse().find((event) => ["run.completed", "run.failed", "run.cancelled"].includes(event.type));
-  const metrics = (terminal?.payload.metrics ?? {}) as Record<string, number>;
+  const metrics = (terminal?.payload.metrics ?? {}) as Record<string, number | string>;
+  const metricNumber = (name: string) => typeof metrics[name] === "number" ? metrics[name] as number : undefined;
+  const durationMs = metricNumber("duration_ms");
+  const toolRounds = metricNumber("tool_rounds");
+  const toolCalls = metricNumber("tool_calls");
+  const totalTokens = metricNumber("total_tokens");
+  const cacheHitTokens = metricNumber("prompt_cache_hit_tokens");
+  const cacheMissTokens = metricNumber("prompt_cache_miss_tokens");
+  const estimatedCost = metricNumber("estimated_cost_usd");
+  const costStatus = String(metrics.cost_estimate_status ?? "");
   const canControl = Boolean(currentRun && !latest?.replay);
 
   return (
@@ -121,11 +139,12 @@ export default function App() {
 
       <section className="metrics">
         <Metric label="状态" value={(latest?.type ?? "idle").replace("run.", "")} />
-        <Metric label="耗时" value={metrics.duration_ms ? `${Math.round(metrics.duration_ms)} ms` : "--"} />
-        <Metric label="调用轮数" value={metrics.tool_rounds?.toString() ?? "--"} />
-        <Metric label="工具调用" value={metrics.tool_calls?.toString() ?? toolEvents.length.toString()} />
-        <Metric label="Token" value={metrics.total_tokens?.toString() ?? "--"} />
-        <Metric label="估算成本" value={metrics.estimated_cost_usd !== undefined ? `$${metrics.estimated_cost_usd.toFixed(6)}` : "--"} />
+        <Metric label="耗时" value={durationMs ? `${Math.round(durationMs)} ms` : "--"} />
+        <Metric label="调用轮数" value={toolRounds?.toString() ?? "--"} />
+        <Metric label="工具调用" value={toolCalls?.toString() ?? toolEvents.length.toString()} />
+        <Metric label="Token" value={totalTokens?.toString() ?? "--"} />
+        <Metric label="缓存 命中/未命中" value={cacheHitTokens !== undefined && cacheMissTokens !== undefined ? `${cacheHitTokens} / ${cacheMissTokens}` : "--"} />
+        <Metric label={costStatus === "exact" ? "精确成本" : "估算成本"} value={estimatedCost !== undefined ? `$${estimatedCost.toFixed(6)}` : "--"} />
       </section>
 
       <section className="workspace">
@@ -161,7 +180,7 @@ export default function App() {
 
       <section className="panel history">
         <div className="section-title"><h2>Recent Runs</h2><span>{history.length}</span></div>
-        {history.slice(0, 8).map((item) => <button key={item.run_id} onClick={() => setCurrentRun(item.run_id)}><strong>{item.status}</strong><span>{item.prompt}</span><code>{item.run_id.slice(0, 8)}</code></button>)}
+        {history.slice(0, 8).map((item) => <button key={item.run_id} onClick={() => selectHistory(item)}><strong>{item.status}</strong><span>{item.prompt}</span><code>{item.run_id.slice(0, 8)}</code></button>)}
       </section>
     </main>
   );
@@ -182,5 +201,6 @@ function EventRow({event}: {event: AgentEvent}) {
 
 function ObjectCard({object}: {object: SceneObject}) {
   const color = object.color?.length === 3 ? `rgb(${object.color.join(",")})` : "#738087";
-  return <article className="object-card"><span className="swatch" style={{background: color}} /><div><strong>{object.name || object.type}</strong><p>{object.type} · {object.layer}</p><code>size {object.size?.join(" × ")} · center {object.center?.join(", ")}</code></div></article>;
+  const groups = object.groups?.length ? ` · ${object.groups.join(", ")}` : "";
+  return <article className="object-card"><span className="swatch" style={{background: color}} /><div><strong>{object.name || object.type}</strong><p>{object.type} · {object.layer}{groups}</p><code>size {object.size?.join(" × ")} · center {object.center?.join(", ")}</code></div></article>;
 }

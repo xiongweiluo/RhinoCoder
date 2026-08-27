@@ -35,8 +35,12 @@ async def test_run_manager_broadcast_and_history(monkeypatch):
     run_id = await manager.start("create a box")
     await manager.runs[run_id].task
     assert client.messages[0]["type"] == "run.started"
+    assert client.messages[-1]["type"] == "history.updated"
+    assert client.messages[-1]["history"][0]["run_id"] == run_id
+    assert client.messages[-1]["history"][0]["events"][0]["type"] == "run.started"
     assert manager.history[0]["status"] == "completed"
     assert manager.snapshot()["history"][0]["run_id"] == run_id
+    assert manager.snapshot()["history"][0]["events"][0]["run_id"] == run_id
 
 
 @pytest.mark.asyncio

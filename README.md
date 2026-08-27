@@ -19,10 +19,10 @@ RhinoCoder 是一个基于 MCP 的 Rhino 8 空间设计 Agent。系统把自然�
 - React + TypeScript WebSocket 交互面板与三份脱敏 Replay。
 - 停止、重试、Undo、精准回滚和三类用户反馈。
 - 用户反馈、敏感字段脱敏和黄金样本准入规则。
+- 三个核心场景已在真实 Rhino 环境中各连续运行 3 次成功，详见 [UI 真实环境验收报告](docs/ui-acceptance-report.md)。
 
 ### 待真实环境验收
 
-- 三个核心场景在真实 Rhino 环境中连续 3 次成功。
 - 新环境首次安装、Rhino 重连与 WebSocket 断线恢复演练。
 
 ### 后续规划

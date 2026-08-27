@@ -18,7 +18,7 @@
 ## 3. 真实环境验收
 
 - [x] Rhino 8 已打开，Listener 健康检查通过。
-- [ ] Agent、MCP Server 与 UI 可由 `./scripts/start.sh` 启动。
+- [x] Agent、MCP Server 与 UI 可由 `./scripts/start.sh` 启动。
 - [x] `./scripts/benchmark.sh` 完成 30 题 Baseline / Closed-loop，各重复 3 次。
 - [x] 30 题全部进入报告，基础设施错误保留在失败分母。
 - [x] Closed-loop Pass@1 不低于 70%。
@@ -26,7 +26,7 @@
 
 ## 4. 交互与恢复
 
-- [ ] 三个核心任务在真实 Rhino 环境连续运行 3 次成功。
+- [x] 三个核心任务在真实 Rhino 环境连续运行 3 次成功，详见 [UI 真实环境验收报告](ui-acceptance-report.md)。
 - [ ] WebSocket 断线重连后可恢复当前任务快照。
 - [ ] 停止后不再产生新工具调用。
 - [ ] 重试、Undo、任务级精准回滚和反馈均已人工演练。

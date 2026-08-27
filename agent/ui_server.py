@@ -97,7 +97,11 @@ class RunManager:
                         "status": managed.result.status.value,
                         "metrics": managed.result.to_dict()["metrics"],
                         "created_object_ids": managed.result.created_object_ids,
+                        "events": list(managed.events),
                     }
+                )
+                await self.broadcast(
+                    {"type": "history.updated", "history": list(self.history)}
                 )
             except Exception as exc:
                 await self.broadcast(
