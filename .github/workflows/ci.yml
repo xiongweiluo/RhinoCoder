@@ -25,7 +25,9 @@ jobs:
       - name: Build UI
         run: npm run build --prefix agent/ui
       - name: Validate benchmark tasks
-        run: python eval/run_eval.py --dry-run
+        run: |
+          python eval/run_eval.py --dry-run
+          python tools/check_collection_campaign.py
       - name: Scan secrets
         run: python tools/check_secrets.py
       - name: Audit trace admission and release data
