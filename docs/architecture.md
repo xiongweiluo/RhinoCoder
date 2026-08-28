@@ -52,6 +52,7 @@ OpenAI-compatible LLM <-> MCP ClientSession
 - 完整 Trace 与评测结果默认被 Git 忽略。
 - `reset_environment` 要求 Agent 与 Rhino 进程共享本地评测令牌。
 - 黄金样本在写入前必须通过断言、自检、人工确认和脱敏。
+- 真实数据采集按 campaign/task ID 追踪并防止重复入库；默认拒绝清空非空 Rhino 文档，进度报告只保存在本地忽略目录。
 - 公开报告和 Replay 通过敏感字段扫描及 SHA-256 复核清单锁定。
 
 ## Failure and recovery

@@ -168,6 +168,25 @@ python tools/audit_release_data.py
 
 新黄金数据只写入 `data/golden_traces_v2.jsonl`。旧的根目录 `golden_dataset.jsonl` 缺少当前准入元数据，只作为本地 legacy 数据保留，不会进入新 SFT 正样本。完整验收证据见 [数据与脱敏验收报告](docs/data-sanitization-acceptance-report.md)。
 
+## 真实黄金数据采集
+
+无需 GPU 即可在单台 Mac 上启动第一阶段 30 条真实黄金轨迹采集。清单包含 30 条唯一指令和 29 个标签，并覆盖旋转、移动、分布、对齐、Undo、布尔、感知和空间关系等任务。
+
+先校验清单和查看进度：
+
+```bash
+python agent/data_collector.py --dry-run
+python agent/data_collector.py --status
+```
+
+在 Rhino 中打开空白、可丢弃的专用文档后，每次先采一条：
+
+```bash
+python agent/data_collector.py --allow-reset --limit 1
+```
+
+采集器不会默认清空非空场景。每条轨迹仍必须通过程序断言、场景自检、人工确认、脱敏审计和 campaign 任务去重才能进入黄金集。完整操作与人工验收标准见[真实黄金轨迹采集指南](docs/golden-data-collection.md)。
+
 ## 安全边界
 
 - Listener 仅绑定 `127.0.0.1`。

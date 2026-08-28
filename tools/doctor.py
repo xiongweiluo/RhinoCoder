@@ -28,7 +28,7 @@ def _http_json(url: str) -> tuple[bool, str]:
 
 def main() -> int:
     checks: list[tuple[str, bool, str]] = []
-    checks.append(("Python", sys.version_info >= (3, 10), sys.version.split()[0]))
+    checks.append(("Python", (3, 11) <= sys.version_info[:2] < (3, 14), sys.version.split()[0]))
     checks.append(("MCP Server", (ROOT / "plugin/mcp_server/main.py").is_file(), "plugin/mcp_server/main.py"))
     checks.append(("UI build", (ROOT / "agent/ui/dist/index.html").is_file(), "agent/ui/dist/index.html"))
 

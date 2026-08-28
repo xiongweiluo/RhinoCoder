@@ -47,6 +47,7 @@ def build_trace_record(
     *,
     evaluation: Optional[dict[str, Any]] = None,
     feedback: Optional[dict[str, Any]] = None,
+    task: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     return {
         "schema_version": TRACE_SCHEMA_VERSION,
@@ -58,6 +59,7 @@ def build_trace_record(
         "run": run.to_dict(),
         "evaluation": evaluation,
         "feedback": feedback,
+        "task": task,
     }
 
 
@@ -111,7 +113,7 @@ def classify_trace_disposition(record: dict[str, Any], gate: GoldenGateResult) -
         return GOLDEN
     evaluation = record.get("evaluation") or {}
     run = record.get("run") or {}
-    if evaluation.get("partial"):
+    if evaluation.get("partial") or (record.get("feedback") or {}).get("label") == "partial":
         return PARTIAL
     if run.get("status") in {"failed", "cancelled"} or not evaluation.get("passed"):
         return ERROR_ANALYSIS
@@ -228,8 +230,20 @@ def save_golden(gate: GoldenGateResult) -> None:
             "admission": admission,
             "prompt_version": gate.sanitized_record["prompt_version"],
             "tool_schema_version": gate.sanitized_record["tool_schema_version"],
+            "task": gate.sanitized_record.get("task"),
         },
     }
+    task = payload["metadata"].get("task") or {}
+    campaign_id = task.get("campaign_id")
+    task_id = task.get("task_id")
+    if campaign_id and task_id and GOLDEN_FILE.is_file():
+        for line in GOLDEN_FILE.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            existing = json.loads(line)
+            existing_task = ((existing.get("metadata") or {}).get("task") or {})
+            if existing_task.get("campaign_id") == campaign_id and existing_task.get("task_id") == task_id:
+                raise ValueError(f"黄金任务重复: {campaign_id}/{task_id}")
     if contains_sensitive_data(payload):
         raise ValueError("黄金样本写入前仍检测到敏感数据")
     row_reasons = validate_saved_golden_record(payload)

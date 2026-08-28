@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "campaign_id": "phase1-30",
+  "title": "第一阶段 30 条真实黄金轨迹",
+  "target": 30,
+  "source_task_files": [
+    "../tasks/bench_v1.jsonl",
+    "../tasks/bench_perception.jsonl"
+  ],
+  "exclude_task_ids": ["bench-06", "bench-08"],
+  "additional_tasks": [
+    {
+      "id": "collect-25-rotate",
+      "instruction": "在原点创建一个 30x10x10 的纯紫色方块，然后绕通过原点的 Z 轴旋转 90 度。",
+      "tags": ["single", "edit", "rotate", "color"],
+      "difficulty": 2,
+      "asserts": [
+        {"kind": "count", "selector": {"color": [255, 0, 255]}, "n": 1},
+        {"kind": "property", "selector": {"color": [255, 0, 255]}, "props": {"size": [10, 30, 10]}, "tol": 1.0}
+      ]
+    },
+    {
+      "id": "collect-26-move",
+      "instruction": "在原点创建一个半径 6 的纯青色球体，然后把球心移动到 X=40、Y=10、Z=6。",
+      "tags": ["single", "edit", "move", "sphere", "color"],
+      "difficulty": 2,
+      "asserts": [
+        {"kind": "count", "selector": {"color": [0, 255, 255]}, "n": 1},
+        {"kind": "property", "selector": {"color": [0, 255, 255]}, "props": {"size": [12, 12, 12], "center": [40, 10, 6]}, "tol": 0.8}
+      ]
+    },
+    {
+      "id": "collect-27-distribute",
+      "instruction": "创建红色 10x10x10、绿色 20x10x10、蓝色 6x10x10 三个方块，先沿 X 轴依次摆放，再使用等距分布让相邻方块包围盒之间保持 5 个单位净间距，第一个红色方块保持在原点。",
+      "tags": ["array", "edit", "distribute", "spacing", "color"],
+      "difficulty": 3,
+      "asserts": [
+        {"kind": "count", "selector": {}, "n": 3},
+        {"kind": "spatial", "a": {"color": [0, 255, 0]}, "b": {"color": [255, 0, 0]}, "relation": "distance", "value": 20, "tol": 1.0},
+        {"kind": "spatial", "a": {"color": [0, 0, 255]}, "b": {"color": [0, 255, 0]}, "relation": "distance", "value": 18, "tol": 1.0}
+      ]
+    },
+    {
+      "id": "collect-28-align",
+      "instruction": "创建一个红色 10x10x10 方块、一个绿色 10x10x20 方块和一个蓝色 10x10x30 方块；三个方块的 X/Y 起点都保持在原点，先把它们放在不同高度，最后沿 Z 轴执行最小端对齐，让三个方块底面都落在 Z=0。",
+      "tags": ["compose", "edit", "align", "color"],
+      "difficulty": 3,
+      "asserts": [
+        {"kind": "count", "selector": {}, "n": 3},
+        {"kind": "property", "selector": {"color": [255, 0, 0]}, "props": {"center": [5, 5, 5]}, "tol": 1.0},
+        {"kind": "property", "selector": {"color": [0, 255, 0]}, "props": {"center": [5, 5, 10]}, "tol": 1.0},
+        {"kind": "property", "selector": {"color": [0, 0, 255]}, "props": {"center": [5, 5, 15]}, "tol": 1.0}
+      ]
+    },
+    {
+      "id": "collect-29-undo",
+      "instruction": "在原点创建一个半径 10 的纯黄色球体，再创建一个 20x20x20 的方块；然后执行一次 Undo 撤销刚创建的方块，最终只保留黄色球体。",
+      "tags": ["single", "edit", "undo", "sphere", "color"],
+      "difficulty": 2,
+      "asserts": [
+        {"kind": "count", "selector": {}, "n": 1},
+        {"kind": "property", "selector": {"type": "Surface"}, "props": {"size": [20, 20, 20], "color": [255, 255, 0]}, "tol": 0.8}
+      ]
+    },
+    {
+      "id": "collect-30-place-right",
+      "instruction": "在原点创建一个 20x20x20 的深灰色方块，再创建一个半径 5 的纯红色球体，并把球体贴合放到方块右侧面的正中心。",
+      "tags": ["compose", "spatial", "place", "color"],
+      "difficulty": 3,
+      "asserts": [
+        {"kind": "count", "selector": {}, "n": 2},
+        {"kind": "property", "selector": {"color": [255, 0, 0]}, "props": {"size": [10, 10, 10]}, "tol": 0.8},
+        {"kind": "spatial", "a": {"color": [255, 0, 0]}, "b": {"type": ["Polysurface", "Extrusion"]}, "relation": "distance", "value": 15, "tol": 1.0}
+      ]
+    },
+    {
+      "id": "collect-31-curve-transform",
+      "instruction": "从原点画一条沿 X 轴长度 20 的直线，把它绕 Z 轴旋转 90 度，再整体沿 X 轴正方向移动 10 个单位。",
+      "tags": ["single", "line", "edit", "rotate", "move"],
+      "difficulty": 3,
+      "asserts": [
+        {"kind": "count", "selector": {"type": "Curve"}, "n": 1},
+        {"kind": "property", "selector": {"type": "Curve"}, "props": {"size": [0, 20, 0], "center": [10, 10, 0]}, "tol": 1.0}
+      ]
+    },
+    {
+      "id": "collect-32-group-align",
+      "instruction": "在原点附近创建两个红色 10x10x10 方块并打成群组「双联块」，再以原点为 X/Y 起点创建一个蓝色 10x10x20 方块并先移动到较高位置；最后把群组和蓝色方块沿 Z 轴最小端对齐，使它们底面都落在 Z=0。",
+      "tags": ["compose", "group", "edit", "align", "move", "color"],
+      "difficulty": 4,
+      "asserts": [
+        {"kind": "count", "selector": {"in_group": "双联块"}, "n": 2},
+        {"kind": "count", "selector": {"color": [0, 0, 255]}, "n": 1},
+        {"kind": "property", "selector": {"color": [0, 0, 255]}, "props": {"center": [5, 5, 10]}, "tol": 1.0}
+      ]
+    }
+  ],
+  "diversity_requirements": {
+    "min_unique_tags": 20,
+    "min_difficulty_4_or_higher": 9,
+    "max_numeric_template_duplicates": 2,
+    "required_tags": [
+      "perception", "boolean", "extrude", "rotate", "move", "distribute",
+      "align", "undo", "place", "group", "layer"
+    ]
+  }
+}
