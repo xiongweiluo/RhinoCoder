@@ -45,7 +45,9 @@ python agent/data_collector.py --status
 
 ## 推荐采集节奏
 
-第一次只跑一条：
+默认推荐使用 5 条一批的 AI 辅助审核：每条先通过程序断言、Scene Summary、Tool Trace 和 Rhino 视口检查，明确正确的轨迹只进入 `ai_reviewed_candidate`，整批收齐后再由人类一次性确认。AI 审核不能直接写入黄金集。
+
+第一次只跑一条验证链路：
 
 ```bash
 python agent/data_collector.py --allow-reset --limit 1
@@ -63,6 +65,34 @@ python agent/data_collector.py --allow-reset --limit 1
 ```bash
 python agent/data_collector.py --allow-reset --limit 5
 ```
+
+使用五条批量审核模式：
+
+```bash
+python agent/data_collector.py \
+  --review-mode batch \
+  --batch-size 5 \
+  --allow-reset \
+  --limit 5
+```
+
+AI 审核员会为通过项记录项目内相对截图路径和审核摘要。五条收齐后生成汇总：
+
+```bash
+python agent/data_collector.py --batch-status phase1-30-batch-01
+python tools/report_collection_campaign.py \
+  --batch-id phase1-30-batch-01 \
+  --output data/collection_reports/phase1-30-batch-01.md \
+  --json-output data/collection_reports/phase1-30-batch-01.json
+```
+
+人类检查汇总截图与指标并一次性同意后，运行：
+
+```bash
+python agent/data_collector.py --approve-batch phase1-30-batch-01
+```
+
+终端仍要求输入精确的 `APPROVE`，避免误触。晋级会先验证整批，再原子写入；任一候选不符合黄金门槛时，整批都不会部分入库。已经逐条确认的任务会显示为 `golden`，不会被重复写入。
 
 同一进程会在下一条任务前清理上一条采集产生的对象。若进程中断且场景仍非空，最安全的做法是新建空白文档后继续。只有确认当前文档完全可丢弃时，才允许显式使用：
 
@@ -98,6 +128,8 @@ python agent/data_collector.py --allow-reset --allow-nonempty-reset --limit 1
 本地文件均被 Git 忽略：
 
 - `data/golden_traces_v2.jsonl`：黄金轨迹。
+- `data/ai_reviewed_candidates.jsonl`：AI 已审核、等待人类批量确认的候选。
+- `data/review_batches/`：本地 Rhino 视口截图和批次报告。
 - `data/partial_traces.jsonl`：程序或人工 Partial。
 - `data/error_traces.jsonl`：失败与断言未通过。
 - `data/candidates.jsonl`：其他候选。

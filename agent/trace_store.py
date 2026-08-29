@@ -7,13 +7,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
 
-from agent.runtime import AgentRunResult
+from agent.runtime import AgentRunResult, utc_now
 from agent.sanitizer import contains_sensitive_data, sanitize_structure
 from agent.version import PROMPT_VERSION, TOOL_SCHEMA_VERSION, TRACE_SCHEMA_VERSION, __version__
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 TRACE_DIR = PROJECT_ROOT / "data" / "traces"
 CANDIDATE_FILE = PROJECT_ROOT / "data" / "candidates.jsonl"
+AI_REVIEWED_FILE = PROJECT_ROOT / "data" / "ai_reviewed_candidates.jsonl"
 PARTIAL_FILE = PROJECT_ROOT / "data" / "partial_traces.jsonl"
 ERROR_ANALYSIS_FILE = PROJECT_ROOT / "data" / "error_traces.jsonl"
 GOLDEN_FILE = PROJECT_ROOT / "data" / "golden_traces_v2.jsonl"
@@ -22,8 +23,16 @@ FEEDBACK_FILE = PROJECT_ROOT / "data" / "feedback.jsonl"
 
 GOLDEN = "golden"
 CANDIDATE = "candidate"
+AI_REVIEWED = "ai_reviewed_candidate"
 PARTIAL = "partial"
 ERROR_ANALYSIS = "error_analysis"
+
+AI_REVIEW_REQUIRED_CHECKS = {
+    "programmatic_assertions",
+    "scene_summary",
+    "tool_trace",
+    "rhino_viewport",
+}
 
 
 @dataclass(slots=True)
@@ -107,6 +116,51 @@ def validate_golden_candidate(
     return GoldenGateResult(not reasons, reasons, sanitized)
 
 
+def validate_ai_review_candidate(record: dict[str, Any]) -> GoldenGateResult:
+    """验证 AI 审核候选；它仍不具备进入黄金集所需的人类确认。"""
+    reasons: list[str] = []
+    run = record.get("run") or {}
+    evaluation = record.get("evaluation") or {}
+    feedback = record.get("feedback") or {}
+    review = feedback.get("review") or {}
+    if run.get("status") != "completed":
+        reasons.append("run_not_completed")
+    if not evaluation.get("passed"):
+        reasons.append("programmatic_assertions_not_passed")
+    if evaluation.get("partial"):
+        reasons.append("partial_pass_not_ai_candidate")
+    if not run.get("scene_checks"):
+        reasons.append("missing_scene_check")
+    if not _has_successful_scene_summary(run):
+        reasons.append("missing_successful_get_scene_summary")
+    if not run.get("messages"):
+        reasons.append("empty_messages")
+    if feedback.get("label") != AI_REVIEWED:
+        reasons.append("ai_review_label_missing")
+    if feedback.get("source") != "ai_visual_review":
+        reasons.append("ai_review_source_missing")
+    if review.get("verdict") != "pass":
+        reasons.append("ai_review_not_passed")
+    checks = {str(item) for item in review.get("checks") or []}
+    if not AI_REVIEW_REQUIRED_CHECKS.issubset(checks):
+        reasons.append("ai_review_checks_incomplete")
+    visual_evidence = str(review.get("visual_evidence") or "").strip()
+    if not visual_evidence:
+        reasons.append("ai_visual_evidence_missing")
+    else:
+        evidence_path = Path(visual_evidence)
+        resolved_evidence = (PROJECT_ROOT / evidence_path).resolve()
+        if evidence_path.is_absolute() or not resolved_evidence.is_relative_to(PROJECT_ROOT):
+            reasons.append("ai_visual_evidence_outside_project")
+        elif not resolved_evidence.is_file():
+            reasons.append("ai_visual_evidence_not_found")
+
+    sanitized = sanitize_structure(record)
+    if contains_sensitive_data(sanitized):
+        reasons.append("sensitive_data_remaining")
+    return GoldenGateResult(not reasons, reasons, sanitized)
+
+
 def classify_trace_disposition(record: dict[str, Any], gate: GoldenGateResult) -> str:
     """将非黄金轨迹稳定分流，避免 Partial/Fail 混入 SFT 正样本。"""
     if gate.accepted:
@@ -172,6 +226,66 @@ def append_jsonl(path: Path, record: dict[str, Any]) -> None:
         stream.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
+def _read_jsonl(path: Path) -> list[dict[str, Any]]:
+    if not path.is_file():
+        return []
+    rows: list[dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            value = json.loads(line)
+            if isinstance(value, dict):
+                rows.append(value)
+    return rows
+
+
+def _task_key(record: dict[str, Any]) -> tuple[str, str] | None:
+    task = record.get("task") or ((record.get("metadata") or {}).get("task") or {})
+    campaign_id = str(task.get("campaign_id") or "")
+    task_id = str(task.get("task_id") or "")
+    return (campaign_id, task_id) if campaign_id and task_id else None
+
+
+def save_ai_reviewed_candidate(
+    record: dict[str, Any],
+    *,
+    batch_id: str,
+    note: str,
+    visual_evidence: str,
+) -> dict[str, Any]:
+    """保存通过程序、轨迹和视口检查的 AI 候选，不冒充黄金样本。"""
+    evidence_path = Path(visual_evidence)
+    resolved_evidence = (PROJECT_ROOT / evidence_path).resolve()
+    if evidence_path.is_absolute() or not resolved_evidence.is_relative_to(PROJECT_ROOT):
+        raise ValueError("视口证据必须使用项目内的相对路径")
+    if not resolved_evidence.is_file():
+        raise ValueError(f"视口证据不存在: {visual_evidence}")
+    reviewed = {
+        **record,
+        "feedback": {
+            "label": AI_REVIEWED,
+            "source": "ai_visual_review",
+            "timestamp": utc_now(),
+            "batch_id": batch_id,
+            "review": {
+                "verdict": "pass",
+                "checks": sorted(AI_REVIEW_REQUIRED_CHECKS),
+                "note": str(note)[:1000],
+                "visual_evidence": visual_evidence,
+            },
+        },
+        "disposition": AI_REVIEWED,
+    }
+    gate = validate_ai_review_candidate(reviewed)
+    if not gate.accepted:
+        raise ValueError(f"AI 审核候选准入失败: {gate.reasons}")
+    key = _task_key(gate.sanitized_record)
+    existing = _read_jsonl(AI_REVIEWED_FILE) + _read_jsonl(GOLDEN_FILE)
+    if key and any(_task_key(row) == key for row in existing):
+        raise ValueError(f"审核任务重复: {key[0]}/{key[1]}")
+    append_jsonl(AI_REVIEWED_FILE, gate.sanitized_record)
+    return gate.sanitized_record
+
+
 def save_candidate(record: dict[str, Any]) -> None:
     evaluation = record.get("evaluation") or {}
     run = record.get("run") or {}
@@ -202,7 +316,7 @@ def save_rejected_trace(record: dict[str, Any], gate: GoldenGateResult) -> tuple
     return disposition, target
 
 
-def save_golden(gate: GoldenGateResult) -> None:
+def _golden_payload(gate: GoldenGateResult) -> dict[str, Any]:
     if not gate.accepted:
         raise ValueError(f"黄金样本准入失败: {gate.reasons}")
     run = gate.sanitized_record["run"]
@@ -227,29 +341,51 @@ def save_golden(gate: GoldenGateResult) -> None:
             "app_version": gate.sanitized_record["app_version"],
             "evaluation": gate.sanitized_record["evaluation"],
             "feedback": gate.sanitized_record["feedback"],
+            "review_history": gate.sanitized_record.get("review_history") or [],
             "admission": admission,
             "prompt_version": gate.sanitized_record["prompt_version"],
             "tool_schema_version": gate.sanitized_record["tool_schema_version"],
             "task": gate.sanitized_record.get("task"),
         },
     }
-    task = payload["metadata"].get("task") or {}
-    campaign_id = task.get("campaign_id")
-    task_id = task.get("task_id")
-    if campaign_id and task_id and GOLDEN_FILE.is_file():
-        for line in GOLDEN_FILE.read_text(encoding="utf-8").splitlines():
-            if not line.strip():
-                continue
-            existing = json.loads(line)
-            existing_task = ((existing.get("metadata") or {}).get("task") or {})
-            if existing_task.get("campaign_id") == campaign_id and existing_task.get("task_id") == task_id:
-                raise ValueError(f"黄金任务重复: {campaign_id}/{task_id}")
     if contains_sensitive_data(payload):
         raise ValueError("黄金样本写入前仍检测到敏感数据")
     row_reasons = validate_saved_golden_record(payload)
     if row_reasons:
         raise ValueError(f"黄金样本写入行审计失败: {row_reasons}")
-    append_jsonl(GOLDEN_FILE, payload)
+    return payload
+
+
+def save_golden_batch(gates: list[GoldenGateResult], *, path: Path | None = None) -> int:
+    """先完整预检，再以一次原子替换写入整批黄金样本。"""
+    if not gates:
+        return 0
+    target = path or GOLDEN_FILE
+    existing = _read_jsonl(target)
+    seen = {key for row in existing if (key := _task_key(row))}
+    payloads: list[dict[str, Any]] = []
+    for gate in gates:
+        payload = _golden_payload(gate)
+        key = _task_key(payload)
+        if key and key in seen:
+            raise ValueError(f"黄金任务重复: {key[0]}/{key[1]}")
+        if key:
+            seen.add(key)
+        payloads.append(payload)
+
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temporary = target.with_name(f".{target.name}.tmp")
+    rows = existing + payloads
+    temporary.write_text(
+        "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows),
+        encoding="utf-8",
+    )
+    temporary.replace(target)
+    return len(payloads)
+
+
+def save_golden(gate: GoldenGateResult) -> None:
+    save_golden_batch([gate])
 
 
 def save_feedback(record: dict[str, Any]) -> None:

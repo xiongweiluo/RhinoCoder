@@ -26,15 +26,20 @@ from agent.llm import run_agent
 from agent.collection_campaign import (
     DEFAULT_CAMPAIGN_MANIFEST,
     CampaignDefinition,
+    ai_reviewed_task_ids,
+    batch_id_for_task,
     campaign_summary,
     golden_task_ids,
     load_campaign,
+    promote_review_batch,
+    review_batch_summary,
     task_metadata,
 )
 from agent.runtime import utc_now
 from agent.trace_store import (
     GOLDEN_FILE,
     build_trace_record,
+    save_ai_reviewed_candidate,
     save_golden,
     save_feedback,
     save_rejected_trace,
@@ -107,7 +112,8 @@ def _print_status(campaign: CampaignDefinition, *, as_json: bool = False) -> Non
     typer.echo(
         f"任务={summary['target']}，唯一指令={summary['unique_instructions']}，"
         f"标签={summary['unique_tags']}，尝试={summary['attempts']}，黄金={summary['golden']}，"
-        f"剩余={summary['remaining']}"
+        f"AI候选={summary['ai_reviewed_candidates']}，待采={summary['remaining_to_collect']}，"
+        f"剩余黄金={summary['remaining']}"
     )
     typer.echo(f"难度分布: {summary['difficulty_distribution']}")
     typer.echo(f"最新分流: {summary['latest_dispositions']}")
@@ -139,17 +145,24 @@ async def _collect_loop(
     task_id: str | None,
     allow_reset: bool,
     allow_nonempty_reset: bool,
+    review_mode: str,
+    batch_size: int,
 ) -> None:
     if not allow_reset:
         raise RuntimeError("真实采集会在每条任务前清空当前 Rhino 文档；请在空白专用文档中使用 --allow-reset")
     await _preflight(allow_nonempty_reset=allow_nonempty_reset)
 
     completed = golden_task_ids(campaign.campaign_id)
-    pending = [task for task in campaign.tasks if task["id"] not in completed]
+    staged = ai_reviewed_task_ids(campaign.campaign_id)
+    pending = [
+        task
+        for task in campaign.tasks
+        if task["id"] not in completed and task["id"] not in staged
+    ]
     if task_id:
         pending = [task for task in pending if task["id"] == task_id]
         if not pending:
-            raise RuntimeError(f"任务不存在或已经进入黄金集: {task_id}")
+            raise RuntimeError(f"任务不存在、已经进入黄金集或正在等待批量确认: {task_id}")
     if limit > 0:
         pending = pending[:limit]
 
@@ -215,6 +228,63 @@ async def _collect_loop(
             marker = "✓" if result.get("ok") else "✗"
             _echo("ASSERT", f"{marker} {result.get('reason') or result.get('spec', {}).get('kind')}")
 
+        if review_mode == "batch":
+            batch_id = batch_id_for_task(campaign, task, batch_size=batch_size)
+            verdict = input(
+                "AI 审核员请检查程序断言、Tool Trace、Scene Summary 和 Rhino 视口。"
+                "输入 a=审核通过候选 / u=存疑 / n=错误 / q=退出: "
+            ).strip().lower()
+            if verdict == "q":
+                _echo("UNREVIEWED", f"已保留脱敏 Trace {trace_path.name}，未写入候选或训练数据集")
+                return
+            while verdict not in {"a", "u", "n"}:
+                verdict = input("请输入 a、u 或 n: ").strip().lower()
+            if verdict == "a":
+                evidence = input("Rhino 视口截图证据路径: ").strip()
+                note = input("AI 审核摘要（最多 1000 字）: ").strip()[:1000]
+                record = save_ai_reviewed_candidate(
+                    record,
+                    batch_id=batch_id,
+                    note=note,
+                    visual_evidence=evidence,
+                )
+                save_trace(record)
+                save_feedback(record["feedback"] | {
+                    "run_id": run.run_id,
+                    "instruction": raw,
+                    "task": task_metadata(campaign, task),
+                })
+                _echo("AI CANDIDATE", f"已进入 {batch_id}，等待人类一次性批量确认")
+                batch = review_batch_summary(campaign, batch_id, batch_size=batch_size)
+                _echo(
+                    "BATCH",
+                    f"{batch_id}: 黄金={batch['golden']}，AI候选={batch['ai_reviewed_candidates']}，"
+                    f"缺少={batch['missing']}，ready={batch['ready_for_human_review']}",
+                )
+                continue
+
+            label = "partial" if verdict == "u" else "rejected"
+            note = input("AI 审核备注（最多 1000 字）: ").strip()[:1000]
+            record["feedback"] = {
+                "label": label,
+                "source": "ai_visual_review",
+                "timestamp": utc_now(),
+                "note": note,
+            }
+            save_trace(record)
+            save_feedback(record["feedback"] | {
+                "run_id": run.run_id,
+                "instruction": raw,
+                "task": task_metadata(campaign, task),
+            })
+            gate = validate_golden_candidate(record, human_confirmed=False)
+            disposition, target = save_rejected_trace(record, gate)
+            _echo(
+                "REVIEW FLAG",
+                f"AI 审核未通过，分流={disposition}，文件={target.name}，需单独人工检查",
+            )
+            continue
+
         verdict = input(
             "请在 Rhino 中人工检查。输入 y=完全正确 / p=部分正确 / n=错误 / q=退出且本条不入库: "
         ).strip().lower()
@@ -265,6 +335,16 @@ def main() -> None:
     parser.add_argument("--manifest", type=Path, default=DEFAULT_CAMPAIGN_MANIFEST)
     parser.add_argument("--limit", type=int, default=1, help="本次最多执行的任务数；0 表示全部待办")
     parser.add_argument("--task-id", help="只执行指定任务 ID")
+    parser.add_argument(
+        "--review-mode",
+        choices=("immediate", "batch"),
+        default="immediate",
+        help="immediate=逐条人工确认；batch=AI 审核后每批统一人工确认",
+    )
+    parser.add_argument("--batch-size", type=int, default=5, help="批量人工确认的任务数")
+    parser.add_argument("--batch-status", help="显示指定审核批次状态，不连接 Rhino")
+    parser.add_argument("--approve-batch", help="在一次人类确认后晋级指定完整批次")
+    parser.add_argument("--human-note", default="", help="批量确认备注")
     parser.add_argument("--status", action="store_true", help="只显示本地 campaign 进度")
     parser.add_argument("--json", action="store_true", help="状态以 JSON 输出")
     parser.add_argument("--dry-run", action="store_true", help="只校验任务清单，不连接 Rhino 或模型")
@@ -277,6 +357,34 @@ def main() -> None:
     args = parser.parse_args()
     _setup_logging()
     campaign = load_campaign(args.manifest)
+    if args.batch_size < 1:
+        raise SystemExit("--batch-size 必须大于 0")
+    if args.batch_status:
+        typer.echo(json.dumps(
+            review_batch_summary(campaign, args.batch_status, batch_size=args.batch_size),
+            ensure_ascii=False,
+            indent=2,
+        ))
+        return
+    if args.approve_batch:
+        batch = review_batch_summary(campaign, args.approve_batch, batch_size=args.batch_size)
+        typer.echo(json.dumps(batch, ensure_ascii=False, indent=2))
+        if not batch["ready_for_human_review"]:
+            raise SystemExit(f"批次尚未收齐，缺少 {batch['missing']} 条")
+        confirmation = input(
+            f"确认已由人类检查以上 {batch['batch_size']} 条汇总证据；输入 APPROVE 批量晋级: "
+        ).strip()
+        if confirmation != "APPROVE":
+            raise SystemExit("未确认，批次保持 AI 审核候选状态")
+        written = promote_review_batch(
+            campaign,
+            args.approve_batch,
+            human_note=args.human_note,
+            batch_size=args.batch_size,
+        )
+        _echo("GOLDEN BATCH", f"已原子晋级 {written} 条新黄金轨迹")
+        _print_status(campaign)
+        return
     if args.status:
         _print_status(campaign, as_json=args.json)
         return
@@ -297,6 +405,8 @@ def main() -> None:
                 task_id=args.task_id,
                 allow_reset=args.allow_reset,
                 allow_nonempty_reset=args.allow_nonempty_reset,
+                review_mode=args.review_mode,
+                batch_size=args.batch_size,
             )
         )
     except (KeyboardInterrupt, RuntimeError) as exc:

@@ -187,6 +187,8 @@ python agent/data_collector.py --allow-reset --limit 1
 
 采集器不会默认清空非空场景。每条轨迹仍必须通过程序断言、场景自检、人工确认、脱敏审计和 campaign 任务去重才能进入黄金集。完整操作与人工验收标准见[真实黄金轨迹采集指南](docs/golden-data-collection.md)。
 
+为减少逐条操作，也可使用 `--review-mode batch --batch-size 5`：AI 审核通过的轨迹先进入独立候选集，五条汇总后由人类一次性确认，再原子晋级黄金集。AI 审核不会冒充人工确认。
+
 ## 安全边界
 
 - Listener 仅绑定 `127.0.0.1`。

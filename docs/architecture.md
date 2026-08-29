@@ -53,6 +53,7 @@ OpenAI-compatible LLM <-> MCP ClientSession
 - `reset_environment` 要求 Agent 与 Rhino 进程共享本地评测令牌。
 - 黄金样本在写入前必须通过断言、自检、人工确认和脱敏。
 - 真实数据采集按 campaign/task ID 追踪并防止重复入库；默认拒绝清空非空 Rhino 文档，进度报告只保存在本地忽略目录。
+- AI 视口审核结果先进入独立候选层；五条批次只有在汇总证据经人类一次性确认后才原子晋级黄金集，AI 反馈与人类确认均保留在数据血缘中。
 - 公开报告和 Replay 通过敏感字段扫描及 SHA-256 复核清单锁定。
 
 ## Failure and recovery

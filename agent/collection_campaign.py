@@ -10,12 +10,17 @@ from pathlib import Path
 from typing import Any
 
 from agent.trace_store import (
+    AI_REVIEWED,
+    AI_REVIEWED_FILE,
     GOLDEN,
     GOLDEN_FILE,
     TRACE_DIR,
     classify_trace_disposition,
+    save_feedback,
+    save_golden_batch,
     validate_golden_candidate,
 )
+from agent.runtime import utc_now
 from eval.run_eval import load_tasks
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -41,6 +46,16 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
             if isinstance(value, dict):
                 rows.append(value)
     return rows
+
+
+def _read_json(path: Path) -> dict[str, Any]:
+    if not path.is_file():
+        return {}
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return value if isinstance(value, dict) else {}
 
 
 def load_campaign(path: Path = DEFAULT_CAMPAIGN_MANIFEST) -> CampaignDefinition:
@@ -150,6 +165,209 @@ def golden_task_ids(campaign_id: str, path: Path = GOLDEN_FILE) -> set[str]:
     return found
 
 
+def ai_reviewed_candidates(
+    campaign_id: str,
+    *,
+    path: Path = AI_REVIEWED_FILE,
+    golden_path: Path = GOLDEN_FILE,
+) -> list[dict[str, Any]]:
+    """返回仍待人类批量确认的 AI 审核候选。"""
+    golden_ids = golden_task_ids(campaign_id, golden_path)
+    latest: dict[str, dict[str, Any]] = {}
+    for row in _read_jsonl(path):
+        task = row.get("task") or {}
+        if task.get("campaign_id") == campaign_id and task.get("task_id"):
+            latest[str(task["task_id"])] = row
+    return [row for task_id, row in latest.items() if task_id not in golden_ids]
+
+
+def ai_reviewed_task_ids(
+    campaign_id: str,
+    *,
+    path: Path = AI_REVIEWED_FILE,
+    golden_path: Path = GOLDEN_FILE,
+) -> set[str]:
+    return {
+        str((row.get("task") or {}).get("task_id"))
+        for row in ai_reviewed_candidates(campaign_id, path=path, golden_path=golden_path)
+    }
+
+
+def batch_id_for_task(
+    campaign: CampaignDefinition,
+    task: dict[str, Any],
+    *,
+    batch_size: int = 5,
+) -> str:
+    if batch_size < 1:
+        raise ValueError("batch_size 必须大于 0")
+    task_ids = [str(item["id"]) for item in campaign.tasks]
+    try:
+        index = task_ids.index(str(task["id"]))
+    except ValueError as exc:
+        raise ValueError(f"任务不属于 campaign: {task.get('id')}") from exc
+    return f"{campaign.campaign_id}-batch-{index // batch_size + 1:02d}"
+
+
+def _batch_tasks(
+    campaign: CampaignDefinition,
+    batch_id: str,
+    *,
+    batch_size: int = 5,
+) -> list[dict[str, Any]]:
+    matching = [
+        task
+        for task in campaign.tasks
+        if batch_id_for_task(campaign, task, batch_size=batch_size) == batch_id
+    ]
+    if not matching:
+        raise ValueError(f"未知审核批次: {batch_id}")
+    return matching
+
+
+def review_batch_summary(
+    campaign: CampaignDefinition,
+    batch_id: str,
+    *,
+    batch_size: int = 5,
+    candidate_path: Path = AI_REVIEWED_FILE,
+    golden_path: Path = GOLDEN_FILE,
+    trace_dir: Path = TRACE_DIR,
+) -> dict[str, Any]:
+    tasks = _batch_tasks(campaign, batch_id, batch_size=batch_size)
+    golden_ids = golden_task_ids(campaign.campaign_id, golden_path)
+    candidates = {
+        str((row.get("task") or {}).get("task_id")): row
+        for row in ai_reviewed_candidates(
+            campaign.campaign_id,
+            path=candidate_path,
+            golden_path=golden_path,
+        )
+    }
+    golden_rows = {
+        str((((row.get("metadata") or {}).get("task") or {}).get("task_id"))): row
+        for row in _read_jsonl(golden_path)
+        if (((row.get("metadata") or {}).get("task") or {}).get("campaign_id"))
+        == campaign.campaign_id
+    }
+    rows: list[dict[str, Any]] = []
+    for task in tasks:
+        task_id = str(task["id"])
+        candidate = candidates.get(task_id)
+        status = "golden" if task_id in golden_ids else "ai_reviewed_candidate" if candidate else "missing"
+        golden_row = golden_rows.get(task_id) or {}
+        trace_path = trace_dir / f"{golden_row.get('run_id')}.json" if golden_row.get("run_id") else None
+        golden_trace = _read_json(trace_path) if trace_path else {}
+        run = (candidate or golden_trace).get("run") or {}
+        metrics = run.get("metrics") or {}
+        evaluation = (candidate or golden_trace).get("evaluation") or {}
+        review_history = ((golden_row.get("metadata") or {}).get("review_history") or [])
+        review = ((candidate or {}).get("feedback") or {}).get("review") or (
+            (review_history[-1].get("review") or {}) if review_history else {}
+        )
+        rows.append(
+            {
+                "task_id": task_id,
+                "instruction": task["instruction"],
+                "status": status,
+                "score": evaluation.get("score"),
+                "scene_checks": len(run.get("scene_checks") or []),
+                "tool_calls": len(run.get("tool_calls") or []),
+                "tokens": int(metrics.get("total_tokens", 0)),
+                "cost_usd": float(metrics.get("estimated_cost_upper_bound_usd", 0)),
+                "visual_evidence": review.get("visual_evidence"),
+                "review_note": review.get("note"),
+            }
+        )
+    ready = all(row["status"] in {"golden", "ai_reviewed_candidate"} for row in rows)
+    return {
+        "campaign_id": campaign.campaign_id,
+        "batch_id": batch_id,
+        "batch_size": len(tasks),
+        "ready_for_human_review": ready,
+        "golden": sum(row["status"] == "golden" for row in rows),
+        "ai_reviewed_candidates": sum(row["status"] == "ai_reviewed_candidate" for row in rows),
+        "missing": sum(row["status"] == "missing" for row in rows),
+        "total_tokens": sum(row["tokens"] for row in rows),
+        "estimated_cost_upper_bound_usd": round(sum(row["cost_usd"] for row in rows), 6),
+        "tasks": rows,
+    }
+
+
+def promote_review_batch(
+    campaign: CampaignDefinition,
+    batch_id: str,
+    *,
+    human_note: str = "",
+    batch_size: int = 5,
+    candidate_path: Path = AI_REVIEWED_FILE,
+    golden_path: Path = GOLDEN_FILE,
+) -> int:
+    """将一个完整批次的 AI 候选在单次人类确认后原子晋级为黄金样本。"""
+    summary = review_batch_summary(
+        campaign,
+        batch_id,
+        batch_size=batch_size,
+        candidate_path=candidate_path,
+        golden_path=golden_path,
+    )
+    if not summary["ready_for_human_review"]:
+        raise ValueError(f"批次尚未收齐，缺少 {summary['missing']} 条")
+    candidates = {
+        str((row.get("task") or {}).get("task_id")): row
+        for row in ai_reviewed_candidates(
+            campaign.campaign_id,
+            path=candidate_path,
+            golden_path=golden_path,
+        )
+    }
+    batch_task_ids = {row["task_id"] for row in summary["tasks"]}
+    timestamp = utc_now()
+    gates = []
+    feedback_rows = []
+    for task_id, candidate in candidates.items():
+        if task_id not in batch_task_ids:
+            continue
+        ai_feedback = candidate.get("feedback") or {}
+        promoted = {
+            **candidate,
+            "review_history": [*(candidate.get("review_history") or []), ai_feedback],
+            "feedback": {
+                "label": "accepted",
+                "source": "human_review",
+                "mode": "batch",
+                "batch_id": batch_id,
+                "timestamp": timestamp,
+                "note": str(human_note)[:1000],
+            },
+        }
+        promoted.pop("disposition", None)
+        gate = validate_golden_candidate(promoted, human_confirmed=True)
+        if not gate.accepted:
+            raise ValueError(f"{task_id} 黄金晋级失败: {gate.reasons}")
+        gates.append(gate)
+        feedback_rows.append(
+            {
+                "run_id": promoted["run_id"],
+                "instruction": promoted["instruction"],
+                "label": "accepted",
+                "source": "human_review",
+                "mode": "batch",
+                "batch_id": batch_id,
+                "note": str(human_note)[:1000],
+                "task": promoted.get("task"),
+                "timestamp": timestamp,
+            }
+        )
+    if not gates:
+        return 0
+
+    written = save_golden_batch(gates, path=golden_path)
+    for feedback in feedback_rows:
+        save_feedback(feedback)
+    return written
+
+
 def campaign_attempts(campaign_id: str, trace_dir: Path = TRACE_DIR) -> list[dict[str, Any]]:
     attempts: list[dict[str, Any]] = []
     if not trace_dir.is_dir():
@@ -166,6 +384,8 @@ def campaign_attempts(campaign_id: str, trace_dir: Path = TRACE_DIR) -> list[dic
 
 def trace_disposition(record: dict[str, Any]) -> str:
     feedback = record.get("feedback") or {}
+    if feedback.get("label") == AI_REVIEWED and feedback.get("source") == "ai_visual_review":
+        return AI_REVIEWED
     if feedback.get("source") != "human_review":
         return "unreviewed"
     gate = validate_golden_candidate(
@@ -179,9 +399,15 @@ def campaign_summary(
     campaign: CampaignDefinition,
     *,
     golden_path: Path = GOLDEN_FILE,
+    candidate_path: Path = AI_REVIEWED_FILE,
     trace_dir: Path = TRACE_DIR,
 ) -> dict[str, Any]:
     golden_ids = golden_task_ids(campaign.campaign_id, golden_path)
+    ai_candidate_ids = ai_reviewed_task_ids(
+        campaign.campaign_id,
+        path=candidate_path,
+        golden_path=golden_path,
+    )
     attempts = campaign_attempts(campaign.campaign_id, trace_dir)
     latest: dict[str, dict[str, Any]] = {}
     for record in attempts:
@@ -191,6 +417,11 @@ def campaign_summary(
     dispositions = Counter(trace_disposition(record) for record in latest.values())
     dispositions[GOLDEN] = len(golden_ids)
     pending = [task["id"] for task in campaign.tasks if task["id"] not in golden_ids]
+    collection_pending = [
+        task["id"]
+        for task in campaign.tasks
+        if task["id"] not in golden_ids and task["id"] not in ai_candidate_ids
+    ]
     golden_tasks = [task for task in campaign.tasks if task["id"] in golden_ids]
     metrics = [record.get("run", {}).get("metrics", {}) for record in attempts]
     tool_usage = Counter(
@@ -225,7 +456,9 @@ def campaign_summary(
         "attempts": len(attempts),
         "attempted_tasks": len(latest),
         "golden": len(golden_ids),
+        "ai_reviewed_candidates": len(ai_candidate_ids),
         "remaining": campaign.target - len(golden_ids),
+        "remaining_to_collect": len(collection_pending),
         "latest_dispositions": dict(sorted(dispositions.items())),
         "golden_difficulty_distribution": dict(sorted(Counter(task["difficulty"] for task in golden_tasks).items())),
         "golden_tag_coverage": dict(sorted(Counter(tag for task in golden_tasks for tag in task.get("tags") or []).items())),
@@ -236,4 +469,5 @@ def campaign_summary(
         "estimated_cost_lower_bound_usd": round(sum(float(metric.get("estimated_cost_lower_bound_usd", 0)) for metric in metrics), 6),
         "estimated_cost_upper_bound_usd": round(sum(float(metric.get("estimated_cost_upper_bound_usd", 0)) for metric in metrics), 6),
         "pending_task_ids": pending,
+        "collection_pending_task_ids": collection_pending,
     }

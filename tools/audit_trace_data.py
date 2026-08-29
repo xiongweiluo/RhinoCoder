@@ -16,6 +16,8 @@ if str(ROOT) not in sys.path:
 
 from agent.sanitizer import contains_sensitive_data
 from agent.trace_store import (
+    AI_REVIEWED,
+    AI_REVIEWED_FILE,
     CANDIDATE_FILE,
     ERROR_ANALYSIS,
     ERROR_ANALYSIS_FILE,
@@ -23,6 +25,7 @@ from agent.trace_store import (
     LEGACY_GOLDEN_FILE,
     PARTIAL,
     PARTIAL_FILE,
+    validate_ai_review_candidate,
     validate_saved_golden_record,
 )
 
@@ -64,6 +67,13 @@ def audit_trace_data() -> TraceDataAudit:
     for index, row in enumerate(_read_jsonl(GOLDEN_FILE, audit, "golden_v2"), 1):
         for reason in validate_saved_golden_record(row):
             audit.findings.append(f"{GOLDEN_FILE.name}:{index}: {reason}")
+
+    for index, row in enumerate(_read_jsonl(AI_REVIEWED_FILE, audit, "ai_reviewed_candidate"), 1):
+        if row.get("disposition") != AI_REVIEWED:
+            audit.findings.append(f"{AI_REVIEWED_FILE.name}:{index}: disposition 应为 {AI_REVIEWED}")
+        gate = validate_ai_review_candidate(row)
+        for reason in gate.reasons:
+            audit.findings.append(f"{AI_REVIEWED_FILE.name}:{index}: {reason}")
 
     separated = (
         (PARTIAL_FILE, "partial", PARTIAL),
