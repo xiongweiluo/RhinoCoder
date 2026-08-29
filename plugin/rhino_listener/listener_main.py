@@ -572,7 +572,13 @@ def stop_listener() -> None:
 
     if _server_instance is not None:
         try:
-            _server_instance.shutdown()
+            # ``HTTPServer.shutdown()`` must only be called while
+            # ``serve_forever()`` is running in another thread. If the
+            # Listener thread has already crashed or exited, calling it here
+            # can block the Rhino main thread forever and prevent hot
+            # recovery. Closing the stale socket is sufficient in that case.
+            if _server_thread is not None and _server_thread.is_alive():
+                _server_instance.shutdown()
             _server_instance.server_close()
             logger.info("HTTP Server（端口 %d）已关闭", LISTEN_PORT)
         except Exception as exc:

@@ -395,6 +395,17 @@ def trace_disposition(record: dict[str, Any]) -> str:
     return classify_trace_disposition(record, gate)
 
 
+def _record_timestamp(record: dict[str, Any]) -> str:
+    feedback = record.get("feedback") or {}
+    metrics = (record.get("run") or {}).get("metrics") or {}
+    return str(
+        feedback.get("timestamp")
+        or metrics.get("completed_at")
+        or metrics.get("started_at")
+        or ""
+    )
+
+
 def campaign_summary(
     campaign: CampaignDefinition,
     *,
@@ -412,9 +423,16 @@ def campaign_summary(
     latest: dict[str, dict[str, Any]] = {}
     for record in attempts:
         task_id = str((record.get("task") or {}).get("task_id", ""))
-        if task_id:
+        if task_id and (
+            task_id not in latest
+            or _record_timestamp(record) >= _record_timestamp(latest[task_id])
+        ):
             latest[task_id] = record
-    dispositions = Counter(trace_disposition(record) for record in latest.values())
+    dispositions = Counter(
+        AI_REVIEWED if task_id in ai_candidate_ids else trace_disposition(record)
+        for task_id, record in latest.items()
+        if task_id not in golden_ids
+    )
     dispositions[GOLDEN] = len(golden_ids)
     pending = [task["id"] for task in campaign.tasks if task["id"] not in golden_ids]
     collection_pending = [

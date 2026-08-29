@@ -110,7 +110,18 @@ def contains_sensitive_data(value: Any, *, parent_key: str = "") -> bool:
     if key_lc in COORD_KEYS and isinstance(value, (list, tuple)) and 2 <= len(value) <= 3:
         return all(isinstance(item, (int, float)) for item in value)
     if isinstance(value, str):
-        value = re.sub(r"<(?:SECRET|PATH|COORD|LAYER|GROUP|GUID)_REDACTED>", "", value)
+        # Preserve a separator where an earlier sanitization pass inserted a
+        # marker. Removing markers entirely can join adjacent lines (for
+        # example ``z=<COORD_REDACTED>\n4.`` becomes ``z=\n4``) and create a
+        # false positive for sensitive data that is no longer present.
+        # An empty layer value must stay empty; a placeholder inside quotes
+        # would itself look like a real project layer to ``LAYER_RE``.
+        value = value.replace("<LAYER_REDACTED>", "")
+        value = re.sub(
+            r"<(?:SECRET|PATH|COORD|GROUP|GUID)_REDACTED>",
+            " REDACTED ",
+            value,
+        )
         return bool(
             SECRET_RE.search(value)
             or GUID_RE.search(value)

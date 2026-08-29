@@ -71,6 +71,13 @@ def test_sanitize_secret_path_coordinate_and_layer():
     assert not contains_sensitive_data(sanitized)
 
 
+def test_redaction_marker_does_not_join_numbered_lines_into_coordinate():
+    sanitized = sanitize_text("move z=5\n4. verify the scene")
+
+    assert "z=<COORD_REDACTED>" in sanitized
+    assert not contains_sensitive_data(sanitized)
+
+
 def test_sanitize_structured_coordinate_and_token():
     data = {
         "center": [1, 2, 3],

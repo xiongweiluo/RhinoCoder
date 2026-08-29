@@ -165,6 +165,25 @@ def test_ai_reviewed_batch_waits_for_one_human_confirmation(monkeypatch, tmp_pat
     for index, task in enumerate(campaign.tasks[1:5], 2):
         _stage_ai_candidate(campaign, task, tmp_path, f"batch-candidate-{index}")
 
+    # Raw trace files intentionally remain immutable and therefore still have
+    # no review feedback. Campaign status must overlay the separate AI review
+    # ledger instead of reporting an already reviewed task as unreviewed.
+    trace_dir = tmp_path / "traces"
+    trace_dir.mkdir()
+    raw_trace = _accepted_record(campaign, campaign.tasks[1], "raw-before-review")
+    raw_trace["feedback"] = None
+    (trace_dir / "raw-before-review.json").write_text(
+        json.dumps(raw_trace, ensure_ascii=False), encoding="utf-8"
+    )
+    campaign_status = campaign_summary(
+        campaign,
+        golden_path=golden_path,
+        candidate_path=candidate_path,
+        trace_dir=trace_dir,
+    )
+    assert campaign_status["latest_dispositions"]["ai_reviewed_candidate"] == 1
+    assert "unreviewed" not in campaign_status["latest_dispositions"]
+
     summary = review_batch_summary(
         campaign,
         "phase1-30-batch-01",

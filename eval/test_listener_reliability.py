@@ -176,6 +176,36 @@ def test_listener_does_not_enable_placeholder_eval_token(monkeypatch, tmp_path):
     assert not listener_main._eval_reset_enabled()
 
 
+def test_stop_listener_does_not_shutdown_an_already_dead_server_thread(monkeypatch):
+    class DeadThread:
+        @staticmethod
+        def is_alive():
+            return False
+
+    class StaleServer:
+        def __init__(self):
+            self.shutdown_calls = 0
+            self.close_calls = 0
+
+        def shutdown(self):
+            self.shutdown_calls += 1
+
+        def server_close(self):
+            self.close_calls += 1
+
+    server = StaleServer()
+    monkeypatch.setattr(listener_main, "_server_instance", server)
+    monkeypatch.setattr(listener_main, "_server_thread", DeadThread())
+    monkeypatch.setattr(listener_main, "_idle_registered", False)
+
+    listener_main.stop_listener()
+
+    assert server.shutdown_calls == 0
+    assert server.close_calls == 1
+    assert listener_main._server_instance is None
+    assert listener_main._server_thread is None
+
+
 def test_reset_environment_uses_supported_clear_undo_overload(monkeypatch):
     class Doc:
         clear_args = None
