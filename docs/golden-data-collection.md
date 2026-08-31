@@ -156,6 +156,14 @@ python tools/report_collection_campaign.py \
 
 报告包含黄金数量、剩余任务、难度与标签覆盖、工具调用、token、成本区间、程序断言失败和黄金准入失败分布。
 
+完成一个 campaign 后，另生成包含首次通过率、重试恢复、纠错事件、失败明细和最终黄金成本的质量报告：
+
+```bash
+python tools/report_golden_dataset_quality.py \
+  --output data/collection_reports/phase1-30-quality.md \
+  --json-output data/collection_reports/phase1-30-quality.json
+```
+
 每批结束后运行：
 
 ```bash

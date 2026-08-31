@@ -11,7 +11,7 @@
   "additional_tasks": [
     {
       "id": "collect-25-rotate",
-      "instruction": "在原点创建一个 30x10x10 的纯紫色方块，然后绕通过原点的 Z 轴旋转 90 度。",
+      "instruction": "在原点创建一个 30x10x10 的方块，颜色设为 RGB(255,0,255)（品红色），然后绕通过原点的 Z 轴旋转 90 度。",
       "tags": ["single", "edit", "rotate", "color"],
       "difficulty": 2,
       "asserts": [
