@@ -25,6 +25,18 @@
 
 清单会在本地检查和 CI 中验证任务数量、ID、指令唯一性、断言结构、难度和必须标签。它不会加入默认 30 题基准，因此不会改变 `0.2.0` 的正式基准口径。
 
+## 第二阶段完成状态
+
+第二阶段清单位于 `eval/collection/phase2_100.json`，复用冻结的第一阶段 30 条黄金轨迹，并新增 70 条长尾任务。当前已完成 100/100 条黄金准入，AI 候选与待采集任务均为 0；稳定发布版本仍保持 `0.2.0`。
+
+- 100 条唯一指令、36 个标签。
+- 难度分布：L1 3 条、L2 6 条、L3 21 条、L4 49 条、L5 21 条。
+- 本阶段新增任务共 98 次运行，累计 9,421,043 token，成本 $0.379609。
+- 每条黄金数据均通过程序化断言、至少一次 `get_scene_summary`、Rhino 视口截图、AI 初审、人工批量 `APPROVE`、脱敏与写入门禁。
+- `p2-063` 按 Rhino 有效布尔语义采用“球形穿出式切除”：完全封闭且不与外表面相交的内部球体不能形成有效的 Rhino 布尔差集结果。
+
+完整任务设计见 [第二阶段任务设计](phase2-task-design.md)。本地进度报告为 `data/collection_reports/phase2-100.{md,json}`，质量报告为 `data/collection_reports/phase2-100-quality.{md,json}`；这些报告包含准入、标签/难度/工具覆盖、失败与重试/纠错分布、延迟、token 和成本，并与真实轨迹、截图、反馈一起被 Git 忽略。
+
 ## 安全前置条件
 
 1. 在 Rhino 中新建一个空白、可丢弃的 `.3dm` 文档。
@@ -45,7 +57,7 @@ python agent/data_collector.py --status
 
 ## 推荐采集节奏
 
-默认推荐使用 5 条一批的 AI 辅助审核：每条先通过程序断言、Scene Summary、Tool Trace 和 Rhino 视口检查，明确正确的轨迹只进入 `ai_reviewed_candidate`，整批收齐后再由人类一次性确认。AI 审核不能直接写入黄金集。
+第一阶段默认使用 5 条一批，第二阶段使用 10 条一批的 AI 辅助审核。每条先通过程序断言、Scene Summary、Tool Trace 和 Rhino 视口检查，明确正确的轨迹只进入 `ai_reviewed_candidate`，整批收齐后再由人类一次性确认。AI 审核不能直接写入黄金集。
 
 第一次只跑一条验证链路：
 
@@ -171,4 +183,4 @@ python tools/audit_trace_data.py
 ./scripts/check.sh
 ```
 
-第一阶段完成条件是 `golden=30`、审计通过、30 个任务 ID 无重复，并对所有 Partial/Fail 做过一次失败分布复盘。
+第一阶段完成条件是 `golden=30`、审计通过、30 个任务 ID 无重复，并对所有 Partial/Fail 做过一次失败分布复盘。第二阶段完成条件同理扩展为 `golden=100`、活跃 AI 候选为 0、待采集为 0、100 个任务 ID 无重复，并完成失败、重试和纠错分布复盘；当前已满足。

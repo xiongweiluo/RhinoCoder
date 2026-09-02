@@ -82,6 +82,14 @@ def test_spatial_above_and_on_top():
     assert not assert_spatial_relation(base, sphere, "above")[0]
 
 
+def test_spatial_supported_by_allows_off_center_but_rejects_overhang():
+    base = {"center": [10, 10, 5], "size": [20, 20, 10]}
+    supported_sphere = {"center": [5, 10, 14], "size": [8, 8, 8]}
+    overhanging_sphere = {"center": [1, 10, 14], "size": [8, 8, 8]}
+    assert assert_spatial_relation(supported_sphere, base, "supported_by")[0]
+    assert not assert_spatial_relation(overhanging_sphere, base, "supported_by")[0]
+
+
 def test_spatial_distance():
     s = _scene()
     sphere = select_one(s, {"type": "Surface"})[0]
@@ -89,6 +97,17 @@ def test_spatial_distance():
     # 中心距 = |10 - 1| = 9
     assert assert_spatial_relation(sphere, base, "distance", value=9.0)[0]
     assert not assert_spatial_relation(sphere, base, "distance", value=5.0)[0]
+
+
+def test_spatial_axis_distance_ignores_other_axes():
+    a = {"center": [0, 10, 30], "size": [1, 1, 1]}
+    b = {"center": [20, -40, -5], "size": [1, 1, 1]}
+    assert assert_spatial_relation(
+        a, b, "axis_distance", value={"axis": "x", "value": 20}
+    )[0]
+    assert not assert_spatial_relation(
+        a, b, "axis_distance", value={"axis": "y", "value": 20}
+    )[0]
 
 
 def test_verify_full_pass():

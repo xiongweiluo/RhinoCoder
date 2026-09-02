@@ -28,8 +28,8 @@ from agent.collection_campaign import (
     CampaignDefinition,
     ai_reviewed_task_ids,
     batch_id_for_task,
+    campaign_golden_task_ids,
     campaign_summary,
-    golden_task_ids,
     load_campaign,
     promote_review_batch,
     review_batch_summary,
@@ -103,6 +103,26 @@ async def _scene_summary() -> dict:
         return payload
 
 
+async def _capture_viewport(*, batch_id: str, task_id: str) -> str:
+    """请求 Rhino 主线程导出当前任务的真实视口证据。"""
+    relative_path = f"data/review_batches/{batch_id}/{task_id}.png"
+    async with httpx.AsyncClient(trust_env=False) as client:
+        response = await client.post(
+            f"{RHINO_BASE_URL}/capture_viewport",
+            json={"relative_path": relative_path},
+            headers=_eval_headers(),
+            timeout=httpx.Timeout(connect=3.0, read=20.0, write=5.0, pool=5.0),
+        )
+        response.raise_for_status()
+        payload = response.json()
+        if payload.get("status") == "error":
+            raise RuntimeError(payload.get("message", "视口截图失败"))
+    evidence = str(payload.get("visual_evidence") or "")
+    if not evidence:
+        raise RuntimeError("视口截图响应未返回证据路径")
+    return evidence
+
+
 def _print_status(campaign: CampaignDefinition, *, as_json: bool = False) -> None:
     summary = campaign_summary(campaign)
     if as_json:
@@ -147,12 +167,14 @@ async def _collect_loop(
     allow_nonempty_reset: bool,
     review_mode: str,
     batch_size: int,
+    auto_run: bool,
+    auto_review: bool,
 ) -> None:
     if not allow_reset:
         raise RuntimeError("真实采集会在每条任务前清空当前 Rhino 文档；请在空白专用文档中使用 --allow-reset")
     await _preflight(allow_nonempty_reset=allow_nonempty_reset)
 
-    completed = golden_task_ids(campaign.campaign_id)
+    completed = campaign_golden_task_ids(campaign)
     staged = ai_reviewed_task_ids(campaign.campaign_id)
     pending = [
         task
@@ -182,7 +204,9 @@ async def _collect_loop(
             f"{index}/{len(pending)} {task['id']} | 难度 L{task['difficulty']} | {', '.join(task['tags'])}",
         )
         typer.echo(task["instruction"])
-        action = input("输入 RUN 清空当前采集场景并执行；s 跳过；q 退出: ").strip().lower()
+        action = "run" if auto_run else input(
+            "输入 RUN 清空当前采集场景并执行；s 跳过；q 退出: "
+        ).strip().lower()
         if action == "q":
             return
         if action == "s":
@@ -230,6 +254,29 @@ async def _collect_loop(
 
         if review_mode == "batch":
             batch_id = batch_id_for_task(campaign, task, batch_size=batch_size)
+            if auto_review:
+                try:
+                    evidence = await _capture_viewport(batch_id=batch_id, task_id=str(task["id"]))
+                    record = save_ai_reviewed_candidate(
+                        record,
+                        batch_id=batch_id,
+                        note=(
+                            "自动初审通过：程序断言全部通过，"
+                            f"场景自检 {len(run.scene_checks)} 次，已导出 Rhino 视口证据。"
+                        ),
+                        visual_evidence=evidence,
+                    )
+                    save_trace(record)
+                    save_feedback(record["feedback"] | {
+                        "run_id": run.run_id,
+                        "instruction": raw,
+                        "task": task_metadata(campaign, task),
+                    })
+                    _echo("AI CANDIDATE", f"自动初审通过，已进入 {batch_id}")
+                    continue
+                except Exception as exc:
+                    _echo("AUTO REVIEW", f"未自动进入候选，保留 Trace 待人工处理: {exc}", err=True)
+                    continue
             verdict = input(
                 "AI 审核员请检查程序断言、Tool Trace、Scene Summary 和 Rhino 视口。"
                 "输入 a=审核通过候选 / u=存疑 / n=错误 / q=退出: "
@@ -348,6 +395,8 @@ def main() -> None:
     parser.add_argument("--status", action="store_true", help="只显示本地 campaign 进度")
     parser.add_argument("--json", action="store_true", help="状态以 JSON 输出")
     parser.add_argument("--dry-run", action="store_true", help="只校验任务清单，不连接 Rhino 或模型")
+    parser.add_argument("--auto-run", action="store_true", help="跳过每条任务前的 RUN 输入；仍需 --allow-reset")
+    parser.add_argument("--auto-review", action="store_true", help="自动导出 Rhino 视口并写入 AI 审核候选；仅 batch 模式可用")
     parser.add_argument("--allow-reset", action="store_true", help="确认在每条任务前清空专用 Rhino 文档")
     parser.add_argument(
         "--allow-nonempty-reset",
@@ -359,6 +408,8 @@ def main() -> None:
     campaign = load_campaign(args.manifest)
     if args.batch_size < 1:
         raise SystemExit("--batch-size 必须大于 0")
+    if args.auto_review and args.review_mode != "batch":
+        raise SystemExit("--auto-review 仅支持 --review-mode batch")
     if args.batch_status:
         typer.echo(json.dumps(
             review_batch_summary(campaign, args.batch_status, batch_size=args.batch_size),
@@ -407,6 +458,8 @@ def main() -> None:
                 allow_nonempty_reset=args.allow_nonempty_reset,
                 review_mode=args.review_mode,
                 batch_size=args.batch_size,
+                auto_run=args.auto_run,
+                auto_review=args.auto_review,
             )
         )
     except (KeyboardInterrupt, RuntimeError) as exc:

@@ -19,6 +19,7 @@ if str(ROOT) not in sys.path:
 from agent.collection_campaign import (  # noqa: E402
     DEFAULT_CAMPAIGN_MANIFEST,
     campaign_attempts,
+    campaign_golden_task_ids,
     golden_task_ids,
     load_campaign,
 )
@@ -70,9 +71,14 @@ def summarize(manifest: Path) -> dict[str, Any]:
         if task_id:
             task_attempts[task_id].append(record)
 
-    golden_ids = golden_task_ids(campaign.campaign_id)
+    golden_ids = campaign_golden_task_ids(campaign)
+    current_golden_ids = golden_task_ids(campaign.campaign_id)
+    inherited_golden_ids = golden_ids - current_golden_ids
+    collection_target = campaign.target - len(inherited_golden_ids)
     latest = {task_id: rows[-1] for task_id, rows in task_attempts.items()}
-    golden_final_records = [latest[task_id] for task_id in golden_ids if task_id in latest]
+    golden_final_records = [
+        latest[task_id] for task_id in current_golden_ids if task_id in latest
+    ]
     first_attempts = [rows[0] for rows in task_attempts.values()]
     outcome_counts = Counter(_outcome(record) for record in attempts)
     first_passes = sum(_outcome(record) == "full_pass" for record in first_attempts)
@@ -141,20 +147,22 @@ def summarize(manifest: Path) -> dict[str, Any]:
             }
         )
 
-    total_tasks = len(campaign.tasks)
     return {
         "campaign_id": campaign.campaign_id,
         "title": campaign.title,
         "target": campaign.target,
         "golden": len(golden_ids),
         "golden_complete": len(golden_ids) == campaign.target,
+        "inherited_golden": len(inherited_golden_ids),
+        "collection_target": collection_target,
+        "collected_golden": len(current_golden_ids),
         "attempts": len(attempts),
         "unique_attempted_tasks": len(task_attempts),
         "first_attempt_full_pass": first_passes,
-        "first_attempt_full_pass_rate": _percent(first_passes, total_tasks),
+        "first_attempt_full_pass_rate": _percent(first_passes, collection_target),
         "eventual_full_pass": sum(_outcome(record) == "full_pass" for record in latest.values()),
         "eventual_full_pass_rate": _percent(
-            sum(_outcome(record) == "full_pass" for record in latest.values()), total_tasks
+            sum(_outcome(record) == "full_pass" for record in latest.values()), collection_target
         ),
         "attempt_outcomes": dict(sorted(outcome_counts.items())),
         "recovered_task_ids": recovered,
@@ -192,8 +200,9 @@ def render_markdown(summary: dict[str, Any]) -> str:
         "## 结论",
         "",
         f"- 黄金准入：**{summary['golden']}/{summary['target']}**（{'完成' if summary['golden_complete'] else '未完成'}）。",
-        f"- 首次完整通过：**{summary['first_attempt_full_pass']}/{summary['target']}**（{summary['first_attempt_full_pass_rate']:.2f}%）；最终完整通过：**{summary['eventual_full_pass']}/{summary['target']}**（{summary['eventual_full_pass_rate']:.2f}%）。",
-        f"- 共 {summary['attempts']} 次运行；恢复成功任务：{', '.join(f'`{item}`' for item in summary['recovered_task_ids']) or '无'}。",
+        f"- 本阶段复用上游黄金 {summary['inherited_golden']} 条，新采集 **{summary['collected_golden']}/{summary['collection_target']}** 条。",
+        f"- 新采集任务首次完整通过：**{summary['first_attempt_full_pass']}/{summary['collection_target']}**（{summary['first_attempt_full_pass_rate']:.2f}%）；最终完整通过：**{summary['eventual_full_pass']}/{summary['collection_target']}**（{summary['eventual_full_pass_rate']:.2f}%）。",
+        f"- 新采集任务共 {summary['attempts']} 次运行；恢复成功任务：{', '.join(f'`{item}`' for item in summary['recovered_task_ids']) or '无'}。",
         f"- 闭环纠错：{summary['correction_events']} 个 correction.started 事件，覆盖 {summary['correction_attempts']} 次运行。",
         "",
         "## 覆盖与难度",
@@ -204,7 +213,7 @@ def render_markdown(summary: dict[str, Any]) -> str:
         "",
         *_table(summary["tag_coverage"], "标签"),
         "",
-        "## 工具覆盖（最终黄金轨迹）",
+        "## 工具覆盖（本阶段新增最终黄金轨迹）",
         "",
         *_table(summary["tool_usage_final_golden"], "工具"),
         "",
@@ -239,13 +248,13 @@ def render_markdown(summary: dict[str, Any]) -> str:
             "",
             "| 指标 | 数值 |",
             "|---|---:|",
-            f"| 全部尝试 token | {summary['all_attempt_tokens']} |",
-            f"| 全部尝试成本上界 | ${summary['all_attempt_cost_usd']:.6f} |",
-            f"| 最终黄金 token | {summary['golden_final_tokens']} |",
-            f"| 最终黄金成本上界 | ${summary['golden_final_cost_usd']:.6f} |",
-            f"| 最终黄金平均延迟 | {summary['latency_ms']['mean']:.2f} ms |",
-            f"| 最终黄金中位延迟 | {summary['latency_ms']['median']:.2f} ms |",
-            f"| 最终黄金 P95 延迟 | {summary['latency_ms']['p95']:.2f} ms |",
+            f"| 本阶段全部尝试 token | {summary['all_attempt_tokens']} |",
+            f"| 本阶段全部尝试成本上界 | ${summary['all_attempt_cost_usd']:.6f} |",
+            f"| 本阶段新增最终黄金 token | {summary['golden_final_tokens']} |",
+            f"| 本阶段新增最终黄金成本上界 | ${summary['golden_final_cost_usd']:.6f} |",
+            f"| 本阶段新增最终黄金平均延迟 | {summary['latency_ms']['mean']:.2f} ms |",
+            f"| 本阶段新增最终黄金中位延迟 | {summary['latency_ms']['median']:.2f} ms |",
+            f"| 本阶段新增最终黄金 P95 延迟 | {summary['latency_ms']['p95']:.2f} ms |",
             "",
             "## 复盘结论",
             "",

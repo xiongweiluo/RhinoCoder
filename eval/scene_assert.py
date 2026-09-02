@@ -165,10 +165,12 @@ def assert_spatial_relation(
       above          A 整体在 B 之上（A 底面 ≥ B 顶面 - tol）
       below          A 整体在 B 之下
       on_top_of      A 紧贴叠放在 B 上（A 底 ≈ B 顶）且 X/Y 中心对齐
+      supported_by    A 贴合在 B 顶面上，且 A 的 X/Y 包围盒完全落在 B 顶面范围内
       center_aligned X/Y 中心对齐（不约束 Z）
       concentric     三轴中心重合
       tangent        两物体中心距 ≈ 各自外接半径之和（按 size/2 估算，近似相切）
-      distance       两物体中心距 ≈ value
+      distance       两物体三维中心距 ≈ value
+      axis_distance  指定坐标轴的中心差绝对值 ≈ value（需提供 axis）
     """
     amn, amx = _bounds(a)
     bmn, bmx = _bounds(b)
@@ -176,6 +178,13 @@ def assert_spatial_relation(
 
     def xy_aligned() -> bool:
         return abs(ac[0] - bc[0]) <= tol and abs(ac[1] - bc[1]) <= tol
+
+    def horizontally_contained() -> bool:
+        """A 的投影落在 B 的顶面范围内；允许不超过位置容差的边缘误差。"""
+        return (
+            amn[0] >= bmn[0] - tol and amx[0] <= bmx[0] + tol
+            and amn[1] >= bmn[1] - tol and amx[1] <= bmx[1] + tol
+        )
 
     if relation == "above":
         ok = amn[2] >= bmx[2] - tol
@@ -186,12 +195,31 @@ def assert_spatial_relation(
     if relation == "on_top_of":
         ok = abs(amn[2] - bmx[2]) <= tol and xy_aligned()
         return ok, ("" if ok else f"A 底 {amn[2]:.2f} 未紧贴 B 顶 {bmx[2]:.2f} 或 XY 未对齐")
+    if relation == "supported_by":
+        ok = abs(amn[2] - bmx[2]) <= tol and horizontally_contained()
+        return ok, (
+            "" if ok else (
+                f"A 底 {amn[2]:.2f} 未紧贴 B 顶 {bmx[2]:.2f}，"
+                "或 A 的 X/Y 投影超出 B 顶面范围"
+            )
+        )
     if relation == "center_aligned":
         ok = xy_aligned()
         return ok, ("" if ok else f"XY 中心未对齐: A={ac[:2]} B={bc[:2]}")
     if relation == "concentric":
         ok = _match_vec3(ac, bc, tol)
         return ok, ("" if ok else f"中心不重合: A={ac} B={bc}")
+    if relation == "axis_distance":
+        axis = {"x": 0, "y": 1, "z": 2}.get(str(value.get("axis", "")).lower()) if isinstance(value, dict) else None
+        expected = value.get("value") if isinstance(value, dict) else None
+        if axis is None or expected is None:
+            return False, "axis_distance 需要 value={'axis': 'x'|'y'|'z', 'value': 数值}"
+        distance = abs(ac[axis] - bc[axis])
+        ok = abs(distance - float(expected)) <= tol
+        axis_name = "XYZ"[axis]
+        return ok, (
+            "" if ok else f"{axis_name} 轴中心距 {distance:.2f} ≠ 期望 {expected} (tol={tol})"
+        )
     if relation in ("tangent", "distance"):
         d = sum((ac[i] - bc[i]) ** 2 for i in range(3)) ** 0.5
         if relation == "distance":

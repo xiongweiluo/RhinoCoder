@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "campaign_id": "phase2-100",
+  "title": "第二阶段 100 条真实黄金轨迹",
+  "target": 100,
+  "source_campaign_manifests": ["phase1_30.json"],
+  "inherited_golden_campaign_ids": ["phase1-30"],
+  "source_task_files": ["../tasks/phase2_expansion.jsonl"],
+  "diversity_requirements": {
+    "min_unique_tags": 30,
+    "min_difficulty_4_or_higher": 45,
+    "max_numeric_template_duplicates": 2,
+    "required_tags": [
+      "perception", "boolean", "extrude", "rotate", "move", "distribute",
+      "align", "undo", "place", "group", "layer", "spatial", "recovery"
+    ]
+  }
+}

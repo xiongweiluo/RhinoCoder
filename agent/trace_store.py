@@ -135,6 +135,14 @@ def validate_ai_review_candidate(record: dict[str, Any]) -> GoldenGateResult:
         reasons.append("missing_successful_get_scene_summary")
     if not run.get("messages"):
         reasons.append("empty_messages")
+    task = record.get("task") or {}
+    requires_clean_tool_trace = task.get("requires_clean_tool_trace") or (
+        task.get("campaign_id") == "phase2-100" and task.get("task_id") == "p2-011"
+    )
+    if requires_clean_tool_trace and any(
+        not bool(call.get("success")) for call in (run.get("tool_calls") or [])
+    ):
+        reasons.append("failed_tool_call_requires_manual_review")
     if feedback.get("label") != AI_REVIEWED:
         reasons.append("ai_review_label_missing")
     if feedback.get("source") != "ai_visual_review":
@@ -279,7 +287,11 @@ def save_ai_reviewed_candidate(
     if not gate.accepted:
         raise ValueError(f"AI 审核候选准入失败: {gate.reasons}")
     key = _task_key(gate.sanitized_record)
-    existing = _read_jsonl(AI_REVIEWED_FILE) + _read_jsonl(GOLDEN_FILE)
+    active_ai_candidates = [
+        row for row in _read_jsonl(AI_REVIEWED_FILE)
+        if validate_ai_review_candidate(row).accepted
+    ]
+    existing = active_ai_candidates + _read_jsonl(GOLDEN_FILE)
     if key and any(_task_key(row) == key for row in existing):
         raise ValueError(f"审核任务重复: {key[0]}/{key[1]}")
     append_jsonl(AI_REVIEWED_FILE, gate.sanitized_record)

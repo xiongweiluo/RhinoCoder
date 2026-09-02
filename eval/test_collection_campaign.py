@@ -10,6 +10,8 @@ import agent.data_collector as data_collector
 from agent.collection_campaign import (
     DEFAULT_CAMPAIGN_MANIFEST,
     batch_id_for_task,
+    ai_reviewed_task_ids,
+    campaign_golden_task_ids,
     campaign_summary,
     load_campaign,
     promote_review_batch,
@@ -72,6 +74,36 @@ def test_phase1_campaign_has_30_diverse_unique_tasks():
     assert {"rotate", "move", "distribute", "align", "undo", "place"} <= tags
 
 
+def test_phase2_campaign_reuses_frozen_phase1_and_adds_70_tasks():
+    phase1 = load_campaign(DEFAULT_CAMPAIGN_MANIFEST)
+    phase2 = load_campaign(DEFAULT_CAMPAIGN_MANIFEST.with_name("phase2_100.json"))
+    assert phase2.target == 100
+    assert len(phase2.tasks) == 100
+    assert [task["id"] for task in phase2.tasks[:30]] == [task["id"] for task in phase1.tasks]
+    assert len({task["instruction"] for task in phase2.tasks}) == 100
+    assert sum(task["difficulty"] >= 4 for task in phase2.tasks) >= 45
+    assert {"boolean", "perception", "undo", "group", "spatial"} <= {
+        tag for task in phase2.tasks for tag in task["tags"]
+    }
+    assert phase2.inherited_golden_campaign_ids == ["phase1-30"]
+
+
+def test_phase2_summary_recognizes_frozen_phase1_golden_records(tmp_path):
+    phase1 = load_campaign(DEFAULT_CAMPAIGN_MANIFEST)
+    phase2 = load_campaign(DEFAULT_CAMPAIGN_MANIFEST.with_name("phase2_100.json"))
+    golden_path = tmp_path / "golden.jsonl"
+    golden_path.write_text(
+        json.dumps({"metadata": {"task": task_metadata(phase1, phase1.tasks[0])}}) + "\n",
+        encoding="utf-8",
+    )
+
+    assert campaign_golden_task_ids(phase2, golden_path) == {phase1.tasks[0]["id"]}
+    summary = campaign_summary(phase2, golden_path=golden_path, trace_dir=tmp_path / "traces")
+    assert summary["golden"] == 1
+    assert summary["remaining"] == 99
+    assert phase1.tasks[0]["id"] not in summary["collection_pending_task_ids"]
+
+
 def test_human_partial_feedback_is_physically_partial(monkeypatch, tmp_path):
     campaign = load_campaign(DEFAULT_CAMPAIGN_MANIFEST)
     record = _accepted_record(campaign, campaign.tasks[0])
@@ -99,6 +131,8 @@ def test_campaign_summary_supports_resume_and_cost_tracking(tmp_path):
     campaign = load_campaign(DEFAULT_CAMPAIGN_MANIFEST)
     task = campaign.tasks[0]
     record = _accepted_record(campaign, task)
+    # 原始 Trace 保持不可变；批量人工确认记录在独立黄金行中。
+    record["feedback"] = None
     trace_dir = tmp_path / "traces"
     trace_dir.mkdir()
     (trace_dir / "campaign-run-1.json").write_text(
@@ -116,6 +150,7 @@ def test_campaign_summary_supports_resume_and_cost_tracking(tmp_path):
     assert summary["golden"] == 1
     assert summary["remaining"] == 29
     assert summary["total_tokens"] == 120
+    assert summary["gate_failure_reasons"] == {}
     assert task["id"] not in summary["pending_task_ids"]
 
 
@@ -154,6 +189,54 @@ def _stage_ai_candidate(campaign, task, tmp_path, run_id):
         note="程序、轨迹、场景和视口检查均通过",
         visual_evidence=f"evidence/{task['id']}.png",
     )
+
+
+def test_ai_candidate_with_failed_tool_call_requires_manual_review(monkeypatch, tmp_path):
+    campaign = load_campaign(DEFAULT_CAMPAIGN_MANIFEST)
+    _configure_batch_paths(monkeypatch, tmp_path)
+    task = campaign.tasks[0]
+    evidence = tmp_path / "evidence" / "failed-tool.png"
+    evidence.parent.mkdir(parents=True, exist_ok=True)
+    evidence.write_bytes(b"viewport")
+    record = build_trace_record(
+        task["instruction"],
+        _run("failed-tool-run"),
+        evaluation={"passed": True, "partial": False, "score": 1.0, "failed_reasons": []},
+        task=task_metadata(campaign, task),
+    )
+    record["task"]["requires_clean_tool_trace"] = True
+    record["run"]["tool_calls"][0]["success"] = False
+    with pytest.raises(ValueError, match="failed_tool_call_requires_manual_review"):
+        save_ai_reviewed_candidate(
+            record,
+            batch_id=batch_id_for_task(campaign, task),
+            note="工具曾失败，必须人工复核",
+            visual_evidence="evidence/failed-tool.png",
+        )
+
+
+def test_invalid_ai_candidate_does_not_block_recollection(monkeypatch, tmp_path):
+    campaign = load_campaign(DEFAULT_CAMPAIGN_MANIFEST)
+    _, candidate_path = _configure_batch_paths(monkeypatch, tmp_path)
+    task = campaign.tasks[0]
+    evidence = tmp_path / "evidence" / "stale.png"
+    evidence.parent.mkdir(parents=True, exist_ok=True)
+    evidence.write_bytes(b"viewport")
+    stale = build_trace_record(
+        task["instruction"],
+        _run("stale-run"),
+        evaluation={"passed": True, "partial": False, "score": 1.0, "failed_reasons": []},
+        task=task_metadata(campaign, task),
+    )
+    stale["task"]["requires_clean_tool_trace"] = True
+    stale["run"]["tool_calls"][0]["success"] = False
+    stale["feedback"] = {
+        "label": "ai_reviewed_candidate", "source": "ai_visual_review",
+        "review": {"verdict": "pass", "checks": ["programmatic_assertions", "scene_summary", "tool_trace", "rhino_viewport"], "visual_evidence": "evidence/stale.png"},
+    }
+    candidate_path.write_text(json.dumps(stale) + "\n", encoding="utf-8")
+    assert task["id"] not in ai_reviewed_task_ids(campaign.campaign_id, path=candidate_path)
+    _stage_ai_candidate(campaign, task, tmp_path, "fresh-run")
 
 
 def test_ai_reviewed_batch_waits_for_one_human_confirmation(monkeypatch, tmp_path):

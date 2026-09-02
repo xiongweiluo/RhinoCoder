@@ -18,6 +18,7 @@ from agent.trace_store import (
     classify_trace_disposition,
     save_feedback,
     save_golden_batch,
+    validate_ai_review_candidate,
     validate_golden_candidate,
 )
 from agent.runtime import utc_now
@@ -34,6 +35,7 @@ class CampaignDefinition:
     target: int
     tasks: list[dict[str, Any]]
     manifest_path: Path
+    inherited_golden_campaign_ids: list[str]
 
 
 def _read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -58,15 +60,31 @@ def _read_json(path: Path) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
-def load_campaign(path: Path = DEFAULT_CAMPAIGN_MANIFEST) -> CampaignDefinition:
+def _load_manifest_tasks(
+    path: Path,
+    *,
+    ancestors: set[Path] | None = None,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """读取一个 campaign，并支持以只读方式组合已冻结的上游 campaign。"""
+    path = path.resolve()
+    if not path.is_relative_to(PROJECT_ROOT):
+        raise ValueError(f"campaign 文件越出项目目录: {path}")
+    ancestors = set(ancestors or ())
+    if path in ancestors:
+        raise ValueError(f"campaign 引用循环: {path}")
+    ancestors.add(path)
     manifest = json.loads(path.read_text(encoding="utf-8"))
     if manifest.get("schema_version") != "1.0":
         raise ValueError("campaign schema_version 必须为 1.0")
-    campaign_id = str(manifest.get("campaign_id", "")).strip()
-    if not campaign_id:
-        raise ValueError("campaign_id 不能为空")
 
     tasks: list[dict[str, Any]] = []
+    inherited = manifest.get("source_campaign_manifests") or []
+    if not isinstance(inherited, list):
+        raise ValueError("source_campaign_manifests 必须是数组")
+    for relative in inherited:
+        child_path = (path.parent / str(relative)).resolve()
+        _, child_tasks = _load_manifest_tasks(child_path, ancestors=ancestors)
+        tasks.extend(child_tasks)
     for relative in manifest.get("source_task_files") or []:
         task_path = (path.parent / str(relative)).resolve()
         if not task_path.is_relative_to(PROJECT_ROOT):
@@ -78,6 +96,25 @@ def load_campaign(path: Path = DEFAULT_CAMPAIGN_MANIFEST) -> CampaignDefinition:
     if not isinstance(additional, list):
         raise ValueError("additional_tasks 必须是数组")
     tasks.extend(additional)
+    return manifest, tasks
+
+
+def load_campaign(path: Path = DEFAULT_CAMPAIGN_MANIFEST) -> CampaignDefinition:
+    path = path.resolve()
+    manifest, tasks = _load_manifest_tasks(path)
+    campaign_id = str(manifest.get("campaign_id", "")).strip()
+    if not campaign_id:
+        raise ValueError("campaign_id 不能为空")
+    inherited_golden_campaign_ids = manifest.get("inherited_golden_campaign_ids") or []
+    if not isinstance(inherited_golden_campaign_ids, list):
+        raise ValueError("inherited_golden_campaign_ids 必须是数组")
+    inherited_golden_campaign_ids = [
+        str(value).strip() for value in inherited_golden_campaign_ids if str(value).strip()
+    ]
+    if len(set(inherited_golden_campaign_ids)) != len(inherited_golden_campaign_ids):
+        raise ValueError("inherited_golden_campaign_ids 不能重复")
+    if campaign_id in inherited_golden_campaign_ids:
+        raise ValueError("campaign 不能继承自身的黄金轨迹")
 
     target = int(manifest.get("target", 0))
     findings = validate_campaign_tasks(tasks, target=target, requirements=manifest.get("diversity_requirements") or {})
@@ -89,6 +126,7 @@ def load_campaign(path: Path = DEFAULT_CAMPAIGN_MANIFEST) -> CampaignDefinition:
         target=target,
         tasks=tasks,
         manifest_path=path,
+        inherited_golden_campaign_ids=inherited_golden_campaign_ids,
     )
 
 
@@ -148,12 +186,15 @@ def validate_campaign_tasks(
 
 
 def task_metadata(campaign: CampaignDefinition, task: dict[str, Any]) -> dict[str, Any]:
-    return {
+    metadata = {
         "campaign_id": campaign.campaign_id,
         "task_id": task["id"],
         "tags": list(task.get("tags") or []),
         "difficulty": int(task.get("difficulty", 0)),
     }
+    if task.get("requires_clean_tool_trace"):
+        metadata["requires_clean_tool_trace"] = True
+    return metadata
 
 
 def golden_task_ids(campaign_id: str, path: Path = GOLDEN_FILE) -> set[str]:
@@ -163,6 +204,35 @@ def golden_task_ids(campaign_id: str, path: Path = GOLDEN_FILE) -> set[str]:
         if task.get("campaign_id") == campaign_id and task.get("task_id"):
             found.add(str(task["task_id"]))
     return found
+
+
+def campaign_golden_task_ids(
+    campaign: CampaignDefinition,
+    path: Path = GOLDEN_FILE,
+) -> set[str]:
+    """返回本 campaign 与其冻结上游已确认的任务 ID。"""
+    campaign_ids = {campaign.campaign_id, *campaign.inherited_golden_campaign_ids}
+    found: set[str] = set()
+    for row in _read_jsonl(path):
+        task = ((row.get("metadata") or {}).get("task") or {})
+        if task.get("campaign_id") in campaign_ids and task.get("task_id"):
+            found.add(str(task["task_id"]))
+    return found
+
+
+def _campaign_golden_rows(
+    campaign: CampaignDefinition,
+    path: Path,
+) -> dict[str, dict[str, Any]]:
+    """按任务 ID 返回当前 campaign 及其冻结上游的黄金记录。"""
+    campaign_ids = {campaign.campaign_id, *campaign.inherited_golden_campaign_ids}
+    rows: dict[str, dict[str, Any]] = {}
+    for row in _read_jsonl(path):
+        task = ((row.get("metadata") or {}).get("task") or {})
+        task_id = str(task.get("task_id") or "")
+        if task.get("campaign_id") in campaign_ids and task_id:
+            rows[task_id] = row
+    return rows
 
 
 def ai_reviewed_candidates(
@@ -176,7 +246,11 @@ def ai_reviewed_candidates(
     latest: dict[str, dict[str, Any]] = {}
     for row in _read_jsonl(path):
         task = row.get("task") or {}
-        if task.get("campaign_id") == campaign_id and task.get("task_id"):
+        if (
+            task.get("campaign_id") == campaign_id
+            and task.get("task_id")
+            and validate_ai_review_candidate(row).accepted
+        ):
             latest[str(task["task_id"])] = row
     return [row for task_id, row in latest.items() if task_id not in golden_ids]
 
@@ -235,7 +309,7 @@ def review_batch_summary(
     trace_dir: Path = TRACE_DIR,
 ) -> dict[str, Any]:
     tasks = _batch_tasks(campaign, batch_id, batch_size=batch_size)
-    golden_ids = golden_task_ids(campaign.campaign_id, golden_path)
+    golden_ids = campaign_golden_task_ids(campaign, golden_path)
     candidates = {
         str((row.get("task") or {}).get("task_id")): row
         for row in ai_reviewed_candidates(
@@ -244,12 +318,7 @@ def review_batch_summary(
             golden_path=golden_path,
         )
     }
-    golden_rows = {
-        str((((row.get("metadata") or {}).get("task") or {}).get("task_id"))): row
-        for row in _read_jsonl(golden_path)
-        if (((row.get("metadata") or {}).get("task") or {}).get("campaign_id"))
-        == campaign.campaign_id
-    }
+    golden_rows = _campaign_golden_rows(campaign, golden_path)
     rows: list[dict[str, Any]] = []
     for task in tasks:
         task_id = str(task["id"])
@@ -312,6 +381,17 @@ def promote_review_batch(
         golden_path=golden_path,
     )
     if not summary["ready_for_human_review"]:
+        batch_task_ids = {row["task_id"] for row in summary["tasks"]}
+        latest_raw: dict[str, dict[str, Any]] = {}
+        for row in _read_jsonl(candidate_path):
+            task = row.get("task") or {}
+            task_id = str(task.get("task_id") or "")
+            if task.get("campaign_id") == campaign.campaign_id and task_id in batch_task_ids:
+                latest_raw[task_id] = row
+        for task_id, candidate in latest_raw.items():
+            gate = validate_ai_review_candidate(candidate)
+            if not gate.accepted:
+                raise ValueError(f"{task_id} 黄金晋级失败: {gate.reasons}")
         raise ValueError(f"批次尚未收齐，缺少 {summary['missing']} 条")
     candidates = {
         str((row.get("task") or {}).get("task_id")): row
@@ -413,7 +493,7 @@ def campaign_summary(
     candidate_path: Path = AI_REVIEWED_FILE,
     trace_dir: Path = TRACE_DIR,
 ) -> dict[str, Any]:
-    golden_ids = golden_task_ids(campaign.campaign_id, golden_path)
+    golden_ids = campaign_golden_task_ids(campaign, golden_path)
     ai_candidate_ids = ai_reviewed_task_ids(
         campaign.campaign_id,
         path=candidate_path,
@@ -454,7 +534,9 @@ def campaign_summary(
         for reason in ((record.get("evaluation") or {}).get("failed_reasons") or [])
     )
     gate_failures: Counter[str] = Counter()
-    for record in latest.values():
+    for task_id, record in latest.items():
+        if task_id in golden_ids:
+            continue
         feedback = record.get("feedback") or {}
         if feedback.get("source") != "human_review":
             gate_failures["human_review_missing"] += 1

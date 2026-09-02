@@ -31,6 +31,7 @@ rhino_listener/tools_perception.py  —  运行在 Rhino 8 内部（Python 3.9�
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 
 from ._types import _OBJECT_TYPE_MAP
 from .validation import is_guid
@@ -101,6 +102,27 @@ def _route_get_scene_summary(h) -> None:
     h._enqueue_and_wait("get_scene_summary", {})
 
 
+def _route_capture_viewport(h) -> None:
+    """导出当前视口；证据文件只能写入项目的审核目录。"""
+    data = h._parse_body()
+    if data is None:
+        return
+    relative_path = data.get("relative_path")
+    if not isinstance(relative_path, str) or not relative_path.strip():
+        h._send_json(400, {"status": "error", "message": "Missing relative_path"})
+        return
+    path = Path(relative_path)
+    if (
+        path.is_absolute()
+        or ".." in path.parts
+        or path.suffix.lower() != ".png"
+        or path.parts[:2] != ("data", "review_batches")
+    ):
+        h._send_json(400, {"status": "error", "message": "Invalid evidence path"})
+        return
+    h._enqueue_and_wait("capture_viewport", {"relative_path": str(path)})
+
+
 # ===========================================================================
 # Rhino 主线程执行层 — rhinoscriptsyntax 调用（零逻辑改动）
 # ===========================================================================
@@ -127,6 +149,32 @@ def _exec_get_selected_objects(rs, params: dict):
     if not ids:
         logger.info("扫盘完毕，未发现选中状态的对象")
     return {"object_ids": ids}
+
+
+def _exec_capture_viewport(rs, params: dict):
+    """在 Rhino 主线程生成真实视口 PNG，供 AI 初审和批量人工复核使用。"""
+    import Rhino as _Rhino
+
+    project_root = Path(__file__).resolve().parents[2]
+    output_path = (project_root / params["relative_path"]).resolve()
+    if not output_path.is_relative_to(project_root):
+        raise ValueError("evidence path escapes project root")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    view = _Rhino.RhinoDoc.ActiveDoc.Views.ActiveView
+    if view is None:
+        raise RuntimeError("没有可用的 Rhino 活动视口")
+    capture = _Rhino.Display.ViewCapture()
+    capture.Width, capture.Height = 1280, 800
+    capture.ScaleScreenItems = False
+    bitmap = capture.CaptureToBitmap(view)
+    if bitmap is None:
+        raise RuntimeError("Rhino 视口截图失败")
+    try:
+        bitmap.Save(str(output_path))
+    finally:
+        bitmap.Dispose()
+    logger.info("已导出 Rhino 视口证据: %s", output_path)
+    return {"visual_evidence": params["relative_path"]}
 
 
 def _exec_get_objects_by_name(rs, params: dict):
@@ -334,6 +382,7 @@ ROUTE_HANDLERS = {
     "/get_object_info":      _route_get_object_info,
     "/get_bounding_box":     _route_get_bounding_box,
     "/get_scene_summary":    _route_get_scene_summary,
+    "/capture_viewport":     _route_capture_viewport,
 }
 
 DISPATCH_HANDLERS = {
@@ -342,4 +391,5 @@ DISPATCH_HANDLERS = {
     "get_object_info":      _exec_get_object_info,
     "get_bounding_box":     _exec_get_bounding_box,
     "get_scene_summary":    _exec_get_scene_summary,
+    "capture_viewport":     _exec_capture_viewport,
 }

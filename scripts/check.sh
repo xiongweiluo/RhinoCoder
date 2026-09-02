@@ -8,6 +8,7 @@ python -m compileall -q agent data_pipeline eval plugin tools
 python -m pytest -q
 python eval/run_eval.py --dry-run
 python tools/check_collection_campaign.py
+python tools/check_collection_campaign.py --manifest eval/collection/phase2_100.json
 python tools/check_secrets.py
 python tools/audit_trace_data.py
 python tools/audit_release_data.py

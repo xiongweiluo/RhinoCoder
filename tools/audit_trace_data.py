@@ -64,16 +64,34 @@ def _read_jsonl(path: Path, audit: TraceDataAudit, label: str) -> list[dict[str,
 
 def audit_trace_data() -> TraceDataAudit:
     audit = TraceDataAudit()
-    for index, row in enumerate(_read_jsonl(GOLDEN_FILE, audit, "golden_v2"), 1):
+    golden_rows = _read_jsonl(GOLDEN_FILE, audit, "golden_v2")
+    golden_task_keys = {
+        (
+            str((((row.get("metadata") or {}).get("task") or {}).get("campaign_id") or "")),
+            str((((row.get("metadata") or {}).get("task") or {}).get("task_id") or "")),
+        )
+        for row in golden_rows
+    }
+    for index, row in enumerate(golden_rows, 1):
         for reason in validate_saved_golden_record(row):
             audit.findings.append(f"{GOLDEN_FILE.name}:{index}: {reason}")
 
-    for index, row in enumerate(_read_jsonl(AI_REVIEWED_FILE, audit, "ai_reviewed_candidate"), 1):
+    candidate_rows = _read_jsonl(AI_REVIEWED_FILE, audit, "ai_reviewed_candidate_history")
+    active_candidates = 0
+    for index, row in enumerate(candidate_rows, 1):
         if row.get("disposition") != AI_REVIEWED:
             audit.findings.append(f"{AI_REVIEWED_FILE.name}:{index}: disposition 应为 {AI_REVIEWED}")
+        if contains_sensitive_data(row):
+            audit.findings.append(f"{AI_REVIEWED_FILE.name}:{index}: 仍包含敏感字段")
+        task = row.get("task") or {}
+        task_key = (str(task.get("campaign_id") or ""), str(task.get("task_id") or ""))
+        if task_key in golden_task_keys:
+            continue
+        active_candidates += 1
         gate = validate_ai_review_candidate(row)
         for reason in gate.reasons:
             audit.findings.append(f"{AI_REVIEWED_FILE.name}:{index}: {reason}")
+    audit.counts["ai_reviewed_candidate"] = active_candidates
 
     separated = (
         (PARTIAL_FILE, "partial", PARTIAL),

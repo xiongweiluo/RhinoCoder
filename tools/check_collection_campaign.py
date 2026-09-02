@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import sys
+import argparse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -14,7 +15,10 @@ from agent.collection_campaign import DEFAULT_CAMPAIGN_MANIFEST, load_campaign
 
 
 def main() -> int:
-    campaign = load_campaign(DEFAULT_CAMPAIGN_MANIFEST)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--manifest", type=Path, default=DEFAULT_CAMPAIGN_MANIFEST)
+    args = parser.parse_args()
+    campaign = load_campaign(args.manifest)
     print(
         "Collection campaign check passed "
         f"({campaign.campaign_id}: {len(campaign.tasks)} unique tasks)."
