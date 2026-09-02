@@ -184,3 +184,18 @@ python tools/audit_trace_data.py
 ```
 
 第一阶段完成条件是 `golden=30`、审计通过、30 个任务 ID 无重复，并对所有 Partial/Fail 做过一次失败分布复盘。第二阶段完成条件同理扩展为 `golden=100`、活跃 AI 候选为 0、待采集为 0、100 个任务 ID 无重复，并完成失败、重试和纠错分布复盘；当前已满足。
+
+第三阶段清单位于 `eval/collection/phase3_300.json`，只读继承前两阶段 100 条黄金数据并新增 200 条长尾任务。任务设计和二十个审核批次见 [第三阶段任务设计](phase3-task-design.md)。采集时使用：
+
+```bash
+python agent/data_collector.py \
+  --manifest eval/collection/phase3_300.json \
+  --review-mode batch \
+  --batch-size 10 \
+  --allow-reset \
+  --auto-run \
+  --auto-review \
+  --limit 10
+```
+
+每批收齐后必须先检查十张 Rhino 视口截图和批次报告，再由人类输入精确的 `APPROVE` 原子晋级；不得跨批预授权。

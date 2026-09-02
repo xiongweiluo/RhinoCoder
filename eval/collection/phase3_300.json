@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "campaign_id": "phase3-300",
+  "title": "第三阶段 300 条真实黄金轨迹",
+  "target": 300,
+  "source_campaign_manifests": ["phase2_100.json"],
+  "inherited_golden_campaign_ids": ["phase1-30", "phase2-100"],
+  "source_task_files": ["../tasks/phase3_expansion.jsonl"],
+  "diversity_requirements": {
+    "min_unique_tags": 40,
+    "min_difficulty_4_or_higher": 260,
+    "max_numeric_template_duplicates": 2,
+    "required_tags": [
+      "boolean", "perception", "recovery", "group", "undo", "spatial",
+      "supported_by", "argument_error", "delete", "distribute", "align",
+      "layer", "place", "extrude", "tangent", "concentric"
+    ]
+  }
+}
