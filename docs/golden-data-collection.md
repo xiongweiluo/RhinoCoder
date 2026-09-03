@@ -37,6 +37,18 @@
 
 完整任务设计见 [第二阶段任务设计](phase2-task-design.md)。本地进度报告为 `data/collection_reports/phase2-100.{md,json}`，质量报告为 `data/collection_reports/phase2-100-quality.{md,json}`；这些报告包含准入、标签/难度/工具覆盖、失败与重试/纠错分布、延迟、token 和成本，并与真实轨迹、截图、反馈一起被 Git 忽略。
 
+## 第三阶段完成状态
+
+第三阶段清单位于 `eval/collection/phase3_300.json`，只读复用前两阶段已确认的 100 条黄金轨迹，并新增 200 条长尾任务。当前已完成 300/300 条黄金准入，AI 候选、待采集和剩余任务均为 0；稳定发布版本仍保持 `0.2.0`。
+
+- 300 条唯一指令、40 个标签。
+- 难度分布：L1 3 条、L2 6 条、L3 21 条、L4 149 条、L5 121 条。
+- 新增 200 条任务共经历 269 次运行；首次通过 154/200（77%），最终通过 200/200（100%），记录 67 次纠错事件。
+- 最终黄金轨迹共 17,875,489 token，估算成本 $0.660791；包含失败与重试在内的全部尝试共 19,869,479 token，估算成本 $0.730549。
+- 每条黄金数据均通过程序化断言、`get_scene_summary`、Rhino 视口证据、AI 初审、人工批量 `APPROVE`、脱敏与写入门禁。
+
+完整任务设计见 [第三阶段任务设计](phase3-task-design.md)。本地进度报告为 `data/collection_reports/phase3-300-progress.{md,json}`，质量报告为 `data/collection_reports/phase3-300-quality.{md,json}`；报告与真实轨迹、截图和反馈继续保持 Git 忽略。
+
 ## 安全前置条件
 
 1. 在 Rhino 中新建一个空白、可丢弃的 `.3dm` 文档。
@@ -57,7 +69,7 @@ python agent/data_collector.py --status
 
 ## 推荐采集节奏
 
-第一阶段默认使用 5 条一批，第二阶段使用 10 条一批的 AI 辅助审核。每条先通过程序断言、Scene Summary、Tool Trace 和 Rhino 视口检查，明确正确的轨迹只进入 `ai_reviewed_candidate`，整批收齐后再由人类一次性确认。AI 审核不能直接写入黄金集。
+第一阶段默认使用 5 条一批，第二、第三阶段使用 10 条一批的 AI 辅助审核。每条先通过程序断言、Scene Summary、Tool Trace 和 Rhino 视口检查，明确正确的轨迹只进入 `ai_reviewed_candidate`，整批收齐后再由人类一次性确认。AI 审核不能直接写入黄金集。
 
 第一次只跑一条验证链路：
 
@@ -185,7 +197,7 @@ python tools/audit_trace_data.py
 
 第一阶段完成条件是 `golden=30`、审计通过、30 个任务 ID 无重复，并对所有 Partial/Fail 做过一次失败分布复盘。第二阶段完成条件同理扩展为 `golden=100`、活跃 AI 候选为 0、待采集为 0、100 个任务 ID 无重复，并完成失败、重试和纠错分布复盘；当前已满足。
 
-第三阶段清单位于 `eval/collection/phase3_300.json`，只读继承前两阶段 100 条黄金数据并新增 200 条长尾任务。任务设计和二十个审核批次见 [第三阶段任务设计](phase3-task-design.md)。采集时使用：
+第三阶段完成条件为 `golden=300`、活跃 AI 候选为 0、待采集为 0、300 个任务 ID 无重复，并完成失败、重试和纠错分布复盘；当前已全部满足。如需在新的本地数据目录复现采集，使用：
 
 ```bash
 python agent/data_collector.py \

@@ -21,7 +21,7 @@ RhinoCoder 是一个基于 MCP 的 Rhino 8 空间设计 Agent。系统把自然�
 - React + TypeScript WebSocket 交互面板与三份脱敏 Replay。
 - 停止、重试、Undo、精准回滚和三类用户反馈。
 - 用户反馈、敏感字段脱敏和黄金样本准入规则。
-- 第二阶段真实黄金数据采集已完成：100/100 条黄金轨迹、36 个标签，累计 9,421,043 token，成本 $0.379609；本地质量报告与真实证据均保持 Git 忽略。
+- 第三阶段真实黄金数据采集已完成：300/300 条黄金轨迹、40 个标签，首次通过率 77%、最终通过率 100%；稳定原型版本仍为 `0.2.0`，本地质量报告与真实证据均保持 Git 忽略。
 - 三个核心场景已在真实 Rhino 环境中各连续运行 3 次成功，详见 [UI 真实环境验收报告](docs/ui-acceptance-report.md)。
 - WebSocket 快照恢复、Rhino Listener 热重启和四类故障恢复已完成真实验收，详见 [断线与故障恢复验收报告](docs/recovery-acceptance-report.md)。
 - 停止、重试、Undo、任务级精准回滚和三类反馈已完成真实演练，详见 [交互控制真实环境验收报告](docs/interaction-control-acceptance-report.md)。
@@ -171,13 +171,13 @@ python tools/audit_release_data.py
 
 ## 真实黄金数据采集
 
-无需 GPU 即可在单台 Mac 上采集真实黄金轨迹。第一阶段 30/30 与第二阶段 100/100 均已完成；第二阶段清单包含 100 条唯一指令和 36 个标签，难度分布为 L1=3、L2=6、L3=21、L4=49、L5=21，并覆盖旋转、移动、分布、对齐、Undo、布尔、感知和空间关系等任务。
+无需 GPU 即可在单台 Mac 上采集真实黄金轨迹。第一阶段 30/30、第二阶段 100/100 和第三阶段 300/300 均已完成。完整清单包含 300 条唯一指令和 40 个标签，难度分布为 L1=3、L2=6、L3=21、L4=149、L5=121，并覆盖旋转、移动、分布、对齐、Undo、布尔、感知、错误恢复和复杂空间关系等任务。第三阶段新增 200 条任务共经历 269 次运行，首次通过 154/200（77%），重试后最终通过 200/200（100%）。
 
 先校验清单和查看进度：
 
 ```bash
-python agent/data_collector.py --manifest eval/collection/phase2_100.json --dry-run
-python agent/data_collector.py --manifest eval/collection/phase2_100.json --status
+python agent/data_collector.py --manifest eval/collection/phase3_300.json --dry-run
+python agent/data_collector.py --manifest eval/collection/phase3_300.json --status
 ```
 
 在 Rhino 中打开空白、可丢弃的专用文档后，每次先采一条：
@@ -188,7 +188,7 @@ python agent/data_collector.py --allow-reset --limit 1
 
 采集器不会默认清空非空场景。每条轨迹仍必须通过程序断言、场景自检、人工确认、脱敏审计和 campaign 任务去重才能进入黄金集。完整操作与人工验收标准见[真实黄金轨迹采集指南](docs/golden-data-collection.md)。
 
-第二阶段采用每 10 条一次的批量流程：每条轨迹经程序化断言、至少一次 `get_scene_summary`、Rhino 视口截图与 AI 初审后，再由人类输入精确的 `APPROVE` 原子晋级。AI 审核不会冒充人工确认。采集进度与质量报告生成在 `data/collection_reports/phase2-100.{md,json}` 和 `phase2-100-quality.{md,json}`；它们连同真实轨迹、截图与反馈都只保留在本地并被 Git 忽略。
+第二、第三阶段采用每 10 条一次的批量流程：每条轨迹经程序化断言、至少一次 `get_scene_summary`、Rhino 视口截图与 AI 初审后，再由人类输入精确的 `APPROVE` 原子晋级。AI 审核不会冒充人工确认。第三阶段采集进度与质量报告生成在 `data/collection_reports/phase3-300-progress.{md,json}` 和 `phase3-300-quality.{md,json}`；它们连同真实轨迹、截图与反馈都只保留在本地并被 Git 忽略。
 
 ## 安全边界
 
