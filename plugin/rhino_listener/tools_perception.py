@@ -163,6 +163,16 @@ def _exec_capture_viewport(rs, params: dict):
     view = _Rhino.RhinoDoc.ActiveDoc.Views.ActiveView
     if view is None:
         raise RuntimeError("没有可用的 Rhino 活动视口")
+    viewport = view.ActiveViewport
+    if viewport is None:
+        raise RuntimeError("没有可用的 Rhino 活动视口配置")
+    # Evidence must be self-contained even when consecutive tasks create
+    # differently sized models. Fit the current scene, then leave a margin so
+    # the fixed 1280x800 capture does not clip geometry near the image edges.
+    if not viewport.ZoomExtents():
+        raise RuntimeError("Rhino 视口无法缩放到模型范围")
+    viewport.Magnify(0.85, False)
+    view.Redraw()
     capture = _Rhino.Display.ViewCapture()
     capture.Width, capture.Height = 1280, 800
     capture.ScaleScreenItems = False
