@@ -202,9 +202,16 @@ def build_tasks() -> list[dict[str, Any]]:
         marker_name, marker = _color(i)
         heights, xs = [16 + i, 30 + i * 2, 22 + i], [0, 24 + i, 52 + i * 2]
         radius = 3 + i % 2
+        # Preserve p3-103's already-collected instruction; clarify only tasks
+        # whose prior attempts exposed the ambiguous "top-face center" wording.
+        marker_placement = (
+            "最高圆柱顶面中心"
+            if i == 2
+            else "最高圆柱上，使球体底部紧贴圆柱顶面且球心与该顶面中心的 X/Y 坐标一致"
+        )
         tasks.append(_task(
             101 + i,
-            f"在 X={xs[0]}、{xs[1]}、{xs[2]} 处创建三根半径 5、底面 Z=0、高度分别为 {heights[0]}、{heights[1]}、{heights[2]} 的圆柱。必须先调用场景摘要识别最高圆柱，再把半径 {radius} 的{_rgb(marker_name, marker)}标记球放到最高圆柱顶面中心；不得按创建顺序猜测。",
+            f"在 X={xs[0]}、{xs[1]}、{xs[2]} 处创建三根半径 5、底面 Z=0、高度分别为 {heights[0]}、{heights[1]}、{heights[2]} 的圆柱。必须先调用场景摘要识别最高圆柱，再把半径 {radius} 的{_rgb(marker_name, marker)}标记球放到{marker_placement}；不得按创建顺序猜测。",
             ["perception", "select", "cylinder", "stack", "spatial", "sphere"], 4,
             [_count({}, 4), _spatial({"color": marker}, {"size": [10, 10, heights[1]]}, "on_top_of")],
         ))
@@ -315,11 +322,13 @@ def build_tasks() -> list[dict[str, Any]]:
         wrong_name, wrong = _color(i); final_name, final = _color(i + 10)
         width, depth, height = 18 + i, 12 + i, 10 + i
         dx, dz = 26 + i * 2, 8 + i
+        final_center = [width / 2 + dx, depth / 2, height / 2 + dz]
+        correction = [final_center[0] + 10, final_center[1] - 5, final_center[2]]
         tasks.append(_task(
             191 + i,
-            f"创建 {width}x{depth}x{height} 的方块，先故意设成{wrong_name}色并移动到错误位置 (-10,5,0)。调用场景摘要发现错误后，把同一个方块改为{_rgb(final_name, final)}，再平移到最终增量合计为 ({dx},0,{dz})；不得删除重建。最终只保留一个方块，并再次调用场景摘要确认颜色与中心。",
+            f"创建 {width}x{depth}x{height} 的方块，先故意设成{wrong_name}色并将其中心移到错误位置 (-10,5,0)。调用场景摘要发现错误后，把同一个方块改为{_rgb(final_name, final)}，并从当前错误位置精确平移向量 ({correction[0]:g},{correction[1]:g},{correction[2]:g})，使最终中心为 ({final_center[0]:g},{final_center[1]:g},{final_center[2]:g})；不得删除重建。最终只保留一个方块，并再次调用场景摘要确认颜色与中心。",
             ["revision", "recovery", "perception", "move", "color", "edit", "final_state"], 5,
-            [_count({"color": wrong}, 0), _count({"color": final}, 1), _property({"color": final}, {"center": [width / 2 + dx, depth / 2, height / 2 + dz]})],
+            [_count({"color": wrong}, 0), _count({"color": final}, 1), _property({"color": final}, {"center": final_center})],
         ))
 
     if len(tasks) != 200 or [row["id"] for row in tasks] != [f"p3-{i:03d}" for i in range(1, 201)]:
