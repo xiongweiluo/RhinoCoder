@@ -145,6 +145,12 @@ def test_tool_text_failures_are_classified():
     assert llm._tool_output_error_code("参数错误：object_id 不能为空") == "tool.invalid_argument"
     assert llm._tool_output_error_code("失败 [http.invalid_argument]：bad") == "http.invalid_argument"
     assert llm._tool_output_error_code("创建成功") is None
+    assert (
+        llm._tool_output_error_code(
+            "成功：布尔差集完成。\n结果 GUIDs = [cc710d48-dae4-41a5-88f1-c1c5fcfbdb73]"
+        )
+        is None
+    )
 
 
 def test_mcp_process_exit_is_recoverable():

@@ -76,7 +76,10 @@ CREATE_TOOLS = {
 GUID_PATTERN = re.compile(
     r"\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}\b"
 )
-ERROR_CODE_PATTERN = re.compile(r"\[([a-z][a-z0-9_.-]+)\]", re.IGNORECASE)
+ERROR_CODE_PATTERN = re.compile(
+    r"^(?:失败|错误)\s*\[([a-z][a-z0-9_.-]+)\]",
+    re.IGNORECASE,
+)
 
 
 # ---------------------------------------------------------------------------
