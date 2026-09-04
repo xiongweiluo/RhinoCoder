@@ -190,6 +190,14 @@ python agent/data_collector.py --allow-reset --limit 1
 
 第二、第三阶段采用每 10 条一次的批量流程：每条轨迹经程序化断言、至少一次 `get_scene_summary`、Rhino 视口截图与 AI 初审后，再由人类输入精确的 `APPROVE` 原子晋级。AI 审核不会冒充人工确认。第三阶段采集进度与质量报告生成在 `data/collection_reports/phase3-300-progress.{md,json}` 和 `phase3-300-quality.{md,json}`；它们连同真实轨迹、截图与反馈都只保留在本地并被 Git 忽略。
 
+完成 300 条采集后，可创建包含黄金记录、完整 Trace、截图证据、反馈、审核血缘、质量报告和 campaign manifest 的本地冻结备份：
+
+```bash
+python tools/freeze_golden_set.py
+```
+
+命令会在 `data/backups/golden-set-300/` 生成 SHA-256 清单、归档文件和恢复演练报告。输出继续受 Git 忽略；工具会拒绝把 `.env`、项目外文件、符号链接或检测到的 API 密钥写入备份。再次生成必须显式传入 `--overwrite`。完整结果见[黄金数据冻结与恢复报告](docs/golden-set-300-freeze-report.md)。
+
 ## 安全边界
 
 - Listener 仅绑定 `127.0.0.1`。
