@@ -196,8 +196,13 @@ class RhinoCoderAgent:
 
         返回结构化 AgentRunResult。
         """
+        from agent.db import record_live_trace
         from agent.llm import run_agent
-        return await run_agent(prompt, closed_loop=closed_loop)
+        from agent.trace_store import build_trace_record
+
+        result = await run_agent(prompt, closed_loop=closed_loop)
+        record_live_trace(build_trace_record(prompt, result))
+        return result
 
 
 # ---------------------------------------------------------------------------

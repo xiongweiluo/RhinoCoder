@@ -21,6 +21,7 @@ RhinoCoder 是一个基于 MCP 的 Rhino 8 空间设计 Agent。系统把自然�
 - React + TypeScript WebSocket 交互面板与三份脱敏 Replay。
 - 停止、重试、Undo、精准回滚和三类用户反馈。
 - 用户反馈、敏感字段脱敏和黄金样本准入规则。
+- 版本化 SQLite 审计数据库、幂等黄金数据导入、实时运行镜像、血缘查询、聚合导出和自动隐私审计。
 - 第三阶段真实黄金数据采集已完成：300/300 条黄金轨迹、40 个标签，首次通过率 77%、最终通过率 100%；稳定原型版本仍为 `0.2.0`，本地质量报告与真实证据均保持 Git 忽略。
 - 三个核心场景已在真实 Rhino 环境中各连续运行 3 次成功，详见 [UI 真实环境验收报告](docs/ui-acceptance-report.md)。
 - WebSocket 快照恢复、Rhino Listener 热重启和四类故障恢复已完成真实验收，详见 [断线与故障恢复验收报告](docs/recovery-acceptance-report.md)。
@@ -28,7 +29,7 @@ RhinoCoder 是一个基于 MCP 的 Rhino 8 空间设计 Agent。系统把自然�
 
 ### 后续规划
 
-- 本地/云端混合路由和 SQLite 审计。
+- 本地/云端混合路由。
 - 隐私红队任务。
 - 小规模 LoRA 与多模型对照实验。
 - Windows 验证、原生插件与多用户部署。
@@ -197,6 +198,26 @@ python tools/freeze_golden_set.py
 ```
 
 命令会在 `data/backups/golden-set-300/` 生成 SHA-256 清单、归档文件和恢复演练报告。输出继续受 Git 忽略；工具会拒绝把 `.env`、项目外文件、符号链接或检测到的 API 密钥写入备份。再次生成必须显式传入 `--overwrite`。完整结果见[黄金数据冻结与恢复报告](docs/golden-set-300-freeze-report.md)。
+
+## SQLite 审计数据库
+
+CLI、UI 或数据采集器完成运行以及保存 Trace、反馈时，会同步写入本地 `data/audit/rhinocoder.sqlite3`。数据库使用版本化迁移、外键、WAL 和幂等主键，文件默认受 Git 忽略。
+
+首次导入 300 条黄金数据：
+
+```bash
+python tools/audit_db.py import-golden
+```
+
+审计数据库、导出汇总和查询单次运行血缘：
+
+```bash
+python tools/audit_db.py audit
+python tools/audit_db.py summary --output data/audit/summary.json
+python tools/audit_db.py lineage <run_id> --output data/audit/lineage.json
+```
+
+可用 `RHINOCODER_AUDIT_DB` 指定数据库位置，或用 `RHINOCODER_AUDIT_ENABLED=0` 关闭运行时镜像写入。所有结构化内容在入库前经过统一脱敏，审计会检查 SQLite 完整性、外键、敏感字段和黄金样本血缘。Schema、表说明和真实 300 条导入结果见 [SQLite 审计数据库与 A2 验收报告](docs/sqlite-audit-database.md)。
 
 ## 安全边界
 

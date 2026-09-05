@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
@@ -10,6 +11,8 @@ from typing import Any, Optional
 from agent.runtime import AgentRunResult, utc_now
 from agent.sanitizer import contains_sensitive_data, sanitize_structure
 from agent.version import PROMPT_VERSION, TOOL_SCHEMA_VERSION, TRACE_SCHEMA_VERSION, __version__
+
+logger = logging.getLogger("rhinocoder.trace_store")
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 TRACE_DIR = PROJECT_ROOT / "data" / "traces"
@@ -224,7 +227,14 @@ def validate_saved_golden_record(record: dict[str, Any]) -> list[str]:
 def save_trace(record: dict[str, Any]) -> Path:
     TRACE_DIR.mkdir(parents=True, exist_ok=True)
     path = TRACE_DIR / f"{record['run_id']}.json"
-    path.write_text(json.dumps(sanitize_structure(record), ensure_ascii=False, indent=2), encoding="utf-8")
+    sanitized = sanitize_structure(record)
+    path.write_text(json.dumps(sanitized, ensure_ascii=False, indent=2), encoding="utf-8")
+    try:
+        from agent.db import record_live_trace
+
+        record_live_trace(sanitized, artifact_path=path)
+    except Exception as exc:
+        logger.warning("SQLite audit trace write failed for %s: %s", record.get("run_id"), exc)
     return path
 
 
@@ -393,6 +403,13 @@ def save_golden_batch(gates: list[GoldenGateResult], *, path: Path | None = None
         encoding="utf-8",
     )
     temporary.replace(target)
+    try:
+        from agent.db import record_live_golden
+
+        for payload in payloads:
+            record_live_golden(payload)
+    except Exception as exc:
+        logger.warning("SQLite audit golden write failed: %s", exc)
     return len(payloads)
 
 
@@ -401,4 +418,11 @@ def save_golden(gate: GoldenGateResult) -> None:
 
 
 def save_feedback(record: dict[str, Any]) -> None:
-    append_jsonl(FEEDBACK_FILE, sanitize_structure(record))
+    sanitized = sanitize_structure(record)
+    append_jsonl(FEEDBACK_FILE, sanitized)
+    try:
+        from agent.db import record_live_feedback
+
+        record_live_feedback(sanitized)
+    except Exception as exc:
+        logger.warning("SQLite audit feedback write failed for %s: %s", record.get("run_id"), exc)

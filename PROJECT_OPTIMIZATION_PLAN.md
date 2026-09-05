@@ -117,13 +117,15 @@
 
 #### A2：SQLite 审计数据库
 
-- [ ] 定义数据库 schema 和版本迁移。
-- [ ] 覆盖 `runs`、`tasks`、`models`、`route_decisions`、`tool_calls`、`scene_checks`、`assertions`、`feedback`、`admissions`、`cost_usage` 和 `artifacts`。
-- [ ] 实现 JSONL 到 SQLite 的幂等导入和新运行实时写入。
-- [ ] 实现单次运行血缘、模型/标签/失败类型汇总与导出。
-- [ ] 为数据库增加敏感字段过滤和自动审计。
+- [x] 定义数据库 schema 和版本迁移。
+- [x] 覆盖 `runs`、`tasks`、`models`、`route_decisions`、`tool_calls`、`scene_checks`、`assertions`、`feedback`、`admissions`、`cost_usage` 和 `artifacts`。
+- [x] 实现 JSONL 到 SQLite 的幂等导入和新运行实时写入。
+- [x] 实现单次运行血缘、模型/标签/失败类型汇总与导出。
+- [x] 为数据库增加敏感字段过滤和自动审计。
 
 验收：300 条黄金数据完整导入；重复导入无重复记录；SQLite 与 JSONL 统计一致；任意黄金样本可追溯到任务、运行、断言、反馈和证据。
+
+验收结果（2026-09-05）：通过。SQLite 与 JSONL 均为 300 个黄金运行和 300 个唯一任务；连续导入两次后所有表计数保持不变；数据库完整性、外键、敏感字段及全部 300 条黄金血缘审计无异常。详见 [SQLite 审计数据库与 A2 验收报告](docs/sqlite-audit-database.md)。
 
 #### A3：规则优先的混合路由
 
