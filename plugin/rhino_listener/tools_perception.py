@@ -183,7 +183,7 @@ def _exec_capture_viewport(rs, params: dict):
         bitmap.Save(str(output_path))
     finally:
         bitmap.Dispose()
-    logger.info("已导出 Rhino 视口证据: %s", output_path)
+    logger.info("已导出 Rhino 视口证据，relative_path_present=%s", bool(params.get("relative_path")))
     return {"visual_evidence": params["relative_path"]}
 
 
@@ -209,7 +209,10 @@ def _exec_get_objects_by_name(rs, params: dict):
                 if obj_name and obj_name.strip() == search_name:
                     matched.append(str(oid))
     except Exception as _e:
-        logger.warning("rs.AllObjects() 扫描失败，回退到 doc.Objects: %s", _e)
+        logger.warning(
+            "rs.AllObjects() 扫描失败，回退到 doc.Objects exception_type=%s",
+            type(_e).__name__,
+        )
         doc = _Rhino.RhinoDoc.ActiveDoc
         if doc is None:
             open_docs = _Rhino.RhinoDoc.OpenDocuments()
@@ -221,7 +224,7 @@ def _exec_get_objects_by_name(rs, params: dict):
                 if attr_name and attr_name.strip() == search_name:
                     matched.append(str(obj.Id))
 
-    logger.debug("get_objects_by_name('%s') 共找到 %d 个匹配对象", search_name, len(matched))
+    logger.debug("get_objects_by_name 共找到 %d 个匹配对象", len(matched))
     return {"object_ids": matched}
 
 

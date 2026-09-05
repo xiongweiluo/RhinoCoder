@@ -93,6 +93,7 @@ class AgentRunResult:
     created_object_ids: list[str] = field(default_factory=list)
     events: list[AgentEvent] = field(default_factory=list)
     route_decision: Optional[dict[str, Any]] = None
+    privacy_decision: Optional[dict[str, Any]] = None
     error: Optional[RunError] = None
     final_text: str = ""
 

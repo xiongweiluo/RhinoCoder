@@ -15,6 +15,7 @@ agent/main.py  —  RhinoCoder Agent 主控入口
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import logging
 import sys
 from pathlib import Path
@@ -30,6 +31,7 @@ import typer
 from dotenv import load_dotenv
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+from agent.privacy import install_privacy_log_filter, sanitize_for_log
 
 # ---------------------------------------------------------------------------
 # 路径 & 环境变量
@@ -49,6 +51,7 @@ def _setup_logging(verbose: bool = False) -> None:
         datefmt="%H:%M:%S",
         stream=sys.stderr,
     )
+    install_privacy_log_filter()
     # MCP SDK / httpx / anyio 的内部日志平时只看 WARNING，--verbose 时全开
     sdk_level = logging.DEBUG if verbose else logging.WARNING
     for noisy in ("mcp", "httpx", "httpcore", "anyio"):
@@ -64,7 +67,7 @@ _W = 10  # 标签宽度
 
 def _echo(phase: str, msg: str, err: bool = False) -> None:
     """typer.echo 包装：左对齐 phase 标签，保持视觉一致。"""
-    typer.echo(f"[{phase:<{_W}}] {msg}", err=err)
+    typer.echo(f"[{phase:<{_W}}] {sanitize_for_log(msg)}", err=err)
 
 
 # ---------------------------------------------------------------------------
@@ -263,7 +266,8 @@ def main(
     if prompt is not None:
         typer.echo("=" * 55)
         typer.echo("  RhinoCoder  LLM + MCP 完整链路")
-        typer.echo(f"  Prompt : {prompt}")
+        prompt_hash = hashlib.sha256(prompt.encode("utf-8")).hexdigest()[:12]
+        typer.echo(f"  Prompt : <REDACTED sha256={prompt_hash}>")
         typer.echo(f"  前提   : Rhino 已运行 start_listener()")
         typer.echo(f"           DEEPSEEK_API_KEY 已设置")
         typer.echo("=" * 55)

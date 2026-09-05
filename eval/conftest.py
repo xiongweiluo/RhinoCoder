@@ -4,6 +4,7 @@ import os
 # into the developer's default local database.
 os.environ.setdefault("RHINOCODER_AUDIT_ENABLED", "0")
 os.environ.setdefault("RHINOCODER_ROUTER_ENABLED", "0")
+os.environ.setdefault("RHINOCODER_MODEL_REQUEST_AUDIT_ENABLED", "0")
 
 # rhinocoder/eval/conftest.py
 #

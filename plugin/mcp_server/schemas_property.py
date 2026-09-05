@@ -60,7 +60,11 @@ def register(mcp, call_rhino) -> None:
         Returns:
             成功时返回确认消息，包含对象 ID、图层名称和图层索引；失败时返回详细错误描述。
         """
-        logger.info("set_object_layer 调用，object_id=%s, layer_name=%r", object_id, layer_name)
+        logger.info(
+            "set_object_layer 调用，object_id_present=%s, layer_name_length=%d",
+            bool(object_id),
+            len(layer_name) if isinstance(layer_name, str) else 0,
+        )
 
         if not object_id or not isinstance(object_id, str):
             return "参数错误：object_id 必须是非空字符串 GUID"

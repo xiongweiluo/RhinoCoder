@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import ast
+import hashlib
 import json
 import logging
 import os
@@ -25,6 +26,7 @@ from openai import APITimeoutError, AsyncOpenAI
 
 from agent.model_backends import BackendError, ModelBackend, build_default_backends
 from agent.pricing import calculate_cost, resolve_model_pricing
+from agent.privacy import PrivacyAction, classify_request, sanitize_for_log
 from agent.router import RouteContext, RouterConfig, select_route
 from agent.runtime import (
     AgentRunResult,
@@ -85,7 +87,7 @@ _W = 12
 
 def _echo(phase: str, msg: str, err: bool = False) -> None:
     import typer
-    typer.echo(f"[{phase:<{_W}}] {msg}", err=err)
+    typer.echo(f"[{phase:<{_W}}] {sanitize_for_log(msg)}", err=err)
 
 
 # ---------------------------------------------------------------------------
@@ -365,8 +367,49 @@ async def run_agent(
 
             record_live_trace(build_trace_record(prompt, result))
         except Exception as exc:
-            logger.warning("运行结束后的 SQLite 审计镜像失败: %s", exc)
+            logger.warning("运行结束后的 SQLite 审计镜像失败: %s", sanitize_for_log(str(exc)))
         return result
+
+    privacy = classify_request(prompt)
+    result.privacy_decision = privacy.to_dict()
+    safe_prompt = sanitize_for_log(prompt)
+    if privacy.action is PrivacyAction.BLOCK:
+        await emitter.emit(
+            "run.started",
+            {
+                "prompt": "<PRIVACY_BLOCKED>",
+                "prompt_sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
+                "closed_loop": closed_loop,
+            },
+        )
+        await emitter.emit("privacy.blocked", privacy.to_dict())
+        return await finish(
+            RunStatus.FAILED,
+            error=RunError(
+                "privacy.request_blocked",
+                "请求包含凭证、Prompt 注入或数据窃取信号，已在模型和 MCP 调用前阻止。",
+                recoverable=True,
+                detail=",".join(privacy.reason_codes),
+            ),
+        )
+
+    effective_route_context = route_context or RouteContext()
+    if privacy.action is PrivacyAction.FORCE_LOCAL:
+        effective_route_context = RouteContext(
+            privacy_level="high",
+            task_difficulty=effective_route_context.task_difficulty,
+            tool_complexity=effective_route_context.tool_complexity,
+            cost_budget_usd=effective_route_context.cost_budget_usd,
+            latency_budget_ms=effective_route_context.latency_budget_ms,
+        )
+    elif privacy.action is PrivacyAction.MINIMIZE_CLOUD and effective_route_context.privacy_level is None:
+        effective_route_context = RouteContext(
+            privacy_level="medium",
+            task_difficulty=effective_route_context.task_difficulty,
+            tool_complexity=effective_route_context.tool_complexity,
+            cost_budget_usd=effective_route_context.cost_budget_usd,
+            latency_budget_ms=effective_route_context.latency_budget_ms,
+        )
 
     try:
         backends = dict(
@@ -383,7 +426,7 @@ async def run_agent(
         decision = select_route(
             prompt,
             {name: backend.profile for name, backend in backends.items()},
-            context=route_context,
+            context=effective_route_context,
             config=routing,
         )
         active_backend = backends[decision.selected_backend]
@@ -392,7 +435,7 @@ async def run_agent(
     except (KeyError, ValueError) as exc:
         await emitter.emit(
             "run.started",
-            {"prompt": prompt, "model": DEEPSEEK_MODEL, "closed_loop": closed_loop},
+            {"prompt": safe_prompt, "model": DEEPSEEK_MODEL, "closed_loop": closed_loop},
         )
         return await finish(
             RunStatus.FAILED,
@@ -402,12 +445,13 @@ async def run_agent(
     await emitter.emit(
         "run.started",
         {
-            "prompt": prompt,
+            "prompt": safe_prompt,
             "model": active_backend.profile.model,
             "backend": active_backend.profile.backend_id,
             "closed_loop": closed_loop,
         },
     )
+    await emitter.emit("privacy.assessed", privacy.to_dict())
     await emitter.emit("route.selected", decision.to_dict())
 
     async def complete_with_fallback(
@@ -490,7 +534,11 @@ async def run_agent(
                 ]
                 result.messages = messages
 
-                _echo("LLM", f"思考中…  prompt={prompt!r}")
+                _echo(
+                    "LLM",
+                    "思考中…  prompt_sha256="
+                    + hashlib.sha256(prompt.encode("utf-8")).hexdigest()[:12],
+                )
 
                 # ── 4. 工具调用循环 ────────────────────────────────────────
                 scene_is_current = False
@@ -598,7 +646,11 @@ async def run_agent(
                             awaiting_recheck = True
 
                         _echo("INVOKE", f"{fn_name}({fn_args})")
-                        logger.debug("call_tool: name=%s  args=%s", fn_name, fn_args)
+                        logger.debug(
+                            "call_tool: name=%s args=%s",
+                            fn_name,
+                            sanitize_for_log(fn_args),
+                        )
 
                         tool_started_ms = monotonic_ms()
                         tool_record = ToolCallRecord(
@@ -754,7 +806,11 @@ async def run_agent(
     except Exception as exc:
         run_error = _classify_outer_exception(exc)
         _echo("ERROR", run_error.message, err=True)
-        logger.exception("run_agent 意外异常")
+        logger.error(
+            "run_agent 意外异常: %s: %s",
+            type(exc).__name__,
+            sanitize_for_log(str(exc)),
+        )
         return await finish(
             RunStatus.FAILED,
             error=run_error,

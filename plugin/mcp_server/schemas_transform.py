@@ -74,8 +74,8 @@ def register(mcp, call_rhino) -> None:
             成功时返回移动后对象 GUID 的确认消息；失败时返回详细错误描述。
         """
         logger.info(
-            "move_object 调用，object_id=%s, translate=(%.4f,%.4f,%.4f)",
-            object_id, translate_x, translate_y, translate_z,
+            "move_object 调用，object_id_present=%s, translate=(%.4f,%.4f,%.4f)",
+            bool(object_id), translate_x, translate_y, translate_z,
         )
 
         if not object_id or not isinstance(object_id, str):
@@ -149,8 +149,8 @@ def register(mcp, call_rhino) -> None:
             成功时返回旋转后对象 GUID 的确认消息（GUID 不变）；失败时返回详细错误描述。
         """
         logger.info(
-            "rotate_object 调用，object_id=%s, angle=%.4f, axis=%s, center=%s",
-            object_id, angle_degrees, axis, center_point,
+            "rotate_object 调用，object_id_present=%s, angle=%.4f, axis=%s, center=%s",
+            bool(object_id), angle_degrees, axis, center_point,
         )
 
         if not object_id or not isinstance(object_id, str):
@@ -241,8 +241,8 @@ def register(mcp, call_rhino) -> None:
             成功时返回缩放后对象 GUID 的确认消息（GUID 不变）；失败时返回详细错误描述。
         """
         logger.info(
-            "scale_object 调用，object_id=%s, scale_factor=%s, center=%s",
-            object_id, scale_factor, center_point,
+            "scale_object 调用，object_id_present=%s, scale_factor=%s, center=%s",
+            bool(object_id), scale_factor, center_point,
         )
 
         if not object_id or not isinstance(object_id, str):
@@ -524,8 +524,9 @@ def register(mcp, call_rhino) -> None:
             成功时返回群组名称及成员数量的确认消息；失败时返回详细错误描述。
         """
         logger.info(
-            "group_objects 调用，count=%d, group_name=%r",
-            len(object_ids) if object_ids else 0, group_name,
+            "group_objects 调用，count=%d, group_name_length=%d",
+            len(object_ids) if object_ids else 0,
+            len(group_name) if isinstance(group_name, str) else 0,
         )
 
         if not object_ids or len(object_ids) < 2:
@@ -595,8 +596,8 @@ def register(mcp, call_rhino) -> None:
             成功时返回吸附结果确认消息（含实际平移向量）；失败时返回详细错误描述。
         """
         logger.info(
-            "place_on_at 调用，target_id=%s, reference_id=%s, side=%r",
-            target_id, reference_id, side,
+            "place_on_at 调用，target_present=%s, reference_present=%s, side=%r",
+            bool(target_id), bool(reference_id), side,
         )
 
         if not target_id or not isinstance(target_id, str):

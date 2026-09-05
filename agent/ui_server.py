@@ -25,6 +25,7 @@ import httpx
 from aiohttp import WSMsgType, web
 
 from agent.llm import run_agent
+from agent.privacy import sanitize_for_log
 from agent.runtime import AgentEvent, AgentRunResult, CancellationToken, new_run_id, utc_now
 from agent.trace_store import save_feedback
 from agent.version import __version__
@@ -103,6 +104,7 @@ class RunManager:
                         "created_object_ids": managed.result.created_object_ids,
                         "events": list(managed.events),
                         "route_decision": managed.result.route_decision,
+                        "privacy_decision": managed.result.privacy_decision,
                         "control_scene": managed.control_scene,
                         "feedback_labels": list(managed.feedback_labels),
                         "rolled_back": managed.rolled_back,
@@ -121,7 +123,10 @@ class RunManager:
                         "timestamp": utc_now(),
                         "payload": {
                             "status": "failed",
-                            "error": {"code": "ui.run_manager", "message": str(exc)},
+                            "error": {
+                                "code": "ui.run_manager",
+                                "message": sanitize_for_log(str(exc)),
+                            },
                         },
                     }
                 )

@@ -191,7 +191,7 @@ async def call_rhino(endpoint: str, payload: dict) -> Tuple[bool, Any]:
         if data.get("status") == "error":
             error_msg = data.get("message", "未知内部错误")
             error_code = (data.get("error") or {}).get("code", "rhino.application_error")
-            logger.error("%s 返回应用层错误（HTTP 200）: %s", endpoint, error_msg)
+            logger.error("%s 返回应用层错误（HTTP 200），error_code=%s", endpoint, error_code)
             return False, f"失败 [{error_code}]：{error_msg}"
 
         # 多体操作（boolean_difference 等）：响应包含 "guids" 列表
@@ -214,9 +214,9 @@ async def call_rhino(endpoint: str, payload: dict) -> Tuple[bool, Any]:
     error_detail = data.get("message") or response.text[:300]
     error_code = (data.get("error") or {}).get("code", f"http.{response.status_code}")
     logger.error(
-        "Rhino Listener 返回错误 HTTP %d: %s",
+        "Rhino Listener 返回错误 HTTP %d，error_code=%s",
         response.status_code,
-        error_detail,
+        error_code,
     )
 
     if response.status_code == 504:

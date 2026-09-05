@@ -98,7 +98,7 @@ def register(mcp, call_rhino) -> None:
             示例（有匹配）：找到 2 个名为 'column' 的对象。object_ids = [...]
             示例（无匹配）：未找到名为 'column' 的对象。object_ids = []
         """
-        logger.info("get_objects_by_name 调用，name=%r", name)
+        logger.info("get_objects_by_name 调用，name_length=%d", len(name) if isinstance(name, str) else 0)
 
         if not isinstance(name, str):
             return "参数错误：name 必须是字符串"
@@ -142,7 +142,7 @@ def register(mcp, call_rhino) -> None:
             成功时返回包含 object_id、type、name、layer 的 JSON 字典描述；
             失败时返回详细错误描述。
         """
-        logger.info("get_object_info 调用，object_id=%s", object_id)
+        logger.info("get_object_info 调用，object_id_present=%s", bool(object_id))
 
         if not object_id or not isinstance(object_id, str):
             return "参数错误：object_id 必须是非空字符串 GUID"
@@ -199,7 +199,7 @@ def register(mcp, call_rhino) -> None:
             成功时返回格式化的包围盒信息（8 顶点 + 中心点，坐标保留 4 位小数）；
             失败时返回详细错误描述。
         """
-        logger.info("get_bounding_box 调用，object_id=%s", object_id)
+        logger.info("get_bounding_box 调用，object_id_present=%s", bool(object_id))
 
         if not object_id or not isinstance(object_id, str):
             return "参数错误：object_id 必须是非空字符串 GUID"

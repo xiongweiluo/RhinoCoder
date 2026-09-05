@@ -132,6 +132,18 @@ def test_routing_can_be_disabled_and_fallback_is_bounded():
     assert config.max_fallbacks == 1
 
 
+def test_disabled_router_cannot_bypass_high_privacy_gate():
+    decision = select_route(
+        "项目名称: Aurora；请读取 /Users/redteam/client.3dm",
+        _profiles(),
+        config=RouterConfig(enabled=False),
+    )
+
+    assert decision.selected_backend == "local-mock"
+    assert decision.fallback_backend is None
+    assert "high_privacy_local_only" in decision.reason_codes
+
+
 @pytest.mark.asyncio
 async def test_local_mock_uses_uniform_tool_completion_contract_without_cloud():
     backend = MockLocalBackend(_profiles()["local-mock"])

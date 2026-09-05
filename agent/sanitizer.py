@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import json
 import re
 from typing import Any
+
+from agent.privacy import cloud_sensitive_findings, minimize_text_for_cloud
 
 SECRET_RE = re.compile(r"\bsk-[A-Za-z0-9_-]{12,}\b")
 GUID_RE = re.compile(
@@ -35,6 +38,14 @@ COORD_KEYS = {
 }
 LAYER_KEYS = {"layer", "layer_name", "project_layer"}
 GROUP_KEYS = {"group", "groups", "group_name", "group_names"}
+IDENTITY_KEYS = {
+    "customer",
+    "customer_name",
+    "client",
+    "client_name",
+    "project_name",
+    "project_code",
+}
 
 
 def _is_secret_key(key: str) -> bool:
@@ -45,6 +56,7 @@ def _is_secret_key(key: str) -> bool:
 
 
 def sanitize_text(value: str) -> str:
+    value = minimize_text_for_cloud(value)
     value = SECRET_RE.sub("<SECRET_REDACTED>", value)
     value = GUID_RE.sub("<GUID_REDACTED>", value)
     value = POSIX_PATH_RE.sub("<PATH_REDACTED>", value)
@@ -60,6 +72,18 @@ def sanitize_structure(value: Any, *, parent_key: str = "") -> Any:
     # run_id 是数据血缘主键，不是 Rhino 对象 GUID，必须保留以支持追溯。
     if key_lc == "run_id" and isinstance(value, str):
         return value
+    if key_lc == "arguments" and isinstance(value, str):
+        try:
+            decoded = json.loads(value)
+        except json.JSONDecodeError:
+            pass
+        else:
+            return json.dumps(
+                sanitize_structure(decoded),
+                ensure_ascii=False,
+                separators=(",", ":"),
+                sort_keys=True,
+            )
     if _is_secret_key(key_lc):
         return "<SECRET_REDACTED>"
     if key_lc in LAYER_KEYS and isinstance(value, str):
@@ -69,6 +93,8 @@ def sanitize_structure(value: Any, *, parent_key: str = "") -> Any:
             return "<GROUP_REDACTED>" if value else value
         if isinstance(value, (list, tuple)):
             return ["<GROUP_REDACTED>" for item in value if item]
+    if key_lc in IDENTITY_KEYS:
+        return "<IDENTITY_REDACTED>" if value else value
     if key_lc in COORD_KEYS and isinstance(value, (list, tuple)) and 2 <= len(value) <= 3:
         if all(isinstance(item, (int, float)) for item in value):
             return "<COORD_REDACTED>"
@@ -107,6 +133,8 @@ def contains_sensitive_data(value: Any, *, parent_key: str = "") -> bool:
             return value not in ("", "<GROUP_REDACTED>")
         if isinstance(value, (list, tuple)):
             return any(item not in ("", "<GROUP_REDACTED>") for item in value)
+    if key_lc in IDENTITY_KEYS:
+        return value not in (None, "", "<IDENTITY_REDACTED>")
     if key_lc in COORD_KEYS and isinstance(value, (list, tuple)) and 2 <= len(value) <= 3:
         return all(isinstance(item, (int, float)) for item in value)
     if isinstance(value, str):
@@ -122,7 +150,14 @@ def contains_sensitive_data(value: Any, *, parent_key: str = "") -> bool:
             " REDACTED ",
             value,
         )
+        cloud_findings = [
+            finding
+            for finding in cloud_sensitive_findings(value)
+            if not finding.endswith((":layer", ":group"))
+        ]
         return bool(
+            cloud_findings
+            or
             SECRET_RE.search(value)
             or GUID_RE.search(value)
             or POSIX_PATH_RE.search(value)

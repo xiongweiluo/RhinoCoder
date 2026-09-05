@@ -10,6 +10,8 @@ from enum import Enum
 from typing import Mapping
 from uuid import uuid4
 
+from agent.privacy import PrivacyRisk, classify_request
+
 
 class PrivacyLevel(str, Enum):
     LOW = "low"
@@ -116,23 +118,6 @@ class RouterConfig:
         )
 
 
-HIGH_PRIVACY_PATTERNS = tuple(
-    re.compile(pattern, re.IGNORECASE)
-    for pattern in (
-        r"\b(?:api[_ -]?key|access[_ -]?token|password|secret)\b",
-        r"(?:密钥|密码|令牌|机密|绝密|严格保密|不要上传|禁止上云|仅本地|本地处理)",
-        r"(?:^|\s)/(?:Users|home|private|Volumes)/[^\s]+",
-        r"[A-Z]:\\(?:Users|Projects)\\[^\s]+",
-    )
-)
-MEDIUM_PRIVACY_PATTERNS = tuple(
-    re.compile(pattern, re.IGNORECASE)
-    for pattern in (
-        r"(?:客户|业主|项目代号|内部项目|合同|投标)",
-        r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2}\b",
-        r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}",
-    )
-)
 COMPLEXITY_TERMS = {
     "boolean": 2,
     "布尔": 2,
@@ -166,9 +151,10 @@ def _env_bool(value: str | None, default: bool) -> bool:
 
 
 def infer_privacy_level(prompt: str) -> PrivacyLevel:
-    if any(pattern.search(prompt) for pattern in HIGH_PRIVACY_PATTERNS):
+    risk = classify_request(prompt).risk
+    if risk in {PrivacyRisk.HIGH, PrivacyRisk.CRITICAL}:
         return PrivacyLevel.HIGH
-    if any(pattern.search(prompt) for pattern in MEDIUM_PRIVACY_PATTERNS):
+    if risk is PrivacyRisk.MEDIUM:
         return PrivacyLevel.MEDIUM
     return PrivacyLevel.LOW
 
@@ -237,7 +223,15 @@ def select_route(
     )
     reasons: list[str] = []
 
-    if not config.enabled:
+    if privacy is PrivacyLevel.HIGH:
+        selected = "local-mock"
+        if config.mode in {RouteMode.MAIN, RouteMode.ECONOMY}:
+            reasons.append("manual_mode_overridden")
+        if not config.enabled:
+            reasons.append("routing_disabled_overridden")
+        reasons.append("high_privacy_local_only")
+        reason = "检测到高隐私信号，安全门禁强制使用本地后端；不会降级到云端。"
+    elif not config.enabled:
         selected = "cloud-main"
         reasons.append("routing_disabled")
         reason = "混合路由已关闭，固定使用可靠主后端。"
@@ -247,17 +241,8 @@ def select_route(
             RouteMode.ECONOMY: "cloud-economy",
             RouteMode.LOCAL: "local-mock",
         }[config.mode]
-        if privacy is PrivacyLevel.HIGH and selected != "local-mock":
-            selected = "local-mock"
-            reasons.extend(("manual_mode_overridden", "high_privacy_local_only"))
-            reason = "检测到高隐私内容，覆盖手动云端模式并强制使用本地后端。"
-        else:
-            reasons.append("manual_mode")
-            reason = f"按 RHINOCODER_ROUTE_MODE={config.mode.value} 固定选择后端。"
-    elif privacy is PrivacyLevel.HIGH:
-        selected = "local-mock"
-        reasons.append("high_privacy_local_only")
-        reason = "检测到高隐私信号，仅允许本地后端；不会降级到云端。"
+        reasons.append("manual_mode")
+        reason = f"按 RHINOCODER_ROUTE_MODE={config.mode.value} 固定选择后端。"
     elif difficulty >= 4 or complexity >= 4:
         selected = "cloud-main"
         reasons.append("complex_task_reliable_backend")

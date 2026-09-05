@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import type { AgentEvent, HistoryItem, RouteDecision, SceneObject, SceneSnapshot } from "./types";
+import type { AgentEvent, HistoryItem, PrivacyDecision, RouteDecision, SceneObject, SceneSnapshot } from "./types";
 
 const examples = [
   "在原点创建一个 20x20x2 的基座，再在顶面居中放一个半径 8 的红色球体。",
@@ -160,6 +160,12 @@ export default function App() {
   const route = (routeEvent?.payload as unknown as RouteDecision | undefined)
     ?? currentHistory?.route_decision
     ?? undefined;
+  const privacyEvent = [...currentEvents].reverse().find((event) =>
+    event.type === "privacy.blocked" || event.type === "privacy.assessed"
+  );
+  const privacy = (privacyEvent?.payload as unknown as PrivacyDecision | undefined)
+    ?? currentHistory?.privacy_decision
+    ?? undefined;
   const isReplay = Boolean(latest?.replay);
   const isRunning = Boolean(currentRun && !terminal && !isReplay);
   const canRetry = Boolean(terminal && !isReplay);
@@ -224,9 +230,15 @@ export default function App() {
       <section className={`routing panel ${route?.degraded ? "degraded" : ""}`}>
         <div>
           <span className="eyebrow">MODEL ROUTE</span>
-          <strong>{route ? `${route.selected_backend} · ${route.selected_model}` : "等待路由决策"}</strong>
+          <strong>{route ? `${route.selected_backend} · ${route.selected_model}` : privacy?.action === "block" ? "请求已在本地阻断" : "等待路由决策"}</strong>
         </div>
-        <p>{route?.reason ?? "提交任务后将显示后端、路由理由和降级状态。"}</p>
+        <p>{route?.reason ?? privacy?.reasons?.join("；") ?? "提交任务后将显示后端、路由理由和降级状态。"}</p>
+        {privacy && <div className="route-signals">
+          <span>风险 {privacy.risk}</span>
+          <span>动作 {privacy.action}</span>
+          <span>{privacy.cloud_allowed ? "允许最小化云请求" : "禁止云请求"}</span>
+          {privacy.reason_codes.map((code) => <span key={code}>{code}</span>)}
+        </div>}
         {route && <div className="route-signals">
           <span>隐私 {route.privacy_level}</span>
           <span>难度 L{route.task_difficulty}</span>
@@ -288,10 +300,14 @@ function EventRow({event}: {event: AgentEvent}) {
   const failed = success === false || event.type === "run.failed";
   const rawError = failed ? payload.error ?? payload.output ?? "" : "";
   const errorText = typeof rawError === "string" ? rawError : rawError ? JSON.stringify(rawError) : "";
-  return <article className={`event ${failed ? "failed" : ""}`}><span className="event-dot" /><div><div className="event-head"><strong>{title}</strong><time>#{event.seq}</time></div><p>{event.type}</p>{payload.arguments ? <code>{JSON.stringify(payload.arguments)}</code> : null}{errorText ? <code className="event-error">{errorText}</code> : null}</div></article>;
+  const privacyReasons = event.type.startsWith("privacy.") && Array.isArray(payload.reason_codes)
+    ? payload.reason_codes.join(", ")
+    : "";
+  return <article className={`event ${failed || event.type === "privacy.blocked" ? "failed" : ""}`}><span className="event-dot" /><div><div className="event-head"><strong>{title}</strong><time>#{event.seq}</time></div><p>{event.type}</p>{payload.arguments ? <code>{JSON.stringify(payload.arguments)}</code> : null}{privacyReasons ? <code className={event.type === "privacy.blocked" ? "event-error" : ""}>{privacyReasons}</code> : null}{errorText ? <code className="event-error">{errorText}</code> : null}</div></article>;
 }
 
 function recoveryGuidance(code?: string) {
+  if (code === "privacy.request_blocked") return "移除凭证、数据窃取或 Prompt 注入内容后再提交；该请求尚未调用模型或 Rhino。";
   if (code === "llm.timeout") return "模型本轮未产生新的工具调用；可直接重试。";
   if (code?.startsWith("mcp.")) return "确认 MCP Server 可启动后重试，无需重启 UI。";
   if (code?.startsWith("rhino.")) return "确认 Rhino Listener 健康后重试；幂等键会防止网络重试产生重复对象。";

@@ -14,6 +14,7 @@ python tools/check_collection_campaign.py --manifest eval/collection/phase3_300.
 python tools/check_secrets.py
 python tools/audit_trace_data.py
 python tools/audit_release_data.py
+python tools/privacy_audit.py
 python tools/check_release_consistency.py
 if [[ -f data/audit/rhinocoder.sqlite3 ]]; then
   python tools/audit_db.py audit

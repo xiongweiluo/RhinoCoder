@@ -18,6 +18,12 @@ from openai import (
 )
 
 from agent.router import BackendProfile
+from agent.privacy import (
+    PrivacyViolation,
+    cloud_sensitive_findings,
+    prepare_cloud_messages,
+    record_model_request,
+)
 
 
 class BackendError(RuntimeError):
@@ -83,14 +89,36 @@ class OpenAICompatibleBackend(ModelBackend):
         tools: list[dict[str, Any]],
     ) -> Any:
         try:
-            return await self._client_instance().chat.completions.create(
+            outbound_messages = prepare_cloud_messages(messages)
+            tool_findings = cloud_sensitive_findings(tools)
+            if tool_findings:
+                raise PrivacyViolation(
+                    "privacy.outbound_tools_blocked",
+                    "模型工具定义包含敏感数据，已阻止发送。",
+                    tool_findings,
+                )
+            client = self._client_instance()
+            record_model_request(
+                backend=self.profile.backend_id,
                 model=self.profile.model,
-                messages=messages,
+                messages=outbound_messages,
+                tools=tools,
+            )
+            return await client.chat.completions.create(
+                model=self.profile.model,
+                messages=outbound_messages,
                 tools=tools or None,
                 tool_choice="auto" if tools else None,
             )
         except BackendError:
             raise
+        except PrivacyViolation as exc:
+            raise BackendError(
+                exc.code,
+                exc.message,
+                recoverable=True,
+                fallback_eligible=False,
+            ) from exc
         except AuthenticationError as exc:
             raise BackendError(
                 "llm.authentication",

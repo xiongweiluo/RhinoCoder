@@ -173,7 +173,11 @@ def api_error_handler(fn):
         try:
             return fn(h, *args, **kwargs)
         except Exception as exc:
-            logger.exception("api_error_handler 捕获未处理异常 [%s]: %s", fn.__name__, exc)
+            logger.error(
+                "api_error_handler 捕获未处理异常 [%s] exception_type=%s",
+                fn.__name__,
+                type(exc).__name__,
+            )
             try:
                 h._send_json(
                     200,
@@ -261,12 +265,12 @@ def _idle_handler(sender, e) -> None:  # type: ignore[override]
         # 若 HTTP 请求已超时，跳过执行，避免在 Rhino 中产生"幽灵对象"
         if work.cancelled:
             logger.warning(
-                "跳过已超时取消的任务 (op=%s, params=%s)",
-                work.operation, work.params,
+                "跳过已超时取消的任务 (op=%s, param_keys=%s)",
+                work.operation, sorted(work.params.keys()),
             )
             continue
 
-        logger.debug("主线程：执行 %s params=%s", work.operation, work.params)
+        logger.debug("主线程：执行 %s param_keys=%s", work.operation, sorted(work.params.keys()))
         try:
             import rhinoscriptsyntax as rs    # noqa: PLC0415
             import scriptcontext as sc        # noqa: PLC0415
@@ -298,17 +302,17 @@ def _idle_handler(sender, e) -> None:  # type: ignore[override]
                 logger.error(work.error)
             elif isinstance(result, dict):
                 work.result_data = result
-                logger.info("%s 成功，data=%s", work.operation, work.result_data)
+                logger.info("%s 成功，result_keys=%s", work.operation, sorted(work.result_data.keys()))
             elif isinstance(result, list):
                 work.result_guids = result
-                logger.info("%s 成功，GUIDs=%s", work.operation, work.result_guids)
+                logger.info("%s 成功，result_count=%d", work.operation, len(work.result_guids))
             else:
                 work.result_guid = str(result)
-                logger.info("%s 成功，GUID=%s", work.operation, work.result_guid)
+                logger.info("%s 成功，result_present=%s", work.operation, bool(work.result_guid))
 
         except Exception as exc:
             work.error = str(exc)
-            logger.exception("主线程执行 %s 失败: %s", work.operation, exc)
+            logger.error("主线程执行 %s 失败 exception_type=%s", work.operation, type(exc).__name__)
         finally:
             # 无论成功或失败，都通知等待中的 HTTP 处理线程
             work.done.set()
@@ -416,8 +420,8 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
         work = _PendingWork(operation=operation, params=params)
         _work_queue.put(work)
         logger.info(
-            "请求入队 %s(params=%s)，等待 Rhino 主线程（超时 %.1fs）…",
-            operation, params, REQUEST_TIMEOUT,
+            "请求入队 %s(param_keys=%s)，等待 Rhino 主线程（超时 %.1fs）…",
+            operation, sorted(params.keys()), REQUEST_TIMEOUT,
         )
 
         if not work.done.wait(timeout=REQUEST_TIMEOUT):
@@ -441,21 +445,21 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
             return
 
         if work.error:
-            logger.error("%s 执行失败: %s", operation, work.error)
+            logger.error("%s 执行失败 error_present=true", operation)
             self._send_json(
                 200,
                 _error_payload("rhino.execution_failed", work.error, recoverable=True),
             )
         elif work.result_data is not None:
-            logger.info("%s 完成，data=%s", operation, work.result_data)
+            logger.info("%s 完成，result_keys=%s", operation, sorted(work.result_data.keys()))
             payload = {"status": "ok", **work.result_data}
             self._cache_and_send(idempotency_key, request_signature, payload)
         elif work.result_guids is not None:
-            logger.info("%s 完成，GUIDs=%s", operation, work.result_guids)
+            logger.info("%s 完成，result_count=%d", operation, len(work.result_guids))
             payload = {"status": "ok", "guids": work.result_guids}
             self._cache_and_send(idempotency_key, request_signature, payload)
         else:
-            logger.info("%s 完成，GUID=%s", operation, work.result_guid)
+            logger.info("%s 完成，result_present=%s", operation, bool(work.result_guid))
             payload = {"status": "ok", "guid": work.result_guid}
             self._cache_and_send(idempotency_key, request_signature, payload)
 
@@ -503,7 +507,7 @@ def _server_thread_target(server: _ThreadedHTTPServer) -> None:
     try:
         server.serve_forever()
     except Exception as exc:
-        logger.exception("HTTP Listener 线程崩溃: %s", exc)
+        logger.error("HTTP Listener 线程崩溃 exception_type=%s", type(exc).__name__)
     finally:
         logger.info("HTTP Listener 线程退出")
 
@@ -534,7 +538,7 @@ def start_listener() -> None:
         except ImportError:
             logger.warning("Rhino 模块不可用，跳过 Idle 注册（非 Rhino 环境运行）")
         except Exception as exc:
-            logger.error("注册 Idle 处理器失败: %s", exc)
+            logger.error("注册 Idle 处理器失败 exception_type=%s", type(exc).__name__)
             raise
 
     # 创建 HTTP Server（可能因端口占用抛出 OSError）
@@ -542,10 +546,10 @@ def start_listener() -> None:
         server = _ThreadedHTTPServer((LISTEN_HOST, LISTEN_PORT), _RhinoHTTPHandler)
     except OSError as exc:
         logger.error(
-            "HTTP Server 创建失败，端口 %d 可能已被占用: %s\n"
+            "HTTP Server 创建失败，端口 %d 可能已被占用 exception_type=%s\n"
             "可尝试修改 LISTEN_PORT 后重启。",
             LISTEN_PORT,
-            exc,
+            type(exc).__name__,
         )
         raise
 
@@ -582,7 +586,7 @@ def stop_listener() -> None:
             _server_instance.server_close()
             logger.info("HTTP Server（端口 %d）已关闭", LISTEN_PORT)
         except Exception as exc:
-            logger.warning("关闭 HTTP Server 时出错: %s", exc)
+            logger.warning("关闭 HTTP Server 时出错 exception_type=%s", type(exc).__name__)
         _server_instance = None
 
     if _idle_registered:
@@ -592,7 +596,7 @@ def stop_listener() -> None:
             _idle_registered = False
             logger.info("已注销 Rhino.RhinoApp.Idle 处理器")
         except Exception as exc:
-            logger.warning("注销 Idle 处理器时出错（可忽略）: %s", exc)
+            logger.warning("注销 Idle 处理器时出错（可忽略） exception_type=%s", type(exc).__name__)
 
     _server_thread = None
     logger.info("HTTP Listener 已停止")

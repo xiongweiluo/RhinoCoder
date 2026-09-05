@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from agent.runtime import AgentRunResult, utc_now
+from agent.privacy import sanitize_for_log
 from agent.sanitizer import contains_sensitive_data, sanitize_structure
 from agent.version import PROMPT_VERSION, TOOL_SCHEMA_VERSION, TRACE_SCHEMA_VERSION, __version__
 
@@ -234,7 +235,11 @@ def save_trace(record: dict[str, Any]) -> Path:
 
         record_live_trace(sanitized, artifact_path=path)
     except Exception as exc:
-        logger.warning("SQLite audit trace write failed for %s: %s", record.get("run_id"), exc)
+        logger.warning(
+            "SQLite audit trace write failed for %s: %s",
+            record.get("run_id"),
+            sanitize_for_log(str(exc)),
+        )
     return path
 
 
@@ -409,7 +414,7 @@ def save_golden_batch(gates: list[GoldenGateResult], *, path: Path | None = None
         for payload in payloads:
             record_live_golden(payload)
     except Exception as exc:
-        logger.warning("SQLite audit golden write failed: %s", exc)
+        logger.warning("SQLite audit golden write failed: %s", sanitize_for_log(str(exc)))
     return len(payloads)
 
 
@@ -425,4 +430,8 @@ def save_feedback(record: dict[str, Any]) -> None:
 
         record_live_feedback(sanitized)
     except Exception as exc:
-        logger.warning("SQLite audit feedback write failed for %s: %s", record.get("run_id"), exc)
+        logger.warning(
+            "SQLite audit feedback write failed for %s: %s",
+            record.get("run_id"),
+            sanitize_for_log(str(exc)),
+        )

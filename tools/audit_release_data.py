@@ -16,6 +16,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from agent.sanitizer import GUID_RE, POSIX_PATH_RE, SECRET_RE, WINDOWS_PATH_RE
+from agent.privacy import cloud_sensitive_findings
 
 MANIFEST_PATH = ROOT / "docs" / "release-data-manifest.json"
 EXPECTED_ARTIFACTS = {
@@ -66,6 +67,13 @@ def _scan_public_text(relative: str, text: str, audit: ReleaseDataAudit) -> None
     for label, pattern in patterns.items():
         if pattern.search(scrubbed):
             audit.findings.append(f"{relative}: 检测到{label}")
+    privacy_findings = [
+        finding
+        for finding in cloud_sensitive_findings(text)
+        if not finding.endswith((":layer", ":group", ":local_path", ":windows_path"))
+    ]
+    if privacy_findings:
+        audit.findings.append(f"{relative}: 检测到隐私内容 {privacy_findings[:5]}")
 
 
 def _walk_replay(value: Any, relative: str, audit: ReleaseDataAudit, path: str = "$") -> None:

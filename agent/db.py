@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Iterator, Sequence
 
 from agent.sanitizer import contains_sensitive_data, sanitize_structure
+from agent.privacy import sanitize_for_log
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -1243,7 +1244,11 @@ def record_live_trace(record: dict[str, Any], *, artifact_path: Path | None = No
         with AuditDatabase(configured_audit_path()) as database:
             database.ingest_trace(record, artifact_path=artifact_path)
     except Exception as exc:
-        logger.warning("SQLite audit trace write failed for %s: %s", record.get("run_id"), exc)
+        logger.warning(
+            "SQLite audit trace write failed for %s: %s",
+            record.get("run_id"),
+            sanitize_for_log(str(exc)),
+        )
 
 
 def record_live_feedback(record: dict[str, Any]) -> None:
@@ -1253,7 +1258,11 @@ def record_live_feedback(record: dict[str, Any]) -> None:
         with AuditDatabase(configured_audit_path()) as database:
             database.ingest_feedback(record)
     except Exception as exc:
-        logger.warning("SQLite audit feedback write failed for %s: %s", record.get("run_id"), exc)
+        logger.warning(
+            "SQLite audit feedback write failed for %s: %s",
+            record.get("run_id"),
+            sanitize_for_log(str(exc)),
+        )
 
 
 def record_live_golden(record: dict[str, Any]) -> None:
@@ -1263,4 +1272,8 @@ def record_live_golden(record: dict[str, Any]) -> None:
         with AuditDatabase(configured_audit_path()) as database:
             database.mark_golden(record)
     except Exception as exc:
-        logger.warning("SQLite audit golden write failed for %s: %s", record.get("run_id"), exc)
+        logger.warning(
+            "SQLite audit golden write failed for %s: %s",
+            record.get("run_id"),
+            sanitize_for_log(str(exc)),
+        )

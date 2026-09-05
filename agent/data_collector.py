@@ -23,6 +23,7 @@ import httpx
 import typer
 
 from agent.llm import run_agent
+from agent.privacy import install_privacy_log_filter, sanitize_for_log
 from agent.collection_campaign import (
     DEFAULT_CAMPAIGN_MANIFEST,
     CampaignDefinition,
@@ -54,7 +55,7 @@ _W = 12
 
 
 def _echo(phase: str, message: str, err: bool = False) -> None:
-    typer.echo(f"[{phase:<{_W}}] {message}", err=err)
+    typer.echo(f"[{phase:<{_W}}] {sanitize_for_log(message)}", err=err)
 
 
 def _setup_logging() -> None:
@@ -64,6 +65,7 @@ def _setup_logging() -> None:
         datefmt="%H:%M:%S",
         stream=sys.stderr,
     )
+    install_privacy_log_filter()
     for noisy in ("mcp", "httpx", "httpcore", "anyio"):
         logging.getLogger(noisy).setLevel(logging.WARNING)
 
@@ -203,7 +205,7 @@ async def _collect_loop(
             "TASK",
             f"{index}/{len(pending)} {task['id']} | 难度 L{task['difficulty']} | {', '.join(task['tags'])}",
         )
-        typer.echo(task["instruction"])
+        typer.echo(sanitize_for_log(task["instruction"]))
         action = "run" if auto_run else input(
             "输入 RUN 清空当前采集场景并执行；s 跳过；q 退出: "
         ).strip().lower()

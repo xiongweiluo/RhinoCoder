@@ -7,6 +7,8 @@ React UI / Replay
       | WebSocket AgentEvent
 aiohttp UI Server + RunManager
       | run_agent(prompt)
+Local Privacy Gate -> block / force local / minimize
+      | allowed request
 Rule-first Router -> Main Cloud / Economy Cloud / Local Mock
       | one uniform completion interface
 OpenAI-compatible planning <-> MCP ClientSession
@@ -23,13 +25,14 @@ OpenAI-compatible planning <-> MCP ClientSession
 ## Run data flow
 
 1. UI 或 CLI 创建 `run_id` 并调用 `run_agent`。
-2. 本地规则路由按隐私、难度、工具复杂度、成本和延迟预算生成结构化 `RouteDecision`。
-3. Agent 发现 MCP 工具，通过统一后端接口向所选模型发送系统 Prompt。
-4. 每次路由、规划和工具调用产生单调递增的 `AgentEvent`。
-5. 变更操作携带幂等键；Listener 将操作切换到 Rhino 主线程。
-6. Closed-loop 模式要求模型读取 `get_scene_summary` 并在需要时纠错。
-7. `AgentRunResult` 汇总消息、工具、指标、场景检查、路由决策、对象 ID 和错误。
-8. 运行结束后 Trace 与 `route_decisions` 写入 SQLite；UI 可实时展示或离线 Replay。
+2. 不可关闭的本地隐私门生成结构化 `PrivacyDecision`；Critical 请求提前阻断，高风险强制本地，中风险标记为出站最小化。
+3. 规则路由按隐私、难度、工具复杂度、成本和延迟预算生成结构化 `RouteDecision`。
+4. Agent 发现 MCP 工具；云端边界白名单化并最小化消息，二次扫描通过后才发送。
+5. 每次隐私判断、路由、规划和工具调用产生单调递增的 `AgentEvent`。
+6. 变更操作携带幂等键；Listener 将操作切换到 Rhino 主线程。
+7. Closed-loop 模式要求模型读取 `get_scene_summary` 并在需要时纠错。
+8. `AgentRunResult` 汇总消息、工具、指标、场景检查、隐私/路由决策、对象 ID 和错误。
+9. 运行结束后 Trace 与 `route_decisions` 写入 SQLite；UI 可实时展示或离线 Replay。
 
 ## Interface versions
 
@@ -53,6 +56,9 @@ OpenAI-compatible planning <-> MCP ClientSession
 - UI 与 Listener 只绑定本机回环地址。
 - 模型密钥仅从环境变量读取，不进入事件和报告。
 - 高隐私路由只允许本地后端，候选云后端标记为不可用且没有云端 fallback。
+- 凭证、Prompt 注入和数据窃取请求在 MCP/模型启动前阻断；该门禁不受普通路由开关影响。
+- 云端请求只保留白名单消息字段，身份、路径、邮箱、图层、群组和密钥在出站前最小化并二次扫描。
+- Trace、日志、SQLite、Replay 和实际模型请求台账使用统一可重复审计；几何坐标、尺寸和对象 ID 保留用于闭环验证。
 - 完整 Trace 与评测结果默认被 Git 忽略。
 - `reset_environment` 要求 Agent 与 Rhino 进程共享本地评测令牌。
 - 黄金样本在写入前必须通过断言、自检、人工确认和脱敏。

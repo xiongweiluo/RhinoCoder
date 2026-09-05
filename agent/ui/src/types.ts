@@ -16,6 +16,7 @@ export type HistoryItem = {
   created_object_ids: string[];
   events: AgentEvent[];
   route_decision?: RouteDecision | null;
+  privacy_decision?: PrivacyDecision | null;
   control_scene?: SceneSnapshot | null;
   feedback_labels?: string[];
   rolled_back?: boolean;
@@ -32,6 +33,16 @@ export type RouteDecision = {
   fallback_from?: string | null;
   fallback_error_code?: string | null;
   degraded: boolean;
+};
+
+export type PrivacyDecision = {
+  decision_id: string;
+  risk: string;
+  action: string;
+  reason_codes: string[];
+  reasons: string[];
+  cloud_allowed: boolean;
+  requires_minimization: boolean;
 };
 
 export type SceneSnapshot = {

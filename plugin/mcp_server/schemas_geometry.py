@@ -310,8 +310,8 @@ def register(mcp, call_rhino) -> None:
             成功时返回挤出实体/曲面 GUID 的确认消息；失败时返回详细错误描述。
         """
         logger.info(
-            "extrude_curve_straight 调用，curve_id=%s, start=(%.4f,%.4f,%.4f) end=(%.4f,%.4f,%.4f)",
-            curve_id, start_x, start_y, start_z, end_x, end_y, end_z,
+            "extrude_curve_straight 调用，curve_id_present=%s, start=(%.4f,%.4f,%.4f) end=(%.4f,%.4f,%.4f)",
+            bool(curve_id), start_x, start_y, start_z, end_x, end_y, end_z,
         )
 
         if not curve_id or not isinstance(curve_id, str):
@@ -390,7 +390,9 @@ def register(mcp, call_rhino) -> None:
             失败时返回详细错误描述（包含可能的原因提示）。
         """
         logger.info(
-            "boolean_difference 调用，input0=%s, input1=%s", input0_ids, input1_ids
+            "boolean_difference 调用，input0_count=%d, input1_count=%d",
+            len(input0_ids) if input0_ids else 0,
+            len(input1_ids) if input1_ids else 0,
         )
 
         if not input0_ids:

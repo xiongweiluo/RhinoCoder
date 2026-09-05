@@ -23,6 +23,7 @@ RhinoCoder 是一个基于 MCP 的 Rhino 8 空间设计 Agent。系统把自然�
 - 用户反馈、敏感字段脱敏和黄金样本准入规则。
 - 版本化 SQLite 审计数据库、幂等黄金数据导入、实时运行镜像、血缘查询、聚合导出和自动隐私审计。
 - 规则优先混合路由：可靠主云模型、低成本云模型与本地 Mock 后端，包含有限安全降级、SQLite 血缘及 UI 可视化。
+- 隐私红队与不可绕过的请求安全门：高风险强制本地、凭证/窃取请求提前阻断、云端字段最小化及 Trace/日志/SQLite/Replay/模型请求统一审计。
 - 第三阶段真实黄金数据采集已完成：300/300 条黄金轨迹、40 个标签，首次通过率 77%、最终通过率 100%；稳定原型版本仍为 `0.2.0`，本地质量报告与真实证据均保持 Git 忽略。
 - 三个核心场景已在真实 Rhino 环境中各连续运行 3 次成功，详见 [UI 真实环境验收报告](docs/ui-acceptance-report.md)。
 - WebSocket 快照恢复、Rhino Listener 热重启和四类故障恢复已完成真实验收，详见 [断线与故障恢复验收报告](docs/recovery-acceptance-report.md)。
@@ -31,7 +32,6 @@ RhinoCoder 是一个基于 MCP 的 Rhino 8 空间设计 Agent。系统把自然�
 ### 后续规划
 
 - 真实本地推理后端与多模型对照评测。
-- 隐私红队任务。
 - 小规模 LoRA 与多模型对照实验。
 - Windows 验证、原生插件与多用户部署。
 
@@ -167,6 +167,7 @@ python tools/recalculate_benchmark_cost.py eval/results/<benchmark>.json
 ```bash
 python tools/audit_trace_data.py
 python tools/audit_release_data.py
+python tools/privacy_audit.py
 ```
 
 新黄金数据只写入 `data/golden_traces_v2.jsonl`。旧的根目录 `golden_dataset.jsonl` 缺少当前准入元数据，只作为本地 legacy 数据保留，不会进入新 SFT 正样本。完整验收证据见 [数据与脱敏验收报告](docs/data-sanitization-acceptance-report.md)。
@@ -233,11 +234,29 @@ RHINOCODER_ROUTE_MODE=main python agent/main.py --prompt "创建一个方块"
 RHINOCODER_ROUTER_ENABLED=0 python agent/main.py --prompt "创建一个方块"
 ```
 
+关闭混合路由只会固定普通请求的主模型选择，不会关闭隐私门禁；高隐私请求依然强制本地，Critical 请求依然在 MCP 和模型初始化前阻断。
+
 瞬时超时、连接错误、HTTP 429、5xx 或明确的模型不可用错误最多触发一次云端后端降级。切换发生在模型规划请求边界，继续使用原消息和已完成工具结果，不会重放 Rhino 工具调用。路由选择、理由和降级结果会进入事件流、UI 与 SQLite。完整规则、配置和验收证据见 [规则优先混合路由与 A3 验收报告](docs/hybrid-routing.md)。
+
+## 隐私红队与云端最小化
+
+每个请求先在本地分类：凭证、Prompt 注入和数据窃取意图会直接阻断；客户/项目身份、本机路径、图层、群组和明确仅本地要求会强制进入本地后端且禁止云端降级；邮箱等中风险标识会在出站前替换。云模型边界还会丢弃非白名单消息字段、二次扫描消息和工具定义，并将实际尝试发送的最小化请求写入权限为 `0600` 的本地审计台账。
+
+可重复执行完整红队与存储面审计：
+
+```bash
+python tools/privacy_audit.py
+python tools/privacy_audit.py --json
+python tools/privacy_audit.py --write-report docs/privacy-red-team-report.md
+```
+
+可用 `RHINOCODER_MODEL_REQUEST_AUDIT_ENABLED=0` 关闭请求台账，或用 `RHINOCODER_MODEL_REQUEST_AUDIT` 修改路径；隐私分类、阻断、强制本地和出站二次扫描不会随台账关闭。红队类别、覆盖数量与零泄漏结论见 [A4 隐私红队与零泄漏验收报告](docs/privacy-red-team-report.md)。
 
 ## 安全边界
 
 - Listener 仅绑定 `127.0.0.1`。
+- 隐私门禁先于普通路由、MCP 和模型调用，不能通过关闭路由或手动指定云模型绕过。
+- Agent、MCP Server 与 Listener 日志不记录原始 Prompt、对象名、图层/群组名、本机路径或异常正文。
 - `.env`、运行轨迹、评测结果和真实数据默认不进入 Git。
 - `reset_environment` 只用于显式评测流程，不应暴露给普通 UI。
 - 仓库历史中曾出现过密钥格式的值；使用者必须轮换对应密钥，删除工作区内容不能使旧密钥失效。

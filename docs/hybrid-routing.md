@@ -20,9 +20,9 @@ A3 已于 2026-09-05 完成并通过离线自动验收。RhinoCoder 现在使用
 
 规则按以下优先级执行：
 
-1. 路由关闭时固定使用 `cloud-main`，用于兼容原有单模型行为。
-2. `main`、`economy`、`local` 手动模式固定选择对应后端；高隐私信号仍会覆盖手动云端模式。
-3. 密钥、密码、机密、禁止上云、仅本地及用户绝对路径等高隐私信号强制进入 `local-mock`，云端候选标记为不可用且无 fallback。
+1. 不可关闭的隐私门先执行；Critical 请求直接阻断，高隐私请求固定使用 `local-mock`，并覆盖关闭路由或手动云端模式。
+2. 对其余请求，路由关闭时固定使用 `cloud-main`，用于兼容原有单模型行为。
+3. `main`、`economy`、`local` 手动模式固定选择对应后端。
 4. 难度或工具复杂度达到 L4/L5 时选择 `cloud-main`。
 5. 非复杂任务在成本预算不高于 0.01 USD 或延迟预算不高于 30 秒时选择 `cloud-economy`。
 6. 其余简单任务选择 `cloud-economy`，多步任务选择 `cloud-main`。
@@ -39,7 +39,7 @@ A3 已于 2026-09-05 完成并通过离线自动验收。RhinoCoder 现在使用
 
 | 环境变量 | 默认值 | 说明 |
 | --- | --- | --- |
-| `RHINOCODER_ROUTER_ENABLED` | `1` | `0` 恢复固定主模型行为 |
+| `RHINOCODER_ROUTER_ENABLED` | `1` | `0` 对普通请求恢复固定主模型行为；不会关闭隐私门 |
 | `RHINOCODER_ROUTE_MODE` | `auto` | `auto/main/economy/local` |
 | `RHINOCODER_ROUTER_FALLBACK` | `1` | 是否允许瞬时故障降级 |
 | `RHINOCODER_ROUTER_MAX_FALLBACKS` | `1` | 最大降级次数；实现硬限制为 0 或 1 |
@@ -69,6 +69,7 @@ python tools/route_preview.py "仅本地处理这个机密项目，不要上传"
 ## 自动验收覆盖
 
 - 高隐私强制本地且云端候选不可用。
+- 关闭路由和手动云端模式均不能绕过高隐私门禁。
 - 复杂任务选择可靠主后端。
 - 简单、成本受限和延迟受限任务选择低成本后端。
 - 自动/手动/关闭模式及 fallback 上限。
