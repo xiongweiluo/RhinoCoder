@@ -39,6 +39,7 @@
 - [x] 黄金 Trace 同时满足断言通过、至少一次场景自检、人工确认与脱敏审计，旧格式数据已隔离，详见 [数据与脱敏验收报告](data-sanitization-acceptance-report.md)。
 - [x] Partial Pass 和失败 Trace 已物理分流且不会进入黄金 SFT，详见 [数据与脱敏验收报告](data-sanitization-acceptance-report.md)。
 - [x] 正式报告与三份 Replay 已逐文件复核、声明合成来源并通过哈希锁定的脱敏审计，详见 [数据与脱敏验收报告](data-sanitization-acceptance-report.md)。
+- [x] 训练数据四视图使用任务级 70/15/15 防泄漏分区、锁定 holdout、完整哈希/血缘和独立隐私审计，详见 [A5 训练数据管线验收报告](training-data-pipeline.md)。
 - [x] macOS clean-room 环境可按 README 完成安装、Replay 首任务和只读 Rhino 首任务，详见 [版本、安装与文档验收报告](release-acceptance-report.md)。
 - [x] README、架构、已知限制、故障排查、CHANGELOG 与当前版本一致，并由自动检查保护，详见 [版本、安装与文档验收报告](release-acceptance-report.md)。
 

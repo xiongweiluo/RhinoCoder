@@ -24,6 +24,7 @@ RhinoCoder 是一个基于 MCP 的 Rhino 8 空间设计 Agent。系统把自然�
 - 版本化 SQLite 审计数据库、幂等黄金数据导入、实时运行镜像、血缘查询、聚合导出和自动隐私审计。
 - 规则优先混合路由：可靠主云模型、低成本云模型与本地 Mock 后端，包含有限安全降级、SQLite 血缘及 UI 可视化。
 - 隐私红队与不可绕过的请求安全门：高风险强制本地、凭证/窃取请求提前阻断、云端字段最小化及 Trace/日志/SQLite/Replay/模型请求统一审计。
+- 可复现训练数据管线：四类训练视图、模板/数字变体防泄漏 70/15/15 分区、holdout 锁定、完整血缘和隐私审计。
 - 第三阶段真实黄金数据采集已完成：300/300 条黄金轨迹、40 个标签，首次通过率 77%、最终通过率 100%；稳定原型版本仍为 `0.2.0`，本地质量报告与真实证据均保持 Git 忽略。
 - 三个核心场景已在真实 Rhino 环境中各连续运行 3 次成功，详见 [UI 真实环境验收报告](docs/ui-acceptance-report.md)。
 - WebSocket 快照恢复、Rhino Listener 热重启和四类故障恢复已完成真实验收，详见 [断线与故障恢复验收报告](docs/recovery-acceptance-report.md)。
@@ -251,6 +252,18 @@ python tools/privacy_audit.py --write-report docs/privacy-red-team-report.md
 ```
 
 可用 `RHINOCODER_MODEL_REQUEST_AUDIT_ENABLED=0` 关闭请求台账，或用 `RHINOCODER_MODEL_REQUEST_AUDIT` 修改路径；隐私分类、阻断、强制本地和出站二次扫描不会随台账关闭。红队类别、覆盖数量与零泄漏结论见 [A4 隐私红队与零泄漏验收报告](docs/privacy-red-team-report.md)。
+
+## 训练数据管线
+
+本地 300 条黄金 Trace 可确定性导出四类 JSONL 视图：指令到首次工具调用、完整轨迹、工具错误到纠正，以及场景摘要到下一步。管线移除 system Prompt、`reasoning_content`、延迟和临时调用 ID，统一校验工具参数 JSON，并继续复用 A4 隐私最小化和敏感扫描。
+
+```bash
+python tools/build_training_dataset.py build
+python tools/build_training_dataset.py audit
+python tools/build_training_dataset.py report --output docs/training-data-pipeline.md
+```
+
+输出位于本地 `data/training/a5/`，继续受 Git 忽略。300 个源任务先按 campaign/标签模板族和数字归一化签名合并为不可拆分组，再以固定种子精确分为 210 个 train、45 个 validation 和 45 个 holdout。已有 manifest 作为 split lock；后续增量任务若与 holdout 模板相连，仍只能进入 holdout。训练和调参不得读取 `holdout/`。当前 995 条真实导出、文件哈希、样本血缘及零泄漏结果见 [A5 训练数据管线验收报告](docs/training-data-pipeline.md)。
 
 ## 安全边界
 

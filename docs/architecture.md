@@ -34,6 +34,23 @@ OpenAI-compatible planning <-> MCP ClientSession
 8. `AgentRunResult` 汇总消息、工具、指标、场景检查、隐私/路由决策、对象 ID 和错误。
 9. 运行结束后 Trace 与 `route_decisions` 写入 SQLite；UI 可实时展示或离线 Replay。
 
+## Training data flow
+
+```text
+Golden Trace + campaign task definition
+        | privacy minimization / runtime-noise removal / valid JSON repair
+        v
+Template union (campaign + tags + numeric signature)
+        | deterministic 70 / 15 / 15 assignment + existing split lock
+        v
+train / validation / holdout
+        | four views per eligible transition
+        v
+JSONL artifacts + stats + SHA-256 manifest + independent audit
+```
+
+分区发生在任务层、视图提取之前；同一任务的所有视图，以及 campaign/标签模板族和仅数字不同的变体，始终保留在同一分区。manifest 保存任务、模板、源行、Trace/任务指纹和各产物哈希；后续重建沿用既有任务分区，尤其不允许 holdout 迁入 train。导出通过暂存目录完成，只有来源、格式、长度、去重、模板隔离、血缘、产物哈希和隐私审计全部通过后才原子替换现有数据集。
+
 ## Interface versions
 
 - Application: `0.2.0`

@@ -15,6 +15,10 @@ python tools/check_secrets.py
 python tools/audit_trace_data.py
 python tools/audit_release_data.py
 python tools/privacy_audit.py
+if [[ -f data/golden_traces_v2.jsonl ]]; then
+  python tools/build_training_dataset.py build
+  python tools/build_training_dataset.py audit
+fi
 python tools/check_release_consistency.py
 if [[ -f data/audit/rhinocoder.sqlite3 ]]; then
   python tools/audit_db.py audit
