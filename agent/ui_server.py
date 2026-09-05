@@ -25,9 +25,8 @@ import httpx
 from aiohttp import WSMsgType, web
 
 from agent.llm import run_agent
-from agent.db import record_live_trace
 from agent.runtime import AgentEvent, AgentRunResult, CancellationToken, new_run_id, utc_now
-from agent.trace_store import build_trace_record, save_feedback
+from agent.trace_store import save_feedback
 from agent.version import __version__
 
 UI_ROOT = _HERE.parent / "ui"
@@ -94,7 +93,6 @@ class RunManager:
                     cancellation_token=managed.token,
                     run_id=run_id,
                 )
-                record_live_trace(build_trace_record(prompt, managed.result))
                 self.history.appendleft(
                     {
                         "run_id": run_id,
@@ -104,6 +102,7 @@ class RunManager:
                         "metrics": managed.result.to_dict()["metrics"],
                         "created_object_ids": managed.result.created_object_ids,
                         "events": list(managed.events),
+                        "route_decision": managed.result.route_decision,
                         "control_scene": managed.control_scene,
                         "feedback_labels": list(managed.feedback_labels),
                         "rolled_back": managed.rolled_back,

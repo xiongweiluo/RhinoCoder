@@ -17,19 +17,15 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Mapping, Optional
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
-from openai import (
-    AsyncOpenAI,
-    AuthenticationError,
-    APIConnectionError,
-    APIStatusError,
-    APITimeoutError,
-)
+from openai import APITimeoutError, AsyncOpenAI
 
+from agent.model_backends import BackendError, ModelBackend, build_default_backends
 from agent.pricing import calculate_cost, resolve_model_pricing
+from agent.router import RouteContext, RouterConfig, select_route
 from agent.runtime import (
     AgentRunResult,
     CancellationToken,
@@ -173,7 +169,13 @@ def _system_prompt(closed_loop: bool) -> str:
     )
 
 
-def _update_usage(metrics: RunMetrics, response: Any) -> None:
+def _update_usage(
+    metrics: RunMetrics,
+    response: Any,
+    *,
+    model: str = DEEPSEEK_MODEL,
+    base_url: str = DEEPSEEK_BASE_URL,
+) -> None:
     usage = getattr(response, "usage", None)
     if usage is None:
         return
@@ -211,7 +213,7 @@ def _update_usage(metrics: RunMetrics, response: Any) -> None:
     metrics.prompt_cache_miss_tokens += cache_miss_tokens
     metrics.completion_tokens += completion_tokens
     metrics.total_tokens += int(getattr(usage, "total_tokens", 0) or prompt_tokens + completion_tokens)
-    pricing = resolve_model_pricing(DEEPSEEK_MODEL, DEEPSEEK_BASE_URL)
+    pricing = resolve_model_pricing(model, base_url)
     if pricing is None:
         metrics.prompt_cache_unknown_tokens = max(
             metrics.prompt_tokens
@@ -308,6 +310,9 @@ async def run_agent(
     cancellation_token: Optional[CancellationToken] = None,
     run_id: Optional[str] = None,
     max_tool_rounds: int = MAX_TOOL_ROUNDS,
+    route_context: RouteContext | None = None,
+    router_config: RouterConfig | None = None,
+    backend_registry: Mapping[str, ModelBackend] | None = None,
 ) -> AgentRunResult:
     """
     完整 Agent 循环:
@@ -354,12 +359,88 @@ async def run_agent(
             }
         await emitter.emit(terminal_type, payload)
         result.events = list(emitter.events)
+        try:
+            from agent.db import record_live_trace
+            from agent.trace_store import build_trace_record
+
+            record_live_trace(build_trace_record(prompt, result))
+        except Exception as exc:
+            logger.warning("运行结束后的 SQLite 审计镜像失败: %s", exc)
         return result
+
+    try:
+        backends = dict(
+            backend_registry
+            or build_default_backends(
+                main_model=DEEPSEEK_MODEL,
+                main_base_url=DEEPSEEK_BASE_URL,
+                main_client_factory=make_deepseek_client,
+                timeout_seconds=LLM_TIMEOUT_SECONDS,
+                max_retries=LLM_MAX_RETRIES,
+            )
+        )
+        routing = router_config or RouterConfig.from_env()
+        decision = select_route(
+            prompt,
+            {name: backend.profile for name, backend in backends.items()},
+            context=route_context,
+            config=routing,
+        )
+        active_backend = backends[decision.selected_backend]
+        remaining_fallbacks = routing.max_fallbacks if routing.fallback_enabled else 0
+        result.route_decision = decision.to_dict()
+    except (KeyError, ValueError) as exc:
+        await emitter.emit(
+            "run.started",
+            {"prompt": prompt, "model": DEEPSEEK_MODEL, "closed_loop": closed_loop},
+        )
+        return await finish(
+            RunStatus.FAILED,
+            error=RunError("config.routing_invalid", str(exc), recoverable=True),
+        )
 
     await emitter.emit(
         "run.started",
-        {"prompt": prompt, "model": DEEPSEEK_MODEL, "closed_loop": closed_loop},
+        {
+            "prompt": prompt,
+            "model": active_backend.profile.model,
+            "backend": active_backend.profile.backend_id,
+            "closed_loop": closed_loop,
+        },
     )
+    await emitter.emit("route.selected", decision.to_dict())
+
+    async def complete_with_fallback(
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+    ) -> Any:
+        nonlocal active_backend, remaining_fallbacks
+        try:
+            return await active_backend.complete(messages=messages, tools=tools)
+        except BackendError as exc:
+            fallback_name = decision.fallback_backend
+            if not (
+                exc.fallback_eligible
+                and remaining_fallbacks > 0
+                and fallback_name
+                and fallback_name in backends
+            ):
+                raise
+            previous = active_backend.profile.backend_id
+            active_backend = backends[fallback_name]
+            remaining_fallbacks -= 1
+            decision.apply_fallback(active_backend.profile, exc.code)
+            result.route_decision = decision.to_dict()
+            await emitter.emit(
+                "route.fallback",
+                {
+                    **decision.to_dict(),
+                    "previous_backend": previous,
+                    "safe_boundary": "planning_request",
+                    "replayed_tool_calls": 0,
+                },
+            )
+            return await active_backend.complete(messages=messages, tools=tools)
 
     # ── 前置检查 ─────────────────────────────────────────────────────────
     if not MCP_SERVER_SCRIPT.exists():
@@ -367,22 +448,16 @@ async def run_agent(
         _echo("SETUP", message, err=True)
         return await finish(RunStatus.FAILED, error=RunError("setup.mcp_missing", message))
 
-    try:
-        client = make_deepseek_client()
-    except EnvironmentError as exc:
-        _echo("CONFIG", str(exc), err=True)
-        return await finish(
-            RunStatus.FAILED,
-            error=RunError("config.api_key_missing", str(exc), recoverable=True),
-        )
-
     server_params = StdioServerParameters(
         command=sys.executable,
         args=[str(MCP_SERVER_SCRIPT)],
     )
 
     _echo("SETUP", "MCP Server  : plugin/mcp_server/main.py")
-    _echo("SETUP", f"LLM Model   : {DEEPSEEK_MODEL}  @ {DEEPSEEK_BASE_URL}")
+    _echo(
+        "SETUP",
+        f"LLM Route   : {active_backend.profile.backend_id} / {active_backend.profile.model}",
+    )
 
     try:
         async with stdio_client(server_params) as (read_stream, write_stream):
@@ -429,49 +504,24 @@ async def run_agent(
 
                     planning_started_ms = monotonic_ms()
                     try:
-                        response = await client.chat.completions.create(
-                            model=DEEPSEEK_MODEL,
-                            messages=messages,
-                            tools=openai_tools if openai_tools else None,
-                            tool_choice="auto" if openai_tools else None,
-                        )
-                    except AuthenticationError:
-                        message = "API Key 无效，请检查 DEEPSEEK_API_KEY。"
-                        _echo("LLM", message, err=True)
+                        response = await complete_with_fallback(messages, openai_tools)
+                    except BackendError as exc:
+                        _echo("LLM", exc.message, err=True)
                         return await finish(
                             RunStatus.FAILED,
-                            error=RunError("llm.authentication", message, recoverable=True),
-                        )
-                    except APITimeoutError:
-                        message = (
-                            f"DeepSeek 响应超时（>{LLM_TIMEOUT_SECONDS:g}s）。"
-                            "本轮未执行新的工具调用，可以安全重试任务。"
-                        )
-                        _echo("LLM", message, err=True)
-                        return await finish(
-                            RunStatus.FAILED,
-                            error=RunError("llm.timeout", message, recoverable=True),
-                        )
-                    except APIConnectionError as exc:
-                        message = f"无法连接到 DeepSeek API: {exc}"
-                        _echo("LLM", message, err=True)
-                        return await finish(
-                            RunStatus.FAILED,
-                            error=RunError("llm.connection", message, recoverable=True),
-                        )
-                    except APIStatusError as exc:
-                        message = f"DeepSeek API 错误 {exc.status_code}: {exc.message}"
-                        _echo("LLM", message, err=True)
-                        return await finish(
-                            RunStatus.FAILED,
-                            error=RunError("llm.api_status", message, recoverable=exc.status_code >= 500),
+                            error=RunError(exc.code, exc.message, recoverable=exc.recoverable),
                         )
 
                     metrics.planning_ms = round(
                         metrics.planning_ms + monotonic_ms() - planning_started_ms,
                         2,
                     )
-                    _update_usage(metrics, response)
+                    _update_usage(
+                        metrics,
+                        response,
+                        model=active_backend.profile.model,
+                        base_url=active_backend.base_url,
+                    )
 
                     choice = response.choices[0]
                     finish_reason = choice.finish_reason
@@ -515,6 +565,16 @@ async def run_agent(
                         _echo("RESULT", "✓ LLM 回复:")
                         for line in final_text.splitlines():
                             _echo("RESULT", f"  {line}")
+                        if active_backend.profile.backend_id == "local-mock":
+                            return await finish(
+                                RunStatus.FAILED,
+                                error=RunError(
+                                    "local.mock_only",
+                                    "本地 Mock 后端只验证安全路由和接口，不执行建模任务。",
+                                    recoverable=True,
+                                ),
+                                final_text=final_text,
+                            )
                         return await finish(RunStatus.COMPLETED, final_text=final_text)
 
                     # ── 4b. 有工具调用 → 逐一执行 ──────────────────────────

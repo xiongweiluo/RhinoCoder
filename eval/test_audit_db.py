@@ -282,6 +282,33 @@ def test_route_decision_and_json_exports(tmp_path):
     assert stat.S_IMODE(lineage_path.stat().st_mode) == 0o600
 
 
+def test_trace_ingest_automatically_records_structured_route_decision(tmp_path):
+    record = _trace(0)
+    record["run"]["route_decision"] = {
+        "route_id": "automatic-route",
+        "timestamp": "2026-09-05T00:00:00+00:00",
+        "selected_backend": "cloud-economy",
+        "selected_model_id": "deepseek:deepseek-v4-flash",
+        "selected_model": "deepseek-v4-flash",
+        "privacy_level": "low",
+        "task_difficulty": 1,
+        "tool_complexity": 1,
+        "reason": "simple task",
+        "degraded": False,
+    }
+
+    with AuditDatabase(tmp_path / "audit.sqlite3") as database:
+        database.ingest_trace(record)
+        lineage = database.get_run_lineage("run-0")
+
+    assert lineage["model"]["name"] == "deepseek-v4-flash"
+    assert lineage["model"]["backend"] == "cloud-economy"
+    assert lineage["route_decisions"][0]["route_id"] == "automatic-route"
+    assert lineage["route_decisions"][0]["selected_model_id"] == (
+        "deepseek:deepseek-v4-flash"
+    )
+
+
 def test_trace_store_mirrors_trace_and_feedback_to_realtime_audit(monkeypatch, tmp_path):
     import agent.db as db_module
     import agent.trace_store as trace_store

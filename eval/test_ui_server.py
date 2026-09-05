@@ -35,6 +35,12 @@ async def test_run_manager_broadcast_and_history(monkeypatch):
             run_id=kwargs["run_id"],
             status=RunStatus.COMPLETED,
             metrics=RunMetrics(started_at="now", duration_ms=5),
+            route_decision={
+                "selected_backend": "cloud-main",
+                "selected_model": "reliable-model",
+                "reason": "complex task",
+                "degraded": False,
+            },
         )
 
     monkeypatch.setattr(ui_server, "run_agent", fake_run_agent)
@@ -45,6 +51,7 @@ async def test_run_manager_broadcast_and_history(monkeypatch):
     assert client.messages[-1]["history"][0]["run_id"] == run_id
     assert client.messages[-1]["history"][0]["events"][0]["type"] == "run.started"
     assert manager.history[0]["status"] == "completed"
+    assert manager.history[0]["route_decision"]["selected_backend"] == "cloud-main"
     assert manager.snapshot()["history"][0]["run_id"] == run_id
     assert manager.snapshot()["history"][0]["events"][0]["run_id"] == run_id
 

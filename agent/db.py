@@ -303,6 +303,11 @@ def _provider_for_model(name: str) -> str:
 
 
 def _model_name(record: dict[str, Any]) -> str:
+    route_decision = (record.get("run") or {}).get("route_decision") or record.get(
+        "route_decision"
+    )
+    if isinstance(route_decision, dict) and route_decision.get("selected_model"):
+        return str(route_decision["selected_model"])
     run = record.get("run") or {}
     for event in run.get("events") or []:
         if isinstance(event, dict) and event.get("type") == "run.started":
@@ -459,17 +464,26 @@ class AuditDatabase:
             ),
         )
 
-    def _upsert_model(self, name: str) -> str:
-        provider = _provider_for_model(name)
+    def _upsert_model(
+        self,
+        name: str,
+        *,
+        provider: str | None = None,
+        backend: str = "cloud",
+    ) -> str:
+        provider = provider or _provider_for_model(name)
         model_id = f"{provider}:{name}"
         now = utc_now()
         self._connection.execute(
             """
-            INSERT INTO models(model_id, provider, name, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?)
-            ON CONFLICT(model_id) DO UPDATE SET updated_at=excluded.updated_at
+            INSERT INTO models(
+                model_id, provider, name, backend, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(model_id) DO UPDATE SET
+                backend=excluded.backend,
+                updated_at=excluded.updated_at
             """,
-            (model_id, provider, _safe_text(name), now, now),
+            (model_id, provider, _safe_text(name), _safe_text(backend), now, now),
         )
         return model_id
 
@@ -495,13 +509,21 @@ class AuditDatabase:
         task_key, task = _record_task(sanitized, run_id)
         metrics = run.get("metrics") or {}
         error = run.get("error") or {}
+        route_decision = run.get("route_decision") or sanitized.get("route_decision") or {}
         model_name = _model_name(sanitized)
         content_hash = _sha256_bytes(_canonical_json(sanitized).encode("utf-8"))
         now = utc_now()
 
         with self.transaction():
             self._upsert_task(task_key, task, instruction)
-            model_id = self._upsert_model(model_name)
+            route_model_id = str(route_decision.get("selected_model_id") or "")
+            route_provider = route_model_id.split(":", 1)[0] if ":" in route_model_id else None
+            route_backend = str(route_decision.get("selected_backend") or "cloud")
+            model_id = self._upsert_model(
+                model_name,
+                provider=route_provider,
+                backend=route_backend,
+            )
             self._connection.execute(
                 """
                 INSERT INTO runs(
@@ -574,6 +596,11 @@ class AuditDatabase:
             self._replace_scene_checks(run_id, run.get("scene_checks") or [])
             self._replace_assertions(run_id, evaluation.get("results") or [])
             self._upsert_cost_usage(run_id, metrics)
+            if route_decision:
+                self.record_route_decision(
+                    run_id,
+                    {**route_decision, "selected_model_id": model_id},
+                )
             if feedback_record:
                 self.ingest_feedback({**feedback_record, "run_id": run_id})
             if admission:

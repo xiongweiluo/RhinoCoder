@@ -22,6 +22,7 @@ RhinoCoder 是一个基于 MCP 的 Rhino 8 空间设计 Agent。系统把自然�
 - 停止、重试、Undo、精准回滚和三类用户反馈。
 - 用户反馈、敏感字段脱敏和黄金样本准入规则。
 - 版本化 SQLite 审计数据库、幂等黄金数据导入、实时运行镜像、血缘查询、聚合导出和自动隐私审计。
+- 规则优先混合路由：可靠主云模型、低成本云模型与本地 Mock 后端，包含有限安全降级、SQLite 血缘及 UI 可视化。
 - 第三阶段真实黄金数据采集已完成：300/300 条黄金轨迹、40 个标签，首次通过率 77%、最终通过率 100%；稳定原型版本仍为 `0.2.0`，本地质量报告与真实证据均保持 Git 忽略。
 - 三个核心场景已在真实 Rhino 环境中各连续运行 3 次成功，详见 [UI 真实环境验收报告](docs/ui-acceptance-report.md)。
 - WebSocket 快照恢复、Rhino Listener 热重启和四类故障恢复已完成真实验收，详见 [断线与故障恢复验收报告](docs/recovery-acceptance-report.md)。
@@ -29,7 +30,7 @@ RhinoCoder 是一个基于 MCP 的 Rhino 8 空间设计 Agent。系统把自然�
 
 ### 后续规划
 
-- 本地/云端混合路由。
+- 真实本地推理后端与多模型对照评测。
 - 隐私红队任务。
 - 小规模 LoRA 与多模型对照实验。
 - Windows 验证、原生插件与多用户部署。
@@ -41,7 +42,7 @@ RhinoCoder 是一个基于 MCP 的 Rhino 8 空间设计 Agent。系统把自然�
 ```text
 User / UI
    | WebSocket events
-RhinoCoder Agent -- OpenAI-compatible LLM
+RhinoCoder Agent -- Rule Router -- Main / Economy / Local Mock
    | MCP stdio
 FastMCP Server
    | localhost HTTP
@@ -219,6 +220,21 @@ python tools/audit_db.py lineage <run_id> --output data/audit/lineage.json
 
 可用 `RHINOCODER_AUDIT_DB` 指定数据库位置，或用 `RHINOCODER_AUDIT_ENABLED=0` 关闭运行时镜像写入。所有结构化内容在入库前经过统一脱敏，审计会检查 SQLite 完整性、外键、敏感字段和黄金样本血缘。Schema、表说明和真实 300 条导入结果见 [SQLite 审计数据库与 A2 验收报告](docs/sqlite-audit-database.md)。
 
+## 规则优先混合路由
+
+默认路由会先在本地按隐私级别、任务难度、工具复杂度、成本和延迟预算选择后端，不额外调用分类模型。简单低风险任务选择 `cloud-economy`，复杂任务选择 `cloud-main`，检测到高隐私信号时只使用 `local-mock` 且禁止回退云端。Mock 只做安全接口演练，不会执行建模或把任务谎报为成功。
+
+```bash
+# 仅预览决策；不会调用 Rhino 或模型
+python tools/route_preview.py "创建参数化立面，然后阵列并执行布尔差集"
+
+# 固定主模型或完全关闭混合路由
+RHINOCODER_ROUTE_MODE=main python agent/main.py --prompt "创建一个方块"
+RHINOCODER_ROUTER_ENABLED=0 python agent/main.py --prompt "创建一个方块"
+```
+
+瞬时超时、连接错误、HTTP 429、5xx 或明确的模型不可用错误最多触发一次云端后端降级。切换发生在模型规划请求边界，继续使用原消息和已完成工具结果，不会重放 Rhino 工具调用。路由选择、理由和降级结果会进入事件流、UI 与 SQLite。完整规则、配置和验收证据见 [规则优先混合路由与 A3 验收报告](docs/hybrid-routing.md)。
+
 ## 安全边界
 
 - Listener 仅绑定 `127.0.0.1`。
@@ -230,6 +246,6 @@ python tools/audit_db.py lineage <run_id> --output data/audit/lineage.json
 
 - 当前主要验证环境为 macOS 15.6 arm64 + Rhino 8；clean-room 安装已在该环境完成，尚未在另一台物理 Mac 或 Intel Mac 上复验。
 - 完整30题基准需要交互式 Rhino 环境，CI 只运行离线测试。
-- 混合路由、本地微调模型和生产级并发不属于当前稳定原型。
+- `local-mock` 是安全、确定性的本地接口与测试替身，不是可执行复杂建模推理的生产模型；真实本地模型、多模型实测基准和生产级并发仍不属于当前稳定原型。
 
 架构和恢复策略见 [docs/architecture.md](docs/architecture.md)，常见问题见 [docs/troubleshooting.md](docs/troubleshooting.md)，发布门槛见 [docs/release-checklist.md](docs/release-checklist.md)。

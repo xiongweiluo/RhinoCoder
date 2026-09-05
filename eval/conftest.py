@@ -3,6 +3,7 @@ import os
 # Unit tests use explicit temporary audit databases and must not write fixtures
 # into the developer's default local database.
 os.environ.setdefault("RHINOCODER_AUDIT_ENABLED", "0")
+os.environ.setdefault("RHINOCODER_ROUTER_ENABLED", "0")
 
 # rhinocoder/eval/conftest.py
 #

@@ -29,6 +29,14 @@ textarea { width: 100%; resize: vertical; border: 0; outline: 0; color: #f0f5f6;
 .metric { padding: 14px 16px; display: flex; flex-direction: column; gap: 5px; }
 .metric span, .section-title span { color: #7f9095; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
 .metric strong { font-size: 20px; }
+.routing { margin-bottom: 14px; padding: 14px 16px; display: grid; grid-template-columns: minmax(240px, .7fr) minmax(320px, 1.3fr); gap: 8px 20px; align-items: center; }
+.routing > div:first-child { display: flex; flex-direction: column; gap: 5px; }
+.routing strong { color: #dff8f0; }
+.routing p { margin: 0; color: #aebdc0; line-height: 1.45; font-size: 13px; }
+.route-signals { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 7px; }
+.route-signals span { padding: 4px 8px; color: #8fb0a7; background: #14241f; border: 1px solid #29473e; border-radius: 999px; font-size: 11px; }
+.routing.degraded { border-color: #74582d; }
+.routing.degraded .route-signals span:last-child { color: #ffd99a; background: #342914; border-color: #74582d; }
 .workspace { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(320px, .8fr); gap: 14px; }
 .trace-panel, .scene-panel, .controls, .history { padding: 16px; }
 .section-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
@@ -55,4 +63,4 @@ select { width: 100%; margin-top: 10px; padding: 9px; color: #dce6e8; background
 .history > button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; }
 .empty { color: #718087; line-height: 1.6; padding: 20px 8px; text-align: center; }
 @media (max-width: 1050px) { .metrics { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 850px) { .metrics { grid-template-columns: 1fr 1fr; } .workspace { grid-template-columns: 1fr; } .composer-actions { align-items: flex-start; gap: 12px; flex-direction: column; } }
+@media (max-width: 850px) { .metrics { grid-template-columns: 1fr 1fr; } .routing { grid-template-columns: 1fr; } .route-signals { grid-column: 1; } .workspace { grid-template-columns: 1fr; } .composer-actions { align-items: flex-start; gap: 12px; flex-direction: column; } }

@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import type { AgentEvent, HistoryItem, SceneObject, SceneSnapshot } from "./types";
+import type { AgentEvent, HistoryItem, RouteDecision, SceneObject, SceneSnapshot } from "./types";
 
 const examples = [
   "在原点创建一个 20x20x2 的基座，再在顶面居中放一个半径 8 的红色球体。",
@@ -154,6 +154,12 @@ export default function App() {
   const estimatedCost = metricNumber("estimated_cost_usd");
   const costStatus = String(metrics.cost_estimate_status ?? "");
   const currentHistory = history.find((item) => item.run_id === currentRun);
+  const routeEvent = [...currentEvents].reverse().find((event) =>
+    event.type === "route.fallback" || event.type === "route.selected"
+  );
+  const route = (routeEvent?.payload as unknown as RouteDecision | undefined)
+    ?? currentHistory?.route_decision
+    ?? undefined;
   const isReplay = Boolean(latest?.replay);
   const isRunning = Boolean(currentRun && !terminal && !isReplay);
   const canRetry = Boolean(terminal && !isReplay);
@@ -213,6 +219,20 @@ export default function App() {
         <Metric label="Token" value={totalTokens?.toString() ?? "--"} />
         <Metric label="缓存 命中/未命中" value={cacheHitTokens !== undefined && cacheMissTokens !== undefined ? `${cacheHitTokens} / ${cacheMissTokens}` : "--"} />
         <Metric label={costStatus === "exact" ? "精确成本" : "估算成本"} value={estimatedCost !== undefined ? `$${estimatedCost.toFixed(6)}` : "--"} />
+      </section>
+
+      <section className={`routing panel ${route?.degraded ? "degraded" : ""}`}>
+        <div>
+          <span className="eyebrow">MODEL ROUTE</span>
+          <strong>{route ? `${route.selected_backend} · ${route.selected_model}` : "等待路由决策"}</strong>
+        </div>
+        <p>{route?.reason ?? "提交任务后将显示后端、路由理由和降级状态。"}</p>
+        {route && <div className="route-signals">
+          <span>隐私 {route.privacy_level}</span>
+          <span>难度 L{route.task_difficulty}</span>
+          <span>工具复杂度 {route.tool_complexity}</span>
+          <span>{route.degraded ? `已从 ${route.fallback_from} 降级（${route.fallback_error_code}）` : "未降级"}</span>
+        </div>}
       </section>
 
       <section className="workspace">
