@@ -225,6 +225,10 @@ def _update_usage(
         )
         metrics.cost_estimate_status = "unconfigured"
         return
+    if metrics.pricing_schedule == "unconfigured":
+        metrics.pricing_schedule = pricing.schedule
+    elif metrics.pricing_schedule != pricing.schedule:
+        metrics.pricing_schedule = "mixed"
     cost = calculate_cost(
         prompt_tokens=metrics.prompt_tokens,
         completion_tokens=metrics.completion_tokens,

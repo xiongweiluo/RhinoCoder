@@ -220,6 +220,14 @@ def minimize_for_cloud(value: Any, *, parent_key: str = "") -> Any:
                 separators=(",", ":"),
                 sort_keys=True,
             )
+    # A mapping below a sensitive-looking key is commonly a JSON Schema node
+    # (for example properties.layer_name = {"type": "string"}).  Preserve its
+    # structure and inspect its children; only concrete values are redacted.
+    if isinstance(value, dict):
+        return {
+            str(item_key): minimize_for_cloud(item, parent_key=str(item_key))
+            for item_key, item in value.items()
+        }
     if key in {
         "api_key",
         "apikey",
@@ -241,8 +249,6 @@ def minimize_for_cloud(value: Any, *, parent_key: str = "") -> Any:
         return "<IDENTITY_REDACTED>" if value else value
     if isinstance(value, str):
         return minimize_text_for_cloud(value)
-    if isinstance(value, dict):
-        return {str(item_key): minimize_for_cloud(item, parent_key=str(item_key)) for item_key, item in value.items()}
     if isinstance(value, (list, tuple)):
         return [minimize_for_cloud(item, parent_key=parent_key) for item in value]
     return value
@@ -310,7 +316,10 @@ def cloud_sensitive_findings(value: Any, *, path: str = "$") -> list[str]:
         return findings
     if not isinstance(value, str):
         return findings
-    scrubbed = re.sub(r"<(?:SECRET|PATH|EMAIL|IDENTITY|LAYER|GROUP|PROMPT_INJECTION)_REDACTED>", "", value)
+    # Keep redaction sentinels in place while scanning.  Removing one after a
+    # label (for example ``layer_name: <LAYER_REDACTED>``) exposes the following
+    # punctuation as a bogus field value and creates a false positive.
+    scrubbed = value
     for code, pattern in SECRET_PATTERNS:
         if pattern.search(scrubbed):
             findings.append(f"{path}:{code}")
@@ -336,6 +345,29 @@ def prepare_cloud_messages(messages: Sequence[Mapping[str, Any]]) -> list[dict[s
         raise PrivacyViolation(
             "privacy.outbound_blocked",
             "模型请求在最小化后仍包含敏感数据，已阻止发送。",
+            findings,
+        )
+    return minimized
+
+
+def prepare_cloud_tools(tools: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Minimize and validate model-visible tool definitions.
+
+    MCP descriptions legitimately contain fields such as ``layer_name`` and
+    ``group_name`` plus realistic examples.  Scanning those definitions as if
+    they were live project data creates false positives; minimizing the values
+    first keeps the callable schema intact while removing any accidental
+    secrets, identities, paths, or project labels from descriptions/defaults.
+    """
+
+    minimized = minimize_for_cloud(list(tools))
+    if not isinstance(minimized, list):  # pragma: no cover - defensive invariant
+        raise TypeError("tool definitions must minimize to a list")
+    findings = cloud_sensitive_findings(minimized)
+    if findings:
+        raise PrivacyViolation(
+            "privacy.outbound_tools_blocked",
+            "模型工具定义在最小化后仍包含敏感数据，已阻止发送。",
             findings,
         )
     return minimized

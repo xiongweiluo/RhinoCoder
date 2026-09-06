@@ -23,4 +23,7 @@ python tools/check_release_consistency.py
 if [[ -f data/audit/rhinocoder.sqlite3 ]]; then
   python tools/audit_db.py audit
 fi
+if [[ -f data/a6/run-manifest.json ]]; then
+  python tools/run_a6_baseline.py audit
+fi
 npm run build --prefix agent/ui

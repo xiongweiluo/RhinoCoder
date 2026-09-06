@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -24,10 +25,15 @@ def _model_from_results(results: list[dict[str, Any]]) -> str:
     raise ValueError("结果中缺少 run.started 模型信息")
 
 
-def recalculate(payload: dict[str, Any], *, base_url: str) -> dict[str, Any]:
+def recalculate(
+    payload: dict[str, Any],
+    *,
+    base_url: str,
+    at: datetime | None = None,
+) -> dict[str, Any]:
     results = payload.get("results") or []
     model = _model_from_results(results)
-    pricing = resolve_model_pricing(model, base_url, env={})
+    pricing = resolve_model_pricing(model, base_url, env={}, at=at)
     if pricing is None:
         raise ValueError(f"没有 {model} @ {base_url} 的内置价格")
 

@@ -26,6 +26,7 @@ load_dotenv(PROJECT_ROOT / ".env", override=False)
 import httpx
 
 from agent.runtime import AgentRunResult, RunStatus
+from agent.router import RouteContext, RouterConfig
 from eval.scene_assert import verify
 
 RHINO_BASE_URL = os.environ.get("RHINOCODER_RHINO_URL", "http://127.0.0.1:8080")
@@ -225,6 +226,9 @@ async def eval_one(
     *,
     closed_loop: bool,
     repeat_index: int,
+    mode_name: str | None = None,
+    route_context: RouteContext | None = None,
+    router_config: RouterConfig | None = None,
 ) -> dict[str, Any]:
     from agent.llm import run_agent
 
@@ -248,7 +252,12 @@ async def eval_one(
             timings["reset_ms"] = round((time.monotonic() - phase) * 1000, 2)
 
             phase = time.monotonic()
-            run_result = await run_agent(task["instruction"], closed_loop=closed_loop)
+            run_result = await run_agent(
+                task["instruction"],
+                closed_loop=closed_loop,
+                route_context=route_context,
+                router_config=router_config,
+            )
             timings["agent_ms"] = round((time.monotonic() - phase) * 1000, 2)
 
             phase = time.monotonic()
@@ -277,7 +286,7 @@ async def eval_one(
         "instruction": task["instruction"],
         "tags": task["tags"],
         "difficulty": task["difficulty"],
-        "mode": "closed_loop" if closed_loop else "baseline",
+        "mode": mode_name or ("closed_loop" if closed_loop else "baseline"),
         "repeat": repeat_index,
         "attempted": True,
         "passed": passed,

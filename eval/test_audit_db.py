@@ -257,6 +257,44 @@ def test_writes_sanitize_sensitive_fields_before_audit(tmp_path):
     assert "<GUID_REDACTED>" in lineage["tool_calls"][0]["output"]
 
 
+def test_resanitize_storage_repairs_legacy_coordinate_payloads(tmp_path):
+    with AuditDatabase(tmp_path / "audit.sqlite3") as database:
+        database.ingest_trace(_trace(0))
+        legacy_arguments = json.dumps({"center": [1, 2, 3]})
+        database._connection.execute(
+            "UPDATE tool_calls SET arguments_json = ? WHERE run_id = ?",
+            (legacy_arguments, "run-0"),
+        )
+        database._connection.execute(
+            "UPDATE runs SET messages_json = ? WHERE run_id = ?",
+            (
+                json.dumps(
+                    [
+                        {
+                            "role": "assistant",
+                            "tool_calls": [
+                                {"function": {"name": "rotate_object", "arguments": legacy_arguments}}
+                            ],
+                        }
+                    ]
+                ),
+                "run-0",
+            ),
+        )
+        assert not database.audit().passed
+
+        first = database.resanitize_storage()
+        second = database.resanitize_storage()
+        lineage = database.get_run_lineage("run-0")
+
+        assert first["runs"] == 1
+        assert first["tool_calls"] == 1
+        assert all(count == 0 for count in second.values())
+        assert database.audit().passed
+        assert "<COORD_REDACTED>" in lineage["run"]["messages_json"]
+        assert "<COORD_REDACTED>" in lineage["tool_calls"][0]["arguments_json"]
+
+
 def test_route_decision_and_json_exports(tmp_path):
     with AuditDatabase(tmp_path / "audit.sqlite3") as database:
         database.ingest_trace(_trace(0))
@@ -307,6 +345,28 @@ def test_trace_ingest_automatically_records_structured_route_decision(tmp_path):
     assert lineage["route_decisions"][0]["selected_model_id"] == (
         "deepseek:deepseek-v4-flash"
     )
+
+
+def test_uuid_route_lineage_is_preserved_and_legacy_collision_can_be_rebuilt(tmp_path):
+    record = _trace(0)
+    route_id = "33333333-3333-4333-8333-333333333333"
+    record["run"]["route_decision"] = {
+        "route_id": route_id,
+        "selected_backend": "cloud-main",
+        "selected_model": "deepseek-fixture",
+    }
+
+    with AuditDatabase(tmp_path / "audit.sqlite3") as database:
+        database.ingest_trace(record)
+        database._connection.execute(
+            "UPDATE route_decisions SET route_id = ? WHERE route_id = ?",
+            ("<GUID_REDACTED>", route_id),
+        )
+        result = database.rebuild_route_decisions([record])
+        lineage = database.get_run_lineage("run-0")
+
+    assert result == {"legacy_collapsed_removed": 1, "restored": 1, "skipped": 0}
+    assert lineage["route_decisions"][0]["route_id"] == route_id
 
 
 def test_trace_store_mirrors_trace_and_feedback_to_realtime_audit(monkeypatch, tmp_path):

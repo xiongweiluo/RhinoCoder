@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import os
 from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
 from typing import Mapping
 from urllib.parse import urlparse
 
 
 DEEPSEEK_PRICING_SOURCE = "https://api-docs.deepseek.com/quick_start/pricing/"
-DEEPSEEK_PRICING_CHECKED_AT = "2026-08-27"
+DEEPSEEK_PRICING_CHECKED_AT = "2026-09-06"
+DEEPSEEK_SCHEDULE_EFFECTIVE_AT = datetime(2026, 8, 16, 16, 0, tzinfo=timezone.utc)
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,20 +48,41 @@ class CostBreakdown:
         return asdict(self)
 
 
-OFFICIAL_DEEPSEEK_PRICING: dict[str, ModelPricing] = {
-    "deepseek-v4-flash": ModelPricing(
-        model="deepseek-v4-flash",
-        input_cache_hit_per_m_tokens=0.0028,
-        input_cache_miss_per_m_tokens=0.14,
-        output_per_m_tokens=0.28,
-    ),
-    "deepseek-v4-pro": ModelPricing(
-        model="deepseek-v4-pro",
-        input_cache_hit_per_m_tokens=0.003625,
-        input_cache_miss_per_m_tokens=0.435,
-        output_per_m_tokens=0.87,
-    ),
+LEGACY_DEEPSEEK_PRICING: dict[str, tuple[float, float, float]] = {
+    "deepseek-v4-flash": (0.0028, 0.14, 0.28),
+    "deepseek-v4-pro": (0.003625, 0.435, 0.87),
 }
+SCHEDULED_DEEPSEEK_PRICING: dict[str, dict[str, tuple[float, float, float]]] = {
+    "deepseek-v4-flash": {
+        "off_peak": (0.007, 0.22, 0.66),
+        "peak": (0.014, 0.44, 1.32),
+    },
+    "deepseek-v4-pro": {
+        "off_peak": (0.022, 0.66, 1.98),
+        "peak": (0.044, 1.32, 3.96),
+    },
+}
+
+
+def _official_deepseek_pricing(model: str, at: datetime) -> ModelPricing | None:
+    instant = at if at.tzinfo is not None else at.replace(tzinfo=timezone.utc)
+    instant = instant.astimezone(timezone.utc)
+    if instant < DEEPSEEK_SCHEDULE_EFFECTIVE_AT:
+        values = LEGACY_DEEPSEEK_PRICING.get(model)
+        schedule = "legacy_regular"
+    else:
+        hour = instant.hour
+        schedule = "peak" if 1 <= hour < 4 or 6 <= hour < 10 else "off_peak"
+        values = (SCHEDULED_DEEPSEEK_PRICING.get(model) or {}).get(schedule)
+    if values is None:
+        return None
+    return ModelPricing(
+        model=model,
+        input_cache_hit_per_m_tokens=values[0],
+        input_cache_miss_per_m_tokens=values[1],
+        output_per_m_tokens=values[2],
+        schedule=schedule,
+    )
 
 
 def _optional_float(env: Mapping[str, str], name: str) -> float | None:
@@ -71,8 +94,10 @@ def resolve_model_pricing(
     model: str,
     base_url: str,
     env: Mapping[str, str] | None = None,
+    *,
+    at: datetime | None = None,
 ) -> ModelPricing | None:
-    """Resolve explicit overrides first, then official DeepSeek regular pricing."""
+    """Resolve explicit overrides first, then the effective DeepSeek time band."""
     values = os.environ if env is None else env
     cache_hit = _optional_float(values, "LLM_INPUT_CACHE_HIT_COST_PER_M_TOKENS")
     cache_miss = _optional_float(values, "LLM_INPUT_CACHE_MISS_COST_PER_M_TOKENS")
@@ -101,7 +126,7 @@ def resolve_model_pricing(
 
     hostname = (urlparse(base_url).hostname or "").lower()
     if hostname == "api.deepseek.com":
-        return OFFICIAL_DEEPSEEK_PRICING.get(model)
+        return _official_deepseek_pricing(model, at or datetime.now(timezone.utc))
     return None
 
 

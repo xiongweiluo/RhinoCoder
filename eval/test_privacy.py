@@ -21,6 +21,7 @@ from agent.privacy import (
     cloud_sensitive_findings,
     minimize_text_for_cloud,
     prepare_cloud_messages,
+    prepare_cloud_tools,
     record_model_request,
     sanitize_for_log,
 )
@@ -101,6 +102,36 @@ def test_cloud_minimization_parses_tool_call_argument_json():
 
     assert arguments["layer_name"] == "<LAYER_REDACTED>"
     assert arguments["object_id"] == "11111111-1111-4111-8111-111111111111"
+    assert cloud_sensitive_findings(minimized) == []
+
+
+def test_cloud_tool_schema_minimization_preserves_contract_and_removes_examples():
+    tools = [
+        {
+            "type": "function",
+            "function": {
+                "name": "set_object_layer",
+                "description": (
+                    "Set a layer. layer_name: Client-Aurora; "
+                    "contact architect@example.test"
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {"layer_name": {"type": "string"}},
+                    "required": ["layer_name"],
+                },
+            },
+        }
+    ]
+
+    minimized = prepare_cloud_tools(tools)
+
+    function = minimized[0]["function"]
+    assert function["name"] == "set_object_layer"
+    assert function["parameters"]["properties"]["layer_name"] == {"type": "string"}
+    assert function["parameters"]["required"] == ["layer_name"]
+    assert "Client-Aurora" not in function["description"]
+    assert "architect@example.test" not in function["description"]
     assert cloud_sensitive_findings(minimized) == []
 
 

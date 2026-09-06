@@ -97,15 +97,44 @@ def test_sanitize_structured_coordinate_and_token():
     assert not contains_sensitive_data(sanitized)
 
 
+def test_json_tool_arguments_use_structured_coordinate_rules():
+    arguments = json.dumps(
+        {
+            "center": [1, 2, 3],
+            "center_point": [4, 5, 6],
+            "scale_factor": [1.5, 1.0, 1.0],
+        }
+    )
+
+    assert contains_sensitive_data(
+        arguments,
+        parent_key="arguments",
+        inspect_embedded_json=True,
+    )
+    sanitized = sanitize_structure(arguments, parent_key="arguments")
+    decoded = json.loads(sanitized)
+
+    assert decoded["center"] == "<COORD_REDACTED>"
+    assert decoded["center_point"] == [4, 5, 6]
+    assert decoded["scale_factor"] == [1.5, 1.0, 1.0]
+    assert not contains_sensitive_data(
+        sanitized,
+        parent_key="arguments",
+        inspect_embedded_json=True,
+    )
+
+
 def test_sanitize_object_guid_project_layer_and_group_but_keep_run_id():
     data = {
         "run_id": "11111111-1111-4111-8111-111111111111",
+        "route_id": "33333333-3333-4333-8333-333333333333",
         "object_id": "22222222-2222-4222-8222-222222222222",
         "layer": "Client-Alpha",
         "groups": ["Private Assembly"],
     }
     sanitized = sanitize_structure(data)
     assert sanitized["run_id"] == data["run_id"]
+    assert sanitized["route_id"] == data["route_id"]
     assert sanitized["object_id"] == "<GUID_REDACTED>"
     assert sanitized["layer"] == "<LAYER_REDACTED>"
     assert sanitized["groups"] == ["<GROUP_REDACTED>"]

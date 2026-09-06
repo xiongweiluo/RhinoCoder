@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from types import SimpleNamespace
 
 from agent import llm
@@ -13,11 +14,39 @@ def test_official_deepseek_v4_pro_pricing():
         "deepseek-v4-pro",
         "https://api.deepseek.com/v1",
         env={},
+        at=datetime(2026, 9, 6, 12, 0, tzinfo=timezone.utc),
     )
     assert pricing is not None
-    assert pricing.input_cache_hit_per_m_tokens == 0.003625
+    assert pricing.schedule == "off_peak"
+    assert pricing.input_cache_hit_per_m_tokens == 0.022
+    assert pricing.input_cache_miss_per_m_tokens == 0.66
+    assert pricing.output_per_m_tokens == 1.98
+
+
+def test_official_deepseek_v4_peak_pricing():
+    pricing = resolve_model_pricing(
+        "deepseek-v4-pro",
+        "https://api.deepseek.com/v1",
+        env={},
+        at=datetime(2026, 9, 6, 6, 0, tzinfo=timezone.utc),
+    )
+    assert pricing is not None
+    assert pricing.schedule == "peak"
+    assert pricing.input_cache_hit_per_m_tokens == 0.044
+    assert pricing.input_cache_miss_per_m_tokens == 1.32
+    assert pricing.output_per_m_tokens == 3.96
+
+
+def test_historical_run_keeps_legacy_pricing():
+    pricing = resolve_model_pricing(
+        "deepseek-v4-pro",
+        "https://api.deepseek.com/v1",
+        env={},
+        at=datetime(2026, 8, 1, tzinfo=timezone.utc),
+    )
+    assert pricing is not None
+    assert pricing.schedule == "legacy_regular"
     assert pricing.input_cache_miss_per_m_tokens == 0.435
-    assert pricing.output_per_m_tokens == 0.87
 
 
 def test_legacy_zero_prices_fall_back_to_official_pricing():
@@ -28,9 +57,10 @@ def test_legacy_zero_prices_fall_back_to_official_pricing():
             "LLM_INPUT_COST_PER_M_TOKENS": "0",
             "LLM_OUTPUT_COST_PER_M_TOKENS": "0",
         },
+        at=datetime(2026, 9, 6, 12, 0, tzinfo=timezone.utc),
     )
     assert pricing is not None
-    assert pricing.input_cache_miss_per_m_tokens == 0.435
+    assert pricing.input_cache_miss_per_m_tokens == 0.66
 
 
 def test_compatible_provider_requires_explicit_pricing():
@@ -38,7 +68,12 @@ def test_compatible_provider_requires_explicit_pricing():
 
 
 def test_cost_is_exact_when_cache_split_is_known():
-    pricing = resolve_model_pricing("deepseek-v4-pro", "https://api.deepseek.com", env={})
+    pricing = resolve_model_pricing(
+        "deepseek-v4-pro",
+        "https://api.deepseek.com",
+        env={},
+        at=datetime(2026, 9, 6, 12, 0, tzinfo=timezone.utc),
+    )
     assert pricing is not None
     cost = calculate_cost(
         prompt_tokens=1_000_000,
@@ -51,11 +86,16 @@ def test_cost_is_exact_when_cache_split_is_known():
     assert cost.cache_unknown_tokens == 0
     assert cost.estimated_cost_usd == cost.total_cost_lower_bound_usd
     assert cost.estimated_cost_usd == cost.total_cost_upper_bound_usd
-    assert cost.estimated_cost_usd == 0.98146875
+    assert cost.estimated_cost_usd == 2.1615
 
 
 def test_legacy_prompt_tokens_produce_strict_cost_range():
-    pricing = resolve_model_pricing("deepseek-v4-pro", "https://api.deepseek.com", env={})
+    pricing = resolve_model_pricing(
+        "deepseek-v4-pro",
+        "https://api.deepseek.com",
+        env={},
+        at=datetime(2026, 9, 6, 12, 0, tzinfo=timezone.utc),
+    )
     assert pricing is not None
     cost = calculate_cost(
         prompt_tokens=1_000_000,
@@ -64,9 +104,9 @@ def test_legacy_prompt_tokens_produce_strict_cost_range():
     )
     assert cost.status == "range"
     assert cost.cache_unknown_tokens == 1_000_000
-    assert cost.total_cost_lower_bound_usd == 0.003625
-    assert cost.total_cost_upper_bound_usd == 0.435
-    assert cost.estimated_cost_usd == 0.435
+    assert cost.total_cost_lower_bound_usd == 0.022
+    assert cost.total_cost_upper_bound_usd == 0.66
+    assert cost.estimated_cost_usd == 0.66
 
 
 def test_update_usage_records_deepseek_cache_fields(monkeypatch):
@@ -170,10 +210,14 @@ def test_recalculate_legacy_benchmark_without_rerunning_services():
         ]
     }
 
-    result = recalculate(payload, base_url="https://api.deepseek.com/v1")
+    result = recalculate(
+        payload,
+        base_url="https://api.deepseek.com/v1",
+        at=datetime(2026, 9, 6, 12, 0, tzinfo=timezone.utc),
+    )
     metrics = result["results"][0]["run"]["metrics"]
 
     assert metrics["cost_estimate_status"] == "range"
-    assert metrics["estimated_cost_lower_bound_usd"] == 0.873625
-    assert metrics["estimated_cost_upper_bound_usd"] == 1.305
+    assert metrics["estimated_cost_lower_bound_usd"] == 2.002
+    assert metrics["estimated_cost_upper_bound_usd"] == 2.64
     assert result["summary"]["legacy_cache_unknown_runs"] == 1

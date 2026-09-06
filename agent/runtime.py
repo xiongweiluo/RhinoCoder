@@ -69,6 +69,7 @@ class RunMetrics:
     estimated_cost_upper_bound_usd: float = 0.0
     estimated_cost_usd: float = 0.0
     cost_estimate_status: str = "unconfigured"
+    pricing_schedule: str = "unconfigured"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

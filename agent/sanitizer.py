@@ -46,6 +46,15 @@ IDENTITY_KEYS = {
     "project_name",
     "project_code",
 }
+LINEAGE_ID_KEYS = {
+    "run_id",
+    "route_id",
+    "decision_id",
+    "request_id",
+    "feedback_id",
+    "call_id",
+    "tool_call_id",
+}
 
 
 def _is_secret_key(key: str) -> bool:
@@ -69,8 +78,8 @@ def sanitize_text(value: str) -> str:
 
 def sanitize_structure(value: Any, *, parent_key: str = "") -> Any:
     key_lc = parent_key.lower()
-    # run_id 是数据血缘主键，不是 Rhino 对象 GUID，必须保留以支持追溯。
-    if key_lc == "run_id" and isinstance(value, str):
+    # 系统血缘 ID 不是 Rhino 对象 GUID，必须保留以支持跨表追溯。
+    if key_lc in LINEAGE_ID_KEYS and isinstance(value, str):
         return value
     if key_lc == "arguments" and isinstance(value, str):
         try:
@@ -120,10 +129,31 @@ def sanitize_structure(value: Any, *, parent_key: str = "") -> Any:
     return value
 
 
-def contains_sensitive_data(value: Any, *, parent_key: str = "") -> bool:
+def contains_sensitive_data(
+    value: Any,
+    *,
+    parent_key: str = "",
+    inspect_embedded_json: bool = False,
+) -> bool:
+    """Return whether ``value`` still contains protected content.
+
+    ``inspect_embedded_json`` enables the stricter SQLite/storage boundary: it
+    decodes serialized tool arguments so coordinate arrays are interpreted by
+    their semantic key instead of by the broad free-text tuple detector.  It is
+    opt-in because frozen trace corpora were admitted under the original
+    byte-level contract and must not be retroactively reclassified.
+    """
+
     key_lc = parent_key.lower()
-    if key_lc == "run_id" and isinstance(value, str):
+    if key_lc in LINEAGE_ID_KEYS and isinstance(value, str):
         return False
+    if inspect_embedded_json and key_lc == "arguments" and isinstance(value, str):
+        try:
+            decoded = json.loads(value)
+        except json.JSONDecodeError:
+            pass
+        else:
+            return contains_sensitive_data(decoded, inspect_embedded_json=True)
     if _is_secret_key(key_lc):
         return value not in (None, "", "<SECRET_REDACTED>")
     if key_lc in LAYER_KEYS and isinstance(value, str):
@@ -174,9 +204,20 @@ def contains_sensitive_data(value: Any, *, parent_key: str = "") -> bool:
                 or key_lower.endswith(("_x", "_y", "_z"))
             ) and isinstance(item, (int, float)):
                 return True
-            if contains_sensitive_data(item, parent_key=str(key)):
+            if contains_sensitive_data(
+                item,
+                parent_key=str(key),
+                inspect_embedded_json=inspect_embedded_json,
+            ):
                 return True
         return False
     if isinstance(value, (list, tuple)):
-        return any(contains_sensitive_data(item, parent_key=parent_key) for item in value)
+        return any(
+            contains_sensitive_data(
+                item,
+                parent_key=parent_key,
+                inspect_embedded_json=inspect_embedded_json,
+            )
+            for item in value
+        )
     return False

@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator, Sequence
 
-from agent.sanitizer import contains_sensitive_data, sanitize_structure
+from agent.sanitizer import contains_sensitive_data, sanitize_structure, sanitize_text
 from agent.privacy import sanitize_for_log
 
 
@@ -22,6 +22,24 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_AUDIT_DB = PROJECT_ROOT / "data" / "audit" / "rhinocoder.sqlite3"
 SCHEMA_VERSION = 2
 logger = logging.getLogger("rhinocoder.audit_db")
+
+AUDITED_CONTENT_COLUMNS: dict[str, tuple[str, ...]] = {
+    "tasks": ("instruction", "tags_json", "metadata_json"),
+    "models": ("metadata_json",),
+    "runs": (
+        "instruction", "final_text", "messages_json", "events_json",
+        "created_object_ids_json", "error_message", "metadata_json",
+    ),
+    "route_decisions": ("reason", "decision_json"),
+    "tool_calls": ("arguments_json", "output"),
+    "scene_checks": ("output", "summary_json"),
+    "assertions": ("reason", "specification_json"),
+    "feedback": ("note", "feedback_json"),
+    "admissions": ("reasons_json", "admission_json"),
+    "cost_usage": ("usage_json",),
+    "artifacts": ("metadata_json",),
+    "import_batches": ("summary_json",),
+}
 
 
 MIGRATIONS: tuple[tuple[int, str, str], ...] = (
@@ -843,6 +861,34 @@ class AuditDatabase:
             )
         return route_id
 
+    def rebuild_route_decisions(self, records: Sequence[dict[str, Any]]) -> dict[str, int]:
+        """Restore route lineage from trusted run records after sanitizer upgrades."""
+
+        restored = 0
+        skipped = 0
+        with self.transaction():
+            legacy = self._connection.execute(
+                "DELETE FROM route_decisions WHERE route_id = ?",
+                ("<GUID_REDACTED>",),
+            ).rowcount
+            for record in records:
+                run = record.get("run") or record
+                run_id = str(run.get("run_id") or record.get("run_id") or "")
+                decision = run.get("route_decision") or record.get("route_decision") or {}
+                if (
+                    not run_id
+                    or not decision
+                    or self._connection.execute(
+                        "SELECT 1 FROM runs WHERE run_id = ?", (run_id,)
+                    ).fetchone()
+                    is None
+                ):
+                    skipped += 1
+                    continue
+                self.record_route_decision(run_id, decision)
+                restored += 1
+        return {"legacy_collapsed_removed": int(legacy), "restored": restored, "skipped": skipped}
+
     def record_artifact(
         self,
         *,
@@ -975,6 +1021,48 @@ class AuditDatabase:
             for table in tables
         }
 
+    def resanitize_storage(self) -> dict[str, int]:
+        """Reapply the current sanitizer to every audited content column.
+
+        This is intentionally idempotent and transactional.  Primary keys,
+        lineage columns, timestamps, metrics and content hashes are untouched;
+        only already-designated free-text/JSON audit payloads are minimized.
+        """
+
+        updates: dict[str, int] = {}
+        with self.transaction():
+            for table, names in AUDITED_CONTENT_COLUMNS.items():
+                changed = 0
+                select = ", ".join(("rowid AS resanitize_rowid", *names))
+                rows = list(self._connection.execute(f"SELECT {select} FROM {table}"))
+                for row in rows:
+                    assignments: list[str] = []
+                    parameters: list[Any] = []
+                    for name in names:
+                        stored = row[name]
+                        if stored in (None, ""):
+                            continue
+                        if name.endswith("_json"):
+                            try:
+                                decoded = json.loads(stored)
+                            except json.JSONDecodeError:
+                                continue
+                            sanitized = _canonical_json(decoded)
+                        else:
+                            sanitized = sanitize_text(str(stored))
+                        if sanitized != stored:
+                            assignments.append(f"{name} = ?")
+                            parameters.append(sanitized)
+                    if assignments:
+                        parameters.append(row["resanitize_rowid"])
+                        self._connection.execute(
+                            f"UPDATE {table} SET {', '.join(assignments)} WHERE rowid = ?",
+                            parameters,
+                        )
+                        changed += 1
+                updates[table] = changed
+        return updates
+
     def audit(self) -> AuditResult:
         integrity = str(self._connection.execute("PRAGMA integrity_check").fetchone()[0])
         foreign_keys = [dict(row) for row in self._connection.execute("PRAGMA foreign_key_check")]
@@ -991,25 +1079,8 @@ class AuditDatabase:
         )
 
     def _sensitive_findings(self) -> list[str]:
-        columns = {
-            "tasks": ("instruction", "tags_json", "metadata_json"),
-            "models": ("metadata_json",),
-            "runs": (
-                "instruction", "final_text", "messages_json", "events_json",
-                "created_object_ids_json", "error_message", "metadata_json",
-            ),
-            "route_decisions": ("reason", "decision_json"),
-            "tool_calls": ("arguments_json", "output"),
-            "scene_checks": ("output", "summary_json"),
-            "assertions": ("reason", "specification_json"),
-            "feedback": ("note", "feedback_json"),
-            "admissions": ("reasons_json", "admission_json"),
-            "cost_usage": ("usage_json",),
-            "artifacts": ("metadata_json",),
-            "import_batches": ("summary_json",),
-        }
         findings: list[str] = []
-        for table, names in columns.items():
+        for table, names in AUDITED_CONTENT_COLUMNS.items():
             select = ", ".join(("rowid AS audit_rowid", *names))
             for row in self._connection.execute(f"SELECT {select} FROM {table}"):
                 for name in names:
@@ -1022,7 +1093,11 @@ class AuditDatabase:
                         except json.JSONDecodeError:
                             findings.append(f"{table}:{row['audit_rowid']}:{name}:invalid_json")
                             continue
-                    if contains_sensitive_data(value, parent_key=name):
+                    if contains_sensitive_data(
+                        value,
+                        parent_key=name,
+                        inspect_embedded_json=True,
+                    ):
                         findings.append(f"{table}:{row['audit_rowid']}:{name}:sensitive_data")
         return findings
 

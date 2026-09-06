@@ -20,8 +20,8 @@ from openai import (
 from agent.router import BackendProfile
 from agent.privacy import (
     PrivacyViolation,
-    cloud_sensitive_findings,
     prepare_cloud_messages,
+    prepare_cloud_tools,
     record_model_request,
 )
 
@@ -90,25 +90,19 @@ class OpenAICompatibleBackend(ModelBackend):
     ) -> Any:
         try:
             outbound_messages = prepare_cloud_messages(messages)
-            tool_findings = cloud_sensitive_findings(tools)
-            if tool_findings:
-                raise PrivacyViolation(
-                    "privacy.outbound_tools_blocked",
-                    "模型工具定义包含敏感数据，已阻止发送。",
-                    tool_findings,
-                )
+            outbound_tools = prepare_cloud_tools(tools)
             client = self._client_instance()
             record_model_request(
                 backend=self.profile.backend_id,
                 model=self.profile.model,
                 messages=outbound_messages,
-                tools=tools,
+                tools=outbound_tools,
             )
             return await client.chat.completions.create(
                 model=self.profile.model,
                 messages=outbound_messages,
-                tools=tools or None,
-                tool_choice="auto" if tools else None,
+                tools=outbound_tools or None,
+                tool_choice="auto" if outbound_tools else None,
             )
         except BackendError:
             raise

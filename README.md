@@ -25,6 +25,7 @@ RhinoCoder 是一个基于 MCP 的 Rhino 8 空间设计 Agent。系统把自然�
 - 规则优先混合路由：可靠主云模型、低成本云模型与本地 Mock 后端，包含有限安全降级、SQLite 血缘及 UI 可视化。
 - 隐私红队与不可绕过的请求安全门：高风险强制本地、凭证/窃取请求提前阻断、云端字段最小化及 Trace/日志/SQLite/Replay/模型请求统一审计。
 - 可复现训练数据管线：四类训练视图、模板/数字变体防泄漏 70/15/15 分区、holdout 锁定、完整血缘和隐私审计。
+- A6 无微调三路对照基线：主模型、低成本模型与规则路由各完成 30 题 × 3 次真实 Rhino 运行，270/270 通过；300 条黄金数据离线回放通过，质量、延迟、token、成本、路由和隐私指标统一冻结。
 - 第三阶段真实黄金数据采集已完成：300/300 条黄金轨迹、40 个标签，首次通过率 77%、最终通过率 100%；稳定原型版本仍为 `0.2.0`，本地质量报告与真实证据均保持 Git 忽略。
 - 三个核心场景已在真实 Rhino 环境中各连续运行 3 次成功，详见 [UI 真实环境验收报告](docs/ui-acceptance-report.md)。
 - WebSocket 快照恢复、Rhino Listener 热重启和四类故障恢复已完成真实验收，详见 [断线与故障恢复验收报告](docs/recovery-acceptance-report.md)。
@@ -162,6 +163,19 @@ DeepSeek 官方模型会按版本化的缓存命中、缓存未命中和输出�
 ```bash
 python tools/recalculate_benchmark_cost.py eval/results/<benchmark>.json
 ```
+
+A6 三路无微调基线使用冻结的 30 题契约、三次重复和可恢复检查点。完整真实结果保存在本地 Git 忽略目录，仓库只提交脱敏汇总：
+
+```bash
+python tools/run_a6_baseline.py prepare
+python tools/run_a6_baseline.py offline
+python tools/run_a6_baseline.py run
+python tools/run_a6_baseline.py sync-audit
+python tools/run_a6_baseline.py audit
+python tools/run_a6_baseline.py report
+```
+
+审计会拒绝任务集或路由配置漂移、重复/缺失矩阵槽位、缺失 token/计价时段、错误血缘以及不完整的 300 条离线回放。当前冻结结论见 [A6 无微调三路对照基线报告](docs/a6-no-finetune-baseline.md)。
 
 审计本地黄金数据准入、Partial/Fail 分流和公开报告/Replay 脱敏：
 

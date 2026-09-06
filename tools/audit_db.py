@@ -51,6 +51,11 @@ def main() -> int:
     )
     audit_parser.add_argument("--output", type=Path)
 
+    resanitize_parser = subparsers.add_parser(
+        "resanitize", help="Transactionally reapply current privacy minimization"
+    )
+    resanitize_parser.add_argument("--output", type=Path)
+
     lineage_parser = subparsers.add_parser(
         "lineage", help="Export all normalized records for one run_id"
     )
@@ -82,6 +87,15 @@ def main() -> int:
         if args.command == "audit":
             result = database.audit()
             _write_or_print(asdict(result), args.output)
+            return 0 if result.passed else 1
+        if args.command == "resanitize":
+            changed_rows = database.resanitize_storage()
+            result = database.audit()
+            payload = {
+                "changed_rows": changed_rows,
+                "audit": asdict(result),
+            }
+            _write_or_print(payload, args.output)
             return 0 if result.passed else 1
         if args.command == "lineage":
             _write_or_print(database.get_run_lineage(args.run_id), args.output)
