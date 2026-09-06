@@ -4,7 +4,7 @@ set -euo pipefail
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_DIR"
 
-python -m compileall -q agent data_pipeline eval plugin tools
+python -m compileall -q agent data_pipeline eval plugin tools training
 python -m pytest -q
 python eval/run_eval.py --dry-run
 python tools/check_collection_campaign.py
@@ -18,7 +18,15 @@ python tools/privacy_audit.py
 if [[ -f data/golden_traces_v2.jsonl ]]; then
   python tools/build_training_dataset.py build
   python tools/build_training_dataset.py audit
+  python tools/run_training.py audit
+  if [[ -d data/training/tokenizer-cache ]]; then
+    python tools/run_training.py tokenizer-audit --local-files-only
+  fi
+  if python -c "import torch" >/dev/null 2>&1; then
+    python tools/run_training.py smoke
+  fi
 fi
+python tools/run_training.py cluster-template-audit
 python tools/check_release_consistency.py
 if [[ -f data/audit/rhinocoder.sqlite3 ]]; then
   python tools/audit_db.py audit

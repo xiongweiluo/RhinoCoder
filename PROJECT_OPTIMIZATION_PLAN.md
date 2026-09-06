@@ -16,7 +16,8 @@
 - 30 题 Baseline / Closed-loop 真实 Rhino 基准已完成，Pass@1 均为 100%。
 - 第三阶段黄金数据已完成 300/300，AI 候选、待采集和剩余任务均为 0。
 - 300 条黄金轨迹覆盖 40 个标签；新增 200 条任务首次通过率 77%，最终通过率 100%。
-- A1–A5 已完成：黄金数据冻结备份、SQLite 审计、混合路由、隐私红队和训练数据管线均已通过验收。
+- A1–A6 已完成：黄金数据冻结备份、SQLite 审计、混合路由、隐私红队、训练数据管线和三路无微调基线均已通过验收。
+- B1–B4 已完成工程准备，状态为 `Training Ready — Waiting for School GPU Access`。
 - Trace、脱敏、准入、密钥、任务格式和 CI 检查已通过。
 - 当前尚未获得学校 GPU 权限。GPU 阶段必须等用户明确确认权限已开通后才能启动。
 
@@ -190,29 +191,31 @@
 
 #### B1：确定首个 LoRA 实验范围
 
-- [ ] 首轮只选择一个基座模型和一个主要训练视图。
-- [ ] 记录模型许可证、版本、权重来源、tokenizer 和预期显存需求。
-- [ ] 限制 LoRA 配置数量，不在首轮做大规模超参搜索。
+- [x] 首轮只选择一个基座模型和一个主要训练视图。
+- [x] 记录模型许可证、版本、权重来源、tokenizer 和预期显存需求。
+- [x] 限制 LoRA 配置数量，不在首轮做大规模超参搜索。
 
 #### B2：固定训练配置
 
-- [ ] 固定最大序列长度、LoRA rank/alpha/dropout、batch size、梯度累积、学习率、epoch、随机种子和验证频率。
-- [ ] 定义 checkpoint、断点续训、最佳模型选择和实验日志格式。
-- [ ] 生成可复现的配置 manifest。
+- [x] 固定最大序列长度、LoRA rank/alpha/dropout、batch size、梯度累积、学习率、epoch、随机种子和验证频率。
+- [x] 定义 checkpoint、断点续训、最佳模型选择和实验日志格式。
+- [x] 生成可复现的配置 manifest。
 
 #### B3：训练与评测脚本
 
-- [ ] 完成数据加载、tokenizer、参数校验和 CPU 小样本冒烟测试。
-- [ ] 实现 checkpoint 保存/恢复、日志解析、模型登记和自动评测入口。
-- [ ] 准备统一实验报告模板。
+- [x] 完成数据加载、tokenizer、参数校验和 CPU 小样本冒烟测试。
+- [x] 实现 checkpoint 保存/恢复、日志解析、模型登记和自动评测入口。
+- [x] 准备统一实验报告模板。
 
 #### B4：学校 GPU 接入清单
 
-- [ ] 记录集群登录、作业调度、CUDA/驱动、GPU 型号/显存、时间限制和存储配额。
-- [ ] 确认模型下载、网络访问、密钥注入、checkpoint 导出和备份规则。
-- [ ] 将项目状态标记为 `Training Ready — Waiting for School GPU Access`。
+- [x] 记录集群登录、作业调度、CUDA/驱动、GPU 型号/显存、时间限制和存储配额。
+- [x] 确认模型下载、网络访问、密钥注入、checkpoint 导出和备份规则。
+- [x] 将项目状态标记为 `Training Ready — Waiting for School GPU Access`。
 
 阶段 B 验收：数据、配置、脚本和报告入口均已准备；无需改业务代码即可在 GPU 环境启动最小训练。
+
+验收结果（2026-09-06）：通过。首轮唯一实验锁定 `Qwen/Qwen2.5-Coder-7B-Instruct@c03e6d3…`、A5 `instruction_to_tool_call` 视图和一套 4-bit QLoRA 配置；210/45 训练/验证数据的行数与 SHA-256 均通过 manifest 审计，固定官方 tokenizer 全量审计最大仅 646/572 tokens、无超长，holdout 在加载器和评测入口双重禁用。训练入口具备 assistant-only loss、超长拒绝、checkpoint 自动恢复、validation 最佳模型、JSONL 日志、结构化工具调用评测、adapter 哈希登记和报告生成。网络隔离 CPU 冒烟已完成两步训练、checkpoint 保存/恢复及验证，学校 Slurm/PBS/直接节点、GPU/CUDA/存储/网络/密钥/备份模板与严格现场检查已就绪；未知学校参数明确等待权限后实测，未执行阶段 C 正式训练。详见 [B1–B4 LoRA 训练就绪验收报告](docs/training-readiness.md)。
 
 ### 阶段 C：获得学校 GPU 权限后
 

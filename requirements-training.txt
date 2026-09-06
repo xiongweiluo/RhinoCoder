@@ -1,0 +1,9 @@
+# RhinoCoder B1-B4 locked training toolchain (Linux + NVIDIA CUDA).
+# Install PyTorch using the wheel appropriate for the school's CUDA driver
+# when the default PyPI wheel is not compatible, then install this file.
+torch==2.10.0
+transformers==5.2.0
+peft==0.18.1
+accelerate==1.12.0
+bitsandbytes==0.49.2
+safetensors==0.7.0

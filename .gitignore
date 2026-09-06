@@ -33,6 +33,7 @@ ENV/
 !.env.example
 *.secret
 rhinocoder.yaml.local
+training/school_gpu.local.json
 
 # === Model weights & large binaries ===
 *.gguf

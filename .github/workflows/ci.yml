@@ -19,7 +19,7 @@ jobs:
       - name: Install UI dependencies
         run: npm ci --prefix agent/ui
       - name: Compile
-        run: python -m compileall -q agent data_pipeline eval plugin tools
+        run: python -m compileall -q agent data_pipeline eval plugin tools training
       - name: Unit tests
         run: python -m pytest -q
       - name: Build UI
@@ -36,3 +36,7 @@ jobs:
           python tools/audit_release_data.py
       - name: Check release versions and documentation
         run: python tools/check_release_consistency.py
+      - name: Validate locked training and school GPU templates
+        run: |
+          python tools/run_training.py audit --no-data
+          python tools/run_training.py cluster-template-audit

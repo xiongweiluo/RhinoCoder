@@ -26,6 +26,7 @@ RhinoCoder 是一个基于 MCP 的 Rhino 8 空间设计 Agent。系统把自然�
 - 隐私红队与不可绕过的请求安全门：高风险强制本地、凭证/窃取请求提前阻断、云端字段最小化及 Trace/日志/SQLite/Replay/模型请求统一审计。
 - 可复现训练数据管线：四类训练视图、模板/数字变体防泄漏 70/15/15 分区、holdout 锁定、完整血缘和隐私审计。
 - A6 无微调三路对照基线：主模型、低成本模型与规则路由各完成 30 题 × 3 次真实 Rhino 运行，270/270 通过；300 条黄金数据离线回放通过，质量、延迟、token、成本、路由和隐私指标统一冻结。
+- B1–B4 训练就绪：锁定 Qwen2.5-Coder-7B-Instruct、`instruction_to_tool_call` 视图和唯一 QLoRA 配置，训练/恢复/自动评测/模型登记/报告及学校 GPU 接入门禁已完成；当前状态为 `Training Ready — Waiting for School GPU Access`。
 - 第三阶段真实黄金数据采集已完成：300/300 条黄金轨迹、40 个标签，首次通过率 77%、最终通过率 100%；稳定原型版本仍为 `0.2.0`，本地质量报告与真实证据均保持 Git 忽略。
 - 三个核心场景已在真实 Rhino 环境中各连续运行 3 次成功，详见 [UI 真实环境验收报告](docs/ui-acceptance-report.md)。
 - WebSocket 快照恢复、Rhino Listener 热重启和四类故障恢复已完成真实验收，详见 [断线与故障恢复验收报告](docs/recovery-acceptance-report.md)。
@@ -34,7 +35,7 @@ RhinoCoder 是一个基于 MCP 的 Rhino 8 空间设计 Agent。系统把自然�
 ### 后续规划
 
 - 真实本地推理后端与多模型对照评测。
-- 小规模 LoRA 与多模型对照实验。
+- 获得学校 GPU 权限后执行小规模 LoRA 与多模型对照实验。
 - Windows 验证、原生插件与多用户部署。
 
 完整路线见 [PROJECT_OPTIMIZATION_PLAN.md](PROJECT_OPTIMIZATION_PLAN.md)。
@@ -278,6 +279,19 @@ python tools/build_training_dataset.py report --output docs/training-data-pipeli
 ```
 
 输出位于本地 `data/training/a5/`，继续受 Git 忽略。300 个源任务先按 campaign/标签模板族和数字归一化签名合并为不可拆分组，再以固定种子精确分为 210 个 train、45 个 validation 和 45 个 holdout。已有 manifest 作为 split lock；后续增量任务若与 holdout 模板相连，仍只能进入 holdout。训练和调参不得读取 `holdout/`。当前 995 条真实导出、文件哈希、样本血缘及零泄漏结果见 [A5 训练数据管线验收报告](docs/training-data-pipeline.md)。
+
+## LoRA 训练就绪
+
+首轮实验只使用固定 revision 的 `Qwen/Qwen2.5-Coder-7B-Instruct`、A5 `instruction_to_tool_call` 视图和一套 4-bit QLoRA 配置。配置审计会锁定基座、tokenizer、数据行数/哈希及全部超参数，并禁止训练或自动评测读取 holdout。
+
+```bash
+python tools/run_training.py audit
+python tools/run_training.py tokenizer-audit
+python tools/run_training.py smoke
+python tools/run_training.py cluster-template-audit
+```
+
+CPU 冒烟不联网、不下载基座，已验证 adapter-only 更新、checkpoint 保存/恢复及验证计算。获得学校 GPU 权限后，先填写被 Git 忽略的 `training/school_gpu.local.json`，再执行严格环境清单；正式训练入口支持 `--resume auto`、validation 最佳 checkpoint、JSONL 日志、结构化工具调用评测与本地模型登记。当前状态和完整操作见 [B1–B4 LoRA 训练就绪验收报告](docs/training-readiness.md)。在用户明确确认 GPU 权限前，不运行正式训练或阶段 C holdout 评测。
 
 ## 安全边界
 

@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "status": "awaiting_school_access",
+  "login": {
+    "host": "REQUIRED_AT_ACCESS",
+    "username_environment_variable": "SCHOOL_GPU_USER",
+    "jump_host": "OPTIONAL_AT_ACCESS",
+    "ssh_key_policy": "school-managed; never commit private keys"
+  },
+  "scheduler": {
+    "type": "REQUIRED_AT_ACCESS",
+    "queue_or_partition": "REQUIRED_AT_ACCESS",
+    "account": "OPTIONAL_AT_ACCESS",
+    "qos": "OPTIONAL_AT_ACCESS"
+  },
+  "compute": {
+    "gpu_models": ["RECORD_AT_ACCESS"],
+    "minimum_vram_gb": 16,
+    "recommended_vram_gb": 24,
+    "cuda_version": "RECORD_AT_ACCESS",
+    "driver_version": "RECORD_AT_ACCESS",
+    "maximum_walltime": "RECORD_AT_ACCESS",
+    "cpu_cores": "RECORD_AT_ACCESS",
+    "ram_gb": "RECORD_AT_ACCESS"
+  },
+  "storage": {
+    "project_quota_gb": "RECORD_AT_ACCESS",
+    "scratch_quota_gb": "RECORD_AT_ACCESS",
+    "model_cache_environment_variable": "RHINOCODER_MODEL_CACHE",
+    "run_directory": "data/training/runs",
+    "checkpoint_export": "rsync adapter, manifest, metrics and evaluation; verify SHA-256",
+    "backup": "school-approved encrypted storage; retain best adapter and last resumable checkpoint"
+  },
+  "network": {
+    "login_node_huggingface_access": "VERIFY_AT_ACCESS",
+    "compute_node_huggingface_access": "VERIFY_AT_ACCESS",
+    "offline_fallback": "pre-download pinned revision to RHINOCODER_MODEL_CACHE"
+  },
+  "secrets": {
+    "huggingface_token_environment_variable": "HF_TOKEN",
+    "storage_policy": "scheduler secret/file permission 0600; never command-line or Git"
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "experiment_id": "rhinocoder-qwen25-coder-7b-itc-lora-v1",
+  "status": "locked_pre_gpu",
+  "scope": {
+    "base_model_count": 1,
+    "training_view": "instruction_to_tool_call",
+    "hyperparameter_variants": 1,
+    "holdout_policy": "forbidden"
+  },
+  "base_model": {
+    "id": "Qwen/Qwen2.5-Coder-7B-Instruct",
+    "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+    "source_url": "https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "license": "Apache-2.0",
+    "license_url": "https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct/blob/c03e6d358207e414f1eca0bb1891e29f1db0e242/LICENSE",
+    "parameters": 7615616512,
+    "weights_format": "safetensors-bfloat16",
+    "tokenizer": {
+      "id": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+      "loader": "AutoTokenizer",
+      "chat_template": "upstream-qwen2.5-tool-call"
+    },
+    "expected_vram_gb": {
+      "minimum": 16,
+      "recommended": 24,
+      "basis": "4-bit NF4 QLoRA, sequence length 2048, batch 1, gradient checkpointing"
+    }
+  },
+  "data": {
+    "pipeline_version": "a5-training-views-v1",
+    "manifest": "data/training/a5/manifest.json",
+    "view": "instruction_to_tool_call",
+    "train": {
+      "path": "data/training/a5/train/instruction_to_tool_call.jsonl",
+      "rows": 210,
+      "sha256": "1e533d29f13669b11019e60b76a0e5a77800a7e09df3c6d7750a5d9233d16a99"
+    },
+    "validation": {
+      "path": "data/training/a5/validation/instruction_to_tool_call.jsonl",
+      "rows": 45,
+      "sha256": "2b71d0a8e138c0b188f86086178e06b72ff44421f88d7e615b86cd4a51845d56"
+    }
+  },
+  "lora": {
+    "method": "QLoRA",
+    "rank": 16,
+    "alpha": 32,
+    "dropout": 0.05,
+    "bias": "none",
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "quantization": {
+      "bits": 4,
+      "type": "nf4",
+      "double_quant": true,
+      "compute_dtype": "bfloat16"
+    }
+  },
+  "training": {
+    "max_sequence_length": 2048,
+    "overflow_policy": "reject",
+    "per_device_train_batch_size": 1,
+    "per_device_eval_batch_size": 1,
+    "gradient_accumulation_steps": 16,
+    "learning_rate": 0.0002,
+    "epochs": 3,
+    "seed": 20260906,
+    "data_seed": 20260906,
+    "warmup_ratio": 0.05,
+    "weight_decay": 0.01,
+    "max_grad_norm": 1.0,
+    "optimizer": "paged_adamw_8bit",
+    "lr_scheduler": "cosine",
+    "gradient_checkpointing": true,
+    "bf16": true,
+    "tf32": true,
+    "logging_steps": 1,
+    "evaluation_steps": 10
+  },
+  "checkpoint": {
+    "root": "data/training/runs/rhinocoder-qwen25-coder-7b-itc-lora-v1",
+    "save_steps": 10,
+    "save_total_limit": 3,
+    "resume": "auto",
+    "selection_metric": "eval_loss",
+    "greater_is_better": false,
+    "adapter_directory": "best-adapter"
+  },
+  "logging": {
+    "format": "jsonl",
+    "metrics_file": "metrics.jsonl",
+    "environment_file": "environment.json",
+    "run_manifest": "run-manifest.json",
+    "model_registry": "data/training/model-registry.jsonl"
+  },
+  "evaluation": {
+    "split": "validation",
+    "generation_max_new_tokens": 512,
+    "metrics": [
+      "eval_loss",
+      "perplexity",
+      "tool_call_parse_rate",
+      "tool_name_exact_rate",
+      "tool_arguments_exact_rate",
+      "tool_sequence_exact_rate"
+    ],
+    "holdout_allowed": false
+  }
+}
