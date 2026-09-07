@@ -89,6 +89,15 @@ async def _reset_rhino_environment() -> None:
         payload = response.json()
         if payload.get("status") == "error":
             raise RuntimeError(payload.get("message", "环境重置失败"))
+        reported_remaining = payload.get("remaining_count")
+        if reported_remaining not in (None, 0):
+            raise RuntimeError(f"环境重置后仍有 {reported_remaining} 个对象")
+
+    # 不信任“重置请求成功”本身；从独立读取端点确认真实场景为空。
+    summary = await _scene_summary()
+    remaining = int(summary.get("total") or len(summary.get("objects") or []))
+    if remaining:
+        raise RuntimeError(f"环境重置验证失败：场景仍有 {remaining} 个对象")
 
 
 async def _scene_summary() -> dict:
@@ -187,6 +196,15 @@ async def _collect_loop(
         pending = [task for task in pending if task["id"] == task_id]
         if not pending:
             raise RuntimeError(f"任务不存在、已经进入黄金集或正在等待批量确认: {task_id}")
+    elif review_mode == "batch" and pending:
+        # 批量模式必须在一个原子人工审核批次的边界停下。这样不会在上一批尚未
+        # APPROVE 时静默跨入下一批，也让中断/续采始终保持十条证据边界。
+        first_batch = batch_id_for_task(campaign, pending[0], batch_size=batch_size)
+        pending = [
+            task
+            for task in pending
+            if batch_id_for_task(campaign, task, batch_size=batch_size) == first_batch
+        ]
     if limit > 0:
         pending = pending[:limit]
 
@@ -226,6 +244,9 @@ async def _collect_loop(
 
         raw = task["instruction"]
         run = await run_agent(raw, closed_loop=True)
+        if run is None:  # 防御连续 SIGINT 在 run_agent 清理阶段再次打断返回值。
+            _echo("CANCEL", "运行清理被再次中断；当前任务未写入任何准入数据", err=True)
+            return
         try:
             summary = await _scene_summary()
             evaluation = verify(summary, task["asserts"])
@@ -390,7 +411,12 @@ def main() -> None:
         default="immediate",
         help="immediate=逐条人工确认；batch=AI 审核后每批统一人工确认",
     )
-    parser.add_argument("--batch-size", type=int, default=5, help="批量人工确认的任务数")
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=None,
+        help="批量人工确认的任务数；默认使用 campaign manifest 的 review_batch_size",
+    )
     parser.add_argument("--batch-status", help="显示指定审核批次状态，不连接 Rhino")
     parser.add_argument("--approve-batch", help="在一次人类确认后晋级指定完整批次")
     parser.add_argument("--human-note", default="", help="批量确认备注")
@@ -408,7 +434,7 @@ def main() -> None:
     args = parser.parse_args()
     _setup_logging()
     campaign = load_campaign(args.manifest)
-    if args.batch_size < 1:
+    if args.batch_size is not None and args.batch_size < 1:
         raise SystemExit("--batch-size 必须大于 0")
     if args.auto_review and args.review_mode != "batch":
         raise SystemExit("--auto-review 仅支持 --review-mode batch")

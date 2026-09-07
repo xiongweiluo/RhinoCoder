@@ -3,6 +3,7 @@
   "campaign_id": "phase2-100",
   "title": "第二阶段 100 条真实黄金轨迹",
   "target": 100,
+  "review_batch_size": 10,
   "source_campaign_manifests": ["phase1_30.json"],
   "inherited_golden_campaign_ids": ["phase1-30"],
   "source_task_files": ["../tasks/phase2_expansion.jsonl"],

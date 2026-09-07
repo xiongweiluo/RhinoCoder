@@ -18,6 +18,7 @@ from agent.sanitizer import contains_sensitive_data
 from agent.trace_store import (
     AI_REVIEWED,
     AI_REVIEWED_FILE,
+    AI_REVIEW_WITHDRAWN,
     CANDIDATE_FILE,
     ERROR_ANALYSIS,
     ERROR_ANALYSIS_FILE,
@@ -77,20 +78,34 @@ def audit_trace_data() -> TraceDataAudit:
             audit.findings.append(f"{GOLDEN_FILE.name}:{index}: {reason}")
 
     candidate_rows = _read_jsonl(AI_REVIEWED_FILE, audit, "ai_reviewed_candidate_history")
+    latest_candidate_rows: dict[tuple[str, str], tuple[int, dict[str, Any]]] = {}
+    for index, row in enumerate(candidate_rows, 1):
+        task = row.get("task") or {}
+        task_key = (str(task.get("campaign_id") or ""), str(task.get("task_id") or ""))
+        if all(task_key):
+            latest_candidate_rows[task_key] = (index, row)
     active_candidates = 0
     for index, row in enumerate(candidate_rows, 1):
-        if row.get("disposition") != AI_REVIEWED:
-            audit.findings.append(f"{AI_REVIEWED_FILE.name}:{index}: disposition 应为 {AI_REVIEWED}")
-        if contains_sensitive_data(row):
+        disposition = row.get("disposition")
+        if disposition not in {AI_REVIEWED, AI_REVIEW_WITHDRAWN}:
+            audit.findings.append(
+                f"{AI_REVIEWED_FILE.name}:{index}: disposition 应为 "
+                f"{AI_REVIEWED} 或 {AI_REVIEW_WITHDRAWN}"
+            )
+        if contains_sensitive_data(row, inspect_embedded_json=True):
             audit.findings.append(f"{AI_REVIEWED_FILE.name}:{index}: 仍包含敏感字段")
+        if disposition == AI_REVIEW_WITHDRAWN:
+            continue
         task = row.get("task") or {}
         task_key = (str(task.get("campaign_id") or ""), str(task.get("task_id") or ""))
         if task_key in golden_task_keys:
             continue
-        active_candidates += 1
-        gate = validate_ai_review_candidate(row)
-        for reason in gate.reasons:
-            audit.findings.append(f"{AI_REVIEWED_FILE.name}:{index}: {reason}")
+        latest = latest_candidate_rows.get(task_key)
+        if latest and latest[0] == index:
+            active_candidates += 1
+            gate = validate_ai_review_candidate(row)
+            for reason in gate.reasons:
+                audit.findings.append(f"{AI_REVIEWED_FILE.name}:{index}: {reason}")
     audit.counts["ai_reviewed_candidate"] = active_candidates
 
     separated = (
@@ -102,7 +117,7 @@ def audit_trace_data() -> TraceDataAudit:
         for index, row in enumerate(_read_jsonl(path, audit, label), 1):
             if row.get("disposition") != expected:
                 audit.findings.append(f"{path.name}:{index}: disposition 应为 {expected}")
-            if contains_sensitive_data(row):
+            if contains_sensitive_data(row, inspect_embedded_json=True):
                 audit.findings.append(f"{path.name}:{index}: 仍包含敏感字段")
 
     legacy_rows = _read_jsonl(LEGACY_GOLDEN_FILE, audit, "legacy_excluded")

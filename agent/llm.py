@@ -26,7 +26,13 @@ from openai import APITimeoutError, AsyncOpenAI
 
 from agent.model_backends import BackendError, ModelBackend, build_default_backends
 from agent.pricing import calculate_cost, resolve_model_pricing
-from agent.privacy import PrivacyAction, classify_request, sanitize_for_log
+from agent.privacy import (
+    PrivacyAction,
+    classify_request,
+    extract_local_tool_aliases,
+    rehydrate_local_tool_arguments,
+    sanitize_for_log,
+)
 from agent.router import RouteContext, RouterConfig, select_route
 from agent.runtime import (
     AgentRunResult,
@@ -157,7 +163,10 @@ def _system_prompt(closed_loop: bool) -> str:
         "- 世界原点为 (0,0,0)；未指定位置时新建几何体默认落在原点附近。\n"
         "- 颜色使用 0-255 RGB 三元组。尺寸和间距均为模型单位。\n"
         "- 群组操作使用 group_objects；修改既有要求时以最新要求为准。\n"
-        "- get_scene_summary 的 type 是 Rhino 几何类别而不是语义形状名。"
+        "- get_scene_summary 的 type 是 Rhino 几何类别而不是语义形状名。\n\n"
+        "【脱敏占位符约定】\n"
+        "- <LAYER_REDACTED> 和 <GROUP_REDACTED> 代表本机保留的精确名称。\n"
+        "- 工具参数和最终总结中必须原样使用占位符，不得自造或猜测替代名。"
     )
     if not closed_loop:
         return base + "\n请规划并执行用户任务，完成后给出清晰总结。"
@@ -537,6 +546,7 @@ async def run_agent(
                     {"role": "user", "content": prompt},
                 ]
                 result.messages = messages
+                local_tool_aliases = extract_local_tool_aliases(prompt)
 
                 _echo(
                     "LLM",
@@ -639,6 +649,7 @@ async def run_agent(
                             fn_args = json.loads(tc.function.arguments or "{}")
                         except json.JSONDecodeError:
                             fn_args = {}
+                        fn_args = rehydrate_local_tool_arguments(fn_args, local_tool_aliases)
 
                         if scene_is_current and fn_name != "get_scene_summary":
                             metrics.corrections += 1

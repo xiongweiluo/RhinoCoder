@@ -19,10 +19,12 @@ from agent.privacy import (
     PrivacyLogFilter,
     classify_request,
     cloud_sensitive_findings,
+    extract_local_tool_aliases,
     minimize_text_for_cloud,
     prepare_cloud_messages,
     prepare_cloud_tools,
     record_model_request,
+    rehydrate_local_tool_arguments,
     sanitize_for_log,
 )
 from agent.router import BackendProfile, RouteMode, RouterConfig
@@ -32,6 +34,14 @@ from agent.sanitizer import contains_sensitive_data, sanitize_structure
 
 ROOT = Path(__file__).resolve().parent.parent
 RED_TEAM_PATH = ROOT / "eval" / "privacy" / "red_team.json"
+
+
+def test_system_prompt_preserves_privacy_placeholders_without_guessing():
+    prompt = llm._system_prompt(closed_loop=True)
+
+    assert "<LAYER_REDACTED>" in prompt
+    assert "<GROUP_REDACTED>" in prompt
+    assert "不得自造或猜测替代名" in prompt
 
 
 def _cases():
@@ -105,6 +115,51 @@ def test_cloud_minimization_parses_tool_call_argument_json():
     assert cloud_sensitive_findings(minimized) == []
 
 
+def test_cloud_placeholders_rehydrate_from_unambiguous_local_prompt_aliases():
+    prompt = '把三个对象加入群组“A7编辑组-01”并移入图层“A7工作流::编辑-01”。'
+    aliases = extract_local_tool_aliases(prompt)
+
+    assert aliases == {
+        "layer_name": ("A7工作流::编辑-01",),
+        "group_name": ("A7编辑组-01",),
+    }
+    hydrated = rehydrate_local_tool_arguments(
+        {
+            "object_id": "11111111-1111-4111-8111-111111111111",
+            "layer_name": "<LAYER_REDACTED>",
+        },
+        aliases,
+    )
+    assert hydrated["layer_name"] == "A7工作流::编辑-01"
+
+    hallucinated = rehydrate_local_tool_arguments(
+        {"layer_name": "Cylinders_Layer"}, aliases
+    )
+    assert hallucinated["layer_name"] == "A7工作流::编辑-01"
+
+
+def test_quoted_layer_and_group_labels_are_minimized_before_cloud():
+    prompt = "加入群组“A7编辑组-01”并移入图层“A7工作流::编辑-01”"
+
+    minimized = minimize_text_for_cloud(prompt)
+
+    assert "A7编辑组-01" not in minimized
+    assert "A7工作流::编辑-01" not in minimized
+    assert "<GROUP_REDACTED>" in minimized
+    assert "<LAYER_REDACTED>" in minimized
+    assert cloud_sensitive_findings(minimized) == []
+    assert any(item.endswith(":group") for item in cloud_sensitive_findings(prompt))
+    assert any(item.endswith(":layer") for item in cloud_sensitive_findings(prompt))
+
+
+def test_cloud_placeholder_is_not_guessed_when_prompt_has_multiple_aliases():
+    aliases = {"layer_name": ("Layer A", "Layer B")}
+    hydrated = rehydrate_local_tool_arguments(
+        {"layer_name": "<LAYER_REDACTED>"}, aliases
+    )
+    assert hydrated["layer_name"] == "<LAYER_REDACTED>"
+
+
 def test_cloud_tool_schema_minimization_preserves_contract_and_removes_examples():
     tools = [
         {
@@ -161,6 +216,30 @@ def test_trace_sanitizer_keeps_tool_arguments_as_valid_json():
     assert arguments["object_id"] == "<GUID_REDACTED>"
     assert arguments["layer_name"] == "<LAYER_REDACTED>"
     assert not contains_sensitive_data(sanitized)
+
+
+def test_trace_sanitizer_redacts_unlabelled_repetitions_of_local_aliases():
+    payload = {
+        "instruction": "移入图层“A7工作流::编辑-03”并加入群组“A7编辑组-03”。",
+        "messages": [
+            {
+                "role": "assistant",
+                "reasoning_content": (
+                    "I wrote A7工作流::编辑-03 and observed groups "
+                    "['A7编辑组-03']."
+                ),
+            }
+        ],
+        "started_at": "2026-09-07T07:54:37.393870+00:00",
+    }
+
+    sanitized = sanitize_structure(payload)
+    serialized = json.dumps(sanitized, ensure_ascii=False)
+
+    assert "A7工作流::编辑-03" not in serialized
+    assert "A7编辑组-03" not in serialized
+    assert sanitized["started_at"] == "2026-09-07T07:54:37.393870+00:00"
+    assert not contains_sensitive_data(sanitized, inspect_embedded_json=True)
 
 
 def test_storage_and_log_sanitization_cover_new_sensitive_categories():

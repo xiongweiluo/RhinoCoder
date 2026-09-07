@@ -21,7 +21,11 @@ def test_audit_skips_superseded_ai_candidate_gate_but_still_counts_history(monke
 
     monkeypatch.setattr(audit_module, "_read_jsonl", fake_read)
     monkeypatch.setattr(audit_module, "validate_saved_golden_record", lambda _row: [])
-    monkeypatch.setattr(audit_module, "contains_sensitive_data", lambda _row: False)
+    monkeypatch.setattr(
+        audit_module,
+        "contains_sensitive_data",
+        lambda _row, **_kwargs: False,
+    )
 
     def unexpected_gate(_row):
         raise AssertionError("已晋级候选不应再按活跃候选门禁复核")

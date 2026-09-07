@@ -210,6 +210,12 @@ def test_reset_environment_uses_supported_clear_undo_overload(monkeypatch):
     class Doc:
         clear_args = None
 
+        class ObjectsTable:
+            def Delete(self, object_id, quiet):
+                raise AssertionError("bulk delete should have cleared the scene")
+
+        Objects = ObjectsTable()
+
         def ClearUndoRecords(self, purge_deleted_objects):
             self.clear_args = purge_deleted_objects
 
@@ -218,14 +224,16 @@ def test_reset_environment_uses_supported_clear_undo_overload(monkeypatch):
 
     class FakeRS:
         deleted = None
+        objects = ["one", "two"]
 
-        @staticmethod
-        def AllObjects():
-            return ["one", "two"]
+        @classmethod
+        def AllObjects(cls):
+            return list(cls.objects)
 
         @classmethod
         def DeleteObjects(cls, object_ids):
             cls.deleted = object_ids
+            cls.objects = []
 
         @staticmethod
         def Redraw():
@@ -234,7 +242,51 @@ def test_reset_environment_uses_supported_clear_undo_overload(monkeypatch):
     result = tools_transform._exec_reset_environment(FakeRS, {})
     assert FakeRS.deleted == ["one", "two"]
     assert doc.clear_args is True
+    assert result["requested_count"] == 2
+    assert result["remaining_count"] == 0
     assert "场景已清空" in result["message"]
+
+
+def test_reset_environment_falls_back_to_object_table_for_silent_bulk_failure(monkeypatch):
+    class FakeRS:
+        objects = ["grouped-one", "grouped-two"]
+
+        @classmethod
+        def AllObjects(cls):
+            return list(cls.objects)
+
+        @staticmethod
+        def DeleteObjects(object_ids):
+            return []
+
+        @staticmethod
+        def Redraw():
+            return None
+
+    class ObjectsTable:
+        calls = []
+
+        def Delete(self, object_id, quiet):
+            self.calls.append((object_id, quiet))
+            FakeRS.objects.remove(object_id)
+            return True
+
+    class Doc:
+        Objects = ObjectsTable()
+        clear_args = None
+
+        def ClearUndoRecords(self, purge_deleted_objects):
+            self.clear_args = purge_deleted_objects
+
+    doc = Doc()
+    monkeypatch.setitem(sys.modules, "scriptcontext", SimpleNamespace(doc=doc))
+
+    result = tools_transform._exec_reset_environment(FakeRS, {})
+
+    assert doc.Objects.calls == [("grouped-one", True), ("grouped-two", True)]
+    assert doc.clear_args is True
+    assert result["requested_count"] == 2
+    assert result["remaining_count"] == 0
 
 
 class _UndoDoc:

@@ -20,6 +20,7 @@ from agent.collection_campaign import (
     trace_disposition,
 )
 from agent.runtime import AgentRunResult, RunMetrics, RunStatus, ToolCallRecord
+from agent.sanitizer import contains_sensitive_data, sanitize_structure
 from agent.trace_store import (
     PARTIAL,
     build_trace_record,
@@ -27,6 +28,7 @@ from agent.trace_store import (
     save_golden,
     save_rejected_trace,
     validate_golden_candidate,
+    withdraw_ai_reviewed_candidate,
 )
 
 
@@ -86,6 +88,7 @@ def test_phase2_campaign_reuses_frozen_phase1_and_adds_70_tasks():
         tag for task in phase2.tasks for tag in task["tags"]
     }
     assert phase2.inherited_golden_campaign_ids == ["phase1-30"]
+    assert phase2.review_batch_size == 10
 
 
 def test_phase2_summary_recognizes_frozen_phase1_golden_records(tmp_path):
@@ -292,6 +295,116 @@ def test_ai_reviewed_batch_waits_for_one_human_confirmation(monkeypatch, tmp_pat
     assert promoted["feedback"]["mode"] == "batch"
     assert promoted["feedback"]["source"] == "human_review"
     assert promoted["review_history"][0]["source"] == "ai_visual_review"
+
+
+def test_ai_candidate_can_be_withdrawn_and_recollected(monkeypatch, tmp_path):
+    campaign = load_campaign(DEFAULT_CAMPAIGN_MANIFEST)
+    golden_path, candidate_path = _configure_batch_paths(monkeypatch, tmp_path)
+    task = campaign.tasks[0]
+    _stage_ai_candidate(campaign, task, tmp_path, "weak-run")
+    assert task["id"] in ai_reviewed_task_ids(
+        campaign.campaign_id,
+        path=candidate_path,
+        golden_path=golden_path,
+    )
+
+    tombstone = withdraw_ai_reviewed_candidate(
+        campaign.campaign_id,
+        task["id"],
+        note="tool trace was correct but too noisy for positive training data",
+        path=candidate_path,
+        golden_path=golden_path,
+    )
+
+    assert tombstone["feedback"]["supersedes_run_id"] == "weak-run"
+    assert task["id"] not in ai_reviewed_task_ids(
+        campaign.campaign_id,
+        path=candidate_path,
+        golden_path=golden_path,
+    )
+    _stage_ai_candidate(campaign, task, tmp_path, "clean-run")
+    assert task["id"] in ai_reviewed_task_ids(
+        campaign.campaign_id,
+        path=candidate_path,
+        golden_path=golden_path,
+    )
+
+
+def test_manifest_review_batch_size_is_used_by_default():
+    campaign = load_campaign(DEFAULT_CAMPAIGN_MANIFEST.with_name("phase3_300.json"))
+    assert campaign.review_batch_size == 10
+    assert batch_id_for_task(campaign, campaign.tasks[100]) == "phase3-300-batch-11"
+
+
+def test_rotation_axis_in_serialized_tool_arguments_is_preserved():
+    payload = {"arguments": '{"angle_degrees":90,"axis":[0,0,1]}'}
+    sanitized = sanitize_structure(payload)
+    assert '"axis":[0,0,1]' in sanitized["arguments"]
+    assert contains_sensitive_data(sanitized, inspect_embedded_json=True) is False
+
+
+def test_scale_vector_in_serialized_tool_arguments_is_preserved():
+    payload = {"arguments": '{"object_id":"abc","scale_factor":[1.5,1.5,0.75]}'}
+    sanitized = sanitize_structure(payload)
+    assert '"scale_factor":[1.5,1.5,0.75]' in sanitized["arguments"]
+    assert contains_sensitive_data(sanitized, inspect_embedded_json=True) is False
+
+
+def test_a7_campaign_adds_200_coverage_driven_tasks_in_ten_item_batches():
+    campaign = load_campaign(DEFAULT_CAMPAIGN_MANIFEST.with_name("a7_500.json"))
+    new_tasks = [task for task in campaign.tasks if task["id"].startswith("a7-")]
+    assert campaign.target == 500
+    assert campaign.review_batch_size == 10
+    assert len(new_tasks) == 200
+    assert len({task["instruction"] for task in campaign.tasks}) == 500
+    assert all(task["difficulty"] == 5 for task in new_tasks)
+    assert all(task["expected_route"] == "cloud-main" for task in new_tasks)
+    assert {task["coverage_gap"] for task in new_tasks} == {
+        "multi_round_revision",
+        "complex_edit_membership",
+        "undo_recovery_sequence",
+        "boolean_alternative_recovery",
+        "incomplete_perception",
+        "complex_edit_selection",
+        "route_misclassification",
+        "tool_error_recovery",
+    }
+    assert batch_id_for_task(campaign, new_tasks[0]) == "a7-500-batch-31"
+    assert batch_id_for_task(campaign, new_tasks[-1]) == "a7-500-batch-50"
+
+
+def test_batch_collector_stops_at_manifest_batch_boundary(monkeypatch, tmp_path):
+    campaign = load_campaign(DEFAULT_CAMPAIGN_MANIFEST.with_name("a7_500.json"))
+    calls = []
+
+    monkeypatch.setattr(data_collector, "campaign_golden_task_ids", lambda _campaign: {
+        task["id"] for task in campaign.tasks[:300]
+    })
+    monkeypatch.setattr(data_collector, "ai_reviewed_task_ids", lambda _campaign_id: set())
+    monkeypatch.setattr(data_collector, "_preflight", lambda **_kwargs: asyncio.sleep(0))
+
+    async def reset():
+        return None
+
+    async def run(prompt, **_kwargs):
+        calls.append(prompt)
+        raise RuntimeError("stop after task selection")
+
+    monkeypatch.setattr(data_collector, "_reset_rhino_environment", reset)
+    monkeypatch.setattr(data_collector, "run_agent", run)
+    with pytest.raises(RuntimeError, match="stop after task selection"):
+        asyncio.run(data_collector._collect_loop(
+            campaign,
+            limit=0,
+            task_id=None,
+            allow_reset=True,
+            allow_nonempty_reset=False,
+            review_mode="batch",
+            batch_size=None,
+            auto_run=True,
+            auto_review=True,
+        ))
+    assert calls == [campaign.tasks[300]["instruction"]]
 
 
 def test_batch_promotion_prevalidates_every_candidate_before_atomic_write(monkeypatch, tmp_path):

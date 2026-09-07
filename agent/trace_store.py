@@ -28,6 +28,7 @@ FEEDBACK_FILE = PROJECT_ROOT / "data" / "feedback.jsonl"
 GOLDEN = "golden"
 CANDIDATE = "candidate"
 AI_REVIEWED = "ai_reviewed_candidate"
+AI_REVIEW_WITHDRAWN = "ai_review_withdrawn"
 PARTIAL = "partial"
 ERROR_ANALYSIS = "error_analysis"
 
@@ -115,7 +116,7 @@ def validate_golden_candidate(
         "feedback_source": (record.get("feedback") or {}).get("source"),
         "sanitization_applied": True,
     }
-    if contains_sensitive_data(sanitized):
+    if contains_sensitive_data(sanitized, inspect_embedded_json=True):
         reasons.append("sensitive_data_remaining")
     return GoldenGateResult(not reasons, reasons, sanitized)
 
@@ -168,7 +169,7 @@ def validate_ai_review_candidate(record: dict[str, Any]) -> GoldenGateResult:
             reasons.append("ai_visual_evidence_not_found")
 
     sanitized = sanitize_structure(record)
-    if contains_sensitive_data(sanitized):
+    if contains_sensitive_data(sanitized, inspect_embedded_json=True):
         reasons.append("sensitive_data_remaining")
     return GoldenGateResult(not reasons, reasons, sanitized)
 
@@ -220,7 +221,7 @@ def validate_saved_golden_record(record: dict[str, Any]) -> list[str]:
             reasons.append(f"admission_{key}_invalid")
     if not isinstance(admission.get("scene_check_count"), int) or admission.get("scene_check_count", 0) < 1:
         reasons.append("admission_scene_check_count_invalid")
-    if contains_sensitive_data(record):
+    if contains_sensitive_data(record, inspect_embedded_json=True):
         reasons.append("sensitive_data_remaining")
     return reasons
 
@@ -268,6 +269,15 @@ def _task_key(record: dict[str, Any]) -> tuple[str, str] | None:
     return (campaign_id, task_id) if campaign_id and task_id else None
 
 
+def _active_ai_reviewed_rows(path: Path) -> list[dict[str, Any]]:
+    latest: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in _read_jsonl(path):
+        key = _task_key(row)
+        if key:
+            latest[key] = row
+    return [row for row in latest.values() if validate_ai_review_candidate(row).accepted]
+
+
 def save_ai_reviewed_candidate(
     record: dict[str, Any],
     *,
@@ -302,15 +312,46 @@ def save_ai_reviewed_candidate(
     if not gate.accepted:
         raise ValueError(f"AI 审核候选准入失败: {gate.reasons}")
     key = _task_key(gate.sanitized_record)
-    active_ai_candidates = [
-        row for row in _read_jsonl(AI_REVIEWED_FILE)
-        if validate_ai_review_candidate(row).accepted
-    ]
+    active_ai_candidates = _active_ai_reviewed_rows(AI_REVIEWED_FILE)
     existing = active_ai_candidates + _read_jsonl(GOLDEN_FILE)
     if key and any(_task_key(row) == key for row in existing):
         raise ValueError(f"审核任务重复: {key[0]}/{key[1]}")
     append_jsonl(AI_REVIEWED_FILE, gate.sanitized_record)
     return gate.sanitized_record
+
+
+def withdraw_ai_reviewed_candidate(
+    campaign_id: str,
+    task_id: str,
+    *,
+    note: str,
+    path: Path = AI_REVIEWED_FILE,
+    golden_path: Path = GOLDEN_FILE,
+) -> dict[str, Any]:
+    """Append an auditable tombstone so a weak AI candidate can be recollected."""
+    key = (str(campaign_id), str(task_id))
+    if any(_task_key(row) == key for row in _read_jsonl(golden_path)):
+        raise ValueError(f"已是黄金样本，不能撤回 AI 候选: {campaign_id}/{task_id}")
+    latest = next(
+        (row for row in reversed(_read_jsonl(path)) if _task_key(row) == key),
+        None,
+    )
+    if latest is None or not validate_ai_review_candidate(latest).accepted:
+        raise ValueError(f"没有可撤回的 AI 候选: {campaign_id}/{task_id}")
+    tombstone = {
+        "schema_version": TRACE_SCHEMA_VERSION,
+        "task": {"campaign_id": key[0], "task_id": key[1]},
+        "feedback": {
+            "label": AI_REVIEW_WITHDRAWN,
+            "source": "ai_visual_review",
+            "timestamp": utc_now(),
+            "note": str(note)[:1000],
+            "supersedes_run_id": latest.get("run_id"),
+        },
+        "disposition": AI_REVIEW_WITHDRAWN,
+    }
+    append_jsonl(path, tombstone)
+    return tombstone
 
 
 def save_candidate(record: dict[str, Any]) -> None:
@@ -375,7 +416,11 @@ def _golden_payload(gate: GoldenGateResult) -> dict[str, Any]:
             "task": gate.sanitized_record.get("task"),
         },
     }
-    if contains_sensitive_data(payload):
+    # Tool arguments are serialized JSON.  Inspect them structurally so safe
+    # semantic vectors (for example ``scale_factor`` or a rotation ``axis``)
+    # are not mistaken for raw project coordinates at the final write gate.
+    # This must match the candidate gate and SQLite storage boundary.
+    if contains_sensitive_data(payload, inspect_embedded_json=True):
         raise ValueError("黄金样本写入前仍检测到敏感数据")
     row_reasons = validate_saved_golden_record(payload)
     if row_reasons:

@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "campaign_id": "a7-500",
+  "title": "A7 覆盖缺口扩展 500 条真实黄金轨迹",
+  "target": 500,
+  "review_batch_size": 10,
+  "source_campaign_manifests": ["phase3_300.json"],
+  "inherited_golden_campaign_ids": ["phase1-30", "phase2-100", "phase3-300"],
+  "source_task_files": ["../tasks/a7_expansion.jsonl"],
+  "diversity_requirements": {
+    "min_unique_tags": 46,
+    "min_difficulty_4_or_higher": 460,
+    "max_numeric_template_duplicates": 2,
+    "required_tags": [
+      "boolean", "perception", "recovery", "undo", "revision", "multi_round",
+      "complex_edit", "incomplete_scene", "fallback", "route_boundary",
+      "argument_error", "group", "layer", "place", "supported_by"
+    ],
+    "required_coverage_gaps": [
+      "multi_round_revision", "complex_edit_membership", "undo_recovery_sequence",
+      "boolean_alternative_recovery", "incomplete_perception",
+      "complex_edit_selection", "route_misclassification", "tool_error_recovery"
+    ],
+    "expected_route_minimums": {"cloud-main": 200}
+  }
+}

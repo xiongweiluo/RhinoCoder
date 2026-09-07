@@ -6,7 +6,11 @@ import json
 import re
 from typing import Any
 
-from agent.privacy import cloud_sensitive_findings, minimize_text_for_cloud
+from agent.privacy import (
+    cloud_sensitive_findings,
+    extract_local_tool_aliases,
+    minimize_text_for_cloud,
+)
 
 SECRET_RE = re.compile(r"\bsk-[A-Za-z0-9_-]{12,}\b")
 GUID_RE = re.compile(
@@ -20,9 +24,6 @@ COORD_TUPLE_RE = re.compile(
 )
 KEYED_COORD_RE = re.compile(
     r"(?i)(['\"]?(?:x|y|z|center_[xyz]|origin_[xyz]|start_[xyz]|end_[xyz]|base_[xyz]|point_[xyz])['\"]?\s*[:=]\s*)-?\d+(?:\.\d+)?"
-)
-LAYER_RE = re.compile(
-    r"(?i)(layer|图层)\s*[:=]?\s*['\"]([^'\"]{2,80})['\"]"
 )
 SECRET_KEYS = {"api_key", "apikey", "token", "secret", "password", "authorization"}
 COORD_KEYS = {
@@ -54,6 +55,7 @@ LINEAGE_ID_KEYS = {
     "feedback_id",
     "call_id",
     "tool_call_id",
+    "supersedes_run_id",
 }
 
 
@@ -72,11 +74,55 @@ def sanitize_text(value: str) -> str:
     value = WINDOWS_PATH_RE.sub("<PATH_REDACTED>", value)
     value = COORD_TUPLE_RE.sub("<COORD_REDACTED>", value)
     value = KEYED_COORD_RE.sub(r"\1<COORD_REDACTED>", value)
-    value = LAYER_RE.sub(lambda match: f"{match.group(1)} '<LAYER_REDACTED>'", value)
     return value
 
 
-def sanitize_structure(value: Any, *, parent_key: str = "") -> Any:
+def _collect_sensitive_aliases(value: Any) -> dict[str, str]:
+    """Find trusted labels, then redact their later unlabelled repetitions."""
+    aliases: dict[str, str] = {}
+
+    def collect_text(text: str) -> None:
+        detected = extract_local_tool_aliases(text)
+        aliases.update({item: "<LAYER_REDACTED>" for item in detected["layer_name"]})
+        aliases.update({item: "<GROUP_REDACTED>" for item in detected["group_name"]})
+
+    def walk(item: Any) -> None:
+        if isinstance(item, dict):
+            role = str(item.get("role") or "").lower()
+            if role == "user" and isinstance(item.get("content"), str):
+                collect_text(item["content"])
+            for key, child in item.items():
+                key_lc = str(key).lower()
+                if key_lc in LAYER_KEYS and isinstance(child, str) and child != "Default":
+                    aliases[child] = "<LAYER_REDACTED>"
+                elif key_lc in GROUP_KEYS:
+                    children = child if isinstance(child, (list, tuple)) else [child]
+                    for candidate in children:
+                        if isinstance(candidate, str) and candidate:
+                            aliases[candidate] = "<GROUP_REDACTED>"
+                elif key_lc in {"instruction", "prompt"} and isinstance(child, str):
+                    collect_text(child)
+                walk(child)
+        elif isinstance(item, (list, tuple)):
+            for child in item:
+                walk(child)
+
+    walk(value)
+    return {
+        key: marker
+        for key, marker in aliases.items()
+        if key and not key.startswith("<") and any(char.isalnum() for char in key)
+    }
+
+
+def sanitize_structure(
+    value: Any,
+    *,
+    parent_key: str = "",
+    _aliases: dict[str, str] | None = None,
+) -> Any:
+    if _aliases is None:
+        _aliases = _collect_sensitive_aliases(value)
     key_lc = parent_key.lower()
     # 系统血缘 ID 不是 Rhino 对象 GUID，必须保留以支持跨表追溯。
     if key_lc in LINEAGE_ID_KEYS and isinstance(value, str):
@@ -88,7 +134,7 @@ def sanitize_structure(value: Any, *, parent_key: str = "") -> Any:
             pass
         else:
             return json.dumps(
-                sanitize_structure(decoded),
+                sanitize_structure(decoded, _aliases=_aliases),
                 ensure_ascii=False,
                 separators=(",", ":"),
                 sort_keys=True,
@@ -108,7 +154,10 @@ def sanitize_structure(value: Any, *, parent_key: str = "") -> Any:
         if all(isinstance(item, (int, float)) for item in value):
             return "<COORD_REDACTED>"
     if isinstance(value, str):
-        return sanitize_text(value)
+        sanitized = sanitize_text(value)
+        for alias in sorted(_aliases, key=len, reverse=True):
+            sanitized = sanitized.replace(alias, _aliases[alias])
+        return sanitized
     if isinstance(value, dict):
         sanitized: dict[str, Any] = {}
         for key, item in value.items():
@@ -120,12 +169,22 @@ def sanitize_structure(value: Any, *, parent_key: str = "") -> Any:
             ) and isinstance(item, (int, float)):
                 sanitized[key_str] = "<COORD_REDACTED>"
             else:
-                sanitized[key_str] = sanitize_structure(item, parent_key=key_str)
+                sanitized[key_str] = sanitize_structure(
+                    item,
+                    parent_key=key_str,
+                    _aliases=_aliases,
+                )
         return sanitized
     if isinstance(value, list):
-        return [sanitize_structure(item, parent_key=parent_key) for item in value]
+        return [
+            sanitize_structure(item, parent_key=parent_key, _aliases=_aliases)
+            for item in value
+        ]
     if isinstance(value, tuple):
-        return [sanitize_structure(item, parent_key=parent_key) for item in value]
+        return [
+            sanitize_structure(item, parent_key=parent_key, _aliases=_aliases)
+            for item in value
+        ]
     return value
 
 
@@ -194,7 +253,6 @@ def contains_sensitive_data(
             or WINDOWS_PATH_RE.search(value)
             or COORD_TUPLE_RE.search(value)
             or KEYED_COORD_RE.search(value)
-            or LAYER_RE.search(value)
         )
     if isinstance(value, dict):
         for key, item in value.items():

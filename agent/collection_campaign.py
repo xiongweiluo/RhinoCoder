@@ -36,6 +36,7 @@ class CampaignDefinition:
     tasks: list[dict[str, Any]]
     manifest_path: Path
     inherited_golden_campaign_ids: list[str]
+    review_batch_size: int
 
 
 def _read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -117,6 +118,11 @@ def load_campaign(path: Path = DEFAULT_CAMPAIGN_MANIFEST) -> CampaignDefinition:
         raise ValueError("campaign 不能继承自身的黄金轨迹")
 
     target = int(manifest.get("target", 0))
+    review_batch_size = int(manifest.get("review_batch_size", 5))
+    if review_batch_size < 1:
+        raise ValueError("review_batch_size 必须大于 0")
+    if target and target % review_batch_size:
+        raise ValueError("target 必须能被 review_batch_size 整除")
     findings = validate_campaign_tasks(tasks, target=target, requirements=manifest.get("diversity_requirements") or {})
     if findings:
         raise ValueError("campaign 校验失败: " + "; ".join(findings))
@@ -127,6 +133,7 @@ def load_campaign(path: Path = DEFAULT_CAMPAIGN_MANIFEST) -> CampaignDefinition:
         tasks=tasks,
         manifest_path=path,
         inherited_golden_campaign_ids=inherited_golden_campaign_ids,
+        review_batch_size=review_batch_size,
     )
 
 
@@ -173,6 +180,27 @@ def validate_campaign_tasks(
     missing_tags = sorted(required_tags - unique_tags)
     if missing_tags:
         findings.append(f"缺少必须覆盖的标签: {missing_tags}")
+    required_gaps = {
+        str(gap) for gap in requirements.get("required_coverage_gaps") or []
+    }
+    covered_gaps = {
+        str(task.get("coverage_gap"))
+        for task in tasks
+        if task.get("coverage_gap")
+    }
+    missing_gaps = sorted(required_gaps - covered_gaps)
+    if missing_gaps:
+        findings.append(f"缺少必须覆盖的 A7 缺口: {missing_gaps}")
+    route_counts = Counter(
+        str(task.get("expected_route"))
+        for task in tasks
+        if task.get("expected_route")
+    )
+    for route, minimum in (requirements.get("expected_route_minimums") or {}).items():
+        if route_counts[str(route)] < int(minimum):
+            findings.append(
+                f"预期路由 {route} 任务数 {route_counts[str(route)]} < {int(minimum)}"
+            )
     normalized = Counter(
         re.sub(r"\d+(?:\.\d+)?", "<N>", instruction).strip().lower()
         for instruction in instructions
@@ -194,7 +222,17 @@ def task_metadata(campaign: CampaignDefinition, task: dict[str, Any]) -> dict[st
     }
     if task.get("requires_clean_tool_trace"):
         metadata["requires_clean_tool_trace"] = True
+    for key in ("coverage_gap", "workflow_family", "expected_route"):
+        if task.get(key):
+            metadata[key] = task[key]
     return metadata
+
+
+def _batch_size(campaign: CampaignDefinition, batch_size: int | None) -> int:
+    resolved = campaign.review_batch_size if batch_size is None else batch_size
+    if resolved < 1:
+        raise ValueError("batch_size 必须大于 0")
+    return resolved
 
 
 def golden_task_ids(campaign_id: str, path: Path = GOLDEN_FILE) -> set[str]:
@@ -249,10 +287,13 @@ def ai_reviewed_candidates(
         if (
             task.get("campaign_id") == campaign_id
             and task.get("task_id")
-            and validate_ai_review_candidate(row).accepted
         ):
             latest[str(task["task_id"])] = row
-    return [row for task_id, row in latest.items() if task_id not in golden_ids]
+    return [
+        row
+        for task_id, row in latest.items()
+        if task_id not in golden_ids and validate_ai_review_candidate(row).accepted
+    ]
 
 
 def ai_reviewed_task_ids(
@@ -271,10 +312,9 @@ def batch_id_for_task(
     campaign: CampaignDefinition,
     task: dict[str, Any],
     *,
-    batch_size: int = 5,
+    batch_size: int | None = None,
 ) -> str:
-    if batch_size < 1:
-        raise ValueError("batch_size 必须大于 0")
+    batch_size = _batch_size(campaign, batch_size)
     task_ids = [str(item["id"]) for item in campaign.tasks]
     try:
         index = task_ids.index(str(task["id"]))
@@ -287,8 +327,9 @@ def _batch_tasks(
     campaign: CampaignDefinition,
     batch_id: str,
     *,
-    batch_size: int = 5,
+    batch_size: int | None = None,
 ) -> list[dict[str, Any]]:
+    batch_size = _batch_size(campaign, batch_size)
     matching = [
         task
         for task in campaign.tasks
@@ -303,11 +344,12 @@ def review_batch_summary(
     campaign: CampaignDefinition,
     batch_id: str,
     *,
-    batch_size: int = 5,
+    batch_size: int | None = None,
     candidate_path: Path = AI_REVIEWED_FILE,
     golden_path: Path = GOLDEN_FILE,
     trace_dir: Path = TRACE_DIR,
 ) -> dict[str, Any]:
+    batch_size = _batch_size(campaign, batch_size)
     tasks = _batch_tasks(campaign, batch_id, batch_size=batch_size)
     golden_ids = campaign_golden_task_ids(campaign, golden_path)
     candidates = {
@@ -368,7 +410,7 @@ def promote_review_batch(
     batch_id: str,
     *,
     human_note: str = "",
-    batch_size: int = 5,
+    batch_size: int | None = None,
     candidate_path: Path = AI_REVIEWED_FILE,
     golden_path: Path = GOLDEN_FILE,
 ) -> int:
@@ -553,6 +595,16 @@ def campaign_summary(
         "unique_instructions": len({task["instruction"] for task in campaign.tasks}),
         "unique_tags": len({tag for task in campaign.tasks for tag in task.get("tags") or []}),
         "difficulty_distribution": dict(sorted(Counter(task["difficulty"] for task in campaign.tasks).items())),
+        "review_batch_size": campaign.review_batch_size,
+        "coverage_gap_distribution": dict(sorted(Counter(
+            str(task.get("coverage_gap")) for task in campaign.tasks if task.get("coverage_gap")
+        ).items())),
+        "workflow_family_distribution": dict(sorted(Counter(
+            str(task.get("workflow_family")) for task in campaign.tasks if task.get("workflow_family")
+        ).items())),
+        "expected_route_distribution": dict(sorted(Counter(
+            str(task.get("expected_route")) for task in campaign.tasks if task.get("expected_route")
+        ).items())),
         "attempts": len(attempts),
         "attempted_tasks": len(latest),
         "golden": len(golden_ids),

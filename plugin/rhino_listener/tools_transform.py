@@ -835,9 +835,20 @@ def _exec_reset_environment(rs, params: dict):
     import scriptcontext as sc  # noqa: PLC0415
 
     # 物理层删除：直接操作文档数据库，不依赖 UI 命令行
-    all_objs = rs.AllObjects()
+    all_objs = list(rs.AllObjects() or [])
     if all_objs:
         rs.DeleteObjects(all_objs)
+
+    # 某些 Rhino 文档在组合对象或复杂 Undo 历史存在时，
+    # rhinoscriptsyntax 批量删除可能静默遗留对象。对剩余项使用
+    # RhinoCommon ObjectTable 再删除一次，且必须以实际场景为准验证。
+    remaining = list(rs.AllObjects() or [])
+    if remaining and sc.doc:
+        for object_id in remaining:
+            sc.doc.Objects.Delete(object_id, True)
+        remaining = list(rs.AllObjects() or [])
+    if remaining:
+        raise RuntimeError(f"评测清场不完整，仍有 {len(remaining)} 个对象")
 
     # 时空层抹除：调用 RhinoCommon 原生方法清空撤销内存
     if sc.doc:
@@ -845,7 +856,11 @@ def _exec_reset_environment(rs, params: dict):
         sc.doc.ClearUndoRecords(True)
 
     rs.Redraw()
-    return {"message": "场景已清空，撤销栈已清除"}
+    return {
+        "message": "场景已清空，撤销栈已清除",
+        "requested_count": len(all_objs),
+        "remaining_count": 0,
+    }
 
 
 # ===========================================================================

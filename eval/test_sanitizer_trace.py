@@ -214,6 +214,27 @@ def test_golden_write_boundary_rechecks_audit_and_writes_sanitized_payload(monke
             "content": "object 22222222-2222-4222-8222-222222222222 on layer: 'Client'",
         }
     )
+    record["run"]["messages"].append(
+        {
+            "role": "assistant",
+            "content": None,
+            "tool_calls": [
+                {
+                    "id": "call-2",
+                    "type": "function",
+                    "function": {
+                        "name": "scale_object",
+                        "arguments": json.dumps(
+                            {
+                                "object_id": "22222222-2222-4222-8222-222222222222",
+                                "scale_factor": [1.5, 1.5, 0.75],
+                            }
+                        ),
+                    },
+                }
+            ],
+        }
+    )
     gate = validate_golden_candidate(record, human_confirmed=True)
     assert gate.accepted
 
@@ -225,6 +246,8 @@ def test_golden_write_boundary_rechecks_audit_and_writes_sanitized_payload(monke
     assert saved["metadata"]["admission"]["run_status"] == "completed"
     assert saved["metadata"]["admission"]["human_confirmed"] is True
     assert "22222222-2222-4222-8222-222222222222" not in json.dumps(saved)
+    tool_arguments = saved["messages"][-1]["tool_calls"][0]["function"]["arguments"]
+    assert json.loads(tool_arguments)["scale_factor"] == [1.5, 1.5, 0.75]
     assert validate_saved_golden_record(saved) == []
 
     gate.sanitized_record["admission"]["human_confirmed"] = False

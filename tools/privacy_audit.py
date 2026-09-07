@@ -162,7 +162,10 @@ def _audit_traces(result: PrivacyAuditResult) -> None:
                 result.findings.append(
                     f"{path.relative_to(ROOT)}:{index}: Trace 敏感项 {raw_findings[:5]}"
                 )
-            if contains_sensitive_data(sanitize_structure(record)):
+            if contains_sensitive_data(
+                sanitize_structure(record),
+                inspect_embedded_json=True,
+            ):
                 result.findings.append(
                     f"{path.relative_to(ROOT)}:{index}: Trace 写入脱敏后仍有敏感数据"
                 )

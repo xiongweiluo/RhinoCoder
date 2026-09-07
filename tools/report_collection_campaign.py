@@ -116,7 +116,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, default=DEFAULT_CAMPAIGN_MANIFEST)
     parser.add_argument("--batch-id", help="输出指定的 5 条审核批次")
-    parser.add_argument("--batch-size", type=int, default=5)
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=None,
+        help="默认使用 campaign manifest 的 review_batch_size",
+    )
     parser.add_argument("--output", type=Path, help="Markdown 输出路径；默认只打印")
     parser.add_argument("--json-output", type=Path, help="可选 JSON 输出路径")
     args = parser.parse_args()

@@ -107,6 +107,31 @@ GROUP_PATTERN = re.compile(
     r"(?i)(['\"]?(?:group(?:[_ ]?name)?|群组)['\"]?)"
     r"\s*[:：=]\s*['\"]?([^\s,，。;；\n\"'<][^,，。;；\n\"']{0,79})['\"]?"
 )
+QUOTED_LAYER_PATTERN = re.compile(
+    r"(?i)(?<![A-Za-z0-9_])(?:layer(?:[_ ]?name)?|图层)(?:\s+(?:名为|called|string))?"
+    r"\s*(?:\[\s*)?"
+    r"[“”‘’\"']([^\s<:：=,，;；\[\]{}“”‘’\"'\n]"
+    r"[^<“”‘’\"'\n]{0,79})[“”‘’\"']"
+)
+QUOTED_GROUP_PATTERN = re.compile(
+    r"(?i)(?<![A-Za-z0-9_])(?:group(?:[_ ]?name)?|群组)(?:\s+(?:名为|called|string))?"
+    r"\s*(?:\[\s*)?"
+    r"[“”‘’\"']([^\s<:：=,，;；\[\]{}“”‘’\"'\n]"
+    r"[^<“”‘’\"'\n]{0,79})[“”‘’\"']"
+)
+GROUP_LIST_PATTERN = re.compile(
+    r"(?i)(?<![A-Za-z0-9_])groups\s*(?:['\"]\s*[:：=]\s*)?\[\s*"
+    r"[“”‘’\"']([^\s<:：=,，;；\[\]{}“”‘’\"'\n]"
+    r"[^<“”‘’\"'\n]{0,79})[“”‘’\"']"
+)
+DICT_LAYER_PATTERN = re.compile(
+    r"(?i)['\"](?:layer(?:[_ ]?name)?|图层)['\"]\s*[:：=]\s*"
+    r"['\"]([^\s<:：=,，;；\[\]{}'\"\n][^<'\"\n]{0,79})['\"]"
+)
+DICT_GROUP_PATTERN = re.compile(
+    r"(?i)['\"](?:group(?:s|[_ ]?name)?|群组)['\"]\s*[:：=]\s*"
+    r"(?:\[\s*)?['\"]([^\s<:：=,，;；\[\]{}'\"\n][^<'\"\n]{0,79})['\"]"
+)
 LOCAL_ONLY_PATTERN = re.compile(
     r"(?i)(?:不要上传|禁止上云|仅本地|只在本地|本地处理|local[- ]only|do not upload)"
 )
@@ -191,11 +216,32 @@ def _redact_secret_patterns(value: str) -> str:
     return value
 
 
+def _redact_quoted_label(
+    value: str,
+    pattern: re.Pattern[str],
+    marker: str,
+) -> str:
+    """Replace only the captured label while preserving surrounding prose."""
+
+    def replace(match: re.Match[str]) -> str:
+        full = match.group(0)
+        start, end = match.span(1)
+        offset = match.start(0)
+        return f"{full[:start - offset]}{marker}{full[end - offset:]}"
+
+    return pattern.sub(replace, value)
+
+
 def minimize_text_for_cloud(value: str) -> str:
     value = _redact_secret_patterns(value)
     value = POSIX_PATH_PATTERN.sub("<PATH_REDACTED>", value)
     value = WINDOWS_PATH_PATTERN.sub("<PATH_REDACTED>", value)
     value = EMAIL_PATTERN.sub("<EMAIL_REDACTED>", value)
+    value = _redact_quoted_label(value, QUOTED_LAYER_PATTERN, "<LAYER_REDACTED>")
+    value = _redact_quoted_label(value, QUOTED_GROUP_PATTERN, "<GROUP_REDACTED>")
+    value = _redact_quoted_label(value, GROUP_LIST_PATTERN, "<GROUP_REDACTED>")
+    value = _redact_quoted_label(value, DICT_LAYER_PATTERN, "<LAYER_REDACTED>")
+    value = _redact_quoted_label(value, DICT_GROUP_PATTERN, "<GROUP_REDACTED>")
     value = LABELED_IDENTITY_PATTERN.sub(
         lambda match: f"{match.group(1)}: <IDENTITY_REDACTED>", value
     )
@@ -267,6 +313,41 @@ def minimize_messages_for_cloud(messages: Sequence[Mapping[str, Any]]) -> list[d
     return minimized
 
 
+def extract_local_tool_aliases(prompt: str) -> dict[str, tuple[str, ...]]:
+    """Keep exact layer/group labels local for placeholder tool-call rehydration."""
+
+    def unique_values(*patterns: re.Pattern[str]) -> tuple[str, ...]:
+        matches = (
+            match.strip()
+            for pattern in patterns
+            for match in pattern.findall(prompt)
+            if match.strip()
+        )
+        return tuple(dict.fromkeys(matches))
+
+    return {
+        "layer_name": unique_values(QUOTED_LAYER_PATTERN, DICT_LAYER_PATTERN),
+        "group_name": unique_values(
+            QUOTED_GROUP_PATTERN,
+            GROUP_LIST_PATTERN,
+            DICT_GROUP_PATTERN,
+        ),
+    }
+
+
+def rehydrate_local_tool_arguments(
+    arguments: Mapping[str, Any],
+    aliases: Mapping[str, Sequence[str]],
+) -> dict[str, Any]:
+    """Bind label arguments to the sole unambiguous value kept on the local side."""
+    hydrated = dict(arguments)
+    for key in ("layer_name", "group_name"):
+        values = tuple(aliases.get(key) or ())
+        if key in hydrated and hydrated.get(key) not in (None, "") and len(values) == 1:
+            hydrated[key] = values[0]
+    return hydrated
+
+
 def cloud_sensitive_findings(value: Any, *, path: str = "$") -> list[str]:
     findings: list[str] = []
     if isinstance(value, dict):
@@ -330,6 +411,11 @@ def cloud_sensitive_findings(value: Any, *, path: str = "$") -> list[str]:
         ("identity", LABELED_IDENTITY_PATTERN),
         ("layer", LAYER_PATTERN),
         ("group", GROUP_PATTERN),
+        ("layer", QUOTED_LAYER_PATTERN),
+        ("group", QUOTED_GROUP_PATTERN),
+        ("group", GROUP_LIST_PATTERN),
+        ("layer", DICT_LAYER_PATTERN),
+        ("group", DICT_GROUP_PATTERN),
     ):
         if pattern.search(scrubbed):
             findings.append(f"{path}:{code}")
