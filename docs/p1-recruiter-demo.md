@@ -4,7 +4,7 @@
 
 状态：**通过**
 
-公开入口：[https://rhinocoder-demo.gritty-olm-3357.chatgpt.site](https://rhinocoder-demo.gritty-olm-3357.chatgpt.site)
+公开入口：[https://rhinocoder-demo.xiongweiluo1.chatgpt.site](https://rhinocoder-demo.xiongweiluo1.chatgpt.site)
 
 ## 目标与结果
 

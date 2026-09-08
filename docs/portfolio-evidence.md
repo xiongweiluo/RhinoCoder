@@ -1,6 +1,6 @@
 # Portfolio evidence index
 
-[在线浏览三套只读 Replay](https://rhinocoder-demo.gritty-olm-3357.chatgpt.site) · 无需 Rhino、模型密钥或本地安装
+[在线浏览三套只读 Replay](https://rhinocoder-demo.xiongweiluo1.chatgpt.site) · 无需 Rhino、模型密钥或本地安装
 
 RhinoCoder 对外只使用能从版本化文件复核的指标。本页是 README、简历表述、演示脚本与面试讲解的统一证据入口；完整真实 Trace、用户身份和项目文件不公开。
 

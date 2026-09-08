@@ -2,7 +2,7 @@
 
 > **An AI agent that executes, observes, verifies, and recovers inside Rhino 8—not just one that writes scripts.**
 
-[Live read-only demo](https://rhinocoder-demo.gritty-olm-3357.chatgpt.site) · [中文](README.md) · [5-minute Replay](#quickstart-a-no-rhino-required) · [Real Rhino quickstart](#quickstart-b-real-rhino-8) · [Evidence index](docs/portfolio-evidence.md) · [Architecture](docs/architecture.md)
+[Live read-only demo](https://rhinocoder-demo.xiongweiluo1.chatgpt.site) · [中文](README.md) · [5-minute Replay](#quickstart-a-no-rhino-required) · [Real Rhino quickstart](#quickstart-b-real-rhino-8) · [Evidence index](docs/portfolio-evidence.md) · [Architecture](docs/architecture.md)
 
 RhinoCoder is a verifiable, recoverable, privacy-aware spatial-design agent for Rhino 8. It translates natural-language tasks into 23 versioned MCP tool calls, executes geometry on Rhino's main thread, reads the resulting scene back, and checks it with programmatic assertions. Privacy decisions, model routing, tool calls, corrections, cost, and evidence share one auditable `run_id`. A sanitized synthetic Replay lets reviewers inspect the loop without Rhino or a model key.
 
@@ -19,7 +19,7 @@ RhinoCoder is a verifiable, recoverable, privacy-aware spatial-design agent for 
 | **Zero sensitive findings in the A4 audit** | 12 red-team cases, 1,609 traces, 7,016 SQLite rows, three Replays, and simulated log/request surfaces; [A4 report](docs/privacy-red-team-report.md) |
 | **A1–A7 and B1–B4 accepted** | Data, audit, routing, privacy, training pipeline, and CPU smoke are complete; formal GPU training has not run; [roadmap](PROJECT_OPTIMIZATION_PLAN.md) |
 
-Current release: [`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0). Recruiters can open the [live read-only demo](https://rhinocoder-demo.gritty-olm-3357.chatgpt.site) without Rhino, a model key, or installation. Versioned docs, Replay/GIF assets, scripts, and validation evidence are also published with the Git tag and GitHub Release. The owner deferred the real Rhino video.
+Current release: [`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0). Recruiters can open the [live read-only demo](https://rhinocoder-demo.xiongweiluo1.chatgpt.site) without Rhino, a model key, or installation. Versioned docs, Replay/GIF assets, scripts, and validation evidence are also published with the Git tag and GitHub Release. The owner deferred the real Rhino video.
 
 > **Honest boundary:** `local-mock` is a deterministic interface and safety test double. It proves forced private routing and no-cloud fallback, not real local-model quality. P2a contains tasks authored externally but executed by the Agent; it is not a study in which people used the UI. P2b is postponed. School-GPU validation and LoRA training have not run, and A5 holdout reads remain zero.
 
@@ -33,7 +33,7 @@ Current release: [`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/t
 
 ## Quickstart A: no Rhino required
 
-Fastest path: open the **[RhinoCoder live read-only demo](https://rhinocoder-demo.gritty-olm-3357.chatgpt.site)** and choose normal execution, self-correction, or privacy-aware routing. It plays frozen sanitized synthetic data in the browser, with no model, Rhino, WebSocket, or mutation capability.
+Fastest path: open the **[RhinoCoder live read-only demo](https://rhinocoder-demo.xiongweiluo1.chatgpt.site)** and choose normal execution, self-correction, or privacy-aware routing. It plays frozen sanitized synthetic data in the browser, with no model, Rhino, WebSocket, or mutation capability.
 
 To inspect the same experience locally, use:
 
