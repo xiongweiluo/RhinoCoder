@@ -21,6 +21,13 @@ export type HistoryItem = {
   feedback_labels?: string[];
   rolled_back?: boolean;
   undo_applied?: boolean;
+  scene_before?: SceneSnapshot | null;
+  scene_after?: SceneSnapshot | null;
+  scene_capture_error?: string | null;
+  evaluation?: SceneEvaluation | null;
+  demo_scenario_id?: string | null;
+  is_replay?: boolean;
+  audit_summary?: AuditSummary;
 };
 
 export type RouteDecision = {
@@ -60,4 +67,56 @@ export type SceneObject = {
   color: number[];
   layer: string;
   groups: string[];
+};
+
+export type DemoEvidence = {
+  label: string;
+  path: string;
+  href: string;
+};
+
+export type DemoScenario = {
+  id: string;
+  title: string;
+  kicker: string;
+  goal: string;
+  input: string;
+  expected: string[];
+  replay: string;
+  evidence: DemoEvidence;
+  read_only_url: string;
+};
+
+export type AssertionResult = {
+  spec: Record<string, unknown>;
+  ok: boolean;
+  reason: string;
+};
+
+export type SceneEvaluation = {
+  score: number;
+  passed: boolean;
+  partial: boolean;
+  results: AssertionResult[];
+  failed_reasons: string[];
+};
+
+export type AuditSummary = {
+  provenance?: string;
+  privacy_reviewed?: boolean;
+  contains_real_trace_data?: boolean;
+  browser_payload: string;
+  raw_trace_exposed: boolean;
+  object_ids: string;
+  event_count: number;
+};
+
+export type ReplayPayload = {
+  name: string;
+  scenario: DemoScenario;
+  events: AgentEvent[];
+  scene_before: SceneSnapshot;
+  scene_after: SceneSnapshot;
+  read_only: true;
+  audit_summary: AuditSummary;
 };

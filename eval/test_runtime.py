@@ -160,6 +160,57 @@ def test_mcp_process_exit_is_recoverable():
     assert error.recoverable
 
 
+def test_run_cancelled_wrapped_by_stdio_task_group_stays_cancelled(monkeypatch):
+    class Message:
+        content = "done"
+        tool_calls = []
+
+        def model_dump(self, **_kwargs):
+            return {"role": "assistant", "content": self.content}
+
+    class Completions:
+        async def create(self, **_kwargs):
+            return SimpleNamespace(
+                choices=[SimpleNamespace(finish_reason="stop", message=Message())],
+                usage=None,
+            )
+
+    fake_client = SimpleNamespace(chat=SimpleNamespace(completions=Completions()))
+
+    @asynccontextmanager
+    async def cancelling_stdio(_params):
+        try:
+            yield object(), object()
+        finally:
+            raise ExceptionGroup("stdio cleanup", [RunCancelled("cancelled")])
+
+    class FakeSession:
+        def __init__(self, *_args):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_args):
+            return None
+
+        async def initialize(self):
+            return SimpleNamespace(serverInfo=SimpleNamespace(name="fake"))
+
+        async def list_tools(self):
+            return SimpleNamespace(tools=[])
+
+    monkeypatch.setattr(llm, "make_deepseek_client", lambda: fake_client)
+    monkeypatch.setattr(llm, "stdio_client", cancelling_stdio)
+    monkeypatch.setattr(llm, "ClientSession", FakeSession)
+
+    result = asyncio.run(llm.run_agent("cancel", closed_loop=False))
+
+    assert result.status is RunStatus.CANCELLED
+    assert result.error.code == "run.cancelled"
+    assert result.events[-1].type == "run.cancelled"
+
+
 def test_llm_timeout_has_specific_recoverable_error(monkeypatch):
     class Completions:
         async def create(self, **_kwargs):

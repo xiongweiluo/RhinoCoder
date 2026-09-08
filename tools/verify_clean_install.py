@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import asyncio
 import json
 import os
 import shutil
@@ -57,22 +56,23 @@ def _read_local_json(url: str, *, timeout: float) -> dict[str, object]:
         return json.load(response)
 
 
-async def _verify_replay_websocket(port: int) -> int:
-    import aiohttp
-
-    events = []
-    async with aiohttp.ClientSession() as session:
-        async with session.ws_connect(f"http://127.0.0.1:{port}/ws") as websocket:
-            snapshot = await websocket.receive_json(timeout=5)
-            if snapshot.get("type") != "snapshot":
-                raise RuntimeError("首次 WebSocket 消息不是 snapshot")
-            await websocket.send_json({"type": "replay", "name": "basic_stack.json"})
-            while True:
-                event = await websocket.receive_json(timeout=10)
-                if event.get("replay"):
-                    events.append(event)
-                if event.get("type") == "run.completed":
-                    break
+def _verify_read_only_replay(port: int) -> int:
+    catalog = _read_local_json(
+        f"http://127.0.0.1:{port}/api/demo-scenarios",
+        timeout=5,
+    )
+    scenarios = catalog.get("scenarios")
+    if not isinstance(scenarios, list) or len(scenarios) != 3:
+        raise RuntimeError("公开演示场景清单必须精确包含三项")
+    payload = _read_local_json(
+        f"http://127.0.0.1:{port}/api/replays/basic_stack.json",
+        timeout=5,
+    )
+    if payload.get("read_only") is not True:
+        raise RuntimeError("公开 Replay API 未声明只读")
+    events = payload.get("events")
+    if not isinstance(events, list):
+        raise RuntimeError("公开 Replay API 缺少事件")
     sequences = [event.get("seq") for event in events]
     if sequences != list(range(1, len(events) + 1)):
         raise RuntimeError(f"Replay 事件顺序错误: {sequences}")
@@ -116,7 +116,7 @@ def _verify_offline_first_task(copy_root: Path, python: Path, env: dict[str, str
         expected = ["basic_stack.json", "self_correction.json", "table_group.json"]
         if replays != expected:
             raise RuntimeError(f"Replay 列表错误: {replays}")
-        return asyncio.run(_verify_replay_websocket(port))
+        return _verify_read_only_replay(port)
     finally:
         process.terminate()
         try:

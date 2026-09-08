@@ -50,6 +50,7 @@ import json
 import logging
 import os
 import queue
+import socket
 import sys
 import threading
 import uuid
@@ -70,6 +71,7 @@ from . import tools_geometry
 from . import tools_transform
 from . import tools_property
 from . import tools_perception
+from . import tools_evaluation
 
 # ---------------------------------------------------------------------------
 # Logging —— 输出到 stdout，在 Rhino Python 控制台中可见
@@ -196,6 +198,7 @@ _TOOL_MODULES = [
     tools_transform,
     tools_property,
     tools_perception,
+    tools_evaluation,
 ]
 
 # _ROUTE_TABLE:    {"/endpoint": wrapped_route_fn(h)}
@@ -231,6 +234,9 @@ _NO_UNDO_RECORD_OPERATIONS = {
     "get_scene_summary",
     "undo_last_action",
     "reset_environment",
+    "setup_p2_fixture",
+    "mutate_p2_fixture",
+    "inspect_p2_fixture",
 }
 
 
@@ -453,15 +459,15 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
         elif work.result_data is not None:
             logger.info("%s 完成，result_keys=%s", operation, sorted(work.result_data.keys()))
             payload = {"status": "ok", **work.result_data}
-            self._cache_and_send(idempotency_key, request_signature, payload)
+            self._cache_and_send(idempotency_key, request_signature, payload, operation=operation)
         elif work.result_guids is not None:
             logger.info("%s 完成，result_count=%d", operation, len(work.result_guids))
             payload = {"status": "ok", "guids": work.result_guids}
-            self._cache_and_send(idempotency_key, request_signature, payload)
+            self._cache_and_send(idempotency_key, request_signature, payload, operation=operation)
         else:
             logger.info("%s 完成，result_present=%s", operation, bool(work.result_guid))
             payload = {"status": "ok", "guid": work.result_guid}
-            self._cache_and_send(idempotency_key, request_signature, payload)
+            self._cache_and_send(idempotency_key, request_signature, payload, operation=operation)
 
     def _cache_and_send(
         self,
@@ -470,6 +476,7 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
         payload: dict,
         *,
         status: int = 200,
+        operation: str = "",
     ) -> None:
         if idempotency_key:
             with _idempotency_lock:
@@ -477,6 +484,15 @@ class _RhinoHTTPHandler(BaseHTTPRequestHandler):
                 _idempotency_cache.move_to_end(idempotency_key)
                 while len(_idempotency_cache) > IDEMPOTENCY_CACHE_SIZE:
                     _idempotency_cache.popitem(last=False)
+        if status == 200 and tools_evaluation.consume_response_drop(operation):
+            logger.warning("P2 one-shot fault: dropping cached %s response", operation)
+            self.close_connection = True
+            try:
+                self.connection.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+            self.connection.close()
+            return
         self._send_json(status, payload)
 
     def _send_json(self, status: int, data: dict) -> None:

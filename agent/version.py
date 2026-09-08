@@ -1,4 +1,4 @@
 __version__ = "0.3.0"
-PROMPT_VERSION = "closed-loop-v1"
+PROMPT_VERSION = "closed-loop-v2"
 TOOL_SCHEMA_VERSION = "1.0"
 TRACE_SCHEMA_VERSION = "1.0"

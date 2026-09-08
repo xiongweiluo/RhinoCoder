@@ -23,17 +23,17 @@
     {
       "path": "eval/replays/basic_stack.json",
       "classification": "synthetic_replay",
-      "sha256": "fd568fa659673f9ebab0242ab89e5b65f0307848bb9cdb4cdfaddba7c88005f9"
+      "sha256": "c605dee872f83db19fa9ce69f9d15893e980c1e9fa95b21b436e609da49a95bd"
     },
     {
       "path": "eval/replays/self_correction.json",
       "classification": "synthetic_replay",
-      "sha256": "aeffcf93b128197fd5c15072f6cf801bc2ae00e16fc6fed0e13a549242d9bdd8"
+      "sha256": "629727f9aba28c140fa23476b568cae1cbce0fba7a236bda71622011e67ee79c"
     },
     {
       "path": "eval/replays/table_group.json",
       "classification": "synthetic_replay",
-      "sha256": "2a5e8b3ca8b7410e5351ac0acafb67e8403e11ca3e4224d5ce29c5a90edf9541"
+      "sha256": "9eed19de926a81fbc047011d10fb9b0de5c79dd39187ebbd864ff74fe27ea591"
     }
   ]
 }

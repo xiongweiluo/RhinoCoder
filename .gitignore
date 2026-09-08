@@ -51,6 +51,7 @@ data/*
 !data/.gitkeep
 *.jsonl
 !eval/tasks/*.jsonl
+!eval/p2/*.jsonl
 *.parquet
 *.arrow
 *.db
@@ -62,6 +63,8 @@ eval/results/
 eval/reports/generated/
 agent/ui/dist/
 agent/ui/node_modules/
+agent/ui/playwright-report/
+agent/ui/test-results/
 *.tsbuildinfo
 tmp/
 

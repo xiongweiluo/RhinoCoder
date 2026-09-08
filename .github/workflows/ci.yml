@@ -24,6 +24,10 @@ jobs:
         run: python -m pytest -q
       - name: Build UI
         run: npm run build --prefix agent/ui
+      - name: Check UI performance budget
+        run: python tools/check_ui_performance.py
+      - name: Browser end-to-end demo
+        run: npm run test:e2e --prefix agent/ui
       - name: Validate benchmark tasks
         run: |
           python eval/run_eval.py --dry-run
@@ -34,6 +38,9 @@ jobs:
         run: |
           python tools/audit_trace_data.py
           python tools/audit_release_data.py
+          python tools/audit_p1_demo.py
+          python tools/audit_p2_hard_set.py
+          python tools/audit_p2_results.py
       - name: Check release versions and documentation
         run: python tools/check_release_consistency.py
       - name: Validate locked training and school GPU templates

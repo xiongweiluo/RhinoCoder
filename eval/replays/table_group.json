@@ -1,14 +1,19 @@
 {
-  "name": "Grouped table",
+  "name": "Privacy-aware grouped table",
   "sample": true,
   "provenance": "synthetic",
+  "demo_scenario": "privacy-route",
   "privacy": {"reviewed":true,"contains_real_trace_data":false,"coordinates":"synthetic","object_ids":"synthetic","layers":"generic"},
+  "scene_before": {"total":0,"capped":false,"objects":[]},
   "events": [
-    {"type":"run.started","run_id":"replay-table","seq":1,"timestamp":"2026-08-24T00:00:00Z","payload":{"prompt":"搭建桌面和四条桌腿并分组","closed_loop":true}},
-    {"type":"planning.started","run_id":"replay-table","seq":2,"timestamp":"2026-08-24T00:00:01Z","payload":{"round":1}},
-    {"type":"tool.completed","run_id":"replay-table","seq":3,"timestamp":"2026-08-24T00:00:02Z","payload":{"name":"create_box","success":true,"duration_ms":130}},
-    {"type":"tool.completed","run_id":"replay-table","seq":4,"timestamp":"2026-08-24T00:00:03Z","payload":{"name":"group_objects","success":true,"duration_ms":70}},
-    {"type":"scene.checked","run_id":"replay-table","seq":5,"timestamp":"2026-08-24T00:00:04Z","payload":{"scene_summary":{"total":5,"objects":[{"object_id":"table-top","name":"TableTop","type":"Polysurface","center":[0,0,32],"size":[60,40,4],"color":[160,120,80],"layer":"Sample","groups":["sample-table"]},{"object_id":"leg-1","name":"Leg","type":"Polysurface","center":[-28,-18,15],"size":[4,4,30],"color":[160,120,80],"layer":"Sample","groups":["sample-table"]}]}}},
-    {"type":"run.completed","run_id":"replay-table","seq":6,"timestamp":"2026-08-24T00:00:05Z","payload":{"status":"completed","metrics":{"duration_ms":11500,"tool_rounds":3,"tool_calls":8,"total_tokens":1430,"estimated_cost_usd":0}}}
+    {"type":"run.started","run_id":"replay-table","seq":1,"timestamp":"2026-08-24T00:00:00Z","payload":{"prompt":"将 <EMAIL_REDACTED> 从云请求中移除，然后搭建桌面和四条桌腿并分组","closed_loop":true}},
+    {"type":"privacy.assessed","run_id":"replay-table","seq":2,"timestamp":"2026-08-24T00:00:01Z","payload":{"decision_id":"privacy-replay-table","risk":"medium","action":"minimize_cloud","reason_codes":["email_address"],"reasons":["合成邮箱信号已在模型调用前最小化"],"cloud_allowed":true,"requires_minimization":true}},
+    {"type":"route.selected","run_id":"replay-table","seq":3,"timestamp":"2026-08-24T00:00:02Z","payload":{"route_id":"route-replay-table","selected_backend":"cloud-main","selected_model":"synthetic-demo-model","privacy_level":"medium","task_difficulty":4,"tool_complexity":4,"reason":"最小化后的多对象分组任务使用可靠主后端","degraded":false}},
+    {"type":"planning.started","run_id":"replay-table","seq":4,"timestamp":"2026-08-24T00:00:03Z","payload":{"round":1}},
+    {"type":"tool.completed","run_id":"replay-table","seq":5,"timestamp":"2026-08-24T00:00:04Z","payload":{"name":"create_box","success":true,"duration_ms":130}},
+    {"type":"tool.completed","run_id":"replay-table","seq":6,"timestamp":"2026-08-24T00:00:05Z","payload":{"name":"group_objects","success":true,"duration_ms":70}},
+    {"type":"scene.checked","run_id":"replay-table","seq":7,"timestamp":"2026-08-24T00:00:06Z","payload":{"scene_summary":{"total":5,"capped":false,"objects":[{"object_id":"table-top","name":"TableTop","type":"Polysurface","center":[0,0,32],"size":[60,40,4],"color":[160,120,80],"layer":"Sample","groups":["demo-table"]},{"object_id":"leg-1","name":"Leg 1","type":"Polysurface","center":[-28,-18,15],"size":[4,4,30],"color":[160,120,80],"layer":"Sample","groups":["demo-table"]},{"object_id":"leg-2","name":"Leg 2","type":"Polysurface","center":[28,-18,15],"size":[4,4,30],"color":[160,120,80],"layer":"Sample","groups":["demo-table"]},{"object_id":"leg-3","name":"Leg 3","type":"Polysurface","center":[-28,18,15],"size":[4,4,30],"color":[160,120,80],"layer":"Sample","groups":["demo-table"]},{"object_id":"leg-4","name":"Leg 4","type":"Polysurface","center":[28,18,15],"size":[4,4,30],"color":[160,120,80],"layer":"Sample","groups":["demo-table"]}]}}},
+    {"type":"assertion.checked","run_id":"replay-table","seq":8,"timestamp":"2026-08-24T00:00:07Z","payload":{"name":"grouped_table_members","success":true,"expected":"5 grouped members and a 60x40x4 tabletop","actual":"5 members; tabletop dimensions 60 × 40 × 4"}},
+    {"type":"run.completed","run_id":"replay-table","seq":9,"timestamp":"2026-08-24T00:00:08Z","payload":{"status":"completed","metrics":{"duration_ms":11500,"tool_rounds":3,"tool_calls":8,"total_tokens":1430,"estimated_cost_usd":0,"cost_estimate_status":"synthetic","corrections":0}}}
   ]
 }

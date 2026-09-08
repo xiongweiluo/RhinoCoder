@@ -4,7 +4,7 @@
 
 ## 1. 版本与招聘者入口
 
-- [x] 应用、UI 与版本清单统一为 `0.3.0`；Prompt、工具 Schema 和 Trace Schema 保持原契约版本。
+- [x] 应用、UI 与版本清单统一为 `0.3.0`；已发布 Tag 的 Prompt 为 `closed-loop-v1`，当前 Unreleased P2 通用修复提升为 `closed-loop-v2`；工具与 Trace Schema 保持 `1.0`。
 - [x] README 第一屏说明问题、真实 Rhino 闭环、500/500、A1–A7、核心差异和诚实限制。
 - [x] 中文 README 与独立英文 README 均提供指标、Quickstart、架构、证据和限制入口。
 - [x] CHANGELOG 包含 `0.3.0` 的功能、验证、安全与候选发布状态。

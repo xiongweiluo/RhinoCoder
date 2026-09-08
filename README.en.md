@@ -15,12 +15,13 @@ RhinoCoder is a verifiable, recoverable, privacy-aware spatial-design agent for 
 | **500/500 admitted golden traces across 46 tags** | Assertion, scene self-check, human approval, and privacy gates; [A7 report](docs/a7-500-marginal-value.md) |
 | **All 8 measured coverage gaps filled** | 200 A7 tasks: 40 each for multi-round revision and Boolean-alternative recovery, 20 each for six other gaps; [A7 report](docs/a7-500-marginal-value.md) |
 | **270/270 locked real-Rhino runs passed** | 30 tasks × 3 repeats × main/economy/rule-router; the saturated set is not an open-world claim; [A6 report](docs/a6-no-finetune-baseline.md) |
+| **P2a external hard set: 18/30 valid baseline passes** | Five first-wave connection interruptions resumed the same slots with the frozen prompt and remain recorded; 60.0%, Wilson 95% CI 42.3%–75.4%; [P2a report](docs/p2-external-hard-set.md) |
 | **Zero sensitive findings in the A4 audit** | 12 red-team cases, 1,609 traces, 7,016 SQLite rows, three Replays, and simulated log/request surfaces; [A4 report](docs/privacy-red-team-report.md) |
 | **A1–A7 and B1–B4 accepted** | Data, audit, routing, privacy, training pipeline, and CPU smoke are complete; formal GPU training has not run; [roadmap](PROJECT_OPTIMIZATION_PLAN.md) |
 
 Current release: [`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0). Versioned docs, Replay/GIF assets, scripts, and validation evidence are published with the Git tag and GitHub Release. The owner deferred the real Rhino video; the Replay and evidence remain independently reviewable.
 
-> **Honest boundary:** `local-mock` is a deterministic interface and safety test double. It proves forced private routing and no-cloud fallback, not real local-model quality. School-GPU validation and LoRA training have not run, and the A5 holdout has not been used for training or tuning.
+> **Honest boundary:** `local-mock` is a deterministic interface and safety test double. It proves forced private routing and no-cloud fallback, not real local-model quality. P2a contains tasks authored externally but executed by the Agent; it is not a study in which people used the UI. P2b is postponed. School-GPU validation and LoRA training have not run, and A5 holdout reads remain zero.
 
 ## Why this is more than an “LLM + tools” demo
 
@@ -41,17 +42,19 @@ RHINOCODER_PYTHON=python3 ./scripts/bootstrap.sh
 ./scripts/start-replay.sh
 ```
 
-Open `http://127.0.0.1:7860`. Under **Recovery & Feedback → Load Replay**, choose:
+Open one of the public read-only entry points:
 
-- `basic_stack.json` for a successful privacy → route → tool → scene → assertion loop;
-- `self_correction.json` for a failed first assertion, targeted correction, second scene read, and pass;
-- `table_group.json` for grouped table geometry.
+- `http://127.0.0.1:7860/?demo=normal-loop&mode=replay` for a successful privacy → route → tool → scene → assertion loop;
+- `http://127.0.0.1:7860/?demo=self-correction&mode=replay` for a failed first assertion, targeted correction, second scene read, and pass;
+- `http://127.0.0.1:7860/?demo=privacy-route&mode=replay` for synthetic email minimization, rule-based routing, grouped-table geometry, and an audit summary.
 
-Expected: `Connected`, strictly increasing event sequence numbers, a synthetic Scene Summary, and final state `completed`. Replay calls neither a model nor Rhino and cannot mutate a scene. To rebuild a temporary public workspace and verify the first Replay:
+Expected: `Read-only demo`, a filterable evidence timeline, a same-`run_id` dashboard, before/after Scene Summary, assertion detail, disabled mutation controls, and a browser-surface privacy summary. Replay is loaded only with GET: it opens no WebSocket, calls neither a model nor Rhino, and cannot mutate a scene. To rebuild a temporary public workspace and verify the first Replay:
 
 ```bash
 python tools/verify_clean_install.py
 ```
+
+The [P1 scenario catalog](docs/demo/p1-scenarios.json) locks each goal, input, expected result, assertion, Replay, and evidence link. See the [P1 recruiter demo report](docs/p1-recruiter-demo.md) for implementation boundaries and browser acceptance.
 
 ## Quickstart B: real Rhino 8
 
@@ -105,7 +108,7 @@ instruction → privacy decision → route decision → Rhino tool
 
 The JSON, GIF, diagrams, and hashes are public and synthetic: [Replay](eval/replays/self_correction.json) · [GIF](docs/assets/replay-demo.gif) · [asset manifest](docs/demo/demo-assets-manifest.json). Full real traces, SQLite databases, screenshots, user identities, and project files stay in Git-ignored local storage.
 
-Training data is grouped by task template and numeric variants before deterministic 70/15/15 splitting and view extraction. The A5 holdout—and the future P2 hard set—are reserved for final locked evaluation, never training or iterative tuning.
+Training data is grouped by task template and numeric variants before deterministic 70/15/15 splitting and view extraction. The A5 holdout and the frozen P2 hard set never enter training or iterative tuning; this run records `holdout_read=0`.
 
 ## Verification
 
@@ -116,7 +119,7 @@ Training data is grouped by task template and numeric variants before determinis
 ./scripts/release-verify.sh --local-rhino
 ```
 
-Release verification checks `git diff --check`, tests, task formats, secret/privacy/Replay audits, training safety gates, version consistency, front-end build, demo hashes, and clean-room Replay. It never commits, tags, pushes, or creates a GitHub Release.
+Release verification checks `git diff --check`, tests, task formats, P2 freeze/result recomputation, secret/privacy/Replay audits, training safety gates, version consistency, front-end build, P1 scenario audit, UI bundle budgets, real-browser end-to-end tests, demo hashes, and clean-room Replay. It never commits, tags, pushes, or creates a GitHub Release.
 
 See the [evidence index](docs/portfolio-evidence.md), [v0.3.0 checklist](docs/release-checklist.md), and [release verification report](docs/v0.3.0-release-verification.md).
 
@@ -133,7 +136,7 @@ The repository GIF is an automated synthetic substitute, not a real Rhino record
 - Primary real-world validation is macOS 15.6 arm64 + Rhino 8. Windows, Intel Mac, multi-user concurrency, and a second physical Mac are not release-validated.
 - The fixed 30-task suite is saturated. Its 100% Pass@1 establishes stability under that contract, not open-world, hard-set, or user-workflow success.
 - `local-mock` does not perform local inference. No school-GPU or LoRA result is claimed.
-- P2 external user testing and the pre-training hard set are not complete.
+- P2a external-task automated evaluation is complete at 18/30 valid baseline passes; five resumed provider interruptions and two pending Rhino manual checks are reported separately. P2b real-user UI operation is postponed.
 - The full live benchmark needs interactive Rhino and a model API; CI is offline.
 
 More: [Architecture](docs/architecture.md) · [Troubleshooting](docs/troubleshooting.md) · [Roadmap](PROJECT_OPTIMIZATION_PLAN.md) · [Changelog](CHANGELOG.md)

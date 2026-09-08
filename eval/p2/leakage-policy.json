@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "p2-hard-no-training-v1",
+  "p2_is_evaluation_only": true,
+  "holdout_read": 0,
+  "forbidden_consumers": [
+    "training dataset builders",
+    "tokenizer fitting",
+    "LoRA or full-model training",
+    "prompt or router hyperparameter search",
+    "golden-data admission",
+    "repeated evaluation-driven tuning"
+  ],
+  "forbidden_paths_for_p2_runner": [
+    "data/training/a5/holdout.jsonl",
+    "data/training/a5/holdout-manifest.json",
+    "data/training/a5/holdout/**"
+  ],
+  "allowed_overlap_audit_inputs": [
+    "eval/tasks/*.jsonl",
+    "data/training/a5/train.jsonl",
+    "data/training/a5/validation.jsonl",
+    "data/training/a5/manifest.json"
+  ],
+  "overlap_policy": "Compare normalized instruction fingerprints against public task files and A5 train/validation only. Never open holdout content for this audit.",
+  "post_evaluation_policy": "P2 tasks, assertions, results, and failure cases remain evaluation-only and must never be copied into golden or training data.",
+  "identity_policy": {
+    "source_ids_are_submission_ids_not_people": true,
+    "real_names": "forbidden",
+    "contact_details": "forbidden",
+    "original_project_files": "forbidden"
+  },
+  "artifact_policy": {
+    "local_raw_results": "git_ignored",
+    "local_full_trace": "git_ignored",
+    "public_results": "sanitized_aggregate_only",
+    "public_run_ids": "sha256_pseudonyms_only"
+  },
+  "synthetic_privacy_literals": [
+    "designer@example.invalid",
+    "/Users/demo/ConfidentialProject/sample.3dm",
+    "<SYNTHETIC_API_KEY>"
+  ]
+}

@@ -38,6 +38,25 @@ OpenAI-compatible planning <-> MCP ClientSession
 8. `AgentRunResult` 汇总消息、工具、指标、场景检查、隐私/路由决策、对象 ID 和错误。
 9. 运行结束后 Trace 与 `route_decisions` 写入 SQLite；UI 可实时展示或离线 Replay。
 
+## P1 recruiter demo and browser boundary
+
+招聘者界面固定三条演示链：正常闭环、错误恢复、隐私/路由。`docs/demo/p1-scenarios.json` 是目标、输入、预期结果、程序断言、Replay 与证据入口的单一清单。
+
+- 真实 Rhino 固定场景通过 WebSocket 提交；UI Server 在执行前后分别只读调用 `get_scene_summary`，最终场景复用 `eval.scene_assert.verify`，把断言展示事件放在终态之前。若 Agent 自报完成但几何断言失败，浏览器终态仍显示失败。
+- 公开 Replay 通过 `GET /api/demo-scenarios` 与 `GET /api/replays/{name}` 加载。`?demo=<id>&mode=replay` 不创建 WebSocket，不发送 instruction、retry、Undo、rollback 或 feedback。
+- UI Server 保留本地运行对象用于重试与回滚，但所有 WebSocket/API 出站载荷先做身份、路径、密钥、图层和群组最小化；Rhino 对象 ID 使用稳定假名，`run_id`/`route_id` 等审计血缘保留。
+- 最近运行索引只消费上述浏览器安全载荷；完整模型消息、原始 Trace、SQLite 与真实对象 GUID 不下发到浏览器。
+
+P1 前端把同一安全事件流投影为可筛选时间线、路由/隐私/成本/延迟/错误/恢复仪表盘、前后场景对比、断言明细和恢复状态。Playwright 在真实 Chrome 中覆盖三份 Replay、只读零写请求、搜索筛选、键盘操作与 390px 窄屏；构建后另有 gzip 体积预算。
+
+## P2a frozen hard-set boundary
+
+P2a 把外部 Rhino/设计用户提出的匿名任务作为独立评测输入，而不是训练素材。`eval/p2/` 在首个运行前锁定原始意图、规范化任务、合成 fixture、断言、统计协议、泄漏规则与 SHA-256 manifest。`tools/audit_p2_hard_set.py` 只读取 A5 manifest 和允许的 train/validation 视图做精确重复与引用审计，明确不打开 holdout 内容；`holdout_read=0`。
+
+`eval/p2_hard.py` 通过受本地 token 保护、且不暴露给 MCP/普通 UI 的 fixture 控制面准备真实 Rhino 场景；正式任务仍走 Privacy Gate → Router → 当前模型 → MCP → Rhino Listener。原始 `AgentRunResult`、前后场景和完整事件只保存在 Git 忽略的 `data/p2/`，公开结果由 `tools/report_p2_hard_set.py` 投影为假名化 run ID、聚合指标和断言计数，再由 `tools/audit_p2_results.py` 复算。
+
+Local Mock 只在冻结的高隐私任务中验证强制本地和安全失败，不计作本地建模能力。提供方连接中断与能力失败分列；代表性失败只允许一次版本化通用修复和一次复测。三项主观/界面证据保持 pending，P2b 真人操作 UI 的可用性研究延期。
+
 ## Training data flow
 
 ![RhinoCoder runtime and training data flow](assets/data-flow.svg)
@@ -60,7 +79,7 @@ JSONL artifacts + stats + SHA-256 manifest + independent audit
 ## Interface versions
 
 - Application: `0.3.0`
-- Prompt: `closed-loop-v1`
+- Prompt: `closed-loop-v2`
 - Tool schema: `1.0`
 - Trace schema: `1.0`
 
@@ -106,6 +125,6 @@ JSONL artifacts + stats + SHA-256 manifest + independent audit
 ## Model and evaluation boundaries
 
 - `local-mock` 是统一后端接口的确定性测试替身，只验证隐私强制本地、禁止云 fallback 和安全失败；它不能完成真实建模推理。
-- A5 holdout 在任务模板与数字变体成组之后锁定，不用于训练或反复调参；未来 P2 困难集也必须在任何 LoRA 训练前冻结。
+- A5 holdout 在任务模板与数字变体成组之后锁定，不用于训练或反复调参；P2 困难集已在任何评测、修复或 LoRA 训练前冻结，同样不进入训练或迭代调参。
 - 当前没有学校 GPU 验收、正式 LoRA 训练或本地模型效果结论。只有用户明确确认 GPU 权限后才能启动 C1–C4。
 - 完整真实 Trace、SQLite、截图和用户反馈保存在本地 Git 忽略目录；公开仓库只包含脱敏聚合、合成 Replay 和哈希清单。

@@ -9,8 +9,19 @@
 - [英文字幕](rhinocoder-demo.en.srt)
 - [可重复生成的合成 Replay GIF](../assets/replay-demo.gif)
 - [演示资产哈希清单](demo-assets-manifest.json)
+- [P1 三个固定演示场景清单](p1-scenarios.json)
+- [P1 招聘者演示链路验收](../p1-recruiter-demo.md)
 
 GIF 是可立即公开的替代素材：来源固定为 `eval/replays/self_correction.json`，其中坐标、对象 ID、图层和模型名均为合成值。它不冒充真实 Rhino 录屏。
+
+无需录屏即可使用三个公开只读入口：`/?demo=normal-loop&mode=replay`、`/?demo=self-correction&mode=replay`、`/?demo=privacy-route&mode=replay`。这些页面只发 GET，不建立 WebSocket，也不会触发 Rhino、模型或反馈写入。浏览器端到端验收命令：
+
+```bash
+npm run build --prefix agent/ui
+npm run test:e2e --prefix agent/ui
+python tools/check_ui_performance.py
+python tools/audit_p1_demo.py
+```
 
 ## 录制前检查
 

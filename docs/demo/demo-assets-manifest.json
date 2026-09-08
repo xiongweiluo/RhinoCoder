@@ -4,7 +4,7 @@
   "source": {
     "path": "eval/replays/self_correction.json",
     "classification": "synthetic_replay",
-    "sha256": "aeffcf93b128197fd5c15072f6cf801bc2ae00e16fc6fed0e13a549242d9bdd8"
+    "sha256": "629727f9aba28c140fa23476b568cae1cbce0fba7a236bda71622011e67ee79c"
   },
   "artifacts": [
     {

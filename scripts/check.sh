@@ -15,6 +15,9 @@ python tools/check_secrets.py
 python tools/audit_trace_data.py
 python tools/audit_release_data.py
 python tools/check_demo_assets.py
+python tools/audit_p1_demo.py
+python tools/audit_p2_hard_set.py
+python tools/audit_p2_results.py
 python tools/privacy_audit.py
 if [[ -f data/golden_traces_v2.jsonl ]]; then
   if [[ -f data/training/a5/manifest.json ]]; then
@@ -36,3 +39,5 @@ if [[ -f data/a6/run-manifest.json ]]; then
   python tools/run_a6_baseline.py audit
 fi
 npm run build --prefix agent/ui
+python tools/check_ui_performance.py
+npm run test:e2e --prefix agent/ui

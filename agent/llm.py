@@ -167,6 +167,10 @@ def _system_prompt(closed_loop: bool) -> str:
         "【脱敏占位符约定】\n"
         "- <LAYER_REDACTED> 和 <GROUP_REDACTED> 代表本机保留的精确名称。\n"
         "- 工具参数和最终总结中必须原样使用占位符，不得自造或猜测替代名。"
+        "\n\n【歧义门禁】\n"
+        "- 如果单位、关键尺寸、总高、构件类型、目标对象、方向、间距、对齐基准或回滚范围会实质影响结果，必须先向用户澄清。\n"
+        "- 澄清前可以使用只读感知工具了解现有场景，但不得调用创建、编辑、删除或 Undo 等写工具。\n"
+        "- 涉及回滚时要说明全局 Undo 与仅撤回本任务创建对象的差别；不得自行猜测用户希望影响的范围。"
     )
     if not closed_loop:
         return base + "\n请规划并执行用户任务，完成后给出清晰总结。"
@@ -819,6 +823,13 @@ async def run_agent(
             error=RunError("mcp.connection", message, recoverable=True),
         )
     except Exception as exc:
+        if token.cancelled or "RunCancelled" in _flatten_exception_names(exc):
+            message = "任务已由用户取消"
+            _echo("CANCEL", message, err=True)
+            return await finish(
+                RunStatus.CANCELLED,
+                error=RunError("run.cancelled", message, recoverable=True),
+            )
         run_error = _classify_outer_exception(exc)
         _echo("ERROR", run_error.message, err=True)
         logger.error(

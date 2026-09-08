@@ -12,7 +12,7 @@
     }
   },
   "interfaces": {
-    "prompt": "closed-loop-v1",
+    "prompt": "closed-loop-v2",
     "tool_schema": "1.0",
     "trace_schema": "1.0",
     "mcp_tool_count": 23
@@ -40,7 +40,7 @@
     },
     "ui": {
       "path": "agent/ui/package-lock.json",
-      "sha256": "a84d9325bd2c7ae6ceaa5586fe176783e32f34a9736a2868776c43b2e796ad13"
+      "sha256": "1d5b6a6d08de63e03e6c81a2bd2206a046a3b565b06a339d42a341d0168fe279"
     }
   },
   "portfolio_evidence": {
@@ -51,10 +51,16 @@
     "a6_real_rhino_runs_passed": 270,
     "a6_real_rhino_runs_total": 270,
     "privacy_sensitive_findings": 0,
+    "p2_valid_attempts": 30,
+    "p2_automated_passed": 18,
+    "p2_infrastructure_excluded": 0,
+    "p2_infrastructure_interrupted_attempts": 5,
+    "p2_holdout_read": 0,
     "sources": {
       "golden_and_coverage": "docs/a7-500-marginal-value.md",
       "three_way_baseline": "docs/a6-no-finetune-baseline.md",
-      "privacy": "docs/privacy-red-team-report.md"
+      "privacy": "docs/privacy-red-team-report.md",
+      "p2_external_hard_set": "docs/p2-external-hard-set.md"
     }
   },
   "ci_actions": {

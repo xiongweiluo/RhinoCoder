@@ -10,7 +10,7 @@ if plugin_path not in sys.path:
     sys.path.insert(0, plugin_path)
 
 from rhino_listener import listener_main
-from rhino_listener import tools_geometry, tools_perception, tools_property, tools_transform
+from rhino_listener import tools_evaluation, tools_geometry, tools_perception, tools_property, tools_transform
 
 # Script Editor 会缓存已导入模块。正常运行的 Listener 先走优雅关闭；如果
 # serve_forever 线程已经异常退出，则不要调用 HTTPServer.shutdown()（它要求
@@ -31,7 +31,7 @@ else:
     listener_main._server_thread = None
     listener_main._idle_registered = False
 
-for tool_module in (tools_geometry, tools_perception, tools_property, tools_transform):
+for tool_module in (tools_geometry, tools_perception, tools_property, tools_transform, tools_evaluation):
     importlib.reload(tool_module)
 listener_main = importlib.reload(listener_main)
 listener_main.start_listener()

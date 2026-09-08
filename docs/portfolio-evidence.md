@@ -8,12 +8,13 @@ RhinoCoder 对外只使用能从版本化文件复核的指标。本页是 READM
 |---|---|---|
 | 黄金数据 500/500、46 个标签 | 四道准入门全部通过；A7 新增 200 条，8 类覆盖缺口达到计划量 | [A7 覆盖与边际价值报告](a7-500-marginal-value.md) |
 | 三路固定基线 270/270 通过 | 30 题 × 3 次重复 × 3 种方案；这是饱和固定集，不代表开放世界或困难集效果 | [A6 无微调基线报告](a6-no-finetune-baseline.md) |
+| P2a 外部来源困难集 18/30 有效基线通过 | 5 次首轮连接中断以冻结 Prompt 重填同槽并保留；60.0%，Wilson 95% 区间 42.3%–75.4%，不宣称统计显著性 | [P2a 困难集报告](p2-external-hard-set.md)、[机器结果](p2-hard-set-results.json) |
 | 30 题 Baseline/Closed-loop 各 3 次均为 100% Pass@1 | 180 次真实 Rhino 端到端运行；Closed-loop 增加场景检查、延迟与 token 开销 | [30 题基准报告](benchmark-report.md) |
 | A7 覆盖缺口 8/8 达标 | 布尔替代恢复与多轮修订各 40；其余 6 类各 20 | [A7 覆盖与边际价值报告](a7-500-marginal-value.md) |
 | A4 敏感发现 0 | 12 条隐私红队；1,609 条 Trace、7,016 行 SQLite、3 份 Replay 与模拟日志/请求面 | [A4 隐私红队报告](privacy-red-team-report.md) |
 | 23 个 MCP 工具 | 版本清单固定工具数，并由发布一致性检查与源码装饰器计数交叉验证 | [版本清单](version-manifest.json) |
 | 训练工程已就绪但没有 GPU 结果 | B1–B4 只完成锁定配置、CPU 冒烟、恢复和集群模板；没有正式训练或 holdout 评测 | [训练就绪报告](training-readiness.md) |
-| 当前版本为 0.3.0 release candidate | 本地版本、文档与资产已对齐；Tag 与 GitHub Release 仍需所有者明确授权 | [版本清单](version-manifest.json)、[发布清单](release-checklist.md) |
+| 当前正式版本为 0.3.0 | Tag、GitHub Release 与公开链接已验证；当前 P1/P2 工作区改动仍未提交 | [版本清单](version-manifest.json)、[发布清单](release-checklist.md) |
 
 ## 代表性可追溯链路
 
@@ -41,6 +42,7 @@ run.started
 
 - 不声称本地模型已经能完成 Rhino 建模。`local-mock` 只是确定性的接口与安全替身。
 - 不声称 LoRA 已训练或优于云模型。学校 GPU 尚未验收，A5 holdout 未用于训练或调参。
-- 不把 30 题 100% 外推为开放世界成功率；该固定集已饱和，P2 困难集和外部用户验证尚未完成。
+- 不把 30 题 100% 外推为开放世界成功率；该固定集已饱和。P2a 是外部用户出题的自动化困难集，不是真实用户亲自操作 UI；P2b 延期。
+- 不把三项代表性失败复测 2/3 外推为全量修复后成功率，也不隐藏 5 次基础设施中断和 2 项待补 Rhino 人工证据。
 - 不声称生产级多用户、Windows 或企业部署已经验收。
 - 不公开真实用户身份、原始项目文件、完整本地 Trace 或密钥。

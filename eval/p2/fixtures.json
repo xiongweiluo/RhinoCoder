@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "coordinate_policy": "synthetic_model_units",
+  "fixtures": {
+    "empty": {"objects": []},
+    "multiple_candidates": {
+      "objects": [
+        {"logical_id":"small_sphere","kind":"sphere","radius":6,"center":[-40,0,6],"color":[255,0,0],"name":"RedSphereSmall"},
+        {"logical_id":"large_sphere","kind":"sphere","radius":10,"center":[0,30,10],"color":[255,0,0],"name":"RedSphereLarge"},
+        {"logical_id":"short_board","kind":"box","size":[30,20,4],"center":[-20,-30,2],"color":[128,128,128],"name":"BoardShort"},
+        {"logical_id":"long_board","kind":"box","size":[60,20,4],"center":[50,0,2],"color":[128,128,128],"name":"BoardLong"}
+      ]
+    },
+    "selected_boxes": {
+      "objects": [
+        {"logical_id":"anchor_box","kind":"box","size":[10,12,10],"center":[-30,10,5],"color":[120,120,120],"name":"SelectedA","selected":true},
+        {"logical_id":"selected_b","kind":"box","size":[20,12,14],"center":[35,-15,9],"color":[120,120,120],"name":"SelectedB","selected":true},
+        {"logical_id":"selected_c","kind":"box","size":[15,12,8],"center":[0,30,8],"color":[120,120,120],"name":"SelectedC","selected":true},
+        {"logical_id":"selected_d","kind":"box","size":[25,12,12],"center":[60,5,8],"color":[120,120,120],"name":"SelectedD","selected":true}
+      ]
+    },
+    "two_frames_missing_top": {
+      "objects": [
+        {"logical_id":"left_post_a","kind":"box","size":[4,8,60],"center":[-68,0,30],"color":[90,110,130],"name":"LeftPostA"},
+        {"logical_id":"left_post_b","kind":"box","size":[4,8,60],"center":[-32,0,30],"color":[90,110,130],"name":"LeftPostB"},
+        {"logical_id":"left_bottom","kind":"box","size":[40,8,4],"center":[-50,0,2],"color":[90,110,130],"name":"LeftBottom"},
+        {"logical_id":"left_top","kind":"box","size":[40,8,4],"center":[-50,0,62],"color":[90,110,130],"name":"LeftTop"},
+        {"logical_id":"right_post_a","kind":"box","size":[4,8,60],"center":[32,0,30],"color":[90,110,130],"name":"RightPostA"},
+        {"logical_id":"right_post_b","kind":"box","size":[4,8,60],"center":[68,0,30],"color":[90,110,130],"name":"RightPostB"},
+        {"logical_id":"right_bottom","kind":"box","size":[40,8,4],"center":[50,0,2],"color":[90,110,130],"name":"RightBottom"}
+      ]
+    },
+    "rollback_with_manual_change": {
+      "objects": [
+        {"logical_id":"user_object","role":"preexisting_user","kind":"box","size":[18,18,18],"center":[-40,0,9],"color":[10,200,80],"name":"UserObject"},
+        {"logical_id":"task_object_a","role":"task_created","kind":"box","size":[20,12,6],"center":[0,0,3],"color":[180,90,60],"name":"TaskObjectA"},
+        {"logical_id":"task_object_b","role":"task_created","kind":"sphere","radius":7,"center":[30,0,7],"color":[180,90,60],"name":"TaskObjectB"}
+      ]
+    },
+    "wrong_sphere": {
+      "objects": [
+        {"logical_id":"target_sphere","kind":"sphere","radius":8,"center":[0,0,8],"color":[255,0,0],"name":"TargetSphere"}
+      ]
+    },
+    "board_cutter_outside": {
+      "objects": [
+        {"logical_id":"board","kind":"box","size":[60,40,6],"center":[0,0,3],"color":[140,140,140],"name":"Board"},
+        {"logical_id":"cutter","kind":"cylinder","radius":5,"height":10,"base":[50,0,-2],"color":[220,80,80],"name":"Cutter"}
+      ]
+    },
+    "stale_target_panel": {
+      "objects": [
+        {"logical_id":"base","kind":"box","size":[40,40,4],"center":[0,0,2],"color":[80,80,80],"name":"Base"},
+        {"logical_id":"target_panel","kind":"box","size":[20,20,2],"center":[50,0,1],"color":[180,180,180],"name":"TargetPanel"}
+      ],
+      "mutations": {
+        "replace_target_after_first_lookup": {"kind":"replace_same_geometry","logical_id":"target_panel"}
+      }
+    },
+    "failed_rack_with_user_objects": {
+      "objects": [
+        {"logical_id":"user_1","role":"preexisting_user","kind":"sphere","radius":5,"center":[-60,0,5],"color":[20,160,200],"name":"User1"},
+        {"logical_id":"user_2","role":"preexisting_user","kind":"box","size":[12,12,12],"center":[-40,0,6],"color":[20,160,200],"name":"User2"},
+        {"logical_id":"user_3","role":"preexisting_user","kind":"cylinder","radius":4,"height":14,"base":[-20,0,0],"color":[20,160,200],"name":"User3"},
+        {"logical_id":"rack_1","role":"task_created","kind":"box","size":[4,30,70],"center":[0,0,35],"color":[160,120,80],"name":"Rack1"},
+        {"logical_id":"rack_2","role":"task_created","kind":"box","size":[4,30,70],"center":[64,0,35],"color":[160,120,80],"name":"Rack2"},
+        {"logical_id":"rack_3","role":"task_created","kind":"box","size":[60,30,4],"center":[32,0,10],"color":[160,120,80],"name":"Rack3"},
+        {"logical_id":"rack_4","role":"task_created","kind":"box","size":[60,30,4],"center":[32,0,35],"color":[160,120,80],"name":"Rack4"}
+      ]
+    },
+    "eight_objects_three_selected": {
+      "objects": [
+        {"logical_id":"selected_1","kind":"box","size":[10,16,10],"center":[0,-25,5],"color":[120,120,120],"name":"Selected1","selected":true},
+        {"logical_id":"selected_2","kind":"box","size":[14,10,16],"center":[25,15,10],"color":[120,120,120],"name":"Selected2","selected":true},
+        {"logical_id":"selected_3","kind":"box","size":[18,20,8],"center":[-20,35,8],"color":[120,120,120],"name":"Selected3","selected":true},
+        {"logical_id":"other_1","kind":"sphere","radius":4,"center":[80,0,4],"color":[200,80,80],"name":"Other1"},
+        {"logical_id":"other_2","kind":"box","size":[7,7,7],"center":[90,15,3.5],"color":[80,200,80],"name":"Other2"},
+        {"logical_id":"other_3","kind":"cylinder","radius":3,"height":12,"base":[100,30,0],"color":[80,80,200],"name":"Other3"},
+        {"logical_id":"other_4","kind":"box","size":[9,11,5],"center":[110,45,2.5],"color":[180,180,60],"name":"Other4"},
+        {"logical_id":"other_5","kind":"sphere","radius":6,"center":[120,60,6],"color":[180,60,180],"name":"Other5"}
+      ]
+    },
+    "duplicate_panels": {
+      "objects": [
+        {"logical_id":"panel_small","kind":"box","size":[20,20,2],"center":[-50,0,1],"color":[120,120,120],"name":"Panel"},
+        {"logical_id":"panel_medium","kind":"box","size":[40,20,2],"center":[0,-40,1],"color":[120,120,120],"name":"Panel"},
+        {"logical_id":"panel_long","kind":"box","size":[60,20,2],"center":[50,-30,1],"color":[120,120,120],"name":"Panel"},
+        {"logical_id":"pedestal","kind":"cylinder","radius":12,"height":20,"base":[0,30,0],"color":[80,80,80],"name":"Pedestal"}
+      ]
+    },
+    "two_rigid_groups": {
+      "objects": [
+        {"logical_id":"a_1","kind":"box","size":[20,10,4],"center":[-45,0,7],"color":[80,140,200],"name":"A1","groups":["ModuleA"]},
+        {"logical_id":"a_2","kind":"box","size":[4,4,16],"center":[-52,-3,17],"color":[80,140,200],"name":"A2","groups":["ModuleA"]},
+        {"logical_id":"a_3","kind":"box","size":[4,4,16],"center":[-38,3,17],"color":[80,140,200],"name":"A3","groups":["ModuleA"]},
+        {"logical_id":"b_1","kind":"box","size":[24,12,6],"center":[30,5,13],"color":[200,130,70],"name":"B1","groups":["ModuleB"]},
+        {"logical_id":"b_2","kind":"sphere","radius":4,"center":[24,5,20],"color":[200,130,70],"name":"B2","groups":["ModuleB"]},
+        {"logical_id":"b_3","kind":"cylinder","radius":3,"height":12,"base":[36,5,16],"color":[200,130,70],"name":"B3","groups":["ModuleB"]}
+      ]
+    },
+    "capped_service_core": {
+      "generators": [
+        {"kind":"box_grid","logical_id_prefix":"filler_","count":51,"size":[2,2,2],"origin":[0,0,1],"step":[4,4,0],"columns":10,"color":[100,100,100],"name_prefix":"Filler"}
+      ],
+      "objects": [
+        {"logical_id":"service_core","kind":"box","size":[8,8,20],"center":[100,100,10],"color":[120,120,120],"name":"ServiceCore"}
+      ]
+    },
+    "rotated_panel": {
+      "objects": [
+        {"logical_id":"rotated_panel","kind":"box","size":[70,30,10],"center":[40,20,5],"rotation_z_degrees":90,"color":[120,120,120],"name":"RotatedPanel","selected":true}
+      ]
+    },
+    "table_missing_leg": {
+      "objects": [
+        {"logical_id":"table_top","kind":"box","size":[60,40,4],"center":[0,0,32],"color":[160,120,80],"name":"TableTop"},
+        {"logical_id":"leg_nw","kind":"box","size":[4,4,30],"center":[-28,18,15],"color":[160,120,80],"name":"LegNW"},
+        {"logical_id":"leg_ne","kind":"box","size":[4,4,30],"center":[28,18,15],"color":[160,120,80],"name":"LegNE"},
+        {"logical_id":"leg_sw","kind":"box","size":[4,4,30],"center":[-28,-18,15],"color":[160,120,80],"name":"LegSW"}
+      ],
+      "expected_missing_center": [28,-18,15]
+    },
+    "private_selected_object": {
+      "objects": [
+        {"logical_id":"base","kind":"box","size":[40,40,4],"center":[0,0,2],"color":[80,80,80],"name":"Base"},
+        {"logical_id":"private_object","kind":"sphere","radius":6,"center":[40,0,6],"color":[120,160,200],"name":"PrivateObject","selected":true}
+      ]
+    }
+  }
+}

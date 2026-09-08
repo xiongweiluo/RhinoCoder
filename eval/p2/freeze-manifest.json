@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "protocol_id": "p2-hard-v1",
+  "status": "frozen",
+  "frozen_at": "2026-09-08T12:34:43Z",
+  "task_count": 30,
+  "source_count": 30,
+  "source_id_semantics": "anonymous_submission_not_person",
+  "holdout_read": 0,
+  "files": {
+    "eval/p2/external-anonymous-tasks.zh-CN.md": "59e419889663d6664a96a7c18da66ba206e27ab78f1674f40f78527f19351fc2",
+    "eval/p2/hard_tasks.jsonl": "5fb261c61905e1e29927f1abef3ca5486a008eed63b520eefae236f9c7192772",
+    "eval/p2/fixtures.json": "c73f2fa73d2d4674128247b89c5595ff25b80ed517612085b862bd203c1a2da4",
+    "eval/p2/statistics-protocol.json": "29c9a013756306dfbef49d78a4a278023dfafdb1d3690123ecbbb2fcfcfabce8",
+    "eval/p2/leakage-policy.json": "769df80ed664714690be8c528c14a90ede7d3aaaf532bff9b42c5c5d7dd175fa"
+  }
+}

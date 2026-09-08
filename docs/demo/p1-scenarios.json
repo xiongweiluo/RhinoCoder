@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "privacy": {
+    "catalog_contains_real_user_data": false,
+    "replays_are_synthetic": true,
+    "browser_payload_policy": "minimized_and_object_ids_pseudonymized"
+  },
+  "scenarios": [
+    {
+      "id": "normal-loop",
+      "title": "正常闭环",
+      "kicker": "EXECUTE → OBSERVE → ASSERT",
+      "goal": "验证 Agent 能在 Rhino 中创建基座与球体，并以真实场景读回和几何断言结束任务。",
+      "input": "在原点创建一个 20x20x2 的基座，再在顶面居中放一个半径 8 的红色球体。",
+      "expected": [
+        "场景中存在一个 20×20×2 基座",
+        "红色球体尺寸为 16×16×16",
+        "球体与基座顶面居中贴合"
+      ],
+      "replay": "basic_stack.json",
+      "evidence": {
+        "label": "A6 固定真实 Rhino 基线",
+        "path": "a6-no-finetune-baseline.md"
+      },
+      "asserts": [
+        {
+          "kind": "count",
+          "selector": {"type": ["Polysurface", "Extrusion"], "size": [20, 20, 2]},
+          "n": 1,
+          "label": "基座数量与尺寸",
+          "expected_text": "1 个 20×20×2 基座"
+        },
+        {
+          "kind": "property",
+          "selector": {"type": "Surface", "size": [16, 16, 16]},
+          "props": {"color": [255, 0, 0]},
+          "label": "球体尺寸与颜色",
+          "expected_text": "16×16×16，RGB 255/0/0"
+        },
+        {
+          "kind": "spatial",
+          "a": {"type": "Surface", "size": [16, 16, 16]},
+          "b": {"type": ["Polysurface", "Extrusion"], "size": [20, 20, 2]},
+          "relation": "on_top_of",
+          "label": "球体位于基座顶面",
+          "expected_text": "底面贴合且 XY 中心对齐"
+        }
+      ]
+    },
+    {
+      "id": "self-correction",
+      "title": "错误恢复",
+      "kicker": "MISMATCH → CORRECT → RECHECK",
+      "goal": "展示第一次场景断言不匹配后，Agent 修改尺寸和颜色，再次读取 Rhino 并通过同一断言。",
+      "input": "创建一个蓝色球体；读取场景，如尺寸或颜色不符则修正到半径 12、RGB 0/0/255 后再次验证。",
+      "expected": [
+        "第一次断言明确显示尺寸与颜色不匹配",
+        "纠错调用不会重复创建球体",
+        "复检后尺寸 24×24×24 且颜色为蓝色"
+      ],
+      "replay": "self_correction.json",
+      "evidence": {
+        "label": "P0 合成纠错链与证据说明",
+        "path": "portfolio-evidence.md"
+      },
+      "asserts": [
+        {
+          "kind": "count",
+          "selector": {"type": "Surface", "size": [24, 24, 24]},
+          "n": 1,
+          "label": "只保留一个目标球体",
+          "expected_text": "1 个 24×24×24 Surface"
+        },
+        {
+          "kind": "property",
+          "selector": {"type": "Surface", "size": [24, 24, 24]},
+          "props": {"color": [0, 0, 255]},
+          "label": "纠错后的尺寸与颜色",
+          "expected_text": "24×24×24，RGB 0/0/255"
+        }
+      ]
+    },
+    {
+      "id": "privacy-route",
+      "title": "隐私与路由",
+      "kicker": "MINIMIZE → ROUTE → AUDIT",
+      "goal": "展示合成邮箱信号在模型调用前被最小化，再由规则路由选择后端，并保留可审计决策。",
+      "input": "将联系人邮箱 contact@example.invalid 从云请求中移除，然后搭建 60x40x4 桌面和四条 4x4x30 桌腿并分组。",
+      "expected": [
+        "隐私风险为 medium，动作是 minimize_cloud",
+        "浏览器与模型载荷只显示 <EMAIL_REDACTED>",
+        "路由、工具、断言与指标共享 replay-table run_id"
+      ],
+      "replay": "table_group.json",
+      "evidence": {
+        "label": "A4 隐私红队与零泄漏报告",
+        "path": "privacy-red-team-report.md"
+      },
+      "asserts": [
+        {
+          "kind": "count",
+          "selector": {"type": ["Polysurface", "Extrusion"]},
+          "n": 5,
+          "label": "桌子成员数量",
+          "expected_text": "空白演示文档中共 5 个桌子构件"
+        },
+        {
+          "kind": "property",
+          "selector": {"name": "TableTop"},
+          "props": {"size": [60, 40, 4]},
+          "label": "桌面尺寸",
+          "expected_text": "60×40×4"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "protocol_id": "p2-hard-v1",
+  "frozen_before_first_evaluation": true,
+  "study_type": "external_user_authored_automated_hard_set_evaluation",
+  "not_a_usability_study": true,
+  "task_count": 30,
+  "initial_baseline": {
+    "attempts_per_task": 1,
+    "agent": "current_unmodified_runtime_at_freeze",
+    "environment": "real_rhino_8_plus_mcp_plus_configured_model_when_allowed_by_privacy_gate",
+    "resume_policy": "infrastructure failures may resume the same unfilled slot; completed outcomes are immutable",
+    "retain_failures": true
+  },
+  "retest": {
+    "maximum_cases": 3,
+    "minimum_cases_when_failures_exist": 2,
+    "selection_policy": "representative failures chosen by distinct root-cause family and generalizability, never by easiest expected gain",
+    "attempts_per_selected_task": 1,
+    "single_versioned_intervention": true,
+    "no_task_or_assertion_changes_after_freeze": true,
+    "no_iterative_tuning_on_retest": true
+  },
+  "outcomes": {
+    "automated_pass": "terminal policy and every objective scene, trace, privacy, route, recovery, and fixture-invariance check pass",
+    "manual_evidence_pending": "automated scope passes but one or more declared manual checks have no reviewed evidence",
+    "full_acceptance": "automated_pass and every declared manual check passes",
+    "partial": "at least one objective check passes but automated_pass is false",
+    "failure": "automated_pass is false",
+    "infrastructure_failure": "Rhino, MCP, model provider, or evaluator infrastructure prevents a valid attempt; excluded from capability denominator and shown separately"
+  },
+  "metrics": [
+    "automated_success_rate",
+    "full_acceptance_rate",
+    "partial_rate",
+    "duration_ms_mean_median_p95",
+    "tool_calls_total_mean",
+    "tool_errors",
+    "scene_checks",
+    "recovery_count",
+    "human_intervention_count",
+    "failure_category_distribution",
+    "privacy_and_route_distribution"
+  ],
+  "confidence_interval": {
+    "method": "Wilson score interval",
+    "confidence": 0.95,
+    "denominator": "valid attempted tasks",
+    "rounding": 4
+  },
+  "failure_categories": [
+    "clarification_error",
+    "planning_error",
+    "tool_selection_error",
+    "argument_error",
+    "spatial_error",
+    "perception_error",
+    "recovery_error",
+    "privacy_error",
+    "routing_error",
+    "product_control_error",
+    "manual_evidence_pending",
+    "infrastructure_error"
+  ],
+  "human_intervention_policy": "Only the six frozen clarification answers and declared cancel/rollback test controls count; no developer coaching or answer changes are allowed.",
+  "reporting": {
+    "publish_sanitized_aggregate_json": true,
+    "publish_markdown_report": true,
+    "publish_raw_local_trace": false,
+    "claim_statistical_significance": false,
+    "label_small_sample_limitations": true,
+    "distinguish_user_authored_tasks_from_user_operated_product": true
+  }
+}

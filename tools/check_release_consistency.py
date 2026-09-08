@@ -157,6 +157,11 @@ def check_release_consistency(root: Path = ROOT) -> list[str]:
         "a6_real_rhino_runs_passed": 270,
         "a6_real_rhino_runs_total": 270,
         "privacy_sensitive_findings": 0,
+        "p2_valid_attempts": 30,
+        "p2_automated_passed": 18,
+        "p2_infrastructure_excluded": 0,
+        "p2_infrastructure_interrupted_attempts": 5,
+        "p2_holdout_read": 0,
     }
     for label, wanted in expected_evidence.items():
         if evidence.get(label) != wanted:

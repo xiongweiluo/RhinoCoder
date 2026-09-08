@@ -76,6 +76,14 @@ class PrivacyViolation(RuntimeError):
 
 
 SECRET_PATTERNS = (
+    (
+        "credential_placeholder",
+        re.compile(
+            r"(?i)<(?!SECRET_REDACTED>)[A-Z0-9_-]*"
+            r"(?:API[_ -]?KEY|ACCESS[_ -]?TOKEN|PASSWORD|SECRET)"
+            r"[A-Z0-9_-]*>"
+        ),
+    ),
     ("openai_style_key", re.compile(r"\b(?:sk|rk_live)-[A-Za-z0-9_-]{12,}\b")),
     ("github_token", re.compile(r"\b(?:ghp|github_pat)_[A-Za-z0-9_]{16,}\b")),
     ("aws_access_key", re.compile(r"\bAKIA[A-Z0-9]{16}\b")),
@@ -140,6 +148,7 @@ PROMPT_INJECTION_PATTERNS = (
     re.compile(r"(?i)(?:reveal|print|show|dump|exfiltrate).{0,40}(?:system prompt|developer message|secret|token|environment)"),
     re.compile(r"(?i)(?:read|open|print|upload).{0,30}(?:\.env|credentials?|id_rsa|keychain)"),
     re.compile(r"(?:忽略|绕过).{0,20}(?:之前|以上|系统|开发者|安全).{0,20}(?:指令|规则|限制)"),
+    re.compile(r"(?:忽略|绕过).{0,20}(?:隐私|保密|数据).{0,20}(?:规则|限制|要求)"),
     re.compile(r"(?:泄露|显示|输出|上传|窃取).{0,30}(?:系统提示|开发者消息|密钥|令牌|环境变量|凭证)"),
     re.compile(r"(?:读取|打开).{0,20}(?:\.env|私钥|钥匙串|环境变量)"),
 )

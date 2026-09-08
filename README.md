@@ -17,12 +17,13 @@ RhinoCoder 是一个面向 Rhino 8 的可验证空间设计 Agent。它把自然
 | **500/500 黄金 Trace，46 个标签** | 断言、场景自检、人工确认、脱敏四道准入；[A7 报告](docs/a7-500-marginal-value.md) |
 | **8/8 覆盖缺口达到计划量** | A7 新增 200 条：布尔替代恢复与多轮修订各 40，其余 6 类各 20；[A7 报告](docs/a7-500-marginal-value.md) |
 | **270/270 固定真实 Rhino 运行通过** | 30 题 × 3 次 × 主模型/低成本模型/规则路由；该固定集已饱和，不能外推为开放世界效果；[A6 报告](docs/a6-no-finetune-baseline.md) |
+| **P2a 外部来源困难集：18/30 有效基线通过** | 首轮 5 次连接中断依协议用冻结 Prompt 重填同槽且保留记录；60.0%，Wilson 95% 区间 42.3%–75.4%；[P2a 报告](docs/p2-external-hard-set.md) |
 | **隐私审计 0 敏感发现** | 12 条红队、1,609 条 Trace、7,016 行 SQLite、3 份 Replay 及模拟日志/请求面；[A4 报告](docs/privacy-red-team-report.md) |
 | **A1–A7、B1–B4 已验收** | 数据、审计、路由、隐私、训练管线和 CPU 冒烟完成；GPU 正式训练未执行；[路线图](PROJECT_OPTIMIZATION_PLAN.md) |
 
 当前正式版本：[`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0)。版本、文档、Replay、GIF、发布脚本和验证证据已随 Git Tag 与 GitHub Release 发布；真实 Rhino 视频按项目所有者决定延期，不影响 Replay 与证据复核。
 
-> **诚实边界：** `local-mock` 只是确定性的本地接口与安全替身，证明统一后端、隐私强制路由和禁止云端降级；它不是能完成 Rhino 建模的真实本地模型。当前没有学校 GPU 验收或 LoRA 效果结论，A5 holdout 也未用于训练或调参。
+> **诚实边界：** `local-mock` 只是确定性的本地接口与安全替身，证明统一后端、隐私强制路由和禁止云端降级；它不是能完成 Rhino 建模的真实本地模型。P2a 是外部用户出题、Agent 自动执行的困难集，不是真人操作 UI 的可用性研究；P2b 延期。当前没有学校 GPU 验收或 LoRA 效果结论，A5 holdout 读取为 0。
 
 ## 为什么这个项目不是普通 “LLM + 工具” Demo
 
@@ -45,17 +46,19 @@ RHINOCODER_PYTHON=python3 ./scripts/bootstrap.sh
 ./scripts/start-replay.sh
 ```
 
-打开 `http://127.0.0.1:7860`，在 **Recovery & Feedback → 加载 Replay…** 选择：
+直接打开任一公开只读入口：
 
-- `basic_stack.json`：正常闭环，包含隐私判断、路由、工具、场景与通过断言。
-- `self_correction.json`：首次断言失败后缩放/改色，二次场景检查与断言通过。
-- `table_group.json`：桌面与桌腿分组场景。
+- `http://127.0.0.1:7860/?demo=normal-loop&mode=replay`：正常闭环，包含隐私、路由、工具、场景与通过断言。
+- `http://127.0.0.1:7860/?demo=self-correction&mode=replay`：首次断言失败、定向纠错、二次场景检查与通过。
+- `http://127.0.0.1:7860/?demo=privacy-route&mode=replay`：合成邮箱信号最小化、规则路由、分组桌子与审计摘要。
 
-预期：顶部为 `Connected`；事件序号从 1 严格递增；最终状态为 `completed`；Scene Summary 显示合成对象。Replay 不调用模型、不连接 Rhino、不修改场景。自动 clean-room 验证入口：
+预期：顶部为 `Read-only demo`；页面展示可筛选证据时间线、同一 `run_id` 仪表盘、操作前后 Scene Summary、断言明细、禁用的恢复写操作与脱敏摘要。Replay 只通过 GET 读取，不建立 WebSocket，不调用模型、不连接 Rhino、不修改场景。自动 clean-room 验证入口：
 
 ```bash
 python tools/verify_clean_install.py
 ```
+
+三个固定场景的目标、输入、预期结果、断言与证据入口由 [P1 场景清单](docs/demo/p1-scenarios.json) 锁定；实现与浏览器验收见 [P1 招聘者演示链路报告](docs/p1-recruiter-demo.md)。
 
 ## Quickstart B：真实 Rhino 8
 
@@ -143,7 +146,7 @@ React UI / CLI
   → scene summary → assertions → Trace / SQLite / feedback
 ```
 
-训练数据在任务层先做模板与数字变体合并，再执行 70/15/15 分区与 split lock，之后才提取四类训练视图。A5 holdout 和未来 P2 困难集只用于最终锁定评测，不进入训练或反复调参。完整真实 Trace、SQLite、截图与用户反馈默认受 Git 忽略；公开仓库只保留脱敏报告、合成 Replay 与哈希。
+训练数据在任务层先做模板与数字变体合并，再执行 70/15/15 分区与 split lock，之后才提取四类训练视图。A5 holdout 与已冻结的 P2 困难集不进入训练或反复调参；本轮 `holdout_read=0`。完整真实 Trace、SQLite、截图与用户反馈默认受 Git 忽略；公开仓库只保留脱敏报告、合成 Replay、聚合结果与哈希。
 
 ## 评测、审计与发布验证
 
@@ -153,7 +156,7 @@ React UI / CLI
 ./scripts/check.sh
 ```
 
-它覆盖 Python 编译、测试、30 题格式、采集清单、密钥扫描、Trace/Replay/隐私审计、训练静态门禁、版本一致性和前端构建。`v0.3.0` 本地发布验收还包含 `git diff --check`、演示资产哈希与 clean-room Replay：
+它覆盖 Python 编译、测试、30 题格式、采集清单、P2 冻结与公开结果复算、密钥扫描、Trace/Replay/隐私审计、训练静态门禁、版本一致性、前端构建、P1 场景审计、UI 体积预算与真实浏览器端到端测试。`v0.3.0` 本地发布验收还包含 `git diff --check`、演示资产哈希与 clean-room Replay：
 
 ```bash
 ./scripts/release-verify.sh
@@ -172,6 +175,8 @@ python tools/audit_release_data.py
 python tools/check_demo_assets.py
 python tools/privacy_audit.py
 python tools/audit_a7_expansion.py
+python tools/audit_p2_hard_set.py
+python tools/audit_p2_results.py
 ```
 
 真实 Baseline / Closed-loop 基准需要 Rhino Listener、有效模型配置和本地 `RHINOCODER_EVAL_TOKEN`：
@@ -205,7 +210,7 @@ python tools/audit_a7_expansion.py
 - 主要真实验收环境为 macOS 15.6 arm64 + Rhino 8；Windows、Intel Mac、多人并发与另一台物理 Mac 尚未完成发布验收。
 - 固定 30 题已经饱和；100% Pass@1 证明该契约下的稳定性，不证明开放世界、困难集或真实用户工作流成功率。
 - `local-mock` 不执行真实本地推理；GPU/LoRA 阶段等待学校权限，未产生可对外声称的本地模型效果。
-- P2 外部用户测试与训练前困难集尚未完成；不对当前数据宣称小样本统计显著性。
+- P2a 外部用户出题的自动化困难集已完成，18/30 有效基线通过；5 次已续跑的连接中断记录和 2 项待补 Rhino 人工证据明确分列，不宣称统计显著性。P2b 真人操作 UI 验证延期。
 - 完整 30 题真实基准需要交互式 Rhino 和模型 API；CI 只运行离线检查。
 
 ## 文档入口
@@ -213,5 +218,6 @@ python tools/audit_a7_expansion.py
 - [Architecture](docs/architecture.md) · [Troubleshooting](docs/troubleshooting.md)
 - [Portfolio evidence](docs/portfolio-evidence.md) · [Release checklist](docs/release-checklist.md)
 - [A4 privacy](docs/privacy-red-team-report.md) · [A6 baseline](docs/a6-no-finetune-baseline.md) · [A7 golden set](docs/a7-500-marginal-value.md)
+- [P2a external hard set](docs/p2-external-hard-set.md) · [P2 machine-readable results](docs/p2-hard-set-results.json)
 - [Training data pipeline](docs/training-data-pipeline.md) · [Training readiness](docs/training-readiness.md)
 - [PROJECT_OPTIMIZATION_PLAN.md](PROJECT_OPTIMIZATION_PLAN.md) · [CHANGELOG.md](CHANGELOG.md)

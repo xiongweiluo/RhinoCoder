@@ -2,7 +2,9 @@
   "name": "Self correction",
   "sample": true,
   "provenance": "synthetic",
+  "demo_scenario": "self-correction",
   "privacy": {"reviewed":true,"contains_real_trace_data":false,"coordinates":"synthetic","object_ids":"synthetic","layers":"generic"},
+  "scene_before": {"total":0,"capped":false,"objects":[]},
   "events": [
     {"type":"run.started","run_id":"replay-correction","seq":1,"timestamp":"2026-08-24T00:00:00Z","payload":{"prompt":"创建并校正一个蓝色球体","closed_loop":true}},
     {"type":"privacy.assessed","run_id":"replay-correction","seq":2,"timestamp":"2026-08-24T00:00:01Z","payload":{"decision_id":"privacy-replay-correction","risk":"low","action":"allow","reason_codes":["geometry_only"],"reasons":["合成样例仅包含几何参数"],"cloud_allowed":true,"requires_minimization":false}},
