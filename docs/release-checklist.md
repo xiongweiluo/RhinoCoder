@@ -23,6 +23,7 @@
 - [x] 无 Rhino clean-room 可按 README 安装、构建 UI、发现三份 Replay 并完成首个 Replay。
 - [x] 真实 Rhino 入口、Listener 命令、健康检查、只读首任务、预期输出和空白文档警告完整。
 - [x] `start-replay.sh` 在不连接 Rhino/模型的条件下启动本地 UI。
+- [x] 招聘者在线只读演示公开可访问；根链接自动加载正常闭环，三场景无需 Rhino、模型密钥或本地安装。
 - [x] `release-verify.sh` 覆盖 diff、全量检查、演示资产与 clean-room，且不执行 Git 发布操作。
 
 ## 4. 演示与求职材料

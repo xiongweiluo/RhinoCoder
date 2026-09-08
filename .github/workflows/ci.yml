@@ -24,10 +24,14 @@ jobs:
         run: python -m pytest -q
       - name: Build UI
         run: npm run build --prefix agent/ui
+      - name: Build public recruiter demo
+        run: npm run build:public --prefix agent/ui
       - name: Check UI performance budget
         run: python tools/check_ui_performance.py
       - name: Browser end-to-end demo
         run: npm run test:e2e --prefix agent/ui
+      - name: Browser end-to-end public deployment
+        run: npm run test:e2e:public --prefix agent/ui
       - name: Validate benchmark tasks
         run: |
           python eval/run_eval.py --dry-run

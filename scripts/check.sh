@@ -41,3 +41,4 @@ fi
 npm run build --prefix agent/ui
 python tools/check_ui_performance.py
 npm run test:e2e --prefix agent/ui
+npm run test:e2e:public --prefix agent/ui

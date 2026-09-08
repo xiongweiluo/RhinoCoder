@@ -1,5 +1,7 @@
 # Portfolio evidence index
 
+[在线浏览三套只读 Replay](https://rhinocoder-demo.gritty-olm-3357.chatgpt.site) · 无需 Rhino、模型密钥或本地安装
+
 RhinoCoder 对外只使用能从版本化文件复核的指标。本页是 README、简历表述、演示脚本与面试讲解的统一证据入口；完整真实 Trace、用户身份和项目文件不公开。
 
 ## 核心指标与来源
@@ -14,7 +16,7 @@ RhinoCoder 对外只使用能从版本化文件复核的指标。本页是 READM
 | A4 敏感发现 0 | 12 条隐私红队；1,609 条 Trace、7,016 行 SQLite、3 份 Replay 与模拟日志/请求面 | [A4 隐私红队报告](privacy-red-team-report.md) |
 | 23 个 MCP 工具 | 版本清单固定工具数，并由发布一致性检查与源码装饰器计数交叉验证 | [版本清单](version-manifest.json) |
 | 训练工程已就绪但没有 GPU 结果 | B1–B4 只完成锁定配置、CPU 冒烟、恢复和集群模板；没有正式训练或 holdout 评测 | [训练就绪报告](training-readiness.md) |
-| 当前正式版本为 0.3.0 | Tag、GitHub Release 与公开链接已验证；当前 P1/P2 工作区改动仍未提交 | [版本清单](version-manifest.json)、[发布清单](release-checklist.md) |
+| 当前正式版本为 0.3.0 | Tag、GitHub Release 与在线只读演示均有公开入口；当前后续改动属于 Unreleased | [版本清单](version-manifest.json)、[发布清单](release-checklist.md) |
 
 ## 代表性可追溯链路
 

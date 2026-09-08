@@ -2,7 +2,7 @@
 
 > **让 AI 不只“写 Rhino 脚本”，而是执行、观察、验证并在失败后恢复。**
 
-[English](README.en.md) · [无 Rhino 的 5 分钟 Replay](#quickstart-a无需-rhino) · [真实 Rhino Quickstart](#quickstart-b真实-rhino-8) · [证据索引](docs/portfolio-evidence.md) · [架构](docs/architecture.md)
+[在线只读演示](https://rhinocoder-demo.gritty-olm-3357.chatgpt.site) · [English](README.en.md) · [无 Rhino 的 5 分钟 Replay](#quickstart-a无需-rhino) · [真实 Rhino Quickstart](#quickstart-b真实-rhino-8) · [证据索引](docs/portfolio-evidence.md) · [架构](docs/architecture.md)
 
 RhinoCoder 是一个面向 Rhino 8 的可验证空间设计 Agent。它把自然语言任务转成 23 个版本化 MCP 工具调用，在 Rhino 主线程执行几何操作，再通过 `get_scene_summary` 和程序化断言读取并核对真实场景。每次运行的隐私判断、模型路由、工具调用、纠错、成本和证据都由同一 `run_id` 关联，可停止、重试、Undo、精准回滚，也可在没有 Rhino 和模型密钥时重放脱敏合成 Replay。
 
@@ -21,7 +21,7 @@ RhinoCoder 是一个面向 Rhino 8 的可验证空间设计 Agent。它把自然
 | **隐私审计 0 敏感发现** | 12 条红队、1,609 条 Trace、7,016 行 SQLite、3 份 Replay 及模拟日志/请求面；[A4 报告](docs/privacy-red-team-report.md) |
 | **A1–A7、B1–B4 已验收** | 数据、审计、路由、隐私、训练管线和 CPU 冒烟完成；GPU 正式训练未执行；[路线图](PROJECT_OPTIMIZATION_PLAN.md) |
 
-当前正式版本：[`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0)。版本、文档、Replay、GIF、发布脚本和验证证据已随 Git Tag 与 GitHub Release 发布；真实 Rhino 视频按项目所有者决定延期，不影响 Replay 与证据复核。
+当前正式版本：[`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0)。招聘者可直接打开[在线只读演示](https://rhinocoder-demo.gritty-olm-3357.chatgpt.site)，无需 Rhino、模型密钥或安装；版本、文档、Replay、GIF、发布脚本和验证证据也已随 Git Tag 与 GitHub Release 发布。真实 Rhino 视频按项目所有者决定延期。
 
 > **诚实边界：** `local-mock` 只是确定性的本地接口与安全替身，证明统一后端、隐私强制路由和禁止云端降级；它不是能完成 Rhino 建模的真实本地模型。P2a 是外部用户出题、Agent 自动执行的困难集，不是真人操作 UI 的可用性研究；P2b 延期。当前没有学校 GPU 验收或 LoRA 效果结论，A5 holdout 读取为 0。
 
@@ -35,7 +35,9 @@ RhinoCoder 是一个面向 Rhino 8 的可验证空间设计 Agent。它把自然
 
 ## Quickstart A：无需 Rhino
 
-目标：在干净 macOS 环境启动本地 UI，并查看“指令 → 隐私 → 路由 → 工具 → 场景 → 断言 → 指标”的合成 Replay。无需 Rhino、模型密钥或 `.env` 中的真实配置。
+最快方式：直接打开 **[RhinoCoder 在线只读演示](https://rhinocoder-demo.gritty-olm-3357.chatgpt.site)**，选择正常闭环、错误恢复或隐私与路由。它在浏览器内播放冻结的脱敏合成数据，不连接模型、Rhino 或 WebSocket，也不提供写操作。
+
+如需在本地复核，同样无需 Rhino、模型密钥或 `.env` 中的真实配置：
 
 前置：Python 3.11–3.13；Node.js `^20.19.0` 或 `>=22.12.0`。
 
@@ -46,7 +48,7 @@ RHINOCODER_PYTHON=python3 ./scripts/bootstrap.sh
 ./scripts/start-replay.sh
 ```
 
-直接打开任一公开只读入口：
+本地启动后打开任一只读入口：
 
 - `http://127.0.0.1:7860/?demo=normal-loop&mode=replay`：正常闭环，包含隐私、路由、工具、场景与通过断言。
 - `http://127.0.0.1:7860/?demo=self-correction&mode=replay`：首次断言失败、定向纠错、二次场景检查与通过。

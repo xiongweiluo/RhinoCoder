@@ -8,6 +8,8 @@
       "git_tag": true,
       "github_release": true,
       "release_url": "https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0",
+      "public_demo": true,
+      "public_demo_url": "https://rhinocoder-demo.gritty-olm-3357.chatgpt.site",
       "authorization": "Project owner authorized P0 release closure on 2026-09-08"
     }
   },

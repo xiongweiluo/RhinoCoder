@@ -10,8 +10,10 @@ import type {
   SceneObject,
   SceneSnapshot,
 } from "./types";
+import {getStaticReplay, STATIC_DEMO_SCENARIOS} from "./publicReplayData";
 
 const EMPTY_SCENE: SceneSnapshot = {objects: [], total: 0, capped: false};
+const HOSTED_PUBLIC_DEMO = import.meta.env.MODE === "public";
 const TERMINAL_TYPES = new Set(["run.completed", "run.failed", "run.cancelled"]);
 const EVENT_FILTERS = ["all", "decision", "execution", "verification", "recovery"] as const;
 type EventFilter = typeof EVENT_FILTERS[number];
@@ -96,8 +98,8 @@ function historyFromReplay(payload: ReplayPayload): HistoryItem {
 
 export default function App() {
   const initialParams = useMemo(() => new URLSearchParams(location.search), []);
-  const initialDemo = initialParams.get("demo") ?? "";
-  const publicReplayMode = initialParams.get("mode") === "replay" || Boolean(initialDemo);
+  const initialDemo = initialParams.get("demo") ?? (HOSTED_PUBLIC_DEMO ? "normal-loop" : "");
+  const publicReplayMode = HOSTED_PUBLIC_DEMO || initialParams.get("mode") === "replay" || Boolean(initialDemo);
   const [connected, setConnected] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [closedLoop, setClosedLoop] = useState(true);
@@ -109,7 +111,7 @@ export default function App() {
   const [notice, setNotice] = useState("");
   const [sceneBeforeOverride, setSceneBeforeOverride] = useState<SceneSnapshot | null>(null);
   const [sceneAfterOverride, setSceneAfterOverride] = useState<SceneSnapshot | null>(null);
-  const [scenarios, setScenarios] = useState<DemoScenario[]>([]);
+  const [scenarios, setScenarios] = useState<DemoScenario[]>(HOSTED_PUBLIC_DEMO ? STATIC_DEMO_SCENARIOS : []);
   const [selectedScenarioId, setSelectedScenarioId] = useState(initialDemo);
   const [playbackState, setPlaybackState] = useState<PlaybackState>("idle");
   const [historyQuery, setHistoryQuery] = useState("");
@@ -139,9 +141,14 @@ export default function App() {
     setSceneBeforeOverride(null);
     setSceneAfterOverride(null);
     try {
-      const response = await fetch(`/api/replays/${encodeURIComponent(scenario.replay)}`);
-      if (!response.ok) throw new Error(`Replay 加载失败 (${response.status})`);
-      const payload = await response.json() as ReplayPayload;
+      let payload: ReplayPayload;
+      if (HOSTED_PUBLIC_DEMO) {
+        payload = getStaticReplay(scenario);
+      } else {
+        const response = await fetch(`/api/replays/${encodeURIComponent(scenario.replay)}`);
+        if (!response.ok) throw new Error(`Replay 加载失败 (${response.status})`);
+        payload = await response.json() as ReplayPayload;
+      }
       if (!payload.read_only || payload.scenario.id !== scenario.id) {
         throw new Error("Replay 与公开场景清单不一致");
       }
@@ -168,6 +175,7 @@ export default function App() {
   }, [chooseRun]);
 
   useEffect(() => {
+    if (HOSTED_PUBLIC_DEMO) return;
     fetch("/api/demo-scenarios")
       .then((response) => {
         if (!response.ok) throw new Error(`场景清单加载失败 (${response.status})`);
@@ -401,8 +409,14 @@ export default function App() {
       <a className="skip-link" href="#evidence-chain">跳到运行证据</a>
       <header className="topbar">
         <div><span className="eyebrow">VERIFIABLE SPATIAL AGENT</span><h1>RhinoCoder</h1><p>从指令到几何证据，一条 run_id 可复核链路。</p></div>
-        <div className={`connection ${connected ? "online" : publicReplayMode ? "readonly" : "offline"}`} role="status" aria-live="polite">
-          <span />{publicReplayMode ? "Read-only demo" : connected ? "Connected" : "Reconnecting"}
+        <div className="topbar-actions">
+          <nav className="project-links" aria-label="项目链接">
+            <a href="https://github.com/xiongweiluo/RhinoCoder" target="_blank" rel="noreferrer">GitHub ↗</a>
+            <a href="https://github.com/xiongweiluo/RhinoCoder/blob/main/README.md" target="_blank" rel="noreferrer">项目说明 ↗</a>
+          </nav>
+          <div className={`connection ${connected ? "online" : publicReplayMode ? "readonly" : "offline"}`} role="status" aria-live="polite">
+            <span />{publicReplayMode ? "Read-only demo" : connected ? "Connected" : "Reconnecting"}
+          </div>
         </div>
       </header>
 
@@ -410,7 +424,7 @@ export default function App() {
         <div>
           <span className="eyebrow">THREE FIXED DEMOS</span>
           <h2 id="demo-heading">先看结果，再钻进 Trace</h2>
-          <p>每个场景都固定目标、输入、预期结果、Replay 和证据入口。Replay 只通过 GET 读取脱敏合成数据。</p>
+          <p>选择一条冻结场景，扫描隐私决策、工具执行、场景读回与程序断言。所有内容均为脱敏合成 Replay。</p>
         </div>
         <div className="hero-proof"><strong>公开边界</strong><span>0 模型调用</span><span>0 Rhino 写操作</span><span>0 原始 Trace</span></div>
       </section>
@@ -450,7 +464,7 @@ export default function App() {
           </form>
         </section>
       ) : (
-        <section className="readonly-banner panel" role="note"><strong>公开只读模式</strong><p>此页面不建立 WebSocket，也不发送 instruction、retry、Undo、rollback 或 feedback 消息。请选择上方任一场景播放。</p></section>
+        <section className="readonly-banner panel" role="note"><strong>公开只读模式</strong><p>可交互浏览，但不连接模型或 Rhino，也不发送 instruction、retry、Undo、rollback 或 feedback。真实 Rhino 操作需按项目 Quickstart 在本机运行。</p></section>
       )}
 
       {!connected && !publicReplayMode && <div className="state-banner offline" role="status"><strong>UI 服务离线</strong><span>正在指数退避重连；Replay 仍可通过上方按钮只读加载。</span></div>}
@@ -546,6 +560,11 @@ export default function App() {
           {filteredHistory.slice(0, 30).map((item) => <button type="button" className={item.run_id === currentRun ? "selected" : ""} key={`${item.is_replay ? "replay" : "live"}-${item.run_id}`} onClick={() => selectHistory(item)}><span className={`status-pill ${item.status}`}>{item.is_replay ? "REPLAY" : statusLabel(item.status)}</span><span>{item.prompt}</span><code title={item.run_id}>{item.run_id.slice(0, 12)}</code></button>)}
         </div>
       </section>
+
+      <footer className="site-footer">
+        <p>RhinoCoder v0.3.0 · 公开 Replay 使用脱敏合成数据 · Local Mock 不代表真实本地模型效果</p>
+        <a href="https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0" target="_blank" rel="noreferrer">查看版本与验证证据 ↗</a>
+      </footer>
     </main>
   );
 }

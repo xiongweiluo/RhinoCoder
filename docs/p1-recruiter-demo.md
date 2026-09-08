@@ -4,6 +4,8 @@
 
 状态：**通过**
 
+公开入口：[https://rhinocoder-demo.gritty-olm-3357.chatgpt.site](https://rhinocoder-demo.gritty-olm-3357.chatgpt.site)
+
 ## 目标与结果
 
 P1 将原有工程型 UI 收敛为招聘者可在数分钟内扫描的证据链：
@@ -32,7 +34,7 @@ P1 将原有工程型 UI 收敛为招聘者可在数分钟内扫描的证据链�
 
 ## 公开只读与隐私边界
 
-三个入口使用 `?demo=<scenario>&mode=replay`。前端只调用：
+三个入口使用 `?demo=<scenario>&mode=replay`。公开托管构建将冻结的三份场景与 Replay 编译进静态浏览器资源，不调用 API、不建立 WebSocket，也不依赖模型或 Rhino。本地 UI Server 模式只调用：
 
 ```text
 GET /api/demo-scenarios
@@ -51,10 +53,11 @@ python tools/audit_p1_demo.py
 npm run build --prefix agent/ui
 python tools/check_ui_performance.py
 npm run test:e2e --prefix agent/ui
+npm run test:e2e:public --prefix agent/ui
 python -m pytest -q eval/test_ui_server.py eval/test_p1_demo.py eval/test_ui_performance.py
 ```
 
-Playwright 使用真实 Chrome，覆盖三场景完整链路、零 API 写请求、零 WebSocket、隐私占位符、事件筛选、运行搜索、恢复按钮只读禁用、键盘焦点与 390px 无横向溢出。
+Playwright 使用真实 Chrome，分别覆盖本地 UI Server 与纯静态托管构建：根链接自动播放、三场景完整链路、零 API 写请求、零 WebSocket、隐私占位符、事件筛选、运行搜索、恢复按钮只读禁用、键盘焦点与 390px 无横向溢出。
 
 当前生产构建为单 JS 与单 CSS；gzip 预算分别为 90 KiB、20 KiB，总预算 120 KiB。
 
@@ -75,4 +78,4 @@ Playwright 使用真实 Chrome，覆盖三场景完整链路、零 API 写请求
 
 取消任务会生成 `run.cancelled` 终态并进入最近运行；固定场景重试会保留原场景 ID、输入和最终断言语义。实时 Rhino 和 Replay 因此使用同一套场景定义、Scene Summary 字段与断言展示口径，但 Replay 仍明确标记为合成证据，不冒充新的真实 Rhino 基准。
 
-本阶段未读取 A5 holdout 或未来 P2 困难集，未执行 C1–C4，也没有新增黄金数据。P1 改动尚未 commit 或 push。
+本阶段未读取 A5 holdout 或 P2 困难集答案，未执行 C1–C4，也没有新增黄金数据。在线站点只发布既有脱敏合成 Replay，不包含完整本地 Trace、SQLite、真实用户身份、真实项目文件或真实 Rhino 对象 GUID。

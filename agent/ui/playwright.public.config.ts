@@ -1,13 +1,12 @@
-import { dirname, resolve } from "node:path";
+import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "@playwright/test";
 
 const uiRoot = dirname(fileURLToPath(import.meta.url));
-const projectRoot = resolve(uiRoot, "../..");
 
 export default defineConfig({
   testDir: "./e2e",
-  testIgnore: "hosted-public.spec.ts",
+  testMatch: ["public-demo.spec.ts", "hosted-public.spec.ts"],
   fullyParallel: false,
   workers: 1,
   retries: process.env.CI ? 1 : 0,
@@ -15,7 +14,7 @@ export default defineConfig({
   timeout: 30_000,
   expect: {timeout: 8_000},
   use: {
-    baseURL: "http://127.0.0.1:7862",
+    baseURL: "http://127.0.0.1:7863",
     browserName: "chromium",
     channel: "chrome",
     headless: true,
@@ -23,10 +22,10 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
   webServer: {
-    command: "python -m agent.ui_server --port 7862",
-    cwd: projectRoot,
-    url: "http://127.0.0.1:7862/api/demo-scenarios",
-    reuseExistingServer: false,
+    command: "npm run preview:public",
+    cwd: uiRoot,
+    url: "http://127.0.0.1:7863/",
+    reuseExistingServer: !process.env.CI,
     timeout: 30_000,
   },
 });
