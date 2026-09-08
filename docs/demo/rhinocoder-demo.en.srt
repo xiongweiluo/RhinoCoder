@@ -1,0 +1,34 @@
+1
+00:00:00,000 --> 00:00:15,000
+RhinoCoder turns natural-language design tasks into real Rhino operations,
+then proves the result with scene reads and programmatic assertions—not just generated code.
+
+2
+00:00:15,000 --> 00:00:48,000
+The task crosses a local privacy gate and a rule-first router.
+The agent uses 23 versioned MCP tools; every mutation runs on Rhino's main thread.
+
+3
+00:00:48,000 --> 00:01:08,000
+Completion is not a model claiming success. The system reads the scene back, checks geometry,
+and links route, tools, metrics, and evidence to one run ID.
+
+4
+00:01:08,000 --> 00:01:42,000
+This synthetic Replay shows recovery: the first scene check finds the wrong size and color,
+the loop corrects the target object, reads the scene again, and passes the assertion.
+
+5
+00:01:42,000 --> 00:02:03,000
+Without Rhino, a reviewer can inspect the main loop in five minutes.
+Replay uses hash-locked, privacy-audited synthetic events, needs no model key, and cannot mutate a scene.
+
+6
+00:02:03,000 --> 00:02:24,000
+Every public metric links to a versioned report. The 500 golden traces passed four admission gates.
+The fixed 30-task baseline passed 270 runs, but it is saturated and does not replace hard-set or user validation.
+
+7
+00:02:24,000 --> 00:02:35,000
+The local backend is still a Mock: it validates the interface, forced privacy routing, and safe fallback only.
+Real local-model quality and school-GPU experiments are not claimed as complete.

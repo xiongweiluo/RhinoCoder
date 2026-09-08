@@ -10,7 +10,7 @@ python tools/doctor.py
 
 ## bootstrap 提示 Python 版本过低
 
-RhinoCoder 0.2.0 支持 Python 3.11–3.13。macOS 上的 `python3` 可能仍指向旧系统解释器，先运行 `python3 --version`，然后显式指定新解释器：
+RhinoCoder 0.3.0 支持 Python 3.11–3.13。macOS 上的 `python3` 可能仍指向旧系统解释器，先运行 `python3 --version`，然后显式指定新解释器：
 
 ```bash
 RHINOCODER_PYTHON=/absolute/path/to/python3.13 ./scripts/bootstrap.sh
@@ -26,7 +26,7 @@ RHINOCODER_PYTHON=/absolute/path/to/python3.13 ./scripts/bootstrap.sh
 
 确认网络可访问 Python 与 npm 包源，并确认平台为 macOS、Python 为 3.11–3.13。不要直接修改锁文件绕过冲突；依赖升级需要同步更新 `requirements-lock.txt`、`package-lock.json` 和 `docs/version-manifest.json`，再运行 `./scripts/check.sh` 与 clean-room 验收。
 
-若 MCP Server 报告 SDK 缺失或版本不兼容，运行 `python -m pip show mcp`。RhinoCoder `0.2.0` 固定使用官方 `mcp 1.29.1`，支持范围为 `>=1.0,<2.0`；同名 2.x 包不提供 `mcp.server.fastmcp`，不能用于本项目。
+若 MCP Server 报告 SDK 缺失或版本不兼容，运行 `python -m pip show mcp`。RhinoCoder `0.3.0` 固定使用官方 `mcp 1.29.1`，支持范围为 `>=1.0,<2.0`；同名 2.x 包不提供 `mcp.server.fastmcp`，不能用于本项目。
 
 ## 无法连接 Rhino Listener
 

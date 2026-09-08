@@ -1,46 +1,54 @@
-# 原型发布检查清单
+# RhinoCoder v0.3.0 发布检查清单
 
-当前代码已具备稳定原型所需的离线基础能力，但只有以下项目全部通过后才能标记正式版本。
+当前状态：**Released**。`v0.3.0` 已完成本地门禁、Git Tag、push、GitHub Release 与公开链接验证。真实 Rhino 视频按项目所有者决定延期；现有合成 Replay GIF、脚本与字幕可独立复核，视频项不会被虚假勾选。
 
-## 1. 安全与版本
+## 1. 版本与招聘者入口
 
-- [x] 在 API 提供方控制台轮换仓库历史中出现过的凭证。
-- [x] `python tools/check_secrets.py` 通过。
-- [x] `.env`、真实 Trace、评测明细和项目数据均未进入提交。
-- [x] 应用、Prompt、工具 Schema、Trace Schema、Python 和前端依赖已固定，并由 [版本清单](version-manifest.json) 与一致性检查保护。
+- [x] 应用、UI 与版本清单统一为 `0.3.0`；Prompt、工具 Schema 和 Trace Schema 保持原契约版本。
+- [x] README 第一屏说明问题、真实 Rhino 闭环、500/500、A1–A7、核心差异和诚实限制。
+- [x] 中文 README 与独立英文 README 均提供指标、Quickstart、架构、证据和限制入口。
+- [x] CHANGELOG 包含 `0.3.0` 的功能、验证、安全与候选发布状态。
+- [x] README、架构、计划、版本清单与报告中的 500/500、46 标签、270/270 和 Local Mock 口径一致。
 
-## 2. 自动检查
+## 2. 架构、数据流与证据
 
-- [x] `./scripts/check.sh` 全部通过。
-- [x] CI 的编译、单元测试、任务格式、前端构建和密钥扫描通过。
-- [x] 工作区不存在与发布无关的未提交改动。
+- [x] 可直接浏览的运行架构 SVG 覆盖 UI、隐私门、路由、模型接口、Agent、MCP、Listener、Rhino 与证据存储。
+- [x] 可直接浏览的数据流 SVG 覆盖黄金准入、任务级分区、A5 holdout、未来 P2 困难集与公开边界。
+- [x] 公开指标索引逐项链接 A4、A6、A7、版本清单与训练就绪报告。
+- [x] 合成 `self_correction` Replay 展示隐私、路由、首次断言失败、纠错、复检和最终通过。
+- [x] README 明确 `local-mock` 不是生产本地模型，30 题 100% 不代表开放世界或困难集效果。
 
-## 3. 真实环境验收
+## 3. Quickstart 与运行验证
 
-- [x] Rhino 8 已打开，Listener 健康检查通过。
-- [x] Agent、MCP Server 与 UI 可由 `./scripts/start.sh` 启动。
-- [x] `./scripts/benchmark.sh` 完成 30 题 Baseline / Closed-loop，各重复 3 次。
-- [x] 30 题全部进入报告，基础设施错误保留在失败分母。
-- [x] Closed-loop Pass@1 不低于 70%。
-- [x] 报告包含任务级结果、均值、标准差、稳定性、延迟、token、成本和失败分类。
+- [x] 无 Rhino clean-room 可按 README 安装、构建 UI、发现三份 Replay 并完成首个 Replay。
+- [x] 真实 Rhino 入口、Listener 命令、健康检查、只读首任务、预期输出和空白文档警告完整。
+- [x] `start-replay.sh` 在不连接 Rhino/模型的条件下启动本地 UI。
+- [x] `release-verify.sh` 覆盖 diff、全量检查、演示资产与 clean-room，且不执行 Git 发布操作。
 
-## 4. 交互与恢复
+## 4. 演示与求职材料
 
-- [x] 三个核心任务在真实 Rhino 环境连续运行 3 次成功，详见 [UI 真实环境验收报告](ui-acceptance-report.md)。
-- [x] WebSocket 断线重连后可恢复当前任务快照，详见 [断线与故障恢复验收报告](recovery-acceptance-report.md)。
-- [x] 停止后不再产生新工具调用，详见 [交互控制真实环境验收报告](interaction-control-acceptance-report.md)。
-- [x] 重试、Undo、任务级精准回滚和反馈均已人工演练，详见 [交互控制真实环境验收报告](interaction-control-acceptance-report.md)。
-- [x] Rhino Listener 重启或重连后无需重启 Agent/UI 即可开始新任务。
-- [x] 无效 GUID、空参数、LLM 超时和 MCP 退出均展示可理解的恢复入口。
-- [x] 网络层重试复用幂等键，Listener 超时不会重复入队或产生重复对象。
+- [x] 2:35 镜头表覆盖真实成功任务、合成失败恢复、无 Rhino Replay、证据和诚实限制。
+- [x] 中英文旁白与 SRT 字幕时间码一致，提供 macOS 录制、字幕烧录和逐帧隐私检查命令。
+- [x] 9 帧 Replay GIF 由隐私复核的合成数据生成；源与产物 SHA-256、尺寸和帧数由自动检查锁定。
+- [x] 一页中英文简历项目描述、30 秒开场和面试深挖提纲已准备。
+- [ ] [外部门禁] 项目所有者在空白演示文档中录制真实 Rhino 视频，并逐帧确认无身份、路径、密钥或真实项目数据。
+- [ ] [外部门禁] 项目所有者选择视频托管位置并授权上传；README 再补充可访问链接。
 
-## 5. 数据与交付
+## 5. 本地发布质量门禁
 
-- [x] 黄金 Trace 同时满足断言通过、至少一次场景自检、人工确认与脱敏审计，旧格式数据已隔离，详见 [数据与脱敏验收报告](data-sanitization-acceptance-report.md)。
-- [x] Partial Pass 和失败 Trace 已物理分流且不会进入黄金 SFT，详见 [数据与脱敏验收报告](data-sanitization-acceptance-report.md)。
-- [x] 正式报告与三份 Replay 已逐文件复核、声明合成来源并通过哈希锁定的脱敏审计，详见 [数据与脱敏验收报告](data-sanitization-acceptance-report.md)。
-- [x] 训练数据四视图使用任务级 70/15/15 防泄漏分区、锁定 holdout、完整哈希/血缘和独立隐私审计，详见 [A5 训练数据管线验收报告](training-data-pipeline.md)。
-- [x] macOS clean-room 环境可按 README 完成安装、Replay 首任务和只读 Rhino 首任务，详见 [版本、安装与文档验收报告](release-acceptance-report.md)。
-- [x] README、架构、已知限制、故障排查、CHANGELOG 与当前版本一致，并由自动检查保护，详见 [版本、安装与文档验收报告](release-acceptance-report.md)。
+- [x] `git diff --check` 通过。
+- [x] Python 编译、完整 pytest、30 题格式与采集/A7 静态检查通过。
+- [x] 前端 TypeScript 构建通过。
+- [x] 密钥、Trace、Replay、隐私与 SQLite 存储面审计通过，敏感发现为 0。
+- [x] 版本、依赖锁、Markdown 本地链接与演示资产一致性检查通过。
+- [x] A5 holdout 与未来 P2 困难集未用于训练或反复调参，C1–C4 未执行。
+- [x] 发布验证结果已记录到 [v0.3.0 发布验证报告](v0.3.0-release-verification.md)。
 
-稳定原型版本已固定为 `0.2.0`，CHANGELOG 的功能与验收记录已归入对应正式版本条目。
+## 6. 外部发布门禁
+
+- [x] [外部门禁] 项目所有者审阅发布范围，并明确授权 commit。
+- [x] [外部门禁] 项目所有者明确授权创建 `v0.3.0` Tag 与 push。
+- [x] [外部门禁] GitHub Release 已附 CHANGELOG 摘要、GIF、发布验证报告，并明确标注视频延期。
+- [x] [外部门禁] GitHub Release、README、GIF 与双语入口可从公开网络访问；未将延期视频描述为可访问。
+
+正式发布状态由 `docs/version-manifest.json` 锁定为 `released`，并记录 Git Tag、GitHub Release 与公开链接。真实 Rhino 视频仍是单独的延期门禁，完成录制、逐帧隐私复核和上传后再勾选，不影响当前版本作为招聘作品集开始投递。

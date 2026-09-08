@@ -8,6 +8,7 @@
 - 审核批次：20 批，每批 10 条；异常批次：0。
 - 已尝试新增任务：200；AI 初审候选：0。
 - 规则路由预演：{'cloud-main': 200}；与预期不符：0。
+- 当前黄金集覆盖标签：46 个。
 - 新增标签：`clean_trace`, `complex_edit`, `fallback`, `incomplete_scene`, `multi_round`, `route_boundary`。
 
 | 覆盖缺口 | 计划 | 已进入黄金 |

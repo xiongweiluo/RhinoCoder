@@ -10,7 +10,7 @@ VENV_DIR="${RHINOCODER_VENV_DIR:-$PROJECT_DIR/.venv}"
 "$PYTHON_BIN" - <<'PY'
 import sys
 if not (sys.version_info >= (3, 11) and sys.version_info < (3, 14)):
-    raise SystemExit("RhinoCoder 0.2.0 requires Python 3.11, 3.12, or 3.13")
+    raise SystemExit("RhinoCoder 0.3.0 requires Python 3.11, 3.12, or 3.13")
 PY
 
 if [[ ! -x "$VENV_DIR/bin/python" ]]; then

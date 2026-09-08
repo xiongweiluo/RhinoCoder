@@ -1,5 +1,9 @@
 # RhinoCoder Architecture
 
+RhinoCoder 把“模型生成工具调用”和“Rhino 中已经得到正确几何结果”分成两个必须独立验证的状态。运行链全部位于本机控制面；只有经过隐私门与出站最小化的消息可以进入云模型。可缩放图可直接在浏览器打开：[运行架构 SVG](assets/architecture.svg) · [运行与训练数据流 SVG](assets/data-flow.svg)。
+
+![RhinoCoder runtime architecture](assets/architecture.svg)
+
 ## Runtime topology
 
 ```text
@@ -36,6 +40,8 @@ OpenAI-compatible planning <-> MCP ClientSession
 
 ## Training data flow
 
+![RhinoCoder runtime and training data flow](assets/data-flow.svg)
+
 ```text
 Golden Trace + campaign task definition
         | privacy minimization / runtime-noise removal / valid JSON repair
@@ -53,7 +59,7 @@ JSONL artifacts + stats + SHA-256 manifest + independent audit
 
 ## Interface versions
 
-- Application: `0.2.0`
+- Application: `0.3.0`
 - Prompt: `closed-loop-v1`
 - Tool schema: `1.0`
 - Trace schema: `1.0`
@@ -65,8 +71,11 @@ JSONL artifacts + stats + SHA-256 manifest + independent audit
 - Python `requirements-lock.txt` 与前端 `package-lock.json` 的 SHA-256。
 - macOS、Rhino、Python 和 Node.js 支持范围及真实验收环境。
 - MCP 工具数量和应用、Prompt、工具 Schema、Trace Schema 的一致性。
+- P0 双语 README、两张可访问 SVG、合成 Replay GIF、字幕与演示资产哈希。
 
 `python tools/check_release_consistency.py` 会验证代码、两份依赖锁、版本清单、README、CHANGELOG、架构文档、发布清单和 Markdown 本地链接。版本或文档漂移会使本地检查与 CI 失败。
+
+`python tools/check_demo_assets.py` 会额外验证两张 SVG 的可访问元数据、GIF 尺寸与帧数、合成 Replay 来源声明和逐文件 SHA-256。演示视频本身必须在上传前由项目所有者逐帧复核。
 
 ## Security boundaries
 
@@ -82,6 +91,7 @@ JSONL artifacts + stats + SHA-256 manifest + independent audit
 - 真实数据采集按 campaign/task ID 追踪并防止重复入库；默认拒绝清空非空 Rhino 文档，进度报告只保存在本地忽略目录。
 - AI 视口审核结果先进入独立候选层；五条批次只有在汇总证据经人类一次性确认后才原子晋级黄金集，AI 反馈与人类确认均保留在数据血缘中。
 - 公开报告和 Replay 通过敏感字段扫描及 SHA-256 复核清单锁定。
+- 公开 GIF 只由合成 Replay 生成，不使用真实用户 Trace、视口截图或项目文件。
 
 ## Failure and recovery
 
@@ -92,3 +102,10 @@ JSONL artifacts + stats + SHA-256 manifest + independent audit
 - Listener 超时会标记队列任务取消，避免 Rhino 恢复后创建幽灵对象。
 - Agent 记录任务创建的对象 ID，UI 可执行精准回滚。
 - UI 取消会取消当前异步任务；新的工具调用不会继续发出。
+
+## Model and evaluation boundaries
+
+- `local-mock` 是统一后端接口的确定性测试替身，只验证隐私强制本地、禁止云 fallback 和安全失败；它不能完成真实建模推理。
+- A5 holdout 在任务模板与数字变体成组之后锁定，不用于训练或反复调参；未来 P2 困难集也必须在任何 LoRA 训练前冻结。
+- 当前没有学校 GPU 验收、正式 LoRA 训练或本地模型效果结论。只有用户明确确认 GPU 权限后才能启动 C1–C4。
+- 完整真实 Trace、SQLite、截图和用户反馈保存在本地 Git 忽略目录；公开仓库只包含脱敏聚合、合成 Replay 和哈希清单。

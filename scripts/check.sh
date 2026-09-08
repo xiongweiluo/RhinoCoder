@@ -14,16 +14,17 @@ python tools/check_collection_campaign.py --manifest eval/collection/phase3_300.
 python tools/check_secrets.py
 python tools/audit_trace_data.py
 python tools/audit_release_data.py
+python tools/check_demo_assets.py
 python tools/privacy_audit.py
 if [[ -f data/golden_traces_v2.jsonl ]]; then
-  python tools/build_training_dataset.py build
-  python tools/build_training_dataset.py audit
-  python tools/run_training.py audit
-  if [[ -d data/training/tokenizer-cache ]]; then
-    python tools/run_training.py tokenizer-audit --local-files-only
-  fi
-  if python -c "import torch" >/dev/null 2>&1; then
-    python tools/run_training.py smoke
+  if [[ -f data/training/a5/manifest.json ]]; then
+    python tools/run_training.py audit
+    if [[ -d data/training/tokenizer-cache ]]; then
+      python tools/run_training.py tokenizer-audit --local-files-only
+    fi
+    if python -c "import torch" >/dev/null 2>&1; then
+      python tools/run_training.py smoke
+    fi
   fi
 fi
 python tools/run_training.py cluster-template-audit

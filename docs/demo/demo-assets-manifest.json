@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "reviewed_at": "2026-09-08",
+  "source": {
+    "path": "eval/replays/self_correction.json",
+    "classification": "synthetic_replay",
+    "sha256": "aeffcf93b128197fd5c15072f6cf801bc2ae00e16fc6fed0e13a549242d9bdd8"
+  },
+  "artifacts": [
+    {
+      "path": "docs/assets/replay-demo.gif",
+      "classification": "generated_synthetic_replay_preview",
+      "sha256": "bdf50abc70b929cbc8042225a2c465320b1d8f4629a418da7dc18c4f46a8043c",
+      "width": 960,
+      "height": 540,
+      "frames": 9
+    },
+    {
+      "path": "docs/assets/architecture.svg",
+      "classification": "code_generated_diagram",
+      "sha256": "958101907ebb52516ff8fdd1182e2129521f6c2a37b18ed24523759c24025e06"
+    },
+    {
+      "path": "docs/assets/data-flow.svg",
+      "classification": "code_generated_diagram",
+      "sha256": "ca3c97ed0ed54842140dc19faece4994dd13508b1731e402e7b3ab6aca3fca78"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="860" viewBox="0 0 1440 860" role="img" aria-labelledby="title desc" style="max-width:100%;height:auto">
+  <title id="title">RhinoCoder runtime architecture</title>
+  <desc id="desc">A local-first closed loop from the React interface through privacy and routing, the agent, MCP, Rhino, verification, and auditable storage.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#081216"/><stop offset="1" stop-color="#101b20"/></linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#76e5c2"/><stop offset="1" stop-color="#8fc9ff"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000" flood-opacity=".28"/></filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#76e5c2"/></marker>
+    <style>
+      .title{font:700 34px Inter,system-ui,sans-serif;fill:#f3f8fa}.sub{font:400 16px Inter,system-ui,sans-serif;fill:#9fb2ba}
+      .label{font:700 18px Inter,system-ui,sans-serif;fill:#edf6f7}.small{font:400 14px Inter,system-ui,sans-serif;fill:#9fb2ba}
+      .box{fill:#132328;stroke:#2f4a52;stroke-width:2;rx:16;filter:url(#shadow)}.edge{stroke:#76e5c2;stroke-width:3;fill:none;marker-end:url(#arrow)}
+      .boundary{fill:none;stroke:#55717a;stroke-width:2;stroke-dasharray:10 9;rx:20}.tag{font:700 12px Inter,system-ui,sans-serif;fill:#76e5c2;letter-spacing:.12em}
+    </style>
+  </defs>
+  <rect width="1440" height="860" fill="url(#bg)"/>
+  <text x="72" y="70" class="title">RhinoCoder · verifiable Rhino agent</text>
+  <text x="72" y="104" class="sub">Every run crosses an enforceable privacy gate, executes through a narrow tool boundary, and returns evidence.</text>
+
+  <rect x="52" y="142" width="1336" height="236" class="boundary"/>
+  <text x="76" y="171" class="tag">AGENT PROCESS · LOCAL</text>
+  <rect x="82" y="205" width="190" height="112" class="box"/><text x="177" y="244" text-anchor="middle" class="label">React UI / CLI</text><text x="177" y="274" text-anchor="middle" class="small">Run · stop · retry</text><text x="177" y="296" text-anchor="middle" class="small">Replay · feedback</text>
+  <rect x="326" y="205" width="220" height="112" class="box"/><text x="436" y="244" text-anchor="middle" class="label">Privacy gate</text><text x="436" y="274" text-anchor="middle" class="small">Block · force local</text><text x="436" y="296" text-anchor="middle" class="small">Minimize outbound</text>
+  <rect x="600" y="205" width="220" height="112" class="box"/><text x="710" y="244" text-anchor="middle" class="label">Rule-first router</text><text x="710" y="274" text-anchor="middle" class="small">Privacy · difficulty</text><text x="710" y="296" text-anchor="middle" class="small">Cost · latency</text>
+  <rect x="874" y="190" width="224" height="142" class="box"/><text x="986" y="226" text-anchor="middle" class="label">Uniform model API</text><text x="986" y="258" text-anchor="middle" class="small">Cloud main</text><text x="986" y="282" text-anchor="middle" class="small">Cloud economy</text><text x="986" y="306" text-anchor="middle" class="small">Local Mock*</text>
+  <rect x="1152" y="205" width="190" height="112" class="box"/><text x="1247" y="244" text-anchor="middle" class="label">Agent loop</text><text x="1247" y="274" text-anchor="middle" class="small">Plan · tool · observe</text><text x="1247" y="296" text-anchor="middle" class="small">Correct · finish</text>
+  <path d="M272 261 H318" class="edge"/><path d="M546 261 H592" class="edge"/><path d="M820 261 H866" class="edge"/><path d="M1098 261 H1144" class="edge"/>
+
+  <rect x="52" y="424" width="1336" height="228" class="boundary"/>
+  <text x="76" y="453" class="tag">RHINO EXECUTION BOUNDARY · LOCALHOST ONLY</text>
+  <rect x="108" y="490" width="218" height="108" class="box"/><text x="217" y="531" text-anchor="middle" class="label">FastMCP server</text><text x="217" y="561" text-anchor="middle" class="small">23 versioned tools</text>
+  <rect x="402" y="490" width="218" height="108" class="box"/><text x="511" y="531" text-anchor="middle" class="label">HTTP Listener</text><text x="511" y="561" text-anchor="middle" class="small">Idempotency · timeout</text>
+  <rect x="696" y="490" width="218" height="108" class="box"/><text x="805" y="531" text-anchor="middle" class="label">Rhino main thread</text><text x="805" y="561" text-anchor="middle" class="small">Document mutations</text>
+  <rect x="990" y="490" width="342" height="108" class="box"/><text x="1161" y="531" text-anchor="middle" class="label">Scene summary + assertions</text><text x="1161" y="561" text-anchor="middle" class="small">Geometry evidence closes the loop</text>
+  <path d="M326 544 H394" class="edge"/><path d="M620 544 H688" class="edge"/><path d="M914 544 H982" class="edge"/>
+  <path d="M1247 317 C1247 398 217 390 217 482" class="edge"/>
+  <path d="M1161 598 C1161 688 1247 688 1247 326" class="edge"/>
+
+  <rect x="82" y="715" width="580" height="90" class="box"/><text x="112" y="750" class="label">Auditable evidence</text><text x="112" y="778" class="small">AgentEvent · Trace · feedback · route decision · SQLite lineage</text>
+  <rect x="720" y="715" width="622" height="90" class="box"/><text x="750" y="750" class="label">Public boundary</text><text x="750" y="778" class="small">Only sanitized reports, synthetic Replay, hashes, and aggregate metrics enter Git.</text>
+  <path d="M1161 606 C1161 682 520 676 520 707" class="edge"/>
+  <text x="72" y="837" class="small">* Local Mock validates interface, privacy routing, and safe fallback only. It is not a production local reasoning model.</text>
+</svg>

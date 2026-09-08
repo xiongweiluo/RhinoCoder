@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 from pathlib import Path
 
@@ -11,6 +12,7 @@ from eval import a6_baseline
 from eval.a6_baseline import (
     SCENARIOS,
     _profiles,
+    _frozen_backup_source_hash,
     analyze_golden_offline,
     build_run_contract,
     iter_schedule,
@@ -18,6 +20,33 @@ from eval.a6_baseline import (
     run_live_benchmark,
     summarize_live_results,
 )
+
+
+def test_frozen_backup_source_hash_requires_verified_archive(tmp_path: Path) -> None:
+    backup = tmp_path / "data" / "backups" / "golden-set-300"
+    backup.mkdir(parents=True)
+    archive = backup / "golden-set-300.tar.gz"
+    archive.write_bytes(b"locked-backup")
+    archive_hash = hashlib.sha256(archive.read_bytes()).hexdigest()
+    source_hash = hashlib.sha256(b"golden-source").hexdigest()
+    (backup / "SHA256SUMS").write_text(
+        f"{source_hash}  data/golden_traces_v2.jsonl\n",
+        encoding="utf-8",
+    )
+    (backup / "RESTORE_VERIFICATION.json").write_text(
+        json.dumps(
+            {
+                "passed": True,
+                "source_and_restored_hashes_match": True,
+                "archive_sha256": archive_hash,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert _frozen_backup_source_hash(tmp_path) == source_hash
+    archive.write_bytes(b"tampered")
+    assert _frozen_backup_source_hash(tmp_path) is None
 
 
 def _golden_row(index: int) -> dict:

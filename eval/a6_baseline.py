@@ -57,6 +57,7 @@ class A6Audit:
     expected_live_runs: int = 270
     observed_live_runs: int = 0
     offline_traces: int = 0
+    offline_source_status: str = "unchecked"
     findings: list[str] = field(default_factory=list)
 
     def add(self, finding: str) -> None:
@@ -83,6 +84,31 @@ def _sha256_file(path: Path) -> str:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _frozen_backup_source_hash(root: Path) -> str | None:
+    """Return the exact A1-frozen golden-source hash after verifying the backup envelope."""
+
+    backup = root / "data" / "backups" / "golden-set-300"
+    verification_path = backup / "RESTORE_VERIFICATION.json"
+    archive_path = backup / "golden-set-300.tar.gz"
+    sums_path = backup / "SHA256SUMS"
+    try:
+        verification = json.loads(verification_path.read_text(encoding="utf-8"))
+        if verification.get("passed") is not True or verification.get("source_and_restored_hashes_match") is not True:
+            return None
+        if _sha256_file(archive_path) != verification.get("archive_sha256"):
+            return None
+        suffix = "  data/golden_traces_v2.jsonl"
+        matches = [line for line in sums_path.read_text(encoding="utf-8").splitlines() if line.endswith(suffix)]
+        if len(matches) != 1:
+            return None
+        digest = matches[0].split()[0]
+        if len(digest) != 64 or any(character not in "0123456789abcdef" for character in digest):
+            return None
+        return digest
+    except (OSError, json.JSONDecodeError):
+        return None
 
 
 def _read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -748,8 +774,14 @@ def audit_a6(output_dir: Path, golden_path: Path, *, root: Path = PROJECT_ROOT) 
     else:
         offline = json.loads(offline_path.read_text(encoding="utf-8"))
         result.offline_traces = int((offline.get("source") or {}).get("traces") or 0)
-        if (offline.get("source") or {}).get("sha256") != _sha256_file(golden_path):
-            result.add("offline source hash mismatch")
+        offline_source_hash = (offline.get("source") or {}).get("sha256")
+        if offline_source_hash == _sha256_file(golden_path):
+            result.offline_source_status = "current_source_exact"
+        elif offline_source_hash == _frozen_backup_source_hash(root):
+            result.offline_source_status = "a1_frozen_backup_verified"
+        else:
+            result.offline_source_status = "unverified"
+            result.add("offline source hash mismatch and A1 frozen backup could not verify the original source")
         if result.offline_traces != 300 or not (offline.get("replay") or {}).get("passed"):
             result.add("offline 300-trace replay did not pass")
     return result

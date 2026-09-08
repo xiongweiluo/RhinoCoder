@@ -5,12 +5,16 @@
   "privacy": {"reviewed":true,"contains_real_trace_data":false,"coordinates":"synthetic","object_ids":"synthetic","layers":"generic"},
   "events": [
     {"type":"run.started","run_id":"replay-correction","seq":1,"timestamp":"2026-08-24T00:00:00Z","payload":{"prompt":"创建并校正一个蓝色球体","closed_loop":true}},
-    {"type":"tool.completed","run_id":"replay-correction","seq":2,"timestamp":"2026-08-24T00:00:01Z","payload":{"name":"create_sphere","success":true,"duration_ms":90}},
-    {"type":"scene.checked","run_id":"replay-correction","seq":3,"timestamp":"2026-08-24T00:00:02Z","payload":{"scene_summary":{"total":1,"objects":[{"object_id":"sphere-before","name":"Sphere","type":"Surface","center":[0,0,0],"size":[40,40,40],"color":[255,255,255],"layer":"Default","groups":[]}]}}},
-    {"type":"correction.started","run_id":"replay-correction","seq":4,"timestamp":"2026-08-24T00:00:03Z","payload":{"tool":"scale_object","round":2}},
-    {"type":"tool.completed","run_id":"replay-correction","seq":5,"timestamp":"2026-08-24T00:00:04Z","payload":{"name":"scale_object","success":true,"duration_ms":110}},
-    {"type":"tool.completed","run_id":"replay-correction","seq":6,"timestamp":"2026-08-24T00:00:05Z","payload":{"name":"set_object_color","success":true,"duration_ms":65}},
-    {"type":"scene.checked","run_id":"replay-correction","seq":7,"timestamp":"2026-08-24T00:00:06Z","payload":{"scene_summary":{"total":1,"objects":[{"object_id":"sphere-after","name":"Sphere","type":"Surface","center":[0,0,0],"size":[24,24,24],"color":[0,0,255],"layer":"Default","groups":[]}]}}},
-    {"type":"run.completed","run_id":"replay-correction","seq":8,"timestamp":"2026-08-24T00:00:07Z","payload":{"status":"completed","metrics":{"duration_ms":9000,"tool_rounds":3,"tool_calls":5,"total_tokens":1100,"estimated_cost_usd":0}}}
+    {"type":"privacy.assessed","run_id":"replay-correction","seq":2,"timestamp":"2026-08-24T00:00:01Z","payload":{"decision_id":"privacy-replay-correction","risk":"low","action":"allow","reason_codes":["geometry_only"],"reasons":["合成样例仅包含几何参数"],"cloud_allowed":true,"requires_minimization":false}},
+    {"type":"route.selected","run_id":"replay-correction","seq":3,"timestamp":"2026-08-24T00:00:02Z","payload":{"selected_backend":"cloud-main","selected_model":"synthetic-demo-model","privacy_level":"low","task_difficulty":3,"tool_complexity":2,"reason":"闭环修订使用可靠主后端","degraded":false}},
+    {"type":"tool.completed","run_id":"replay-correction","seq":4,"timestamp":"2026-08-24T00:00:03Z","payload":{"name":"create_sphere","success":true,"duration_ms":90}},
+    {"type":"scene.checked","run_id":"replay-correction","seq":5,"timestamp":"2026-08-24T00:00:04Z","payload":{"scene_summary":{"total":1,"objects":[{"object_id":"sphere-before","name":"Sphere","type":"Surface","center":[0,0,0],"size":[40,40,40],"color":[255,255,255],"layer":"Default","groups":[]}]}}},
+    {"type":"assertion.checked","run_id":"replay-correction","seq":6,"timestamp":"2026-08-24T00:00:05Z","payload":{"name":"radius_and_color","success":false,"expected":"size=[24,24,24], color=[0,0,255]","actual":"size=[40,40,40], color=[255,255,255]","error":{"code":"assertion.mismatch","message":"尺寸与颜色未达到目标"}}},
+    {"type":"correction.started","run_id":"replay-correction","seq":7,"timestamp":"2026-08-24T00:00:06Z","payload":{"tool":"scale_object","round":2}},
+    {"type":"tool.completed","run_id":"replay-correction","seq":8,"timestamp":"2026-08-24T00:00:07Z","payload":{"name":"scale_object","success":true,"duration_ms":110}},
+    {"type":"tool.completed","run_id":"replay-correction","seq":9,"timestamp":"2026-08-24T00:00:08Z","payload":{"name":"set_object_color","success":true,"duration_ms":65}},
+    {"type":"scene.checked","run_id":"replay-correction","seq":10,"timestamp":"2026-08-24T00:00:09Z","payload":{"scene_summary":{"total":1,"objects":[{"object_id":"sphere-after","name":"Sphere","type":"Surface","center":[0,0,0],"size":[24,24,24],"color":[0,0,255],"layer":"Default","groups":[]}]}}},
+    {"type":"assertion.checked","run_id":"replay-correction","seq":11,"timestamp":"2026-08-24T00:00:10Z","payload":{"name":"radius_and_color","success":true,"expected":"size=[24,24,24], color=[0,0,255]","actual":"size=[24,24,24], color=[0,0,255]"}},
+    {"type":"run.completed","run_id":"replay-correction","seq":12,"timestamp":"2026-08-24T00:00:11Z","payload":{"status":"completed","metrics":{"duration_ms":9000,"tool_rounds":3,"tool_calls":5,"total_tokens":1100,"estimated_cost_usd":0,"cost_estimate_status":"synthetic"}}}
   ]
 }

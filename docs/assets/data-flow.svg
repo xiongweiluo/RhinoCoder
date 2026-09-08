@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="850" viewBox="0 0 1440 850" role="img" aria-labelledby="title desc" style="max-width:100%;height:auto">
+  <title id="title">RhinoCoder runtime and training data flow</title>
+  <desc id="desc">Runtime evidence is admitted into a private golden set only after verification and sanitization, then split before training-view extraction with holdout locked.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0a1117"/><stop offset="1" stop-color="#111921"/></linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8fc9ff"/></marker>
+    <style>
+      .title{font:700 34px Inter,system-ui,sans-serif;fill:#f3f8fa}.sub{font:400 16px Inter,system-ui,sans-serif;fill:#9fb2ba}.label{font:700 18px Inter,system-ui,sans-serif;fill:#edf6f7}.small{font:400 14px Inter,system-ui,sans-serif;fill:#9fb2ba}.tag{font:700 12px Inter,system-ui,sans-serif;fill:#8fc9ff;letter-spacing:.12em}
+      .box{fill:#15222c;stroke:#334b5c;stroke-width:2;rx:16}.private{fill:#1b2423;stroke:#47705f}.locked{fill:#2a2025;stroke:#805064}.edge{stroke:#8fc9ff;stroke-width:3;fill:none;marker-end:url(#arrow)}.boundary{fill:none;stroke:#526678;stroke-width:2;stroke-dasharray:10 9;rx:20}
+    </style>
+  </defs>
+  <rect width="1440" height="850" fill="url(#bg)"/>
+  <text x="70" y="68" class="title">Evidence flow · runtime to locked evaluation</text>
+  <text x="70" y="102" class="sub">Task-level lineage is preserved; private raw artifacts never cross the public repository boundary.</text>
+
+  <text x="70" y="157" class="tag">RUNTIME</text>
+  <rect x="70" y="184" width="218" height="110" class="box"/><text x="179" y="226" text-anchor="middle" class="label">Instruction</text><text x="179" y="256" text-anchor="middle" class="small">privacy decision + run_id</text>
+  <rect x="350" y="184" width="218" height="110" class="box"/><text x="459" y="226" text-anchor="middle" class="label">Tool execution</text><text x="459" y="256" text-anchor="middle" class="small">MCP → Rhino document</text>
+  <rect x="630" y="184" width="218" height="110" class="box"/><text x="739" y="226" text-anchor="middle" class="label">Scene evidence</text><text x="739" y="256" text-anchor="middle" class="small">summary + screenshot</text>
+  <rect x="910" y="184" width="218" height="110" class="box"/><text x="1019" y="226" text-anchor="middle" class="label">Assertions</text><text x="1019" y="256" text-anchor="middle" class="small">pass / partial / fail</text>
+  <rect x="1190" y="184" width="180" height="110" class="box"/><text x="1280" y="226" text-anchor="middle" class="label">Trace</text><text x="1280" y="256" text-anchor="middle" class="small">events + metrics</text>
+  <path d="M288 239 H342" class="edge"/><path d="M568 239 H622" class="edge"/><path d="M848 239 H902" class="edge"/><path d="M1128 239 H1182" class="edge"/>
+
+  <rect x="52" y="354" width="1336" height="212" class="boundary"/>
+  <text x="76" y="383" class="tag">PRIVATE ADMISSION BOUNDARY</text>
+  <rect x="92" y="420" width="250" height="100" class="private"/><text x="217" y="456" text-anchor="middle" class="label">Four admission gates</text><text x="217" y="483" text-anchor="middle" class="small">assertion · self-check</text><text x="217" y="505" text-anchor="middle" class="small">human approval · privacy</text>
+  <rect x="420" y="420" width="250" height="100" class="private"/><text x="545" y="456" text-anchor="middle" class="label">Golden set · 500</text><text x="545" y="483" text-anchor="middle" class="small">Trace + task + evidence</text><text x="545" y="505" text-anchor="middle" class="small">SQLite lineage</text>
+  <rect x="748" y="420" width="250" height="100" class="private"/><text x="873" y="456" text-anchor="middle" class="label">Template union</text><text x="873" y="483" text-anchor="middle" class="small">campaign + tags</text><text x="873" y="505" text-anchor="middle" class="small">numeric signature</text>
+  <rect x="1076" y="420" width="250" height="100" class="private"/><text x="1201" y="456" text-anchor="middle" class="label">Split lock</text><text x="1201" y="483" text-anchor="middle" class="small">task-level 70 / 15 / 15</text><text x="1201" y="505" text-anchor="middle" class="small">before view extraction</text>
+  <path d="M1280 294 C1280 342 217 342 217 412" class="edge"/><path d="M342 470 H412" class="edge"/><path d="M670 470 H740" class="edge"/><path d="M998 470 H1068" class="edge"/>
+
+  <text x="70" y="628" class="tag">DERIVED ARTIFACTS</text>
+  <rect x="70" y="657" width="310" height="116" class="private"/><text x="225" y="696" text-anchor="middle" class="label">Train + validation</text><text x="225" y="725" text-anchor="middle" class="small">four training views</text><text x="225" y="750" text-anchor="middle" class="small">manifest + SHA-256 + lineage</text>
+  <rect x="430" y="657" width="310" height="116" class="locked"/><text x="585" y="696" text-anchor="middle" class="label">A5 holdout · locked</text><text x="585" y="725" text-anchor="middle" class="small">never training or tuning</text><text x="585" y="750" text-anchor="middle" class="small">final locked evaluation only</text>
+  <rect x="790" y="657" width="310" height="116" class="locked"/><text x="945" y="696" text-anchor="middle" class="label">Future P2 hard set</text><text x="945" y="725" text-anchor="middle" class="small">freeze before training</text><text x="945" y="750" text-anchor="middle" class="small">no answer access while tuning</text>
+  <rect x="1150" y="657" width="220" height="116" class="box"/><text x="1260" y="696" text-anchor="middle" class="label">Public evidence</text><text x="1260" y="725" text-anchor="middle" class="small">aggregates · synthetic</text><text x="1260" y="750" text-anchor="middle" class="small">Replay · hashes</text>
+  <path d="M1201 520 C1201 608 225 592 225 649" class="edge"/><path d="M1201 520 C1201 612 585 594 585 649" class="edge"/>
+  <text x="70" y="823" class="small">Current boundary: the local backend is Mock; GPU training and A5 holdout/P2 hard-set evaluation remain gated.</text>
+</svg>

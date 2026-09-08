@@ -1,9 +1,15 @@
 {
   "schema_version": "1.0",
   "release": {
-    "version": "0.2.0",
-    "status": "stable_prototype",
-    "date": "2026-08-27"
+    "version": "0.3.0",
+    "status": "released",
+    "date": "2026-09-08",
+    "external_release": {
+      "git_tag": true,
+      "github_release": true,
+      "release_url": "https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0",
+      "authorization": "Project owner authorized P0 release closure on 2026-09-08"
+    }
   },
   "interfaces": {
     "prompt": "closed-loop-v1",
@@ -34,7 +40,21 @@
     },
     "ui": {
       "path": "agent/ui/package-lock.json",
-      "sha256": "ae3ebc263e176c48e37a57afbec78f9291291a8558057b2fc6b8ac3d31c69047"
+      "sha256": "a84d9325bd2c7ae6ceaa5586fe176783e32f34a9736a2868776c43b2e796ad13"
+    }
+  },
+  "portfolio_evidence": {
+    "golden_traces": 500,
+    "golden_tags": 46,
+    "a7_new_tasks": 200,
+    "a7_coverage_gaps_met": 8,
+    "a6_real_rhino_runs_passed": 270,
+    "a6_real_rhino_runs_total": 270,
+    "privacy_sensitive_findings": 0,
+    "sources": {
+      "golden_and_coverage": "docs/a7-500-marginal-value.md",
+      "three_way_baseline": "docs/a6-no-finetune-baseline.md",
+      "privacy": "docs/privacy-red-team-report.md"
     }
   },
   "ci_actions": {

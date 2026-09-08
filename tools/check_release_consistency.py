@@ -14,6 +14,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from agent.version import PROMPT_VERSION, TOOL_SCHEMA_VERSION, TRACE_SCHEMA_VERSION, __version__
+from tools.check_demo_assets import check_demo_assets
 
 MANIFEST = ROOT / "docs" / "version-manifest.json"
 MARKDOWN_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
@@ -25,7 +26,12 @@ def _sha256(path: Path) -> str:
 
 def _local_markdown_findings() -> list[str]:
     findings: list[str] = []
-    files = [ROOT / "README.md", *sorted((ROOT / "docs").glob("*.md"))]
+    files = [
+        ROOT / "README.md",
+        ROOT / "README.en.md",
+        ROOT / "PROJECT_OPTIMIZATION_PLAN.md",
+        *sorted((ROOT / "docs").rglob("*.md")),
+    ]
     for source in files:
         text = source.read_text(encoding="utf-8")
         for target in MARKDOWN_LINK_RE.findall(text):
@@ -51,7 +57,6 @@ def check_release_consistency(root: Path = ROOT) -> list[str]:
     interfaces = manifest.get("interfaces") or {}
     expected = {
         "release.version": (release.get("version"), __version__),
-        "release.status": (release.get("status"), "stable_prototype"),
         "interfaces.prompt": (interfaces.get("prompt"), PROMPT_VERSION),
         "interfaces.tool_schema": (interfaces.get("tool_schema"), TOOL_SCHEMA_VERSION),
         "interfaces.trace_schema": (interfaces.get("trace_schema"), TRACE_SCHEMA_VERSION),
@@ -62,6 +67,19 @@ def check_release_consistency(root: Path = ROOT) -> list[str]:
     for label, (actual, wanted) in expected.items():
         if actual != wanted:
             findings.append(f"{label}: {actual!r} != {wanted!r}")
+
+    status = release.get("status")
+    if status not in {"stable_prototype", "release_candidate", "released"}:
+        findings.append(f"release.status: unsupported value {status!r}")
+    external = release.get("external_release") or {}
+    if status == "release_candidate" and (
+        external.get("git_tag") is not False or external.get("github_release") is not False
+    ):
+        findings.append("release_candidate must record git_tag=false and github_release=false")
+    if status == "released" and (
+        external.get("git_tag") is not True or external.get("github_release") is not True
+    ):
+        findings.append("released status requires git_tag=true and github_release=true")
 
     for label, lock in (manifest.get("dependency_locks") or {}).items():
         path = root / str(lock.get("path", ""))
@@ -92,14 +110,62 @@ def check_release_consistency(root: Path = ROOT) -> list[str]:
             findings.append(f"architecture.md 缺少版本声明: {label} {value}")
 
     readme = (root / "README.md").read_text(encoding="utf-8")
-    if f"当前稳定原型版本：`{__version__}`" not in readme:
-        findings.append("README 未声明当前稳定原型版本")
+    readme_en = (root / "README.en.md").read_text(encoding="utf-8")
+    if status == "released":
+        if f"当前正式版本：[`v{__version__}`]" not in readme:
+            findings.append("README 未声明当前正式版本")
+        if f"Current release: [`v{__version__}`]" not in readme_en:
+            findings.append("README.en 未声明当前正式版本")
+    else:
+        if f"当前候选版本：`{__version__}`" not in readme:
+            findings.append("README 未声明当前候选版本")
+        if f"Current candidate version: `{__version__}`" not in readme_en:
+            findings.append("README.en 未声明当前候选版本")
+    for phrase in ("500/500", "46 个标签", "270/270", "local-mock"):
+        if phrase not in readme:
+            findings.append(f"README 缺少公开口径: {phrase}")
+    for phrase in ("500/500", "46 tags", "270/270", "local-mock"):
+        if phrase not in readme_en:
+            findings.append(f"README.en 缺少公开口径: {phrase}")
     changelog = (root / "CHANGELOG.md").read_text(encoding="utf-8")
     if f"## [{__version__}]" not in changelog:
         findings.append("CHANGELOG 缺少当前正式版本条目")
     checklist = (root / "docs" / "release-checklist.md").read_text(encoding="utf-8")
-    if "- [ ]" in checklist:
-        findings.append("release-checklist 仍有未完成项目")
+    incomplete_local = [
+        line for line in checklist.splitlines()
+        if line.startswith("- [ ]") and "[外部门禁]" not in line
+    ]
+    if incomplete_local:
+        findings.append(f"release-checklist 仍有 {len(incomplete_local)} 个本地未完成项目")
+    if status == "release_candidate" and "- [ ] [外部门禁]" not in checklist:
+        findings.append("release-checklist 未显式记录外部发布门禁")
+    if status == "released" and "当前状态：**Released**" not in checklist:
+        findings.append("release-checklist 未记录正式发布状态")
+
+    check_script = (root / "scripts" / "check.sh").read_text(encoding="utf-8")
+    if "build_training_dataset.py build" in check_script:
+        findings.append("check.sh 不得在常规发布检查中重建冻结的 A5 数据")
+    if "run_training.py audit" not in check_script:
+        findings.append("check.sh 缺少冻结训练产物审计")
+
+    evidence = manifest.get("portfolio_evidence") or {}
+    expected_evidence = {
+        "golden_traces": 500,
+        "golden_tags": 46,
+        "a7_new_tasks": 200,
+        "a7_coverage_gaps_met": 8,
+        "a6_real_rhino_runs_passed": 270,
+        "a6_real_rhino_runs_total": 270,
+        "privacy_sensitive_findings": 0,
+    }
+    for label, wanted in expected_evidence.items():
+        if evidence.get(label) != wanted:
+            findings.append(f"portfolio_evidence.{label}: {evidence.get(label)!r} != {wanted!r}")
+    for source in (evidence.get("sources") or {}).values():
+        if not (root / str(source)).is_file():
+            findings.append(f"portfolio evidence source missing: {source}")
+
+    findings.extend(check_demo_assets(root))
 
     if root == ROOT:
         findings.extend(_local_markdown_findings())

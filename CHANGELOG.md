@@ -1,8 +1,14 @@
 # Changelog
 
-本项目遵循语义化版本。尚未通过真实 Rhino 基准的内容保留在 Unreleased，不以离线测试代替发布验收。
+本项目遵循语义化版本。尚未通过真实 Rhino 基准的内容保留在 Unreleased，不以离线测试代替发布验收。应用版本可以先进入本地 `release_candidate`；Git Tag 与 GitHub Release 只有在项目所有者明确授权后创建。
 
 ## [Unreleased]
+
+- 暂无。
+
+## [0.3.0] - 2026-09-08
+
+> 已作为 `v0.3.0` Git Tag 与 GitHub Release 正式发布；真实 Rhino 视频按项目所有者决定延期，合成 Replay GIF、脚本与字幕随版本提供。
 
 ### Added
 
@@ -21,6 +27,11 @@
 - SQLite 审计内容的幂等重脱敏命令，并区分系统血缘 UUID 与 Rhino 对象 GUID，避免路由主键被脱敏折叠。
 - B1–B4 单实验 LoRA 就绪管线：锁定 Qwen2.5-Coder-7B-Instruct revision、A5 指令到工具视图、QLoRA 超参数与依赖，提供 GPU 训练、断点恢复、自动评测、JSONL 日志、模型登记和报告入口。
 - 网络隔离 CPU adapter 冒烟与学校 Slurm/CUDA/GPU/存储/网络/密钥/备份接入模板；未知现场参数由严格 preflight 拒绝，不以占位值冒充验收。
+- A7 覆盖缺口扩展：新增 200 条任务，黄金集达到 500/500 与 46 个标签，8 类缺口全部达到计划量，并在 500 条暂停默认扩张。
+- 招聘者优先的中英文 README、公开指标证据索引、可浏览架构图与数据流图，以及真实 Rhino / 无 Rhino Replay 双 Quickstart。
+- 2:35 双语演示镜头表、双语字幕、录制与逐帧隐私检查说明，以及由合成 Replay 自动生成并用 SHA-256 锁定的 9 帧 GIF。
+- 一页中英文简历项目描述、30 秒面试开场与技术深挖提纲。
+- `start-replay.sh` 无 Rhino 入口、`release-verify.sh` 本地发布验证和演示资产一致性检查。
 
 ### Validated
 
@@ -30,6 +41,18 @@
 - A5 真实 300 条黄金 Trace 导出 995 条训练样本；210/45/45 精确分区，119 个模板组和数字变体无跨区，重复、超长丢弃、血缘失败与敏感发现均为 0，连续构建 manifest 哈希一致。
 - A6 主模型、低成本模型和规则路由各完成固定 30 题三次重复，共 270/270 次真实 Rhino 运行通过；300/300 条黄金数据离线回放通过，契约、血缘和指标审计 0 发现。
 - B1–B4 配置和 210/45 训练/验证数据哈希审计通过；CPU 两步 adapter-only 冒烟完成 checkpoint 保存、恢复和验证，holdout 读取为 0，状态为 `Training Ready — Waiting for School GPU Access`。
+- A7 达到 500/500，覆盖 46 个标签；200 个新增任务完成 20 个原子审核批次，路由偏差、证据缺失、准入异常和敏感发现均为 0。
+- `v0.3.0` README、双语入口、图表、Replay GIF、版本清单和发布脚本通过一致性与敏感扫描，并完成 Git Tag、GitHub Release 与公开链接验证；真实演示视频延期。
+
+### Changed
+
+- README 从工程清单重构为招聘者 30 秒可读首页，并把饱和基准、Local Mock、GPU 与 holdout 边界放在公开指标旁。
+- 应用与 UI 版本提升为 `0.3.0`；Prompt、工具 Schema 与 Trace Schema 保持 `closed-loop-v1` / `1.0` / `1.0`，因为接口契约未改变。
+
+### Security
+
+- 演示 GIF 只接受显式声明为合成且完成隐私复核的 Replay；生成源、两张 SVG 与 GIF 均由独立 manifest 锁定。
+- 视频录制流程禁止真实用户身份、项目文件、密钥、环境变量与完整本地 Trace 入镜；上传前要求项目所有者逐帧复核。
 
 ## [0.2.0] - 2026-08-27
 

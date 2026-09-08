@@ -1,311 +1,217 @@
 # RhinoCoder
 
-RhinoCoder 是一个基于 MCP 的 Rhino 8 空间设计 Agent。系统把自然语言任务转换为可审计的工具调用，并通过场景感知和程序化断言验证真实几何结果。
+> **让 AI 不只“写 Rhino 脚本”，而是执行、观察、验证并在失败后恢复。**
 
-当前稳定原型版本：`0.2.0`。Prompt、工具 Schema、Trace Schema、运行时和依赖锁定信息见 [版本清单](docs/version-manifest.json)。
+[English](README.en.md) · [无 Rhino 的 5 分钟 Replay](#quickstart-a无需-rhino) · [真实 Rhino Quickstart](#quickstart-b真实-rhino-8) · [证据索引](docs/portfolio-evidence.md) · [架构](docs/architecture.md)
 
-## 当前状态
+RhinoCoder 是一个面向 Rhino 8 的可验证空间设计 Agent。它把自然语言任务转成 23 个版本化 MCP 工具调用，在 Rhino 主线程执行几何操作，再通过 `get_scene_summary` 和程序化断言读取并核对真实场景。每次运行的隐私判断、模型路由、工具调用、纠错、成本和证据都由同一 `run_id` 关联，可停止、重试、Undo、精准回滚，也可在没有 Rhino 和模型密钥时重放脱敏合成 Replay。
 
-### 已实现
+**English in one paragraph.** RhinoCoder is a verifiable, recoverable, privacy-aware spatial agent for Rhino 8. It executes natural-language tasks through 23 versioned MCP tools, reads the resulting scene back, checks geometry with programmatic assertions, and links privacy, routing, tools, corrections, cost, and evidence under one auditable `run_id`. Reviewers without Rhino can run sanitized synthetic Replay locally; see the [English README](README.en.md).
 
-- Python Agent、FastMCP Server 与 Rhino HTTP Listener 端到端链路。
-- 23 项几何、变换、属性与感知工具。
-- `get_scene_summary` 场景闭环感知。
-- 数量、属性和空间关系断言，以及 Partial Pass 评分。
-- 30 条分级评测任务和半自动轨迹采集器。
-- 精准删除、评测环境重置与基础错误接管。
-- 结构化 `AgentRunResult`、统一事件流与任务级 Trace。
-- Baseline / Closed-loop 多轮对照评测与 JSON/Markdown 报告生成。
-- 30 题、两种模式、各重复 3 次的真实基准已完成，Pass@1 均为 100%。
-- DeepSeek 缓存命中、未命中与输出 token 的版本化成本核算。
-- React + TypeScript WebSocket 交互面板与三份脱敏 Replay。
-- 停止、重试、Undo、精准回滚和三类用户反馈。
-- 用户反馈、敏感字段脱敏和黄金样本准入规则。
-- 版本化 SQLite 审计数据库、幂等黄金数据导入、实时运行镜像、血缘查询、聚合导出和自动隐私审计。
-- 规则优先混合路由：可靠主云模型、低成本云模型与本地 Mock 后端，包含有限安全降级、SQLite 血缘及 UI 可视化。
-- 隐私红队与不可绕过的请求安全门：高风险强制本地、凭证/窃取请求提前阻断、云端字段最小化及 Trace/日志/SQLite/Replay/模型请求统一审计。
-- 可复现训练数据管线：四类训练视图、模板/数字变体防泄漏 70/15/15 分区、holdout 锁定、完整血缘和隐私审计。
-- A6 无微调三路对照基线：主模型、低成本模型与规则路由各完成 30 题 × 3 次真实 Rhino 运行，270/270 通过；300 条黄金数据离线回放通过，质量、延迟、token、成本、路由和隐私指标统一冻结。
-- B1–B4 训练就绪：锁定 Qwen2.5-Coder-7B-Instruct、`instruction_to_tool_call` 视图和唯一 QLoRA 配置，训练/恢复/自动评测/模型登记/报告及学校 GPU 接入门禁已完成；当前状态为 `Training Ready — Waiting for School GPU Access`。
-- 第三阶段真实黄金数据采集已完成：300/300 条黄金轨迹、40 个标签，首次通过率 77%、最终通过率 100%；稳定原型版本仍为 `0.2.0`，本地质量报告与真实证据均保持 Git 忽略。
-- 三个核心场景已在真实 Rhino 环境中各连续运行 3 次成功，详见 [UI 真实环境验收报告](docs/ui-acceptance-report.md)。
-- WebSocket 快照恢复、Rhino Listener 热重启和四类故障恢复已完成真实验收，详见 [断线与故障恢复验收报告](docs/recovery-acceptance-report.md)。
-- 停止、重试、Undo、任务级精准回滚和三类反馈已完成真实演练，详见 [交互控制真实环境验收报告](docs/interaction-control-acceptance-report.md)。
+![RhinoCoder synthetic self-correction Replay](docs/assets/replay-demo.gif)
 
-### 后续规划
+## 30 秒看懂结果
 
-- 真实本地推理后端与多模型对照评测。
-- 获得学校 GPU 权限后执行小规模 LoRA 与多模型对照实验。
-- Windows 验证、原生插件与多用户部署。
+| 已验证结果 | 口径与证据 |
+|---|---|
+| **500/500 黄金 Trace，46 个标签** | 断言、场景自检、人工确认、脱敏四道准入；[A7 报告](docs/a7-500-marginal-value.md) |
+| **8/8 覆盖缺口达到计划量** | A7 新增 200 条：布尔替代恢复与多轮修订各 40，其余 6 类各 20；[A7 报告](docs/a7-500-marginal-value.md) |
+| **270/270 固定真实 Rhino 运行通过** | 30 题 × 3 次 × 主模型/低成本模型/规则路由；该固定集已饱和，不能外推为开放世界效果；[A6 报告](docs/a6-no-finetune-baseline.md) |
+| **隐私审计 0 敏感发现** | 12 条红队、1,609 条 Trace、7,016 行 SQLite、3 份 Replay 及模拟日志/请求面；[A4 报告](docs/privacy-red-team-report.md) |
+| **A1–A7、B1–B4 已验收** | 数据、审计、路由、隐私、训练管线和 CPU 冒烟完成；GPU 正式训练未执行；[路线图](PROJECT_OPTIMIZATION_PLAN.md) |
 
-完整路线见 [PROJECT_OPTIMIZATION_PLAN.md](PROJECT_OPTIMIZATION_PLAN.md)。
+当前正式版本：[`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0)。版本、文档、Replay、GIF、发布脚本和验证证据已随 Git Tag 与 GitHub Release 发布；真实 Rhino 视频按项目所有者决定延期，不影响 Replay 与证据复核。
 
-## 架构
+> **诚实边界：** `local-mock` 只是确定性的本地接口与安全替身，证明统一后端、隐私强制路由和禁止云端降级；它不是能完成 Rhino 建模的真实本地模型。当前没有学校 GPU 验收或 LoRA 效果结论，A5 holdout 也未用于训练或调参。
 
-```text
-User / UI
-   | WebSocket events
-RhinoCoder Agent -- Rule Router -- Main / Economy / Local Mock
-   | MCP stdio
-FastMCP Server
-   | localhost HTTP
-Rhino Listener -- Rhino main thread -- Rhino document
-   |
-Scene Summary -> Eval assertions -> Trace / feedback
-```
+## 为什么这个项目不是普通 “LLM + 工具” Demo
 
-## 安装
+- **完成必须有几何证据**：模型说“完成”不算完成；系统重新读取 Rhino 场景，并核对数量、尺寸、颜色和空间关系。
+- **隐私门先于模型和 MCP**：Critical 请求提前阻断，High 强制本地且禁止云 fallback，Medium 先最小化再出站；关闭普通路由也不能绕过。
+- **恢复不会重复造物体**：变更工具携带幂等键，模型降级发生在规划边界，不重放已完成工具；支持取消、重试、Undo 与任务级精准回滚。
+- **指标能回到一次运行**：统一事件信封、Trace 与 SQLite 血缘让路由、工具、断言、成本和反馈都能按 `run_id` 复核。
+- **评测边界写在结果旁边**：公开饱和基准、失败与成本，不把 Mock、本地训练准备或 30 题 100% 包装成真实本地模型/开放世界能力。
 
-前置要求：
+## Quickstart A：无需 Rhino
 
-- macOS 14 或更高版本。
-- Rhino 8。
-- Python 3.11–3.13；不要使用版本低于 3.11 的 macOS 系统 Python。
-- Node.js `^20.19.0` 或 `>=22.12.0`。
+目标：在干净 macOS 环境启动本地 UI，并查看“指令 → 隐私 → 路由 → 工具 → 场景 → 断言 → 指标”的合成 Replay。无需 Rhino、模型密钥或 `.env` 中的真实配置。
 
-推荐使用一键安装。脚本会创建项目 `.venv`、安装 `requirements-lock.txt` 中的固定 Python 依赖、执行 `npm ci` 并构建前端：
+前置：Python 3.11–3.13；Node.js `^20.19.0` 或 `>=22.12.0`。
 
 ```bash
+git clone https://github.com/xiongweiluo/RhinoCoder.git
+cd RhinoCoder
+RHINOCODER_PYTHON=python3 ./scripts/bootstrap.sh
+./scripts/start-replay.sh
+```
+
+打开 `http://127.0.0.1:7860`，在 **Recovery & Feedback → 加载 Replay…** 选择：
+
+- `basic_stack.json`：正常闭环，包含隐私判断、路由、工具、场景与通过断言。
+- `self_correction.json`：首次断言失败后缩放/改色，二次场景检查与断言通过。
+- `table_group.json`：桌面与桌腿分组场景。
+
+预期：顶部为 `Connected`；事件序号从 1 严格递增；最终状态为 `completed`；Scene Summary 显示合成对象。Replay 不调用模型、不连接 Rhino、不修改场景。自动 clean-room 验证入口：
+
+```bash
+python tools/verify_clean_install.py
+```
+
+## Quickstart B：真实 Rhino 8
+
+前置：macOS 14+、Rhino 8、Python 3.11–3.13、受支持 Node.js，以及 DeepSeek 兼容模型配置。请在**空白、可丢弃**的 Rhino 文档中首次运行。
+
+### 1. 安装并配置
+
+```bash
+git clone https://github.com/xiongweiluo/RhinoCoder.git
+cd RhinoCoder
 RHINOCODER_PYTHON=python3 ./scripts/bootstrap.sh
 ```
 
-如果 `python3 --version` 低于 3.11，请把 `RHINOCODER_PYTHON` 改成新解释器的完整路径。安装完成后填写 `.env` 中的模型配置，不要提交真实密钥。
+编辑本地 `.env` 中的模型占位符；不要提交密钥。安装脚本会创建 `.venv`、安装 `requirements-lock.txt`、执行 `npm ci` 并构建前端。
 
-手动等价步骤：
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements-lock.txt
-npm ci --prefix agent/ui
-npm run build --prefix agent/ui
-cp .env.example .env
-```
-
-在 Rhino Script Editor 中启动 Listener：
+### 2. 在 Rhino Script Editor 启动 Listener
 
 ```text
 _-ScriptEditor _Run "/absolute/path/to/RhinoCoder/plugin/start_rhinocoder_listener.py"
 ```
 
-该命令使用 Rhino 8 的新脚本基础设施，并支持在 Listener 已运行时安全热重载。也可以在 Script Editor 中直接打开并运行该文件。旧的 `RunPythonScript` 命令可能调用不兼容的旧 Python 引擎，不应用于此入口。
+该入口使用 Rhino 8 新脚本基础设施并支持安全热重载；不要使用可能调用旧 Python 引擎的 `RunPythonScript`。
 
-底层等价导入方式：
-
-```python
-import sys
-sys.path.insert(0, "/absolute/path/to/RhinoCoder/plugin")
-from rhino_listener import listener_main
-listener_main.start_listener()
-```
-
-执行任务：
+### 3. 健康检查与只读首任务
 
 ```bash
-python agent/main.py --prompt "在原点创建一个半径为 10 的球体"
+.venv/bin/python tools/doctor.py
+.venv/bin/python agent/main.py --prompt "读取当前 Rhino 场景摘要并报告对象数量；不要创建、删除、移动或修改任何对象。"
 ```
 
-启动交互 UI：
+预期：`Rhino Listener` 健康；Agent 完成只读场景摘要，不创建对象。然后启动 UI：
 
 ```bash
 ./scripts/start.sh
 ```
 
-然后打开 `http://127.0.0.1:7860`。离线时可从界面加载三份脱敏 Replay。
+在 `http://127.0.0.1:7860` 运行固定演示输入：
 
-首次安装建议先运行只读任务，确认 LLM、MCP 与 Rhino 链路，不改变当前场景：
-
-```bash
-.venv/bin/python agent/main.py --prompt "读取当前 Rhino 场景摘要并报告对象数量；不要创建、删除、移动或修改任何对象。"
+```text
+在原点创建一个 20x20x2 的基座，再在顶面居中放一个半径 8 的红色球体。
 ```
 
-## 评测与验证
-
-仅校验30条任务格式，不连接 Rhino 或模型：
-
-```bash
-python eval/run_eval.py --dry-run
-```
-
-运行本地自动检查：
-
-```bash
-python -m compileall -q agent data_pipeline eval plugin tools
-python -m pytest -q
-python tools/check_secrets.py
-```
-
-等价的一键检查：
-
-```bash
-./scripts/check.sh
-```
-
-在临时目录重建公开工作区、虚拟环境和前端，并运行 Replay 首任务；`--local-rhino` 会额外通过 localhost MCP 执行只读 Rhino 首任务，不会把场景数据发送给外部模型：
+预期：Rhino 视口出现两个对象；UI 显示隐私/路由决定、工具 Trace、Scene Summary、指标与完成态。可用 `--local-rhino` 在临时公开工作区验证安装和本地只读 MCP 链路：
 
 ```bash
 python tools/verify_clean_install.py --local-rhino
 ```
 
-该脚本不复制 `.env`、`.git`、本地 Trace 或现有虚拟环境；只读 Rhino 检查不打印或保存场景内容，临时工作区在验收后删除。
+## 代表性链路
 
-真实端到端评测需要 Rhino Listener、有效模型配置以及 `.env` 中的 `RHINOCODER_EVAL_TOKEN`。配置或更换令牌后必须在 Rhino 中重新启动 Listener；可通过 `python tools/doctor.py` 确认 `Rhino eval reset` 已启用。
+`self_correction.json` 提供一条可公开、可复核的合成失败恢复链：
 
-完整 Baseline / Closed-loop 对照：
+```text
+instruction
+  → privacy.assessed: low / allow
+  → route.selected: cloud-main / no fallback
+  → create_sphere
+  → scene.checked
+  → assertion.checked: mismatch
+  → correction.started
+  → scale_object + set_object_color
+  → scene.checked
+  → assertion.checked: pass
+  → run.completed: metrics
+```
+
+它与真实运行消费同一种 `AgentEvent` 信封，但坐标、对象 ID、图层和模型名均为合成值。[打开 Replay JSON](eval/replays/self_correction.json) · [查看指标与限制的证据映射](docs/portfolio-evidence.md)。
+
+## 架构与数据边界
+
+[直接打开架构 SVG](docs/assets/architecture.svg) · [直接打开数据流 SVG](docs/assets/data-flow.svg) · [详细架构说明](docs/architecture.md)
+
+![RhinoCoder runtime architecture](docs/assets/architecture.svg)
+
+![RhinoCoder runtime and training data flow](docs/assets/data-flow.svg)
+
+运行时主链：
+
+```text
+React UI / CLI
+  → local privacy gate
+  → rule-first router → cloud-main / cloud-economy / local-mock
+  → agent loop ↔ FastMCP server
+  → localhost HTTP Listener → Rhino main thread
+  → scene summary → assertions → Trace / SQLite / feedback
+```
+
+训练数据在任务层先做模板与数字变体合并，再执行 70/15/15 分区与 split lock，之后才提取四类训练视图。A5 holdout 和未来 P2 困难集只用于最终锁定评测，不进入训练或反复调参。完整真实 Trace、SQLite、截图与用户反馈默认受 Git 忽略；公开仓库只保留脱敏报告、合成 Replay 与哈希。
+
+## 评测、审计与发布验证
+
+常规本地检查：
+
+```bash
+./scripts/check.sh
+```
+
+它覆盖 Python 编译、测试、30 题格式、采集清单、密钥扫描、Trace/Replay/隐私审计、训练静态门禁、版本一致性和前端构建。`v0.3.0` 本地发布验收还包含 `git diff --check`、演示资产哈希与 clean-room Replay：
+
+```bash
+./scripts/release-verify.sh
+# Rhino Listener 已启动时可追加：
+./scripts/release-verify.sh --local-rhino
+```
+
+该脚本不会 commit、Tag、push 或创建 GitHub Release。发布状态见 [v0.3.0 发布清单](docs/release-checklist.md)；验收结果见 [v0.3.0 发布验证报告](docs/v0.3.0-release-verification.md)。
+
+单项复现：
+
+```bash
+python eval/run_eval.py --dry-run
+python tools/check_release_consistency.py
+python tools/audit_release_data.py
+python tools/check_demo_assets.py
+python tools/privacy_audit.py
+python tools/audit_a7_expansion.py
+```
+
+真实 Baseline / Closed-loop 基准需要 Rhino Listener、有效模型配置和本地 `RHINOCODER_EVAL_TOKEN`：
 
 ```bash
 ./scripts/benchmark.sh
 ```
 
-最近一次脱敏汇总见 [30 题基准报告](docs/benchmark-report.md)。完整 JSON、工具轨迹和场景快照仅保留在本地。
+不要仅为发布重复消耗已验收的 A/B 阶段或读取 holdout。
 
-DeepSeek 官方模型会按版本化的缓存命中、缓存未命中和输出单价自动估算成本；历史结果可在不重新调用 Rhino 或 LLM 的情况下重算：
+## 演示与求职材料
 
-```bash
-python tools/recalculate_benchmark_cost.py eval/results/<benchmark>.json
-```
+- [2:35 镜头表、双语旁白、录制命令与逐帧隐私检查](docs/demo/README.md)
+- [中文字幕](docs/demo/rhinocoder-demo.zh-CN.srt) · [英文字幕](docs/demo/rhinocoder-demo.en.srt)
+- [自动化合成 Replay GIF](docs/assets/replay-demo.gif) · [资产哈希清单](docs/demo/demo-assets-manifest.json)
+- [一页中英文简历项目描述与面试深挖提纲](docs/career-one-pager.md)
 
-A6 三路无微调基线使用冻结的 30 题契约、三次重复和可恢复检查点。完整真实结果保存在本地 Git 忽略目录，仓库只提交脱敏汇总：
-
-```bash
-python tools/run_a6_baseline.py prepare
-python tools/run_a6_baseline.py offline
-python tools/run_a6_baseline.py run
-python tools/run_a6_baseline.py sync-audit
-python tools/run_a6_baseline.py audit
-python tools/run_a6_baseline.py report
-```
-
-审计会拒绝任务集或路由配置漂移、重复/缺失矩阵槽位、缺失 token/计价时段、错误血缘以及不完整的 300 条离线回放。当前冻结结论见 [A6 无微调三路对照基线报告](docs/a6-no-finetune-baseline.md)。
-
-审计本地黄金数据准入、Partial/Fail 分流和公开报告/Replay 脱敏：
-
-```bash
-python tools/audit_trace_data.py
-python tools/audit_release_data.py
-python tools/privacy_audit.py
-```
-
-新黄金数据只写入 `data/golden_traces_v2.jsonl`。旧的根目录 `golden_dataset.jsonl` 缺少当前准入元数据，只作为本地 legacy 数据保留，不会进入新 SFT 正样本。完整验收证据见 [数据与脱敏验收报告](docs/data-sanitization-acceptance-report.md)。
-
-## 真实黄金数据采集
-
-无需 GPU 即可在单台 Mac 上采集真实黄金轨迹。第一阶段 30/30、第二阶段 100/100 和第三阶段 300/300 均已完成。完整清单包含 300 条唯一指令和 40 个标签，难度分布为 L1=3、L2=6、L3=21、L4=149、L5=121，并覆盖旋转、移动、分布、对齐、Undo、布尔、感知、错误恢复和复杂空间关系等任务。第三阶段新增 200 条任务共经历 269 次运行，首次通过 154/200（77%），重试后最终通过 200/200（100%）。
-
-先校验清单和查看进度：
-
-```bash
-python agent/data_collector.py --manifest eval/collection/phase3_300.json --dry-run
-python agent/data_collector.py --manifest eval/collection/phase3_300.json --status
-```
-
-在 Rhino 中打开空白、可丢弃的专用文档后，每次先采一条：
-
-```bash
-python agent/data_collector.py --allow-reset --limit 1
-```
-
-采集器不会默认清空非空场景。每条轨迹仍必须通过程序断言、场景自检、人工确认、脱敏审计和 campaign 任务去重才能进入黄金集。完整操作与人工验收标准见[真实黄金轨迹采集指南](docs/golden-data-collection.md)。
-
-第二、第三阶段采用每 10 条一次的批量流程：每条轨迹经程序化断言、至少一次 `get_scene_summary`、Rhino 视口截图与 AI 初审后，再由人类输入精确的 `APPROVE` 原子晋级。AI 审核不会冒充人工确认。第三阶段采集进度与质量报告生成在 `data/collection_reports/phase3-300-progress.{md,json}` 和 `phase3-300-quality.{md,json}`；它们连同真实轨迹、截图与反馈都只保留在本地并被 Git 忽略。
-
-完成 300 条采集后，可创建包含黄金记录、完整 Trace、截图证据、反馈、审核血缘、质量报告和 campaign manifest 的本地冻结备份：
-
-```bash
-python tools/freeze_golden_set.py
-```
-
-命令会在 `data/backups/golden-set-300/` 生成 SHA-256 清单、归档文件和恢复演练报告。输出继续受 Git 忽略；工具会拒绝把 `.env`、项目外文件、符号链接或检测到的 API 密钥写入备份。再次生成必须显式传入 `--overwrite`。完整结果见[黄金数据冻结与恢复报告](docs/golden-set-300-freeze-report.md)。
-
-## SQLite 审计数据库
-
-CLI、UI 或数据采集器完成运行以及保存 Trace、反馈时，会同步写入本地 `data/audit/rhinocoder.sqlite3`。数据库使用版本化迁移、外键、WAL 和幂等主键，文件默认受 Git 忽略。
-
-首次导入 300 条黄金数据：
-
-```bash
-python tools/audit_db.py import-golden
-```
-
-审计数据库、导出汇总和查询单次运行血缘：
-
-```bash
-python tools/audit_db.py audit
-python tools/audit_db.py summary --output data/audit/summary.json
-python tools/audit_db.py lineage <run_id> --output data/audit/lineage.json
-```
-
-可用 `RHINOCODER_AUDIT_DB` 指定数据库位置，或用 `RHINOCODER_AUDIT_ENABLED=0` 关闭运行时镜像写入。所有结构化内容在入库前经过统一脱敏，审计会检查 SQLite 完整性、外键、敏感字段和黄金样本血缘。Schema、表说明和真实 300 条导入结果见 [SQLite 审计数据库与 A2 验收报告](docs/sqlite-audit-database.md)。
-
-## 规则优先混合路由
-
-默认路由会先在本地按隐私级别、任务难度、工具复杂度、成本和延迟预算选择后端，不额外调用分类模型。简单低风险任务选择 `cloud-economy`，复杂任务选择 `cloud-main`，检测到高隐私信号时只使用 `local-mock` 且禁止回退云端。Mock 只做安全接口演练，不会执行建模或把任务谎报为成功。
-
-```bash
-# 仅预览决策；不会调用 Rhino 或模型
-python tools/route_preview.py "创建参数化立面，然后阵列并执行布尔差集"
-
-# 固定主模型或完全关闭混合路由
-RHINOCODER_ROUTE_MODE=main python agent/main.py --prompt "创建一个方块"
-RHINOCODER_ROUTER_ENABLED=0 python agent/main.py --prompt "创建一个方块"
-```
-
-关闭混合路由只会固定普通请求的主模型选择，不会关闭隐私门禁；高隐私请求依然强制本地，Critical 请求依然在 MCP 和模型初始化前阻断。
-
-瞬时超时、连接错误、HTTP 429、5xx 或明确的模型不可用错误最多触发一次云端后端降级。切换发生在模型规划请求边界，继续使用原消息和已完成工具结果，不会重放 Rhino 工具调用。路由选择、理由和降级结果会进入事件流、UI 与 SQLite。完整规则、配置和验收证据见 [规则优先混合路由与 A3 验收报告](docs/hybrid-routing.md)。
-
-## 隐私红队与云端最小化
-
-每个请求先在本地分类：凭证、Prompt 注入和数据窃取意图会直接阻断；客户/项目身份、本机路径、图层、群组和明确仅本地要求会强制进入本地后端且禁止云端降级；邮箱等中风险标识会在出站前替换。云模型边界还会丢弃非白名单消息字段、二次扫描消息和工具定义，并将实际尝试发送的最小化请求写入权限为 `0600` 的本地审计台账。
-
-可重复执行完整红队与存储面审计：
-
-```bash
-python tools/privacy_audit.py
-python tools/privacy_audit.py --json
-python tools/privacy_audit.py --write-report docs/privacy-red-team-report.md
-```
-
-可用 `RHINOCODER_MODEL_REQUEST_AUDIT_ENABLED=0` 关闭请求台账，或用 `RHINOCODER_MODEL_REQUEST_AUDIT` 修改路径；隐私分类、阻断、强制本地和出站二次扫描不会随台账关闭。红队类别、覆盖数量与零泄漏结论见 [A4 隐私红队与零泄漏验收报告](docs/privacy-red-team-report.md)。
-
-## 训练数据管线
-
-本地 300 条黄金 Trace 可确定性导出四类 JSONL 视图：指令到首次工具调用、完整轨迹、工具错误到纠正，以及场景摘要到下一步。管线移除 system Prompt、`reasoning_content`、延迟和临时调用 ID，统一校验工具参数 JSON，并继续复用 A4 隐私最小化和敏感扫描。
-
-```bash
-python tools/build_training_dataset.py build
-python tools/build_training_dataset.py audit
-python tools/build_training_dataset.py report --output docs/training-data-pipeline.md
-```
-
-输出位于本地 `data/training/a5/`，继续受 Git 忽略。300 个源任务先按 campaign/标签模板族和数字归一化签名合并为不可拆分组，再以固定种子精确分为 210 个 train、45 个 validation 和 45 个 holdout。已有 manifest 作为 split lock；后续增量任务若与 holdout 模板相连，仍只能进入 holdout。训练和调参不得读取 `holdout/`。当前 995 条真实导出、文件哈希、样本血缘及零泄漏结果见 [A5 训练数据管线验收报告](docs/training-data-pipeline.md)。
-
-## LoRA 训练就绪
-
-首轮实验只使用固定 revision 的 `Qwen/Qwen2.5-Coder-7B-Instruct`、A5 `instruction_to_tool_call` 视图和一套 4-bit QLoRA 配置。配置审计会锁定基座、tokenizer、数据行数/哈希及全部超参数，并禁止训练或自动评测读取 holdout。
-
-```bash
-python tools/run_training.py audit
-python tools/run_training.py tokenizer-audit
-python tools/run_training.py smoke
-python tools/run_training.py cluster-template-audit
-```
-
-CPU 冒烟不联网、不下载基座，已验证 adapter-only 更新、checkpoint 保存/恢复及验证计算。获得学校 GPU 权限后，先填写被 Git 忽略的 `training/school_gpu.local.json`，再执行严格环境清单；正式训练入口支持 `--resume auto`、validation 最佳 checkpoint、JSONL 日志、结构化工具调用评测与本地模型登记。当前状态和完整操作见 [B1–B4 LoRA 训练就绪验收报告](docs/training-readiness.md)。在用户明确确认 GPU 权限前，不运行正式训练或阶段 C holdout 评测。
+真实 Rhino 视频需要项目所有者在录制前创建空白演示文档，并在上传前逐帧复核。仓库中的 GIF 是合成 Replay 的自动化替代素材，不冒充真实 Rhino 录屏。
 
 ## 安全边界
 
-- Listener 仅绑定 `127.0.0.1`。
-- 隐私门禁先于普通路由、MCP 和模型调用，不能通过关闭路由或手动指定云模型绕过。
-- Agent、MCP Server 与 Listener 日志不记录原始 Prompt、对象名、图层/群组名、本机路径或异常正文。
-- `.env`、运行轨迹、评测结果和真实数据默认不进入 Git。
-- `reset_environment` 只用于显式评测流程，不应暴露给普通 UI。
-- 仓库历史中曾出现过密钥格式的值；使用者必须轮换对应密钥，删除工作区内容不能使旧密钥失效。
+- UI 与 Listener 只绑定 `127.0.0.1`；模型密钥只从环境变量读取。
+- 隐私门先于普通路由、模型和 MCP；高风险任务强制本地且不能云 fallback。
+- 出站云请求只保留白名单字段，并在发送前二次扫描；Trace、日志、SQLite、Replay 与请求台账共用审计。
+- 变更工具不做普通网络自动重试，并通过幂等键阻止重复 Rhino 对象。
+- `reset_environment` 只接受本地评测令牌，普通 UI 不暴露清场入口。
+- 仓库历史中曾出现密钥格式值；必须在提供方控制台轮换，删除工作区文件不能使旧密钥失效。
 
 ## 已知限制
 
-- 当前主要验证环境为 macOS 15.6 arm64 + Rhino 8；clean-room 安装已在该环境完成，尚未在另一台物理 Mac 或 Intel Mac 上复验。
-- 完整30题基准需要交互式 Rhino 环境，CI 只运行离线测试。
-- `local-mock` 是安全、确定性的本地接口与测试替身，不是可执行复杂建模推理的生产模型；真实本地模型、多模型实测基准和生产级并发仍不属于当前稳定原型。
+- 主要真实验收环境为 macOS 15.6 arm64 + Rhino 8；Windows、Intel Mac、多人并发与另一台物理 Mac 尚未完成发布验收。
+- 固定 30 题已经饱和；100% Pass@1 证明该契约下的稳定性，不证明开放世界、困难集或真实用户工作流成功率。
+- `local-mock` 不执行真实本地推理；GPU/LoRA 阶段等待学校权限，未产生可对外声称的本地模型效果。
+- P2 外部用户测试与训练前困难集尚未完成；不对当前数据宣称小样本统计显著性。
+- 完整 30 题真实基准需要交互式 Rhino 和模型 API；CI 只运行离线检查。
 
-架构和恢复策略见 [docs/architecture.md](docs/architecture.md)，常见问题见 [docs/troubleshooting.md](docs/troubleshooting.md)，发布门槛见 [docs/release-checklist.md](docs/release-checklist.md)。
+## 文档入口
+
+- [Architecture](docs/architecture.md) · [Troubleshooting](docs/troubleshooting.md)
+- [Portfolio evidence](docs/portfolio-evidence.md) · [Release checklist](docs/release-checklist.md)
+- [A4 privacy](docs/privacy-red-team-report.md) · [A6 baseline](docs/a6-no-finetune-baseline.md) · [A7 golden set](docs/a7-500-marginal-value.md)
+- [Training data pipeline](docs/training-data-pipeline.md) · [Training readiness](docs/training-readiness.md)
+- [PROJECT_OPTIMIZATION_PLAN.md](PROJECT_OPTIMIZATION_PLAN.md) · [CHANGELOG.md](CHANGELOG.md)
