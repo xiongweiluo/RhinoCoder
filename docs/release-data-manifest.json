@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "reviewed_at": "2026-09-08",
+  "reviewed_at": "2026-09-09",
   "review": {
     "method": "automated_scan_and_artifact_review",
     "scope": "Published benchmark summary and three synthetic Replay files",
@@ -23,7 +23,7 @@
     {
       "path": "eval/replays/basic_stack.json",
       "classification": "synthetic_replay",
-      "sha256": "c605dee872f83db19fa9ce69f9d15893e980c1e9fa95b21b436e609da49a95bd"
+      "sha256": "f11f5bf361bb2b1eff8e496e297e52e287bec53773691a72838ec2b45cb44c50"
     },
     {
       "path": "eval/replays/self_correction.json",
@@ -33,7 +33,7 @@
     {
       "path": "eval/replays/table_group.json",
       "classification": "synthetic_replay",
-      "sha256": "9eed19de926a81fbc047011d10fb9b0de5c79dd39187ebbd864ff74fe27ea591"
+      "sha256": "7c2b20742a9766fbd9ba34646fce79e080b8cea5f3bb2376b2e9952872a8ebb8"
     }
   ]
 }

@@ -4,12 +4,18 @@
 from __future__ import annotations
 
 import json
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 
 ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from eval.scene_assert import verify
+
 CATALOG = ROOT / "docs" / "demo" / "p1-scenarios.json"
 EXPECTED = {
     "normal-loop": {
@@ -129,7 +135,34 @@ def audit_p1(root: Path = ROOT) -> P1Audit:
         ):
             audit.findings.append(f"{scenario_id}: 缺少最终 Scene Summary")
 
+        final_scene_events = [
+            event for event in events
+            if event.get("type") == "scene.checked"
+            and isinstance((event.get("payload") or {}).get("scene_summary"), dict)
+        ]
+        if final_scene_events:
+            final_scene = (final_scene_events[-1].get("payload") or {}).get("scene_summary") or {}
+            replay_evaluation = verify(final_scene, scenario.get("asserts") or [])
+            if replay_evaluation.get("passed") is not True:
+                audit.findings.append(
+                    f"{scenario_id}: 冻结 Scene Summary 未通过场景清单 verifier: "
+                    f"{replay_evaluation.get('failed_reasons')}"
+                )
+
         assertions = [event for event in events if event.get("type") == "assertion.checked"]
+        final_scene_seq = max((int(event.get("seq", 0)) for event in final_scene_events), default=-1)
+        final_assertions = [event for event in assertions if int(event.get("seq", 0)) > final_scene_seq]
+        if not final_assertions or any((event.get("payload") or {}).get("success") is not True for event in final_assertions):
+            audit.findings.append(f"{scenario_id}: 最终验证必须包含全部通过的 assertion 证据")
+        expected_detailed_count = {"normal-loop": 5, "privacy-route": 3}.get(scenario_id)
+        if expected_detailed_count is not None and len(final_assertions) != expected_detailed_count:
+            audit.findings.append(
+                f"{scenario_id}: 最终详细 assertion 数应为 {expected_detailed_count}，实际 {len(final_assertions)}"
+            )
+        for event in final_assertions:
+            payload = event.get("payload") or {}
+            if not payload.get("expected") or not payload.get("actual"):
+                audit.findings.append(f"{scenario_id}: assertion 缺少 Expected / Actual")
         if scenario_id == "self-correction":
             outcomes = [(event.get("payload") or {}).get("success") for event in assertions]
             if outcomes != [False, True]:

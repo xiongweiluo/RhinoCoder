@@ -6,4 +6,4 @@ def test_p1_demo_audit_passes():
     assert result.passed, result.findings
     assert result.scenarios == 3
     assert result.replays == 3
-    assert result.browser_tests == 3
+    assert result.browser_tests == 4

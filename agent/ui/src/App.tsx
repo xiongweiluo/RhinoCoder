@@ -15,9 +15,10 @@ import {getStaticReplay, STATIC_DEMO_SCENARIOS} from "./publicReplayData";
 const EMPTY_SCENE: SceneSnapshot = {objects: [], total: 0, capped: false};
 const HOSTED_PUBLIC_DEMO = import.meta.env.MODE === "public";
 const TERMINAL_TYPES = new Set(["run.completed", "run.failed", "run.cancelled"]);
-const EVENT_FILTERS = ["all", "decision", "execution", "verification", "recovery"] as const;
+const EVENT_FILTERS = ["key", "all", "decision", "execution", "verification", "recovery"] as const;
 type EventFilter = typeof EVENT_FILTERS[number];
 type PlaybackState = "idle" | "loading" | "playing" | "complete" | "error";
+type SceneMode = "shaded" | "wireframe";
 type ActiveRun = {
   run_id: string;
   events: AgentEvent[];
@@ -31,6 +32,8 @@ function wsUrl() {
 }
 
 function eventGroup(type: string): Exclude<EventFilter, "all"> {
+  if (type.startsWith("semantic.verification")) return "verification";
+  if (type.startsWith("semantic.geometry")) return "execution";
   if (type.startsWith("privacy.") || type.startsWith("route.")) return "decision";
   if (type.startsWith("scene.") || type.startsWith("assertion.")) return "verification";
   if (type.startsWith("correction.") || type.includes("failed") || type.includes("cancelled")) return "recovery";
@@ -53,6 +56,8 @@ function eventLabel(type: string) {
     "run.completed": "任务完成",
     "run.failed": "任务失败",
     "run.cancelled": "任务取消",
+    "semantic.geometry": "几何执行",
+    "semantic.verification": "程序验证",
   };
   return labels[type] ?? type;
 }
@@ -71,7 +76,76 @@ function statusLabel(status: string) {
 }
 
 function filterLabel(filter: EventFilter) {
-  return ({all: "全部", decision: "决策", execution: "执行", verification: "验证", recovery: "恢复"})[filter];
+  return ({key: "关键", all: "全部", decision: "决策", execution: "执行", verification: "验证", recovery: "恢复"})[filter];
+}
+
+function scenarioOutcome(id: string) {
+  return ({
+    "normal-loop": "VERIFIED",
+    "self-correction": "RECOVERED",
+    "privacy-route": "MINIMIZED",
+  } as Record<string, string>)[id] ?? "VERIFIED";
+}
+
+function semanticEvents(events: AgentEvent[]): AgentEvent[] {
+  const output: AgentEvent[] = [];
+  let toolBatch: AgentEvent[] = [];
+  let assertionBatch: AgentEvent[] = [];
+
+  const flushTools = () => {
+    if (!toolBatch.length) return;
+    const tools = toolBatch.map((event) => String(event.payload.name ?? event.payload.tool ?? "tool"));
+    const success = toolBatch.every((event) => event.payload.success !== false);
+    output.push({
+      ...toolBatch.at(-1)!,
+      type: "semantic.geometry",
+      payload: {
+        name: success ? "Geometry created or updated" : "Geometry operation failed",
+        tools,
+        success,
+        duration_ms: toolBatch.reduce((total, event) => total + Number(event.payload.duration_ms ?? 0), 0),
+      },
+    });
+    toolBatch = [];
+  };
+
+  const flushAssertions = () => {
+    if (!assertionBatch.length) return;
+    const passed = assertionBatch.filter((event) => event.payload.success === true).length;
+    const success = passed === assertionBatch.length;
+    output.push({
+      ...assertionBatch.at(-1)!,
+      type: "semantic.verification",
+      payload: {
+        name: success ? "Scene verified" : "Verification mismatch",
+        success,
+        passed,
+        total: assertionBatch.length,
+      },
+    });
+    assertionBatch = [];
+  };
+
+  for (const event of events) {
+    if (event.type === "tool.completed") {
+      flushAssertions();
+      toolBatch.push(event);
+      continue;
+    }
+    if (event.type === "assertion.checked") {
+      flushTools();
+      assertionBatch.push(event);
+      continue;
+    }
+    flushTools();
+    flushAssertions();
+    if (["run.started", "privacy.assessed", "privacy.blocked", "route.selected", "route.fallback", "scene.checked", "correction.started", "run.failed", "run.cancelled"].includes(event.type)) {
+      output.push(event);
+    }
+  }
+  flushTools();
+  flushAssertions();
+  return output;
 }
 
 function historyFromReplay(payload: ReplayPayload): HistoryItem {
@@ -116,7 +190,8 @@ export default function App() {
   const [playbackState, setPlaybackState] = useState<PlaybackState>("idle");
   const [historyQuery, setHistoryQuery] = useState("");
   const [historyFilter, setHistoryFilter] = useState("all");
-  const [eventFilter, setEventFilter] = useState<EventFilter>("all");
+  const [eventFilter, setEventFilter] = useState<EventFilter>(publicReplayMode ? "key" : "all");
+  const [sceneMode, setSceneMode] = useState<SceneMode>("shaded");
   const socketRef = useRef<WebSocket | null>(null);
   const retryRef = useRef(0);
   const currentRunRef = useRef("");
@@ -330,6 +405,9 @@ export default function App() {
   const eventScene = (sceneEvent?.payload.scene_summary as SceneSnapshot | undefined);
   const afterScene = sceneAfterOverride ?? currentHistory?.scene_after ?? currentHistory?.control_scene ?? eventScene ?? EMPTY_SCENE;
   const assertions = currentEvents.filter((event) => event.type === "assertion.checked");
+  const lastSceneSequence = [...currentEvents].reverse().find((event) => event.type === "scene.checked")?.seq ?? -1;
+  const finalAssertions = assertions.filter((event) => event.seq > lastSceneSequence);
+  const priorAssertions = assertions.filter((event) => event.seq <= lastSceneSequence);
   const toolEvents = currentEvents.filter((event) => event.type === "tool.completed");
   const toolErrors = toolEvents.filter((event) => event.payload.success === false).length;
   const recoveries = currentEvents.filter((event) => event.type === "correction.started" || event.type === "route.fallback").length;
@@ -360,7 +438,11 @@ export default function App() {
     object_ids: "pseudonymized",
     event_count: currentEvents.length,
   };
-  const filteredEvents = eventFilter === "all" ? currentEvents : currentEvents.filter((event) => eventGroup(event.type) === eventFilter);
+  const filteredEvents = eventFilter === "key"
+    ? semanticEvents(currentEvents)
+    : eventFilter === "all"
+      ? currentEvents
+      : currentEvents.filter((event) => eventGroup(event.type) === eventFilter);
   const filteredHistory = allHistory.filter((item) => {
     const query = historyQuery.trim().toLowerCase();
     const matchesQuery = !query || `${item.prompt} ${item.run_id} ${item.status} ${item.demo_scenario_id ?? ""}`.toLowerCase().includes(query);
@@ -371,7 +453,7 @@ export default function App() {
   const metricNumber = (name: string) => typeof metrics[name] === "number" ? metrics[name] as number : undefined;
   const cost = metricNumber("estimated_cost_usd");
   const duration = metricNumber("duration_ms");
-  const passedAssertions = assertions.filter((event) => event.payload.success === true).length;
+  const passedAssertions = finalAssertions.filter((event) => event.payload.success === true).length;
 
   useEffect(() => {
     const onShortcut = (event: globalThis.KeyboardEvent) => {
@@ -405,48 +487,71 @@ export default function App() {
   };
 
   return (
-    <main className="shell" id="main-content">
+    <main className={`shell ${publicReplayMode ? "public-shell" : ""}`} id="main-content">
       <a className="skip-link" href="#evidence-chain">跳到运行证据</a>
       <header className="topbar">
-        <div><span className="eyebrow">VERIFIABLE SPATIAL AGENT</span><h1>RhinoCoder</h1><p>从指令到几何证据，一条 run_id 可复核链路。</p></div>
+        <div className="brand-lockup"><span className="brand-token" aria-hidden="true">RC</span><div><h1>RhinoCoder</h1><p>{publicReplayMode ? "Replay Console" : "Verifiable Spatial Agent"}</p></div></div>
         <div className="topbar-actions">
           <nav className="project-links" aria-label="项目链接">
             <a href="https://github.com/xiongweiluo/RhinoCoder" target="_blank" rel="noreferrer">GitHub ↗</a>
-            <a href="https://github.com/xiongweiluo/RhinoCoder/blob/main/README.md" target="_blank" rel="noreferrer">项目说明 ↗</a>
           </nav>
-          <div className={`connection ${connected ? "online" : publicReplayMode ? "readonly" : "offline"}`} role="status" aria-live="polite">
-            <span />{publicReplayMode ? "Read-only demo" : connected ? "Connected" : "Reconnecting"}
+          <div className="demo-statuses">
+            <div className={`connection ${connected ? "online" : publicReplayMode ? "readonly" : "offline"}`} role="status" aria-live="polite">
+              <span />{publicReplayMode ? "Read-only demo" : connected ? "Connected" : "Reconnecting"}
+            </div>
+            {publicReplayMode && <span className="replay-origin" tabIndex={0} aria-describedby="synthetic-replay-help">
+              Synthetic Replay <b aria-hidden="true">i</b>
+              <span role="tooltip" id="synthetic-replay-help">Sanitized recorded execution. No live Rhino connection, model call, or Rhino write.</span>
+            </span>}
           </div>
         </div>
       </header>
 
-      <section className="hero-grid" aria-labelledby="demo-heading">
-        <div>
-          <span className="eyebrow">THREE FIXED DEMOS</span>
-          <h2 id="demo-heading">先看结果，再钻进 Trace</h2>
-          <p>选择一条冻结场景，扫描隐私决策、工具执行、场景读回与程序断言。所有内容均为脱敏合成 Replay。</p>
-        </div>
-        <div className="hero-proof"><strong>公开边界</strong><span>0 模型调用</span><span>0 Rhino 写操作</span><span>0 原始 Trace</span></div>
-      </section>
-
-      <section className="scenario-grid" aria-label="固定演示场景">
-        {scenarios.length === 0 && <div className="panel loading-card" aria-busy="true">正在加载三个演示场景…</div>}
-        {scenarios.map((scenario, index) => (
-          <article className={`scenario-card panel ${selectedScenarioId === scenario.id ? "selected" : ""}`} key={scenario.id}>
-            <div className="scenario-number">0{index + 1}</div>
-            <span className="eyebrow">{scenario.kicker}</span>
-            <h3>{scenario.title}</h3>
-            <p>{scenario.goal}</p>
-            <details><summary>输入与预期结果</summary><code className="prompt-code">{scenario.input}</code><ul>{scenario.expected.map((item) => <li key={item}>{item}</li>)}</ul></details>
-            <div className="scenario-actions">
-              <button type="button" onClick={() => void playReplay(scenario)} aria-label={`播放${scenario.title}只读 Replay`}>播放 Replay</button>
-              {!publicReplayMode && <button type="button" className="ghost" onClick={() => prepareLiveScenario(scenario)}>填入 Rhino</button>}
-              <a href={scenario.evidence.href} target="_blank" rel="noreferrer">证据 ↗</a>
-              <a href={scenario.read_only_url}>只读链接</a>
+      {publicReplayMode ? (
+        <section className="replay-deck" aria-label="选择 Replay 场景">
+          <div className="scenario-tabs" role="tablist" aria-label="Replay 场景">
+            {scenarios.map((scenario, index) => (
+              <button
+                type="button"
+                role="tab"
+                aria-selected={selectedScenarioId === scenario.id}
+                className={selectedScenarioId === scenario.id ? "selected" : ""}
+                onClick={() => void playReplay(scenario)}
+                key={scenario.id}
+              >
+                <span>0{index + 1}</span>
+                <strong>{scenario.title}</strong>
+                <small className={`scenario-outcome ${scenario.id}`}>{scenarioOutcome(scenario.id)}</small>
+              </button>
+            ))}
+          </div>
+          {selectedScenario ? (
+            <div className="run-brief">
+              <span className="brief-label">任务</span>
+              <p>{selectedScenario.input}</p>
+              <details><summary>验收目标</summary><ul>{selectedScenario.expected.map((item) => <li key={item}>{item}</li>)}</ul></details>
+              <a href={selectedScenario.evidence.href} target="_blank" rel="noreferrer">来源 ↗</a>
             </div>
-          </article>
-        ))}
-      </section>
+          ) : <div className="run-brief" aria-busy="true">加载中…</div>}
+        </section>
+      ) : (
+        <>
+          <section className="hero-grid" aria-labelledby="demo-heading">
+            <div><span className="eyebrow">THREE FIXED DEMOS</span><h2 id="demo-heading">先看结果，再钻进 Trace</h2><p>选择一条固定场景，查看从执行到断言的完整证据。</p></div>
+            <div className="hero-proof"><strong>公开边界</strong><span>0 模型调用</span><span>0 Rhino 写操作</span><span>0 原始 Trace</span></div>
+          </section>
+          <section className="scenario-grid" aria-label="固定演示场景">
+            {scenarios.length === 0 && <div className="panel loading-card" aria-busy="true">正在加载三个演示场景…</div>}
+            {scenarios.map((scenario, index) => (
+              <article className={`scenario-card panel ${selectedScenarioId === scenario.id ? "selected" : ""}`} key={scenario.id}>
+                <div className="scenario-number">0{index + 1}</div><span className="eyebrow">{scenario.kicker}</span><h3>{scenario.title}</h3><p>{scenario.goal}</p>
+                <details><summary>输入与预期结果</summary><code className="prompt-code">{scenario.input}</code><ul>{scenario.expected.map((item) => <li key={item}>{item}</li>)}</ul></details>
+                <div className="scenario-actions"><button type="button" onClick={() => void playReplay(scenario)}>播放 Replay</button><button type="button" className="ghost" onClick={() => prepareLiveScenario(scenario)}>填入 Rhino</button><a href={scenario.evidence.href} target="_blank" rel="noreferrer">证据 ↗</a><a href={scenario.read_only_url}>只读链接</a></div>
+              </article>
+            ))}
+          </section>
+        </>
+      )}
 
       {!publicReplayMode ? (
         <section className="composer panel" aria-labelledby="composer-heading">
@@ -463,29 +568,25 @@ export default function App() {
             </div>
           </form>
         </section>
-      ) : (
-        <section className="readonly-banner panel" role="note"><strong>公开只读模式</strong><p>可交互浏览，但不连接模型或 Rhino，也不发送 instruction、retry、Undo、rollback 或 feedback。真实 Rhino 操作需按项目 Quickstart 在本机运行。</p></section>
-      )}
+      ) : null}
 
       {!connected && !publicReplayMode && <div className="state-banner offline" role="status"><strong>UI 服务离线</strong><span>正在指数退避重连；Replay 仍可通过上方按钮只读加载。</span></div>}
-      {notice && <div className="state-banner success" role="status" aria-live="polite">{notice}</div>}
+      {notice && !publicReplayMode && <div className="state-banner success" role="status" aria-live="polite">{notice}</div>}
       {visibleError && <div className="recovery-error" role="alert">
         <div><strong>{visibleError.code ?? "操作失败"}</strong><p>{visibleError.message}</p><small>{recoveryGuidance(visibleError.code)}</small></div>
         {visibleError.recoverable !== false && !isReplay && <button type="button" className="danger" disabled={!canRetry} onClick={() => send({type: "retry", run_id: currentRun})}>一键重试</button>}
       </div>}
 
-      <section className="dashboard" id="evidence-chain" aria-label="运行指标仪表盘">
-        <Metric label="运行状态" value={statusLabel(runStatus)} tone={runStatus === "failed" ? "bad" : runStatus === "completed" ? "good" : "neutral"} />
+      <section className={`dashboard ${publicReplayMode ? "public-dashboard" : ""}`} id="evidence-chain" aria-label="运行指标仪表盘">
+        <Metric label={publicReplayMode ? "Status" : "运行状态"} value={statusLabel(runStatus)} tone={runStatus === "failed" ? "bad" : runStatus === "completed" ? "good" : "neutral"} />
         <Metric label="run_id" value={currentRun || "--"} mono />
-        <Metric label="隐私动作" value={privacy?.action ?? "--"} />
-        <Metric label="模型路由" value={route?.selected_backend ?? "--"} />
-        <Metric label="端到端延迟" value={duration !== undefined ? `${Math.round(duration)} ms` : "--"} />
-        <Metric label="成本" value={cost !== undefined ? `$${cost.toFixed(6)}` : "--"} />
-        <Metric label="工具错误" value={String(toolErrors)} tone={toolErrors ? "bad" : "good"} />
-        <Metric label="恢复次数" value={String(recoveries)} tone={recoveries ? "warn" : "neutral"} />
+        <Metric label="Privacy" value={privacy?.action ?? "--"} mono />
+        <Metric label="Route" value={route?.selected_backend ?? "--"} mono />
+        <Metric label="Runtime" value={duration !== undefined ? `${Math.round(duration)} ms` : "--"} mono />
+        {publicReplayMode ? <Metric label="Assertions" value={finalAssertions.length ? `${passedAssertions} / ${finalAssertions.length}` : "--"} tone={finalAssertions.length && passedAssertions === finalAssertions.length ? "good" : "neutral"} mono /> : <><Metric label="成本" value={cost !== undefined ? `$${cost.toFixed(6)}` : "--"} /><Metric label="工具错误" value={String(toolErrors)} tone={toolErrors ? "bad" : "good"} /><Metric label="恢复次数" value={String(recoveries)} tone={recoveries ? "warn" : "neutral"} /></>}
       </section>
 
-      <section className={`routing panel ${route?.degraded ? "degraded" : ""}`} aria-labelledby="routing-heading">
+      {!publicReplayMode && <section className={`routing panel ${route?.degraded ? "degraded" : ""}`} aria-labelledby="routing-heading">
         <div><span className="eyebrow">PRIVACY + ROUTE</span><h2 id="routing-heading">{route ? `${route.selected_backend} · ${route.selected_model}` : privacy?.action === "block" ? "请求已在本地阻断" : "等待决策"}</h2></div>
         <p>{route?.reason ?? privacy?.reasons?.join("；") ?? "隐私门先于模型与 MCP；路由理由、降级与 run_id 一起记录。"}</p>
         <div className="route-signals">
@@ -493,11 +594,66 @@ export default function App() {
           <span>{privacy ? privacy.cloud_allowed ? "允许最小化云请求" : "禁止云请求" : "云边界待判断"}</span>
           <span>{route?.degraded ? `从 ${route.fallback_from} 降级 · ${route.fallback_error_code}` : "无降级"}</span>
         </div>
-      </section>
+      </section>}
 
-      <section className="workspace">
+      {publicReplayMode ? <section className="spatial-workspace" aria-label="Replay 空间证据工作台">
+        <div className="panel trace-panel spatial-trace">
+          <div className="section-title"><div><span className="eyebrow">RUN TRACE</span><h2>执行时间线</h2></div><span>{filteredEvents.length}/{currentEvents.length} events</span></div>
+          <div className="filter-row" role="group" aria-label="时间线筛选">
+            {EVENT_FILTERS.map((filter) => <button type="button" className={eventFilter === filter ? "active" : "ghost"} aria-pressed={eventFilter === filter} onClick={() => setEventFilter(filter)} key={filter}>{filterLabel(filter)}</button>)}
+          </div>
+          <div className="timeline" aria-live="polite">
+            {playbackState === "loading" && <Empty title="正在加载 Replay" text="只读数据加载完成后开始播放。" />}
+            {playbackState !== "loading" && filteredEvents.length === 0 && <Empty title="尚无事件" text="选择上方场景查看执行证据。" />}
+            {filteredEvents.map((event) => <EventRow key={`${event.run_id}-${event.seq}`} event={event} />)}
+          </div>
+        </div>
+
+        <section className="panel scene-stage" aria-labelledby="scene-stage-heading">
+          <div className="scene-stage-head">
+            <div><span className="eyebrow">SCENE RESULT</span><h2 id="scene-stage-heading">Rhino 空间结果</h2></div>
+            <div className="scene-stage-tools">
+              <span>{afterScene.total} objects</span>
+              <div className="view-switch" role="group" aria-label="场景显示模式">
+                <button type="button" aria-pressed={sceneMode === "shaded"} className={sceneMode === "shaded" ? "active" : ""} onClick={() => setSceneMode("shaded")}>Shaded</button>
+                <button type="button" aria-pressed={sceneMode === "wireframe"} className={sceneMode === "wireframe" ? "active" : ""} onClick={() => setSceneMode("wireframe")}>Wireframe</button>
+              </div>
+            </div>
+          </div>
+          <PublicSceneCanvas scenarioId={selectedScenarioId} scene={afterScene} mode={sceneMode} />
+          <div className="scene-delta" aria-label="操作前后对象数量">
+            <div><span>BEFORE</span><strong>{beforeScene.total}</strong><small>objects</small></div>
+            <i aria-hidden="true">→</i>
+            <div><span>AFTER</span><strong>{afterScene.total}</strong><small>objects</small></div>
+            <div className="scene-object-index">
+              {afterScene.objects.slice(0, 5).map((object) => <span key={object.object_id}><i style={{background: object.color?.length === 3 ? `rgb(${object.color.join(",")})` : undefined}} />{object.name || object.type}</span>)}
+            </div>
+          </div>
+        </section>
+
+        <aside className="spatial-evidence">
+          <section className={`panel proof-verdict ${finalAssertions.length && passedAssertions === finalAssertions.length ? "passed" : ""} ${priorAssertions.some((event) => event.payload.success === false) ? "recovered" : ""}`} aria-label="验证结论">
+            <div><span className="eyebrow">VERIFICATION</span><strong>{finalAssertions.length ? passedAssertions === finalAssertions.length ? "VERIFIED" : "CHECK" : "—"}</strong></div>
+            <div className="proof-count"><b>{finalAssertions.length ? `${passedAssertions} / ${finalAssertions.length}` : "—"}</b><span>{finalAssertions.length ? "assertions passed" : "awaiting evidence"}</span></div>
+          </section>
+          <section className="panel assertion-panel" aria-labelledby="assertion-heading">
+            <div className="section-title"><div><span className="eyebrow">PROGRAMMATIC PROOF</span><h2 id="assertion-heading">为什么通过</h2></div><span>EXPECTED / ACTUAL</span></div>
+            {finalAssertions.length === 0 && <Empty title="暂无断言" text="Replay 完成后显示验证结果。" />}
+            {priorAssertions.some((event) => event.payload.success === false) && <div className="recovery-proof"><strong>Recovered after mismatch</strong><span>场景首次复检未通过，Agent 修正目标对象后再次读取并验证。</span></div>}
+            <div className="assertion-list">
+              {finalAssertions.slice(0, 3).map((event) => <AssertionRow event={event} key={`${event.run_id}-assert-${event.seq}`} />)}
+              {finalAssertions.length > 3 && <details className="more-assertions"><summary>查看其余 {finalAssertions.length - 3} 项验证</summary><div>{finalAssertions.slice(3).map((event) => <AssertionRow event={event} key={`${event.run_id}-assert-${event.seq}`} />)}</div></details>}
+              {priorAssertions.some((event) => event.payload.success === false) && <details className="prior-assertions"><summary>查看首次 mismatch 证据</summary><div>{priorAssertions.filter((event) => event.payload.success === false).map((event) => <AssertionRow event={event} key={`${event.run_id}-prior-assert-${event.seq}`} />)}</div></details>}
+            </div>
+          </section>
+          <section className="panel scene-inspector" aria-labelledby="scene-inspector-heading">
+            <div className="section-title"><div><span className="eyebrow">OBJECT INSPECTOR</span><h2 id="scene-inspector-heading">对象明细</h2></div></div>
+            <div className="inspector-list">{afterScene.objects.length === 0 ? <Empty title="空白场景" text="等待最终 Scene Summary。" /> : afterScene.objects.slice(0, 5).map((object) => <ObjectCard key={object.object_id} object={object} />)}</div>
+          </section>
+        </aside>
+      </section> : <section className="workspace">
         <div className="panel trace-panel">
-          <div className="section-title"><div><span className="eyebrow">SCAN IN SECONDS</span><h2>Evidence Timeline</h2></div><span>{filteredEvents.length}/{currentEvents.length} events</span></div>
+          <div className="section-title"><div><span className="eyebrow">RUN TRACE</span><h2>执行时间线</h2></div><span>{filteredEvents.length}/{currentEvents.length} events</span></div>
           <div className="filter-row" role="group" aria-label="时间线筛选">
             {EVENT_FILTERS.map((filter) => <button type="button" className={eventFilter === filter ? "active" : "ghost"} aria-pressed={eventFilter === filter} onClick={() => setEventFilter(filter)} key={filter}>{filterLabel(filter)}</button>)}
           </div>
@@ -523,7 +679,7 @@ export default function App() {
             <div className="assertion-list">{assertions.map((event) => <AssertionRow event={event} key={`${event.run_id}-assert-${event.seq}`} />)}</div>
           </section>
 
-          <section className="panel controls" aria-labelledby="recovery-heading">
+          {!publicReplayMode && <section className="panel controls" aria-labelledby="recovery-heading">
             <div className="section-title"><div><span className="eyebrow">ONE-CLICK RECOVERY</span><h2 id="recovery-heading">恢复与反馈</h2></div></div>
             {isReplay ? <p className="control-context">Replay 为只读；下列变更操作全部禁用。</p> : <p className="control-context">重试创建新 run_id；Undo 撤销最后操作；精准回滚只删除本任务记录的对象。</p>}
             <div className="button-grid">
@@ -535,12 +691,12 @@ export default function App() {
               <button className="danger" disabled={!canFeedback} onClick={() => send({type: "feedback", run_id: currentRun, label: "rejected"})}>标记错误</button>
             </div>
             {currentHistory?.feedback_labels?.length ? <p className="feedback-state">已记录：{currentHistory.feedback_labels.map(feedbackLabel).join("、")}</p> : null}
-          </section>
+          </section>}
         </div>
-      </section>
+      </section>}
 
-      <section className="panel audit-panel" aria-labelledby="audit-heading">
-        <div><span className="eyebrow">SANITIZED BROWSER SURFACE</span><h2 id="audit-heading">脱敏审计摘要</h2><p>浏览器接收的是最小化展示载荷；完整本地 Trace、模型消息和真实对象 GUID 不通过 UI API 下发。</p></div>
+      <section className={`panel audit-panel ${publicReplayMode ? "compact" : ""}`} aria-labelledby="audit-heading">
+        <div><span className="eyebrow">DATA BOUNDARY</span><h2 id="audit-heading">脱敏审计摘要</h2>{!publicReplayMode && <p>浏览器只接收最小化展示载荷；完整本地 Trace、模型消息和真实对象 GUID 不下发。</p>}</div>
         <div className="audit-grid">
           <AuditFact label="载荷" value={auditSummary.browser_payload} />
           <AuditFact label="原始 Trace" value={auditSummary.raw_trace_exposed ? "暴露" : "未暴露"} good={!auditSummary.raw_trace_exposed} />
@@ -549,7 +705,7 @@ export default function App() {
         </div>
       </section>
 
-      <section className="panel history" aria-labelledby="history-heading">
+      {!publicReplayMode && <section className="panel history" aria-labelledby="history-heading">
         <div className="section-title"><div><span className="eyebrow">MINIMIZED RUN INDEX</span><h2 id="history-heading">Recent Runs</h2></div><span>{filteredHistory.length}/{allHistory.length}</span></div>
         <div className="history-tools">
           <label><span className="sr-only">搜索最近运行</span><input ref={searchRef} type="search" value={historyQuery} onChange={(event) => setHistoryQuery(event.target.value)} placeholder="搜索指令或 run_id（快捷键 /）" /></label>
@@ -559,10 +715,10 @@ export default function App() {
           {filteredHistory.length === 0 && <Empty title="没有匹配的运行" text={allHistory.length ? "调整搜索词或状态筛选。" : "播放 Replay 或执行任务后生成脱敏索引。"} />}
           {filteredHistory.slice(0, 30).map((item) => <button type="button" className={item.run_id === currentRun ? "selected" : ""} key={`${item.is_replay ? "replay" : "live"}-${item.run_id}`} onClick={() => selectHistory(item)}><span className={`status-pill ${item.status}`}>{item.is_replay ? "REPLAY" : statusLabel(item.status)}</span><span>{item.prompt}</span><code title={item.run_id}>{item.run_id.slice(0, 12)}</code></button>)}
         </div>
-      </section>
+      </section>}
 
       <footer className="site-footer">
-        <p>RhinoCoder v0.3.0 · 公开 Replay 使用脱敏合成数据 · Local Mock 不代表真实本地模型效果</p>
+        <p>v0.3.0 · Synthetic Replay · No Rhino writes</p>
         <a href="https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0" target="_blank" rel="noreferrer">查看版本与验证证据 ↗</a>
       </footer>
     </main>
@@ -594,6 +750,8 @@ function EventRow({event}: {event: AgentEvent}) {
 
 function eventSummary(event: AgentEvent) {
   const payload = event.payload as Record<string, unknown>;
+  if (event.type === "semantic.geometry") return `${(payload.tools as string[] | undefined)?.join(" + ") ?? "tool"} · ${payload.success === false ? "failed" : "completed"}`;
+  if (event.type === "semantic.verification") return `${payload.passed ?? 0} / ${payload.total ?? 0} assertions ${payload.success ? "passed" : "require correction"}`;
   if (event.type === "run.started") return `输入摘要：${String(payload.prompt ?? "已最小化")}`;
   if (event.type.startsWith("privacy.")) return `risk=${payload.risk ?? "--"} · action=${payload.action ?? "--"} · cloud=${payload.cloud_allowed ? "minimized/allowed" : "blocked"}`;
   if (event.type.startsWith("route.")) return `${payload.selected_backend ?? "--"} · ${payload.reason ?? "路由理由未提供"}`;
@@ -615,7 +773,47 @@ function eventSummary(event: AgentEvent) {
 function AssertionRow({event}: {event: AgentEvent}) {
   const payload = event.payload as Record<string, unknown>;
   const ok = payload.success === true;
-  return <article className={`assertion-row ${ok ? "passed" : "failed"}`}><span aria-hidden="true">{ok ? "✓" : "×"}</span><div><strong>{String(payload.name ?? "几何断言")}</strong><p><b>期望</b> {String(payload.expected ?? "--")}</p><p><b>实际</b> {String(payload.actual ?? "--")}</p></div></article>;
+  return <article className={`assertion-row ${ok ? "passed" : "failed"}`}><span aria-hidden="true">{ok ? "✓" : "×"}</span><div><strong className="machine-name">{String(payload.name ?? "几何断言")}</strong><dl><div><dt>Expected</dt><dd>{String(payload.expected ?? "--")}</dd></div><div><dt>Actual</dt><dd>{String(payload.actual ?? "--")}</dd></div></dl></div></article>;
+}
+
+function sceneObjectColor(scene: SceneSnapshot, name: string, fallback: string) {
+  const object = scene.objects.find((item) => item.name.toLowerCase() === name.toLowerCase());
+  return object?.color?.length === 3 ? `rgb(${object.color.join(",")})` : fallback;
+}
+
+function PublicSceneCanvas({scenarioId, scene, mode}: {scenarioId: string; scene: SceneSnapshot; mode: SceneMode}) {
+  const hasScene = scene.objects.length > 0;
+  const sphereColor = sceneObjectColor(scene, "Sphere", "rgb(24,89,230)");
+  const baseColor = sceneObjectColor(scene, "Base", "rgb(80,88,92)");
+  const tableColor = sceneObjectColor(scene, "TableTop", "rgb(160,120,80)");
+  return <div className={`scene-viewport ${mode}`}>
+    <div className="viewport-meta"><span>{mode === "shaded" ? "SHADED VIEW" : "WIREFRAME VIEW"}</span><span>SCENE SUMMARY PROJECTION · WORLD XY</span></div>
+    <svg viewBox="0 0 760 520" role="img" aria-labelledby="scene-canvas-title scene-canvas-description">
+      <title id="scene-canvas-title">{hasScene ? "Replay 完成后的 Rhino 场景" : "等待场景结果"}</title>
+      <desc id="scene-canvas-description">{hasScene ? `${scene.objects.length} 个脱敏合成对象的线框视图` : "尚未读取到对象"}</desc>
+      <g className="cad-grid" aria-hidden="true">
+        <path d="M36 410H724M75 366H685M112 326H648M150 290H610M188 257H572M226 228H534" />
+        <path d="M380 112V478M296 134L230 478M464 134L530 478M210 165L78 478M550 165L682 478" />
+      </g>
+      <g className="cad-axis" aria-hidden="true"><path d="M92 416h74M92 416v-74M92 416l-42 29" /><text x="171" y="421">X</text><text x="86" y="335">Z</text><text x="32" y="458">Y</text></g>
+      {hasScene && scenarioId === "privacy-route" ? <g className="cad-model cad-table" style={{color: tableColor}}>
+        <path d="M230 242L382 174L548 247L386 326Z" />
+        <path d="M230 242v26l156 79v-21M548 247v26l-162 74" />
+        <path d="M253 279v121l23 12V291M504 282v118l-23 12V293M359 338v108l23 12V347M431 332v111l-22 11V343" />
+      </g> : null}
+      {hasScene && scenarioId === "self-correction" ? <g className="cad-model cad-ball" style={{color: sphereColor}} data-object-color={scene.objects.find((item) => item.name === "Sphere")?.color?.join(",")}>
+        <ellipse cx="382" cy="284" rx="126" ry="121" />
+        <ellipse cx="382" cy="284" rx="126" ry="37" />
+        <path d="M382 163c-49 35-49 207 0 242M382 163c49 35 49 207 0 242" />
+      </g> : null}
+      {hasScene && scenarioId !== "privacy-route" && scenarioId !== "self-correction" ? <g className="cad-stack">
+        <g className="cad-model cad-base" style={{color: baseColor}}><path d="M223 337L378 267L545 341L384 422Z" /><path d="M223 337v27l161 82v-24M545 341v28l-161 77" /></g>
+        <g className="cad-model cad-sphere" style={{color: sphereColor}} data-object-color={scene.objects.find((item) => item.name === "Sphere")?.color?.join(",")}><ellipse cx="382" cy="252" rx="96" ry="91" /><ellipse cx="382" cy="252" rx="96" ry="28" /><path d="M382 161c-38 26-38 156 0 182M382 161c38 26 38 156 0 182" /></g>
+      </g> : null}
+      {!hasScene ? <g className="cad-empty"><circle cx="380" cy="286" r="34" /><path d="M380 267v38M361 286h38" /><text x="380" y="344">WAITING FOR SCENE SUMMARY</text></g> : null}
+    </svg>
+    <div className={`viewport-state ${hasScene ? "ready" : ""}`}><i />{hasScene ? "SCENE VERIFIED" : "SCENE PENDING"}</div>
+  </div>;
 }
 
 function SceneColumn({title, scene, empty}: {title: string; scene: SceneSnapshot; empty: string}) {
@@ -624,8 +822,15 @@ function SceneColumn({title, scene, empty}: {title: string; scene: SceneSnapshot
 
 function ObjectCard({object}: {object: SceneObject}) {
   const color = object.color?.length === 3 ? `rgb(${object.color.join(",")})` : "#738087";
-  const groups = object.groups?.length ? ` · ${object.groups.join(", ")}` : "";
-  return <article className="object-card"><span className="swatch" style={{background: color}} /><div><strong>{object.name || object.type}</strong><p>{object.type} · {object.layer}{groups}</p><code>size {object.size?.join(" × ")} · center {object.center?.join(", ")}</code></div></article>;
+  const isSphere = object.name?.toLowerCase().includes("sphere") && object.size?.length === 3 && object.size.every((value) => Math.abs(value - object.size[0]) < .01);
+  const radius = isSphere ? object.size[0] / 2 : undefined;
+  return <article className="object-card"><span className="swatch" style={{background: color}} aria-label={`RGB ${object.color?.join(" / ")}`} /><div><div className="object-title"><strong>{object.name || object.type}</strong><code>{object.type}</code></div><dl className="object-facts">
+    {radius !== undefined && <div><dt>Radius</dt><dd>{radius}</dd></div>}
+    <div><dt>Dimensions</dt><dd>{object.size?.join(" × ")}</dd></div>
+    <div><dt>Center</dt><dd>[{object.center?.join(", ")}]</dd></div>
+    <div><dt>Color</dt><dd>RGB {object.color?.join(" / ")}</dd></div>
+    <div><dt>Layer</dt><dd>{object.layer}</dd></div>
+  </dl></div></article>;
 }
 
 function AuditFact({label, value, good = false}: {label: string; value: string; good?: boolean}) {
