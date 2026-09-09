@@ -65,7 +65,7 @@
       "id": "self-correction",
       "title": "错误恢复",
       "kicker": "MISMATCH → CORRECT → RECHECK",
-      "goal": "展示第一次场景断言不匹配后，Agent 修改尺寸和颜色，再次读取 Rhino 并通过同一断言。",
+      "goal": "展示第一次场景断言不匹配后，Agent 修改尺寸和颜色，再次读取 Rhino 并分别通过几何与颜色断言。",
       "input": "创建一个蓝色球体；读取场景，如尺寸或颜色不符则修正到半径 12、RGB 0/0/255 后再次验证。",
       "expected": [
         "第一次断言明确显示尺寸与颜色不匹配",
@@ -82,15 +82,15 @@
           "kind": "count",
           "selector": {"type": "Surface", "size": [24, 24, 24]},
           "n": 1,
-          "label": "只保留一个目标球体",
-          "expected_text": "1 个 24×24×24 Surface"
+          "label": "纠错后的球体半径",
+          "expected_text": "半径 12；包围盒 24×24×24"
         },
         {
           "kind": "property",
           "selector": {"type": "Surface", "size": [24, 24, 24]},
           "props": {"color": [0, 0, 255]},
-          "label": "纠错后的尺寸与颜色",
-          "expected_text": "24×24×24，RGB 0/0/255"
+          "label": "纠错后的球体颜色",
+          "expected_text": "RGB 0/0/255"
         }
       ]
     },

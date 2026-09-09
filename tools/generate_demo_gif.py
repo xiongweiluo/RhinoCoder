@@ -131,16 +131,16 @@ def generate(source: Path, output: Path) -> None:
     if payload.get("provenance") != "synthetic" or payload.get("privacy", {}).get("reviewed") is not True:
         raise SystemExit("Refusing to render a Replay that is not explicitly synthetic and privacy reviewed.")
     events = payload.get("events") or []
-    stops = [1, 3, 5, 6, 7, 9, 10, 11, 12]
+    stops = [1, 3, 5, 7, 8, 10, 11, 13, 14]
     captions = [
         "A natural-language task starts a traceable run.",
         "The local privacy gate approves sanitized geometry; rules choose a backend.",
         "Rhino geometry is read back through Scene Summary.",
-        "A programmatic assertion finds the size/color mismatch.",
+        "Independent radius and color assertions expose both mismatches.",
         "The closed loop starts a targeted correction.",
         "Scale and color tools update the same Rhino object.",
         "A second scene read captures the corrected result.",
-        "The locked assertion now passes.",
+        "Both locked assertions now pass against the re-read scene.",
         "The run completes with events, metrics, and evidence.",
     ]
     frames = [render_frame(events[:stop], caption) for stop, caption in zip(stops, captions, strict=True)]

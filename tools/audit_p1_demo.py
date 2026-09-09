@@ -154,7 +154,7 @@ def audit_p1(root: Path = ROOT) -> P1Audit:
         final_assertions = [event for event in assertions if int(event.get("seq", 0)) > final_scene_seq]
         if not final_assertions or any((event.get("payload") or {}).get("success") is not True for event in final_assertions):
             audit.findings.append(f"{scenario_id}: 最终验证必须包含全部通过的 assertion 证据")
-        expected_detailed_count = {"normal-loop": 5, "privacy-route": 3}.get(scenario_id)
+        expected_detailed_count = {"normal-loop": 5, "self-correction": 2, "privacy-route": 3}.get(scenario_id)
         if expected_detailed_count is not None and len(final_assertions) != expected_detailed_count:
             audit.findings.append(
                 f"{scenario_id}: 最终详细 assertion 数应为 {expected_detailed_count}，实际 {len(final_assertions)}"
@@ -165,8 +165,11 @@ def audit_p1(root: Path = ROOT) -> P1Audit:
                 audit.findings.append(f"{scenario_id}: assertion 缺少 Expected / Actual")
         if scenario_id == "self-correction":
             outcomes = [(event.get("payload") or {}).get("success") for event in assertions]
-            if outcomes != [False, True]:
-                audit.findings.append("self-correction: 必须保留首次失败与复检通过证据")
+            names = [(event.get("payload") or {}).get("name") for event in assertions]
+            if outcomes != [False, False, True, True]:
+                audit.findings.append("self-correction: 必须保留半径、颜色的首次失败与复检通过证据")
+            if names != ["sphere_radius", "sphere_color", "sphere_radius", "sphere_color"]:
+                audit.findings.append("self-correction: 半径与颜色 assertion 名称或顺序漂移")
         if scenario_id == "privacy-route":
             privacy_events = [event for event in events if event.get("type") == "privacy.assessed"]
             decision = (privacy_events[0].get("payload") or {}) if privacy_events else {}
@@ -191,7 +194,7 @@ def audit_p1(root: Path = ROOT) -> P1Audit:
     if e2e_path.is_file():
         e2e_text = e2e_path.read_text(encoding="utf-8")
         audit.browser_tests = e2e_text.count("test(")
-        for phrase in ("three public Replay scenarios", "privacy route Replay", "390px viewport"):
+        for phrase in ("three public Replay scenarios", "privacy route Replay", "recovery Replay", "1440x900 viewport", "390px viewport"):
             if phrase not in e2e_text:
                 audit.findings.append(f"浏览器测试缺少覆盖: {phrase}")
     check_text = (root / "scripts" / "check.sh").read_text(encoding="utf-8")

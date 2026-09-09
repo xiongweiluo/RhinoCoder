@@ -24,6 +24,7 @@
 - Prompt 契约提升为 `closed-loop-v2`，对会实质改变结果的单位、尺寸、对象、方向、对齐和回滚范围要求写入前澄清；取消异常在并发清理包装下仍保留 `run.cancelled` 终态。
 - P2a 首轮保留 30/30 原始结果；5 次模型连接中断以冻结 v1 Prompt 重填同一未完成槽位并保留中断记录，最终有效自动通过 18/30（60.0%，Wilson 95% 区间 42.3%–75.4%）。三类代表性失败一次复测 2/3，不外推总体修复后成功率；P2b 真人可用性验证延期。
 - Public Replay 将默认 Trace 收敛为任务、隐私、路由、几何执行、场景读回、验证和恢复等关键语义事件，同时保留完整事件筛选；正常闭环基于冻结 Scene Summary 展示 5 项 Expected/Actual 断言，场景默认按真实 RGB 着色并可切换 Wireframe。桌面仍为 Trace / Scene / Verification 三栏，窄屏改为先验证、后场景与 Trace 的证据阅读顺序。
+- Scene Summary 投影按对象边界与场景复杂度自动取景，典型笔记本首屏可同时看到任务、摘要、核心 Trace、主要几何和验证入口；错误恢复明确展示 Scene read → mismatch → correction → Scene re-read → recovered，并将半径与颜色拆为两项可复算断言。隐私场景补充出站请求前最小化因果说明，重复桌腿按真实群组证据折叠为 `Legs ×4`。
 
 ## [0.3.0] - 2026-09-08
 

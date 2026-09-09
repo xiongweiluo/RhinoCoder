@@ -91,6 +91,7 @@ function semanticEvents(events: AgentEvent[]): AgentEvent[] {
   const output: AgentEvent[] = [];
   let toolBatch: AgentEvent[] = [];
   let assertionBatch: AgentEvent[] = [];
+  let correctionSeen = false;
 
   const flushTools = () => {
     if (!toolBatch.length) return;
@@ -140,7 +141,15 @@ function semanticEvents(events: AgentEvent[]): AgentEvent[] {
     flushTools();
     flushAssertions();
     if (["run.started", "privacy.assessed", "privacy.blocked", "route.selected", "route.fallback", "scene.checked", "correction.started", "run.failed", "run.cancelled"].includes(event.type)) {
-      output.push(event);
+      output.push(event.type === "scene.checked" ? {
+        ...event,
+        payload: {
+          ...event.payload,
+          name: correctionSeen ? "Scene re-read" : "Scene read",
+          re_read: correctionSeen,
+        },
+      } : event);
+      if (event.type === "correction.started") correctionSeen = true;
     }
   }
   flushTools();
@@ -168,6 +177,11 @@ function historyFromReplay(payload: ReplayPayload): HistoryItem {
     is_replay: true,
     audit_summary: payload.audit_summary,
   };
+}
+
+function formatSummaryDuration(duration?: number) {
+  if (duration === undefined) return "--";
+  return `${(duration / 1000).toFixed(1)} s`;
 }
 
 export default function App() {
@@ -454,6 +468,9 @@ export default function App() {
   const cost = metricNumber("estimated_cost_usd");
   const duration = metricNumber("duration_ms");
   const passedAssertions = finalAssertions.filter((event) => event.payload.success === true).length;
+  const recovered = priorAssertions.some((event) => event.payload.success === false)
+    && finalAssertions.length > 0
+    && passedAssertions === finalAssertions.length;
 
   useEffect(() => {
     const onShortcut = (event: globalThis.KeyboardEvent) => {
@@ -582,7 +599,7 @@ export default function App() {
         <Metric label="run_id" value={currentRun || "--"} mono />
         <Metric label="Privacy" value={privacy?.action ?? "--"} mono />
         <Metric label="Route" value={route?.selected_backend ?? "--"} mono />
-        <Metric label="Runtime" value={duration !== undefined ? `${Math.round(duration)} ms` : "--"} mono />
+        <Metric label="Runtime" value={publicReplayMode ? formatSummaryDuration(duration) : duration !== undefined ? `${Math.round(duration)} ms` : "--"} mono />
         {publicReplayMode ? <Metric label="Assertions" value={finalAssertions.length ? `${passedAssertions} / ${finalAssertions.length}` : "--"} tone={finalAssertions.length && passedAssertions === finalAssertions.length ? "good" : "neutral"} mono /> : <><Metric label="成本" value={cost !== undefined ? `$${cost.toFixed(6)}` : "--"} /><Metric label="工具错误" value={String(toolErrors)} tone={toolErrors ? "bad" : "good"} /><Metric label="恢复次数" value={String(recoveries)} tone={recoveries ? "warn" : "neutral"} /></>}
       </section>
 
@@ -625,30 +642,28 @@ export default function App() {
             <div><span>BEFORE</span><strong>{beforeScene.total}</strong><small>objects</small></div>
             <i aria-hidden="true">→</i>
             <div><span>AFTER</span><strong>{afterScene.total}</strong><small>objects</small></div>
-            <div className="scene-object-index">
-              {afterScene.objects.slice(0, 5).map((object) => <span key={object.object_id}><i style={{background: object.color?.length === 3 ? `rgb(${object.color.join(",")})` : undefined}} />{object.name || object.type}</span>)}
-            </div>
+            <SceneObjectIndex scene={afterScene} />
           </div>
         </section>
 
         <aside className="spatial-evidence">
-          <section className={`panel proof-verdict ${finalAssertions.length && passedAssertions === finalAssertions.length ? "passed" : ""} ${priorAssertions.some((event) => event.payload.success === false) ? "recovered" : ""}`} aria-label="验证结论">
-            <div><span className="eyebrow">VERIFICATION</span><strong>{finalAssertions.length ? passedAssertions === finalAssertions.length ? "VERIFIED" : "CHECK" : "—"}</strong></div>
-            <div className="proof-count"><b>{finalAssertions.length ? `${passedAssertions} / ${finalAssertions.length}` : "—"}</b><span>{finalAssertions.length ? "assertions passed" : "awaiting evidence"}</span></div>
+          <section className={`panel proof-verdict ${finalAssertions.length && passedAssertions === finalAssertions.length ? "passed" : ""} ${recovered ? "recovered" : ""}`} aria-label="验证结论">
+            <div className="proof-status"><span className="eyebrow">VERIFICATION</span><strong>{finalAssertions.length ? recovered ? "RECOVERED" : passedAssertions === finalAssertions.length ? "VERIFIED" : "CHECK" : "—"}</strong>{recovered && <small>Verified after correction</small>}</div>
+            <div className="proof-count"><b>{finalAssertions.length ? `${passedAssertions} / ${finalAssertions.length}` : "—"}</b><span>{finalAssertions.length ? recovered ? "final assertions passed" : "assertions passed" : "awaiting evidence"}</span></div>
           </section>
           <section className="panel assertion-panel" aria-labelledby="assertion-heading">
             <div className="section-title"><div><span className="eyebrow">PROGRAMMATIC PROOF</span><h2 id="assertion-heading">为什么通过</h2></div><span>EXPECTED / ACTUAL</span></div>
             {finalAssertions.length === 0 && <Empty title="暂无断言" text="Replay 完成后显示验证结果。" />}
-            {priorAssertions.some((event) => event.payload.success === false) && <div className="recovery-proof"><strong>Recovered after mismatch</strong><span>场景首次复检未通过，Agent 修正目标对象后再次读取并验证。</span></div>}
+            {recovered && <div className="recovery-proof"><strong>Mismatch → correction → re-read</strong><span>首次读回未通过；Agent 修正目标对象、重新读取场景，并用最终断言复检。</span></div>}
             <div className="assertion-list">
               {finalAssertions.slice(0, 3).map((event) => <AssertionRow event={event} key={`${event.run_id}-assert-${event.seq}`} />)}
               {finalAssertions.length > 3 && <details className="more-assertions"><summary>查看其余 {finalAssertions.length - 3} 项验证</summary><div>{finalAssertions.slice(3).map((event) => <AssertionRow event={event} key={`${event.run_id}-assert-${event.seq}`} />)}</div></details>}
-              {priorAssertions.some((event) => event.payload.success === false) && <details className="prior-assertions"><summary>查看首次 mismatch 证据</summary><div>{priorAssertions.filter((event) => event.payload.success === false).map((event) => <AssertionRow event={event} key={`${event.run_id}-prior-assert-${event.seq}`} />)}</div></details>}
+              {recovered && <details className="prior-assertions"><summary>查看首次 mismatch 证据</summary><div>{priorAssertions.filter((event) => event.payload.success === false).map((event) => <AssertionRow event={event} key={`${event.run_id}-prior-assert-${event.seq}`} />)}</div></details>}
             </div>
           </section>
           <section className="panel scene-inspector" aria-labelledby="scene-inspector-heading">
             <div className="section-title"><div><span className="eyebrow">OBJECT INSPECTOR</span><h2 id="scene-inspector-heading">对象明细</h2></div></div>
-            <div className="inspector-list">{afterScene.objects.length === 0 ? <Empty title="空白场景" text="等待最终 Scene Summary。" /> : afterScene.objects.slice(0, 5).map((object) => <ObjectCard key={object.object_id} object={object} />)}</div>
+            <SceneInspector scene={afterScene} />
           </section>
         </aside>
       </section> : <section className="workspace">
@@ -696,7 +711,7 @@ export default function App() {
       </section>}
 
       <section className={`panel audit-panel ${publicReplayMode ? "compact" : ""}`} aria-labelledby="audit-heading">
-        <div><span className="eyebrow">DATA BOUNDARY</span><h2 id="audit-heading">脱敏审计摘要</h2>{!publicReplayMode && <p>浏览器只接收最小化展示载荷；完整本地 Trace、模型消息和真实对象 GUID 不下发。</p>}</div>
+        <div><span className="eyebrow">DATA BOUNDARY</span><h2 id="audit-heading">脱敏审计摘要</h2>{selectedScenarioId === "privacy-route" && publicReplayMode ? <p className="privacy-causality"><strong>Before outbound request</strong>敏感字段在出站模型请求前完成最小化。</p> : !publicReplayMode ? <p>浏览器只接收最小化展示载荷；完整本地 Trace、模型消息和真实对象 GUID 不下发。</p> : null}</div>
         <div className="audit-grid">
           <AuditFact label="载荷" value={auditSummary.browser_payload} />
           <AuditFact label="原始 Trace" value={auditSummary.raw_trace_exposed ? "暴露" : "未暴露"} good={!auditSummary.raw_trace_exposed} />
@@ -759,7 +774,7 @@ function eventSummary(event: AgentEvent) {
   if (event.type === "tool.completed") return `${payload.success === false ? "失败" : "成功"} · ${Math.round(Number(payload.duration_ms ?? 0))} ms`;
   if (event.type === "scene.checked") {
     const scene = payload.scene_summary as SceneSnapshot | undefined;
-    return `读取 ${scene?.total ?? scene?.objects?.length ?? 0} 个对象`;
+    return `${payload.re_read === true ? "重新读取" : "读取"} ${scene?.total ?? scene?.objects?.length ?? 0} 个对象`;
   }
   if (event.type === "assertion.checked") return `${payload.success ? "通过" : "不通过"} · 期望 ${String(payload.expected ?? "--")}`;
   if (event.type === "correction.started") return `第 ${payload.round ?? "--"} 轮 · ${payload.reason ?? payload.tool ?? "根据场景重新规划"}`;
@@ -773,12 +788,62 @@ function eventSummary(event: AgentEvent) {
 function AssertionRow({event}: {event: AgentEvent}) {
   const payload = event.payload as Record<string, unknown>;
   const ok = payload.success === true;
-  return <article className={`assertion-row ${ok ? "passed" : "failed"}`}><span aria-hidden="true">{ok ? "✓" : "×"}</span><div><strong className="machine-name">{String(payload.name ?? "几何断言")}</strong><dl><div><dt>Expected</dt><dd>{String(payload.expected ?? "--")}</dd></div><div><dt>Actual</dt><dd>{String(payload.actual ?? "--")}</dd></div></dl></div></article>;
+  return <article className={`assertion-row ${ok ? "passed" : "failed"}`}><span aria-hidden="true">{ok ? "✓" : "×"}</span><div><strong className="machine-name">{String(payload.name ?? "几何断言")}</strong><dl><div><dt>Expected</dt><dd>{String(payload.expected ?? "--")}</dd></div><div><dt>Actual</dt><dd className="actual-value">{String(payload.actual ?? "--")}{ok && <b aria-label="匹配">✓</b>}</dd></div></dl></div></article>;
 }
 
 function sceneObjectColor(scene: SceneSnapshot, name: string, fallback: string) {
   const object = scene.objects.find((item) => item.name.toLowerCase() === name.toLowerCase());
   return object?.color?.length === 3 ? `rgb(${object.color.join(",")})` : fallback;
+}
+
+type ProjectedBounds = {x: number; y: number; width: number; height: number};
+
+const PROJECTED_SCENE_BOUNDS: Record<string, ProjectedBounds> = {
+  "normal-loop": {x: 223, y: 161, width: 322, height: 285},
+  "self-correction": {x: 256, y: 163, width: 252, height: 242},
+  "privacy-route": {x: 230, y: 174, width: 318, height: 284},
+};
+
+function fittedSceneViewBox(scenarioId: string, objectCount: number) {
+  const bounds = PROJECTED_SCENE_BOUNDS[scenarioId] ?? {x: 188, y: 145, width: 384, height: 310};
+  const frameAspect = 760 / 520;
+  const targetFill = objectCount >= 5 ? .7 : objectCount === 1 ? .56 : .64;
+  let width = bounds.width / targetFill;
+  let height = bounds.height / targetFill;
+  if (width / height < frameAspect) width = height * frameAspect;
+  else height = width / frameAspect;
+  const centerX = bounds.x + bounds.width / 2;
+  const centerY = bounds.y + bounds.height / 2;
+  return [centerX - width / 2, centerY - height / 2, width, height]
+    .map((value) => Math.round(value * 10) / 10)
+    .join(" ");
+}
+
+function tableLegs(scene: SceneSnapshot) {
+  const legs = scene.objects.filter((object) => /^Leg\s+\d+$/i.test(object.name ?? ""));
+  if (legs.length < 2) return [];
+  const signature = (object: SceneObject) => JSON.stringify({
+    type: object.type,
+    size: object.size,
+    color: object.color,
+    layer: object.layer,
+    groups: object.groups,
+  });
+  return legs.every((object) => signature(object) === signature(legs[0])) ? legs : [];
+}
+
+function colorStyle(object: SceneObject) {
+  return object.color?.length === 3 ? `rgb(${object.color.join(",")})` : undefined;
+}
+
+function SceneObjectIndex({scene}: {scene: SceneSnapshot}) {
+  const legs = tableLegs(scene);
+  const legIds = new Set(legs.map((object) => object.object_id));
+  const singles = scene.objects.filter((object) => !legIds.has(object.object_id)).slice(0, 5);
+  return <div className="scene-object-index">
+    {singles.map((object) => <span key={object.object_id}><i style={{background: colorStyle(object)}} />{object.name || object.type}</span>)}
+    {legs.length > 0 && <span><i style={{background: colorStyle(legs[0])}} />Legs ×{legs.length}</span>}
+  </div>;
 }
 
 function PublicSceneCanvas({scenarioId, scene, mode}: {scenarioId: string; scene: SceneSnapshot; mode: SceneMode}) {
@@ -787,26 +852,26 @@ function PublicSceneCanvas({scenarioId, scene, mode}: {scenarioId: string; scene
   const baseColor = sceneObjectColor(scene, "Base", "rgb(80,88,92)");
   const tableColor = sceneObjectColor(scene, "TableTop", "rgb(160,120,80)");
   return <div className={`scene-viewport ${mode}`}>
-    <div className="viewport-meta"><span>{mode === "shaded" ? "SHADED VIEW" : "WIREFRAME VIEW"}</span><span>SCENE SUMMARY PROJECTION · WORLD XY</span></div>
-    <svg viewBox="0 0 760 520" role="img" aria-labelledby="scene-canvas-title scene-canvas-description">
+    <div className="viewport-meta"><span>SCENE SUMMARY PROJECTION · WORLD XY</span></div>
+    <svg viewBox={hasScene ? fittedSceneViewBox(scenarioId, scene.objects.length) : "0 0 760 520"} preserveAspectRatio="xMidYMid slice" data-auto-fit={hasScene ? "bounds" : "pending"} role="img" aria-labelledby="scene-canvas-title scene-canvas-description">
       <title id="scene-canvas-title">{hasScene ? "Replay 完成后的 Rhino 场景" : "等待场景结果"}</title>
-      <desc id="scene-canvas-description">{hasScene ? `${scene.objects.length} 个脱敏合成对象的线框视图` : "尚未读取到对象"}</desc>
+      <desc id="scene-canvas-description">{hasScene ? `${scene.objects.length} 个脱敏合成对象的${mode === "shaded" ? "着色" : "线框"}投影视图` : "尚未读取到对象"}</desc>
       <g className="cad-grid" aria-hidden="true">
         <path d="M36 410H724M75 366H685M112 326H648M150 290H610M188 257H572M226 228H534" />
         <path d="M380 112V478M296 134L230 478M464 134L530 478M210 165L78 478M550 165L682 478" />
       </g>
       <g className="cad-axis" aria-hidden="true"><path d="M92 416h74M92 416v-74M92 416l-42 29" /><text x="171" y="421">X</text><text x="86" y="335">Z</text><text x="32" y="458">Y</text></g>
-      {hasScene && scenarioId === "privacy-route" ? <g className="cad-model cad-table" style={{color: tableColor}}>
+      {hasScene && scenarioId === "privacy-route" ? <g className="cad-model cad-table cad-subject" style={{color: tableColor}}>
         <path d="M230 242L382 174L548 247L386 326Z" />
         <path d="M230 242v26l156 79v-21M548 247v26l-162 74" />
         <path d="M253 279v121l23 12V291M504 282v118l-23 12V293M359 338v108l23 12V347M431 332v111l-22 11V343" />
       </g> : null}
-      {hasScene && scenarioId === "self-correction" ? <g className="cad-model cad-ball" style={{color: sphereColor}} data-object-color={scene.objects.find((item) => item.name === "Sphere")?.color?.join(",")}>
+      {hasScene && scenarioId === "self-correction" ? <g className="cad-model cad-ball cad-subject" style={{color: sphereColor}} data-object-color={scene.objects.find((item) => item.name === "Sphere")?.color?.join(",")}>
         <ellipse cx="382" cy="284" rx="126" ry="121" />
         <ellipse cx="382" cy="284" rx="126" ry="37" />
         <path d="M382 163c-49 35-49 207 0 242M382 163c49 35 49 207 0 242" />
       </g> : null}
-      {hasScene && scenarioId !== "privacy-route" && scenarioId !== "self-correction" ? <g className="cad-stack">
+      {hasScene && scenarioId !== "privacy-route" && scenarioId !== "self-correction" ? <g className="cad-stack cad-subject">
         <g className="cad-model cad-base" style={{color: baseColor}}><path d="M223 337L378 267L545 341L384 422Z" /><path d="M223 337v27l161 82v-24M545 341v28l-161 77" /></g>
         <g className="cad-model cad-sphere" style={{color: sphereColor}} data-object-color={scene.objects.find((item) => item.name === "Sphere")?.color?.join(",")}><ellipse cx="382" cy="252" rx="96" ry="91" /><ellipse cx="382" cy="252" rx="96" ry="28" /><path d="M382 161c-38 26-38 156 0 182M382 161c38 26 38 156 0 182" /></g>
       </g> : null}
@@ -818,6 +883,28 @@ function PublicSceneCanvas({scenarioId, scene, mode}: {scenarioId: string; scene
 
 function SceneColumn({title, scene, empty}: {title: string; scene: SceneSnapshot; empty: string}) {
   return <div className="scene-column"><div className="scene-column-head"><strong>{title}</strong><span>{scene.total ?? scene.objects.length} objects{scene.capped ? " · capped" : ""}</span></div><div className="objects">{scene.objects.length === 0 ? <p className="scene-empty">{empty}</p> : scene.objects.slice(0, 8).map((object) => <ObjectCard key={object.object_id} object={object} />)}</div></div>;
+}
+
+function SceneInspector({scene}: {scene: SceneSnapshot}) {
+  if (scene.objects.length === 0) return <div className="inspector-list"><Empty title="空白场景" text="等待最终 Scene Summary。" /></div>;
+  const legs = tableLegs(scene);
+  const legIds = new Set(legs.map((object) => object.object_id));
+  const singles = scene.objects.filter((object) => !legIds.has(object.object_id));
+  return <div className="inspector-list">
+    {singles.map((object) => <ObjectCard key={object.object_id} object={object} />)}
+    {legs.length > 0 && <ObjectGroupCard label="Legs" objects={legs} />}
+  </div>;
+}
+
+function ObjectGroupCard({label, objects}: {label: string; objects: SceneObject[]}) {
+  const sample = objects[0];
+  const color = colorStyle(sample) ?? "#738087";
+  return <article className="object-card object-group-card"><span className="swatch" style={{background: color}} aria-label={`RGB ${sample.color?.join(" / ")}`} /><div><div className="object-title"><strong>{label} × {objects.length}</strong><code>{sample.type}</code></div><dl className="object-facts">
+    <div><dt>Dimensions</dt><dd>{sample.size?.join(" × ")}</dd></div>
+    <div><dt>Color</dt><dd>RGB {sample.color?.join(" / ")}</dd></div>
+    <div><dt>Layer</dt><dd>{sample.layer}</dd></div>
+    <div><dt>Group</dt><dd>{sample.groups?.join(", ") || "—"}</dd></div>
+  </dl><details><summary>View individual objects</summary><ul>{objects.map((object) => <li key={object.object_id}><span>{object.name}</span><code>[{object.center?.join(", ")}]</code></li>)}</ul></details></div></article>;
 }
 
 function ObjectCard({object}: {object: SceneObject}) {

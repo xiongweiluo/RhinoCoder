@@ -28,7 +28,7 @@
     {
       "path": "eval/replays/self_correction.json",
       "classification": "synthetic_replay",
-      "sha256": "629727f9aba28c140fa23476b568cae1cbce0fba7a236bda71622011e67ee79c"
+      "sha256": "9aa1bf417cac7e2982a7bb2755ac0e3451bb76fa7adfb9b79eb477f662df3097"
     },
     {
       "path": "eval/replays/table_group.json",
