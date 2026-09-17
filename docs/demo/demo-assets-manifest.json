@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "reviewed_at": "2026-09-09",
+  "reviewed_at": "2026-09-17",
   "source": {
     "path": "eval/replays/self_correction.json",
     "classification": "synthetic_replay",
@@ -24,6 +24,23 @@
       "path": "docs/assets/data-flow.svg",
       "classification": "code_generated_diagram",
       "sha256": "ca3c97ed0ed54842140dc19faece4994dd13508b1731e402e7b3ab6aca3fca78"
+    },
+    {
+      "path": "docs/assets/rhinocoder-real-rhino-demo.mov",
+      "classification": "sanitized_real_rhino_single_window_frame_sequence",
+      "sha256": "7453dbd674214154d6b258262cce8990c1c07edd66ca8e90a2a21edeaf1312f8",
+      "width": 1280,
+      "height": 720,
+      "duration_seconds": 15,
+      "audio": false,
+      "privacy_review": "four timeline samples plus source frames reviewed; no identity, path, key, notification, or real project data"
+    },
+    {
+      "path": "docs/assets/rhinocoder-real-rhino-result.png",
+      "classification": "sanitized_real_rhino_single_window_result",
+      "sha256": "aa01356232091d23056bf694a3f68ae9a826de397550285aa11557386bd0e5f0",
+      "width": 1200,
+      "height": 675
     }
   ]
 }

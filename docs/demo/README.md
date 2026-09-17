@@ -8,11 +8,15 @@
 - [中文字幕](rhinocoder-demo.zh-CN.srt)
 - [英文字幕](rhinocoder-demo.en.srt)
 - [可重复生成的合成 Replay GIF](../assets/replay-demo.gif)
+- [真实 Rhino 单窗口证据短片](../assets/rhinocoder-real-rhino-demo.mov)
+- [真实 Rhino 结果帧](../assets/rhinocoder-real-rhino-result.png)
 - [演示资产哈希清单](demo-assets-manifest.json)
 - [P1 三个固定演示场景清单](p1-scenarios.json)
 - [P1 招聘者演示链路验收](../p1-recruiter-demo.md)
 
-GIF 是可立即公开的替代素材：来源固定为 `eval/replays/self_correction.json`，其中坐标、对象 ID、图层和模型名均为合成值。它不冒充真实 Rhino 录屏。
+GIF 的来源固定为 `eval/replays/self_correction.json`，其中坐标、对象 ID、图层和模型名均为合成值。真实 Rhino 短片则来自空白可丢弃文档中的真实执行，明确标注为执行前/后单窗口帧序列；两类素材不混淆。
+
+真实短片为 15 秒、1280×720、无音频 H.264 MOV。发布前抽查执行前、转场、执行后多个时间点，并核对源帧：只包含 Rhino 窗口、任务结果和最小化运行编号，不包含桌面、身份、通知、文件路径、密钥或真实项目数据。资产清单锁定其 SHA-256、时长、尺寸和隐私复核声明。
 
 无需录屏即可使用三个公开只读入口：`/?demo=normal-loop&mode=replay`、`/?demo=self-correction&mode=replay`、`/?demo=privacy-route&mode=replay`。这些页面只发 GET，不建立 WebSocket，也不会触发 Rhino、模型或反馈写入。浏览器端到端验收命令：
 
@@ -51,7 +55,7 @@ ffmpeg -i data/demo-recordings/rhinocoder-v0.3.0.mov \
   data/demo-recordings/rhinocoder-v0.3.0-captioned.mp4
 ```
 
-真实视频必须由项目所有者完成最终屏幕复核与录制；仓库不包含真实项目画面。未经明确授权，不上传视频、不创建 Tag 或 GitHub Release。
+真实单窗口短片已在项目所有者授权下完成并进入仓库；它是隐私安全的证据短片，不宣称为连续桌面操作录屏。任何未来更长版本仍必须逐帧复核，未经明确授权不得上传新素材或创建新版本发布。
 
 ## GIF 再生成
 

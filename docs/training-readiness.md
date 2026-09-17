@@ -2,9 +2,9 @@
 
 验收日期：2026-09-06
 
-项目状态：**Training Ready — Waiting for School GPU Access**
+项目状态：**GPU Access Available — C1 Not Started**
 
-本阶段没有执行正式训练、没有下载 7B 权重，也没有读取 A5 holdout。正式 GPU 训练仍受阶段 C 的用户授权门禁约束。
+本阶段没有执行正式训练、没有下载 7B 权重，也没有读取 A5 holdout。项目所有者于 2026-09-17 确认已获得 GPU 访问；集群参数、CUDA/驱动、配额和调度器仍需在 C1 现场验收后才能启动训练。
 
 ## B1：首个实验范围
 
@@ -101,7 +101,7 @@ python tools/run_training.py report --run-dir data/training/runs/rhinocoder-qwen
 
 ## B4：学校 GPU 接入清单
 
-实际学校参数尚不可访问，因此不伪造主机名、GPU、CUDA 或配额。已提供完整模板 `training/school_gpu.example.json`；获得权限后复制为被 Git 忽略的 `training/school_gpu.local.json` 并填写。严格检查会拒绝任何 `REQUIRED/RECORD/VERIFY_AT_ACCESS` 占位项。
+GPU 访问已获得，但实际学校参数尚未在本仓库执行 C1 验收，因此不伪造主机名、GPU、CUDA 或配额。已提供完整模板 `training/school_gpu.example.json`；C1 开始时复制为被 Git 忽略的 `training/school_gpu.local.json` 并填写。严格检查会拒绝任何 `REQUIRED/RECORD/VERIFY_AT_ACCESS` 占位项。
 
 | 类别 | 必填记录 | 验证方式 / 通过条件 |
 | --- | --- | --- |
@@ -141,7 +141,7 @@ qsub -q <school-queue> scripts/train_school_gpu.pbs
 - B1–B4 共 12 项工程准备均完成。
 - 配置审计：通过；train 210、validation 45，哈希与 A5 manifest 一致。
 - CPU 保存/恢复/评测冒烟：通过。
-- 学校接入模板审计：通过；13 个现场值明确等待权限后填写，支持 Slurm/PBS/直接节点，严格检查不会把未知值当成通过。
-- 当前不满足也不声称完成 C1：没有学校 GPU 实测，没有正式训练，没有 holdout 评测。
+- 学校接入模板审计：通过；13 个现场值等待 C1 填写，支持 Slurm/PBS/直接节点，严格检查不会把未知值当成通过。
+- GPU 访问已由项目所有者确认，但当前不满足也不声称完成 C1：尚无现场 GPU 实测、正式训练或 holdout 评测。
 
-结论：数据、配置、脚本、恢复、自动评测、登记、报告和学校接入门禁均已就绪；获得权限并填写站点配置后，无需修改业务代码即可启动最小训练。
+结论：数据、配置、脚本、恢复、自动评测、登记、报告和学校接入门禁均已就绪；下一步是 C1 现场验收并填写站点配置，通过后无需修改业务代码即可启动最小训练。

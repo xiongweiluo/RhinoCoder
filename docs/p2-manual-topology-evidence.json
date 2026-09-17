@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-17T12:39:52.981580+00:00",
+  "environment": {
+    "application": "Rhino 8",
+    "version": "8.21.25188.17002",
+    "document": "blank disposable document"
+  },
+  "scope": "Topology evidence omitted by Scene Summary; not a rerating of the frozen automated baseline.",
+  "holdout_read": 0,
+  "tasks": [
+    {
+      "task_id": "P2-HARD-002",
+      "frozen_baseline_public_run_id": "c52584c1a3f26b2d",
+      "evidence_scope": "supplemental real-Rhino topology inspection",
+      "baseline_score_changed": false,
+      "reconstruction": {
+        "basis": "frozen baseline tool arguments",
+        "plate": "90x36x6 from (0,0,0)",
+        "cutters": "radius 4 at x=15/45/75, y=18, z=-1..7",
+        "note": "Baseline remains failed because created_type_consumed expected create_cylinder but the run used circle extrusions."
+      },
+      "rhino_object_id_recorded_locally_only": true,
+      "topology": {
+        "passed": true,
+        "assertions": {
+          "closed_solid": true,
+          "bounding_box_matches": true,
+          "top_through_openings": true,
+          "bottom_through_openings": true,
+          "single_boolean_result": true
+        },
+        "actual": {
+          "object_count": 1,
+          "bounding_box_size": [
+            90.0,
+            36.0,
+            6.0
+          ],
+          "brep_face_count": 9,
+          "brep_edge_count": 21,
+          "horizontal_faces": [
+            {
+              "z": 0.0,
+              "inner_loops": 3,
+              "total_loops": 4
+            },
+            {
+              "z": 6.0,
+              "inner_loops": 3,
+              "total_loops": 4
+            }
+          ]
+        },
+        "expected": {
+          "object_count": 1,
+          "bounding_box_size": [
+            90.0,
+            36.0,
+            6.0
+          ],
+          "through_holes": 3,
+          "closed_solid": true
+        }
+      },
+      "viewport_evidence": {
+        "path": "docs/assets/p2-hard-002-rhino-topology.png",
+        "sha256": "19a02576ea51ea09e625c287460521c6f5026269045cc80bc01a62902cd19511",
+        "capture": "Rhino 8 top viewport, ViewCapture 1280x800"
+      }
+    },
+    {
+      "task_id": "P2-HARD-014",
+      "frozen_baseline_public_run_id": "27b30b4d10966ac6",
+      "evidence_scope": "supplemental real-Rhino topology inspection",
+      "baseline_score_changed": false,
+      "reconstruction": {
+        "basis": "frozen baseline fixture and tool arguments",
+        "plate": "60x40x6 centered at (0,0,3)",
+        "existing_cutter": "radius 5, moved from x=50 to x=0, z=-2..8",
+        "note": "Baseline remains failed because it moved first and never produced the required failed-then-successful Boolean sequence."
+      },
+      "rhino_object_id_recorded_locally_only": true,
+      "topology": {
+        "passed": true,
+        "assertions": {
+          "closed_solid": true,
+          "bounding_box_matches": true,
+          "top_through_openings": true,
+          "bottom_through_openings": true,
+          "single_boolean_result": true
+        },
+        "actual": {
+          "object_count": 1,
+          "bounding_box_size": [
+            60.0,
+            40.0,
+            6.0
+          ],
+          "brep_face_count": 7,
+          "brep_edge_count": 15,
+          "horizontal_faces": [
+            {
+              "z": 0.0,
+              "inner_loops": 1,
+              "total_loops": 2
+            },
+            {
+              "z": 6.0,
+              "inner_loops": 1,
+              "total_loops": 2
+            }
+          ]
+        },
+        "expected": {
+          "object_count": 1,
+          "bounding_box_size": [
+            60.0,
+            40.0,
+            6.0
+          ],
+          "through_holes": 1,
+          "closed_solid": true
+        }
+      },
+      "viewport_evidence": {
+        "path": "docs/assets/p2-hard-014-rhino-topology.png",
+        "sha256": "0ad5d223688a07de1c43d1cf11ca3e15dfa52d92922699cb5f7ba71ea9aed6a0",
+        "capture": "Rhino 8 top viewport, ViewCapture 1280x800"
+      }
+    }
+  ],
+  "all_topology_assertions_passed": true
+}

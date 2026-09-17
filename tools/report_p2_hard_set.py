@@ -225,8 +225,8 @@ def build() -> dict[str, Any]:
         },
         "manual_evidence": {
             "declared_tasks": ["P2-HARD-002", "P2-HARD-014", "P2-HARD-017"],
-            "completed": ["P2-HARD-017"],
-            "pending": ["P2-HARD-002", "P2-HARD-014"],
+            "completed": ["P2-HARD-002", "P2-HARD-014", "P2-HARD-017"],
+            "pending": [],
             "usability_study_completed": False,
         },
         "results": results,
@@ -246,9 +246,9 @@ def build() -> dict[str, Any]:
             "sqlite_integrity_and_lineage": "passed",
             "privacy_audit": {
                 "trace_records": 2821,
-                "sqlite_rows": 18156,
+                "sqlite_rows": 18212,
                 "replays": 3,
-                "model_requests": 3545,
+                "model_requests": 3569,
                 "sensitive_findings": 0,
             },
             "browser_e2e": {"passed": 4, "failed": 0},
@@ -259,7 +259,7 @@ def build() -> dict[str, Any]:
             "Thirty anonymous submissions are task-source IDs, not proof of thirty distinct people.",
             "Five provider connection interruptions required same-slot resume with the frozen v1 prompt; all interruption evidence remains visible.",
             "The confidence interval describes only this small frozen set; no statistical significance is claimed.",
-            "Two Rhino visual/topology evidence checks remain pending and are not represented as objective passes; the cancellation UI state has automated browser evidence.",
+            "Supplemental Rhino topology evidence is complete for P2-HARD-002 and P2-HARD-014, but it does not change either frozen baseline failure or the 18/30 score.",
             "Real users did not personally operate the UI; P2b usability validation is postponed.",
             "Local Mock proves interface, forced routing, and safe failure only; it is not evidence of local-model quality.",
         ],
@@ -350,9 +350,11 @@ def render(payload: dict[str, Any]) -> str:
 
 修复版本为 `p2-general-safety-v1`，Prompt 契约提升到 `closed-loop-v2`。评测器 `p2-evaluator-v1.1` 同时修正了 `ignore_transform` 语义：几何指纹只比较包围盒尺寸，不把允许的位移误算为几何变化；冻结任务和断言未改。
 
-## 主观证据与延期项
+## 补充 Rhino 证据与延期项
 
-`P2-HARD-002` 的贯穿孔拓扑和 `P2-HARD-014` 的 Rhino 视口结果保持 **pending**，没有伪装为客观通过；两者的自动基线本身也未通过冻结工具链断言。`P2-HARD-017` 在后端取消、精准清理通过后，又由 Playwright 浏览器控制用例确认取消终态退出运行状态、停止按钮禁用且时间线可见，因此该项界面证据已完成；这仍不是用户亲自操作。
+`P2-HARD-002` 与 `P2-HARD-014` 已在空白、一次性 Rhino 8 文档中按冻结基线参数重建，并通过 RhinoCommon 读取 BRep 拓扑：002 的上下水平面各有 3 个内环，014 各有 1 个内环；两者均为单一闭合实体且包围盒匹配。公开的[最小化机器证据](p2-manual-topology-evidence.json)与 [002 视口](assets/p2-hard-002-rhino-topology.png)、[014 视口](assets/p2-hard-014-rhino-topology.png)均不含对象 GUID。
+
+这些是 Scene Summary 未覆盖的**补充拓扑证据**，不是对冻结基线重新计分：002 仍因未使用要求的 `create_cylinder` 失败，014 仍因没有发生要求的“先失败、移动后成功”布尔序列失败，基线保持 **18/30**。`P2-HARD-017` 的后端取消与精准清理通过后，另由 Playwright 确认取消终态、停止按钮和时间线状态；这仍不是用户亲自操作。
 
 真实用户亲自操作产品、形成性访谈、SUS/主观反馈、直接 Rhino 配对计时均属于 **P2b**，本轮未执行且延期。自动化浏览器回归只能验证产品状态机，不等同真人可用性研究。
 
@@ -377,7 +379,7 @@ def render(payload: dict[str, Any]) -> str:
 | 真实 Rhino Listener | healthy；29 endpoints；queue 0；最终场景 0 objects |
 | `scripts/check.sh` | passed |
 
-本样本很小、任务来源人数未经去匿名化确认、执行过程中发生 5 次模型连接中断、2 项 Rhino 人工证据未完成；区间只描述本冻结集合，不宣称统计显著性或总体用户表现。
+本样本很小、任务来源人数未经去匿名化确认、执行过程中发生 5 次模型连接中断；补充 Rhino 证据不改变冻结评分。区间只描述本冻结集合，不宣称统计显著性或总体用户表现。
 """
 
 

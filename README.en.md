@@ -2,7 +2,7 @@
 
 > **An AI agent that executes, observes, verifies, and recovers inside Rhino 8—not just one that writes scripts.**
 
-[Live read-only demo](https://rhinocoder-demo.xiongweiluo1.chatgpt.site) · [中文](README.md) · [5-minute Replay](#quickstart-a-no-rhino-required) · [Real Rhino quickstart](#quickstart-b-real-rhino-8) · [Evidence index](docs/portfolio-evidence.md) · [Architecture](docs/architecture.md)
+[Live read-only demo](https://rhinocoder-demo.xiongweiluo1.chatgpt.site) · [Real Rhino evidence clip](docs/assets/rhinocoder-real-rhino-demo.mov) · [中文](README.md) · [5-minute Replay](#quickstart-a-no-rhino-required) · [Real Rhino quickstart](#quickstart-b-real-rhino-8) · [Evidence index](docs/portfolio-evidence.md) · [Architecture](docs/architecture.md)
 
 RhinoCoder is a verifiable, recoverable, privacy-aware spatial-design agent for Rhino 8. It translates natural-language tasks into 23 versioned MCP tool calls, executes geometry on Rhino's main thread, reads the resulting scene back, and checks it with programmatic assertions. Privacy decisions, model routing, tool calls, corrections, cost, and evidence share one auditable `run_id`. A sanitized synthetic Replay lets reviewers inspect the loop without Rhino or a model key.
 
@@ -19,9 +19,9 @@ RhinoCoder is a verifiable, recoverable, privacy-aware spatial-design agent for 
 | **Zero sensitive findings in the A4 audit** | 12 red-team cases, 1,609 traces, 7,016 SQLite rows, three Replays, and simulated log/request surfaces; [A4 report](docs/privacy-red-team-report.md) |
 | **A1–A7 and B1–B4 accepted** | Data, audit, routing, privacy, training pipeline, and CPU smoke are complete; formal GPU training has not run; [roadmap](PROJECT_OPTIMIZATION_PLAN.md) |
 
-Current release: [`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0). Recruiters can open the [live read-only demo](https://rhinocoder-demo.xiongweiluo1.chatgpt.site) without Rhino, a model key, or installation. Versioned docs, Replay/GIF assets, scripts, and validation evidence are also published with the Git tag and GitHub Release. The owner deferred the real Rhino video.
+Current release: [`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0). Recruiters can open the [live read-only demo](https://rhinocoder-demo.xiongweiluo1.chatgpt.site) without Rhino, a model key, or installation. Unreleased evidence now includes a [real-Rhino single-window clip](docs/assets/rhinocoder-real-rhino-demo.mov) and [result frame](docs/assets/rhinocoder-real-rhino-result.png). The clip is an explicitly labeled, privacy-reviewed before/after frame sequence—not continuous desktop footage—and contains no audio or real project data.
 
-> **Honest boundary:** `local-mock` is a deterministic interface and safety test double. It proves forced private routing and no-cloud fallback, not real local-model quality. P2a contains tasks authored externally but executed by the Agent; it is not a study in which people used the UI. P2b is postponed. School-GPU validation and LoRA training have not run, and A5 holdout reads remain zero.
+> **Honest boundary:** `local-mock` is a deterministic interface and safety test double. It proves forced private routing and no-cloud fallback, not real local-model quality. P2a contains tasks authored externally but executed by the Agent; it is not a study in which people used the UI. P2b is postponed. School-GPU access is now available, but C1 validation and formal LoRA training have not started; A5 holdout reads remain zero.
 
 ## Why this is more than an “LLM + tools” demo
 
@@ -131,16 +131,17 @@ See the [evidence index](docs/portfolio-evidence.md), [v0.3.0 checklist](docs/re
 
 - [2:35 storyboard, bilingual narration, recording command, and privacy checklist](docs/demo/README.md)
 - [Chinese subtitles](docs/demo/rhinocoder-demo.zh-CN.srt) · [English subtitles](docs/demo/rhinocoder-demo.en.srt)
+- [Real Rhino single-window evidence clip](docs/assets/rhinocoder-real-rhino-demo.mov) · [result frame](docs/assets/rhinocoder-real-rhino-result.png)
 - [One-page bilingual résumé description and interview outline](docs/career-one-pager.md)
 
-The repository GIF is an automated synthetic substitute, not a real Rhino recording. The owner must record and review the real Rhino footage before any upload.
+The repository GIF remains an automated synthetic Replay. The real-Rhino clip is separately labeled as a sanitized single-window before/after frame sequence and was reviewed before publication.
 
 ## Known limitations
 
 - Primary real-world validation is macOS 15.6 arm64 + Rhino 8. Windows, Intel Mac, multi-user concurrency, and a second physical Mac are not release-validated.
 - The fixed 30-task suite is saturated. Its 100% Pass@1 establishes stability under that contract, not open-world, hard-set, or user-workflow success.
-- `local-mock` does not perform local inference. No school-GPU or LoRA result is claimed.
-- P2a external-task automated evaluation is complete at 18/30 valid baseline passes; five resumed provider interruptions and two pending Rhino manual checks are reported separately. P2b real-user UI operation is postponed.
+- `local-mock` does not perform local inference. GPU access is available, but C1 and formal LoRA training have not started, so no local-model result is claimed.
+- P2a external-task automated evaluation is complete at 18/30 valid baseline passes; five resumed provider interruptions remain recorded. Supplemental real-Rhino topology evidence for 002/014 is complete but does not change the frozen failures or score. P2b real-user UI operation is postponed.
 - The full live benchmark needs interactive Rhino and a model API; CI is offline.
 
 More: [Architecture](docs/architecture.md) · [Troubleshooting](docs/troubleshooting.md) · [Roadmap](PROJECT_OPTIMIZATION_PLAN.md) · [Changelog](CHANGELOG.md)

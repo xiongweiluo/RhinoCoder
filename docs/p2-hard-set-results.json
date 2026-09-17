@@ -122,12 +122,11 @@
       "P2-HARD-017"
     ],
     "completed": [
+      "P2-HARD-002",
+      "P2-HARD-014",
       "P2-HARD-017"
     ],
-    "pending": [
-      "P2-HARD-002",
-      "P2-HARD-014"
-    ],
+    "pending": [],
     "usability_study_completed": false
   },
   "results": [
@@ -1094,9 +1093,9 @@
     "sqlite_integrity_and_lineage": "passed",
     "privacy_audit": {
       "trace_records": 2821,
-      "sqlite_rows": 18156,
+      "sqlite_rows": 18212,
       "replays": 3,
-      "model_requests": 3545,
+      "model_requests": 3569,
       "sensitive_findings": 0
     },
     "browser_e2e": {
@@ -1115,7 +1114,7 @@
     "Thirty anonymous submissions are task-source IDs, not proof of thirty distinct people.",
     "Five provider connection interruptions required same-slot resume with the frozen v1 prompt; all interruption evidence remains visible.",
     "The confidence interval describes only this small frozen set; no statistical significance is claimed.",
-    "Two Rhino visual/topology evidence checks remain pending and are not represented as objective passes; the cancellation UI state has automated browser evidence.",
+    "Supplemental Rhino topology evidence is complete for P2-HARD-002 and P2-HARD-014, but it does not change either frozen baseline failure or the 18/30 score.",
     "Real users did not personally operate the UI; P2b usability validation is postponed.",
     "Local Mock proves interface, forced routing, and safe failure only; it is not evidence of local-model quality."
   ]

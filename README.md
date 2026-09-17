@@ -2,7 +2,7 @@
 
 > **让 AI 不只“写 Rhino 脚本”，而是执行、观察、验证并在失败后恢复。**
 
-[在线只读演示](https://rhinocoder-demo.xiongweiluo1.chatgpt.site) · [English](README.en.md) · [无 Rhino 的 5 分钟 Replay](#quickstart-a无需-rhino) · [真实 Rhino Quickstart](#quickstart-b真实-rhino-8) · [证据索引](docs/portfolio-evidence.md) · [架构](docs/architecture.md)
+[在线只读演示](https://rhinocoder-demo.xiongweiluo1.chatgpt.site) · [真实 Rhino 证据短片](docs/assets/rhinocoder-real-rhino-demo.mov) · [English](README.en.md) · [无 Rhino 的 5 分钟 Replay](#quickstart-a无需-rhino) · [真实 Rhino Quickstart](#quickstart-b真实-rhino-8) · [证据索引](docs/portfolio-evidence.md) · [架构](docs/architecture.md)
 
 RhinoCoder 是一个面向 Rhino 8 的可验证空间设计 Agent。它把自然语言任务转成 23 个版本化 MCP 工具调用，在 Rhino 主线程执行几何操作，再通过 `get_scene_summary` 和程序化断言读取并核对真实场景。每次运行的隐私判断、模型路由、工具调用、纠错、成本和证据都由同一 `run_id` 关联，可停止、重试、Undo、精准回滚，也可在没有 Rhino 和模型密钥时重放脱敏合成 Replay。
 
@@ -21,9 +21,9 @@ RhinoCoder 是一个面向 Rhino 8 的可验证空间设计 Agent。它把自然
 | **隐私审计 0 敏感发现** | 12 条红队、1,609 条 Trace、7,016 行 SQLite、3 份 Replay 及模拟日志/请求面；[A4 报告](docs/privacy-red-team-report.md) |
 | **A1–A7、B1–B4 已验收** | 数据、审计、路由、隐私、训练管线和 CPU 冒烟完成；GPU 正式训练未执行；[路线图](PROJECT_OPTIMIZATION_PLAN.md) |
 
-当前正式版本：[`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0)。招聘者可直接打开[在线只读演示](https://rhinocoder-demo.xiongweiluo1.chatgpt.site)，无需 Rhino、模型密钥或安装；版本、文档、Replay、GIF、发布脚本和验证证据也已随 Git Tag 与 GitHub Release 发布。真实 Rhino 视频按项目所有者决定延期。
+当前正式版本：[`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0)。招聘者可直接打开[在线只读演示](https://rhinocoder-demo.xiongweiluo1.chatgpt.site)，无需 Rhino、模型密钥或安装；Unreleased 证据补充了[真实 Rhino 单窗口短片](docs/assets/rhinocoder-real-rhino-demo.mov)与[结果帧](docs/assets/rhinocoder-real-rhino-result.png)。短片由已逐帧复核的真实 Rhino 执行前/后窗口帧组成，不是连续桌面录屏，也不包含音频或真实项目数据。
 
-> **诚实边界：** `local-mock` 只是确定性的本地接口与安全替身，证明统一后端、隐私强制路由和禁止云端降级；它不是能完成 Rhino 建模的真实本地模型。P2a 是外部用户出题、Agent 自动执行的困难集，不是真人操作 UI 的可用性研究；P2b 延期。当前没有学校 GPU 验收或 LoRA 效果结论，A5 holdout 读取为 0。
+> **诚实边界：** `local-mock` 只是确定性的本地接口与安全替身，证明统一后端、隐私强制路由和禁止云端降级；它不是能完成 Rhino 建模的真实本地模型。P2a 是外部用户出题、Agent 自动执行的困难集，不是真人操作 UI 的可用性研究；P2b 延期。学校 GPU 访问已获得，但 C1 环境验收和 LoRA 正式训练尚未开始，A5 holdout 读取为 0。
 
 ## 为什么这个项目不是普通 “LLM + 工具” Demo
 
@@ -193,10 +193,11 @@ python tools/audit_p2_results.py
 
 - [2:35 镜头表、双语旁白、录制命令与逐帧隐私检查](docs/demo/README.md)
 - [中文字幕](docs/demo/rhinocoder-demo.zh-CN.srt) · [英文字幕](docs/demo/rhinocoder-demo.en.srt)
+- [真实 Rhino 单窗口证据短片](docs/assets/rhinocoder-real-rhino-demo.mov) · [结果帧](docs/assets/rhinocoder-real-rhino-result.png)
 - [自动化合成 Replay GIF](docs/assets/replay-demo.gif) · [资产哈希清单](docs/demo/demo-assets-manifest.json)
 - [一页中英文简历项目描述与面试深挖提纲](docs/career-one-pager.md)
 
-真实 Rhino 视频需要项目所有者在录制前创建空白演示文档，并在上传前逐帧复核。仓库中的 GIF 是合成 Replay 的自动化替代素材，不冒充真实 Rhino 录屏。
+真实 Rhino 短片来自空白、可丢弃文档，使用单窗口帧序列隔离桌面信息；发布前已检查执行前、转场和执行后时间点。合成 Replay GIF 仍明确标为 synthetic，不冒充真实 Rhino 画面。
 
 ## 安全边界
 
@@ -211,8 +212,8 @@ python tools/audit_p2_results.py
 
 - 主要真实验收环境为 macOS 15.6 arm64 + Rhino 8；Windows、Intel Mac、多人并发与另一台物理 Mac 尚未完成发布验收。
 - 固定 30 题已经饱和；100% Pass@1 证明该契约下的稳定性，不证明开放世界、困难集或真实用户工作流成功率。
-- `local-mock` 不执行真实本地推理；GPU/LoRA 阶段等待学校权限，未产生可对外声称的本地模型效果。
-- P2a 外部用户出题的自动化困难集已完成，18/30 有效基线通过；5 次已续跑的连接中断记录和 2 项待补 Rhino 人工证据明确分列，不宣称统计显著性。P2b 真人操作 UI 验证延期。
+- `local-mock` 不执行真实本地推理；学校 GPU 访问已获得，但 C1 与正式 LoRA 尚未启动，未产生可对外声称的本地模型效果。
+- P2a 外部用户出题的自动化困难集已完成，18/30 有效基线通过；5 次已续跑的连接中断完整保留。002/014 的补充真实 Rhino 拓扑证据已完成，但不改变冻结失败与总体分数；P2b 真人操作 UI 验证延期。
 - 完整 30 题真实基准需要交互式 Rhino 和模型 API；CI 只运行离线检查。
 
 ## 文档入口

@@ -2,6 +2,8 @@
 
 [在线浏览三套只读 Replay](https://rhinocoder-demo.xiongweiluo1.chatgpt.site) · 无需 Rhino、模型密钥或本地安装
 
+[真实 Rhino 单窗口证据短片](assets/rhinocoder-real-rhino-demo.mov) · [真实结果帧](assets/rhinocoder-real-rhino-result.png)
+
 RhinoCoder 对外只使用能从版本化文件复核的指标。本页是 README、简历表述、演示脚本与面试讲解的统一证据入口；完整真实 Trace、用户身份和项目文件不公开。
 
 ## 核心指标与来源
@@ -11,6 +13,8 @@ RhinoCoder 对外只使用能从版本化文件复核的指标。本页是 READM
 | 黄金数据 500/500、46 个标签 | 四道准入门全部通过；A7 新增 200 条，8 类覆盖缺口达到计划量 | [A7 覆盖与边际价值报告](a7-500-marginal-value.md) |
 | 三路固定基线 270/270 通过 | 30 题 × 3 次重复 × 3 种方案；这是饱和固定集，不代表开放世界或困难集效果 | [A6 无微调基线报告](a6-no-finetune-baseline.md) |
 | P2a 外部来源困难集 18/30 有效基线通过 | 5 次首轮连接中断以冻结 Prompt 重填同槽并保留；60.0%，Wilson 95% 区间 42.3%–75.4%，不宣称统计显著性 | [P2a 困难集报告](p2-external-hard-set.md)、[机器结果](p2-hard-set-results.json) |
+| P2 真实 Rhino 补充拓扑证据完成 | 002/014 均为闭合单实体、包围盒匹配且上下表面内环数符合预期；不改变冻结基线失败或 18/30 分数 | [最小化 JSON](p2-manual-topology-evidence.json)、[002 视口](assets/p2-hard-002-rhino-topology.png)、[014 视口](assets/p2-hard-014-rhino-topology.png) |
+| 真实 Rhino 执行证据短片 | 空白临时文档真实执行；单窗口执行前/后帧序列，无音频，读回 2 对象、20×20×2 基座、r=8 红球、5 次工具调用 | [短片](assets/rhinocoder-real-rhino-demo.mov)、[结果帧](assets/rhinocoder-real-rhino-result.png)、[资产清单](demo/demo-assets-manifest.json) |
 | 30 题 Baseline/Closed-loop 各 3 次均为 100% Pass@1 | 180 次真实 Rhino 端到端运行；Closed-loop 增加场景检查、延迟与 token 开销 | [30 题基准报告](benchmark-report.md) |
 | A7 覆盖缺口 8/8 达标 | 布尔替代恢复与多轮修订各 40；其余 6 类各 20 | [A7 覆盖与边际价值报告](a7-500-marginal-value.md) |
 | A4 敏感发现 0 | 12 条隐私红队；1,609 条 Trace、7,016 行 SQLite、3 份 Replay 与模拟日志/请求面 | [A4 隐私红队报告](privacy-red-team-report.md) |
@@ -43,8 +47,8 @@ run.started
 ## 不应对外声称
 
 - 不声称本地模型已经能完成 Rhino 建模。`local-mock` 只是确定性的接口与安全替身。
-- 不声称 LoRA 已训练或优于云模型。学校 GPU 尚未验收，A5 holdout 未用于训练或调参。
+- 不声称 LoRA 已训练或优于云模型。学校 GPU 访问已获得，但 C1 尚未开始，A5 holdout 未用于训练或调参。
 - 不把 30 题 100% 外推为开放世界成功率；该固定集已饱和。P2a 是外部用户出题的自动化困难集，不是真实用户亲自操作 UI；P2b 延期。
-- 不把三项代表性失败复测 2/3 外推为全量修复后成功率，也不隐藏 5 次基础设施中断和 2 项待补 Rhino 人工证据。
+- 不把三项代表性失败复测 2/3 外推为全量修复后成功率，也不隐藏 5 次基础设施中断；002/014 补充拓扑证据不用于重写冻结评分。
 - 不声称生产级多用户、Windows 或企业部署已经验收。
 - 不公开真实用户身份、原始项目文件、完整本地 Trace 或密钥。

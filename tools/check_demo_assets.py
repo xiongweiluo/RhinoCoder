@@ -14,6 +14,8 @@ EXPECTED_ARTIFACTS = {
     "docs/assets/replay-demo.gif",
     "docs/assets/architecture.svg",
     "docs/assets/data-flow.svg",
+    "docs/assets/rhinocoder-real-rhino-demo.mov",
+    "docs/assets/rhinocoder-real-rhino-result.png",
 }
 REQUIRED_TEXT_ASSETS = {
     "docs/demo/README.md",
@@ -76,6 +78,34 @@ def _gif_info(path: Path) -> tuple[int, int, int]:
     return width, height, frames
 
 
+def _png_info(path: Path) -> tuple[int, int]:
+    data = path.read_bytes()
+    if len(data) < 24 or data[:8] != b"\x89PNG\r\n\x1a\n":
+        raise ValueError("not a PNG")
+    return struct.unpack_from(">II", data, 16)
+
+
+def _mov_duration(path: Path) -> float:
+    data = path.read_bytes()
+    if b"ftyp" not in data[:64]:
+        raise ValueError("not an ISO media file")
+    marker = data.find(b"mvhd")
+    if marker < 0:
+        raise ValueError("missing mvhd atom")
+    version = data[marker + 4]
+    if version == 0:
+        timescale = struct.unpack_from(">I", data, marker + 16)[0]
+        duration = struct.unpack_from(">I", data, marker + 20)[0]
+    elif version == 1:
+        timescale = struct.unpack_from(">I", data, marker + 28)[0]
+        duration = struct.unpack_from(">Q", data, marker + 32)[0]
+    else:
+        raise ValueError(f"unsupported mvhd version {version}")
+    if not timescale:
+        raise ValueError("zero movie timescale")
+    return duration / timescale
+
+
 def check_demo_assets(root: Path = ROOT) -> list[str]:
     findings: list[str] = []
     manifest_path = root / "docs" / "demo" / "demo-assets-manifest.json"
@@ -128,6 +158,28 @@ def check_demo_assets(root: Path = ROOT) -> list[str]:
                 expected = (item.get("width"), item.get("height"), item.get("frames"))
                 if (width, height, frames) != expected:
                     findings.append(f"Replay GIF dimensions/frames drift: {(width, height, frames)} != {expected}")
+        elif path.suffix == ".png":
+            try:
+                width, height = _png_info(path)
+            except ValueError as exc:
+                findings.append(f"invalid Rhino result PNG: {exc}")
+            else:
+                if (width, height) != (item.get("width"), item.get("height")):
+                    findings.append(f"Rhino result PNG dimensions drift: {(width, height)}")
+        elif path.suffix == ".mov":
+            if item.get("classification") != "sanitized_real_rhino_single_window_frame_sequence":
+                findings.append("real Rhino video classification is missing")
+            if item.get("audio") is not False:
+                findings.append("real Rhino video must declare audio=false")
+            if not item.get("privacy_review"):
+                findings.append("real Rhino video lacks a privacy review declaration")
+            try:
+                duration = _mov_duration(path)
+            except ValueError as exc:
+                findings.append(f"invalid real Rhino video: {exc}")
+            else:
+                if abs(duration - float(item.get("duration_seconds", 0))) > 0.1:
+                    findings.append(f"real Rhino video duration drift: {duration:.3f}s")
 
     for relative in REQUIRED_TEXT_ASSETS:
         path = root / relative
@@ -143,7 +195,7 @@ def main() -> int:
         for finding in findings:
             print(f"  ✗ {finding}")
         return 1
-    print("Demo asset check passed (2 diagrams, 1 synthetic 9-frame GIF, 2 subtitle tracks).")
+    print("Demo asset check passed (2 diagrams, synthetic Replay GIF, sanitized real-Rhino clip/result, 2 subtitle tracks).")
     return 0
 
 

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import math
 from collections import Counter
 from pathlib import Path
@@ -12,6 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS = ROOT / "docs" / "p2-hard-set-results.json"
 TASKS = ROOT / "eval" / "p2" / "hard_tasks.jsonl"
+MANUAL_EVIDENCE = ROOT / "docs" / "p2-manual-topology-evidence.json"
 
 
 def main() -> int:
@@ -49,8 +51,25 @@ def main() -> int:
     if any(token in serialized for token in forbidden):
         findings.append("public projection contains a forbidden raw-evidence field")
     manual = data.get("manual_evidence", {})
-    if manual.get("completed") != ["P2-HARD-017"] or manual.get("pending") != ["P2-HARD-002", "P2-HARD-014"]:
-        findings.append("manual/browser evidence status does not match the accepted browser cancellation check")
+    if manual.get("completed") != ["P2-HARD-002", "P2-HARD-014", "P2-HARD-017"] or manual.get("pending") != []:
+        findings.append("manual/browser evidence status does not match the completed supplemental checks")
+    try:
+        supplemental = json.loads(MANUAL_EVIDENCE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        findings.append(f"supplemental Rhino evidence is unreadable: {exc}")
+    else:
+        supplemental_tasks = supplemental.get("tasks") or []
+        if supplemental.get("holdout_read") != 0 or supplemental.get("all_topology_assertions_passed") is not True:
+            findings.append("supplemental Rhino evidence boundary or assertion status is invalid")
+        if [item.get("task_id") for item in supplemental_tasks] != ["P2-HARD-002", "P2-HARD-014"]:
+            findings.append("supplemental Rhino evidence task set is invalid")
+        for item in supplemental_tasks:
+            if item.get("baseline_score_changed") is not False or item.get("topology", {}).get("passed") is not True:
+                findings.append(f"supplemental evidence boundary failed for {item.get('task_id')}")
+            viewport = item.get("viewport_evidence") or {}
+            path = ROOT / str(viewport.get("path", ""))
+            if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != viewport.get("sha256"):
+                findings.append(f"supplemental viewport hash mismatch for {item.get('task_id')}")
     if data.get("manual_evidence", {}).get("usability_study_completed") is not False:
         findings.append("P2b usability status is not explicitly false")
     verification = data.get("verification", {})

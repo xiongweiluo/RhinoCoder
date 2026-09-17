@@ -1,6 +1,6 @@
 # RhinoCoder v0.3.0 发布检查清单
 
-当前状态：**Released**。`v0.3.0` 已完成本地门禁、Git Tag、push、GitHub Release 与公开链接验证。真实 Rhino 视频按项目所有者决定延期；现有合成 Replay GIF、脚本与字幕可独立复核，视频项不会被虚假勾选。
+当前状态：**Released**（含 Unreleased evidence update）。`v0.3.0` 已完成本地门禁、Git Tag、push、GitHub Release 与公开链接验证；随后补充了经隐私复核的真实 Rhino 单窗口证据短片，合成 Replay GIF 仍独立标注。
 
 ## 1. 版本与招聘者入口
 
@@ -32,8 +32,8 @@
 - [x] 中英文旁白与 SRT 字幕时间码一致，提供 macOS 录制、字幕烧录和逐帧隐私检查命令。
 - [x] 9 帧 Replay GIF 由隐私复核的合成数据生成；源与产物 SHA-256、尺寸和帧数由自动检查锁定。
 - [x] 一页中英文简历项目描述、30 秒开场和面试深挖提纲已准备。
-- [ ] [外部门禁] 项目所有者在空白演示文档中录制真实 Rhino 视频，并逐帧确认无身份、路径、密钥或真实项目数据。
-- [ ] [外部门禁] 项目所有者选择视频托管位置并授权上传；README 再补充可访问链接。
+- [x] [外部门禁] 在空白可丢弃文档中执行真实 Rhino 任务；以单窗口帧序列隔离桌面，并复核无身份、路径、密钥、通知或真实项目数据。
+- [x] [外部门禁] 项目所有者授权发布覆盖；短片与结果帧由 GitHub 仓库托管，README 已提供可访问链接。
 
 ## 5. 本地发布质量门禁
 
@@ -52,4 +52,4 @@
 - [x] [外部门禁] GitHub Release 已附 CHANGELOG 摘要、GIF、发布验证报告，并明确标注视频延期。
 - [x] [外部门禁] GitHub Release、README、GIF 与双语入口可从公开网络访问；未将延期视频描述为可访问。
 
-正式发布状态由 `docs/version-manifest.json` 锁定为 `released`，并记录 Git Tag、GitHub Release 与公开链接。真实 Rhino 视频仍是单独的延期门禁，完成录制、逐帧隐私复核和上传后再勾选，不影响当前版本作为招聘作品集开始投递。
+正式发布状态仍由 `docs/version-manifest.json` 锁定为 `released`，并记录既有 Tag、GitHub Release 与公开链接。本次是 Unreleased 证据更新：真实 Rhino 单窗口短片完成复核并随仓库发布，不回写已冻结的 `v0.3.0` Release 历史描述。
