@@ -125,6 +125,8 @@ JSONL artifacts + stats + SHA-256 manifest + independent audit
 ## Model and evaluation boundaries
 
 - `local-mock` 是统一后端接口的确定性测试替身，只验证隐私强制本地、禁止云 fallback 和安全失败；它不能完成真实建模推理。
-- A5 holdout 在任务模板与数字变体成组之后锁定，不用于训练或反复调参；P2 困难集已在任何评测、修复或 LoRA 训练前冻结，同样不进入训练或迭代调参。
-- 当前没有学校 GPU 验收、正式 LoRA 训练或本地模型效果结论。只有用户明确确认 GPU 权限后才能启动 C1–C4。
+- A5 holdout 在任务模板与数字变体成组之后锁定，不用于训练或反复调参；训练与 validation 加载器永久拒绝 holdout。最终锁定方案只能通过独立、显式确认、append-only 留痕的一次性入口评测，记录冻结资产哈希与 `holdout_consumed_at`。
+- P2 困难集不进入训练或迭代调参。它在 LoRA 训练前冻结，但已用于既有系统失败分析与一次通用修复，因此定位为外部困难回归集，不冒充完全盲测；A5 与 P2 分层报告。
+- GPU 访问已经获得，但当前没有学校 GPU 现场验收、正式 LoRA 训练或本地模型效果结论。C 阶段只运行一个预注册 QLoRA 主配置；客观工程故障 fallback 不参与择优，最终输出 `GO / MORE-DATA / NO-GO` 三种结论之一。
+- Agent/Rhino 桌面兼容与本地模型兼容是两个独立矩阵。Windows/macOS 桌面集成不自动意味着本地模型跨平台；本地推理只声明实际验证过的 CUDA、MLX/Metal 或 llama.cpp 路线，其他平台使用云端或混合路由。
 - 完整真实 Trace、SQLite、截图和用户反馈保存在本地 Git 忽略目录；公开仓库只包含脱敏聚合、合成 Replay 和哈希清单。

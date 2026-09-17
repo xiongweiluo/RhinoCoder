@@ -23,7 +23,7 @@ RhinoCoder 是一个面向 Rhino 8 的可验证空间设计 Agent。它把自然
 
 当前正式版本：[`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0)。招聘者可直接打开[在线只读演示](https://rhinocoder-demo.xiongweiluo1.chatgpt.site)，无需 Rhino、模型密钥或安装；Unreleased 证据补充了[真实 Rhino 单窗口短片](docs/assets/rhinocoder-real-rhino-demo.mov)与[结果帧](docs/assets/rhinocoder-real-rhino-result.png)。短片由已逐帧复核的真实 Rhino 执行前/后窗口帧组成，不是连续桌面录屏，也不包含音频或真实项目数据。
 
-> **诚实边界：** `local-mock` 只是确定性的本地接口与安全替身，证明统一后端、隐私强制路由和禁止云端降级；它不是能完成 Rhino 建模的真实本地模型。P2a 是外部用户出题、Agent 自动执行的困难集，不是真人操作 UI 的可用性研究；P2b 延期。学校 GPU 访问已获得，但 C1 环境验收和 LoRA 正式训练尚未开始，A5 holdout 读取为 0。
+> **诚实边界：** `local-mock` 只是确定性的本地接口与安全替身，证明统一后端、隐私强制路由和禁止云端降级；它不是能完成 Rhino 建模的真实本地模型。P2a 是外部用户出题、Agent 自动执行的困难集，不是真人操作 UI 的可用性研究；P2b 延期。学校 GPU 访问已获得，但 C0 预注册、C1 环境验收和 LoRA 正式训练尚未开始，A5 holdout 读取为 0。
 
 ## 为什么这个项目不是普通 “LLM + 工具” Demo
 
@@ -148,7 +148,7 @@ React UI / CLI
   → scene summary → assertions → Trace / SQLite / feedback
 ```
 
-训练数据在任务层先做模板与数字变体合并，再执行 70/15/15 分区与 split lock，之后才提取四类训练视图。A5 holdout 与已冻结的 P2 困难集不进入训练或反复调参；本轮 `holdout_read=0`。完整真实 Trace、SQLite、截图与用户反馈默认受 Git 忽略；公开仓库只保留脱敏报告、合成 Replay、聚合结果与哈希。
+训练数据在任务层先做模板与数字变体合并，再执行 70/15/15 分区与 split lock，之后才提取四类训练视图。A5 holdout 与已冻结的 P2 困难集不进入训练或反复调参；本轮 `holdout_read=0`。最终锁定方案只能通过独立审计入口一次性消费 A5，训练加载器继续拒绝 holdout；P2 作为训练前冻结、但已用于既有系统失败分析的外部困难回归集单独报告。完整真实 Trace、SQLite、截图与用户反馈默认受 Git 忽略；公开仓库只保留脱敏报告、合成 Replay、聚合结果与哈希。
 
 ## 评测、审计与发布验证
 
@@ -213,6 +213,7 @@ python tools/audit_p2_results.py
 - 主要真实验收环境为 macOS 15.6 arm64 + Rhino 8；Windows、Intel Mac、多人并发与另一台物理 Mac 尚未完成发布验收。
 - 固定 30 题已经饱和；100% Pass@1 证明该契约下的稳定性，不证明开放世界、困难集或真实用户工作流成功率。
 - `local-mock` 不执行真实本地推理；学校 GPU 访问已获得，但 C1 与正式 LoRA 尚未启动，未产生可对外声称的本地模型效果。
+- 首轮模型实验只运行一个预注册 QLoRA 主配置，并允许 `GO / MORE-DATA / NO-GO`；Agent/Rhino 的 Windows/macOS 兼容不等于本地模型跨平台，本地推理只声明实际验证过的平台。
 - P2a 外部用户出题的自动化困难集已完成，18/30 有效基线通过；5 次已续跑的连接中断完整保留。002/014 的补充真实 Rhino 拓扑证据已完成，但不改变冻结失败与总体分数；P2b 真人操作 UI 验证延期。
 - 完整 30 题真实基准需要交互式 Rhino 和模型 API；CI 只运行离线检查。
 
@@ -222,5 +223,5 @@ python tools/audit_p2_results.py
 - [Portfolio evidence](docs/portfolio-evidence.md) · [Release checklist](docs/release-checklist.md)
 - [A4 privacy](docs/privacy-red-team-report.md) · [A6 baseline](docs/a6-no-finetune-baseline.md) · [A7 golden set](docs/a7-500-marginal-value.md)
 - [P2a external hard set](docs/p2-external-hard-set.md) · [P2 machine-readable results](docs/p2-hard-set-results.json)
-- [Training data pipeline](docs/training-data-pipeline.md) · [Training readiness](docs/training-readiness.md)
+- [Training data pipeline](docs/training-data-pipeline.md) · [Training readiness](docs/training-readiness.md) · [C0 preregistration template](docs/training-preregistration-template.md)
 - [PROJECT_OPTIMIZATION_PLAN.md](PROJECT_OPTIMIZATION_PLAN.md) · [CHANGELOG.md](CHANGELOG.md)
