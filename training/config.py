@@ -32,7 +32,7 @@ class ReadinessError(RuntimeError):
 @dataclass(slots=True)
 class ReadinessAudit:
     passed: bool = True
-    status: str = "Training Ready — Waiting for School GPU Access"
+    status: str = "GPU Available — C1 Partial; GPU Smoke/Resume Pending"
     config_sha256: str = ""
     train_rows: int = 0
     validation_rows: int = 0

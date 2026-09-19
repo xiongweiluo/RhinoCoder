@@ -26,6 +26,11 @@ from training.config import (  # noqa: E402
     project_path,
 )
 from training.data import audit_official_tokenizer  # noqa: E402
+from training.gpu_smoke import audit_gpu_smoke, run_gpu_smoke  # noqa: E402
+from training.preregistration import (  # noqa: E402
+    DEFAULT_C1_REPORT,
+    DEFAULT_FREEZE_MANIFEST,
+)
 from training.reporting import atomic_json  # noqa: E402
 from training.runtime import evaluate_adapter, train, write_report  # noqa: E402
 from training.smoke import run_cpu_smoke  # noqa: E402
@@ -50,6 +55,27 @@ def _smoke(args: argparse.Namespace) -> int:
     return 0 if result["passed"] else 1
 
 
+def _gpu_smoke(args: argparse.Namespace) -> int:
+    result = run_gpu_smoke(
+        args.config,
+        phase=args.phase,
+        output_dir=args.output_dir,
+        freeze_manifest=args.freeze_manifest,
+    )
+    _print(result)
+    return 0 if result["status"] in {"initial_complete", "complete"} else 1
+
+
+def _gpu_smoke_audit(args: argparse.Namespace) -> int:
+    result = audit_gpu_smoke(
+        args.config,
+        output_dir=args.output_dir,
+        freeze_manifest=args.freeze_manifest,
+    )
+    _print(result)
+    return 0 if result["passed"] else 1
+
+
 def _tokenizer_audit(args: argparse.Namespace) -> int:
     config = load_config(args.config)
     result = audit_official_tokenizer(
@@ -64,7 +90,15 @@ def _tokenizer_audit(args: argparse.Namespace) -> int:
 
 
 def _train(args: argparse.Namespace) -> int:
-    _print(train(args.config, resume=args.resume))
+    _print(
+        train(
+            args.config,
+            resume=args.resume,
+            confirm_formal_training=args.confirm_formal_training,
+            freeze_manifest=args.freeze_manifest,
+            c1_report=args.c1_report,
+        )
+    )
     return 0
 
 
@@ -121,12 +155,34 @@ def build_parser() -> argparse.ArgumentParser:
     smoke.add_argument("--output-dir", default="data/training/smoke")
     smoke.set_defaults(handler=_smoke)
 
+    gpu_smoke = subparsers.add_parser(
+        "gpu-smoke",
+        help="run isolated CUDA step 1 or resume step 2 without touching the formal run",
+    )
+    gpu_smoke.add_argument("--config", default=str(DEFAULT_CONFIG))
+    gpu_smoke.add_argument("--phase", choices=("initial", "resume"), required=True)
+    gpu_smoke.add_argument("--output-dir")
+    gpu_smoke.add_argument("--freeze-manifest", default=DEFAULT_FREEZE_MANIFEST)
+    gpu_smoke.set_defaults(handler=_gpu_smoke)
+
+    gpu_smoke_audit = subparsers.add_parser(
+        "gpu-smoke-audit",
+        help="verify the completed two-process C1 report without starting formal training",
+    )
+    gpu_smoke_audit.add_argument("--config", default=str(DEFAULT_CONFIG))
+    gpu_smoke_audit.add_argument("--output-dir")
+    gpu_smoke_audit.add_argument("--freeze-manifest", default=DEFAULT_FREEZE_MANIFEST)
+    gpu_smoke_audit.set_defaults(handler=_gpu_smoke_audit)
+
     tokenizer = subparsers.add_parser(
         "tokenizer-audit",
         help="verify all train/validation samples with the pinned upstream tokenizer",
     )
     tokenizer.add_argument("--config", default=str(DEFAULT_CONFIG))
-    tokenizer.add_argument("--cache-dir", default="data/training/tokenizer-cache")
+    tokenizer.add_argument(
+        "--cache-dir",
+        help="Hugging Face cache root; defaults to RHINOCODER_MODEL_CACHE then project cache",
+    )
     tokenizer.add_argument("--output", default="data/training/tokenizer-audit.json")
     tokenizer.add_argument("--local-files-only", action="store_true")
     tokenizer.set_defaults(handler=_tokenizer_audit)
@@ -134,6 +190,13 @@ def build_parser() -> argparse.ArgumentParser:
     train_parser = subparsers.add_parser("train", help="launch the locked QLoRA job on CUDA")
     train_parser.add_argument("--config", default=str(DEFAULT_CONFIG))
     train_parser.add_argument("--resume", default="auto", help="auto, none, or a checkpoint inside the run dir")
+    train_parser.add_argument("--freeze-manifest", default=DEFAULT_FREEZE_MANIFEST)
+    train_parser.add_argument("--c1-report", default=DEFAULT_C1_REPORT)
+    train_parser.add_argument(
+        "--confirm-formal-training",
+        action="store_true",
+        help="explicitly confirm that audited C0/C1 gates are complete",
+    )
     train_parser.set_defaults(handler=_train)
 
     evaluate = subparsers.add_parser("evaluate", help="evaluate an adapter on validation only")
@@ -148,17 +211,18 @@ def build_parser() -> argparse.ArgumentParser:
     report.set_defaults(handler=_report)
 
     template = subparsers.add_parser(
-        "cluster-template-audit", help="validate the pre-access school GPU checklist template"
+        "cluster-template-audit", help="validate the generic GPU-host checklist template"
     )
     template.add_argument("--cluster-config", default=DEFAULT_CLUSTER_TEMPLATE)
     template.set_defaults(handler=_cluster_template_audit)
 
     cluster = subparsers.add_parser(
-        "cluster-check", help="after access is granted, inventory CUDA, GPU, Slurm and storage"
+        "cluster-check", help="inventory CUDA, GPU, scheduler and storage on a configured host"
     )
     cluster.add_argument("--cluster-config", default="training/school_gpu.local.json")
     cluster.add_argument("--output", default="data/training/cluster-inventory.json")
     cluster.set_defaults(handler=_cluster_check)
+
     return parser
 
 

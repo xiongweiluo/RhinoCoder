@@ -11,7 +11,7 @@
 - 建立 500/500 条黄金 Trace 数据闭环，覆盖 46 个标签；A7 新增 200 条任务，8 类覆盖缺口全部达到计划量，准入、证据与敏感审计异常均为 0。
 - 在固定 30 题真实 Rhino 基准上完成主模型、低成本模型与规则路由各 3 次重复，共 270/270 次通过；同时明确该基准已饱和，不将 100% 外推为开放世界效果。
 - 完成请求前隐私分类、云端最小化与统一存储面审计；12 条红队用例及 1,609 条 Trace、7,016 行 SQLite、3 份 Replay 检查均为 0 敏感发现。
-- 构建可复现训练数据与 LoRA 工程准备，但保持严格边界：本地后端仍为 Mock，学校 GPU 访问已获得但 C1/正式训练未执行；A5 holdout 不进入训练或调参，只允许最终锁定方案经独立审计入口消费一次。
+- 构建可复现训练数据与 LoRA 工程准备，并在 MornAI RTX 3090 上完成 CUDA/BF16、4-bit 模型加载与 LoRA 挂载；严格边界仍保持：本地后端是 Mock，C1 backward/checkpoint/resume 与正式训练未执行，A5 holdout 只允许最终锁定方案经独立审计入口消费一次。
 
 证据：[A7](a7-500-marginal-value.md) · [A6](a6-no-finetune-baseline.md) · [A4](privacy-red-team-report.md) · [架构](architecture.md) · [公开指标索引](portfolio-evidence.md)
 
@@ -24,7 +24,7 @@ Designed and built an end-to-end agent that turns natural-language tasks into re
 - Curated 500/500 admitted golden traces across 46 tags; a 200-task A7 expansion filled all eight measured coverage gaps with zero admission, evidence, or privacy findings.
 - Ran a locked 30-task real-Rhino benchmark three times across three backends/routes (270/270 passed), while documenting that the saturated set does not establish open-world performance.
 - Validated local privacy classification and cloud minimization with 12 red-team cases and scans of 1,609 traces, 7,016 SQLite rows, and three Replays—zero sensitive findings.
-- Prepared reproducible LoRA data/config/checkpoint tooling without overstating results: the local backend remains a Mock; GPU access is available but C1/formal training has not run; the A5 holdout stays outside training and tuning and is reserved for one audited final evaluation.
+- Prepared reproducible LoRA data/config/checkpoint tooling and validated CUDA/BF16, pinned 4-bit loading, and LoRA attachment on a MornAI RTX 3090 without overstating results: the local backend remains a Mock; C1 backward/checkpoint/resume and formal training have not run; the A5 holdout stays outside training and tuning and is reserved for one audited final evaluation.
 
 ## 30 秒面试开场
 

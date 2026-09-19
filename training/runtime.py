@@ -24,6 +24,12 @@ from training.data import (
     load_samples,
     score_tool_generations,
 )
+from training.model_cache import pinned_pretrained_source, pretrained_load_kwargs
+from training.preregistration import (
+    DEFAULT_C1_REPORT,
+    DEFAULT_FREEZE_MANIFEST,
+    assert_formal_training_ready,
+)
 from training.reporting import (
     append_jsonl,
     atomic_json,
@@ -119,11 +125,15 @@ def resolve_resume(run_dir: Path, requested: str) -> str | None:
 
 def _load_tokenizer(stack: Mapping[str, Any], config: Mapping[str, Any]) -> Any:
     tokenizer_config = config["base_model"]["tokenizer"]
+    load_kwargs = pretrained_load_kwargs()
+    source, revision = pinned_pretrained_source(
+        str(tokenizer_config["id"]), str(tokenizer_config["revision"]), load_kwargs
+    )
     tokenizer = stack["AutoTokenizer"].from_pretrained(
-        tokenizer_config["id"],
-        revision=tokenizer_config["revision"],
+        source,
+        revision=revision,
         trust_remote_code=False,
-        token=os.getenv("HF_TOKEN") or None,
+        **load_kwargs,
     )
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
@@ -145,11 +155,15 @@ def _quantization(stack: Mapping[str, Any], config: Mapping[str, Any]) -> Any:
 def _load_base_model(stack: Mapping[str, Any], config: Mapping[str, Any]) -> Any:
     torch = stack["torch"]
     local_rank = int(os.getenv("LOCAL_RANK", "0"))
+    load_kwargs = pretrained_load_kwargs()
+    source, revision = pinned_pretrained_source(
+        str(config["base_model"]["id"]), str(config["base_model"]["revision"]), load_kwargs
+    )
     model = stack["AutoModelForCausalLM"].from_pretrained(
-        config["base_model"]["id"],
-        revision=config["base_model"]["revision"],
+        source,
+        revision=revision,
         trust_remote_code=False,
-        token=os.getenv("HF_TOKEN") or None,
+        **load_kwargs,
         quantization_config=_quantization(stack, config),
         dtype=torch.bfloat16,
         device_map={"": local_rank},
@@ -279,16 +293,32 @@ def evaluate_generations(
     return score_tool_generations(samples, generated)
 
 
-def train(config_path: str | Path = DEFAULT_CONFIG, *, resume: str = "auto") -> dict[str, Any]:
+def train(
+    config_path: str | Path = DEFAULT_CONFIG,
+    *,
+    resume: str = "auto",
+    confirm_formal_training: bool = False,
+    freeze_manifest: str | Path = DEFAULT_FREEZE_MANIFEST,
+    c1_report: str | Path = DEFAULT_C1_REPORT,
+) -> dict[str, Any]:
     config = load_config(config_path)
     audit = audit_readiness(config_path)
     if not audit.passed:
         raise ReadinessError("training readiness audit failed: " + "; ".join(audit.findings))
+    gate = assert_formal_training_ready(
+        config,
+        confirmed=confirm_formal_training,
+        freeze_manifest_path=freeze_manifest,
+        c1_report_path=c1_report,
+    )
     stack = _require_training_stack()
     require_gpu(stack["torch"], config)
     run_dir = project_path(config["checkpoint"]["root"]).resolve()
     run_dir.mkdir(parents=True, exist_ok=True)
-    write_run_manifest(run_dir, config)
+    run_manifest = write_run_manifest(run_dir, config)
+    run_manifest["c0_freeze"] = gate["c0"]
+    run_manifest["c1_report_sha256"] = gate["c1_report_sha256"]
+    atomic_json(run_dir / str(config["logging"]["run_manifest"]), run_manifest)
     atomic_json(run_dir / str(config["logging"]["environment_file"]), environment_snapshot())
     resume_from = resolve_resume(run_dir, resume)
     tokenizer = _load_tokenizer(stack, config)

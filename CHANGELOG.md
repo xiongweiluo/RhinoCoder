@@ -6,6 +6,9 @@
 
 ### Added
 
+- Freeze-ready C0 formal preregistration with quantitative GO thresholds, paired A5/P2 statistics, a no-second-config operational recovery policy, GPU exit/export rules, and an external immutable manifest that avoids self-hashing.
+- An isolated two-process C1 CUDA smoke command: step 1 performs real QLoRA forward/backward/optimizer work and saves a checkpoint; step 2 resumes in a new process, validates optimizer/checkpoint lineage, and records loss, validation loss, peak VRAM, walltime, and a non-secret environment snapshot without touching the formal run or model registry.
+- Formal training now requires an audited C0 freeze manifest, a complete C1 smoke/resume report, and explicit operator confirmation before model loading.
 - C0 模型实验预注册模板，覆盖唯一 QLoRA 配置、客观工程 fallback、实际意义门槛、A5/P2 分层配对统计、GPU 租期导出、一次性 holdout、三路决策与平台范围。
 - 经隐私复核的 15 秒真实 Rhino 单窗口证据短片与结果帧：空白临时文档执行真实 Agent 任务，读回 2 个对象、20×20×2 基座、半径 8 的 RGB(255,0,0) 球体与 5 次工具调用；资产 SHA-256、尺寸、时长、无音频声明和复核范围由演示清单锁定。
 - `P2-HARD-002` 与 `P2-HARD-014` 的真实 Rhino 补充拓扑证据：程序化验证闭合单实体、包围盒以及上下表面内环数，并发布最小化 JSON 和两张无 GUID 视口图。
@@ -25,8 +28,10 @@
 
 ### Changed
 
+- MornAI Ubuntu 22.04.4 + RTX 3090 is the confirmed C1 environment. CUDA/BF16, the 210/45 train/validation inputs, tokenizer audit, pinned 4-bit model load, and LoRA attachment passed; backward/checkpoint/resume remains pending, so C1 is only partially accepted and C2–C4 remain unstarted.
+- Tokenizer and base-model loaders now consistently pass `RHINOCODER_MODEL_CACHE` to Hugging Face and honor strict offline environment switches; a predownloaded pinned revision no longer depends on an accidental `HF_HUB_CACHE` setting.
 - C 阶段实验治理升级为 `C0 预注册 → C1 环境验收 → C2 唯一 QLoRA 配置 → C3 一次性锁定评测 → C4 GO / MORE-DATA / NO-GO`：客观工程 fallback 不参与择优，GPU 租期内必须导出基座/LoRA 必要生成和完整血缘，A5 通过独立审计入口一次性消费，P2 作为非完全盲测的外部困难回归集分层报告；桌面兼容与本地模型平台支持也改为独立验收。
-- GPU 访问门禁已由项目所有者确认解除；公开状态更新为 `GPU Access Available — C0 Preregistration Pending`。尚未执行预注册冻结、集群/CUDA/显存验收、正式训练或 holdout 评测，不产生 LoRA 效果声明。
+- GPU 权限门禁已解除并完成上述 MornAI 部分实测；C0 外部冻结、完整 C1、正式训练和 holdout 评测仍未执行，不产生 LoRA 效果声明。
 - P2 手工/浏览器证据清单现为 3/3 完成；002/014 的补充几何证据不改变冻结工具选择/恢复序列失败，困难集基线仍为 18/30。
 - Prompt 契约提升为 `closed-loop-v2`，对会实质改变结果的单位、尺寸、对象、方向、对齐和回滚范围要求写入前澄清；取消异常在并发清理包装下仍保留 `run.cancelled` 终态。
 - P2a 首轮保留 30/30 原始结果；5 次模型连接中断以冻结 v1 Prompt 重填同一未完成槽位并保留中断记录，最终有效自动通过 18/30（60.0%，Wilson 95% 区间 42.3%–75.4%）。三类代表性失败一次复测 2/3，不外推总体修复后成功率；P2b 真人可用性验证延期。
@@ -67,7 +72,7 @@
 - A4 隐私验收通过：12 条类别化红队请求、1,609 条 Trace、7,016 行 SQLite、3 份 Replay 和 3 次合法云请求模拟均为零敏感泄漏；高风险请求不能通过路由开关或手动云模式绕过。
 - A5 真实 300 条黄金 Trace 导出 995 条训练样本；210/45/45 精确分区，119 个模板组和数字变体无跨区，重复、超长丢弃、血缘失败与敏感发现均为 0，连续构建 manifest 哈希一致。
 - A6 主模型、低成本模型和规则路由各完成固定 30 题三次重复，共 270/270 次真实 Rhino 运行通过；300/300 条黄金数据离线回放通过，契约、血缘和指标审计 0 发现。
-- B1–B4 配置和 210/45 训练/验证数据哈希审计通过；CPU 两步 adapter-only 冒烟完成 checkpoint 保存、恢复和验证，holdout 读取为 0，状态为 `Training Ready — Waiting for School GPU Access`。
+- B1–B4 配置和 210/45 训练/验证数据哈希审计通过；CPU 两步 adapter-only 冒烟完成 checkpoint 保存、恢复和验证，holdout 读取为 0。该发布时状态已被 Unreleased 的 MornAI C1 部分实测取代。
 - A7 达到 500/500，覆盖 46 个标签；200 个新增任务完成 20 个原子审核批次，路由偏差、证据缺失、准入异常和敏感发现均为 0。
 - `v0.3.0` README、双语入口、图表、Replay GIF、版本清单和发布脚本通过一致性与敏感扫描，并完成 Git Tag、GitHub Release 与公开链接验证；真实演示视频延期。
 

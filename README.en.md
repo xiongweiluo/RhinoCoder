@@ -17,11 +17,11 @@ RhinoCoder is a verifiable, recoverable, privacy-aware spatial-design agent for 
 | **270/270 locked real-Rhino runs passed** | 30 tasks × 3 repeats × main/economy/rule-router; the saturated set is not an open-world claim; [A6 report](docs/a6-no-finetune-baseline.md) |
 | **P2a external hard set: 18/30 valid baseline passes** | Five first-wave connection interruptions resumed the same slots with the frozen prompt and remain recorded; 60.0%, Wilson 95% CI 42.3%–75.4%; [P2a report](docs/p2-external-hard-set.md) |
 | **Zero sensitive findings in the A4 audit** | 12 red-team cases, 1,609 traces, 7,016 SQLite rows, three Replays, and simulated log/request surfaces; [A4 report](docs/privacy-red-team-report.md) |
-| **A1–A7 and B1–B4 accepted** | Data, audit, routing, privacy, training pipeline, and CPU smoke are complete; formal GPU training has not run; [roadmap](PROJECT_OPTIMIZATION_PLAN.md) |
+| **A1–A7 and B1–B4 accepted; C1 partially passed** | A MornAI RTX 3090 passed CUDA/BF16, pinned 4-bit model loading, and LoRA attachment; GPU backward/checkpoint/resume and formal training have not run; [roadmap](PROJECT_OPTIMIZATION_PLAN.md) |
 
 Current release: [`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0). Recruiters can open the [live read-only demo](https://rhinocoder-demo.xiongweiluo1.chatgpt.site) without Rhino, a model key, or installation. Unreleased evidence now includes a [real-Rhino single-window clip](docs/assets/rhinocoder-real-rhino-demo.mov) and [result frame](docs/assets/rhinocoder-real-rhino-result.png). The clip is an explicitly labeled, privacy-reviewed before/after frame sequence—not continuous desktop footage—and contains no audio or real project data.
 
-> **Honest boundary:** `local-mock` is a deterministic interface and safety test double. It proves forced private routing and no-cloud fallback, not real local-model quality. P2a contains tasks authored externally but executed by the Agent; it is not a study in which people used the UI. P2b is postponed. School-GPU access is now available, but C0 preregistration, C1 validation, and formal LoRA training have not started; A5 holdout reads remain zero.
+> **Honest boundary:** `local-mock` is a deterministic interface and safety test double. It proves forced private routing and no-cloud fallback, not real local-model quality. P2a contains tasks authored externally but executed by the Agent; it is not a study in which people used the UI. P2b is postponed. A MornAI RTX 3090 has passed the C1 CUDA/BF16, data, tokenizer, 4-bit model-load, and LoRA-attachment checks. C0 is freeze-ready but has no external freeze manifest yet; C1 still needs real backward/checkpoint/resume, C2–C4 have not started, and A5 holdout reads remain zero.
 
 ## Why this is more than an “LLM + tools” demo
 
@@ -140,9 +140,9 @@ The repository GIF remains an automated synthetic Replay. The real-Rhino clip is
 
 - Primary real-world validation is macOS 15.6 arm64 + Rhino 8. Windows, Intel Mac, multi-user concurrency, and a second physical Mac are not release-validated.
 - The fixed 30-task suite is saturated. Its 100% Pass@1 establishes stability under that contract, not open-world, hard-set, or user-workflow success.
-- `local-mock` does not perform local inference. GPU access is available, but C0/C1 and formal LoRA training have not started, so no local-model result is claimed.
+- `local-mock` does not perform local inference. The RTX 3090 check covers model load, quantization, and LoRA attachment only; GPU smoke/resume and formal LoRA training have not run, so no local-model result is claimed.
 - The first model experiment runs one preregistered QLoRA configuration and permits `GO / MORE-DATA / NO-GO`. Windows/macOS Agent and Rhino compatibility does not imply cross-platform local-model support; local inference is claimed only on platforms actually validated.
 - P2a external-task automated evaluation is complete at 18/30 valid baseline passes; five resumed provider interruptions remain recorded. Supplemental real-Rhino topology evidence for 002/014 is complete but does not change the frozen failures or score. P2b real-user UI operation is postponed.
 - The full live benchmark needs interactive Rhino and a model API; CI is offline.
 
-More: [Architecture](docs/architecture.md) · [Training readiness](docs/training-readiness.md) · [C0 preregistration template](docs/training-preregistration-template.md) · [Troubleshooting](docs/troubleshooting.md) · [Roadmap](PROJECT_OPTIMIZATION_PLAN.md) · [Changelog](CHANGELOG.md)
+More: [Architecture](docs/architecture.md) · [Training readiness](docs/training-readiness.md) · [C0 formal preregistration](docs/training-preregistration.md) · [Template](docs/training-preregistration-template.md) · [Troubleshooting](docs/troubleshooting.md) · [Roadmap](PROJECT_OPTIMIZATION_PLAN.md) · [Changelog](CHANGELOG.md)

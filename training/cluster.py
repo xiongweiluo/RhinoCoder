@@ -1,4 +1,4 @@
-"""School GPU configuration validation and non-secret environment inventory."""
+"""GPU-host configuration validation and non-secret environment inventory."""
 
 from __future__ import annotations
 

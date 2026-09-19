@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import json
 import math
-import os
 import re
 import statistics
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from training.config import ReadinessError, project_path
+from training.model_cache import pinned_pretrained_source, pretrained_load_kwargs, resolve_model_cache
 
 
 TOOL_CALL_RE = re.compile(r"<tool_call>\s*(.*?)\s*</tool_call>", re.DOTALL)
@@ -217,7 +217,7 @@ def add_loss_metrics(metrics: Mapping[str, Any]) -> dict[str, Any]:
 def audit_official_tokenizer(
     config: Mapping[str, Any],
     *,
-    cache_dir: str | Path,
+    cache_dir: str | Path | None = None,
     local_files_only: bool = False,
 ) -> dict[str, Any]:
     """Download only the pinned tokenizer and verify every train/validation length."""
@@ -227,23 +227,19 @@ def audit_official_tokenizer(
     except ImportError as exc:
         raise ReadinessError("tokenizer audit requires transformers") from exc
     tokenizer_config = config["base_model"]["tokenizer"]
-    cache_path = project_path(cache_dir)
     source = tokenizer_config["id"]
     revision = tokenizer_config["revision"]
-    if local_files_only:
-        repository_cache = "models--" + str(source).replace("/", "--")
-        snapshot = cache_path / repository_cache / "snapshots" / str(revision)
-        if not snapshot.is_dir():
-            raise ReadinessError(f"pinned tokenizer snapshot is not cached: {snapshot}")
-        source = str(snapshot)
-        revision = None
+    load_kwargs = pretrained_load_kwargs(
+        cache_dir=cache_dir,
+        default_cache="data/training/tokenizer-cache",
+        local_files_only=local_files_only,
+    )
+    source, revision = pinned_pretrained_source(str(source), str(revision), load_kwargs)
     tokenizer = AutoTokenizer.from_pretrained(
         source,
         revision=revision,
         trust_remote_code=False,
-        token=None if local_files_only else os.getenv("HF_TOKEN") or None,
-        cache_dir=cache_path,
-        local_files_only=local_files_only,
+        **load_kwargs,
     )
     maximum = int(config["training"]["max_sequence_length"])
     view = str(config["data"]["view"])
@@ -256,6 +252,8 @@ def audit_official_tokenizer(
         "splits": {},
         "overflow_sample_ids": [],
         "holdout_read": False,
+        "model_cache": str(resolve_model_cache(cache_dir, default="data/training/tokenizer-cache")),
+        "local_files_only": bool(load_kwargs["local_files_only"]),
     }
     for split in ("train", "validation"):
         samples = load_samples(config["data"][split]["path"], split=split, view=view)

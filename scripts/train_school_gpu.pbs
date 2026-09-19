@@ -14,7 +14,9 @@ MODEL_CACHE="${RHINOCODER_MODEL_CACHE:?Set RHINOCODER_MODEL_CACHE to school-appr
 cd "$PROJECT_DIR"
 source "$TRAINING_VENV/bin/activate"
 export HF_HOME="$MODEL_CACHE"
+export HF_HUB_CACHE="$MODEL_CACHE"
 export TOKENIZERS_PARALLELISM=false
 
 python tools/run_training.py audit
-accelerate launch --num_processes 1 tools/run_training.py train --resume auto
+python tools/freeze_preregistration.py audit
+accelerate launch --num_processes 1 tools/run_training.py train --resume auto --confirm-formal-training

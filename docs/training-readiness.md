@@ -1,10 +1,10 @@
-# B1–B4 LoRA 训练就绪验收报告
+# B1–B4 LoRA 训练就绪与 C1 部分验收报告
 
-验收日期：2026-09-06
+最近更新：2026-09-19
 
-项目状态：**GPU Access Available — C0 Preregistration Pending**
+项目状态：**C0 Freeze Ready — C1 Partial — Formal Training Locked**
 
-本阶段没有执行正式训练、没有下载 7B 权重，也没有读取 A5 holdout。项目所有者于 2026-09-17 确认已获得 GPU 访问；集群参数、CUDA/驱动、配额和调度器仍需在 C1 现场验收后才能启动训练。
+MornAI Ubuntu 22.04.4 + RTX 3090 24GB 环境已完成 CUDA/BF16、A5 train/validation、固定 tokenizer、完整 7B 固定 revision 下载、4-bit 量化加载和 LoRA 挂载实测。尚未执行真实 backward、optimizer step、GPU checkpoint 保存/恢复或正式 QLoRA；C1 因此只部分通过。正式 C0 内容已填写，但必须在本次改动进入干净 commit 后生成外部冻结清单。A5 holdout 未上传到服务器、未读取；C2–C4 未开始。
 
 ## B1：首个实验范围
 
@@ -22,7 +22,7 @@
 | 配置数量 | 1；首轮禁止超参搜索 |
 | 显存预期 | 16 GiB 最低、24 GiB 推荐 |
 
-模型选择依据：7B 规模能在单卡 QLoRA 上形成现实的学校 GPU 起点；官方 chat template 原生表达工具调用；首轮 210/45 条“指令→工具调用”数据目标短、边界清晰，可直接用工具名与参数结构精确率判断收益。长轨迹和其他视图不进入首轮实验。
+模型选择依据：7B 规模能在单卡 24GB QLoRA 上形成现实起点；官方 chat template 原生表达工具调用；首轮 210/45 条“指令→工具调用”数据目标短、边界清晰，可直接用工具名与参数结构精确率判断收益。长轨迹和其他视图不进入首轮实验。
 
 只有预注册且可机械判定的工程故障（OOM、NaN/Inf、硬件或算子不兼容）才允许启用一个预登记的 operational fallback。fallback 只用于恢复可执行性，不与主配置择优；validation 收益低、收敛慢或结果不理想不构成 fallback 条件，而应作为主实验结果进入 C4 判断。
 
@@ -33,7 +33,7 @@
 - [Apache-2.0 许可证](https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct/blob/c03e6d358207e414f1eca0bb1891e29f1db0e242/LICENSE)
 - [Qwen 官方模型规格与许可说明](https://qwenlm.github.io/blog/qwen2.5-coder-family/)
 
-显存值是准入预算，不冒充学校硬件实测：4-bit 权重约 3.8 GB，另计量化元数据、激活、LoRA/优化器、CUDA 内核和 2,048 token 上下文余量；正式接入时必须由 `nvidia-smi` 实测验证。
+显存值最初是准入预算；MornAI RTX 3090 的实际模型加载峰值已在下文单独记录。4-bit 权重之外仍需计量化元数据、激活、LoRA/优化器、CUDA 内核和上下文余量，加载通过不能替代 backward 实测。
 
 ## B2：冻结配置
 
@@ -64,17 +64,21 @@
 
 ```bash
 python tools/run_training.py audit
-python tools/run_training.py tokenizer-audit
+python tools/run_training.py tokenizer-audit --local-files-only
 python tools/run_training.py smoke
-accelerate launch --num_processes 1 tools/run_training.py train --resume auto
-python tools/run_training.py evaluate --adapter data/training/runs/rhinocoder-qwen25-coder-7b-itc-lora-v1/best-adapter
-python tools/run_training.py report --run-dir data/training/runs/rhinocoder-qwen25-coder-7b-itc-lora-v1 --output data/training/runs/rhinocoder-qwen25-coder-7b-itc-lora-v1/report.md
+python tools/run_training.py gpu-smoke --phase initial
+# 等 initial 进程退出后，在新的进程中：
+python tools/run_training.py gpu-smoke --phase resume
+python tools/run_training.py gpu-smoke-audit
 ```
+
+正式 `train` 现在要求有效的 C0 外部冻结清单、完整 C1 smoke 报告和 `--confirm-formal-training`。在两道门禁通过前不要运行；缺少任一条件时命令会在加载模型前失败。
 
 实现保证：
 
 - 数据加载器只能读取 train/validation，任何路径或 split 指向 holdout 都会失败。
 - 使用基座同 revision tokenizer/chat template，并只对 assistant 工具调用目标计算 loss。
+- tokenizer 与 base model 加载统一显式尊重 `RHINOCODER_MODEL_CACHE`；`HF_HUB_OFFLINE=1` 或 `TRANSFORMERS_OFFLINE=1` 会强制 `local_files_only`，不再依赖用户额外设置 `HF_HUB_CACHE` 才能找到用同一 cache root 预下载的固定 revision。
 - 最大长度超限直接报出 `sample_id`，避免静默截断目标。
 - QLoRA 仅训练适配器，启用 gradient checkpointing、NF4 与 BF16。
 - checkpoint 自动发现最大 step；恢复前校验配置、基座和数据血缘。
@@ -103,42 +107,58 @@ python tools/run_training.py report --run-dir data/training/runs/rhinocoder-qwen
 
 机器报告位于 Git 忽略目录 `data/training/smoke/smoke-report.json`。
 
-## B4：学校 GPU 接入清单
+### MornAI RTX 3090 部分实测
 
-GPU 访问已获得，但实际学校参数尚未在本仓库执行 C1 验收，因此不伪造主机名、GPU、CUDA 或配额。已提供完整模板 `training/school_gpu.example.json`；C1 开始时复制为被 Git 忽略的 `training/school_gpu.local.json` 并填写。严格检查会拒绝任何 `REQUIRED/RECORD/VERIFY_AT_ACCESS` 占位项。
+| 项目 | 已确认结果 |
+| --- | --- |
+| OS / GPU | Ubuntu 22.04.4 LTS / NVIDIA GeForce RTX 3090 24,576 MiB |
+| 驱动 / CUDA | 550.107.02；`nvidia-smi` CUDA 12.4；PyTorch 2.10.0+cu126 |
+| CPU / RAM / Swap | 12 核 / 31 GiB / 2 GiB |
+| BF16 | `torch.cuda.is_bf16_supported()` 为真；1024×1024 BF16 CUDA 矩阵运算通过 |
+| 数据 | train 210、validation 45；服务器未上传 holdout |
+| Tokenizer | 255 条通过，最大 646/572 tokens，overflow 0 |
+| 模型缓存 | 固定 revision 完整缓存约 15GB；禁用 Xet 后续传成功 |
+| 4-bit / LoRA | bitsandbytes 4-bit 与所有 target modules 挂载通过 |
+| 参数 | trainable 40,370,176 / all 7,655,986,688，0.5273% |
+| 显存 | peak allocated 13.62 GiB；peak reserved 17.88 GiB |
+
+缓存下载曾在 Hugging Face Xet/CAS reconstruction 遇到 401；使用 `HF_HUB_DISABLE_XET=1` 和较长下载 timeout 后断点续传成功。运行时代码现直接把 `RHINOCODER_MODEL_CACHE` 传给 tokenizer/base model 的 `from_pretrained(cache_dir=...)`，严格离线仍保留 model ID + revision 血缘。
+
+上述实测只证明模型可装入显存并挂载 LoRA，**不证明** backward、optimizer、checkpoint 或恢复。新 C1 GPU smoke 分成两个独立命令：initial 最多运行 1 个 optimizer step 并保存 checkpoint，resume 在新进程中恢复并完成第 2 步与一次 validation loss。输出固定隔离在 `data/training/gpu-smoke/`，不会写正式 run directory 或 model registry。
+
+## B4 / C1：GPU 主机接入清单
+
+MornAI 主机参数以上述实测为准；不在公开仓库记录 IP、端口、凭据、Token 或私有绝对路径。历史文件名 `training/school_gpu.example.json` 继续作为通用主机模板，复制为被 Git 忽略的 `training/school_gpu.local.json` 后填写；严格检查仍会拒绝占位项。
 
 | 类别 | 必填记录 | 验证方式 / 通过条件 |
 | --- | --- | --- |
-| 登录 | host、用户名环境变量、可选跳板、学校 SSH key 规则 | 登录成功；私钥不进入仓库 |
+| 登录 | host、用户名环境变量、可选跳板、SSH key 规则 | 登录成功；地址和私钥不进入仓库 |
 | 调度 | 类型、queue/partition、account、可选 QoS | 支持 Slurm、PBS 或直接节点；相应版本命令与提交模板通过 |
 | GPU | 型号、显存 | `nvidia-smi`；单卡至少 16 GiB，推荐 24 GiB |
 | CUDA/驱动 | driver、CUDA compiler/runtime | `nvidia-smi`、`nvcc --version` 与 PyTorch CUDA wheel 兼容 |
-| 资源限制 | walltime、CPU、RAM | 满足 8 小时模板或按学校上限调整作业参数 |
-| 存储 | project/scratch quota、模型 cache | `df -h`、`quota -s`；模型、运行和备份均位于获批目录 |
+| 资源限制 | walltime、CPU、RAM | 满足运行预算或按主机上限调整作业参数 |
+| 存储 | project/scratch quota、模型 cache | `df -h`、`quota -s`；模型、运行和备份均位于私有获批目录 |
 | 下载/网络 | 登录节点与计算节点 Hugging Face 连通性 | 能取固定 revision；否则在允许节点预下载后离线加载 |
 | 密钥 | `HF_TOKEN` 注入渠道 | 只经 scheduler secret 或权限 0600 文件，不进参数、日志或 Git |
 | 导出 | adapter、manifest、metrics、evaluation | `rsync` 后逐文件 SHA-256 一致 |
-| 备份 | 最佳 adapter + 最后可恢复 checkpoint | 学校批准的加密存储，完成恢复抽查 |
+| 备份 | 最佳 adapter + 最后可恢复 checkpoint | 获批的加密存储，完成恢复抽查 |
 
 接入顺序：
 
 ```bash
-# 使用学校支持的 Python 3.11/3.12 创建独立环境，并按学校 CUDA 版本选择 PyTorch wheel
+# 使用主机支持的 Python 3.11/3.12 创建独立环境，并按 CUDA 版本选择 PyTorch wheel
 python3 -m venv <approved-training-venv>
 source <approved-training-venv>/bin/activate
 python -m pip install -r requirements-training.txt
 
-# 从本机安全传输且只传输 manifest、train、validation；不要把 holdout 放进训练作业
+# 只传输 manifest、train、validation；不要把 holdout 放进 C1/C2 主机
 python tools/run_training.py cluster-template-audit
 python tools/run_training.py cluster-check --cluster-config training/school_gpu.local.json
 python tools/run_training.py audit
-# Slurm:
-sbatch --partition=<school-partition> --account=<school-account> scripts/train_school_gpu.slurm
-# PBS:
-qsub -q <school-queue> scripts/train_school_gpu.pbs
+# direct / Slurm / PBS 均需先通过 C0 外部冻结与 C1 smoke；正式 train 当前仍被门禁锁定。
 ```
 
-`cluster-check` 只记录命令输出和环境变量是否存在，不记录 token 或密钥值。正式作业模板要求显式提供训练虚拟环境与学校批准的模型缓存路径。
+`cluster-check` 只记录命令输出和环境变量是否存在，不记录 token 或密钥值。正式作业模板要求显式提供训练虚拟环境与私有模型缓存路径。
 
 ## C0–C4 执行边界
 
@@ -169,8 +189,9 @@ Agent/Rhino 桌面兼容与本地模型兼容分别验收。Windows + NVIDIA/CUD
 - B1–B4 共 12 项工程准备均完成。
 - 配置审计：通过；train 210、validation 45，哈希与 A5 manifest 一致。
 - CPU 保存/恢复/评测冒烟：通过。
-- 学校接入模板审计：通过；13 个现场值等待 C1 填写，支持 Slurm/PBS/直接节点，严格检查不会把未知值当成通过。
-- GPU 访问已由项目所有者确认，但当前不满足也不声称完成 C1：尚无现场 GPU 实测、正式训练或 holdout 评测。
-- 唯一 QLoRA 配置、租期导出边界、一次性 holdout、配对统计与 `GO / MORE-DATA / NO-GO` 决策规则已写入计划；预注册文件和独立 holdout 入口仍须在相应门禁前完成。
+- 通用 GPU 主机模板审计：通过；私有主机配置继续保持 Git 忽略。
+- MornAI RTX 3090 的环境、CUDA/BF16、数据、tokenizer、模型缓存、4-bit 加载和 LoRA 挂载已通过；C1 缺 backward/optimizer/checkpoint/resume 与吞吐估算，因此只部分通过。
+- C0 正式预注册已 freeze-ready，并使用外部冻结清单解决自哈希；当前尚未 commit/freeze。一次性 holdout 入口仍须在 C3 前实现。
+- 正式 `train` 入口要求 C0+C1 双门禁和显式确认；没有正式训练、adapter、validation adapter 结果、P2 LoRA 结果或本地模型收益声明。
 
-结论：数据、唯一训练配置、恢复、validation 评测、登记、报告和学校接入门禁均已就绪；下一步先填写并冻结 [`training-preregistration-template.md`](training-preregistration-template.md)，再执行 C1 现场验收和站点配置。现有代码足以启动最小训练；C3 前仍需实现隔离的一次性 holdout 入口，不能解除训练期保护。
+结论：下一步不是正式训练，而是先把 [`training-preregistration.md`](training-preregistration.md) 合并到干净 commit 并生成外部 C0 清单，再在 MornAI 依次运行 GPU smoke initial/resume。只有完整报告通过后才能讨论 C2；C3 前仍需实现隔离的一次性 holdout 入口，不能解除训练期保护。

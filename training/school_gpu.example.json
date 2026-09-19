@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "status": "awaiting_school_access",
+  "status": "template_requires_local_values",
   "login": {
     "host": "REQUIRED_AT_ACCESS",
     "username_environment_variable": "SCHOOL_GPU_USER",
