@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "protocol_id": "p2-qwen-base-lora-paired-v1",
   "status": "frozen_before_first_model_lane_run",
   "experiment_id": "rhinocoder-qwen25-coder-7b-itc-lora-v1",
@@ -31,14 +31,14 @@
       "max_new_tokens_per_round": 512,
       "maximum_tool_rounds": 30
     },
-    "environment": "real Rhino 8 + MCP on macOS; authenticated Qwen inference through an SSH loopback tunnel to the frozen RTX 3090 environment",
-    "transport_security": "both inference server and client endpoint bind loopback only; bearer token is required and never committed",
+    "environment": "real Rhino 8 + MCP on macOS; authenticated Qwen inference through encrypted SSH exec requests to the frozen RTX 3090 environment",
+    "transport_security": "the inference server binds remote loopback only; each request and bearer token travel in encrypted SSH stdin; the restricted temporary key keeps port forwarding disabled; no connection detail or credential is committed",
     "raw_evidence": "Git-ignored; public output is aggregate only"
   },
   "implementation_contract": {
     "agent/llm.py": "cb38886d7960b2a0a2de2a1e7ec135b47da80dfa9599215f4f9266457a706821",
-    "agent/model_backends.py": "993e4890d00e4d56f1e3af12cd90419f9e9b80a788507894740e0402beb0b56b",
-    "eval/p2_hard.py": "bb3db8d966f32dbedc6779eb00af61e03db362b96b6b7e378a9a99506cbb1cd5",
+    "agent/model_backends.py": "ff787d742f32cedfe044066416001a24be8c35575d7e3b1fe89476a1a5551c3f",
+    "eval/p2_hard.py": "8963b64eaea03820327d53451d30179faf4d36df577fcb3b286feb97409259c2",
     "training/p2_inference_server.py": "59bf77ffc8c6b091f534578fb0a6de6c59fd762c683a86f96c8b9e858db7c747",
     "tools/report_p2_model_comparison.py": "3a755a9e98abcb3630a586b5ceea50041dd8596c8c755bcab238d1684d267bef",
     "training/configs/rhinocoder-qwen25-coder-7b-itc-lora-v1.json": "c4872a3c821d962c5031bac17aaa567ad6f14d442ffd8d769b8009957640a6b0"
@@ -56,6 +56,14 @@
     "safety": "no new critical privacy, unauthorized mutation, geometry destruction, or recovery failure"
   },
   "route_role_note": "For paired base/LoRA lanes, the three frozen router role IDs all target the same selected model lane. They preserve policy and fallback assertions but do not represent external cloud providers.",
+  "pre_run_corrections": [
+    {
+      "kind": "transport_only",
+      "timing": "before the first base or LoRA task/model response",
+      "reason": "the restricted evaluation SSH key correctly prohibits port forwarding",
+      "change": "replace the proposed local port forward with one authenticated SSH exec request per inference call; model, task, prompt, tools, generation, scoring, and retry rules are unchanged"
+    }
+  ],
   "cloud_lane_policy": "A cloud-only lane is safety-inadmissible for frozen force-local/block tasks; the previously published configured hybrid P2 baseline remains the cloud/hybrid deployment comparator and is not rerun or relabeled.",
   "mutation_policy": "No task, fixture, assertion, prompt, adapter, generation setting, or retry rule may change after either lane starts. Infrastructure failures before the first model/tool outcome may fill the same slot once with the failed attempt retained."
 }

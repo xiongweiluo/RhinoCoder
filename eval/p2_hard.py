@@ -46,6 +46,7 @@ from agent.llm import (
 from agent.model_backends import (
     BackendError,
     ControlledLocalOpenAIBackend,
+    ControlledSSHOpenAIBackend,
     ModelBackend,
     build_default_backends,
 )
@@ -299,8 +300,34 @@ def _controlled_local_backends(lane: str) -> Mapping[str, ModelBackend]:
             typical_latency_ms=20_000,
         ),
     }
+    transport = os.environ.get("RHINOCODER_P2_TRANSPORT", "http").strip().lower()
+    if transport == "http":
+        return {
+            name: ControlledLocalOpenAIBackend(profile, client_factory, base_url=base_url)
+            for name, profile in profiles.items()
+        }
+    if transport != "ssh":
+        raise RuntimeError("RHINOCODER_P2_TRANSPORT must be http or ssh")
+    required = {
+        "host": os.environ.get("RHINOCODER_P2_SSH_HOST", "").strip(),
+        "user": os.environ.get("RHINOCODER_P2_SSH_USER", "").strip(),
+        "identity_file": os.environ.get("RHINOCODER_P2_SSH_IDENTITY", "").strip(),
+    }
+    if not all(required.values()):
+        raise RuntimeError("controlled SSH transport requires host, user, and identity env vars")
+    try:
+        port = int(os.environ.get("RHINOCODER_P2_SSH_PORT", "22"))
+    except ValueError as exc:
+        raise RuntimeError("RHINOCODER_P2_SSH_PORT must be an integer") from exc
     return {
-        name: ControlledLocalOpenAIBackend(profile, client_factory, base_url=base_url)
+        name: ControlledSSHOpenAIBackend(
+            profile,
+            host=required["host"],
+            port=port,
+            user=required["user"],
+            identity_file=required["identity_file"],
+            token=token,
+        )
         for name, profile in profiles.items()
     }
 

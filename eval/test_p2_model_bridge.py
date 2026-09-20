@@ -64,6 +64,20 @@ def test_comparison_registry_preserves_frozen_route_roles(monkeypatch):
     assert all(item.profile.kind == "local" for item in registry.values())
 
 
+def test_comparison_registry_supports_restricted_ssh_transport(monkeypatch, tmp_path):
+    identity = tmp_path / "id_ed25519"
+    identity.write_text("test-only", encoding="utf-8")
+    monkeypatch.setenv("RHINOCODER_P2_INFERENCE_TOKEN", "x" * 32)
+    monkeypatch.setenv("RHINOCODER_P2_TRANSPORT", "ssh")
+    monkeypatch.setenv("RHINOCODER_P2_SSH_HOST", "gpu.example.invalid")
+    monkeypatch.setenv("RHINOCODER_P2_SSH_USER", "runner")
+    monkeypatch.setenv("RHINOCODER_P2_SSH_PORT", "24017")
+    monkeypatch.setenv("RHINOCODER_P2_SSH_IDENTITY", str(identity))
+    registry = _controlled_local_backends("lora")
+    assert set(registry) == {"cloud-main", "cloud-economy", "local-mock"}
+    assert all(item.base_url == "ssh://controlled-loopback" for item in registry.values())
+
+
 def test_model_comparison_protocol_matches_implementation_contract():
     protocol = _audit_model_comparison_protocol()
     assert protocol["task_set"]["task_count"] == 30

@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
+import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Callable, Mapping
 
@@ -16,6 +19,7 @@ from openai import (
     APIStatusError,
     APITimeoutError,
 )
+from openai.types.chat import ChatCompletion
 
 from agent.router import BackendProfile
 from agent.privacy import (
@@ -217,6 +221,122 @@ class ControlledLocalOpenAIBackend(OpenAICompatibleBackend):
                 f"受控本地推理端点错误 {exc.status_code}: {exc.message}",
                 recoverable=fallback_eligible,
                 fallback_eligible=fallback_eligible,
+            ) from exc
+
+
+class ControlledSSHOpenAIBackend(ModelBackend):
+    """Run one authenticated loopback inference request through SSH stdin.
+
+    This transport is designed for restricted SSH keys that intentionally
+    prohibit port forwarding.  Connection details and credentials are supplied
+    only at runtime; the remote command reads an encrypted stdin envelope and
+    contacts the inference server on the remote loopback interface.
+    """
+
+    _SAFE_HOST = re.compile(r"^[A-Za-z0-9.-]+$")
+    _REMOTE_PROXY = (
+        "import json,sys,urllib.request;"
+        "e=json.load(sys.stdin);"
+        "b=json.dumps(e['payload'],ensure_ascii=False).encode();"
+        "r=urllib.request.Request('http://127.0.0.1:18080/v1/chat/completions',"
+        "data=b,headers={'Content-Type':'application/json','Authorization':'Bearer '+e['token']});"
+        "sys.stdout.buffer.write(urllib.request.urlopen(r,timeout=180).read())"
+    )
+
+    def __init__(
+        self,
+        profile: BackendProfile,
+        *,
+        host: str,
+        port: int,
+        user: str,
+        identity_file: str | Path,
+        token: str,
+        timeout_seconds: float = 210,
+    ) -> None:
+        if not self._SAFE_HOST.fullmatch(host) or not self._SAFE_HOST.fullmatch(user):
+            raise ValueError("SSH host/user contains unsupported characters")
+        if not 1 <= int(port) <= 65535:
+            raise ValueError("SSH port is out of range")
+        identity = Path(identity_file).expanduser().resolve()
+        if not identity.is_file():
+            raise ValueError("SSH identity file does not exist")
+        if len(token) < 32:
+            raise ValueError("controlled SSH inference token is too short")
+        self.profile = profile
+        self.base_url = "ssh://controlled-loopback"
+        self.host = host
+        self.port = int(port)
+        self.user = user
+        self.identity = identity
+        self.token = token
+        self.timeout_seconds = timeout_seconds
+
+    async def complete(
+        self,
+        *,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+    ) -> Any:
+        payload = {
+            "model": self.profile.model,
+            "messages": messages,
+            "tools": tools or None,
+            "tool_choice": "auto" if tools else None,
+        }
+        envelope = json.dumps(
+            {"token": self.token, "payload": payload},
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        process = await asyncio.create_subprocess_exec(
+            "ssh",
+            "-i",
+            str(self.identity),
+            "-p",
+            str(self.port),
+            "-o",
+            "BatchMode=yes",
+            "-o",
+            "ConnectTimeout=10",
+            "-o",
+            "ServerAliveInterval=15",
+            f"{self.user}@{self.host}",
+            "python3",
+            "-c",
+            self._REMOTE_PROXY,
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        try:
+            stdout, _stderr = await asyncio.wait_for(
+                process.communicate(envelope), timeout=self.timeout_seconds
+            )
+        except TimeoutError as exc:
+            process.kill()
+            await process.wait()
+            raise BackendError(
+                "llm.timeout",
+                "受控 SSH 推理请求超时；本轮未执行新的工具调用。",
+                recoverable=True,
+                fallback_eligible=True,
+            ) from exc
+        if process.returncode != 0:
+            raise BackendError(
+                "llm.connection",
+                "受控 SSH 推理请求失败；未记录远端 stderr 以避免泄漏连接信息。",
+                recoverable=True,
+                fallback_eligible=True,
+            )
+        try:
+            return ChatCompletion.model_validate_json(stdout)
+        except Exception as exc:
+            raise BackendError(
+                "llm.invalid_response",
+                "受控 SSH 推理端点返回了无效响应。",
+                recoverable=False,
+                fallback_eligible=False,
             ) from exc
 
 
