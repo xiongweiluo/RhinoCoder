@@ -118,6 +118,15 @@ def _is_infrastructure_result(row: dict[str, Any]) -> bool:
         return True
     runs = row.get("runs") or []
     error_code = ((runs[-1].get("error") or {}).get("code")) if runs else None
+    if (
+        row.get("model_lane") in {"base", "lora"}
+        and error_code == "run.cancelled"
+        and not row.get("tool_calls")
+    ):
+        # An operator may stop a comparison batch after repeated transport
+        # failures.  With no model response or tool call, this is an unfilled
+        # infrastructure slot rather than a capability outcome.
+        return True
     # P2-HARD-028 already exposes a deterministic pre-model privacy failure;
     # the subsequent connection error does not invalidate that observation.
     return error_code == "llm.connection" and row.get("task_id") != "P2-HARD-028"

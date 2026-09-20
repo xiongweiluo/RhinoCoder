@@ -16,6 +16,7 @@ import re
 import secrets
 import sys
 import time
+import traceback
 import uuid
 from datetime import datetime, timezone
 from http import HTTPStatus
@@ -236,6 +237,10 @@ class InferenceHandler(BaseHTTPRequestHandler):
         except (ValueError, json.JSONDecodeError) as exc:
             self._json(HTTPStatus.BAD_REQUEST, {"error": {"message": str(exc)}})
         except Exception as exc:
+            # The private server log may contain a traceback for operational
+            # diagnosis, but never the request body, messages, token, or raw
+            # model output.  The HTTP response remains type-only.
+            traceback.print_exc()
             self._json(
                 HTTPStatus.INTERNAL_SERVER_ERROR,
                 {"error": {"message": f"{type(exc).__name__}: inference failed"}},
