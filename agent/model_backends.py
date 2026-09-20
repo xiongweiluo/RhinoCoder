@@ -6,6 +6,7 @@ import asyncio
 import json
 import os
 import re
+import shlex
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
@@ -302,9 +303,7 @@ class ControlledSSHOpenAIBackend(ModelBackend):
             "-o",
             "ServerAliveInterval=15",
             f"{self.user}@{self.host}",
-            "python3",
-            "-c",
-            self._REMOTE_PROXY,
+            f"python3 -c {shlex.quote(self._REMOTE_PROXY)}",
             stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,

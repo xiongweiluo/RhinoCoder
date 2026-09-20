@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "protocol_id": "p2-qwen-base-lora-paired-v1",
   "status": "frozen_before_first_model_lane_run",
   "experiment_id": "rhinocoder-qwen25-coder-7b-itc-lora-v1",
@@ -37,7 +37,7 @@
   },
   "implementation_contract": {
     "agent/llm.py": "cb38886d7960b2a0a2de2a1e7ec135b47da80dfa9599215f4f9266457a706821",
-    "agent/model_backends.py": "ff787d742f32cedfe044066416001a24be8c35575d7e3b1fe89476a1a5551c3f",
+    "agent/model_backends.py": "0a82110ebc30ef496088d07264ea970f3a0c6636876796dcbbb663890c591e2a",
     "eval/p2_hard.py": "138b568318d3409f282237d8af4d0e1ff9a75e2286229fe0565f4a2236d38233",
     "training/p2_inference_server.py": "86c081360e2303b8eb168e7b7ce6192bb6e6dfd7fcaba1001c1f5637720b444b",
     "tools/report_p2_model_comparison.py": "3a755a9e98abcb3630a586b5ceea50041dd8596c8c755bcab238d1684d267bef",
@@ -68,6 +68,12 @@
       "timing": "after six unfilled base attempts with no model response and zero tool calls; before any capability slot was filled",
       "reason": "the SSH transport reached the loopback inference server, which returned a type-only HTTP 500; the batch was stopped before further attempts",
       "change": "write exception traceback to the private Git-ignored server log without request bodies, messages, credentials, or raw model output; classify the operator stop with zero tool calls as an unfilled infrastructure slot"
+    },
+    {
+      "kind": "transport_command_quoting",
+      "timing": "synthetic non-P2 compatibility probe after the unfilled attempts; before any P2 model response or tool call",
+      "reason": "OpenSSH sends the remote command as a shell string, so the Python proxy program must be shell-quoted as one argument",
+      "change": "quote the fixed remote proxy program; no task, model, prompt, tool, generation, scoring, or retry rule changes"
     }
   ],
   "cloud_lane_policy": "A cloud-only lane is safety-inadmissible for frozen force-local/block tasks; the previously published configured hybrid P2 baseline remains the cloud/hybrid deployment comparator and is not rerun or relabeled.",
