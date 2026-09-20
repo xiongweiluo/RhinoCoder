@@ -24,7 +24,7 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from openai import APITimeoutError, AsyncOpenAI
 
-from agent.model_backends import BackendError, ModelBackend, build_default_backends
+from agent.model_backends import BackendError, MockLocalBackend, ModelBackend, build_default_backends
 from agent.pricing import calculate_cost, resolve_model_pricing
 from agent.privacy import (
     PrivacyAction,
@@ -631,7 +631,7 @@ async def run_agent(
                         _echo("RESULT", "✓ LLM 回复:")
                         for line in final_text.splitlines():
                             _echo("RESULT", f"  {line}")
-                        if active_backend.profile.backend_id == "local-mock":
+                        if isinstance(active_backend, MockLocalBackend):
                             return await finish(
                                 RunStatus.FAILED,
                                 error=RunError(

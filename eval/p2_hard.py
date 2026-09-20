@@ -30,6 +30,7 @@ if str(ROOT) not in sys.path:
 
 import httpx
 from dotenv import load_dotenv
+from openai import AsyncOpenAI
 
 load_dotenv(ROOT / ".env", override=False)
 
@@ -42,15 +43,22 @@ from agent.llm import (
     make_deepseek_client,
     run_agent,
 )
-from agent.model_backends import BackendError, ModelBackend, build_default_backends
-from agent.router import RouteContext, RouterConfig
+from agent.model_backends import (
+    BackendError,
+    ControlledLocalOpenAIBackend,
+    ModelBackend,
+    build_default_backends,
+)
+from agent.router import BackendProfile, RouteContext, RouterConfig
 from agent.runtime import AgentRunResult, CancellationToken, RunStatus
 from eval.scene_assert import select, verify
 from tools.audit_p2_hard_set import MANIFEST_PATH, audit
+from training.reporting import git_revision
 
 
 P2_DIR = ROOT / "eval" / "p2"
 TASKS_PATH = P2_DIR / "hard_tasks.jsonl"
+MODEL_COMPARISON_PROTOCOL = P2_DIR / "model-comparison-protocol.json"
 DEFAULT_OUTPUT = ROOT / "data" / "p2" / "initial-results.jsonl"
 RHINO_URL = os.environ.get("RHINOCODER_RHINO_URL", "http://127.0.0.1:8080")
 MODEL_AUDIT = ROOT / "data" / "audit" / "model_requests.jsonl"
@@ -134,6 +142,20 @@ def _fixture_sha() -> str:
     return manifest["files"]["eval/p2/fixtures.json"]
 
 
+def _audit_model_comparison_protocol() -> dict[str, Any]:
+    protocol = json.loads(MODEL_COMPARISON_PROTOCOL.read_text(encoding="utf-8"))
+    if protocol.get("status") != "frozen_before_first_model_lane_run":
+        raise RuntimeError("P2 model comparison protocol is not frozen")
+    if protocol.get("task_set", {}).get("holdout_read") != 0:
+        raise RuntimeError("P2 model comparison protocol holdout_read must remain zero")
+    for relative, expected in protocol.get("implementation_contract", {}).items():
+        target = ROOT / relative
+        actual = hashlib.sha256(target.read_bytes()).hexdigest()
+        if actual != expected:
+            raise RuntimeError(f"P2 model comparison implementation drift: {relative}")
+    return protocol
+
+
 async def _post(
     client: httpx.AsyncClient,
     endpoint: str,
@@ -213,16 +235,74 @@ class _FailOnceBackend(ModelBackend):
         return await self.inner.complete(messages=messages, tools=tools)
 
 
-def _fallback_backends() -> Mapping[str, ModelBackend]:
-    backends = build_default_backends(
-        main_model=DEEPSEEK_MODEL,
-        main_base_url=DEEPSEEK_BASE_URL,
-        main_client_factory=make_deepseek_client,
-        timeout_seconds=LLM_TIMEOUT_SECONDS,
-        max_retries=LLM_MAX_RETRIES,
-    )
+def _fallback_backends(
+    source: Mapping[str, ModelBackend] | None = None,
+) -> Mapping[str, ModelBackend]:
+    if source is not None:
+        backends = dict(source)
+    else:
+        backends = build_default_backends(
+            main_model=DEEPSEEK_MODEL,
+            main_base_url=DEEPSEEK_BASE_URL,
+            main_client_factory=make_deepseek_client,
+            timeout_seconds=LLM_TIMEOUT_SECONDS,
+            max_retries=LLM_MAX_RETRIES,
+        )
     backends["cloud-main"] = _FailOnceBackend(backends["cloud-main"])
     return backends
+
+
+def _controlled_local_backends(lane: str) -> Mapping[str, ModelBackend]:
+    base_url = os.environ.get("RHINOCODER_P2_INFERENCE_URL", "http://127.0.0.1:18080/v1").strip()
+    token = os.environ.get("RHINOCODER_P2_INFERENCE_TOKEN", "").strip()
+    if len(token) < 32:
+        raise RuntimeError("RHINOCODER_P2_INFERENCE_TOKEN must contain at least 32 characters")
+    model = f"qwen25-coder-7b-{lane}"
+
+    def client_factory() -> AsyncOpenAI:
+        return AsyncOpenAI(
+            api_key=token,
+            base_url=base_url,
+            timeout=float(os.environ.get("RHINOCODER_P2_INFERENCE_TIMEOUT", "180")),
+            max_retries=LLM_MAX_RETRIES,
+        )
+
+    profiles = {
+        "cloud-main": BackendProfile(
+            backend_id="cloud-main",
+            model_id=f"controlled-local:{model}:reliable-role",
+            model=model,
+            provider="controlled-local",
+            kind="local",
+            cost_tier=0,
+            reliability_rank=3,
+            typical_latency_ms=20_000,
+        ),
+        "cloud-economy": BackendProfile(
+            backend_id="cloud-economy",
+            model_id=f"controlled-local:{model}:economy-role",
+            model=model,
+            provider="controlled-local",
+            kind="local",
+            cost_tier=0,
+            reliability_rank=2,
+            typical_latency_ms=20_000,
+        ),
+        "local-mock": BackendProfile(
+            backend_id="local-mock",
+            model_id=f"controlled-local:{model}:private-role",
+            model=model,
+            provider="controlled-local",
+            kind="local",
+            cost_tier=0,
+            reliability_rank=1,
+            typical_latency_ms=20_000,
+        ),
+    }
+    return {
+        name: ControlledLocalOpenAIBackend(profile, client_factory, base_url=base_url)
+        for name, profile in profiles.items()
+    }
 
 
 def _route_context(task: dict[str, Any]) -> RouteContext | None:
@@ -488,7 +568,14 @@ async def _run_control_rollback(client: httpx.AsyncClient, task: dict[str, Any],
     controls["control_tool_calls"] = 2
 
 
-async def _run_task(task: dict[str, Any], phase: str, intervention: str) -> dict[str, Any]:
+async def _run_task(
+    task: dict[str, Any],
+    phase: str,
+    intervention: str,
+    *,
+    backend_registry: Mapping[str, ModelBackend] | None = None,
+    model_lane: str | None = None,
+) -> dict[str, Any]:
     started = time.monotonic()
     public_run_id = hashlib.sha256(f"{phase}:{task['id']}:{uuid.uuid4()}".encode()).hexdigest()[:16]
     runs: list[AgentRunResult] = []
@@ -540,7 +627,11 @@ async def _run_task(task: dict[str, Any], phase: str, intervention: str) -> dict
                 else:
                     if task["id"] == "P2-HARD-016":
                         await _post(client, "/configure_p2_fault", {"fault_id": task["fault_id"]}, evaluation=True)
-                    registry = _fallback_backends() if task["id"] == "P2-HARD-030" else None
+                    registry = (
+                        _fallback_backends(backend_registry)
+                        if task["id"] == "P2-HARD-030"
+                        else backend_registry
+                    )
                     run = await _invoke_agent(
                         task["instruction"],
                         phase=phase,
@@ -605,7 +696,13 @@ async def _run_task(task: dict[str, Any], phase: str, intervention: str) -> dict
         "public_run_id": public_run_id,
         "started_at": _now(),
         "duration_ms": round((time.monotonic() - started) * 1000, 2),
-        "environment": "real_rhino_8_mcp_configured_model",
+        "environment": (
+            "real_rhino_8_mcp_controlled_gpu_inference_over_ssh"
+            if model_lane
+            else "real_rhino_8_mcp_configured_model"
+        ),
+        "model_lane": model_lane,
+        "git_revision": git_revision(),
         "mock_claimed_as_real": False,
         "automated_pass": automated_pass,
         "manual_evidence_pending": manual_pending,
@@ -665,6 +762,11 @@ async def _main(args) -> int:
         if missing:
             raise ValueError("未知 task_id: " + ", ".join(sorted(missing)))
     output = Path(args.output).resolve()
+    if args.model_lane and output == DEFAULT_OUTPUT.resolve():
+        raise RuntimeError("model comparison requires an explicit isolated --output path")
+    if args.model_lane:
+        _audit_model_comparison_protocol()
+    backends = _controlled_local_backends(args.model_lane) if args.model_lane else None
     output.parent.mkdir(parents=True, exist_ok=True)
     completed = set()
     if output.exists():
@@ -678,7 +780,13 @@ async def _main(args) -> int:
             print(f"[{index}/{len(tasks)}] {task['id']} immutable result already present; skipped", flush=True)
             continue
         print(f"[{index}/{len(tasks)}] {task['id']} starting", flush=True)
-        result = await _run_task(task, args.phase, args.intervention)
+        result = await _run_task(
+            task,
+            args.phase,
+            args.intervention,
+            backend_registry=backends,
+            model_lane=args.model_lane,
+        )
         with output.open("a", encoding="utf-8") as stream:
             stream.write(json.dumps(result, ensure_ascii=False, separators=(",", ":")) + "\n")
         print(
@@ -704,6 +812,11 @@ def main() -> int:
     parser.add_argument("--task-id", action="append")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT))
     parser.add_argument("--force", action="store_true", help="append another explicit attempt; never overwrites")
+    parser.add_argument(
+        "--model-lane",
+        choices=("base", "lora"),
+        help="use the authenticated controlled-local GPU endpoint for a paired model lane",
+    )
     args = parser.parse_args()
     return asyncio.run(_main(args))
 

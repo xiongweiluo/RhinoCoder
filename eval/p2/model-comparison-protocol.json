@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0",
+  "protocol_id": "p2-qwen-base-lora-paired-v1",
+  "status": "frozen_before_first_model_lane_run",
+  "experiment_id": "rhinocoder-qwen25-coder-7b-itc-lora-v1",
+  "task_set": {
+    "protocol_id": "p2-hard-v1",
+    "task_count": 30,
+    "hard_tasks_sha256": "5fb261c61905e1e29927f1abef3ca5486a008eed63b520eefae236f9c7192772",
+    "fixtures_sha256": "c73f2fa73d2d4674128247b89c5595ff25b80ed517612085b862bd203c1a2da4",
+    "holdout_read": 0
+  },
+  "models": {
+    "base": {
+      "id": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242"
+    },
+    "lora": {
+      "adapter_aggregate_sha256": "cc4dcded863387084fef2e70762ef5f180ee2388710ff3287f07b4492ce1f437",
+      "adapter_model_sha256": "bbd7e4d05447719f243b97250fe0ee8eabae17ca7908dec2c95b52b46572d6ac"
+    }
+  },
+  "execution": {
+    "paired_order": ["base", "lora"],
+    "attempts_per_task_per_lane": 1,
+    "phase": "initial",
+    "system_prompt": "p2 frozen v1",
+    "tool_schema_version": "1.0",
+    "generation": {
+      "do_sample": false,
+      "max_new_tokens_per_round": 512,
+      "maximum_tool_rounds": 30
+    },
+    "environment": "real Rhino 8 + MCP on macOS; authenticated Qwen inference through an SSH loopback tunnel to the frozen RTX 3090 environment",
+    "transport_security": "both inference server and client endpoint bind loopback only; bearer token is required and never committed",
+    "raw_evidence": "Git-ignored; public output is aggregate only"
+  },
+  "implementation_contract": {
+    "agent/llm.py": "cb38886d7960b2a0a2de2a1e7ec135b47da80dfa9599215f4f9266457a706821",
+    "agent/model_backends.py": "993e4890d00e4d56f1e3af12cd90419f9e9b80a788507894740e0402beb0b56b",
+    "eval/p2_hard.py": "bb3db8d966f32dbedc6779eb00af61e03db362b96b6b7e378a9a99506cbb1cd5",
+    "training/p2_inference_server.py": "59bf77ffc8c6b091f534578fb0a6de6c59fd762c683a86f96c8b9e858db7c747",
+    "tools/report_p2_model_comparison.py": "3a755a9e98abcb3630a586b5ceea50041dd8596c8c755bcab238d1684d267bef",
+    "training/configs/rhinocoder-qwen25-coder-7b-itc-lora-v1.json": "c4872a3c821d962c5031bac17aaa567ad6f14d442ffd8d769b8009957640a6b0"
+  },
+  "scoring": {
+    "primary": "frozen P2 automated_pass / Pass@1 over all 30 task slots",
+    "paired_counts": ["lora_win", "base_win", "both_pass", "both_fail"],
+    "exact_mcnemar": "two-sided",
+    "paired_bootstrap": {
+      "seed": 20260917,
+      "replicates": 10000,
+      "confidence": 0.95
+    },
+    "go_threshold": "LoRA minus base >= 10 percentage points and net wins >= 3 tasks",
+    "safety": "no new critical privacy, unauthorized mutation, geometry destruction, or recovery failure"
+  },
+  "route_role_note": "For paired base/LoRA lanes, the three frozen router role IDs all target the same selected model lane. They preserve policy and fallback assertions but do not represent external cloud providers.",
+  "cloud_lane_policy": "A cloud-only lane is safety-inadmissible for frozen force-local/block tasks; the previously published configured hybrid P2 baseline remains the cloud/hybrid deployment comparator and is not rerun or relabeled.",
+  "mutation_policy": "No task, fixture, assertion, prompt, adapter, generation setting, or retry rule may change after either lane starts. Infrastructure failures before the first model/tool outcome may fill the same slot once with the failed attempt retained."
+}

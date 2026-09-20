@@ -150,6 +150,76 @@ class OpenAICompatibleBackend(ModelBackend):
             ) from exc
 
 
+class ControlledLocalOpenAIBackend(OpenAICompatibleBackend):
+    """OpenAI-compatible backend reached through a user-controlled local tunnel.
+
+    Unlike a cloud backend, this path deliberately does not apply cloud
+    redaction or write to the cloud-request audit.  Callers must provide a
+    loopback URL (normally an SSH local forward) so raw tool observations never
+    leave the controlled evaluation channel.
+    """
+
+    def __init__(
+        self,
+        profile: BackendProfile,
+        client_factory: Callable[[], AsyncOpenAI],
+        *,
+        base_url: str,
+    ) -> None:
+        if not (
+            base_url.startswith("http://127.0.0.1:")
+            or base_url.startswith("http://localhost:")
+        ):
+            raise ValueError("controlled local backend requires a loopback HTTP URL")
+        super().__init__(profile, client_factory, base_url=base_url)
+
+    async def complete(
+        self,
+        *,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+    ) -> Any:
+        try:
+            client = self._client_instance()
+            return await client.chat.completions.create(
+                model=self.profile.model,
+                messages=messages,
+                tools=tools or None,
+                tool_choice="auto" if tools else None,
+            )
+        except BackendError:
+            raise
+        except AuthenticationError as exc:
+            raise BackendError(
+                "llm.authentication",
+                "受控本地推理端点鉴权失败。",
+                recoverable=True,
+                fallback_eligible=False,
+            ) from exc
+        except APITimeoutError as exc:
+            raise BackendError(
+                "llm.timeout",
+                "受控本地推理端点响应超时；本轮未执行新的工具调用。",
+                recoverable=True,
+                fallback_eligible=True,
+            ) from exc
+        except APIConnectionError as exc:
+            raise BackendError(
+                "llm.connection",
+                f"无法连接受控本地推理端点: {exc}",
+                recoverable=True,
+                fallback_eligible=True,
+            ) from exc
+        except APIStatusError as exc:
+            fallback_eligible = exc.status_code == 429 or exc.status_code >= 500
+            raise BackendError(
+                "llm.api_status",
+                f"受控本地推理端点错误 {exc.status_code}: {exc.message}",
+                recoverable=fallback_eligible,
+                fallback_eligible=fallback_eligible,
+            ) from exc
+
+
 @dataclass(slots=True)
 class _MockToolFunction:
     name: str
