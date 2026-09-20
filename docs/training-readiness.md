@@ -1,10 +1,10 @@
-# B1–B4 LoRA 训练就绪与 C1 部分验收报告
+# B1–B4 LoRA 训练就绪与 C0–C2 验收报告
 
-最近更新：2026-09-19
+最近更新：2026-09-20
 
-项目状态：**C0 Freeze Ready — C1 Partial — Formal Training Locked**
+项目状态：**C0 Frozen — C1 Passed — C2 Completed — C3 Preflight Pending**
 
-MornAI Ubuntu 22.04.4 + RTX 3090 24GB 环境已完成 CUDA/BF16、A5 train/validation、固定 tokenizer、完整 7B 固定 revision 下载、4-bit 量化加载和 LoRA 挂载实测。尚未执行真实 backward、optimizer step、GPU checkpoint 保存/恢复或正式 QLoRA；C1 因此只部分通过。正式 C0 内容已填写，但必须在本次改动进入干净 commit 后生成外部冻结清单。A5 holdout 未上传到服务器、未读取；C2–C4 未开始。
+MornAI Ubuntu 22.04.4 + RTX 3090 24GB 已完成 C0 外部冻结、C1 两进程 GPU smoke/resume 和 C2 唯一锁定 QLoRA 配置。C2 共 42 optimizer steps / 3 epochs，adapter、最后 checkpoint、日志、环境与 model registry 已保存；validation loss 为 0.75035，但结构化工具调用四项指标均为 0，因此没有质量收益或部署声明。A5 holdout 尚未上传或读取；C3 入口已实现，等待干净 commit 上冻结和无读取 preflight。
 
 ## B1：首个实验范围
 
@@ -87,7 +87,7 @@ python tools/run_training.py gpu-smoke-audit
 - adapter 文件逐项 SHA-256 后才登记到本地 `data/training/model-registry.jsonl`。
 - 统一人工结论字段见 [`docs/training-experiment-report-template.md`](training-experiment-report-template.md)。
 
-现有 `evaluate` 命令只允许 validation，这是刻意的训练期保护。C3 前需要新增一个与训练加载器隔离的一次性 holdout 评测入口；不得把现有加载器的 `holdout` 拒绝逻辑改为普通开关。
+现有 `evaluate` 命令只允许 validation，这是刻意的训练期保护。C3 使用独立 [`tools/run_final_evaluation.py`](../tools/run_final_evaluation.py)；它不放宽或导入训练加载器，而是先冻结 C2 与评测实现、运行无读取 preflight，再以显式 experiment ID + freeze SHA-256 一次性声明消费。协议见 [`c3-final-evaluation.md`](c3-final-evaluation.md)。
 
 固定官方 tokenizer 已对全部非 holdout 样本实测：train 210 条为 68–646 tokens（P95 484），validation 45 条为 113–572 tokens（P95 404），0 条超过 2,048。审计只下载 tokenizer/config，不下载 7B 权重；结果保存在 `data/training/tokenizer-audit.json`。
 
@@ -107,7 +107,7 @@ python tools/run_training.py gpu-smoke-audit
 
 机器报告位于 Git 忽略目录 `data/training/smoke/smoke-report.json`。
 
-### MornAI RTX 3090 部分实测
+### MornAI RTX 3090 实测
 
 | 项目 | 已确认结果 |
 | --- | --- |
@@ -121,10 +121,14 @@ python tools/run_training.py gpu-smoke-audit
 | 4-bit / LoRA | bitsandbytes 4-bit 与所有 target modules 挂载通过 |
 | 参数 | trainable 40,370,176 / all 7,655,986,688，0.5273% |
 | 显存 | peak allocated 13.62 GiB；peak reserved 17.88 GiB |
+| C1 GPU smoke | initial 完成 step 1 forward/backward/optimizer/checkpoint；独立进程 resume 到 step 2 并完成 validation；审计通过 |
+| C2 正式训练 | 42 steps / 3 epochs；train loss 0.91673；388.29 秒；1.623 samples/s |
+| C2 validation | loss 0.75035；perplexity 2.11774；parse/name/arguments/sequence exact 全为 0 |
+| C2 导出 | checkpoint 30/40/42；最佳 adapter 已登记；adapter model SHA-256 `bbd7e4d…72d6ac` |
 
 缓存下载曾在 Hugging Face Xet/CAS reconstruction 遇到 401；使用 `HF_HUB_DISABLE_XET=1` 和较长下载 timeout 后断点续传成功。运行时代码现直接把 `RHINOCODER_MODEL_CACHE` 传给 tokenizer/base model 的 `from_pretrained(cache_dir=...)`，严格离线仍保留 model ID + revision 血缘。
 
-上述实测只证明模型可装入显存并挂载 LoRA，**不证明** backward、optimizer、checkpoint 或恢复。新 C1 GPU smoke 分成两个独立命令：initial 最多运行 1 个 optimizer step 并保存 checkpoint，resume 在新进程中恢复并完成第 2 步与一次 validation loss。输出固定隔离在 `data/training/gpu-smoke/`，不会写正式 run directory 或 model registry。
+模型加载峰值是 C1 初始装载数据；后续 C1 已进一步证明 backward、optimizer、checkpoint 和独立进程恢复。C2 证明唯一配置可完成正式训练与导出，但 **不证明模型质量提升**：validation 结构化指标全为 0。不得因这一结果修改同一实验或启动第二配置；只有 C3 的冻结 base/LoRA 配对和独立 P2 结果才能进入 C4。完整汇总见 [`c2-qlora-training-report.md`](c2-qlora-training-report.md)。
 
 ## B4 / C1：GPU 主机接入清单
 
@@ -190,8 +194,10 @@ Agent/Rhino 桌面兼容与本地模型兼容分别验收。Windows + NVIDIA/CUD
 - 配置审计：通过；train 210、validation 45，哈希与 A5 manifest 一致。
 - CPU 保存/恢复/评测冒烟：通过。
 - 通用 GPU 主机模板审计：通过；私有主机配置继续保持 Git 忽略。
-- MornAI RTX 3090 的环境、CUDA/BF16、数据、tokenizer、模型缓存、4-bit 加载和 LoRA 挂载已通过；C1 缺 backward/optimizer/checkpoint/resume 与吞吐估算，因此只部分通过。
-- C0 正式预注册已 freeze-ready，并使用外部冻结清单解决自哈希；当前尚未 commit/freeze。一次性 holdout 入口仍须在 C3 前实现。
-- 正式 `train` 入口要求 C0+C1 双门禁和显式确认；没有正式训练、adapter、validation adapter 结果、P2 LoRA 结果或本地模型收益声明。
+- MornAI RTX 3090 的环境、CUDA/BF16、数据、tokenizer、模型缓存、4-bit、LoRA、backward/optimizer/checkpoint/resume 已通过；C1 工程门禁完成。
+- C0 已通过外部冻结清单解决自哈希并冻结；C2 唯一配置已训练、validation、保存和登记，没有触发 fallback 或第二配置。
+- C2 validation 的结构化工具调用指标全为 0；这必须作为负面结果保留，不能用 loss 或训练完成掩盖，也不能声称本地模型收益。
+- C3 一次性入口已实现并与训练入口隔离；本地合成测试覆盖错误确认、先声明后读取、第二新 run 拒绝、同 run 单次恢复、配对统计和完成后证据复算。
+- A5 holdout 读取仍为 0，P2 LoRA 结果不存在，C4 尚无结论。
 
-结论：下一步不是正式训练，而是先把 [`training-preregistration.md`](training-preregistration.md) 合并到干净 commit 并生成外部 C0 清单，再在 MornAI 依次运行 GPU smoke initial/resume。只有完整报告通过后才能讨论 C2；C3 前仍需实现隔离的一次性 holdout 入口，不能解除训练期保护。
+结论：下一步是在这组 C3 代码进入干净 commit 后，于 MornAI 生成 C3 freeze、执行 `freeze-audit` 和 `preflight`。这三步不打开 holdout。只有审阅输出并获得单独明确授权后，才能上传 holdout 并执行一次 `holdout-run`。

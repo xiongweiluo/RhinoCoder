@@ -1,8 +1,8 @@
 # RhinoCoder 项目优化计划
 
-**版本：** v4.1
+**版本：** v4.2
 
-**更新日期：** 2026-09-19
+**更新日期：** 2026-09-20
 
 **目标：** 在保持 Rhino Agent 工程质量、可复现评测和安全边界的前提下，把项目升级为招聘者在 5 分钟内能看懂、能运行、能验证价值的 AI 全栈作品集，并以真实用户和锁定实验决定后续模型与产品路线。
 
@@ -17,20 +17,21 @@
 - A1–A7 已完成：黄金数据冻结备份、SQLite 审计、混合路由、隐私红队、训练数据管线、三路无微调基线和覆盖缺口扩展均已通过验收。
 - 黄金数据已达到 500/500，覆盖 46 个标签；AI 候选、待采集、准入异常、证据缺失和敏感发现均为 0。
 - A7 新增 200 条唯一任务，完整覆盖 8 类已知缺口；边际价值评估决定暂停扩张，不默认继续增加到 1,000–5,000 条。
-- B1–B4 已完成工程准备；MornAI Ubuntu + RTX 3090 24GB 已完成 CUDA/BF16、A5 train/validation、tokenizer、固定 revision 4-bit 模型加载和 LoRA 挂载实测，状态为 `C0 Freeze Ready — C1 Partial`。
+- B1–B4、C0、C1 和 C2 已完成：MornAI Ubuntu + RTX 3090 24GB 已完成 C1 两进程 GPU smoke/resume，并用唯一锁定配置完成 42 steps / 3 epochs 的正式 QLoRA、adapter 登记和 validation。
 - Trace、脱敏、准入、密钥、任务格式和 CI 检查已通过。
 - 当前主要短板已从底层工程转为招聘可读性、产品展示、真实用户证据和可区分方案的困难评测。
 - P0 已完成招聘作品集发布收尾，可以立即开始投递；真实 Rhino 单窗口证据短片已补充并完成隐私复核。
 - P1 已完成招聘者导向产品演示链路；三个公开只读场景、证据时间线、同 `run_id` 仪表盘、场景前后对比、恢复状态、响应式与浏览器端到端验收均已通过。
 - P2a 外部来源困难集与自动化真实链路评测已完成；P2b 真实用户亲自操作 UI 的可用性验证明确延期，不以自动化评测替代。
-- 项目所有者已明确确认 MornAI GPU 可用；C0 正式预注册内容已填写但需在本次改动提交后生成外部冻结清单。C1 已完成环境、缓存、数据、tokenizer、量化和 LoRA 挂载，尚缺真实 backward、optimizer、checkpoint 保存与独立进程恢复；C2–C4 未开始。
+- C0 外部冻结清单 SHA-256 为 `40a0771d…b1927e5`；C1 报告通过且 holdout/P2 读取均为 0。C2 train loss 为 0.91673、validation loss 为 0.75035，但 validation 的工具调用 parse/name/arguments/sequence exact 均为 0；这是真实负面信号，不构成 LoRA 优于基座的声明。
+- C3 的独立一次性 A5 入口、append-only/并发锁台账、同 run 单次恢复、原始生成/资源事件哈希和配对统计已经实现并完成本地合成测试；下一步是在干净 commit 上冻结 C3 并运行不打开 holdout 的 preflight。C3/C4 尚未完成。
 
 跨对话窗口续接规则：
 
 1. 新对话先读取本文档和 `README.md`。
 2. 从当前主线中第一个未勾选任务继续；遵守依赖和冻结门禁，不重做已通过验收的里程碑。
 3. 每完成一项，更新勾选状态、验收结果和必要的实验链接。
-4. GPU 权限门禁已解除；先在干净 commit 上生成并审计 C0 外部冻结清单，再用独立 GPU smoke 完成 C1。两项门禁未通过前，正式 `train` 入口必须拒绝执行。
+4. C0/C1/C2 已完成，禁止为改善 validation 结果重训同一实验。下一步只允许冻结并审计 C3；未经再次明确授权，不执行一次性 `holdout-run`。
 5. P0 验收后项目即进入可投递状态；P1、P2、C 和精简 D 是持续迭代，不作为开始投递的前置条件。
 
 当前执行顺序：`P0/P1/P2a 已完成 → C0 外部冻结 → C1 GPU smoke/resume → C2 唯一 QLoRA 配置 → C3 一次性锁定评测 → C4 三路决策 → 精简 D`。P2b 可独立延期，不阻塞模型实验或投递。
@@ -228,11 +229,11 @@
 
 - [x] 记录主机登录、作业调度、CUDA/驱动、GPU 型号/显存、时间限制和存储配额模板。
 - [x] 确认模型下载、网络访问、密钥注入、checkpoint 导出和备份规则。
-- [x] 建立 GPU 权限开通前的严格占位值门禁；当前状态已由 MornAI C1 部分实测取代。
+- [x] 建立 GPU 权限开通前的严格占位值门禁；当前状态已由 MornAI C0–C2 实测取代。
 
 阶段 B 验收：数据、配置、脚本和报告入口均已准备；无需改业务代码即可在 GPU 环境启动最小训练。
 
-验收结果（2026-09-06，2026-09-19 状态补充）：通过。首轮唯一实验锁定 `Qwen/Qwen2.5-Coder-7B-Instruct@c03e6d3…`、A5 `instruction_to_tool_call` 视图和一套 4-bit QLoRA 配置；210/45 训练/验证数据的行数与 SHA-256 均通过 manifest 审计，固定官方 tokenizer 全量审计最大仅 646/572 tokens、无超长，holdout 在加载器和评测入口双重禁用。训练入口具备 assistant-only loss、超长拒绝、checkpoint 自动恢复、validation 最佳模型、JSONL 日志、结构化工具调用评测、adapter 哈希登记和报告生成。网络隔离 CPU 冒烟已完成两步训练、checkpoint 保存/恢复及验证，Slurm/PBS/直接节点、GPU/CUDA/存储/网络/密钥/备份模板与严格现场检查已就绪；MornAI 主机现已进入 C1 部分验收，阶段 C 正式训练仍未执行。详见 [B1–B4 LoRA 训练就绪验收报告](docs/training-readiness.md)。
+验收结果（2026-09-06，2026-09-20 状态补充）：通过。首轮唯一实验锁定 `Qwen/Qwen2.5-Coder-7B-Instruct@c03e6d3…`、A5 `instruction_to_tool_call` 视图和一套 4-bit QLoRA 配置；210/45 训练/验证数据的行数与 SHA-256 均通过 manifest 审计，固定官方 tokenizer 全量审计最大仅 646/572 tokens、无超长，训练/validation 加载器永久拒绝 holdout。训练入口具备 assistant-only loss、超长拒绝、checkpoint 自动恢复、validation 最佳模型、JSONL 日志、结构化工具调用评测、adapter 哈希登记和报告生成。网络隔离 CPU 冒烟、MornAI C1 两进程 GPU smoke/resume 和 C2 唯一正式训练均已完成；C3 使用独立的一次性入口，不解除训练加载保护。详见 [B1–B4 与 C0–C2 验收报告](docs/training-readiness.md)。
 
 ### 阶段 P：招聘作品集与外部验证（当前主线）
 
@@ -294,35 +295,37 @@
 
 ### 阶段 C：MornAI RTX 3090 上的锁定模型实验
 
-> **门禁状态（2026-09-19）：** MornAI RTX 3090 已完成环境、数据、tokenizer、4-bit 固定模型加载和 LoRA 挂载，峰值 allocated/reserved 为 13.62/17.88 GiB。C0 文件已 freeze-ready，但外部冻结清单必须等本次改动进入干净 commit 后生成；C1 仍缺真实 backward、optimizer、checkpoint 和恢复，因此只标记部分通过。正式训练入口由 C0+C1 双门禁锁定，C2–C4 未开始。
+> **门禁状态（2026-09-20）：** C0 已冻结，C1 两进程 GPU smoke/resume 已通过，C2 唯一配置已完成 42 steps / 3 epochs、adapter 登记与 validation。validation 结构化工具调用指标均为 0，因此不声明质量收益，也不允许启动第二配置。C3 入口已实现；等待本次代码进入干净 commit 后冻结并执行无读取 preflight。A5 holdout 尚未上传或读取，C3/C4 未完成。
 
 #### C0：租赁前预注册与执行包
 
-- [ ] 预注册唯一主实验、主要/次要指标、同任务配对统计方法以及 `GO / MORE-DATA / NO-GO` 的实际意义门槛；A5 45 条与 P2 30 条分层报告，不简单合并样本。
-- [ ] 锁定客观工程 fallback 条件：只允许 OOM、NaN/Inf、硬件或算子不兼容等可机械判定的执行故障；validation 收益低、收敛慢或结果不理想不得触发第二套配置。
-- [ ] 列出必须在 GPU 租期内完成的基座/LoRA 生成、checkpoint、adapter、日志、环境快照、原始输出和 SHA-256 导出清单，并为中断、导出校验和受控推理端点关闭预留时间。
-- [ ] 在正式评测前实现独立的一次性 A5 holdout 入口与 append-only 消费记录；训练/validation 加载器继续永久拒绝 holdout。
+- [x] 预注册唯一主实验、主要/次要指标、同任务配对统计方法以及 `GO / MORE-DATA / NO-GO` 的实际意义门槛；A5 45 条与 P2 30 条分层报告，不简单合并样本。
+- [x] 锁定客观工程 fallback 条件：只允许 OOM、NaN/Inf、硬件或算子不兼容等可机械判定的执行故障；validation 收益低、收敛慢或结果不理想不得触发第二套配置。
+- [x] 列出必须在 GPU 租期内完成的基座/LoRA 生成、checkpoint、adapter、日志、环境快照、原始输出和 SHA-256 导出清单，并为中断、导出校验和受控推理端点关闭预留时间。
+- [x] 在正式评测前实现独立的一次性 A5 holdout 入口与 append-only 消费记录；训练/validation 加载器继续永久拒绝 holdout。
 
 预注册文件必须先于首次正式 GPU 训练冻结；正式内容使用 [`docs/training-preregistration.md`](docs/training-preregistration.md)，模板保留在 [`docs/training-preregistration-template.md`](docs/training-preregistration-template.md)。文档 SHA-256 与全部依赖哈希写入外部冻结清单，避免自引用。阈值不得在看到 validation、holdout 或 P2 的 LoRA 结果后修改；如需修改，应创建新的实验 ID 并明确旧实验结论。
 
-当前进度：正式内容已写入 [`docs/training-preregistration.md`](docs/training-preregistration.md)，实际意义门槛、配对统计、失败处理、无第二配置 fallback、租期退出条件和导出清单均已填写。采用 Git 忽略的外部冻结清单解决文档自哈希问题；由于当前改动尚未 commit，C0 仍为 freeze-ready 而非 frozen。一次性 holdout 入口仍按计划在 C3 前实现。
+验收结果（2026-09-20）：通过。外部 C0 冻结清单记录训练 Git revision、配置/data/task/prompt/tool 契约哈希，清单 SHA-256 为 `40a0771d98f1a110266b8ee6bc1c2194b70f1649650a0b0dfa3363030b1927e5`，并以独立清单解决文档自哈希。一次性入口现已实现，详见 [C3 最终评测协议](docs/c3-final-evaluation.md)。
 
 #### C1：GPU 环境验收
 
-- [ ] 检查 CUDA、驱动、显存、存储、网络、调度器和作业时限，保存可复现环境快照。
-- [ ] 加载冻结基座模型，用少量脱敏训练样本训练数十步；不得读取 holdout 或 P2 困难集答案。
-- [ ] 验证损失、梯度、显存峰值、checkpoint、断点续训和数据目录安全性。
+- [x] 检查 CUDA、驱动、显存、存储、网络和运行资源，保存可复现环境快照。
+- [x] 加载冻结基座模型，用少量脱敏训练样本执行受限 GPU smoke；不得读取 holdout 或 P2 困难集答案。
+- [x] 验证损失、梯度、显存峰值、checkpoint、独立进程断点续训和数据目录安全性。
 - [ ] 实测并记录基座与 adapter 推理吞吐、单任务显存和预计全量生成时长，据此确认租期内评测计划或临时受控推理端点方案。
 
-部分验收结果（2026-09-19）：Ubuntu 22.04.4、RTX 3090 24,576 MiB、驱动 550.107.02、`nvidia-smi` CUDA 12.4、PyTorch 2.10.0+cu126、BF16 与基础 CUDA 运算通过；210/45 数据和 tokenizer 审计通过；固定 revision 模型缓存完成，4-bit 模型与 LoRA target modules 挂载成功，40,370,176 / 7,655,986,688 参数可训练（0.5273%）。这不证明 backward、optimizer、checkpoint 或 resume；新 `gpu-smoke --phase initial/resume` 入口完成实测前不得勾选 C1。
+验收结果（2026-09-20）：C1 工程门禁通过。Ubuntu 22.04.4、RTX 3090 24,576 MiB、驱动 550.107.02、PyTorch 2.10.0+cu126、BF16、210/45 数据、tokenizer、4-bit 和 LoRA 挂载均通过；initial 实际完成 forward/backward/optimizer 与 step-1 checkpoint，resume 在独立进程恢复并完成 step 2 和 validation，正式 run/model registry 未被污染，holdout/P2 读取为 0。全量 base/LoRA 推理资源数据将在 C3 按 route 自动记录，不作为重新训练条件。
 
 #### C2：LoRA 试验
 
-- [ ] 比较未经微调的冻结基座与唯一预注册的 QLoRA 配置；不运行第二个配置，也不做超参搜索。
-- [ ] 只有 C0 预注册的客观工程故障发生时，才允许启用预登记的保守 operational fallback；fallback 只用于恢复可执行性，不与主配置择优，也不得由 validation 表现触发。
-- [ ] 仅使用训练集和验证集选择最佳 checkpoint，不反复查看 holdout 或 P2 困难集调参。
-- [ ] 保留配置、随机种子、环境、训练日志、资源用量、checkpoint 哈希和权重血缘。
-- [ ] 在 GPU 租期结束前导出最佳 adapter、最后可恢复 checkpoint、基座/LoRA 必要生成、原始日志、环境快照与逐文件 SHA-256；若使用临时推理端点，完成请求审计后关闭并记录销毁时间。
+- [x] 使用唯一预注册的 QLoRA 配置完成正式训练；不运行第二个配置，也不做超参搜索。
+- [x] 未触发 operational fallback，且没有因 validation 表现启用第二配置。
+- [x] 仅使用训练集和验证集选择 checkpoint；holdout 与 P2 读取均为 0。
+- [x] 保留配置、随机种子、环境、训练日志、资源用量、checkpoint、adapter 哈希和权重血缘，并登记 model registry。
+- [x] 保留最佳 adapter、最后可恢复 checkpoint、原始日志、环境快照与逐文件 SHA-256；base/LoRA 原始生成在 C3 冻结后产生，不混入 C2 checkpoint 选择。
+
+验收结果（2026-09-20）：工程完成。42 optimizer steps / 3 epochs，train loss 0.91673，validation loss 0.75035、perplexity 2.11774；最佳日志 step 40、最后 checkpoint 42，adapter 已登记。但 validation 的 parse/name/arguments/sequence exact 全为 0，诊断生成表现为自然语言步骤或错误标记结构。因此没有 LoRA 优于基座或可部署的声明，详见 [C2 QLoRA 训练报告](docs/c2-qlora-training-report.md)。
 
 #### C3：四路统一比较
 
@@ -332,6 +335,8 @@
 - [ ] 对最终锁定方案执行一次 A5 holdout 与一次 P2 四路正式评测。A5 是未见保留集；P2 是训练前冻结但已用于既有系统失败分析的外部困难回归集，不包装成完全盲测。
 - [ ] 对几何成功率、Pass@1 和最终恢复率做同任务配对比较，报告配对差值与置信区间；A5 与 P2 分层呈现，同时报告延迟、成本、GPU 资源、云端调用比例、隐私风险和工具错误率。
 - [ ] 公布失败样本和适用边界，不以平均分或饱和的 30 题结果掩盖路线差异。
+
+当前进度：独立入口、冻结清单构建/审计、显式双确认、append-only 并发锁、同 run 单次恢复、原始生成与资源事件哈希、exact McNemar 和 10,000 次配对 bootstrap 已实现并通过合成测试。尚未生成服务器 C3 freeze，未上传/打开 holdout，未执行 P2 LoRA 或四路比较。
 
 #### C4：模型路线决策
 

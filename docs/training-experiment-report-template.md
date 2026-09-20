@@ -54,6 +54,8 @@
 - `holdout_consumed_at`：
 - Holdout 实验 ID / 运行 ID / 冻结清单哈希：
 - 完整原始输出保存位置与 SHA-256：
+- 分段资源事件保存位置与 SHA-256（base/LoRA walltime、峰值 allocated/reserved 显存）：
+- append-only 消费台账完成事件与独立 `run-audit` 结果：
 - 确认训练加载器的 holdout 保护未解除：
 
 > A5 是一次性未见保留集；P2 是训练前冻结、但已用于既有系统失败分析的外部困难回归集。两者必须分层报告，不得合并包装成一个完全盲测集合。

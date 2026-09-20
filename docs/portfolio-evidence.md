@@ -19,7 +19,7 @@ RhinoCoder 对外只使用能从版本化文件复核的指标。本页是 READM
 | A7 覆盖缺口 8/8 达标 | 布尔替代恢复与多轮修订各 40；其余 6 类各 20 | [A7 覆盖与边际价值报告](a7-500-marginal-value.md) |
 | A4 敏感发现 0 | 12 条隐私红队；1,609 条 Trace、7,016 行 SQLite、3 份 Replay 与模拟日志/请求面 | [A4 隐私红队报告](privacy-red-team-report.md) |
 | 23 个 MCP 工具 | 版本清单固定工具数，并由发布一致性检查与源码装饰器计数交叉验证 | [版本清单](version-manifest.json) |
-| GPU 环境与模型加载已验证，但没有训练结果 | MornAI RTX 3090 已完成 CUDA/BF16、数据/tokenizer、4-bit 固定模型加载和 LoRA 挂载；C0 尚未生成外部冻结清单，C1 backward/checkpoint/resume、正式训练和一次性 holdout 评测均未执行 | [训练就绪报告](training-readiness.md)、[C0 预注册](training-preregistration.md)、[路线图](../PROJECT_OPTIMIZATION_PLAN.md) |
+| C0–C2 已完成，但没有 LoRA 收益结论 | MornAI RTX 3090 已完成 C1 GPU smoke/resume 与唯一 C2 QLoRA；42 steps / 3 epochs 正常导出 adapter，但 validation 结构化四指标全为 0。A5 holdout 未读取，C3/P2/C4 未完成 | [C2 报告](c2-qlora-training-report.md)、[训练就绪报告](training-readiness.md)、[C3 协议](c3-final-evaluation.md) |
 | 当前正式版本为 0.3.0 | Tag、GitHub Release 与在线只读演示均有公开入口；当前后续改动属于 Unreleased | [版本清单](version-manifest.json)、[发布清单](release-checklist.md) |
 
 ## 代表性可追溯链路
@@ -47,7 +47,7 @@ run.started
 ## 不应对外声称
 
 - 不声称本地模型已经能完成 Rhino 建模。`local-mock` 只是确定性的接口与安全替身。
-- 不声称 LoRA 已训练或优于云模型。MornAI RTX 3090 只完成模型加载与 LoRA 挂载，C0/C1 仍未完整通过；A5 holdout 未用于训练或调参，只为最终锁定方案保留一次性审计评测。
+- 不声称 LoRA 优于基座或云模型。唯一 QLoRA 已训练，但 validation 结构化指标为 0；A5 holdout 未用于训练或调参，只为最终锁定方案保留一次性审计评测。
 - 不把 P2 包装成完全盲测：它在 LoRA 训练前冻结，但已用于既有系统失败分析；C3 将其作为外部困难回归集与 A5 分层报告。
 - 不把 Agent/Rhino 的 Windows/macOS 兼容表述为本地模型跨平台；本地推理只声明实际验证过的平台。
 - 不把 30 题 100% 外推为开放世界成功率；该固定集已饱和。P2a 是外部用户出题的自动化困难集，不是真实用户亲自操作 UI；P2b 延期。

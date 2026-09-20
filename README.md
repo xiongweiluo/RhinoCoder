@@ -19,11 +19,11 @@ RhinoCoder 是一个面向 Rhino 8 的可验证空间设计 Agent。它把自然
 | **270/270 固定真实 Rhino 运行通过** | 30 题 × 3 次 × 主模型/低成本模型/规则路由；该固定集已饱和，不能外推为开放世界效果；[A6 报告](docs/a6-no-finetune-baseline.md) |
 | **P2a 外部来源困难集：18/30 有效基线通过** | 首轮 5 次连接中断依协议用冻结 Prompt 重填同槽且保留记录；60.0%，Wilson 95% 区间 42.3%–75.4%；[P2a 报告](docs/p2-external-hard-set.md) |
 | **隐私审计 0 敏感发现** | 12 条红队、1,609 条 Trace、7,016 行 SQLite、3 份 Replay 及模拟日志/请求面；[A4 报告](docs/privacy-red-team-report.md) |
-| **A1–A7、B1–B4 已验收；C1 部分通过** | MornAI RTX 3090 已完成 CUDA/BF16、固定模型 4-bit 加载和 LoRA 挂载；GPU backward/checkpoint/resume 与正式训练尚未执行；[路线图](PROJECT_OPTIMIZATION_PLAN.md) |
+| **A1–A7、B1–B4、C0–C2 已完成** | MornAI RTX 3090 已完成 C1 GPU smoke/resume 与唯一 C2 QLoRA；validation 结构化指标全为 0，不声明 LoRA 收益；[C2 报告](docs/c2-qlora-training-report.md) |
 
 当前正式版本：[`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0)。招聘者可直接打开[在线只读演示](https://rhinocoder-demo.xiongweiluo1.chatgpt.site)，无需 Rhino、模型密钥或安装；Unreleased 证据补充了[真实 Rhino 单窗口短片](docs/assets/rhinocoder-real-rhino-demo.mov)与[结果帧](docs/assets/rhinocoder-real-rhino-result.png)。短片由已逐帧复核的真实 Rhino 执行前/后窗口帧组成，不是连续桌面录屏，也不包含音频或真实项目数据。
 
-> **诚实边界：** `local-mock` 只是确定性的本地接口与安全替身，证明统一后端、隐私强制路由和禁止云端降级；它不是能完成 Rhino 建模的真实本地模型。P2a 是外部用户出题、Agent 自动执行的困难集，不是真人操作 UI 的可用性研究；P2b 延期。MornAI RTX 3090 环境已完成 C1 的 CUDA/BF16、数据、tokenizer、4-bit 模型加载和 LoRA 挂载验收；C0 已形成 freeze-ready 预注册但尚未生成外部冻结清单，C1 仍缺真实 backward/checkpoint/resume，C2–C4 未开始，A5 holdout 读取为 0。
+> **诚实边界：** `local-mock` 只是确定性的本地接口与安全替身，证明统一后端、隐私强制路由和禁止云端降级；它不是能完成 Rhino 建模的真实本地模型。P2a 是外部用户出题、Agent 自动执行的困难集，不是真人操作 UI 的可用性研究；P2b 延期。MornAI RTX 3090 上的 C0/C1/C2 已完成，但 C2 validation 的工具调用 parse/name/arguments/sequence exact 全为 0；不能据此声称 LoRA 优于基座或能完成 Rhino 建模。A5 holdout 尚未上传或读取；C3 一次性入口已实现但尚未冻结/运行，P2 LoRA 与 C4 决策均不存在。
 
 ## 为什么这个项目不是普通 “LLM + 工具” Demo
 
@@ -212,7 +212,7 @@ python tools/audit_p2_results.py
 
 - 主要真实验收环境为 macOS 15.6 arm64 + Rhino 8；Windows、Intel Mac、多人并发与另一台物理 Mac 尚未完成发布验收。
 - 固定 30 题已经饱和；100% Pass@1 证明该契约下的稳定性，不证明开放世界、困难集或真实用户工作流成功率。
-- `local-mock` 不执行真实本地推理；MornAI RTX 3090 只完成模型加载/量化/LoRA 挂载，尚未完成 GPU smoke/resume 或正式 LoRA，未产生可对外声称的本地模型效果。
+- `local-mock` 不执行真实本地推理；MornAI RTX 3090 已完成 GPU smoke/resume 和唯一正式 QLoRA，但 validation 结构化指标为 0，A5/P2 最终配对尚未执行，仍未产生可对外声称的本地模型效果。
 - 首轮模型实验只运行一个预注册 QLoRA 主配置，并允许 `GO / MORE-DATA / NO-GO`；Agent/Rhino 的 Windows/macOS 兼容不等于本地模型跨平台，本地推理只声明实际验证过的平台。
 - P2a 外部用户出题的自动化困难集已完成，18/30 有效基线通过；5 次已续跑的连接中断完整保留。002/014 的补充真实 Rhino 拓扑证据已完成，但不改变冻结失败与总体分数；P2b 真人操作 UI 验证延期。
 - 完整 30 题真实基准需要交互式 Rhino 和模型 API；CI 只运行离线检查。
