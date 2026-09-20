@@ -2,7 +2,7 @@
 
 最近更新：2026-09-20
 
-状态：**入口已实现；等待干净 commit 上冻结与无读取 preflight；A5 holdout 尚未消费**
+状态：**入口已实现并完成一次性 A5 评测；第二新 run 已永久禁止**
 
 ## 设计边界
 
@@ -59,4 +59,4 @@ python tools/run_final_evaluation.py holdout-run \
   --resume-run-id <EXACT_INCOMPLETE_RUN_ID>
 ```
 
-本阶段不会自动执行上述消费命令。A5 原始样本、生成和消费台账都在 Git 忽略的私有目录中；公开仓库只记录协议与可公开汇总。
+本实验已于评测 commit `32bc6f4` 按上述流程完成一次消费，`run-audit` 通过；不得再次执行新 run。A5 原始样本、生成和消费台账都在 Git 忽略的私有目录中；公开仓库只记录协议与[聚合结果](c3-a5-holdout-report.md)。

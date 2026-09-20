@@ -39,4 +39,4 @@ Designed and built an end-to-end agent that turns natural-language tasks into re
 5. **指标解读**：270/270 证明固定契约和工程稳定性，不证明开放世界泛化；闭环在旧基准增加 25.2% 延迟和 32.8% token，需要按风险选择。
 6. **数据治理**：黄金样本必须通过断言、自检、人工确认和脱敏；模板与数字变体先成组再做 70/15/15 分区，holdout 锁定。
 7. **没有做什么**：没有 LoRA 优于基座的证据、没有 A5/P2 最终配对、没有 Windows/多用户生产验收；这些限制直接写在 README 和报告里。
-8. **下一步**：冻结 C3 评测实现与 C2 adapter/checkpoint，先运行不打开 holdout 的 preflight；获得单独授权后一次性评测 A5，并把 P2 作为外部困难回归集分层比较。C4 只输出 `GO / MORE-DATA / NO-GO`，只有 MORE-DATA 才针对可解释失败簇建立 dataset v2。
+8. **下一步**：一次性 A5 已完成且基座/LoRA 均为 0/45，本实验已不能 GO；继续把 P2 作为外部困难回归集分层比较，再在 `MORE-DATA / NO-GO` 中裁决。只有 MORE-DATA 才针对可解释失败簇建立 dataset v2。

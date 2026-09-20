@@ -50,6 +50,6 @@ C1 最终报告 SHA-256：`5a04dc0716077918d618da26aab8503be67c1494085df053349e8
 - C2 的工程目标——唯一配置训练、checkpoint、adapter 导出、validation、注册和血缘——已经完成。
 - validation loss 下降不能替代工具调用精确率；当前结构化指标全为 0，是明确的负面质量信号。
 - 不能据此声称 LoRA 优于基座、能完成 Rhino 建模或应进入部署。
-- A5 holdout 尚未上传或读取；P2 LoRA 正式评测尚未运行。C4 的 `GO / MORE-DATA / NO-GO` 必须等待冻结后的分层配对结果，且不得因当前结果重训同一实验。
+- C2 完成时 A5/P2 均未读取；后续一次性 A5 已按冻结协议完成且未达到 GO 门槛。P2 LoRA 尚未运行，不得因当前结果重训同一实验。
 
-下一安全步骤是提交并冻结 C3 评测实现，在不打开 holdout 的情况下运行 `freeze-audit` 与 `preflight`。一次性消费必须由操作者再次提供精确的实验 ID 与 C3 freeze SHA-256。
+后续 C3 已完成一次性 A5 配对评测：基座与 LoRA 的结构化四指标均为 0/45，A5 GO 门槛未达到。详见 [C3 A5 报告](c3-a5-holdout-report.md)。

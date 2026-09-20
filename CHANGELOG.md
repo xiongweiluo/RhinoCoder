@@ -6,6 +6,7 @@
 
 ### Added
 
+- Audited one-time C3 A5 holdout evidence: 45 paired base/LoRA tasks, immutable raw/resource/summary hashes, zero retries, and a permanently closed second-run gate. Base and LoRA both scored 0/45 on parse/name/arguments/full-sequence exactness, so the preregistered A5 GO threshold was not met.
 - An isolated C3 final-evaluation entry that freezes C2 adapter/checkpoint and evaluation lineage without opening A5 holdout, then requires an exact experiment ID and freeze SHA-256 before a one-time base/LoRA run. Its POSIX-locked append-only ledger, one-resume limit, raw generations, segmented GPU resource evidence, exact McNemar test, paired bootstrap, and post-run hash audit are covered by synthetic tests and remain separate from the training loader.
 - A public C2 engineering report that records the completed 42-step/3-epoch locked run, adapter lineage, and the negative structured-validation result without publishing private samples or claiming LoRA superiority.
 - Freeze-ready C0 formal preregistration with quantitative GO thresholds, paired A5/P2 statistics, a no-second-config operational recovery policy, GPU exit/export rules, and an external immutable manifest that avoids self-hashing.

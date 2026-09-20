@@ -40,7 +40,7 @@ def test_locked_readiness_contract_and_real_a5_inputs_pass() -> None:
     assert audit.passed, audit.findings
     assert audit.train_rows == 210
     assert audit.validation_rows == 45
-    assert audit.status == "C0/C1 Passed — C2 Completed; C3 Freeze/Preflight Pending"
+    assert audit.status == "C0–C2 Completed — C3 A5 Evaluated; P2/C4 Pending"
     assert len(audit.config_sha256) == 64
 
 

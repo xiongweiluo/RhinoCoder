@@ -2,9 +2,9 @@
 
 最近更新：2026-09-20
 
-项目状态：**C0 Frozen — C1 Passed — C2 Completed — C3 Preflight Pending**
+项目状态：**C0 Frozen — C1 Passed — C2 Completed — C3 A5 Evaluated — P2/C4 Pending**
 
-MornAI Ubuntu 22.04.4 + RTX 3090 24GB 已完成 C0 外部冻结、C1 两进程 GPU smoke/resume 和 C2 唯一锁定 QLoRA 配置。C2 共 42 optimizer steps / 3 epochs，adapter、最后 checkpoint、日志、环境与 model registry 已保存；validation loss 为 0.75035，但结构化工具调用四项指标均为 0，因此没有质量收益或部署声明。A5 holdout 尚未上传或读取；C3 入口已实现，等待干净 commit 上冻结和无读取 preflight。
+MornAI Ubuntu 22.04.4 + RTX 3090 24GB 已完成 C0、C1、C2 与 C3 A5 一次性配对。C2 共 42 optimizer steps / 3 epochs；validation 结构化四指标均为 0。C3 的 45 条 A5 上，基座与 LoRA 四指标也均为 0/45，差值 0.0pp、净胜 0；独立审计通过且第二 run 已禁止。因此没有质量收益或部署声明，本实验已不能 `GO`；P2/云端/混合与 C4 `MORE-DATA / NO-GO` 尚待完成。
 
 ## B1：首个实验范围
 
@@ -197,7 +197,7 @@ Agent/Rhino 桌面兼容与本地模型兼容分别验收。Windows + NVIDIA/CUD
 - MornAI RTX 3090 的环境、CUDA/BF16、数据、tokenizer、模型缓存、4-bit、LoRA、backward/optimizer/checkpoint/resume 已通过；C1 工程门禁完成。
 - C0 已通过外部冻结清单解决自哈希并冻结；C2 唯一配置已训练、validation、保存和登记，没有触发 fallback 或第二配置。
 - C2 validation 的结构化工具调用指标全为 0；这必须作为负面结果保留，不能用 loss 或训练完成掩盖，也不能声称本地模型收益。
-- C3 一次性入口已实现并与训练入口隔离；本地合成测试覆盖错误确认、先声明后读取、第二新 run 拒绝、同 run 单次恢复、配对统计和完成后证据复算。
-- A5 holdout 读取仍为 0，P2 LoRA 结果不存在，C4 尚无结论。
+- C3 一次性入口已实现并与训练入口隔离；正式 A5 运行完成，独立审计覆盖冻结血缘、先声明后读取、第二新 run 拒绝、90 条配对生成、资源事件与统计复算。
+- A5 基座/LoRA 结构化四指标均为 0/45；A5 GO 门槛失败。P2 LoRA 结果不存在，C4 尚未在 `MORE-DATA / NO-GO` 中裁决。
 
-结论：下一步是在这组 C3 代码进入干净 commit 后，于 MornAI 生成 C3 freeze、执行 `freeze-audit` 和 `preflight`。这三步不打开 holdout。只有审阅输出并获得单独明确授权后，才能上传 holdout 并执行一次 `holdout-run`。
+结论：不得重训同一实验或重复读取 A5。下一步是按分层协议补齐 P2 LoRA 与云端/混合对照，并结合失败簇、安全/几何回退和成本做 C4 `MORE-DATA / NO-GO`。完整 A5 结果见 [`c3-a5-holdout-report.md`](c3-a5-holdout-report.md)。
