@@ -20,7 +20,7 @@ RhinoCoder 是一个面向 Rhino 8 的可验证空间设计 Agent。它把自然
 | **P2a 外部来源困难集：18/30 有效基线通过** | 首轮 5 次连接中断依协议用冻结 Prompt 重填同槽且保留记录；60.0%，Wilson 95% 区间 42.3%–75.4%；[P2a 报告](docs/p2-external-hard-set.md) |
 | **隐私审计 0 敏感发现** | 12 条红队、1,609 条 Trace、7,016 行 SQLite、3 份 Replay 及模拟日志/请求面；[A4 报告](docs/privacy-red-team-report.md) |
 | **C3 A5 一次性评测完成，未达到 GO 门槛** | 基座与 LoRA 在 45 条锁定 holdout 上的结构化四指标均为 0/45；差值 0.0pp、净胜 0，第二 run 已禁止；[C3 报告](docs/c3-a5-holdout-report.md) |
-| **C4 决策：NO-GO** | 冻结 P2 真实 Rhino 配对为基座 4/30、LoRA 5/30，差值 +3.3pp、净胜 1、McNemar `p=1.0`，未达到 +10pp / 净胜 3 门槛；[C4 报告](docs/c4-model-decision.md) |
+| **C4 决策：NO-GO** | 冻结 P2 真实 Rhino 配对的描述性结果为基座 4/30、LoRA 5/30，差值 +3.3pp、净胜 1、McNemar `p=1.0`，未达到 +10pp / 净胜 3 门槛；事后发现 LoRA 基础设施补位超出冻结规则，见[诊断与限制](docs/c4-posthoc-failure-diagnosis.md)；[C4 原报告](docs/c4-model-decision.md) |
 
 当前正式版本：[`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0)。招聘者可直接打开[在线只读演示](https://rhinocoder-demo.xiongweiluo1.chatgpt.site)，无需 Rhino、模型密钥或安装；Unreleased 证据补充了[真实 Rhino 单窗口短片](docs/assets/rhinocoder-real-rhino-demo.mov)与[结果帧](docs/assets/rhinocoder-real-rhino-result.png)。短片由已逐帧复核的真实 Rhino 执行前/后窗口帧组成，不是连续桌面录屏，也不包含音频或真实项目数据。
 

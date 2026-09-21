@@ -25,6 +25,9 @@
 - P2a 外部来源困难集与自动化真实链路评测已完成；P2b 真实用户亲自操作 UI 的可用性验证明确延期，不以自动化评测替代。
 - C0 外部冻结清单 SHA-256 为 `40a0771d…b1927e5`；C1 报告通过且 holdout/P2 读取均为 0。C2 train loss 为 0.91673、validation loss 为 0.75035，但 validation 的工具调用 parse/name/arguments/sequence exact 均为 0；这是真实负面信号，不构成 LoRA 优于基座的声明。
 - C3 的独立一次性 A5 入口已在冻结 commit 上完成正式消费与独立审计：基座/LoRA 结构化四指标均为 0/45，差值 0.0pp、净胜 0；第二新 run 已永久禁止。冻结 P2 真实 Rhino 配对为基座 4/30、LoRA 5/30，差值 +3.3pp、净胜 1、McNemar `p=1.0`，低于 +10pp / 净胜 3 门槛；C4 已裁决 `NO-GO`。
+- [C4 事后只读诊断](docs/c4-posthoc-failure-diagnosis.md)发现训练/推理工具 schema 输入契约差异，并披露 LoRA 的 15 个 P2 任务超过冻结的单次基础设施补位规则；4/30 对 5/30 只能按既有原始记录作描述性结果，不将其包装为严格合规的 Pass@1。维持混合路由，先做无 GPU 契约设计，再决定是否开启新实验。
+- [双阶段单工具候选契约](docs/tool-call-contract-v2-candidate.md)已在 CPU 上用固定 tokenizer 与合成样本验证 2,048-token 预算、训练/推理同前缀和严格工具参数解析；它未接入正式运行，也不授权 dataset v2、重训或再次使用 A5/P2 作为盲测。
+- [合成控制器审计](docs/tool-controller-v2-candidate-audit.md)补测了场景版本、隐私/本地路由、澄清、写入确认、无效输出和不确定回执的拒绝路径；真实模型选择质量、人工确认与 Rhino 原子/持久幂等仍未验收，不能据此切换产品路线。
 
 跨对话窗口续接规则：
 
