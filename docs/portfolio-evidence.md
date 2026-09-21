@@ -20,6 +20,7 @@ RhinoCoder 对外只使用能从版本化文件复核的指标。本页是 READM
 | A4 敏感发现 0 | 12 条隐私红队；1,609 条 Trace、7,016 行 SQLite、3 份 Replay 与模拟日志/请求面 | [A4 隐私红队报告](privacy-red-team-report.md) |
 | 23 个 MCP 工具 | 版本清单固定工具数，并由发布一致性检查与源码装饰器计数交叉验证 | [版本清单](version-manifest.json) |
 | C3 A5 一次性评测未达到 GO 门槛 | 基座与 LoRA 在 45 条锁定 holdout 上的 parse/name/arguments/sequence exact 均为 0/45；差值 0.0pp、净胜 0，第二 run 已禁止 | [C3 A5 报告](c3-a5-holdout-report.md)、[C2 报告](c2-qlora-training-report.md)、[C3 协议](c3-final-evaluation.md) |
+| C4 模型实验裁决为 NO-GO | 冻结 P2 真实 Rhino 配对为基座 4/30、LoRA 5/30；+3.3pp、净胜 1、exact McNemar `p=1.0`、bootstrap 95% CI [0,10]pp，未达到预注册门槛 | [C4 决策报告](c4-model-decision.md)、[最小化机器结果](p2-model-comparison-results.json) |
 | 当前正式版本为 0.3.0 | Tag、GitHub Release 与在线只读演示均有公开入口；当前后续改动属于 Unreleased | [版本清单](version-manifest.json)、[发布清单](release-checklist.md) |
 
 ## 代表性可追溯链路
@@ -47,8 +48,8 @@ run.started
 ## 不应对外声称
 
 - 不声称本地模型已经能完成 Rhino 建模。`local-mock` 只是确定性的接口与安全替身。
-- 不声称 LoRA 优于基座或云模型。唯一 QLoRA 已训练，且一次性 A5 上基座/LoRA 结构化四指标均为 0/45；A5 未用于训练或调参，也不得再次运行。
-- 不把 P2 包装成完全盲测：它在 LoRA 训练前冻结，但已用于既有系统失败分析；C3 将其作为外部困难回归集与 A5 分层报告。
+- 不声称 LoRA 优于基座或云模型。唯一 QLoRA 已训练，但一次性 A5 上基座/LoRA 均为 0/45，P2 也只有 4/30 对 5/30；C4 已按预注册规则裁决 `NO-GO`。
+- 不把 P2 包装成完全盲测：它在 LoRA 训练前冻结，但已用于既有系统失败分析；C4 将其作为外部困难回归集与 A5 分层报告。
 - 不把 Agent/Rhino 的 Windows/macOS 兼容表述为本地模型跨平台；本地推理只声明实际验证过的平台。
 - 不把 30 题 100% 外推为开放世界成功率；该固定集已饱和。P2a 是外部用户出题的自动化困难集，不是真实用户亲自操作 UI；P2b 延期。
 - 不把三项代表性失败复测 2/3 外推为全量修复后成功率，也不隐藏 5 次基础设施中断；002/014 补充拓扑证据不用于重写冻结评分。

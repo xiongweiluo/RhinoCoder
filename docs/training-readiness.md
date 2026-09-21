@@ -1,10 +1,10 @@
 # B1–B4 LoRA 训练就绪与 C0–C2 验收报告
 
-最近更新：2026-09-20
+最近更新：2026-09-21
 
-项目状态：**C0 Frozen — C1 Passed — C2 Completed — C3 A5 Evaluated — P2/C4 Pending**
+项目状态：**C0–C3 Completed — C4 NO-GO**
 
-MornAI Ubuntu 22.04.4 + RTX 3090 24GB 已完成 C0、C1、C2 与 C3 A5 一次性配对。C2 共 42 optimizer steps / 3 epochs；validation 结构化四指标均为 0。C3 的 45 条 A5 上，基座与 LoRA 四指标也均为 0/45，差值 0.0pp、净胜 0；独立审计通过且第二 run 已禁止。因此没有质量收益或部署声明，本实验已不能 `GO`；P2/云端/混合与 C4 `MORE-DATA / NO-GO` 尚待完成。
+MornAI Ubuntu 22.04.4 + RTX 3090 24GB 已完成 C0–C4。C2 共 42 optimizer steps / 3 epochs；validation 结构化四指标均为 0。C3 的 45 条 A5 上，基座与 LoRA 四指标也均为 0/45，差值 0.0pp、净胜 0；独立审计通过且第二 run 已禁止。冻结 P2 真实 Rhino 配对为基座 4/30、LoRA 5/30，差值 +3.3pp、净胜 1、McNemar `p=1.0`，未达到 +10pp / 净胜 3 门槛。C4 最终裁决为 `NO-GO`，部署继续使用已验证的混合路线。
 
 ## B1：首个实验范围
 
@@ -198,6 +198,6 @@ Agent/Rhino 桌面兼容与本地模型兼容分别验收。Windows + NVIDIA/CUD
 - C0 已通过外部冻结清单解决自哈希并冻结；C2 唯一配置已训练、validation、保存和登记，没有触发 fallback 或第二配置。
 - C2 validation 的结构化工具调用指标全为 0；这必须作为负面结果保留，不能用 loss 或训练完成掩盖，也不能声称本地模型收益。
 - C3 一次性入口已实现并与训练入口隔离；正式 A5 运行完成，独立审计覆盖冻结血缘、先声明后读取、第二新 run 拒绝、90 条配对生成、资源事件与统计复算。
-- A5 基座/LoRA 结构化四指标均为 0/45；A5 GO 门槛失败。P2 LoRA 结果不存在，C4 尚未在 `MORE-DATA / NO-GO` 中裁决。
+- A5 基座/LoRA 结构化四指标均为 0/45；P2 基座/LoRA 为 4/30 与 5/30，+3.3pp、净胜 1、关键安全回退 0。两层均未达到预注册门槛，C4 已裁决 `NO-GO`。
 
-结论：不得重训同一实验或重复读取 A5。下一步是按分层协议补齐 P2 LoRA 与云端/混合对照，并结合失败簇、安全/几何回退和成本做 C4 `MORE-DATA / NO-GO`。完整 A5 结果见 [`c3-a5-holdout-report.md`](c3-a5-holdout-report.md)。
+结论：不得重训同一实验或重复读取 A5。保留训练与评测资产，部署继续使用已验证的混合路线；若未来启动 dataset v2，必须创建新实验 ID、新预注册与新的未见保留集。完整结果见 [`c3-a5-holdout-report.md`](c3-a5-holdout-report.md) 与 [`c4-model-decision.md`](c4-model-decision.md)。

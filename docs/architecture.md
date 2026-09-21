@@ -127,6 +127,6 @@ JSONL artifacts + stats + SHA-256 manifest + independent audit
 - `local-mock` 是统一后端接口的确定性测试替身，只验证隐私强制本地、禁止云 fallback 和安全失败；它不能完成真实建模推理。
 - A5 holdout 在任务模板与数字变体成组之后锁定，不用于训练或反复调参；训练与 validation 加载器永久拒绝 holdout。最终锁定方案只能通过独立、显式确认、append-only 留痕的一次性入口评测，记录冻结资产哈希与 `holdout_consumed_at`。
 - P2 困难集不进入训练或迭代调参。它在 LoRA 训练前冻结，但已用于既有系统失败分析与一次通用修复，因此定位为外部困难回归集，不冒充完全盲测；A5 与 P2 分层报告。
-- MornAI RTX 3090 已完成 C1 backward/optimizer/checkpoint/resume、唯一 C2 QLoRA 与一次性 C3 A5 配对；A5 上基座/LoRA 结构化四指标均为 0/45，因此没有本地模型效果结论且本实验不能 GO。C3 使用与训练入口隔离的 POSIX 锁定一次性 gate：先 `fsync` append-only 消费声明，再打开并校验 holdout；原始 base/LoRA 生成、分段资源事件与汇总分别哈希，完成后可在不重开 holdout 的情况下复算审计。客观工程故障 recovery 不参与择优，C4 将在 `MORE-DATA / NO-GO` 中裁决。
+- MornAI RTX 3090 已完成 C1 backward/optimizer/checkpoint/resume、唯一 C2 QLoRA、一次性 C3 A5 配对与 C4 P2 配对裁决。A5 上基座/LoRA 结构化四指标均为 0/45；P2 真实 Rhino 为 4/30 对 5/30，+3.3pp、净胜 1，未达到预注册门槛，C4 为 `NO-GO`。C3 使用与训练入口隔离的 POSIX 锁定一次性 gate：先 `fsync` append-only 消费声明，再打开并校验 holdout；原始生成、资源事件与汇总分别哈希，可在不重开 holdout 的情况下复算审计。部署继续使用已验证的混合路线。
 - Agent/Rhino 桌面兼容与本地模型兼容是两个独立矩阵。Windows/macOS 桌面集成不自动意味着本地模型跨平台；本地推理只声明实际验证过的 CUDA、MLX/Metal 或 llama.cpp 路线，其他平台使用云端或混合路由。
 - 完整真实 Trace、SQLite、截图和用户反馈保存在本地 Git 忽略目录；公开仓库只包含脱敏聚合、合成 Replay 和哈希清单。

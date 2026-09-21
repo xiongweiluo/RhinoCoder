@@ -6,6 +6,7 @@
 
 ### Added
 
+- Auditable C4 `NO-GO` evidence for the frozen 30-task real-Rhino base/LoRA pairing: 4/30 vs 5/30, +3.3pp, one net win, exact McNemar `p=1.0`, paired bootstrap 95% CI [0, 10]pp, and zero critical safety regressions. Raw prompts, traces, and Rhino GUIDs remain ignored; only minimized aggregates and evidence hashes are published.
 - Audited one-time C3 A5 holdout evidence: 45 paired base/LoRA tasks, immutable raw/resource/summary hashes, zero retries, and a permanently closed second-run gate. Base and LoRA both scored 0/45 on parse/name/arguments/full-sequence exactness, so the preregistered A5 GO threshold was not met.
 - An isolated C3 final-evaluation entry that freezes C2 adapter/checkpoint and evaluation lineage without opening A5 holdout, then requires an exact experiment ID and freeze SHA-256 before a one-time base/LoRA run. Its POSIX-locked append-only ledger, one-resume limit, raw generations, segmented GPU resource evidence, exact McNemar test, paired bootstrap, and post-run hash audit are covered by synthetic tests and remain separate from the training loader.
 - A public C2 engineering report that records the completed 42-step/3-epoch locked run, adapter lineage, and the negative structured-validation result without publishing private samples or claiming LoRA superiority.

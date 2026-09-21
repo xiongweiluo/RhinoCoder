@@ -20,10 +20,11 @@ RhinoCoder 是一个面向 Rhino 8 的可验证空间设计 Agent。它把自然
 | **P2a 外部来源困难集：18/30 有效基线通过** | 首轮 5 次连接中断依协议用冻结 Prompt 重填同槽且保留记录；60.0%，Wilson 95% 区间 42.3%–75.4%；[P2a 报告](docs/p2-external-hard-set.md) |
 | **隐私审计 0 敏感发现** | 12 条红队、1,609 条 Trace、7,016 行 SQLite、3 份 Replay 及模拟日志/请求面；[A4 报告](docs/privacy-red-team-report.md) |
 | **C3 A5 一次性评测完成，未达到 GO 门槛** | 基座与 LoRA 在 45 条锁定 holdout 上的结构化四指标均为 0/45；差值 0.0pp、净胜 0，第二 run 已禁止；[C3 报告](docs/c3-a5-holdout-report.md) |
+| **C4 决策：NO-GO** | 冻结 P2 真实 Rhino 配对为基座 4/30、LoRA 5/30，差值 +3.3pp、净胜 1、McNemar `p=1.0`，未达到 +10pp / 净胜 3 门槛；[C4 报告](docs/c4-model-decision.md) |
 
 当前正式版本：[`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0)。招聘者可直接打开[在线只读演示](https://rhinocoder-demo.xiongweiluo1.chatgpt.site)，无需 Rhino、模型密钥或安装；Unreleased 证据补充了[真实 Rhino 单窗口短片](docs/assets/rhinocoder-real-rhino-demo.mov)与[结果帧](docs/assets/rhinocoder-real-rhino-result.png)。短片由已逐帧复核的真实 Rhino 执行前/后窗口帧组成，不是连续桌面录屏，也不包含音频或真实项目数据。
 
-> **诚实边界：** `local-mock` 只是确定性的本地接口与安全替身，证明统一后端、隐私强制路由和禁止云端降级；它不是能完成 Rhino 建模的真实本地模型。P2a 是外部用户出题、Agent 自动执行的困难集，不是真人操作 UI 的可用性研究；P2b 延期。MornAI RTX 3090 上的 C0/C1/C2 与一次性 A5 配对已完成；基座和 LoRA 在 A5 上的 parse/name/arguments/sequence exact 均为 0/45，因此本实验不可能判为 `GO`，也不能声称 LoRA 优于基座或能完成 Rhino 建模。P2 LoRA 与最终 `MORE-DATA / NO-GO` 决策尚未完成。
+> **诚实边界：** `local-mock` 只是确定性的本地接口与安全替身，证明统一后端、隐私强制路由和禁止云端降级；它不是能完成 Rhino 建模的真实本地模型。P2a 是外部用户出题、Agent 自动执行的困难集，不是真人操作 UI 的可用性研究；P2b 延期。MornAI RTX 3090 上的 C0–C4 已完成：A5 基座/LoRA 均为 0/45；冻结 P2 真实 Rhino 配对为 4/30 对 5/30，+3.3pp、净胜 1，未达到预注册门槛，最终裁决为 `NO-GO`。不能声称 LoRA 优于基座或能可靠完成 Rhino 建模，部署继续采用已验证的混合路线。
 
 ## 为什么这个项目不是普通 “LLM + 工具” Demo
 

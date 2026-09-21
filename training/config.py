@@ -32,7 +32,7 @@ class ReadinessError(RuntimeError):
 @dataclass(slots=True)
 class ReadinessAudit:
     passed: bool = True
-    status: str = "C0–C2 Completed — C3 A5 Evaluated; P2/C4 Pending"
+    status: str = "C0–C3 Completed — C4 NO-GO"
     config_sha256: str = ""
     train_rows: int = 0
     validation_rows: int = 0

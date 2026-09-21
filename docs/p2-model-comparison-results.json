@@ -1,0 +1,87 @@
+{
+  "base": {
+    "failure_categories": {
+      "clarification_error": 6,
+      "perception_error": 5,
+      "planning_error": 2,
+      "privacy_error": 1,
+      "recovery_error": 5,
+      "spatial_error": 7
+    },
+    "passed": 4,
+    "total": 30
+  },
+  "c4_decision": "NO-GO",
+  "deployment_context": {
+    "cloud_only": {
+      "reason": "frozen force-local and pre-model block tasks prohibit a cloud-only deployment lane",
+      "status": "safety_inadmissible_not_run"
+    },
+    "published_configured_hybrid_p2": {
+      "passed": 18,
+      "success_rate": 0.6,
+      "total": 30
+    }
+  },
+  "evidence": {
+    "base_infrastructure_interruptions": 6,
+    "base_raw_sha256": "7d07df6b6b83afcb482c9835ea021cc39ce829fdbbe2f578cbc2b05caaccb5d4",
+    "lora_infrastructure_interruptions": 44,
+    "lora_raw_sha256": "2eba476ee4e0e58d9bd43b25d8f7b63afe41f9780698995dcd8f53bedf0e38c0",
+    "raw_committed": false,
+    "raw_prompts_or_traces_published": false
+  },
+  "experiment_id": "rhinocoder-qwen25-coder-7b-itc-lora-v1",
+  "freeze": {
+    "hard_tasks_sha256": "5fb261c61905e1e29927f1abef3ca5486a008eed63b520eefae236f9c7192772",
+    "holdout_read": 0,
+    "protocol_sha256": "c9b3cd2707316f752d82a3adcd53d63f600efdeb1b9b202640d0bcc73d1b5441",
+    "task_count": 30
+  },
+  "generated_at": "2026-09-21",
+  "lora": {
+    "failure_categories": {
+      "clarification_error": 5,
+      "perception_error": 5,
+      "planning_error": 2,
+      "privacy_error": 1,
+      "recovery_error": 5,
+      "spatial_error": 7
+    },
+    "passed": 5,
+    "total": 30
+  },
+  "paired_lora_minus_base": {
+    "difference_percentage_points": 3.3333333333333335,
+    "left_rate": 0.13333333333333333,
+    "mcnemar_exact_two_sided_p": 1.0,
+    "net_wins_right_minus_left": 1,
+    "paired_bootstrap_95ci_percentage_points": {
+      "high": 10.0,
+      "low": 0.0,
+      "resamples": 10000,
+      "seed": 20260917
+    },
+    "pairs": {
+      "both_failure": 25,
+      "both_success": 4,
+      "left_only": 0,
+      "right_only": 1
+    },
+    "right_rate": 0.16666666666666666,
+    "tasks": 30
+  },
+  "report_id": "p2-qwen-base-lora-paired-v1",
+  "safety": {
+    "critical_regression_task_count": 0,
+    "critical_regression_task_ids": []
+  },
+  "schema_version": "1.0",
+  "scope": "frozen 30-task real-Rhino paired model comparison; P2 remains evaluation-only",
+  "thresholds": {
+    "a5_passed": false,
+    "p2_passed": false,
+    "p2_required_difference_percentage_points": 10,
+    "p2_required_net_wins": 3
+  }
+}
