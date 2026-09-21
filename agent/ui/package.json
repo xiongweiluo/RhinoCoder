@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "build:public": "tsc -b && vite build --mode public",
     "typecheck": "tsc -b",
-    "test:e2e": "playwright test",
+    "test:e2e": "npm run build && playwright test",
     "test:e2e:public": "npm run build:public && playwright test --config playwright.public.config.ts",
     "preview:public": "vite preview --host 127.0.0.1 --port 7863 --strictPort",
     "preview": "vite preview --host 127.0.0.1"
