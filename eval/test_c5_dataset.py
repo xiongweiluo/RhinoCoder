@@ -49,6 +49,26 @@ def test_generated_family_plan_has_exact_count_and_valid_contract_shapes() -> No
     assert not any("unknown dataset stage" in finding for finding in audit.findings)
 
 
+def test_holdout_source_policy_accepts_owner_content_without_weakening_development() -> None:
+    family = synthetic_core_families()[0]
+    family["source_kind"] = "repository_owner_holdout"
+    holdout_audit = audit_draft(
+        [family],
+        load_public_mcp_tools(),
+        expected_family_count=1,
+        minimum_core_tool_families=0,
+        source_policy="repository_owner_holdout",
+    )
+    assert holdout_audit.passed
+    development_audit = audit_draft(
+        [family],
+        load_public_mcp_tools(),
+        expected_family_count=1,
+        minimum_core_tool_families=0,
+    )
+    assert any("provenance drifted" in finding for finding in development_audit.findings)
+
+
 def test_multistep_families_keep_one_scene_context_across_all_steps() -> None:
     for family in synthetic_multistep_families():
         context = family["scenario_key"].split(":", 3)[2]

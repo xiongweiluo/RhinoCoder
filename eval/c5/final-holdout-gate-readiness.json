@@ -1,0 +1,19 @@
+{
+  "commitment_template_sha256": "9dc3936991f8f119bf73a359f0d699a2134f22f97d163a6d532047ab683d0ff7",
+  "development_agent_plaintext_access": false,
+  "development_dataset_freeze_sha256": "8a08059fbcaa7b8650f096106bef3d699a4240fdca9c64ad999e62904f585903",
+  "final_holdout_rows_read": 0,
+  "gpu_authorized": false,
+  "historical_exclusions_sha256": "ed1fa0859633da40e64001ca1646c094e140f9a06f9aa48c86a1fe8b552389fc",
+  "implementation_sha256": {
+    "eval/test_c5_holdout_gate.py": "c237b446b49b3b31647d5bf7d8b995b87613dbaa5ad9544dbd186e49fdc6d791",
+    "tools/c5_holdout_custodian.py": "ac9efe97d0529acb3cd86c05bd8cbdd125197de28b68c6c6e8237583633d8bbc",
+    "tools/c5_holdout_gate.py": "2e0721535024b952a894e72e4c2e8863ad73589eb47b82ac4bda728ebccabcf8",
+    "training/c5_holdout.py": "5be71078717ea9d40b6a310478d8d22448715de211bca25981273fba64e60d6a"
+  },
+  "owner_commitment_registered": false,
+  "schema_version": "1.0",
+  "single_use_claim_executed": false,
+  "status": "implementation_ready_owner_commitment_required",
+  "training_authorized": false
+}
