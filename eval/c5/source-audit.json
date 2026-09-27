@@ -3552,7 +3552,7 @@
     }
   ],
   "implementation_sha256": {
-    "tools/freeze_c5_offline.py": "ee6e3daa92a809821d73263aeef76e568f053892ca88ab89e8c7e81cbd86cb53",
+    "tools/freeze_c5_offline.py": "74531fb5ab43dcc6c97c2b35571a6c65ef610e94930e112abcdfa2038bac3026",
     "training/c5_freeze.py": "ea4cf25b7b5f10e69531e78b097c2cd3113da3ef4e15ece75cf25f85b6b08a24"
   },
   "isolation": {
