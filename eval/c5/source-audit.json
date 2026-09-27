@@ -1,0 +1,3573 @@
+{
+  "audit": {
+    "campaign_counts": {
+      "a7-500": 200,
+      "phase1-30": 30,
+      "phase2-100": 70,
+      "phase3-300": 200
+    },
+    "conservative_family_count": 129,
+    "core_tool_coverage": {
+      "boolean_difference": {
+        "requires_new_families": 4,
+        "source_calls": 81,
+        "source_families": 16,
+        "source_tasks": 81,
+        "train_family_minimum": 20
+      },
+      "create_box": {
+        "requires_new_families": 0,
+        "source_calls": 556,
+        "source_families": 80,
+        "source_tasks": 330,
+        "train_family_minimum": 20
+      },
+      "create_cylinder": {
+        "requires_new_families": 0,
+        "source_calls": 402,
+        "source_families": 33,
+        "source_tasks": 182,
+        "train_family_minimum": 20
+      },
+      "create_sphere": {
+        "requires_new_families": 0,
+        "source_calls": 264,
+        "source_families": 54,
+        "source_tasks": 194,
+        "train_family_minimum": 20
+      },
+      "get_bounding_box": {
+        "requires_new_families": 12,
+        "source_calls": 43,
+        "source_families": 8,
+        "source_tasks": 28,
+        "train_family_minimum": 20
+      },
+      "get_scene_summary": {
+        "requires_new_families": 0,
+        "source_calls": 844,
+        "source_families": 129,
+        "source_tasks": 500,
+        "train_family_minimum": 20
+      },
+      "group_objects": {
+        "requires_new_families": 0,
+        "source_calls": 133,
+        "source_families": 31,
+        "source_tasks": 133,
+        "train_family_minimum": 20
+      },
+      "move_object": {
+        "requires_new_families": 0,
+        "source_calls": 861,
+        "source_families": 98,
+        "source_tasks": 411,
+        "train_family_minimum": 20
+      },
+      "rotate_object": {
+        "requires_new_families": 3,
+        "source_calls": 65,
+        "source_families": 17,
+        "source_tasks": 64,
+        "train_family_minimum": 20
+      },
+      "scale_object": {
+        "requires_new_families": 7,
+        "source_calls": 41,
+        "source_families": 13,
+        "source_tasks": 41,
+        "train_family_minimum": 20
+      },
+      "set_object_color": {
+        "requires_new_families": 0,
+        "source_calls": 1018,
+        "source_families": 114,
+        "source_tasks": 485,
+        "train_family_minimum": 20
+      },
+      "set_object_layer": {
+        "requires_new_families": 11,
+        "source_calls": 221,
+        "source_families": 9,
+        "source_tasks": 65,
+        "train_family_minimum": 20
+      }
+    },
+    "family_size_histogram": {
+      "1": 98,
+      "10": 20,
+      "2": 1,
+      "20": 10
+    },
+    "new_development_families_required": 311,
+    "observed_tool_count": 20,
+    "selector_tool_count": 23,
+    "source_can_supply_440_independent_families": false,
+    "tool_call_counts": {
+      "align_objects": 26,
+      "boolean_difference": 81,
+      "create_box": 556,
+      "create_circle": 17,
+      "create_cylinder": 402,
+      "create_line": 18,
+      "create_sphere": 264,
+      "delete_objects": 51,
+      "distribute_objects": 15,
+      "extrude_curve_straight": 17,
+      "get_bounding_box": 43,
+      "get_scene_summary": 844,
+      "group_objects": 133,
+      "move_object": 861,
+      "place_on_at": 85,
+      "rotate_object": 65,
+      "scale_object": 41,
+      "set_object_color": 1018,
+      "set_object_layer": 221,
+      "undo_last_action": 126
+    },
+    "tool_task_counts": {
+      "align_objects": 16,
+      "boolean_difference": 81,
+      "create_box": 330,
+      "create_circle": 17,
+      "create_cylinder": 182,
+      "create_line": 17,
+      "create_sphere": 194,
+      "delete_objects": 51,
+      "distribute_objects": 14,
+      "extrude_curve_straight": 17,
+      "get_bounding_box": 28,
+      "get_scene_summary": 500,
+      "group_objects": 133,
+      "move_object": 411,
+      "place_on_at": 77,
+      "rotate_object": 64,
+      "scale_object": 41,
+      "set_object_color": 485,
+      "set_object_layer": 65,
+      "undo_last_action": 82
+    },
+    "unique_runs": 500,
+    "unique_tasks": 500
+  },
+  "candidate_source_assignment": {
+    "accepted_into_dataset_v2": false,
+    "actual_family_counts": {
+      "candidate_development": 23,
+      "candidate_train": 42,
+      "candidate_validation": 32,
+      "source_reserve": 32
+    },
+    "actual_task_counts": {
+      "candidate_development": 60,
+      "candidate_train": 320,
+      "candidate_validation": 60,
+      "source_reserve": 60
+    },
+    "historical_eval_overlap_status": "not_resolved_no_a5_or_p2_files_read",
+    "purpose": "planning_only_not_dataset_acceptance",
+    "target_task_counts": {
+      "candidate_development": 60,
+      "candidate_train": 320,
+      "candidate_validation": 60,
+      "source_reserve": 60
+    },
+    "tool_task_counts": {
+      "candidate_development": {
+        "align_objects": 1,
+        "boolean_difference": 5,
+        "create_box": 40,
+        "create_circle": 2,
+        "create_cylinder": 31,
+        "create_line": 1,
+        "create_sphere": 23,
+        "delete_objects": 3,
+        "extrude_curve_straight": 2,
+        "get_bounding_box": 2,
+        "get_scene_summary": 60,
+        "group_objects": 15,
+        "move_object": 54,
+        "place_on_at": 2,
+        "rotate_object": 3,
+        "scale_object": 3,
+        "set_object_color": 56,
+        "set_object_layer": 10,
+        "undo_last_action": 20
+      },
+      "candidate_train": {
+        "align_objects": 12,
+        "boolean_difference": 51,
+        "create_box": 213,
+        "create_circle": 11,
+        "create_cylinder": 106,
+        "create_line": 10,
+        "create_sphere": 119,
+        "delete_objects": 41,
+        "distribute_objects": 12,
+        "extrude_curve_straight": 11,
+        "get_bounding_box": 23,
+        "get_scene_summary": 320,
+        "group_objects": 77,
+        "move_object": 257,
+        "place_on_at": 61,
+        "rotate_object": 50,
+        "scale_object": 31,
+        "set_object_color": 319,
+        "set_object_layer": 50,
+        "undo_last_action": 51
+      },
+      "candidate_validation": {
+        "align_objects": 1,
+        "boolean_difference": 12,
+        "create_box": 47,
+        "create_circle": 2,
+        "create_cylinder": 20,
+        "create_line": 3,
+        "create_sphere": 30,
+        "delete_objects": 4,
+        "distribute_objects": 1,
+        "extrude_curve_straight": 2,
+        "get_bounding_box": 1,
+        "get_scene_summary": 60,
+        "group_objects": 22,
+        "move_object": 50,
+        "place_on_at": 4,
+        "rotate_object": 6,
+        "scale_object": 4,
+        "set_object_color": 54,
+        "set_object_layer": 2,
+        "undo_last_action": 5
+      },
+      "source_reserve": {
+        "align_objects": 2,
+        "boolean_difference": 13,
+        "create_box": 30,
+        "create_circle": 2,
+        "create_cylinder": 25,
+        "create_line": 3,
+        "create_sphere": 22,
+        "delete_objects": 3,
+        "distribute_objects": 1,
+        "extrude_curve_straight": 2,
+        "get_bounding_box": 2,
+        "get_scene_summary": 60,
+        "group_objects": 19,
+        "move_object": 50,
+        "place_on_at": 10,
+        "rotate_object": 5,
+        "scale_object": 3,
+        "set_object_color": 56,
+        "set_object_layer": 3,
+        "undo_last_action": 6
+      }
+    }
+  },
+  "families": [
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_0289162b8d584e0b9f9f",
+      "size": 1,
+      "task_hashes": [
+        "40c696e213bba262dedbd6c6ac63f6eb34729e614bac1beb23bced3893721035"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "create_cylinder": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1,
+        "undo_last_action": 1
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_cylinder": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1,
+        "undo_last_action": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_02f02c84aaea35b235fb",
+      "size": 1,
+      "task_hashes": [
+        "0aacd09833d4ec53e97f1796349eea32f28d38f8a1d73080b80df44e7a51947f"
+      ],
+      "tool_call_counts": {
+        "create_box": 5,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 5
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_03777555730ec9ac37b4",
+      "size": 20,
+      "task_hashes": [
+        "e0ecc4a2090ae54cbcadd508c8cedf1916a0f650d1cd2d9de89bb0eef43de1d1",
+        "afd806bc12d0e6c752cdf1e90e52bbd5b50f85112725cf13e0f55e9a73960ab9",
+        "6432d09fca97ee11c2a09259f63096f04ac53cc5689d0116b8f0d4fc48512d57",
+        "71b85ed75a711be3fcff3bf48b8b023ef808038cf4dfddd8642022b060a71379",
+        "2d00f23c44a5d8a4730961741af518d95d3d583d77b3c18d9197cb0a2f614f74",
+        "3bd2182d921ad4fb85e8d179a2e4f244fa3af0a0b6b2ea54e08c05d35186f7a0",
+        "714414e57028871df4c8a1ad067e1089ace942eeb3501efef1eb4d10d438be39",
+        "81d7d2d45281efc4fe9df37ed8220210ac2a9a61cbf19f2d39561f7417c0f0ae",
+        "4e3c1efc5a1e449206084150df2c76c816eb645025a88b9ce2301c7109f49327",
+        "8742b62fa799881b30c82d98bd8ec4fc745755a1c4a6a6cbcc05d7c6a56cbd26",
+        "e02bb6b44d8c7308ea0806b1f988e2db266ef82149d93d7cd3bb67bf36cb031c",
+        "8e13d9a4cf1a85662f0cc5153eae1db873a1a977b057511c85bb5ebc32797767",
+        "830ff2569efe8260cbd4fd36ddd598836c6d9c2854ec5a4c86955188adf356ea",
+        "789f5d4ae7bb5a15201e693a7afc33c773600cb249072e7ea71cbed1db7e7e02",
+        "d357a8217150843dffb7c0fef4d91a93a08a716ea3e56800cbde4199b533748f",
+        "b288cfae52d28078383644b420934b991e373aacfb65bd501a2308824449cf7a",
+        "d0f8871ba3b885813ee26208e46222b642d6c8bdb6d560ba12e225e03904663a",
+        "26f1698da5d3dd0ded69684c915ccda98db1aa83ba0240f556111c74fd439f9a",
+        "aa49d3e15f5038342a48fb174df6c2d4f6e7af3c3d5c5ddb7c33b1a801cab75b",
+        "bf707728ec9a92212ec80b2b179a6a4c2c6112e3d4dea80276672c822abd3090"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 60,
+        "create_sphere": 20,
+        "delete_objects": 20,
+        "get_scene_summary": 58,
+        "move_object": 41,
+        "place_on_at": 20,
+        "set_object_color": 40
+      },
+      "tool_task_counts": {
+        "create_cylinder": 20,
+        "create_sphere": 20,
+        "delete_objects": 20,
+        "get_scene_summary": 20,
+        "move_object": 20,
+        "place_on_at": 20,
+        "set_object_color": 20
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_064426005b8d8abb79ed",
+      "size": 1,
+      "task_hashes": [
+        "813fab270fa3ed7d60e3e84617349a7b189cbb06582e8ccf2d5c3574f6d2c343"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 3,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 3,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_cylinder": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_0b63400c7c7f823e2ea6",
+      "size": 1,
+      "task_hashes": [
+        "0ac0cae65eadcf94fe072b30fb9687de6ea5359f6c9537d719d2e875c631e81e"
+      ],
+      "tool_call_counts": {
+        "boolean_difference": 1,
+        "create_box": 1,
+        "create_cylinder": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "boolean_difference": 1,
+        "create_box": 1,
+        "create_cylinder": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_0cde6138f7be19a965ef",
+      "size": 1,
+      "task_hashes": [
+        "313c1af145d7fa7b21d9ee20c13a15cf43b0aa502566b0feb08236e020ed6400"
+      ],
+      "tool_call_counts": {
+        "create_box": 3,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 2,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_0d40440e057b5ad58318",
+      "size": 1,
+      "task_hashes": [
+        "4ef6d533f6fe621e13f525478ec90935f1f0abf22f5dba4e0e0d86946c7aae0e"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "create_circle": 1,
+        "delete_objects": 1,
+        "extrude_curve_straight": 1,
+        "get_scene_summary": 2,
+        "group_objects": 1,
+        "place_on_at": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_circle": 1,
+        "delete_objects": 1,
+        "extrude_curve_straight": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "place_on_at": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_0df8026e6d1d9c12f17c",
+      "size": 1,
+      "task_hashes": [
+        "a175f74de321768e8f8c73db12ba5a969775dab335c9608cf24d8831a4892f5e"
+      ],
+      "tool_call_counts": {
+        "create_box": 5,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 4
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_0e1d4ede4debb6389f4c",
+      "size": 20,
+      "task_hashes": [
+        "121814a4c9f37d65e9f4074d3d7beeeb7ea7e4ae2670ccbf7719ba1c417dd3c3",
+        "879b1a436239de31d255d6338c381d7a92770ff0daa98e6dba4c8a6b26b3600c",
+        "5694d4e888359754a657e3a56914bf04cbd692df911523004159d4bfb05bf9fb",
+        "6d2f7cf4fc6dc49faaf026281b20a2d1e65ef83d60a5ad837137111f1083acf9",
+        "6de8b840335c5de0c84c02ce2a1e6a191829d735b0ee38318bb44228a7f8ad2c",
+        "a4e68d89b1f267a813cc72efe45353f011476096f339ab767f75ec3858603dc9",
+        "b16c5e844976638d25c9b56eaaa69d4ac428f152a248e994c88399ac8fd76de4",
+        "db94c22eeccbc57efbd8409a1e1934101625140c07fd8757df367616b9b4a523",
+        "1e1beee4171e289ea9b267098ab437b01e586fb9e1561cb86414a2a4403d6acd",
+        "150fa68eb3cd1794b3719d66b4d1698c6a1d233202d7d1984602036ec31d8cee",
+        "2d1b78b2be435ca9aee5513a683d4eb9c5c1833c6735e963020cd38c1d3d5e88",
+        "d2abb1c97c6cb4c8cbfefe2f430109020eb48e18c7d016aa03dda05494a3e0cf",
+        "4919fd459648c0e46c57bd1a599d8a4c22de9052e6150f1ad9bfdf3e8a9e154e",
+        "a0499b8f2f6f986d2fbee7751510247de2ee728b3f7c172d0a3311449459e17e",
+        "51f320026760f1c19bd517d70f801098e369d3a85ec7695e305967a20c79b0b4",
+        "a4d79ad36817e2c2f2b9c43669dadcf52cc64792640c14adb8f164c6b2d70d7c",
+        "61078aacc7db40963311a59e758756057c1fed79ad7e12d7909a8c6b15d5c0e4",
+        "eec89d0d2ab7f65c5f45ba98c2a958b42181e56ab81fdb8b2cc4ad53527b84a1",
+        "2d014c75b76e6ac2750e1931a12a886033ee24bb0e13be780faa394dcbc78b58",
+        "0b3be6643975ad5ba70368575fcb94b84884cdc1d6aa6cb3d451661dddb89fb6"
+      ],
+      "tool_call_counts": {
+        "boolean_difference": 20,
+        "create_box": 20,
+        "create_sphere": 20,
+        "get_bounding_box": 5,
+        "get_scene_summary": 58,
+        "move_object": 40,
+        "set_object_color": 40,
+        "undo_last_action": 20
+      },
+      "tool_task_counts": {
+        "boolean_difference": 20,
+        "create_box": 20,
+        "create_sphere": 20,
+        "get_bounding_box": 3,
+        "get_scene_summary": 20,
+        "move_object": 20,
+        "set_object_color": 20,
+        "undo_last_action": 20
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_1017e4d561ca2483bcdb",
+      "size": 1,
+      "task_hashes": [
+        "510f990ec043d8ed86c860fbe1e3344a3ebbea0c162a61fc42c41fc1dedbe85f"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "create_sphere": 2,
+        "get_scene_summary": 1,
+        "move_object": 2,
+        "set_object_color": 4
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_10c05c1ac5f59dfb269b",
+      "size": 1,
+      "task_hashes": [
+        "02d76f8d35aade7294f446231f75feb42e33f7e7b6b1e0458201388eb294d97b"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 6,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 5
+      },
+      "tool_task_counts": {
+        "create_cylinder": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_10ebd4edfb76b7bcca0a",
+      "size": 1,
+      "task_hashes": [
+        "2a4d8c591915f490468c68573f123f71be29918331636078c5152d00ce9f6f73"
+      ],
+      "tool_call_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_11dfd27178de3c839fe4",
+      "size": 1,
+      "task_hashes": [
+        "d23f08477b294b70600dc730132bd9bacdc3faed732b612cf3667ca81a2aeb15"
+      ],
+      "tool_call_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_13ea147f624663b3b19e",
+      "size": 1,
+      "task_hashes": [
+        "e3b7d3cf976d7b2a614ce43eb61ada552cb90a4ea793ed440518e6428824299e"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 1,
+        "create_sphere": 3,
+        "get_scene_summary": 1,
+        "move_object": 3,
+        "set_object_color": 4
+      },
+      "tool_task_counts": {
+        "create_cylinder": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_164613e118b5f3a6dfd7",
+      "size": 1,
+      "task_hashes": [
+        "1979b758294e764ad9b388273295a13c64b4820266a43b7b651ebd8ef9456271"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "create_sphere": 4,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 4,
+        "set_object_color": 5,
+        "set_object_layer": 5
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1,
+        "set_object_color": 1,
+        "set_object_layer": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_1664a10f2f7d599aeb7b",
+      "size": 1,
+      "task_hashes": [
+        "43f6eab473e1f893eebf32b38bc5b14a8554dd13d220c4408848a3ebbf034518"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 3,
+        "get_scene_summary": 1,
+        "move_object": 2,
+        "set_object_color": 3
+      },
+      "tool_task_counts": {
+        "create_cylinder": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_17029ebdae25571628f7",
+      "size": 1,
+      "task_hashes": [
+        "556ed38c931aea5a4d38431ed4e99eefd207006a2db17624a628c9fc65d065fd"
+      ],
+      "tool_call_counts": {
+        "create_box": 4,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 3,
+        "undo_last_action": 1
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1,
+        "undo_last_action": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_17db75ad0614a3e8fae0",
+      "size": 10,
+      "task_hashes": [
+        "637b4ec5b32134e66009cd69eeb349eb79b56f567b3389e1b259990353270413",
+        "d77c72b47e5aed91069450f6327886e4c8a50ca8d535cb118a715ab1d7e48b46",
+        "21de1309dbe84c7079eb01ace9ca3178e0395acd2721791b519bfb5fe7ad428b",
+        "2813a250c8867b499b06c67f41d81324fd3739a04fb3dd362081b3257fad06ab",
+        "45d7b3aa18d2fe47a3d88cdb9d9c82b52c4248be1c91658a1530b3fad695ac7e",
+        "3899d7f84dbc3dcba3246ff661ae12fa46ccba2416f0a2b1b1bdfbb528680e77",
+        "7ee9083619928d44df02713848575af43afeb9fe5616c58a1bb965ee295efc57",
+        "996f4e1fb48df828aaa563ae4ff2225daa31966f99feb24122ebdcbf57d1693e",
+        "0172bcb0029233763c6821210ed33b5c2cee85fbd6fe93871690034948becd28",
+        "38a4b40cacb4a679603869b017972671bf6938254d55c8a5769ed58f068f4eec"
+      ],
+      "tool_call_counts": {
+        "create_box": 10,
+        "create_sphere": 10,
+        "get_bounding_box": 20,
+        "get_scene_summary": 10,
+        "place_on_at": 13,
+        "set_object_color": 20
+      },
+      "tool_task_counts": {
+        "create_box": 10,
+        "create_sphere": 10,
+        "get_bounding_box": 10,
+        "get_scene_summary": 10,
+        "place_on_at": 10,
+        "set_object_color": 10
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_18f298abdb53ad0e9810",
+      "size": 1,
+      "task_hashes": [
+        "e0e6e1825e9391969f77bfc7b8bea62be8d9724dca24bb025e23cd1af9d5f0ae"
+      ],
+      "tool_call_counts": {
+        "create_circle": 1,
+        "delete_objects": 1,
+        "extrude_curve_straight": 1,
+        "get_scene_summary": 2,
+        "scale_object": 1,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_circle": 1,
+        "delete_objects": 1,
+        "extrude_curve_straight": 1,
+        "get_scene_summary": 1,
+        "scale_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_1aaf6930eee02068a9c4",
+      "size": 1,
+      "task_hashes": [
+        "8dfb486571a1ec47cb9437f55987618f24ce2a6789a2f57eebff45e3c92ee25d"
+      ],
+      "tool_call_counts": {
+        "create_box": 3,
+        "get_scene_summary": 1,
+        "move_object": 2
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_1e7ce27721448be3c4c4",
+      "size": 1,
+      "task_hashes": [
+        "1d4c13a1498f8d99286484abcb8d433f3c212dc751f4bbebe7c70b9525523e7b"
+      ],
+      "tool_call_counts": {
+        "create_line": 1,
+        "create_sphere": 3,
+        "delete_objects": 1,
+        "get_scene_summary": 1,
+        "move_object": 2
+      },
+      "tool_task_counts": {
+        "create_line": 1,
+        "create_sphere": 1,
+        "delete_objects": 1,
+        "get_scene_summary": 1,
+        "move_object": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_2369b39eb79fa69dee5d",
+      "size": 1,
+      "task_hashes": [
+        "9ee43613c9eeb3791995e2c97a2d12240e00ae7d8735e3895c6d7018b9e074d8"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 2,
+        "delete_objects": 1,
+        "get_bounding_box": 2,
+        "get_scene_summary": 3,
+        "move_object": 1,
+        "scale_object": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_cylinder": 1,
+        "delete_objects": 1,
+        "get_bounding_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "scale_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_25aa74be9cb736341cbc",
+      "size": 1,
+      "task_hashes": [
+        "230a8dc5f842630227f8b69105bbfd27052c17edca6e6eb9cca3d030464992e6"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "create_sphere": 2,
+        "get_scene_summary": 1,
+        "move_object": 2,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_25f4ba9b76045bc78775",
+      "size": 10,
+      "task_hashes": [
+        "5d82be78c9c1ee3b30f7a406e9b29d6dda3b5724118e8abcf51cb39e6e3619a1",
+        "924a79f55d6d552c6c93d298d82e994e9b4fa75974f0c97ad6c3856e22a0ca30",
+        "d867a347d2d66adab80f41f4f56db3b3d328c0a5a99237c8f28a99307efb43bd",
+        "a8506ef5d25cdddd312607db765d448f9ee389904cc6e92d7553bd16fb509dbf",
+        "bf2a1d5ae0e4da79ce762bce024c6eaabc6b684c21f0dc354e3738e98a724f82",
+        "c38d0729fe30620d72ae90568f60f71203b929ef54e3fa0dd9d2a7c1b8c7a2aa",
+        "0170ce5c52fd53274fa5ba25382217e56cc249530d0f07e027a865904b8e04bc",
+        "35d20cdb3559bd8b3d657330e7e8745e111cdfdd11f6d06c6c2d6759debfb69f",
+        "fa879e8685ec391c81130696b57d128ceb13a3bacd97aaf67c386a40468f93af",
+        "b4bc5e045d74a93a456b2f61db918923e0c1cb0bf1639881d8bdf475d0c153a4"
+      ],
+      "tool_call_counts": {
+        "create_box": 40,
+        "distribute_objects": 10,
+        "get_scene_summary": 10,
+        "move_object": 40,
+        "set_object_color": 40
+      },
+      "tool_task_counts": {
+        "create_box": 10,
+        "distribute_objects": 10,
+        "get_scene_summary": 10,
+        "move_object": 10,
+        "set_object_color": 10
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_264bdc7bb0308ca38036",
+      "size": 1,
+      "task_hashes": [
+        "3b497b3520d808255285c64dbdf4817fda36b15d06cc17e38693fbd998891c9e"
+      ],
+      "tool_call_counts": {
+        "create_sphere": 2,
+        "get_scene_summary": 1,
+        "set_object_color": 2,
+        "undo_last_action": 2
+      },
+      "tool_task_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "set_object_color": 1,
+        "undo_last_action": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_289f144de483942357d9",
+      "size": 1,
+      "task_hashes": [
+        "8945e6d14690076e3ac4dc003fe26a9a97e1808ed7d7b7280f3ea2cc2cff6adb"
+      ],
+      "tool_call_counts": {
+        "create_box": 3,
+        "delete_objects": 1,
+        "get_bounding_box": 3,
+        "get_scene_summary": 3,
+        "move_object": 2,
+        "rotate_object": 2,
+        "scale_object": 1,
+        "set_object_color": 3
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "delete_objects": 1,
+        "get_bounding_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1,
+        "scale_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_291a271b26db197dd773",
+      "size": 20,
+      "task_hashes": [
+        "0b40fb21c6a616f2fad286b9cbc48b914b6964b931a6d525c8c37c053d71802c",
+        "db11bd4c2de1f9cfcf6c5d4c0b21e9383361ff80a703ce7ceec8a2f8f058c5e6",
+        "59047e31f793a0b12eced0277062a463b3cf7361387a64bdfec48ab6a0051388",
+        "5c24b9a8d5c1434306bbab9f0adc03cee77d8d599ea58bf055de33cb81bed62f",
+        "b7a69c17a7b3709a887d362f0c77e5c73b308147b17a201421f087c109882c6a",
+        "b07ab4f79181ed06977ba52a6518f8c8d4ae7589c1241472855608aca93988ac",
+        "826abc06b5b69135546f34987c5ec321fd40b31348e0df344bb49ca52ccb529a",
+        "c29a8455f7e5a2623e053d44873fd65f7267192257410fd307a6efd9b24e947c",
+        "e124e71c0d038f7440e7c6daadaa6a83efed41ec7395f9de5033fa5f3cf7d68f",
+        "903987f1a436258ac97c01f24476c3d3d029f1afdba820811dcee837b4dd87c1",
+        "581b8471cf74e4248e37fb35470df746785150ec6274f3e3e4464b0c32dfaea7",
+        "1904b847d4325d903ba4f4d1d165bffd150e0ae6df44d4fea350cf51445b9b20",
+        "023448ea495357ea641b2d2c83d3bbf157c4db0543e8d8de385be2042ba44e4a",
+        "5ad600c54aaaaca84327ce29c34930aab105622935b6568f3084ccfa56fc5adf",
+        "9b5355c85b3e332ac94a158672324041afc85a1906056401cab2cb79344cef77",
+        "ba3c22eed41c78c88c027c66360662228caa46711fa0be75e2be62a1ec675542",
+        "2d5b9b75ef5ec05a90e0696d2f61790217ae56e393b552db4359b694702e04c0",
+        "143a18080dff15382b212c66e2be1268a15bfa1c34de4a4d07ef64722f04328a",
+        "65f994b2a9c74e16e2eb22d0e835a40a907556b8eb7dbe4be6570c97c218d076",
+        "d0419748da302292a1ad883d8c6678300fd1eb07b67a63a2d8e5b32903e5503d"
+      ],
+      "tool_call_counts": {
+        "boolean_difference": 20,
+        "create_cylinder": 40,
+        "get_scene_summary": 60,
+        "move_object": 40,
+        "set_object_color": 38,
+        "undo_last_action": 20
+      },
+      "tool_task_counts": {
+        "boolean_difference": 20,
+        "create_cylinder": 20,
+        "get_scene_summary": 20,
+        "move_object": 20,
+        "set_object_color": 20,
+        "undo_last_action": 20
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_2a14154c619d6d82c841",
+      "size": 1,
+      "task_hashes": [
+        "9150bc32cd91911b8beb6490fc4392a644d9ff73ca66e13d7b3b079833447378"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "create_circle": 1,
+        "delete_objects": 1,
+        "extrude_curve_straight": 1,
+        "get_scene_summary": 2,
+        "place_on_at": 1
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_circle": 1,
+        "delete_objects": 1,
+        "extrude_curve_straight": 1,
+        "get_scene_summary": 1,
+        "place_on_at": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_2bb2aa81c3f2ae2befdf",
+      "size": 10,
+      "task_hashes": [
+        "6654888e22290b0f426ecbc8490d273a2cf780652e013853854036b851954f91",
+        "8cba74d073094e98f98538bbbd98c02a88b62039f05a612c92453712c273eeb3",
+        "9710b7ed681bfb4cd6c0e4521f5f613b8ac236fdb76108fc57827d06cdfde926",
+        "0a12bff92d589b81a4554739093e7b3930e1ce72bd3d8970d507da83cd3733ff",
+        "ad80c6c72f62b568afa121a30a8b92eb55f045b5a58e56196e6393a55913b893",
+        "176bbb5528228516e471847a5e7628604722df04012570c93665717cb1c5a8c0",
+        "28149427521662fcef0df92ebbf685515fa89c5a413a3c99e3e5002ec3c49c36",
+        "cfa8d2531f0f9bf4e131d7646b6fc43ea632fd292e593a461ccd4bf6e6bfc7f7",
+        "0fb3a52533d269f2e2851e3468c374279a031d85f6bb544c976f7e0f055bce67",
+        "8f444828ecb6addaec635adab54170637f8b1bba2f995b0f0fc2c0520eb1fe6d"
+      ],
+      "tool_call_counts": {
+        "create_box": 10,
+        "get_scene_summary": 10,
+        "move_object": 10,
+        "rotate_object": 10,
+        "set_object_color": 10
+      },
+      "tool_task_counts": {
+        "create_box": 10,
+        "get_scene_summary": 10,
+        "move_object": 10,
+        "rotate_object": 10,
+        "set_object_color": 10
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_2ecca976c1e741170f30",
+      "size": 1,
+      "task_hashes": [
+        "5ceed5e25e380866c8ecbc5538cdd3e5c5689706927d5b09c17fcb29e7f5366f"
+      ],
+      "tool_call_counts": {
+        "create_box": 3,
+        "distribute_objects": 2,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "set_object_color": 3
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "distribute_objects": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_32420f866aa60e7c5137",
+      "size": 1,
+      "task_hashes": [
+        "0521c3a592d2922d5e060163f4e3c4d75b4cd88fbd868eba40183b204f54ea53"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "get_bounding_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_bounding_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_324492e58e0e8b6d8c17",
+      "size": 1,
+      "task_hashes": [
+        "009b2855ddb0e09171913ef6e38908b3a8a8274cd47a5837d66ca57d7997fe22"
+      ],
+      "tool_call_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "scale_object": 1,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "scale_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_331b0e159de3dccbd38f",
+      "size": 1,
+      "task_hashes": [
+        "9482a28e3a0f4e435aea86b794b73b04a8a30a47128b8c266d06d5d6e3eb0f7d"
+      ],
+      "tool_call_counts": {
+        "boolean_difference": 1,
+        "create_circle": 1,
+        "create_cylinder": 1,
+        "delete_objects": 1,
+        "extrude_curve_straight": 1,
+        "get_scene_summary": 2,
+        "move_object": 1,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "boolean_difference": 1,
+        "create_circle": 1,
+        "create_cylinder": 1,
+        "delete_objects": 1,
+        "extrude_curve_straight": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_33dd228ead70dbfa5c72",
+      "size": 10,
+      "task_hashes": [
+        "536c899ed82a4a6f69d51c86e68f3ecc4ceee24ea35fc49f8a2e7863646c3327",
+        "05fbf137d19c78ef29f8aeac61d8a23e0aebadc70efa65fd30cf10cb1930538e",
+        "d661c83035c9298d49610afda53f605180462b4734c8482d988dfc00e1fd6394",
+        "05948707cf0d0d37c3c832ed64cd9ac4477e7cd05e4273fc901798ccb2ec973f",
+        "bdd6f1bf67145791b5115cf9918446fc6ea1fdd12ccf21a3d3d4f0d64d4413f4",
+        "7133b80ef0c36b853fd2d0d8bba7ca9deb23acacea7053f285839e2ce51ee4cd",
+        "053efacfb552fe20c2728bdd2382f8a2f9d66b74d2eb93acadff2704de02e360",
+        "aa50cacd105be8add507c36ac3ac2f24d303b3a1c8a5b837382a93a0fcaafead",
+        "831170b454965e77f522c10a7b43c8ca2caa0f4ddfedac92597baef4de315ea4",
+        "20f0fd3471802f48ef88a39b2615824d976536a048d9e428b600b92b477224f1"
+      ],
+      "tool_call_counts": {
+        "create_box": 10,
+        "get_bounding_box": 10,
+        "get_scene_summary": 10,
+        "scale_object": 10,
+        "set_object_color": 10
+      },
+      "tool_task_counts": {
+        "create_box": 10,
+        "get_bounding_box": 10,
+        "get_scene_summary": 10,
+        "scale_object": 10,
+        "set_object_color": 10
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_340ef466c4eea7593ccc",
+      "size": 20,
+      "task_hashes": [
+        "f8dfceba26e506b55faa41fc9fc7f1f99d1e312dfdd6431cd265c6a3156cdccb",
+        "5ff226faa75a7f6ba0a14c993adc780e00285d9eefca101347fc40dc437a7050",
+        "bd1fd5b12912313ccb6b9ae4e15ee081da2c6ec510aad9213c1b7e5f7b75ff7a",
+        "d539eecdf4a546050d353d6221637557afeea0cf24ca5c59472e58d06489174a",
+        "5546d789b91edbb94a4e38764e39bd7844851314578c4853d14885147f375305",
+        "1415bbd1bc50b2fb25a71ad4952e7d749bd2a22705e966712adc07b5e80defed",
+        "09aaa472df524ae88f64b3ebd75a05cbb4bd20a2cc1a5cbc6ff1b07018a7dc66",
+        "5779959e88cf0efdd12579668065f52f8e8682556dc8c829150edd7d279b1bed",
+        "13c8838a06df31418569ad3b96631032b4bb77c670401092dddcb7cd3a4b0ff4",
+        "9e32a649c3fac574ce1b418e85854db75c29e2d27c87c6b7854a1d66625d28e3",
+        "ef8129468c90c19ce02d9971603508621ec4183e8c9e54e9c402bb8d4fcadffb",
+        "4ca71ac8dc9b4c4512dfc3ba47bfd10bc24118de1a9b2f5c9c55a33bfd04fb41",
+        "1d693d29fe7163975f624434e7b459ce77fbad7ed8d6ad97222e1f8a970f6f92",
+        "ef923f75c5318156e5ecb2a4d7a8d81817ae3447446958b08b116911eda24c11",
+        "1a926cd8b05b0d629e414abd1137e61beaf0ec122bf76473528faecd8343d0d1",
+        "f610a2a180a02aaa5a20ba83f296bdfa7778bc8e556e2d109096e4178e7d2492",
+        "a499b307028957837804f826224877ff28359989a8fd1e8afa9fd2e9917adf2b",
+        "48ebb14cb4a36fcf3109b9762e96c76458f6a08adf690cb3a19c6f6cf4cf0e87",
+        "0f0806719df4a769e7e496391ce598b8fc5d90923018a9f0a5854cefa5b0cdf2",
+        "baa18764602a064004da01bed25e51ad5988d1930da764d54e8b0492f0471a56"
+      ],
+      "tool_call_counts": {
+        "create_box": 20,
+        "create_sphere": 20,
+        "get_scene_summary": 40,
+        "group_objects": 20,
+        "move_object": 40,
+        "set_object_color": 40
+      },
+      "tool_task_counts": {
+        "create_box": 20,
+        "create_sphere": 20,
+        "get_scene_summary": 20,
+        "group_objects": 20,
+        "move_object": 20,
+        "set_object_color": 20
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_39ea4826936cf126a396",
+      "size": 1,
+      "task_hashes": [
+        "9181ab5c3e1a1001866908942d417be4f64169ba47c072891314cad0d0bf4a9c"
+      ],
+      "tool_call_counts": {
+        "align_objects": 1,
+        "create_box": 3,
+        "get_scene_summary": 1,
+        "move_object": 2,
+        "set_object_color": 3
+      },
+      "tool_task_counts": {
+        "align_objects": 1,
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_43929dff9e850c5e3022",
+      "size": 1,
+      "task_hashes": [
+        "797467da3491c98130b34d45a7a1a4a9d1d91af48dd09b13dd76a8ba19764a50"
+      ],
+      "tool_call_counts": {
+        "create_box": 5,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 4,
+        "set_object_color": 1,
+        "set_object_layer": 5
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1,
+        "set_object_color": 1,
+        "set_object_layer": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_46649cab048d53b57273",
+      "size": 1,
+      "task_hashes": [
+        "3191b970e342e041ac0b5ecda7733ca88df42ed5079adb377628a5aff11836a2"
+      ],
+      "tool_call_counts": {
+        "boolean_difference": 1,
+        "create_circle": 1,
+        "create_sphere": 1,
+        "delete_objects": 1,
+        "extrude_curve_straight": 1,
+        "get_scene_summary": 2,
+        "move_object": 2
+      },
+      "tool_task_counts": {
+        "boolean_difference": 1,
+        "create_circle": 1,
+        "create_sphere": 1,
+        "delete_objects": 1,
+        "extrude_curve_straight": 1,
+        "get_scene_summary": 1,
+        "move_object": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_466de0ca66c7afa809e5",
+      "size": 10,
+      "task_hashes": [
+        "e59e6e1bd81acc96db7efb332e3b8788b950e976565c72bdc34461913b077c8f",
+        "0c705dedeb6f6f00f593bae5dea1028d9c767009bd9d30445d326ed1595029dc",
+        "aca10da08996d4bb57caaa786aba4f12591ee122a77d08cd2bd535e998eec803",
+        "601084d9ead08e864e786256d6912744b3245efec071245a2a5c78357d3416eb",
+        "61ba62d3a74551e61cab87728051626d7021a1d7efef6ea7ea8e2d2479ba678d",
+        "479723c3f140ad66e422fae85121eedd9448453172f887f2cf08738014a1af72",
+        "98440c79fda5b6e791e62db5e139a25e9e569d8b6a240c49a87b9b60d7f7ae6f",
+        "de5fd2d0b7e69546203cf7d3b4eaa00afa744d3118678879d434628fbed809f3",
+        "f1bd17cd02d6f1a6267749ccf89d7cef2575c0ff706c6bce0f6c542f2b38d827",
+        "6e092b8c0007acd609f8ba48db839af9ac056de1a7237e9ab0474277106961fa"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 50,
+        "get_scene_summary": 10,
+        "group_objects": 10,
+        "move_object": 40,
+        "set_object_color": 10,
+        "set_object_layer": 50
+      },
+      "tool_task_counts": {
+        "create_cylinder": 10,
+        "get_scene_summary": 10,
+        "group_objects": 10,
+        "move_object": 10,
+        "set_object_color": 10,
+        "set_object_layer": 10
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_48bb278030ff9a4eb155",
+      "size": 10,
+      "task_hashes": [
+        "cee8778487586cbd2f4159c0bd2ec7b952d8f2c08cb58259a421bf1005accd74",
+        "1bccec734a75e3e6250afd063dd0fe6d445395940b278f301479f74967e51190",
+        "7d0dd480547eb775f1fd807927c7461791bbbbe91a856f8d9c05f7cfc00d3e54",
+        "9690d7be8efd7fdc9061c9860b83f2b332998a75a93d3c4a083ac54eee1ab1eb",
+        "806ba2927ebeebe9acd23744da3136518fbb5570a9661902e46e10bcff128aaf",
+        "5c9bb77571a67d2a5f2f61b2e2ad1edaacf311ea96020b36e35c61d0794908c5",
+        "87e80a51a4ccea83a0c50a66eb3a68ed7acd286189d88db051ba68e80ebc58c4",
+        "6315d5380690574be5272c22596c98493edbf3338f51bc9471289506157276b0",
+        "e415b2b5ea5cdcd14aa9012649561237adcd6eb8d4e1bfc19ab1bc4be1d3a873",
+        "4f6f11fac73c7570d8d33bde0ab5a9fc06a7f2ba57f076a1c506b33717d53d3a"
+      ],
+      "tool_call_counts": {
+        "create_box": 10,
+        "create_cylinder": 10,
+        "get_scene_summary": 10,
+        "set_object_color": 10,
+        "undo_last_action": 10
+      },
+      "tool_task_counts": {
+        "create_box": 10,
+        "create_cylinder": 10,
+        "get_scene_summary": 10,
+        "set_object_color": 10,
+        "undo_last_action": 10
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_4b91cbdd114aec419d5f",
+      "size": 10,
+      "task_hashes": [
+        "54af6048060fc6cbf7fc072a31a289c44ceb7e672b1c44957c4b0aebc97f46fc",
+        "e70e47c667a8f310061d3913105c71e382bf9ad66915ba48c719812ce50e0092",
+        "50f8fb56fbf03f4882ad3bb22242ced9df4f9bd13f2249d77892faa04ea8dee3",
+        "e19d01a9edbe1f9bb665a9cc60e0945bf4c61f19101478fec7c3918c114a812a",
+        "915a6f94565d50471efefffe19a529031cbcb6d8f8e56c31c7944df13f054606",
+        "ecd3b0aa676b5dbb0f171eda26f32e911f78684081200ee13e1baadedcbae3cb",
+        "674a17745a04e2f813fc2f33748b8636d3372dd526fac83a5bd5b46c845916ac",
+        "2127b77cafbf0910a2fd3480a4e52406f46b7f7a1f763a41c72d392fcf36a145",
+        "64cb704d85e887f3b62c43db2bede70661547dd1114adb564ea0845139d1788f",
+        "9624961a27efa4c99ab049a20e2dab57b94e71a4c297d5725f465d887b06673d"
+      ],
+      "tool_call_counts": {
+        "create_box": 30,
+        "get_scene_summary": 10,
+        "group_objects": 10,
+        "move_object": 16,
+        "place_on_at": 10,
+        "set_object_color": 30
+      },
+      "tool_task_counts": {
+        "create_box": 10,
+        "get_scene_summary": 10,
+        "group_objects": 10,
+        "move_object": 7,
+        "place_on_at": 5,
+        "set_object_color": 10
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_4d1bf6d7ee34db52f382",
+      "size": 1,
+      "task_hashes": [
+        "91d7f881e92a58708d83b1632f354fdbe74e9213848c8562f9eb8b891f970fff"
+      ],
+      "tool_call_counts": {
+        "create_sphere": 5,
+        "get_scene_summary": 1,
+        "move_object": 4,
+        "set_object_color": 5
+      },
+      "tool_task_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_5747255330c002826257",
+      "size": 10,
+      "task_hashes": [
+        "ebd4412c57a5eb8b6f7ae585171e0e970fb61787a692d4d5efc2967de7afbdd0",
+        "de2be46e2a7d06761a0aa638f4d8f1bdafece1e4aadece46ed85a8c6d0f3beff",
+        "326e344a05718b0410eb8fb45bf3d503eafe3aa475cbb2b91dfefea56ae12a9d",
+        "b7c99e7bcc8d362a0c05af86020ca87b59e54a4e2963557e14e0227570af0e5d",
+        "2dc98697f5348aa6f470ed14470f957026d8d530bfdfa98f93a11a5567d79f21",
+        "4cbd508f2648e506c048b2ef97094bf6c931ba7bfbf5862b1f30b5b847864810",
+        "1cc13077826c497caf405797015ec49dd91249bc8f79740ddfb835e680445382",
+        "34dc44b87099d88d05c8676afcd4ca03488d04af4388924c08b2d9fd8b452346",
+        "5575e034abeba9cf1d3b74c8da327fc3d720e6da61f24437f6da6cf64cc0e47a",
+        "397bb5c1eee80a55abd5691bd1d67e8fa94d1df089d455e28ab41b44d2e87b50"
+      ],
+      "tool_call_counts": {
+        "align_objects": 18,
+        "create_box": 20,
+        "create_cylinder": 10,
+        "get_scene_summary": 18,
+        "group_objects": 10,
+        "move_object": 42,
+        "set_object_color": 30
+      },
+      "tool_task_counts": {
+        "align_objects": 10,
+        "create_box": 10,
+        "create_cylinder": 10,
+        "get_scene_summary": 10,
+        "group_objects": 10,
+        "move_object": 10,
+        "set_object_color": 10
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_5976ffb8133e63caa92a",
+      "size": 1,
+      "task_hashes": [
+        "8462b15a8100966d782b3d57b0b2c89bc86488b2d43774b683bcb0ccc4455898"
+      ],
+      "tool_call_counts": {
+        "create_box": 3,
+        "distribute_objects": 1,
+        "get_scene_summary": 1,
+        "move_object": 2,
+        "set_object_color": 3
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "distribute_objects": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_5c0bd7ee01ff0989365a",
+      "size": 1,
+      "task_hashes": [
+        "14f11c06d3d90d44004f28934033d50ee7cdfb44c1ed14b1ee1442bec2ddb0a9"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_5c284da126010db520aa",
+      "size": 1,
+      "task_hashes": [
+        "0c563172d1e162467baa52103d4331d6a4e9d1acdd8469ad9023332ecf305d74"
+      ],
+      "tool_call_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_5c5cf0ec338e47791ab3",
+      "size": 10,
+      "task_hashes": [
+        "ffa531b89f34b9ef4bfe0db8c42e7fb33b249b4c5f0958c066b621a1d061ee1b",
+        "7e666d6712e6f9a30f76422c156ec01b683c440a3ef4502052ccd1427b777cf6",
+        "27611b249a328c5d828e20f609ca368cd2580982028f9a064877b1183b159d19",
+        "359d0eb294d73bb3154eec416fd3b10835519059abfe21bf5130091253de3125",
+        "112992df799aa7a8f4062d9207ccff2385f464b14be81f2b3f1964413e710cec",
+        "b644d2cf6009332a46dd1c16efe1b16e30a9b76a764fda14865b0530fdd63f52",
+        "8906884ec8fbc77ad2e07d7374c582660456e19fdfd188f8592cd1daa4a7836e",
+        "2deb9fcb3cd5bdbd03da9e8ecdf8bfb5f532095599c7a3bb270429b8f728ceb4",
+        "8980acdd6c3ce373828fe4d8bd0243725b41c39d9eed85dbb8210752ca05154a",
+        "e1ce632290aa96bc5f69b6663e7c7edd7f91782c76ae3923a4380fa83c5636d2"
+      ],
+      "tool_call_counts": {
+        "boolean_difference": 10,
+        "create_cylinder": 20,
+        "get_scene_summary": 15,
+        "move_object": 10,
+        "set_object_color": 16
+      },
+      "tool_task_counts": {
+        "boolean_difference": 10,
+        "create_cylinder": 10,
+        "get_scene_summary": 10,
+        "move_object": 10,
+        "set_object_color": 10
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_5c8fd4120f01bea5e748",
+      "size": 20,
+      "task_hashes": [
+        "2efd70acbe291ddfc8106f89142ad3b435fd4cfdbe06d3b07e73efc0adfad162",
+        "f64c03c44c2c2ca98aa44bedd299c56a83fff7027630d236baae1aa23b49f29a",
+        "97ce1672a8747bed56b498746ec6973dfd96bf3090afa2a775e6bc4c5806958e",
+        "73c96b8516de295ba82e621bb29a4b8fdae8f7f74266f19c71ad529c206873dc",
+        "a8d66b570b6174cdba252822a869bbe25d748b7fd87ee86cdc8eaec94a064e23",
+        "afae60a4a76d8ed3083d5989b462e94cab0d37db93ec325c3baf4b29dadcfe18",
+        "14e15ec261be0e27ef9fa4a7746c6c6035ede9d1747ffc7e4f51bbf4e42b8435",
+        "531045044271940c17d112fc3192bb77cf3139eb86f2b8e598866501609d00c5",
+        "ee75ac8abf372428edd31150fad354df8011d38239e91634a18223899a170d28",
+        "d9c51f5567f004deb9bb7bfe171cff31139ba0331fe003b35c4feb7d2ad2c13b",
+        "82819bb24340edd329da525167a0597cf3d2cfdff62f1b9a41b6e67754ab2fca",
+        "5526d4329a01cdbdffa628f558d904777b280a97f3175a54dda67de2da0795ad",
+        "b64cdd26c350ffa07bed152baf4e522373a50363ed4e967c484c0f9ed049c064",
+        "730b78f46a700d272d11454bc9561b62f8a1db212476b95ed00c741f5b6faf57",
+        "37a207db40cbbb1d930c7aeebaff2edbb9aa765dbef3bd84bb004da72b82a860",
+        "34d56fb2e68dd9830bb879199256f8dc8410dd106754082d297fc5e51e63ddff",
+        "4e9327f4b38b9df7006e049be5320d06e4cdcaaf2a40c76a38239b011373c50f",
+        "01e9b12acd581330a5de6a72fd8e22c6e19ea1726146481931115d8ce67d403b",
+        "072044d27b96f17a69bab571faf447fa5c2f0907d0e2cf2181cf055303a29114",
+        "d09673731e2a64d4eea0e26c4debcd5955abbabac831c2e00c412fd7440b778c"
+      ],
+      "tool_call_counts": {
+        "create_box": 80,
+        "distribute_objects": 1,
+        "get_scene_summary": 40,
+        "group_objects": 20,
+        "move_object": 60,
+        "rotate_object": 20,
+        "set_object_color": 80
+      },
+      "tool_task_counts": {
+        "create_box": 20,
+        "distribute_objects": 1,
+        "get_scene_summary": 20,
+        "group_objects": 20,
+        "move_object": 20,
+        "rotate_object": 20,
+        "set_object_color": 20
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_5dd4bed8e820f3f5a22a",
+      "size": 1,
+      "task_hashes": [
+        "a6ed20dd7075382d1e891e89315e1506a3c6cf1db9abc349a2a34be5cb51da29"
+      ],
+      "tool_call_counts": {
+        "create_box": 2,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 2,
+        "set_object_color": 1,
+        "undo_last_action": 1
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1,
+        "set_object_color": 1,
+        "undo_last_action": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_66773c86c982296160f0",
+      "size": 10,
+      "task_hashes": [
+        "f7a65685d9bb622139f534ead0620d26cc68994db7da2605d05c92a4a6ac0410",
+        "86b38a252d646333feddf564ad3135e4a1e20815e35e5195c91893c97b6a3542",
+        "e35699c0114b1ab2b2807896ae4be2af6f1030acdd6d429c62a7d710d8c35ea0",
+        "58bbcca7d942f873eba7d90ee0f2133db842dff77f1290dba05c328cd0d0c182",
+        "6558601671b8fe0c0bcf3db4d1f7426173bd7b362ccf1c687aaf41845c1ad246",
+        "4a7486e2e1f0fe05fe59904e7bdc9d6e29adfbc06ffd45585a6cae229a6a5163",
+        "003580b963ce27be9d49ccf2336b242fe547c0fdc5d7b1af5e98080c0ac09f04",
+        "b66e2f805f282834bd2ac4208a5c1374b25bf1b29bf9da77a2260242d54dbae8",
+        "cd1959c9d6853f6b9a7857e9e7fca59b124dd34a0cd3f74ced38aaf724fa9461",
+        "8ac0a903ca070564489446b447e27e707f5e8c91de15472c7613f6ef67ea0b0f"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 30,
+        "create_sphere": 10,
+        "get_scene_summary": 20,
+        "move_object": 28,
+        "place_on_at": 2,
+        "set_object_color": 10
+      },
+      "tool_task_counts": {
+        "create_cylinder": 10,
+        "create_sphere": 10,
+        "get_scene_summary": 10,
+        "move_object": 10,
+        "place_on_at": 2,
+        "set_object_color": 10
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_69f495709cef5a9386fd",
+      "size": 10,
+      "task_hashes": [
+        "06497a1beca803d7f2336699f66563950744c702f5b42ddad766aea7f6e89ed3",
+        "914f5e22bf6c930f246942f34de99a8750e787a56bbb9429b2c37d463f481fd5",
+        "80442485c13fc741e8b11c8fa81f7d8ef8a7b070ce183480cf5cb7d333176c6b",
+        "8952509928b4c28f3a39ef0e45a9f7e34697ae2eb5b129cb658cb364ef472c45",
+        "7b65fefc1511c879a0a7160c62d6677bcd18953e073b1005d33dbf7fb79e8938",
+        "9cc7b1594dfde90c7ee5cd61b6ba42f7ec674231ca841b4a343b845e1f287d02",
+        "87d0fc743ee6f32c44dc8c0a6f2decf5981269fb4f164ff17605079ee6cb6b65",
+        "dc5e8e932438f0ddd723fa729b872fa3b557cafc75bb4a4424cc006c7d94a224",
+        "f675592a677cd607361ce60fa803bd25ea5fb8d5bb8529c08c447417e49142a7",
+        "106cc428e3ec8d3b028fac0e84218f7fcfb88a526c3291755267c0ac1437661d"
+      ],
+      "tool_call_counts": {
+        "create_box": 10,
+        "get_scene_summary": 20,
+        "move_object": 20,
+        "set_object_color": 20
+      },
+      "tool_task_counts": {
+        "create_box": 10,
+        "get_scene_summary": 10,
+        "move_object": 10,
+        "set_object_color": 10
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_6a0d38c98667a3937ac7",
+      "size": 1,
+      "task_hashes": [
+        "40296609ad82b539602eda1e7588fe72bb8f7c9cf0a167bb0cd661895674587f"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 2,
+        "create_line": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 3,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_cylinder": 1,
+        "create_line": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_700d97932b20d1acb40a",
+      "size": 20,
+      "task_hashes": [
+        "11b50f0566ec8d22100b1da4f3ce443ae4d8e53f654358759c17130c3b454c9e",
+        "a766fb2e2edb6942354012ae4351ce3c05321d37b81531e6f8fd055f570e172a",
+        "d4b9339c752c0ebfb0c903f4043dcacb45f66105de2286606432618e98fdfe94",
+        "21a1f8aaf3e66699088aa4bf3bf625ad7b00c747332a4d291317feece2e51d36",
+        "337144eefd9f1718b1a550c80152db37ba3558bd8f28a406cdcae26ca3689ad4",
+        "68689447ba6439a3696dff0f93eb8f215b4a455f16b34d1cbaa48cbf5e24bb28",
+        "90f34227a0d345c846c7f07e40ae68b4f2ac3ec151a6322fba9d96e99b965800",
+        "223a8d5dfb0bc3d2377ad81011f29bd59a875ebb713ffe329e3482b222d1301f",
+        "8322e2e9459093979c204b1c1709a1ab9d4b1e5b8cf532e1aacdf352f39ea0f5",
+        "51bd9f3fc31e598de36489ec555001ba1228e9a59e6f23733e87779c8d579a84",
+        "03870ee4dd600502908014ffcdc9e8fb9ae8facac1170fc521430ab135313acb",
+        "87186b60f2c5130eeb75d989b25fd11db2332955872f5ab9f45f6442a04ecbda",
+        "e8b7b00890f268d6b66eec651d9861d8a3a60a57d81d5ac2f32dceba932db7b1",
+        "b57e6c53a0532dd0e2f3b4e954cfed772f71e23aaa8cf5c4afe0e2c5b3af87ad",
+        "f12fa8eef4458e488c6cfe5fabe687d75738b134c5393b3008f9ba59c3db2df0",
+        "26bd3d8c35e85d056581e6a6e8087b6321bc45a661ddfab238c2d197de989870",
+        "018c5dd42baa11584c1626d0b605b61618c3d4dc6c14ae62fbb363e58e255951",
+        "7f3065bbf078c0ed3ce482785aefacc6c1ff5fa562151e85ce0d902bd7fb2c40",
+        "1eb89e856b57729bf35c7dd357cf276e5f5239358a7086229f27031ac4160151",
+        "01979c1035c32a7b181a138880f3a679e5c07a0d6daf6f01b33df5e6cca97d7f"
+      ],
+      "tool_call_counts": {
+        "create_box": 20,
+        "get_scene_summary": 40,
+        "move_object": 20,
+        "rotate_object": 20,
+        "set_object_color": 40
+      },
+      "tool_task_counts": {
+        "create_box": 20,
+        "get_scene_summary": 20,
+        "move_object": 20,
+        "rotate_object": 20,
+        "set_object_color": 20
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_71ab98b041af39e27b47",
+      "size": 1,
+      "task_hashes": [
+        "c83117a5228c4f97e404b64a413653ed2f2012ad7b73082bb72065605de5a82c"
+      ],
+      "tool_call_counts": {
+        "align_objects": 1,
+        "create_box": 3,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 8,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "align_objects": 1,
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_72bb42c16e5fbec0774a",
+      "size": 1,
+      "task_hashes": [
+        "f1e04febceafecd9062b7de560568b237785b809c027406ec865771fbaa89b1e"
+      ],
+      "tool_call_counts": {
+        "boolean_difference": 1,
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 2,
+        "move_object": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "boolean_difference": 1,
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_741b70e47b96c90f3f83",
+      "size": 1,
+      "task_hashes": [
+        "cb51eb4a889122d46dac3971d3201a13d70d8cd7fbd48dbd1f952a72ac3aba3b"
+      ],
+      "tool_call_counts": {
+        "create_box": 5,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 4,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_7503ec4a36c3a850831e",
+      "size": 1,
+      "task_hashes": [
+        "6c829b8707f53a753f564e847ab15a67acd3037ec58f26755f7f2dc7499db858"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "scale_object": 1,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_cylinder": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "scale_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_77265785c029b76eef39",
+      "size": 1,
+      "task_hashes": [
+        "9e0a7cc3d0efde45085bdb837f5988147d5f2af1e53b97d9883c3b350dcbb9d3"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "place_on_at": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "place_on_at": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_79bf083d478d42de0cfe",
+      "size": 2,
+      "task_hashes": [
+        "0e0b9b17e38f66e63ae0134a2a632d204b7d2412e92d0c7ddcec1644014320be",
+        "eade7e55a227a56f68d119f7570d0e1e811cb9ce14c9e5380b6df5dfc05f7a61"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "create_cylinder": 3,
+        "create_sphere": 2,
+        "get_scene_summary": 2,
+        "move_object": 4,
+        "set_object_color": 6
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_cylinder": 2,
+        "create_sphere": 2,
+        "get_scene_summary": 2,
+        "move_object": 2,
+        "set_object_color": 2
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_7a81827eb0a1a6d09181",
+      "size": 20,
+      "task_hashes": [
+        "6b8949ec7cbbf88ecc1cfac2cd3e3d982fdfec2a92f5b491f1e8f808b9651262",
+        "8651729a78d48c0570cb7253da775c7ddb6ec11e96725b1405e9706309c92944",
+        "dd4eb5f4eed375da304a01de1040207e0b050451679e960d26acef4c7f7934a9",
+        "07217e1fef2912f65b4939ee0e07f2da339a8aaf7c71e2522c2a1c2ec21a0302",
+        "f80c739cba22a978fddd1225c2e8a70ef87c2148fd7f742d0b4ffbe2ac66d4f1",
+        "55a0c224f87652c169f9105b382cf5175d6f93a5578e7ad6b451a548971dc3cb",
+        "91b38b627fdbd67da082684f5112b0c04319a5023c29ae1003f500429033a3de",
+        "3152007f89ab04ba69fe8443b11f2c884ca4cf6ce922aa74130cc5674c014a53",
+        "5ccfb06a3687b6854ff7802bc97c893c968fb83b54c538357dc843f86cc3ae22",
+        "638938f50a9694200ff9a321995db636361ff6ca15096d696da3421bb9b79d12",
+        "661151b552c140fb519bfa583ac85399ed32c66e8749d47f5c7db624a2b73b3f",
+        "c0715cf29dbed509f5e850e556d05e1c6d7c85899167ca2a9ef006b76d114f1d",
+        "6d01346a259ad5704ddd0f75a53ac0fc8f11689a22d7feb3f552f9a47234736f",
+        "d5f279bcf00ba7e5df24deff0e7c7f3416d021272ddc4215cd4e96907079c935",
+        "c554e19344cd574f55dafa39f3b7a89c0530d749de09e87a5641e8887e819c29",
+        "e6f7d81fd1904891cbd4ff6d5615e0146b6d1b3fbfe2ca42da1af1771f0b2d5f",
+        "cc67e90b2c448fbc53346d12a68415ac64040a83ff1ad1911ef08a03ca0f5eb2",
+        "bd07ac05b7bde74a2e33de98c34661f539438de4a689909f5b0cbec1e6b9b372",
+        "6a869d0a3f32f72a23a5c6add03fbe935236c0fad55e7976b45c7dbf75186752",
+        "9b0e8897894d7158048bd872fe09335214bb45476512fe7e52b9d0a87637a389"
+      ],
+      "tool_call_counts": {
+        "create_box": 20,
+        "get_scene_summary": 40,
+        "move_object": 20,
+        "set_object_color": 40
+      },
+      "tool_task_counts": {
+        "create_box": 20,
+        "get_scene_summary": 20,
+        "move_object": 20,
+        "set_object_color": 20
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_7b900ac5ca078b593e62",
+      "size": 1,
+      "task_hashes": [
+        "1ad7259533f3f4b88c16b64b78fd710dbc7a70851b283c91f36d5ce2166c28a1"
+      ],
+      "tool_call_counts": {
+        "create_box": 2,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_7d73490d5fd7ca2b16ee",
+      "size": 1,
+      "task_hashes": [
+        "a66e4500e3ce1f439a781ec97aa97b318e424c1a0976e327cbdc874edab4e2b6"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "create_sphere": 2,
+        "get_scene_summary": 1,
+        "place_on_at": 1,
+        "set_object_color": 3,
+        "undo_last_action": 2
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "place_on_at": 1,
+        "set_object_color": 1,
+        "undo_last_action": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_7f1997eb2b7965bfa336",
+      "size": 1,
+      "task_hashes": [
+        "48549efdcff402d69304cd5c1ef86087fef4e83ae33c51f7b13aac8a0595dffe"
+      ],
+      "tool_call_counts": {
+        "align_objects": 1,
+        "create_box": 4,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 4,
+        "set_object_color": 4
+      },
+      "tool_task_counts": {
+        "align_objects": 1,
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_803da8074796bfacd796",
+      "size": 1,
+      "task_hashes": [
+        "719b1efdc27974f550f9fbb6efb3bc9167028e529670ba00a1dd7d6f5f4f8bd0"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "rotate_object": 1,
+        "set_object_color": 1,
+        "undo_last_action": 1
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "rotate_object": 1,
+        "set_object_color": 1,
+        "undo_last_action": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_82861bbc862764449f11",
+      "size": 20,
+      "task_hashes": [
+        "25795c4f6293c46b90580b2f6248ebf9c85c17dec7cfa84a045558432fb2a8e5",
+        "a9795ccc8f9c136393b2f0ee24ba31e58c9587b0ad2dd74e035c27dfa306d4d3",
+        "75391c28e6339d1a85ecba18d07a3b22c20fd137fdac0bd51a1600b0af3e7031",
+        "f877171bfd236230a68e933ed81c1b02cd18fbce4101a8cd21c29914ed95452e",
+        "da98ea182621ebff5d684151f03638eb1b661ee8109d6aeef14958df9230fa5a",
+        "c83150e894dbdf2103d2e73b214dd3520b08faaedd6f7010c62007f84d7409fd",
+        "fbc25b633214f5ee3ed2b5750ca6ae5e8541c46314ccbb172bda9fe29fd205ec",
+        "741a43246b66ff92f9496137f0aca8f75db370ec65120863cf71b75ed03e11b9",
+        "5d55b347fd0428403d578ca91c26af3c5185f9ef211c3317212f7cadd99c077f",
+        "1a3d81f20e01564d48a5e2b24c69bafab4ea53c600b3941d0053fc9428d8d370",
+        "607b28d69a618904f10bd2d2e1c0a463fc096528e7ef58b90c00f326f8709bf6",
+        "836628d32cfbafb39be66a272f5ada3051b442ea12a53e3e4516dd7dbac86e1e",
+        "b708ab83a5eea359e72c08023d9874494a6653cd92a8fc80286096cc890be7ed",
+        "d74b8260108c72d1294b4d270d253b6a8d1fd1c0d733f1f253770f737e6ee94f",
+        "f3ded07bd74aa14677cddc7f656bd496c840150a68aa3eddfd56a7b61bd2250e",
+        "12ad656325437438cc1b01e91e691d9d3b7cf13440462e48b9b58bad93883e7b",
+        "5399d86c2a3406c4c750243827d9ea345ce89c8bd93b3f87f748856f3f019230",
+        "e1f9bbecd395c377550d4f15dcf4e05fbfd5f30de005d5a0176824550abb6d53",
+        "33c9b985cf3c6a928c811fca6bd9ffdd4704ebfb608fd85896dfb0a0f6a1920f",
+        "a269793bbc19fcab4e5c4e94069a154e33a3d7eaa24fed52e5c6cb8bc37cf654"
+      ],
+      "tool_call_counts": {
+        "create_box": 20,
+        "create_cylinder": 20,
+        "get_scene_summary": 80,
+        "move_object": 20,
+        "set_object_color": 40,
+        "undo_last_action": 60
+      },
+      "tool_task_counts": {
+        "create_box": 20,
+        "create_cylinder": 20,
+        "get_scene_summary": 20,
+        "move_object": 20,
+        "set_object_color": 20,
+        "undo_last_action": 20
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_84c1a64b14b8f23e9155",
+      "size": 1,
+      "task_hashes": [
+        "db4e77cae2fda3093acb18c3497b124531402c7b03e5ff57c998c16d445d8ffe"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 3,
+        "get_scene_summary": 1,
+        "move_object": 2
+      },
+      "tool_task_counts": {
+        "create_cylinder": 1,
+        "get_scene_summary": 1,
+        "move_object": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_8903733c4748fbe2de34",
+      "size": 1,
+      "task_hashes": [
+        "5fa022310ada2b87a9ba7694d5b431e9c83593bc2c940fa0974111f23caa666b"
+      ],
+      "tool_call_counts": {
+        "create_line": 1,
+        "get_bounding_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1
+      },
+      "tool_task_counts": {
+        "create_line": 1,
+        "get_bounding_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_895675022a61f3374e6d",
+      "size": 10,
+      "task_hashes": [
+        "e037f7e58eb61e74ed0a4a2d0c94b1208ec2b3d011d1a1e4c7aabb2f03d0b03e",
+        "62d7bab43d2849b324bbaa36f9106e931bf7dc83ead2565e2c5cf54b9ad593b1",
+        "38b5be3c581af5198b60c951771cf45d6037fd5e7ba04456dbba6644e1c16ad0",
+        "f2fa2caa298a5b264514456d69d46f92def51ba99182192d5b4b9b79f227981a",
+        "96ea688e0fcc87e1ce0afa8e4deb56d50b8272ef3753f9c28cb99d377394ae7b",
+        "11ff33bdb8ece93ab9d83e284c364097e89af55d59ab8a91b2e4c071ca1c446b",
+        "d7dc2085a5adfe55a3525c0ff66595bb839099f831cf2b05aa5c4d6239a7a8ed",
+        "a9d261393ddf697f091cb6bce6c09077cf60f7c07cb8fd30f60dd580851d9727",
+        "aa58f1993319439ee49a69bacfcfad3860f4b016fa7494fe926abe0ae9bb8c43",
+        "1a77e38ecf660f1686e42464028d21dc1291160fd33f4933cd25cd7d0eca3c8d"
+      ],
+      "tool_call_counts": {
+        "create_sphere": 30,
+        "get_scene_summary": 10,
+        "move_object": 20,
+        "set_object_color": 30
+      },
+      "tool_task_counts": {
+        "create_sphere": 10,
+        "get_scene_summary": 10,
+        "move_object": 10,
+        "set_object_color": 10
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_908a68a1ed9a89334252",
+      "size": 1,
+      "task_hashes": [
+        "03dcd106b771dbae4cf8f66f5e1ce38820a136b11f4fe9d4ce557404d09b3830"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "create_sphere": 2,
+        "get_scene_summary": 1,
+        "move_object": 2,
+        "set_object_color": 3
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_93559b70506afbfcfa5d",
+      "size": 10,
+      "task_hashes": [
+        "4178312c9717e0f39cac031f88eb75fcf22855f223189e7e0cfa2bb318a33142",
+        "3b8d72b4882b7056daf50fba7f27d69a343b66df78e1592ca106c85c7b6f2b85",
+        "f4d8b1e93af58c1e39399030bb946320d7698e6daa870faa0df767f657e50157",
+        "94ec432209f01aeb5bef4fdf55d33a1e087d567f2383f70330e85d85ffffcd45",
+        "20cae8d14c45fff6fc7b5f96d525ec67fc4b265601eb236398362600fc58e5e8",
+        "883905c9ece40db55ab3a4387ea1d3f1686d526b6dbd5c9c6e3817afa2d00935",
+        "e49cd125380ed3df3514e9d2666654061fbf1252f835107a8b4ddf67cd8748bc",
+        "30faf7565ccf4084cc8f15df79b48380ca07f387759a7155fd6553dfa96930d2",
+        "16c6d41a6e659688f08ebd77d28e5b4563eedd83e968900060f2d0d8c4dc28f4",
+        "0adaaf918d608d36d664f1a0b828e9b42ba3b6cb9751800b60af92a9b03ca813"
+      ],
+      "tool_call_counts": {
+        "create_box": 10,
+        "get_scene_summary": 10,
+        "move_object": 20,
+        "set_object_color": 10
+      },
+      "tool_task_counts": {
+        "create_box": 10,
+        "get_scene_summary": 10,
+        "move_object": 10,
+        "set_object_color": 10
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_936eddcd37522ddaa190",
+      "size": 1,
+      "task_hashes": [
+        "78c3adcc5631e25a17d4b3ecf9adf55d6c314337a8426bb2302e3aaf6606076e"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 2,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_cylinder": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_95221f29ef714d90e25b",
+      "size": 1,
+      "task_hashes": [
+        "3db057d85d690e8a75be6993d54b9acd1a01566929ec1cfe4195d66b417015e7"
+      ],
+      "tool_call_counts": {
+        "align_objects": 1,
+        "create_box": 2,
+        "get_scene_summary": 1,
+        "set_object_color": 3,
+        "undo_last_action": 1
+      },
+      "tool_task_counts": {
+        "align_objects": 1,
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "set_object_color": 1,
+        "undo_last_action": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_9566f066c6fc9f1cec42",
+      "size": 1,
+      "task_hashes": [
+        "f55f80b76a01ec844929d5cb375a9107006370a07feab167b11f08a45fc76f75"
+      ],
+      "tool_call_counts": {
+        "boolean_difference": 1,
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "boolean_difference": 1,
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_96db8f29818d85b6c96b",
+      "size": 1,
+      "task_hashes": [
+        "79961a7d081752a47bfda233b34bd4a150c7be1ec0f68a717cd2bfa919dde070"
+      ],
+      "tool_call_counts": {
+        "create_sphere": 2,
+        "get_scene_summary": 1,
+        "move_object": 2,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_970787e0d0dc1d99ffbc",
+      "size": 1,
+      "task_hashes": [
+        "3de5af5962c7e5ac93f33d5bb1474df751c843a906db32c44f11d838dc21f008"
+      ],
+      "tool_call_counts": {
+        "create_box": 3,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 3,
+        "set_object_color": 4
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_987432ced2fc635223e0",
+      "size": 1,
+      "task_hashes": [
+        "6354609a1c84a3cd39cadaff06c6f4f60cb7a3048aa2cfeaf8a59abdc647d4ff"
+      ],
+      "tool_call_counts": {
+        "boolean_difference": 1,
+        "create_box": 2,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "place_on_at": 1,
+        "set_object_color": 3
+      },
+      "tool_task_counts": {
+        "boolean_difference": 1,
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "place_on_at": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_9c1292fb31096304787a",
+      "size": 1,
+      "task_hashes": [
+        "2cb97cff3d9e56892543452ca7d27cd35b65930333e1b2ae920a7cb2c07e3d2e"
+      ],
+      "tool_call_counts": {
+        "boolean_difference": 1,
+        "create_cylinder": 2,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "boolean_difference": 1,
+        "create_cylinder": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_9da3692ce5dc205739f9",
+      "size": 1,
+      "task_hashes": [
+        "f0fb3809360734180b21e2fdfb987690e180d5b52a548e0d08124a192c949192"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "place_on_at": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "place_on_at": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_a0dfea0dc0f713229a0d",
+      "size": 1,
+      "task_hashes": [
+        "196dba840535c660c522799e18fbf10bb0691bb902300da05df380ea48df6db6"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "create_cylinder": 3,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 3,
+        "set_object_color": 4
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_cylinder": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_a53ca4ea6ed351f53c48",
+      "size": 1,
+      "task_hashes": [
+        "e294175e5403314c7faa9ee6b56c2ded97450d944fd28f644e4a7eaf42fee676"
+      ],
+      "tool_call_counts": {
+        "create_sphere": 4,
+        "get_scene_summary": 1,
+        "move_object": 3,
+        "set_object_layer": 4
+      },
+      "tool_task_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_layer": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_a5f5e1bf0d47ebe5cfea",
+      "size": 1,
+      "task_hashes": [
+        "1d96fc8154625b34575056d2eb80070b9fe39bd70fb69a4ccfb7d6cd7ffa3f91"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 2,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_cylinder": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_a82464846e43ee195ef5",
+      "size": 1,
+      "task_hashes": [
+        "83bee5c392d845cce87b215cce01544670b39f688f9211aff9eda01a0ec29957"
+      ],
+      "tool_call_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "scale_object": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "scale_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_aa572994dc749bd86a2c",
+      "size": 1,
+      "task_hashes": [
+        "09d33364a46112c28c8ddc460ca89f23d21046ff4a4c64c83bc21c2b3af0dcfd"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "place_on_at": 1,
+        "scale_object": 1,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "place_on_at": 1,
+        "scale_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_aad588ee384fba093fb6",
+      "size": 1,
+      "task_hashes": [
+        "9153301ba9299cac235dee06c2361c50781da47ff519b3565e8eebb4db66c903"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "place_on_at": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "place_on_at": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_ab5e52ed941265208ac0",
+      "size": 1,
+      "task_hashes": [
+        "a1c1a1cc9c610fdcbc29202b6c3194ebd3daa4db84ec0743071c3100ef704a4c"
+      ],
+      "tool_call_counts": {
+        "boolean_difference": 1,
+        "create_circle": 1,
+        "create_cylinder": 1,
+        "delete_objects": 1,
+        "extrude_curve_straight": 1,
+        "get_scene_summary": 2,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "boolean_difference": 1,
+        "create_circle": 1,
+        "create_cylinder": 1,
+        "delete_objects": 1,
+        "extrude_curve_straight": 1,
+        "get_scene_summary": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_ad6304f1f7c9e39715ad",
+      "size": 1,
+      "task_hashes": [
+        "9fd0e12a346aa86d1218e252585443c8f806aa1dbe513b5785ca8d18f23cd9e3"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 4,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 4,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_cylinder": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_ad70ce933ce0cb80fa3f",
+      "size": 1,
+      "task_hashes": [
+        "abaaea74efb5eca365fe2d5bbfc7b207206d0ad505d45f6121dd9de90c25dea6"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "create_sphere": 3,
+        "get_scene_summary": 1,
+        "move_object": 3,
+        "set_object_color": 4
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_b061b172c15a10d9e430",
+      "size": 1,
+      "task_hashes": [
+        "de69aebdfb06eafedf859a68e119feb79a3f6d71f7dd4956df2114e9fef41144"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_b23bb0311536928510db",
+      "size": 1,
+      "task_hashes": [
+        "718782915df3987a5fa8d26b26a5ee2989309ebfa3f66806b9288ef976a544f4"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_b25d9599032e4bd8581f",
+      "size": 1,
+      "task_hashes": [
+        "6bcb20bace97238edaff983e0a6b02045ca49822989b2492bc2839c0f0ae4253"
+      ],
+      "tool_call_counts": {
+        "create_box": 3,
+        "create_line": 1,
+        "delete_objects": 1,
+        "get_scene_summary": 1,
+        "move_object": 2,
+        "set_object_color": 3
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_line": 1,
+        "delete_objects": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_b33bda1992f12861bfac",
+      "size": 1,
+      "task_hashes": [
+        "cdcc41be145f08b9dd83f12bdc84e31cae8e14e7aabc994754af6a825a14b78a"
+      ],
+      "tool_call_counts": {
+        "boolean_difference": 1,
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 2,
+        "move_object": 2,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "boolean_difference": 1,
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_b4f94704ecce18e37478",
+      "size": 1,
+      "task_hashes": [
+        "444a319af50a07b18ea047c4de7bebe129d5d30e528ebc879d1f0e7aacef5964"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_b7012f5d55aed04bf2be",
+      "size": 1,
+      "task_hashes": [
+        "7df3e43f10622158b13cb2d69f7b25fb7c0dff5d841dca69dac9e6319ba59cf7"
+      ],
+      "tool_call_counts": {
+        "align_objects": 2,
+        "create_box": 3,
+        "get_scene_summary": 2,
+        "group_objects": 1,
+        "move_object": 2,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "align_objects": 1,
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_bd57776328d8229aa0c4",
+      "size": 10,
+      "task_hashes": [
+        "203c52dbce4f9a0cf502925047bd90ee8c84b3924273c43362b009c01f51c010",
+        "07b2fcb719cded7acb6ac3c880c69ca27c9a736f95203a2a23700accd17113ad",
+        "3cb986d5d9ee24d407ec1caafa3f0b2bb4a141076082cc7f56035d4b5d0fd742",
+        "af643bc591b6f926b6f0aef06b4b4e968f921a4f4e7cf8c6b39fa37f1830b3fc",
+        "aecac5638ab85e085cf9fbdaaadf0a973de50ade8524f4d52a4d6b757c93e4a5",
+        "197539d6cf47e621f6acab8e52da510a3a1d7c957d97576684a5f43d0e5a7c1e",
+        "8afe37f6d32c7e0626e1f802516a7c59f291077291051b3082ea378ec1fb6f05",
+        "fb75541e6c6268a1d8bf56f439718fefe7419879f49b3ae789fb9ba7ebd09a9d",
+        "bf74cf93d42a33c776a57fae19d6de7fdcf330ffbfae6fcf2f02a67175110b02",
+        "80d2aca31dbc69ed2882167c7ef73f800251ab98498d2412b61a296ec904ac6e"
+      ],
+      "tool_call_counts": {
+        "create_circle": 10,
+        "create_sphere": 10,
+        "delete_objects": 10,
+        "extrude_curve_straight": 10,
+        "get_scene_summary": 16,
+        "place_on_at": 10,
+        "set_object_color": 20
+      },
+      "tool_task_counts": {
+        "create_circle": 10,
+        "create_sphere": 10,
+        "delete_objects": 10,
+        "extrude_curve_straight": 10,
+        "get_scene_summary": 10,
+        "place_on_at": 10,
+        "set_object_color": 10
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_bed9670e6713f9d90fff",
+      "size": 10,
+      "task_hashes": [
+        "be6689408b4b08404d8d927aeeca9d42753691fef11a3b40909b1c84ffb32858",
+        "fb1e0eae3cb7f40b28efc9c13eecfd9915f5363b2c397341a681b6aa2a86b420",
+        "e793ac00a9908e05bb2cfd231ee1f87d8bee36cdd35a493d6d6003fdfd7fcbef",
+        "5ca8a7a910835658f6070b10f55dbf11d34be10c187365765761ddc37298aa80",
+        "f6c93eec1f255f883f4493136eb704acca2f710c63398e3fbcf938ed71b71c56",
+        "52c5f2cfe8ea674dd678b095f17df6183b841a4b5a95f84a241b30db3a2c0c57",
+        "0ab2b5d3b96059e77a84b37082fb8d53407faedee2884b1c5414c872447edc00",
+        "02f798902c7410e449d5dab4607747a7e18a933e215709f1bcaf170577229c38",
+        "a0a1fbcb51c043b9e26b770ef9337b20daeca21266cd8de3bf3704aa66570322",
+        "fbbafa03762b83c0103da1eca65551cd59d73667a96cbf70387b23e2d53bb310"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 30,
+        "create_line": 10,
+        "delete_objects": 10,
+        "get_scene_summary": 20,
+        "move_object": 20,
+        "set_object_color": 10
+      },
+      "tool_task_counts": {
+        "create_cylinder": 10,
+        "create_line": 10,
+        "delete_objects": 10,
+        "get_scene_summary": 10,
+        "move_object": 10,
+        "set_object_color": 10
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_bf2213f2491f8d2a4a65",
+      "size": 1,
+      "task_hashes": [
+        "e6a6a7928a040e5d86a318e13fd0f014d1defdaea98c92e09ab3bf70950bbc74"
+      ],
+      "tool_call_counts": {
+        "create_box": 3,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 3,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_c0e8a50736d5da63afd2",
+      "size": 20,
+      "task_hashes": [
+        "b809905321e57cab0833184e01b178967c32f1336c39f24f591accb820a05374",
+        "c51ff7ea6879ea0f4fb0cce8b37b518d5faf19639ac5e44d27409f695b44813d",
+        "ed40c0a87ace1824ceead9573db4b8b2ce03aef5bffdeb9b1508f4c5ddd76744",
+        "83d1b40c548ce8438213c4f025c3981726af5c955e11ddddc006977428f8d9dd",
+        "b2bbded1417a1d609b6b405a2334f724bae7a8a9309db2ea80c9815a542134fc",
+        "4c832590922435d5381e366d96267bab1246d893265698851b8bb711f1eda08b",
+        "6c04143d573ed076a94b44943bb466e2b8f86fe0bb37e4132628351057566540",
+        "91e5307b6d4b84d3766774f499f931a82e4a0319b27058c06e0a1386242c1a41",
+        "f32edf9cd25a7a0c3a5fa8f1e0bf9e1e6ef6a4a3dc443f2599fa8f87b3049a83",
+        "4e58f96a30e3dc4fc70fd30ff1042d9243eb98b59dc4da20c78108cb55be0352",
+        "5804ea444c82533b958fd7681c7848ae1fd72befb24c3427f5cad4dc126d52d4",
+        "06e754e6702f5cbe6e9d937769a125e4695a3a4642a1e01d39664704370d3209",
+        "f607c370b99ed8654b391c314557c687596b6156a567e095d5a24bf69fd4a3f8",
+        "7d2dc290b0d497fac4fd1a9c9508e3551673565dde1d4a0a57187a7eff3f83c1",
+        "5e9e92daf1af2d55008abffbc50573ca9c31b83ae43757adf0ae9d52be4a28a4",
+        "fa564851b776e208e796f45e6aac6a678b2ba699149cf08dbcf65d971ac84dd3",
+        "d8b90b868e8add65f1d7c2cc17b226ecee807087454fbc113b7f40223d57ec9a",
+        "b1f5d8a770dd2c283b3e480d5ed2c64dc288de01960342b9288a632abdf2d68d",
+        "587218fb142186251e3526493e7a5de6fe914eabb7f0e4b43916662f789a1983",
+        "381f381afbd07387878a07f880d964374df525ecd1780e4eb59d8b53b77b3e3f"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 60,
+        "get_scene_summary": 20,
+        "group_objects": 20,
+        "move_object": 40,
+        "scale_object": 20,
+        "set_object_color": 60,
+        "set_object_layer": 60
+      },
+      "tool_task_counts": {
+        "create_cylinder": 20,
+        "get_scene_summary": 20,
+        "group_objects": 20,
+        "move_object": 20,
+        "scale_object": 20,
+        "set_object_color": 20,
+        "set_object_layer": 20
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_c32830e241312f852b40",
+      "size": 1,
+      "task_hashes": [
+        "02a6b74af4ee0baa23a4427fa587862ecec4648764cdfe0d8fd0aa64b482f642"
+      ],
+      "tool_call_counts": {
+        "create_line": 1,
+        "get_bounding_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1
+      },
+      "tool_task_counts": {
+        "create_line": 1,
+        "get_bounding_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_c36ae0d9f9db60f3b6e1",
+      "size": 10,
+      "task_hashes": [
+        "47fcd72d3f77a137b62367f851e60cb1b6595c962567604a3031f4a415e56a84",
+        "a37e4deaad01f5d7bf72acb5c06301b13f173199b7c41b49bb33532d3211999b",
+        "c776451ae4feec778e47ac896e07170cf0dca3fdb4f9329e33483be12b348c9f",
+        "fa798928ee53921de48dd4c42c94b16e9f1390c969bf14fe52dec8d3f0d2d1d9",
+        "249c27ec59e801e9549b826b69cb35c8e207a079051adcdf20b04c0a395f9299",
+        "833aded31df32ee2a41f2d90eb2e49c57cced2358ffe88dc5df21e11367b15ff",
+        "26a67b92f1d17e050068d8ff98bb463bd00e48a4ebe88ebecd7bb8401a4e4e24",
+        "5b13b8358ba0f2327a5f992a84beb82a72b9dbffdbfc92f335f6f7d7d4f35516",
+        "d74e792f8ebd5e999da60dfa0182fbbf00ab3ff3bd42dab1ce4036258dad1997",
+        "ac9c98cdf0f75f01cd34624d81ee4fbf8e7eb1eb1ed3f3af62605361cc9e4d1d"
+      ],
+      "tool_call_counts": {
+        "create_box": 50,
+        "get_scene_summary": 10,
+        "group_objects": 10,
+        "move_object": 42,
+        "set_object_color": 20,
+        "set_object_layer": 50
+      },
+      "tool_task_counts": {
+        "create_box": 10,
+        "get_scene_summary": 10,
+        "group_objects": 10,
+        "move_object": 10,
+        "set_object_color": 10,
+        "set_object_layer": 10
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_c40dae9d822938cba9a2",
+      "size": 1,
+      "task_hashes": [
+        "5f41b35b6d9c1826a25a1040c63d1856da9a14f046b5c2fcb23ee1c3459cf8e7"
+      ],
+      "tool_call_counts": {
+        "create_circle": 1,
+        "create_sphere": 1,
+        "delete_objects": 1,
+        "extrude_curve_straight": 1,
+        "get_scene_summary": 2,
+        "move_object": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_circle": 1,
+        "create_sphere": 1,
+        "delete_objects": 1,
+        "extrude_curve_straight": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_c68d55f4b3abdb345926",
+      "size": 20,
+      "task_hashes": [
+        "aaa26e6c5a3e5fe22ef02a3f4d37b149850db5525bc292a03491d0794ce64031",
+        "3cbf29bf924a37ff513183de1d327ed36b6772c536d6a70553e17ac39d63a639",
+        "6fb583cd32d51fd6d40fa13b635140cfea69e59733931a267e587c07b9a796b2",
+        "afd93eb62b91ba9ead8b8cbc34651594282bc9bfc27332d893a5d463ff9ab1b2",
+        "5f4cdbf2c59058e79c7aa64aedc7159cce12d74a4eebd6c922e0fbce1a0eb0d5",
+        "5c889f1a0e71f2e667a842ae8abef0c4913c71fb9b16eca80743965346fe98fb",
+        "6f14b1c36cb25eabbd1ce33fc44c99a638a534fb3b5255dc728dc3b740b50773",
+        "1f42e9c148e599f1fdd416775da497d0afcdc24996148cc07e65ada0290c1553",
+        "93d7e4148fdf6b5ce0ca6c30bfee0c4473eaff9fde7fdde4471a230aec094ef4",
+        "f40ad4ac49aee66cd6d3cd96a39476278d2c80b1f113ce2a3234089961be53f2",
+        "0c0f3d7ea7f84f14e5f3f02251d8b0fb943c8ec13bc7d69785e2c3fb0f39d918",
+        "039bc8fa8363818512acb7f2408c60fd0de42b1fb94ad46dc22bafd1c1001744",
+        "5d83d756727339fe7e512a6f0fad8394dd10b050bab6a78de5fc2d54ee0a2605",
+        "f524512fe604822157bd694e821e682c4e78172ed87aba8e1d43ff55c99e9a2a",
+        "d39bffe6010c9b08daaeda9656ac3b67fc025ba868d6d17472abfaf85834e154",
+        "78d4ab345dbb436c05179087353ef243f9dc512077dbf4b262801716e40ed6eb",
+        "463427a9fe43548b57fd65bc6c594348753d596ce625c1c6339362a07e4e73f1",
+        "7f2822669ee6f972b726766b66e4dcdd0f785b6d84a027922d168c33fb60d1d3",
+        "b95f3d04f1b735c2e3ff6ca4b6571eac0362282507946b9f260c39cc4c86a82d",
+        "bf471d51bd83628705f9607393b42364886b9812979523a85e70a02205115709"
+      ],
+      "tool_call_counts": {
+        "create_box": 20,
+        "create_sphere": 20,
+        "get_scene_summary": 41,
+        "place_on_at": 20,
+        "set_object_color": 40,
+        "set_object_layer": 40
+      },
+      "tool_task_counts": {
+        "create_box": 20,
+        "create_sphere": 20,
+        "get_scene_summary": 20,
+        "place_on_at": 20,
+        "set_object_color": 20,
+        "set_object_layer": 20
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_c6c49680bc6df3940da1",
+      "size": 1,
+      "task_hashes": [
+        "0f6ab544d0c54ce9847c00b603026391ab7a29186ce117733fa4e12808916b7e"
+      ],
+      "tool_call_counts": {
+        "boolean_difference": 1,
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 2,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "boolean_difference": 1,
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_c803aec41bd3ccd0ab16",
+      "size": 1,
+      "task_hashes": [
+        "f6542ee2f98e1913ec3853e0a07cea3a02e8063a2dcddc61c5564018e32cd2cf"
+      ],
+      "tool_call_counts": {
+        "create_box": 5,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 4,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_c9cf2774bf2e8b56ac47",
+      "size": 1,
+      "task_hashes": [
+        "f4ab0e83c01e9f85fa3c9c308d11496889ad2e195372a2e0ce83c4ac2a791fc4"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "rotate_object": 1,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "rotate_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_cae85c68242793694b9b",
+      "size": 1,
+      "task_hashes": [
+        "0371b95ffc6b2b04f79220c00b1066acc5e42f4196d32129414670314b3db9a9"
+      ],
+      "tool_call_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 2,
+        "scale_object": 1,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "scale_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_cba33e581efa2c9655fa",
+      "size": 1,
+      "task_hashes": [
+        "75843502038095256d314337adc5982869ff8dca94eef5e25c4eaadf9d4d7db6"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "place_on_at": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "place_on_at": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_ccb2c30fe3dd92cfe94d",
+      "size": 1,
+      "task_hashes": [
+        "c8cb89e041de8fc4a730c3ad238723d2ae20d8feac6a2809a6e454a959a35061"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 3,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 3,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_cylinder": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_ccb48b3066caaa32703d",
+      "size": 1,
+      "task_hashes": [
+        "027cb542758eae1ee130fd001c2d305e9f6b8c625cc02a026e8c4d230972a063"
+      ],
+      "tool_call_counts": {
+        "create_box": 4,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "set_object_color": 4,
+        "undo_last_action": 2
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "set_object_color": 1,
+        "undo_last_action": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_ce96dcf84da395f6d134",
+      "size": 1,
+      "task_hashes": [
+        "62fdfb8a7d014f55911de6b95638eae31bb53f4e456df6c81a3f556a4898fb60"
+      ],
+      "tool_call_counts": {
+        "create_sphere": 5,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 4,
+        "set_object_color": 5
+      },
+      "tool_task_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_d13e8c67479dad6dd58a",
+      "size": 1,
+      "task_hashes": [
+        "caae802cf524140279518b0910d1a9626ec5ea7af8a741e95b089be235585d1f"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 2,
+        "create_line": 1,
+        "get_scene_summary": 1,
+        "move_object": 2,
+        "set_object_color": 1
+      },
+      "tool_task_counts": {
+        "create_cylinder": 1,
+        "create_line": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_d24b42ba4a819d006199",
+      "size": 1,
+      "task_hashes": [
+        "6535e7a1a42b3d1f2ae02f097c98390020d40243010e4c7e3e3156f64d8395d8"
+      ],
+      "tool_call_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "scale_object": 1,
+        "set_object_color": 1,
+        "undo_last_action": 1
+      },
+      "tool_task_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "scale_object": 1,
+        "set_object_color": 1,
+        "undo_last_action": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_d280c289d43f4064c14b",
+      "size": 1,
+      "task_hashes": [
+        "d21ea4278ddb778f474f9a754ca52013777b81ad572b01a3da9e2a2b4418e35c"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "set_object_color": 1,
+        "undo_last_action": 1
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "set_object_color": 1,
+        "undo_last_action": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_d35c575fbe747f86bf6b",
+      "size": 1,
+      "task_hashes": [
+        "bc776aafb070fb7fa8ef142e3497c81408e2cf30bac5661126905d3f00cb605a"
+      ],
+      "tool_call_counts": {
+        "align_objects": 2,
+        "create_box": 4,
+        "distribute_objects": 1,
+        "get_scene_summary": 1,
+        "move_object": 4,
+        "set_object_color": 4
+      },
+      "tool_task_counts": {
+        "align_objects": 1,
+        "create_box": 1,
+        "distribute_objects": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_d4ea8e4070d5568a956b",
+      "size": 1,
+      "task_hashes": [
+        "98e2ea700a58c718626387bb4c17a348a26dc3e4aef944357e905f1d9cdaac2e"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 6,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 6,
+        "set_object_color": 1,
+        "set_object_layer": 6
+      },
+      "tool_task_counts": {
+        "create_cylinder": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1,
+        "set_object_color": 1,
+        "set_object_layer": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_d750e77f38d86e82970f",
+      "size": 1,
+      "task_hashes": [
+        "196ad95c461fdbe957c23f814fe14588bec58d02b73d82da41e18532b3d546b9"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_d8704221002d81ac00f6",
+      "size": 10,
+      "task_hashes": [
+        "f154ba37fe763484ce377dd2604dbf2c39734fc52d560ff694ceea376df55fdf",
+        "070d94da17240aebec883df7664b29d4af01d3b4de7edbb20b6ead905141ec5c",
+        "18d84b262bf1feaae9e8375527bc8723c20f24cf7898a1a296102f7880d64fbf",
+        "e9fa82b19d9b4b60b60739d1e9772881348812d978ad9e66525d52e97a56a221",
+        "19202f6f730d1a9ea7898b9f6dfc8ce8592cb981b512af6bccd87da3726b3213",
+        "e892ee70a5fa85152ab61a3ce89c86485d4b500c2f0aea85927a663df8d5c7d0",
+        "e573e09115ad2c466ccb71d41aa3fd3f05b4b0326891f588cd9b9c6feb9075b7",
+        "997517082b51bbf29f4ca8264dd21e11228d3f46afffad28c30356b66d57814c",
+        "98038c27952c6a827b489c477e975abeb96122baea4ddab48fce58c244510087",
+        "7752c5b93d490f3e894d502debe8d3b126a132eb8acb331968870581288e37b1"
+      ],
+      "tool_call_counts": {
+        "boolean_difference": 10,
+        "create_box": 10,
+        "create_sphere": 10,
+        "get_scene_summary": 13,
+        "move_object": 10,
+        "set_object_color": 15
+      },
+      "tool_task_counts": {
+        "boolean_difference": 10,
+        "create_box": 10,
+        "create_sphere": 10,
+        "get_scene_summary": 10,
+        "move_object": 10,
+        "set_object_color": 10
+      }
+    },
+    {
+      "candidate_split": "candidate_train",
+      "family_id": "fam_db847044c2f1172afa0b",
+      "size": 10,
+      "task_hashes": [
+        "6a0f258272f9c9da982a952d1c55035f1f2e640f5a744aa401f55a04e1a35e2f",
+        "5604edf475e13f996a8f08ceac11744a5400e180db344894a6eb28ad56ca6eba",
+        "235d35570c97813c24d7d431cbca76f0fc70137bd65e8a0bc4ab385e3beaf8e3",
+        "cb8b6ebd4c514b9ed0b0c3e685aa8bcd5edec5ba2e42f40d0e03626c69527281",
+        "34d4cf440847aca1771c42614983a2a87ea80958ab9bceaf664cf8a7a42a1f7a",
+        "fd01f9d3ec85c5ed1528117a33cec73658d05419e46177f10deaf8c5dd35d823",
+        "89fb591c0fc0e6352e58b5573fabe0a06ac21185780bd0fe86fddf668e91a35c",
+        "051369aab57e1832df59785618727d7f3c3f57f470f16548a6979d2d022bb374",
+        "4837cb77348cb3110d3448164ceaf380e71b45e598bf1b5ea58421308c56f2c4",
+        "30d564f96b8c3a81bc806ac40aa172a232ba70944a09a06f141832c281a075ed"
+      ],
+      "tool_call_counts": {
+        "create_cylinder": 10,
+        "create_sphere": 20,
+        "get_scene_summary": 10,
+        "group_objects": 10,
+        "move_object": 20,
+        "set_object_color": 30
+      },
+      "tool_task_counts": {
+        "create_cylinder": 10,
+        "create_sphere": 10,
+        "get_scene_summary": 10,
+        "group_objects": 10,
+        "move_object": 10,
+        "set_object_color": 10
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_e1758ba50cefaea11aec",
+      "size": 1,
+      "task_hashes": [
+        "f5ba9b2bbd2b548c12df017a53efd1ffe79a9e615bbab155686fc1b344a0551e"
+      ],
+      "tool_call_counts": {
+        "create_box": 5,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 4
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "move_object": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_e76a7e099cbe68e4c150",
+      "size": 10,
+      "task_hashes": [
+        "9e7225f274ba20b7cd56df70d47e85470a31b669aa739c2e04955e6db1c29890",
+        "6379846a2a744037758ca782c7e584c8d190908f26ae19d7ab3bfb3426278904",
+        "ae702620f8371ccc8518ba0088f6f2a5f064d88069f6ca787b74a22e11c08786",
+        "11900508076fc13a3466ff708ff43a5a0b33dd7be6e432f7ff1dbf785d73d18e",
+        "b08891ad33ecc2b3b6c41ad3fc32a9b3efa602babac78c6757d0b0b2658a5b6a",
+        "09025ddf54a2fb8b44410e0f0b8c9b66b59db0c7dffe5e3736b0026a6463e61d",
+        "11ff03943a0c7ca7933bb67fd0a16644145481e545bd1e9b2e8f1b2b43b3b960",
+        "f281ecc33031000a249079240961c2a954c5a8602c4d41c6283ce7b3c4afefde",
+        "c06598c88d32fd484728e687a4aee83f22ffdddaff1ace8cb92108576b0e7bc7",
+        "30669f45536a40628346858398aca96f28190e628d8f2f7d112e443408560b21"
+      ],
+      "tool_call_counts": {
+        "create_box": 10,
+        "create_sphere": 20,
+        "get_scene_summary": 10,
+        "move_object": 20,
+        "set_object_color": 30
+      },
+      "tool_task_counts": {
+        "create_box": 10,
+        "create_sphere": 10,
+        "get_scene_summary": 10,
+        "move_object": 10,
+        "set_object_color": 10
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_e93258aebb5b79c8a671",
+      "size": 1,
+      "task_hashes": [
+        "6ad453a243c29ec9a19a2061af3e3d205ee53e9af024d035b4ec6de339eaf4c2"
+      ],
+      "tool_call_counts": {
+        "create_box": 2,
+        "get_scene_summary": 1,
+        "set_object_color": 2,
+        "undo_last_action": 2
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "set_object_color": 1,
+        "undo_last_action": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_e9489e61d2e74d951469",
+      "size": 1,
+      "task_hashes": [
+        "a366346cc433f26c29a05b9a2f9f66124769d544dfd3e869922db7b40325db83"
+      ],
+      "tool_call_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "scale_object": 1
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "scale_object": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_ef12f4056e686ec9674a",
+      "size": 1,
+      "task_hashes": [
+        "4ee2bcac94d0051eb21a6c9537e25f7c5a55c83b843961a15b725bcca454c821"
+      ],
+      "tool_call_counts": {
+        "create_box": 2,
+        "get_scene_summary": 1,
+        "place_on_at": 1,
+        "scale_object": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "place_on_at": 1,
+        "scale_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_f2f74ed6bb8443a8cdf0",
+      "size": 1,
+      "task_hashes": [
+        "3388bb5267d2e85e85638b9c469618adf401e71b3122a5e3de22dc193dc7db07"
+      ],
+      "tool_call_counts": {
+        "create_sphere": 2,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_f3e2db93f4d8b6fbd080",
+      "size": 1,
+      "task_hashes": [
+        "07316f0d1fdd51c02d7357550fd27dadf20c72df85a0a2ffc1012ca83ce408e1"
+      ],
+      "tool_call_counts": {
+        "create_sphere": 2,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "set_object_color": 2
+      },
+      "tool_task_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "group_objects": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_fa5630202d84cfa537b3",
+      "size": 10,
+      "task_hashes": [
+        "279cc62a6e1f2076dbb808f4fbfbf545d53f060fe0d0d7189cd788352ddbb03e",
+        "2ce0c34b9ca6779ba532cf4f7426c19724adb7a2715c79e2a829774d926f6be9",
+        "77665b9f243f8d708ea2cd610745a40cb72a060149aaad573c9978f6835f047b",
+        "2482ab4f07ab2ee573f8f1cb8116931086c5bf3631814f81bb336b97ede51c4c",
+        "30bf9920501d851c472fbe6712f46939fbf5bace0bf3986f0fe90f5ad79bded1",
+        "93267a3ed3e4ecff1e1bd571d25fb4f3410f8da22b6b91c047c7a893f5f97790",
+        "0e462c44dd54e2d059df2de4b629e21970bb970cb02ba70f369874ac805483ed",
+        "ca072f04968a5a85063bdda8eb4ff00c193b44cdb8357d2ff9a3cdac50f03dbb",
+        "67be272124752ca58ea1f89464e1de587c9d2d61d2bcde27691cfb8e1ede90fd",
+        "fb8d6a4fc394c93eeb206266f35c0b2bbf00ad89cc85bc21fa3ed3cb2909120a"
+      ],
+      "tool_call_counts": {
+        "boolean_difference": 10,
+        "create_box": 10,
+        "create_cylinder": 10,
+        "get_scene_summary": 11,
+        "move_object": 10,
+        "set_object_color": 11
+      },
+      "tool_task_counts": {
+        "boolean_difference": 10,
+        "create_box": 10,
+        "create_cylinder": 10,
+        "get_scene_summary": 10,
+        "move_object": 10,
+        "set_object_color": 10
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_fc415c699ea34984f25d",
+      "size": 1,
+      "task_hashes": [
+        "1aebebbb34b2dc00daf95063ac040e13c95803d8cde88f45093a82f1c77d7dfd"
+      ],
+      "tool_call_counts": {
+        "create_box": 3,
+        "get_scene_summary": 1,
+        "move_object": 2,
+        "set_object_color": 3
+      },
+      "tool_task_counts": {
+        "create_box": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "source_reserve",
+      "family_id": "fam_fd79185e2ca8a360d93a",
+      "size": 1,
+      "task_hashes": [
+        "ab6dbbf497c8b39a4b5e422260cd5853c6047abe1db4ec605a0f2a82b70dc40e"
+      ],
+      "tool_call_counts": {
+        "create_line": 2,
+        "get_scene_summary": 1,
+        "rotate_object": 1,
+        "undo_last_action": 1
+      },
+      "tool_task_counts": {
+        "create_line": 1,
+        "get_scene_summary": 1,
+        "rotate_object": 1,
+        "undo_last_action": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_development",
+      "family_id": "fam_feb15c580dda8599319b",
+      "size": 1,
+      "task_hashes": [
+        "090e608722313b12bcb01540663f6133d898c93b58588e81688a4e3bd2ba28b2"
+      ],
+      "tool_call_counts": {
+        "create_sphere": 3,
+        "get_scene_summary": 1,
+        "move_object": 2,
+        "set_object_color": 3
+      },
+      "tool_task_counts": {
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "set_object_color": 1
+      }
+    },
+    {
+      "candidate_split": "candidate_validation",
+      "family_id": "fam_ff1a8d7399dac886f819",
+      "size": 1,
+      "task_hashes": [
+        "3a2dbd044fb96ffd52eb909fe8d01f5caa27f6b62eb9a4176c2160f6f3066204"
+      ],
+      "tool_call_counts": {
+        "boolean_difference": 1,
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 2,
+        "rotate_object": 1,
+        "set_object_color": 1,
+        "set_object_layer": 1
+      },
+      "tool_task_counts": {
+        "boolean_difference": 1,
+        "create_box": 1,
+        "create_sphere": 1,
+        "get_scene_summary": 1,
+        "move_object": 1,
+        "rotate_object": 1,
+        "set_object_color": 1,
+        "set_object_layer": 1
+      }
+    }
+  ],
+  "implementation_sha256": {
+    "tools/freeze_c5_offline.py": "ee6e3daa92a809821d73263aeef76e568f053892ca88ab89e8c7e81cbd86cb53",
+    "training/c5_freeze.py": "2fdb6e13924ac0e80e7a6a633668b504e2662b7b2ad02a7a4f482d9992fc706e"
+  },
+  "isolation": {
+    "a5_read": false,
+    "final_holdout_read": false,
+    "final_holdout_rows_read": 0,
+    "p2_read": false
+  },
+  "pipeline_id": "c5-offline-freeze-v1",
+  "schema_version": "1.0",
+  "source": {
+    "path": "data/golden_traces_v2.jsonl",
+    "raw_content_exported": false,
+    "rows": 500,
+    "sha256": "0b69147c58a19e95fa0d46d5281fbff1657245e7e8af30e6dfdada71965a28ea"
+  },
+  "split_seed": "rhinocoder-c5-development-v1"
+}

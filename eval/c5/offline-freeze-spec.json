@@ -1,0 +1,178 @@
+{
+  "contract": {
+    "all_core_invocations_fit_reserved_budget": true,
+    "base_model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+    "base_revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+    "contract_id": "qwen25-v4-selector-v3-json-invoker-c5-v1",
+    "core_invocation_tools": [
+      "boolean_difference",
+      "create_box",
+      "create_cylinder",
+      "create_sphere",
+      "get_bounding_box",
+      "get_scene_summary",
+      "group_objects",
+      "move_object",
+      "rotate_object",
+      "scale_object",
+      "set_object_color",
+      "set_object_layer"
+    ],
+    "decode": {
+      "do_sample": false,
+      "invocation_max_new_tokens": 512,
+      "num_beams": 1,
+      "selector_max_new_tokens": 128,
+      "stop_on_eos": true,
+      "temperature": 0.0,
+      "top_p": 1.0
+    },
+    "experiment_id": "rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2",
+    "gpu_used": false,
+    "holdout_read": false,
+    "implementation_sha256": {
+      "training/c5_contract.py": "fdda0f64ebbaf98b5d8dbac67150efad9db45e4b9387e1046460f7038254b0fd",
+      "training/tool_contract_v3_candidate.py": "0905b85baf00d4416d7e7a2ae3074035a0d2294fa2f845ee77bc3504d9eb3051",
+      "training/tool_selector_v4_candidate.py": "13d26e9a2b56702a182d68392138d7d453c71e4ad1566ba881f08846c8a4ee1b"
+    },
+    "invocation_prompt_max_tokens": 1213,
+    "invocation_prompt_min_tokens": 429,
+    "invocation_prompt_tokens": {
+      "boolean_difference": 1077,
+      "create_box": 638,
+      "create_cylinder": 548,
+      "create_sphere": 429,
+      "get_bounding_box": 712,
+      "get_scene_summary": 721,
+      "group_objects": 767,
+      "move_object": 865,
+      "rotate_object": 1213,
+      "scale_object": 1190,
+      "set_object_color": 712,
+      "set_object_layer": 702
+    },
+    "invocation_rendered_prefix_sha256": "13cbed989422e9aa22f3be1ae72869469b7d1c69bcf7b62614edfd7453b451b0",
+    "invocation_system_sha256": "6c0625007b1aae4181edae7de4b1458d0b8e0db0a975e672258529ef4e4ff311",
+    "invocation_target_tokens": 662,
+    "model_weights_loaded": false,
+    "parser_repair_allowed": false,
+    "public_tool_schema_sha256": "151c5453bf92f83343e93e53013bfc8f3518e5b6a7e9e2fc49e97ba863b0637d",
+    "rhino_contacted": false,
+    "selector_null_target_tokens": 730,
+    "selector_prompt_tokens": 743,
+    "selector_rendered_prefix_sha256": "1ebcc31e4f993640abb98b15fdb0cb38005b5fdf15fc55ee761f52a8659e232c",
+    "selector_system_sha256": "05aa9a4ae9eebb89c60d9f6ec78b4f8d5a5ff66f21539160d65a87c8951294da",
+    "selector_target_tokens": 751,
+    "selector_tools": [
+      "align_objects",
+      "boolean_difference",
+      "create_box",
+      "create_circle",
+      "create_cylinder",
+      "create_line",
+      "create_sphere",
+      "delete_objects",
+      "distribute_objects",
+      "extrude_curve_straight",
+      "get_bounding_box",
+      "get_object_info",
+      "get_objects_by_name",
+      "get_scene_summary",
+      "get_selected_objects",
+      "group_objects",
+      "move_object",
+      "place_on_at",
+      "rotate_object",
+      "scale_object",
+      "set_object_color",
+      "set_object_layer",
+      "undo_last_action"
+    ],
+    "sequence_tokens": 2048,
+    "strict_roundtrips": 3,
+    "tokenizer_snapshot_sha256": "959e7f1d9a1b7641a6d6ce05ca97b75c7894fcb66cbe5a040406458fb1128ee4",
+    "train_inference_prefix_exact": true
+  },
+  "dataset": {
+    "a5_p2_exclusion_map_required_before_dataset_acceptance": true,
+    "accepted_family_targets": {
+      "development": 60,
+      "final_holdout": 80,
+      "train": 320,
+      "validation": 60
+    },
+    "existing_source_assignment_is_planning_only": true,
+    "grouping": [
+      "campaign_and_exact_tag_set",
+      "numeric_normalized_instruction",
+      "shared_source_trace",
+      "future_semantic_near_duplicate_cluster"
+    ],
+    "new_development_families_required": 311,
+    "pipeline_id": "c5-offline-freeze-v1",
+    "source_audit_sha256": "f078474d1d9049399732c79455815df5c9d2ca2e57c1da7bf29900071a3dd449",
+    "source_family_count": 129,
+    "two_person_review_required": true,
+    "unrestricted_natural_language_targets_allowed": false
+  },
+  "experiment_id": "rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2",
+  "final_decision": {
+    "allowed": [
+      "GO",
+      "MORE-DATA",
+      "NO-GO"
+    ],
+    "go_does_not_switch_default_route": true,
+    "offline": {
+      "arguments_exact_delta_min": 0.05,
+      "clarify_accuracy_min": 0.85,
+      "critical_safety_errors_max": 0,
+      "lora_parse_exact_min": 0.9,
+      "mcnemar_two_sided_p_max_exclusive": 0.05,
+      "paired_net_wins_min_of_80": 8,
+      "refuse_accuracy_min": 0.85,
+      "sequence_exact_delta_min": 0.1,
+      "tool_name_exact_delta_min": 0.05
+    },
+    "thresholds_frozen_before_holdout": true
+  },
+  "historical_exclusions": {
+    "a5": "diagnosis_only_never_c5_split",
+    "c4_result": "NO-GO",
+    "p2": "diagnosis_only_never_c5_split",
+    "r_consumed_cases": "exclusion_corpus_only_never_c5_split",
+    "v8_result": "formal_quality_fail_59_of_60"
+  },
+  "holdout_custody": {
+    "commitment_required": [
+      "encrypted_artifact_sha256",
+      "expected_family_count",
+      "strata_counts",
+      "exclusion_corpus_sha256_set",
+      "author_and_reviewer_role_attestations"
+    ],
+    "content_created_by_this_command": false,
+    "content_path_recorded_in_repository": false,
+    "custodian_role": "independent_non_developer",
+    "developer_read_allowed_before_consumption": false,
+    "expected_families": 80,
+    "rows_read": 0,
+    "single_use_gate": "append_only_consumption_receipt_before_decryption",
+    "status": "protocol_frozen_custodian_identity_pending"
+  },
+  "schema_version": "1.0",
+  "status": "offline_freeze_complete_training_not_authorized",
+  "training": {
+    "authorized": false,
+    "development_runs_max": 2,
+    "formal_runs": 1,
+    "gpu_authorized": false,
+    "gpu_hour_ceiling": 16,
+    "selection_metric": [
+      "validation_sequence_exact",
+      "validation_arguments_exact",
+      "validation_parse_exact",
+      "validation_loss"
+    ]
+  }
+}
