@@ -7,7 +7,7 @@
   "historical_exclusions_sha256": "ed1fa0859633da40e64001ca1646c094e140f9a06f9aa48c86a1fe8b552389fc",
   "implementation_sha256": {
     "eval/test_c5_holdout_gate.py": "c237b446b49b3b31647d5bf7d8b995b87613dbaa5ad9544dbd186e49fdc6d791",
-    "tools/c5_holdout_custodian.py": "ac9efe97d0529acb3cd86c05bd8cbdd125197de28b68c6c6e8237583633d8bbc",
+    "tools/c5_holdout_custodian.py": "682644d2ec3ce0264d53439853648bbd71250f423db923d2f811bf7a04db069a",
     "tools/c5_holdout_gate.py": "2e0721535024b952a894e72e4c2e8863ad73589eb47b82ac4bda728ebccabcf8",
     "training/c5_holdout.py": "5be71078717ea9d40b6a310478d8d22448715de211bca25981273fba64e60d6a"
   },

@@ -38,9 +38,10 @@ python tools/c5_holdout_custodian.py \
   --plaintext-holdout /owner-private/c5-final-holdout.jsonl \
   --encrypted-artifact /owner-private/c5-final-holdout.jsonl.age \
   --encrypted-format age-x25519 \
-  --development data/training/c5/v2/accepted/train.jsonl \
-  --development data/training/c5/v2/accepted/validation.jsonl \
-  --development data/training/c5/v2/accepted/development.jsonl \
+  --tokenizer-snapshot /Users/xiongweiluo/RhinoCoder/data/training/tokenizer-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242 \
+  --development /Users/xiongweiluo/RhinoCoder/data/training/c5/v2/accepted/train.jsonl \
+  --development /Users/xiongweiluo/RhinoCoder/data/training/c5/v2/accepted/validation.jsonl \
+  --development /Users/xiongweiluo/RhinoCoder/data/training/c5/v2/accepted/development.jsonl \
   --output /owner-private/c5-final-holdout-public-commitment.json
 ```
 

@@ -76,6 +76,12 @@ def main() -> int:
     parser.add_argument("--plaintext-holdout", type=Path, required=True)
     parser.add_argument("--encrypted-artifact", type=Path, required=True)
     parser.add_argument("--development", type=Path, action="append", required=True)
+    parser.add_argument(
+        "--tokenizer-snapshot",
+        type=Path,
+        default=TOKENIZER_SNAPSHOT,
+        help="existing pinned local tokenizer snapshot; no download is attempted",
+    )
     parser.add_argument("--encrypted-format", choices=("age-x25519", "aes-256-gcm"), required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
@@ -83,11 +89,13 @@ def main() -> int:
         _outside_repository(args.plaintext_holdout, "plaintext holdout")
         _outside_repository(args.encrypted_artifact, "encrypted holdout artifact")
         _outside_repository(args.output, "public commitment staging output")
-        if not TOKENIZER_SNAPSHOT.is_dir():
+        if not args.tokenizer_snapshot.is_dir():
             raise C5HoldoutError("pinned tokenizer snapshot is unavailable; no download attempted")
         from transformers import AutoTokenizer
 
-        tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_SNAPSHOT, local_files_only=True)
+        tokenizer = AutoTokenizer.from_pretrained(
+            args.tokenizer_snapshot, local_files_only=True
+        )
         families = _load_jsonl(args.plaintext_holdout)
         if len(args.development) != 3:
             raise C5HoldoutError("exactly three frozen development split files are required")
