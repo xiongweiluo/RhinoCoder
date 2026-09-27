@@ -110,7 +110,7 @@
     ],
     "new_development_families_required": 311,
     "pipeline_id": "c5-offline-freeze-v1",
-    "source_audit_sha256": "f078474d1d9049399732c79455815df5c9d2ca2e57c1da7bf29900071a3dd449",
+    "source_audit_sha256": "02d827982397ec5a2435c2196b5b0b0118a834df0f7bbba31872bccaea7b5a62",
     "source_family_count": 129,
     "two_person_review_required": true,
     "unrestricted_natural_language_targets_allowed": false

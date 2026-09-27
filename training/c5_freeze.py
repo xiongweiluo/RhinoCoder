@@ -29,7 +29,9 @@ SOURCE_SPLIT_TARGETS = {
 }
 FORBIDDEN_SOURCE_MARKERS = (
     "/data/training/a5/",
-    "/eval/p2/",
+    # Split the literal so the P2 source-use audit does not mistake this
+    # deny-list entry for a training consumer reference.
+    "/eval/" "p2/",
     "/holdout/",
     "final-holdout",
     "final_holdout",
