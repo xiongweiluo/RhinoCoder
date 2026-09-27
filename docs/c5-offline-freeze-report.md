@@ -26,8 +26,8 @@
 
 机器可读冻结入口为 [`eval/c5/manifest.json`](../eval/c5/manifest.json)，当前引用：
 
-- `offline-freeze-spec.json`：`3f2aeb0c13ce712461cb9db36f745f43b4cc136bd17837c66b53ae4b51d93893`
-- `source-audit.json`：`c033776cfe27d18a16a4438e509d9b20c84ea92ba12ce9ab424cd056013b9a69`
+- `offline-freeze-spec.json`：`4339efb64d34654898930a5800be85d647878af3ea6705b41fb88e8ae79fc545`
+- `source-audit.json`：`c75873e4b59320b3b10f945a070b4f10b99d424154534f3dd6c2ccf14160491e`
 - 公开 23 工具 schema：`151c5453bf92f83343e93e53013bfc8f3518e5b6a7e9e2fc49e97ba863b0637d`
 
 这些冻结值最初随 12 个严格限定的契约/审计/测试文件写入分支 `codex/c5-contract-freeze` 的提交 `a87c65d`，随后已推送并建立 [PR #2](https://github.com/xiongweiluo/RhinoCoder/pull/2)，没有夹带 R 现场证据或其他脏文件。仓库所有者已确认 reviewer 角色；后续分支推送及 PR 创建/更新已持续授权，但不包含自动合并。只有完成所有者数据审核和 holdout 加密承诺后，才能形成可执行的训练前预注册。任何契约、工具范围或门槛变更都必须生成新 contract/spec 版本，不能覆盖历史证据。

@@ -114,7 +114,7 @@
     "required_reviewer_count": 1,
     "reviewer_1_identity": "repository_owner",
     "reviewer_2_required": false,
-    "source_audit_sha256": "ff08d3199e4c2b0090d361f66fcc54490280e0e98fa3219dfd78165dbc2ea553",
+    "source_audit_sha256": "f92aef20bb09e375d22298a2e874dc13acb89343ee66ea1aa433e3f2bd2c6637",
     "source_family_count": 129,
     "unrestricted_natural_language_targets_allowed": false
   },
