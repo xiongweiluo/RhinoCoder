@@ -15,6 +15,7 @@ from training.c5_dataset import (
     apply_reviews,
     assign_family_splits,
     audit_draft,
+    build_owner_review_ledger,
     review_recommendations,
     review_template,
     synthetic_core_families,
@@ -115,6 +116,39 @@ def test_agent_recommendations_cannot_be_used_as_owner_approval() -> None:
     assert "decision" not in recommendation
     with pytest.raises(C5DatasetError, match="not approved"):
         apply_reviews([family], {family["family_id"]: recommendation})
+
+
+def test_owner_attestation_materializes_exact_hash_bound_review_ledger() -> None:
+    family = synthetic_null_families()[0]
+    recommendations = review_recommendations([family])
+    attestation = {
+        "reviewer_1": OWNER_REVIEWER_ID,
+        "decision": "approve_all_current_families",
+        "approved_family_count": 1,
+        "owner_confirms_personal_approval": True,
+        "reviewer_2_required": False,
+    }
+    rows = build_owner_review_ledger([family], recommendations, attestation)
+    assert len(rows) == 1
+    assert rows[0]["decision"] == "approve"
+    assert rows[0]["reviewer_1"] == OWNER_REVIEWER_ID
+    assert "reviewer_2" not in rows[0]
+    accepted = apply_reviews([family], {rows[0]["family_id"]: rows[0]})
+    assert accepted[0]["review"]["status"] == "approved"
+
+
+def test_owner_attestation_rejects_mutated_recommendation() -> None:
+    family = synthetic_null_families()[0]
+    recommendations = review_recommendations([family])
+    recommendations[0]["family_sha256"] = "0" * 64
+    with pytest.raises(C5DatasetError, match="not bound"):
+        build_owner_review_ledger([family], recommendations, {
+            "reviewer_1": OWNER_REVIEWER_ID,
+            "decision": "approve_all_current_families",
+            "approved_family_count": 1,
+            "owner_confirms_personal_approval": True,
+            "reviewer_2_required": False,
+        })
 
 
 def test_review_rejects_reviewer_2_under_owner_only_policy() -> None:

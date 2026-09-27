@@ -1124,6 +1124,73 @@ def review_recommendations(
     ]
 
 
+def build_owner_review_ledger(
+    families: Sequence[Mapping[str, Any]],
+    recommendations: Sequence[Mapping[str, Any]],
+    attestation: Mapping[str, Any],
+) -> list[dict[str, Any]]:
+    """Materialize owner decisions for one exact, agent-audited candidate set.
+
+    The caller is responsible for verifying the byte-level file hashes named by
+    the attestation. This function verifies that every recommendation is bound
+    to the current family content and that the owner approved the complete set.
+    """
+
+    if attestation.get("reviewer_1") != OWNER_REVIEWER_ID:
+        raise C5DatasetError(f"owner attestation requires reviewer_1={OWNER_REVIEWER_ID}")
+    if attestation.get("decision") != "approve_all_current_families":
+        raise C5DatasetError("owner attestation does not approve the current family set")
+    if attestation.get("owner_confirms_personal_approval") is not True:
+        raise C5DatasetError("owner attestation must explicitly confirm personal approval")
+    if int(attestation.get("approved_family_count") or -1) != len(families):
+        raise C5DatasetError("owner attestation family count does not match the candidate set")
+    if attestation.get("reviewer_2_required") not in (False, None):
+        raise C5DatasetError("owner-only policy cannot require reviewer_2")
+
+    family_rows = {
+        str(family["family_id"]): family
+        for family in families
+    }
+    recommendation_rows = {
+        str(row.get("family_id") or ""): row
+        for row in recommendations
+    }
+    if len(family_rows) != len(families):
+        raise C5DatasetError("candidate set contains duplicate family IDs")
+    if "" in recommendation_rows or len(recommendation_rows) != len(recommendations):
+        raise C5DatasetError("recommendation ledger has missing or duplicate family IDs")
+    if set(recommendation_rows) != set(family_rows):
+        raise C5DatasetError("recommendation ledger must contain every family exactly once")
+
+    result = []
+    for family_id in sorted(family_rows):
+        family = family_rows[family_id]
+        recommendation = recommendation_rows[family_id]
+        family_sha256 = _hash(_canonical(family))
+        if recommendation.get("family_sha256") != family_sha256:
+            raise C5DatasetError(
+                f"family {family_id} recommendation is not bound to current content"
+            )
+        if recommendation.get("agent_recommendation") != "approve":
+            raise C5DatasetError(f"family {family_id} lacks an approve recommendation")
+        if recommendation.get("required_reviewer_1") != OWNER_REVIEWER_ID:
+            raise C5DatasetError(f"family {family_id} recommendation has wrong owner policy")
+        if recommendation.get("owner_decision") != "pending":
+            raise C5DatasetError(f"family {family_id} recommendation was already mutated")
+        if recommendation.get("reviewer_2") not in (None, ""):
+            raise C5DatasetError(f"family {family_id} recommendation includes reviewer_2")
+        result.append({
+            "schema_version": REVIEW_SCHEMA_VERSION,
+            "family_id": family_id,
+            "family_sha256": family_sha256,
+            "reviewer_1": OWNER_REVIEWER_ID,
+            "decision": "approve",
+            "approval_scope": "exact_sha256_bound_candidate_set",
+            "notes": "Repository owner approved the exact audited candidate set.",
+        })
+    return result
+
+
 def audit_payload(audit: DatasetAudit) -> dict[str, Any]:
     return {
         "passed": audit.passed,
@@ -1143,6 +1210,7 @@ def audit_payload(audit: DatasetAudit) -> dict[str, Any]:
 __all__ = [
     "C5DatasetError", "DATASET_ID", "EXPECTED_TOTAL_FAMILIES", "FAMILY_TARGETS",
     "apply_reviews", "assign_family_splits", "audit_draft", "audit_payload",
-    "build_draft_families", "build_historical_exclusions", "freeze_accepted_dataset",
+    "build_draft_families", "build_historical_exclusions", "build_owner_review_ledger",
+    "freeze_accepted_dataset",
     "load_reviews", "review_recommendations", "review_template",
 ]

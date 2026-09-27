@@ -1,6 +1,6 @@
 # C5-1b dataset v2 候选开发集报告
 
-日期：2026-09-27。状态：**增强后的全量内容质量门通过，440/440 获 agent 批准建议；仓库所有者逐家族决定仍为 0/440，正式 split 未冻结，不授权训练。**
+日期：2026-09-27。状态：**增强后的全量内容质量门通过；仓库所有者已批准当前 SHA-256 绑定的 440/440 家族，逐家族审核台账已生成，320/60/60 开发 split 已正式冻结。仍不授权训练、GPU 或最终 holdout 消费。**
 
 ## 结果
 
@@ -36,15 +36,19 @@
 - [`eval/c5/dataset-v2-draft-manifest.json`](../eval/c5/dataset-v2-draft-manifest.json)：候选数据哈希、聚合审计和零 holdout 读取声明。
 - [`eval/c5/dataset-v2-review-audit.json`](../eval/c5/dataset-v2-review-audit.json)：440 家族的 agent 内容质量建议、增强检查项与所有者批准仍为 0 的边界。
 - [`eval/c5/dataset-v2-split-plan.json`](../eval/c5/dataset-v2-split-plan.json)：未签字前的确定性 split 计划；320/60/60 精确，12 个核心工具为 train 20–65、validation/development 各 4，11 个非核心 selector 每个 split 各 1。
+- [`eval/c5/dataset-v2-owner-approval.json`](../eval/c5/dataset-v2-owner-approval.json)：所有者批准、候选/推荐/分配/台账哈希和 owner-only 审核边界。
+- [`eval/c5/dataset-v2-freeze-manifest.json`](../eval/c5/dataset-v2-freeze-manifest.json)：正式 320/60/60 开发 split 的文件哈希、行数、审计结果与未授权训练声明。
 - 构建器与质量门：[`training/c5_dataset.py`](../training/c5_dataset.py)、[`tools/build_c5_dataset_v2.py`](../tools/build_c5_dataset_v2.py)。
 
 私有候选正文、所有者审核模板、agent 推荐台账和 provisional assignment 位于 Git 忽略目录 `data/training/c5/v2/`，不会随公共 manifest 上传。当前 draft SHA-256 为 `468d32aaac63e3c1ce0d91e032dd618115cb50bf97c9c9a997e43bec75271ced`，agent 推荐台账 SHA-256 为 `d4fc5e1d879795748e0e696191ecaa66869285ac1e0ddbdd1a0d635252113fd9`，provisional assignment SHA-256 为 `39b49d733e2f2ea7735728877dfc1b66c00dbaa42f8bb352e86c41ee306e0ee4`。
 
-## 接受门
+## 正式接受与冻结结果
 
-自动审计通过不等于黄金数据获批。构建器要求 440 个家族逐一由仓库所有者以固定身份 `repository_owner` 作为唯一 `reviewer_1` 批准；不再设置或要求 `reviewer_2`。任何拒绝、缺审、内容哈希不匹配、非所有者签名或 agent/Codex 自签都会阻止 `freeze`。只有所有者审核后再次通过全部审计，才写出精确 320/60/60 家族 split 和正式 manifest。
+自动审计本身不等于黄金数据获批。仓库所有者随后明确批准 draft SHA-256 `468d32aaac63e3c1ce0d91e032dd618115cb50bf97c9c9a997e43bec75271ced` 对应的全部 440 个家族，并授权正式 320/60/60 split。构建器先验证当前候选、agent 推荐与 provisional assignment 的字节级哈希，再把这份 exact-set attestation 展开为 440 行、每家族内容哈希绑定的 owner review ledger；任何内容变动、缺行、拒绝、非所有者身份或 `reviewer_2` 字段都会阻止冻结。
 
-构建器、公开哈希清单和测试位于分支 `codex/c5-dataset-v2`；私有候选正文未入 Git。当前 `accepted_family_count=0`、`owner_approved_family_count=0`、`formal_split_locked=false`、`training_authorized=false`、`final_holdout_rows_read=0`。仓库所有者身份已经冻结，但 440 家族的逐项决定台账尚未完成，因此 C5-1b 尚未完成，不能进入 C5-2。
+正式冻结结果为 train 320 家族/697 记录、validation 60/126、development 60/120；split 文件 SHA-256 分别为 `69cdcfbf…b192a`、`839b5fad…b370`、`1e7ad89d…786e`。当前 `accepted_family_count=440`、`owner_approved_family_count=440`、`formal_split_locked=true`、`training_authorized=false`、`final_holdout_rows_read=0`。私有候选、attestation、审核台账和 split 正文位于 Git 忽略目录；公开仓库只保存不可逆哈希、聚合统计和状态清单。
+
+C5-1b 的开发数据接受与正式 split lock 已完成。C5-1c 的最终 80 家族 holdout 加密承诺、统计脚本与一次性 gate 仍未完成；因此本次冻结不授权进入 GPU smoke、正式训练或 holdout 读取。
 
 复核命令：
 
@@ -54,4 +58,7 @@ python tools/build_c5_dataset_v2.py draft
 python tools/build_c5_dataset_v2.py audit
 python tools/build_c5_dataset_v2.py review-packet
 python tools/build_c5_dataset_v2.py plan-split
+python tools/build_c5_dataset_v2.py owner-approve
+python tools/build_c5_dataset_v2.py freeze
+python tools/build_c5_dataset_v2.py audit --require-reviews
 ```

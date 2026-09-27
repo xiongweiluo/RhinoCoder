@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from collections import Counter, defaultdict
@@ -22,11 +23,13 @@ from training.c5_dataset import (  # noqa: E402
     audit_payload,
     build_draft_families,
     build_historical_exclusions,
+    build_owner_review_ledger,
     freeze_accepted_dataset,
     load_reviews,
     review_recommendations,
     review_template,
 )
+from training.c5_freeze import sha256_file  # noqa: E402
 from training.tool_schema_inventory import load_public_mcp_tools  # noqa: E402
 
 
@@ -44,6 +47,8 @@ R_SOURCES = tuple(ROOT / value for value in (
     "eval/r4_v7_formal_expected.json",
     "eval/r4_v8_formal_expected.json",
 ))
+OWNER_ATTESTATION = PRIVATE_DIR / "owner-attestation.json"
+OWNER_APPROVAL_MANIFEST = PUBLIC_DIR / "dataset-v2-owner-approval.json"
 
 
 def _write_json(path: Path, value: object) -> None:
@@ -64,6 +69,29 @@ def _load_families() -> list[dict[str, object]]:
     if not path.is_file():
         raise C5DatasetError("draft families do not exist; run draft first")
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
+
+
+def _load_jsonl(path: Path) -> list[dict[str, object]]:
+    if not path.is_file():
+        raise C5DatasetError(f"required private artifact is missing: {path.name}")
+    rows = []
+    for line_number, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        if not raw.strip():
+            continue
+        value = json.loads(raw)
+        if not isinstance(value, dict):
+            raise C5DatasetError(f"{path.name}:{line_number}: row must be an object")
+        rows.append(value)
+    return rows
+
+
+def _load_json(path: Path) -> dict[str, object]:
+    if not path.is_file():
+        raise C5DatasetError(f"required artifact is missing: {path.name}")
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise C5DatasetError(f"{path.name} must contain a JSON object")
+    return value
 
 
 def _tokenizer():
@@ -229,23 +257,109 @@ def split_plan() -> dict[str, object]:
     return payload
 
 
+def owner_approve(attestation_path: Path) -> dict[str, object]:
+    families = _load_families()
+    if len(families) != 440:
+        raise C5DatasetError("owner approval requires exactly 440 candidate families")
+
+    draft_path = PRIVATE_DIR / "draft-families.jsonl"
+    recommendation_path = PRIVATE_DIR / "review-recommendations.jsonl"
+    assignment_path = PRIVATE_DIR / "provisional-split-assignments.json"
+    recommendations = _load_jsonl(recommendation_path)
+    attestation = _load_json(attestation_path)
+    assignments = _load_json(assignment_path)
+
+    draft_sha256 = sha256_file(draft_path)
+    recommendation_sha256 = sha256_file(recommendation_path)
+    assignment_sha256 = sha256_file(assignment_path)
+    expected_hashes = {
+        "candidate_draft_sha256": draft_sha256,
+        "agent_recommendation_sha256": recommendation_sha256,
+        "provisional_assignment_sha256": assignment_sha256,
+    }
+    for field, actual in expected_hashes.items():
+        if attestation.get(field) != actual:
+            raise C5DatasetError(f"owner attestation {field} does not match current bytes")
+    if attestation.get("formal_split_authorized") is not True:
+        raise C5DatasetError("owner attestation does not authorize the formal split")
+    if attestation.get("formal_split_family_targets") != {
+        "development": 60, "train": 320, "validation": 60
+    }:
+        raise C5DatasetError("owner attestation does not authorize the exact 320/60/60 split")
+    if assignments != assign_family_splits(families):
+        raise C5DatasetError("provisional assignment is not the current deterministic split")
+
+    reviews = build_owner_review_ledger(families, recommendations, attestation)
+    reviews_path = PRIVATE_DIR / "reviews.jsonl"
+    _write_jsonl(reviews_path, reviews)
+    accepted = apply_reviews(families, load_reviews(reviews_path))
+    if len(accepted) != 440:
+        raise C5DatasetError("owner review ledger did not accept all 440 families")
+
+    payload = {
+        "schema_version": "1.0",
+        "status": "owner_approved_exact_candidate_set",
+        "dataset_id": "rhinocoder-c5-dataset-v2",
+        "candidate_draft_sha256": draft_sha256,
+        "agent_recommendation_sha256": recommendation_sha256,
+        "provisional_assignment_sha256": assignment_sha256,
+        "owner_attestation_sha256": sha256_file(attestation_path),
+        "owner_review_ledger_sha256": sha256_file(reviews_path),
+        "owner_approved_family_count": len(reviews),
+        "reviewer_1": "repository_owner",
+        "reviewer_2_required": False,
+        "approval_date": str(attestation.get("approval_date") or ""),
+        "authorization_source": str(attestation.get("authorization_source") or ""),
+        "formal_split_authorized": True,
+        "formal_split_family_targets": {
+            "train": 320, "validation": 60, "development": 60
+        },
+        "training_authorized": False,
+        "final_holdout_read": False,
+        "final_holdout_rows_read": 0,
+    }
+    _write_json(OWNER_APPROVAL_MANIFEST, payload)
+    return payload
+
+
 def freeze() -> dict[str, object]:
     families = _load_families()
     reviews_path = PRIVATE_DIR / "reviews.jsonl"
     if not reviews_path.is_file():
         raise C5DatasetError("repository-owner review ledger is missing")
+    owner_approval = _load_json(OWNER_APPROVAL_MANIFEST)
+    draft_sha256 = sha256_file(PRIVATE_DIR / "draft-families.jsonl")
+    if owner_approval.get("status") != "owner_approved_exact_candidate_set":
+        raise C5DatasetError("owner approval manifest is not in an approved state")
+    if owner_approval.get("candidate_draft_sha256") != draft_sha256:
+        raise C5DatasetError("owner approval is not bound to the current candidate draft")
+    if owner_approval.get("owner_review_ledger_sha256") != sha256_file(reviews_path):
+        raise C5DatasetError("owner approval is not bound to the current review ledger")
+    if owner_approval.get("owner_approved_family_count") != 440:
+        raise C5DatasetError("owner approval does not cover all 440 families")
     accepted = apply_reviews(families, load_reviews(reviews_path))
     audit = audit_draft(
         accepted, load_public_mcp_tools(), tokenizer=_tokenizer(), require_reviews=True
     )
     if not audit.passed:
         raise C5DatasetError(f"reviewed dataset failed with {len(audit.findings)} findings")
-    manifest = freeze_accepted_dataset(
-        accepted, assign_family_splits(accepted), PRIVATE_DIR / "accepted"
-    )
+    assignments = assign_family_splits(accepted)
+    provisional_path = PRIVATE_DIR / "provisional-split-assignments.json"
+    if _load_json(provisional_path) != assignments:
+        raise C5DatasetError("formal split differs from the owner-authorized provisional split")
+    manifest = freeze_accepted_dataset(accepted, assignments, PRIVATE_DIR / "accepted")
     public = {
         **manifest,
-        "private_manifest_sha256": __import__("hashlib").sha256(
+        "status": "formal_development_split_locked_training_not_authorized",
+        "candidate_draft_sha256": draft_sha256,
+        "accepted_family_count": len(accepted),
+        "owner_approved_family_count": int(owner_approval["owner_approved_family_count"]),
+        "reviewer_1": "repository_owner",
+        "reviewer_2_required": False,
+        "formal_split_locked": True,
+        "formal_assignment_sha256": sha256_file(provisional_path),
+        "owner_approval_manifest_sha256": sha256_file(OWNER_APPROVAL_MANIFEST),
+        "private_manifest_sha256": hashlib.sha256(
             (PRIVATE_DIR / "accepted/manifest.json").read_bytes()
         ).hexdigest(),
         "audit": audit_payload(audit),
@@ -257,9 +371,16 @@ def freeze() -> dict[str, object]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "command", choices=("draft", "audit", "review-packet", "plan-split", "freeze")
+        "command",
+        choices=("draft", "audit", "review-packet", "plan-split", "owner-approve", "freeze"),
     )
     parser.add_argument("--require-reviews", action="store_true")
+    parser.add_argument(
+        "--owner-attestation",
+        type=Path,
+        default=OWNER_ATTESTATION,
+        help="private owner attestation JSON (default: data/training/c5/v2/owner-attestation.json)",
+    )
     args = parser.parse_args()
     try:
         if args.command == "draft":
@@ -270,6 +391,8 @@ def main() -> int:
             result = review_packet()
         elif args.command == "plan-split":
             result = split_plan()
+        elif args.command == "owner-approve":
+            result = owner_approve(args.owner_attestation)
         else:
             result = freeze()
     except (C5DatasetError, OSError, ValueError, json.JSONDecodeError) as exc:

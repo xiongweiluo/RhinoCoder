@@ -1,0 +1,24 @@
+{
+  "agent_recommendation_sha256": "d4fc5e1d879795748e0e696191ecaa66869285ac1e0ddbdd1a0d635252113fd9",
+  "approval_date": "2026-09-27",
+  "authorization_source": "repository_owner_explicit_instruction_in_current_codex_task",
+  "candidate_draft_sha256": "468d32aaac63e3c1ce0d91e032dd618115cb50bf97c9c9a997e43bec75271ced",
+  "dataset_id": "rhinocoder-c5-dataset-v2",
+  "final_holdout_read": false,
+  "final_holdout_rows_read": 0,
+  "formal_split_authorized": true,
+  "formal_split_family_targets": {
+    "development": 60,
+    "train": 320,
+    "validation": 60
+  },
+  "owner_approved_family_count": 440,
+  "owner_attestation_sha256": "e9c0953da3b662b6cdd07f8be7501055c3034ba46fe2e7fa5a578345b989552f",
+  "owner_review_ledger_sha256": "9297a7e70ab63e12ec6598ad8891ee914f3690e084ba915de6e6efff450bc8f9",
+  "provisional_assignment_sha256": "39b49d733e2f2ea7735728877dfc1b66c00dbaa42f8bb352e86c41ee306e0ee4",
+  "reviewer_1": "repository_owner",
+  "reviewer_2_required": false,
+  "schema_version": "1.0",
+  "status": "owner_approved_exact_candidate_set",
+  "training_authorized": false
+}
