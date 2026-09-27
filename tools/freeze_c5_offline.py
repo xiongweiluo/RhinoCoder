@@ -143,9 +143,24 @@ def contract_audit() -> dict[str, Any]:
 
 def freeze_spec(contract: dict[str, Any], source_manifest: dict[str, Any]) -> dict[str, Any]:
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "status": "offline_freeze_complete_training_not_authorized",
         "experiment_id": EXPERIMENT_ID,
+        "repository_governance": {
+            "revision": "2026-09-27-owner-only-v1",
+            "authority_identity": "repository_owner",
+            "pull_requests": {
+                "required_reviewer_count": 1,
+                "reviewer_1_identity": "repository_owner",
+                "reviewer_2_required": False,
+                "agent_self_approval_allowed": False,
+            },
+            "git_operations": {
+                "automatic_branch_push_authorized": True,
+                "automatic_pull_request_create_or_update_authorized": True,
+                "automatic_merge_authorized": False,
+            },
+        },
         "contract": contract,
         "dataset": {
             "pipeline_id": PIPELINE_ID,
@@ -168,17 +183,21 @@ def freeze_spec(contract: dict[str, Any], source_manifest: dict[str, Any]) -> di
             ],
             "existing_source_assignment_is_planning_only": True,
             "a5_p2_exclusion_map_required_before_dataset_acceptance": True,
-            "two_person_review_required": True,
+            "required_reviewer_count": 1,
+            "reviewer_1_identity": "repository_owner",
+            "reviewer_2_required": False,
+            "agent_self_approval_allowed": False,
             "unrestricted_natural_language_targets_allowed": False,
         },
         "holdout_custody": {
-            "status": "protocol_frozen_custodian_identity_pending",
+            "status": "protocol_frozen_repository_owner_custodian",
             "expected_families": 80,
             "content_created_by_this_command": False,
             "content_path_recorded_in_repository": False,
             "developer_read_allowed_before_consumption": False,
             "rows_read": 0,
-            "custodian_role": "independent_non_developer",
+            "custodian_identity": "repository_owner",
+            "custodian_role": "repository_owner_independent_from_agent",
             "commitment_required": [
                 "encrypted_artifact_sha256",
                 "expected_family_count",
@@ -299,6 +318,23 @@ def verify(output_dir: Path) -> dict[str, Any]:
         raise C5FreezeError("offline freeze unexpectedly authorizes training")
     if spec.get("holdout_custody", {}).get("rows_read") != 0:
         raise C5FreezeError("offline freeze consumed final holdout rows")
+    governance = spec.get("repository_governance", {})
+    pull_requests = governance.get("pull_requests", {})
+    git_operations = governance.get("git_operations", {})
+    if governance.get("authority_identity") != "repository_owner":
+        raise C5FreezeError("repository owner authority is not frozen")
+    if pull_requests.get("required_reviewer_count") != 1:
+        raise C5FreezeError("pull-request reviewer count drifted")
+    if pull_requests.get("reviewer_1_identity") != "repository_owner":
+        raise C5FreezeError("pull-request reviewer 1 identity drifted")
+    if pull_requests.get("reviewer_2_required") is not False:
+        raise C5FreezeError("pull-request reviewer 2 was unexpectedly required")
+    if git_operations.get("automatic_branch_push_authorized") is not True:
+        raise C5FreezeError("automatic branch push authorization is missing")
+    if git_operations.get("automatic_pull_request_create_or_update_authorized") is not True:
+        raise C5FreezeError("automatic pull-request authorization is missing")
+    if git_operations.get("automatic_merge_authorized") is not False:
+        raise C5FreezeError("automatic merge was unexpectedly authorized")
     return manifest
 
 

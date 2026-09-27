@@ -114,7 +114,7 @@ def audit_command(require_reviews: bool) -> dict[str, object]:
     if require_reviews:
         reviews_path = PRIVATE_DIR / "reviews.jsonl"
         if not reviews_path.is_file():
-            raise C5DatasetError("two-person review ledger is missing")
+            raise C5DatasetError("repository-owner review ledger is missing")
         families = apply_reviews(families, load_reviews(reviews_path))
     audit = audit_draft(
         families, load_public_mcp_tools(), tokenizer=_tokenizer(), require_reviews=require_reviews
@@ -129,7 +129,7 @@ def freeze() -> dict[str, object]:
     families = _load_families()
     reviews_path = PRIVATE_DIR / "reviews.jsonl"
     if not reviews_path.is_file():
-        raise C5DatasetError("two-person review ledger is missing")
+        raise C5DatasetError("repository-owner review ledger is missing")
     accepted = apply_reviews(families, load_reviews(reviews_path))
     audit = audit_draft(
         accepted, load_public_mcp_tools(), tokenizer=_tokenizer(), require_reviews=True

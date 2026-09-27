@@ -1,9 +1,9 @@
 """C5 dataset-v2 draft, review, audit, and split-lock pipeline.
 
 The pipeline deliberately separates generated candidates from accepted data.
-No family can enter train/validation/development until two distinct reviewers
-approve it and every contract, privacy, exclusion, duplicate, and token gate
-passes.  Final-holdout content is never accepted by this module.
+No family can enter train/validation/development until the repository owner
+approves it as reviewer 1 and every contract, privacy, exclusion, duplicate,
+and token gate passes. Final-holdout content is never accepted by this module.
 """
 
 from __future__ import annotations
@@ -34,13 +34,14 @@ from training.tool_contract_candidate import ContractError, validate_arguments, 
 
 
 DATASET_ID = "rhinocoder-c5-dataset-v2"
-PIPELINE_ID = "c5-dataset-v2-builder-v1"
+PIPELINE_ID = "c5-dataset-v2-builder-v2"
 DEVELOPMENT_SPLITS = ("train", "validation", "development")
 FAMILY_TARGETS = {"train": 320, "validation": 60, "development": 60}
 EXPECTED_SOURCE_FAMILIES = 103
 EXPECTED_NEW_FAMILIES = 337
 EXPECTED_TOTAL_FAMILIES = 440
-REVIEW_SCHEMA_VERSION = "1.0"
+REVIEW_SCHEMA_VERSION = "1.1"
+OWNER_REVIEWER_ID = "repository_owner"
 NEAR_DUPLICATE_RATIO = 0.92
 
 
@@ -234,7 +235,6 @@ def _family(
             "schema_version": REVIEW_SCHEMA_VERSION,
             "author_role": "agent_generated_draft",
             "reviewer_1": None,
-            "reviewer_2": None,
             "status": "pending",
         },
     }
@@ -620,11 +620,11 @@ def audit_draft(
         source_kind_counts[str(family.get("source_kind") or "<missing>")] += 1
         review = family.get("review") or {}
         if require_reviews:
-            reviewers = (review.get("reviewer_1"), review.get("reviewer_2"))
-            if review.get("status") != "approved" or any(not value for value in reviewers):
-                findings.append(f"{family_id}: two approvals are missing")
-            elif reviewers[0] == reviewers[1] or "agent_generated" in reviewers:
-                findings.append(f"{family_id}: reviewers must be distinct non-author identities")
+            reviewer = str(review.get("reviewer_1") or "").strip()
+            if review.get("status") != "approved" or reviewer != OWNER_REVIEWER_ID:
+                findings.append(f"{family_id}: repository-owner approval is missing")
+            if review.get("reviewer_2") not in (None, ""):
+                findings.append(f"{family_id}: reviewer_2 is not part of the owner-only policy")
         records = family.get("records") or []
         if not records:
             findings.append(f"{family_id}: family has no records")
@@ -740,20 +740,19 @@ def apply_reviews(
         if review.get("family_sha256") != expected_family_hash:
             raise C5DatasetError(f"family {family_id} review is not bound to current content")
         first = str(review.get("reviewer_1") or "").strip()
-        second = str(review.get("reviewer_2") or "").strip()
-        forbidden_reviewer = any(
-            marker in reviewer.lower()
-            for reviewer in (first, second)
-            for marker in ("agent", "codex", "generator")
-        )
-        if not first or not second or first == second or forbidden_reviewer:
-            raise C5DatasetError(f"family {family_id} lacks two distinct non-author reviewers")
+        if first != OWNER_REVIEWER_ID:
+            raise C5DatasetError(
+                f"family {family_id} requires reviewer_1={OWNER_REVIEWER_ID}"
+            )
+        if review.get("reviewer_2") not in (None, ""):
+            raise C5DatasetError(
+                f"family {family_id} must not include reviewer_2 under the owner-only policy"
+            )
         updated = dict(family)
         updated["review"] = {
             "schema_version": REVIEW_SCHEMA_VERSION,
             "author_role": "agent_generated_draft",
             "reviewer_1": first,
-            "reviewer_2": second,
             "status": "approved",
             "notes_sha256": _hash(str(review.get("notes") or "")),
         }
@@ -842,8 +841,7 @@ def review_template(families: Sequence[Mapping[str, Any]]) -> list[dict[str, Any
             "schema_version": REVIEW_SCHEMA_VERSION,
             "family_id": family["family_id"],
             "family_sha256": _hash(_canonical(family)),
-            "reviewer_1": None,
-            "reviewer_2": None,
+            "reviewer_1": OWNER_REVIEWER_ID,
             "decision": "pending",
             "notes": "",
         }

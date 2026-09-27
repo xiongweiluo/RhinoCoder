@@ -2,11 +2,11 @@
   "artifacts": [
     {
       "path": "offline-freeze-spec.json",
-      "sha256": "5ce975ceec41f3f0445d761dfd94037f5c261885ced26ff991e7d0bd87aeed49"
+      "sha256": "3f2aeb0c13ce712461cb9db36f745f43b4cc136bd17837c66b53ae4b51d93893"
     },
     {
       "path": "source-audit.json",
-      "sha256": "0efa3c2da655b02c9d90278bb6a144afe668d5882ff4aa104ea02521139bd934"
+      "sha256": "c033776cfe27d18a16a4438e509d9b20c84ea92ba12ce9ab424cd056013b9a69"
     }
   ],
   "holdout_content_present": false,

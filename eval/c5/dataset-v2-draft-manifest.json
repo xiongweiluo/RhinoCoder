@@ -41,11 +41,11 @@
     }
   },
   "draft_path": "data/training/c5/v2/draft-families.jsonl",
-  "draft_sha256": "0afcee7ee3ca0c89b58ca44c1165af90d421be097b3e0c36e4fc6cbb80ac35d9",
+  "draft_sha256": "955ee758efc0ce8f1469b221fabef09d277b0b319cfc43b031b7ec084ee79436",
   "final_holdout_read": false,
   "final_holdout_rows_read": 0,
   "historical_exclusions_sha256": "ed1fa0859633da40e64001ca1646c094e140f9a06f9aa48c86a1fe8b552389fc",
-  "review_template_sha256": "0dd6ecdaca08f441713ea7988828d567b72ed1e3f8321f7c15cae16d6db426c7",
+  "review_template_sha256": "21d9971a893864462d48e9d300d61b5dca0f7473e65021d38215c686fdfd8a75",
   "schema_version": "1.0",
   "status": "candidate_review_required",
   "training_authorized": false

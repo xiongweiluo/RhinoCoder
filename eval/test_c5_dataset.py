@@ -10,9 +10,11 @@ from training.c5_dataset import (
     EXPECTED_NEW_FAMILIES,
     EXPECTED_TOTAL_FAMILIES,
     FAMILY_TARGETS,
+    OWNER_REVIEWER_ID,
     apply_reviews,
     assign_family_splits,
     audit_draft,
+    review_template,
     synthetic_core_families,
     synthetic_multistep_families,
     synthetic_noncore_families,
@@ -41,7 +43,7 @@ def test_generated_family_plan_has_exact_count_and_valid_contract_shapes() -> No
     assert not any("unknown dataset stage" in finding for finding in audit.findings)
 
 
-def test_reviews_require_two_distinct_non_author_identities() -> None:
+def test_reviews_require_repository_owner_as_only_reviewer() -> None:
     family = synthetic_null_families()[0]
     family_id = family["family_id"]
     family_sha256 = __import__("hashlib").sha256(json.dumps(
@@ -52,18 +54,41 @@ def test_reviews_require_two_distinct_non_author_identities() -> None:
             "family_id": family_id,
             "family_sha256": family_sha256,
             "decision": "approve",
-            "reviewer_1": "owner",
-            "reviewer_2": "owner",
+            "reviewer_1": "independent-domain-reviewer",
         }})
     accepted = apply_reviews([family], {family_id: {
         "family_id": family_id,
         "family_sha256": family_sha256,
         "decision": "approve",
-        "reviewer_1": "owner",
-        "reviewer_2": "independent-domain-reviewer",
+        "reviewer_1": OWNER_REVIEWER_ID,
         "notes": "intent and abstention checked",
     }})
     assert accepted[0]["review"]["status"] == "approved"
+    assert accepted[0]["review"]["reviewer_1"] == OWNER_REVIEWER_ID
+    assert "reviewer_2" not in accepted[0]["review"]
+
+
+def test_review_template_prefills_owner_without_reviewer_2() -> None:
+    row = review_template([synthetic_null_families()[0]])[0]
+    assert row["reviewer_1"] == OWNER_REVIEWER_ID
+    assert row["decision"] == "pending"
+    assert "reviewer_2" not in row
+
+
+def test_review_rejects_reviewer_2_under_owner_only_policy() -> None:
+    family = synthetic_null_families()[0]
+    family_id = family["family_id"]
+    family_sha256 = __import__("hashlib").sha256(json.dumps(
+        family, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    ).encode()).hexdigest()
+    with pytest.raises(C5DatasetError, match="must not include reviewer_2"):
+        apply_reviews([family], {family_id: {
+            "family_id": family_id,
+            "family_sha256": family_sha256,
+            "decision": "approve",
+            "reviewer_1": OWNER_REVIEWER_ID,
+            "reviewer_2": "another-reviewer",
+        }})
 
 
 def test_review_cannot_be_reused_after_family_changes() -> None:
@@ -78,8 +103,7 @@ def test_review_cannot_be_reused_after_family_changes() -> None:
             "family_id": family_id,
             "family_sha256": stale,
             "decision": "approve",
-            "reviewer_1": "owner",
-            "reviewer_2": "domain-reviewer",
+            "reviewer_1": OWNER_REVIEWER_ID,
         }})
 
 

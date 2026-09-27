@@ -101,6 +101,7 @@
       "train": 320,
       "validation": 60
     },
+    "agent_self_approval_allowed": false,
     "existing_source_assignment_is_planning_only": true,
     "grouping": [
       "campaign_and_exact_tag_set",
@@ -110,9 +111,11 @@
     ],
     "new_development_families_required": 311,
     "pipeline_id": "c5-offline-freeze-v1",
-    "source_audit_sha256": "f078474d1d9049399732c79455815df5c9d2ca2e57c1da7bf29900071a3dd449",
+    "required_reviewer_count": 1,
+    "reviewer_1_identity": "repository_owner",
+    "reviewer_2_required": false,
+    "source_audit_sha256": "ff08d3199e4c2b0090d361f66fcc54490280e0e98fa3219dfd78165dbc2ea553",
     "source_family_count": 129,
-    "two_person_review_required": true,
     "unrestricted_natural_language_targets_allowed": false
   },
   "experiment_id": "rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2",
@@ -153,14 +156,30 @@
     ],
     "content_created_by_this_command": false,
     "content_path_recorded_in_repository": false,
-    "custodian_role": "independent_non_developer",
+    "custodian_identity": "repository_owner",
+    "custodian_role": "repository_owner_independent_from_agent",
     "developer_read_allowed_before_consumption": false,
     "expected_families": 80,
     "rows_read": 0,
     "single_use_gate": "append_only_consumption_receipt_before_decryption",
-    "status": "protocol_frozen_custodian_identity_pending"
+    "status": "protocol_frozen_repository_owner_custodian"
   },
-  "schema_version": "1.0",
+  "repository_governance": {
+    "authority_identity": "repository_owner",
+    "git_operations": {
+      "automatic_branch_push_authorized": true,
+      "automatic_merge_authorized": false,
+      "automatic_pull_request_create_or_update_authorized": true
+    },
+    "pull_requests": {
+      "agent_self_approval_allowed": false,
+      "required_reviewer_count": 1,
+      "reviewer_1_identity": "repository_owner",
+      "reviewer_2_required": false
+    },
+    "revision": "2026-09-27-owner-only-v1"
+  },
+  "schema_version": "1.1",
   "status": "offline_freeze_complete_training_not_authorized",
   "training": {
     "authorized": false,
