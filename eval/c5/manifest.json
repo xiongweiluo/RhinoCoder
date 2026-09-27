@@ -1,0 +1,15 @@
+{
+  "artifacts": [
+    {
+      "path": "offline-freeze-spec.json",
+      "sha256": "d8026f640b8a05221b5f7f357809bba04a5b287441c159da0e20a92fd64402c9"
+    },
+    {
+      "path": "source-audit.json",
+      "sha256": "d262a02c26905007eda75a03da0d6c590bfe40edc84d6195394061f6a94b3224"
+    }
+  ],
+  "holdout_content_present": false,
+  "schema_version": "1.0",
+  "training_authorized": false
+}
