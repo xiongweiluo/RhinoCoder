@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections import Counter, defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -23,6 +24,7 @@ from training.c5_dataset import (  # noqa: E402
     build_historical_exclusions,
     freeze_accepted_dataset,
     load_reviews,
+    review_recommendations,
     review_template,
 )
 from training.tool_schema_inventory import load_public_mcp_tools  # noqa: E402
@@ -125,6 +127,108 @@ def audit_command(require_reviews: bool) -> dict[str, object]:
     return payload
 
 
+def review_packet() -> dict[str, object]:
+    families = _load_families()
+    audit = audit_draft(
+        families, load_public_mcp_tools(), tokenizer=_tokenizer(), require_reviews=False
+    )
+    if not audit.passed:
+        raise C5DatasetError(f"content QA failed with {len(audit.findings)} findings")
+    recommendations = review_recommendations(families)
+    recommendation_path = PRIVATE_DIR / "review-recommendations.jsonl"
+    _write_jsonl(recommendation_path, recommendations)
+    draft_path = PRIVATE_DIR / "draft-families.jsonl"
+    payload = {
+        "schema_version": "1.0",
+        "status": "agent_quality_audit_passed_owner_approval_required",
+        "dataset_id": "rhinocoder-c5-dataset-v2",
+        "candidate_draft_sha256": __import__("hashlib").sha256(
+            draft_path.read_bytes()
+        ).hexdigest(),
+        "agent_recommendation_sha256": __import__("hashlib").sha256(
+            recommendation_path.read_bytes()
+        ).hexdigest(),
+        "audited_family_count": len(recommendations),
+        "agent_recommended_approve_count": sum(
+            row["agent_recommendation"] == "approve" for row in recommendations
+        ),
+        "owner_approved_family_count": 0,
+        "required_reviewer_1": "repository_owner",
+        "reviewer_2_required": False,
+        "agent_self_approval_allowed": False,
+        "quality_corrections": ["multistep_scene_coherence_v1"],
+        "audit": audit_payload(audit),
+        "training_authorized": False,
+        "final_holdout_read": False,
+        "final_holdout_rows_read": 0,
+    }
+    _write_json(PUBLIC_DIR / "dataset-v2-review-audit.json", payload)
+    return payload
+
+
+def split_plan() -> dict[str, object]:
+    families = _load_families()
+    audit = audit_draft(
+        families, load_public_mcp_tools(), tokenizer=_tokenizer(), require_reviews=False
+    )
+    if not audit.passed:
+        raise C5DatasetError(f"split planning failed audit with {len(audit.findings)} findings")
+    assignments = assign_family_splits(families)
+    private_path = PRIVATE_DIR / "provisional-split-assignments.json"
+    _write_json(private_path, assignments)
+    family_counts: Counter[str] = Counter()
+    record_counts: Counter[str] = Counter()
+    category_counts: dict[str, Counter[str]] = defaultdict(Counter)
+    invocation_tool_counts: dict[str, Counter[str]] = defaultdict(Counter)
+    noncore_selector_counts: dict[str, Counter[str]] = defaultdict(Counter)
+    for family in families:
+        split = assignments[str(family["family_id"])]
+        family_counts[split] += 1
+        record_counts[split] += len(family["records"])
+        category_counts[split][str(family["category"])] += 1
+        invocation_tools = {
+            str(record.get("selected_tool"))
+            for record in family["records"]
+            if record.get("stage") == "invocation"
+        }
+        invocation_tool_counts[split].update(invocation_tools)
+        if family["category"] == "selector_noncore":
+            noncore_selector_counts[split][str(family["records"][0]["selected_tool"])] += 1
+    payload = {
+        "schema_version": "1.0",
+        "status": "provisional_split_valid_owner_approval_required",
+        "dataset_id": "rhinocoder-c5-dataset-v2",
+        "candidate_draft_sha256": __import__("hashlib").sha256(
+            (PRIVATE_DIR / "draft-families.jsonl").read_bytes()
+        ).hexdigest(),
+        "assignment_sha256": __import__("hashlib").sha256(
+            private_path.read_bytes()
+        ).hexdigest(),
+        "split_seed": "rhinocoder-c5-family-v1",
+        "family_counts": dict(sorted(family_counts.items())),
+        "record_counts": dict(sorted(record_counts.items())),
+        "category_counts": {
+            split: dict(sorted(values.items()))
+            for split, values in sorted(category_counts.items())
+        },
+        "invocation_tool_family_counts": {
+            split: dict(sorted(values.items()))
+            for split, values in sorted(invocation_tool_counts.items())
+        },
+        "noncore_selector_family_counts": {
+            split: dict(sorted(values.items()))
+            for split, values in sorted(noncore_selector_counts.items())
+        },
+        "formal_split_locked": False,
+        "owner_approved_family_count": 0,
+        "training_authorized": False,
+        "final_holdout_read": False,
+        "final_holdout_rows_read": 0,
+    }
+    _write_json(PUBLIC_DIR / "dataset-v2-split-plan.json", payload)
+    return payload
+
+
 def freeze() -> dict[str, object]:
     families = _load_families()
     reviews_path = PRIVATE_DIR / "reviews.jsonl"
@@ -152,7 +256,9 @@ def freeze() -> dict[str, object]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("draft", "audit", "freeze"))
+    parser.add_argument(
+        "command", choices=("draft", "audit", "review-packet", "plan-split", "freeze")
+    )
     parser.add_argument("--require-reviews", action="store_true")
     args = parser.parse_args()
     try:
@@ -160,6 +266,10 @@ def main() -> int:
             result = draft()
         elif args.command == "audit":
             result = audit_command(args.require_reviews)
+        elif args.command == "review-packet":
+            result = review_packet()
+        elif args.command == "plan-split":
+            result = split_plan()
         else:
             result = freeze()
     except (C5DatasetError, OSError, ValueError, json.JSONDecodeError) as exc:

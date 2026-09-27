@@ -1,5 +1,7 @@
 {
-  "accepted_family_count": 0,
+  "agent_recommendation_sha256": "d4fc5e1d879795748e0e696191ecaa66869285ac1e0ddbdd1a0d635252113fd9",
+  "agent_recommended_approve_count": 440,
+  "agent_self_approval_allowed": false,
   "audit": {
     "category_counts": {
       "clarification": 20,
@@ -40,13 +42,18 @@
       "selector": 536
     }
   },
-  "draft_path": "data/training/c5/v2/draft-families.jsonl",
-  "draft_sha256": "468d32aaac63e3c1ce0d91e032dd618115cb50bf97c9c9a997e43bec75271ced",
+  "audited_family_count": 440,
+  "candidate_draft_sha256": "468d32aaac63e3c1ce0d91e032dd618115cb50bf97c9c9a997e43bec75271ced",
+  "dataset_id": "rhinocoder-c5-dataset-v2",
   "final_holdout_read": false,
   "final_holdout_rows_read": 0,
-  "historical_exclusions_sha256": "ed1fa0859633da40e64001ca1646c094e140f9a06f9aa48c86a1fe8b552389fc",
-  "review_template_sha256": "1014f91dc54508bd74de50e5af93fe3124ec5155b510c899f94e652b6da955de",
+  "owner_approved_family_count": 0,
+  "quality_corrections": [
+    "multistep_scene_coherence_v1"
+  ],
+  "required_reviewer_1": "repository_owner",
+  "reviewer_2_required": false,
   "schema_version": "1.0",
-  "status": "candidate_review_required",
+  "status": "agent_quality_audit_passed_owner_approval_required",
   "training_authorized": false
 }

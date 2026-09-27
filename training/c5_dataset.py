@@ -43,6 +43,33 @@ EXPECTED_TOTAL_FAMILIES = 440
 REVIEW_SCHEMA_VERSION = "1.1"
 OWNER_REVIEWER_ID = "repository_owner"
 NEAR_DUPLICATE_RATIO = 0.92
+CORE_SYNTHETIC_FAMILY_TARGETS = {
+    "create_box": 4,
+    "create_cylinder": 4,
+    "create_sphere": 4,
+    "get_scene_summary": 20,
+    "get_bounding_box": 20,
+    "move_object": 20,
+    "boolean_difference": 28,
+    "group_objects": 28,
+    "rotate_object": 28,
+    "scale_object": 28,
+    "set_object_color": 28,
+    "set_object_layer": 28,
+}
+CONTENT_QA_CHECKS = (
+    "contract_and_dataset_identity",
+    "scenario_and_record_uniqueness",
+    "historical_provenance_disjointness",
+    "selector_target_and_outcome_consistency",
+    "invocation_schema_and_roundtrip",
+    "selector_invocation_pairing",
+    "category_shape_and_source_role",
+    "multistep_scene_coherence",
+    "privacy_and_sensitive_text",
+    "numeric_template_and_near_duplicate_screen",
+    "token_budget",
+)
 
 
 class C5DatasetError(RuntimeError):
@@ -319,7 +346,7 @@ PURPOSES = (
 
 
 def _core_step(tool: str, index: int) -> tuple[str, dict[str, Any]]:
-    context = CONTEXTS[index]
+    context = CONTEXTS[index % len(CONTEXTS)]
     n = index + 2
     alias = f"{context}-A"
     other = f"{context}-B"
@@ -362,11 +389,16 @@ def _core_step(tool: str, index: int) -> tuple[str, dict[str, Any]]:
         text = f"只读查询唯一对象 {alias} 的包围盒，用于核对{context}占用范围。"
     else:
         raise C5DatasetError(f"no draft template for core tool {tool}")
-    return text + f" 该动作单独用于{PURPOSES[index]}。", args
+    extension = (
+        " 这是针对参数边界与别名一致性的扩展语义族。"
+        if index >= len(CONTEXTS)
+        else ""
+    )
+    return text + f" 该动作单独用于{PURPOSES[index % len(PURPOSES)]}。{extension}", args
 
 
 def _missing_parameter_step(tool: str, index: int) -> str:
-    context = CONTEXTS[index]
+    context = CONTEXTS[index % len(CONTEXTS)]
     examples = {
         "create_box": f"先给{context}做个盒子，具体尺寸稍后再定。",
         "create_cylinder": f"为{context}加一个圆柱，但我还没有决定半径和高度。",
@@ -385,17 +417,23 @@ def _missing_parameter_step(tool: str, index: int) -> str:
 
 
 def synthetic_core_families() -> list[dict[str, Any]]:
+    if (
+        set(CORE_SYNTHETIC_FAMILY_TARGETS) != set(CORE_INVOCATION_TOOLS)
+        or sum(CORE_SYNTHETIC_FAMILY_TARGETS.values()) != 240
+    ):
+        raise C5DatasetError("core synthetic family targets drifted")
     result = []
     for tool in CORE_INVOCATION_TOOLS:
-        for index in range(20):
-            scenario = f"core:{tool}:{index:02d}:{CONTEXTS[index]}"
+        for index in range(CORE_SYNTHETIC_FAMILY_TARGETS[tool]):
+            context = CONTEXTS[index % len(CONTEXTS)]
+            scenario = f"core:{tool}:{index:02d}:{context}"
             family_id = "new_" + _hash(scenario)[:20]
             text, arguments = _core_step(tool, index)
             records = [
                 _selector_record(family_id, 0, text, tool, outcome="invoke_core_tool"),
                 _invocation_record(family_id, 1, text, tool, arguments),
             ]
-            if index % 4 == 0:
+            if index % 4 == 0 and index < len(CONTEXTS):
                 records.append(_selector_record(
                     family_id, 2, _missing_parameter_step(tool, index), None,
                     outcome="clarify_or_refuse", variant="missing_required",
@@ -523,14 +561,19 @@ def synthetic_multistep_families() -> list[dict[str, Any]]:
         family_id = "new_" + _hash(scenario)[:20]
         records = []
         for step_index, tool in enumerate(sequence):
-            text, arguments = _core_step(tool, (index + step_index) % len(CONTEXTS))
+            text, arguments = _core_step(tool, index % len(CONTEXTS))
             recovery_context = (
                 "前一候选因场景漂移已安全停止；本任务从新的只读快照恢复，"
                 if index >= 20
                 else ""
             )
+            scene_precondition = (
+                f"场景中 {context}-B 已存在且已唯一解析；"
+                if tool in {"group_objects", "boolean_difference"}
+                else ""
+            )
             stateful = (
-                f"{recovery_context}总任务：完成{context}的三步建模与核验，整体目的为"
+                f"{recovery_context}{scene_precondition}总任务：完成{context}的三步建模与核验，整体目的为"
                 f"{workflow_purposes[index]}。当前第 {step_index + 1} 步：{text}"
             )
             records.append(_selector_record(
@@ -606,6 +649,8 @@ def audit_draft(
     stage_counts = Counter()
     source_kind_counts = Counter()
     invocation_families: dict[str, set[str]] = defaultdict(set)
+    scenario_keys: set[str] = set()
+    source_task_owner: dict[str, str] = {}
     prompt_tokens: list[int] = []
     full_tokens: list[int] = []
     inventory = validate_inventory(tools)
@@ -616,8 +661,28 @@ def audit_draft(
             findings.append(f"duplicate or missing family ID: {family_id!r}")
             continue
         family_ids.add(family_id)
-        category_counts[str(family.get("category") or "<missing>")] += 1
-        source_kind_counts[str(family.get("source_kind") or "<missing>")] += 1
+        category = str(family.get("category") or "<missing>")
+        source_kind = str(family.get("source_kind") or "<missing>")
+        category_counts[category] += 1
+        source_kind_counts[source_kind] += 1
+        if family.get("dataset_id") != DATASET_ID or family.get("contract_id") != CONTRACT_ID:
+            findings.append(f"{family_id}: dataset or contract identity drifted")
+        scenario_key = str(family.get("scenario_key") or "")
+        if not scenario_key or scenario_key in scenario_keys:
+            findings.append(f"{family_id}: missing or duplicate scenario key")
+        scenario_keys.add(scenario_key)
+        source_hashes = list(family.get("source_task_hashes") or [])
+        if category == "historical_source":
+            if source_kind != "golden_trace_after_historical_exclusion" or not source_hashes:
+                findings.append(f"{family_id}: historical provenance is incomplete")
+            for source_hash in source_hashes:
+                owner = source_task_owner.setdefault(str(source_hash), family_id)
+                if owner != family_id:
+                    findings.append(
+                        f"{family_id}: source task hash is shared with family {owner}"
+                    )
+        elif source_hashes:
+            findings.append(f"{family_id}: generated family unexpectedly names source tasks")
         review = family.get("review") or {}
         if require_reviews:
             reviewer = str(review.get("reviewer_1") or "").strip()
@@ -635,6 +700,8 @@ def audit_draft(
         if owner != family_id:
             findings.append(f"numeric-template duplicate families: {owner}, {family_id}")
         primary_text.append((family_id, signature))
+        selector_by_variant: dict[str, Mapping[str, Any]] = {}
+        invocation_by_variant: dict[str, Mapping[str, Any]] = {}
         for record in records:
             record_id = str(record.get("record_id") or "")
             if not record_id or record_id in record_ids:
@@ -642,6 +709,7 @@ def audit_draft(
                 continue
             record_ids.add(record_id)
             stage = str(record.get("stage") or "")
+            variant = str(record.get("variant") or "")
             stage_counts[stage] += 1
             user_step = str(record.get("user_step") or "")
             if not user_step or cloud_sensitive_findings(user_step):
@@ -650,8 +718,20 @@ def audit_draft(
             selected = record.get("selected_tool")
             try:
                 if stage == "selector":
+                    if variant in selector_by_variant:
+                        raise ContractError("duplicate selector variant")
+                    selector_by_variant[variant] = record
                     if selected is not None and selected not in SELECTOR_TOOLS:
                         raise ContractError("selector target outside frozen directory")
+                    expected_outcome = (
+                        "clarify_or_refuse"
+                        if selected is None
+                        else "invoke_core_tool"
+                        if selected in CORE_INVOCATION_TOOLS
+                        else "unsupported_for_c5"
+                    )
+                    if record.get("expected_outcome") != expected_outcome:
+                        raise ContractError("selector expected outcome does not match its target")
                     if tokenizer is not None:
                         rendered = render_selection(
                             tokenizer, user_step, tools, selected_tool=selected
@@ -660,8 +740,13 @@ def audit_draft(
                         if parsed != selected:
                             raise ContractError("selector target did not round-trip")
                 elif stage == "invocation":
+                    if variant in invocation_by_variant:
+                        raise ContractError("duplicate invocation variant")
+                    invocation_by_variant[variant] = record
                     if selected not in CORE_INVOCATION_TOOLS:
                         raise ContractError("invocation target outside frozen core")
+                    if record.get("expected_outcome") != "invoke_core_tool":
+                        raise ContractError("invocation expected outcome drifted")
                     arguments = validate_arguments(selected, record.get("arguments"), inventory[selected])
                     invocation_families[selected].add(family_id)
                     if tokenizer is not None:
@@ -682,6 +767,45 @@ def audit_draft(
                 prompt_tokens.append(rendered.prompt_tokens)
                 if rendered.full_tokens is not None:
                     full_tokens.append(rendered.full_tokens)
+
+        for variant, invocation in invocation_by_variant.items():
+            selector = selector_by_variant.get(variant)
+            if selector is None:
+                findings.append(f"{family_id}: invocation {variant!r} has no paired selector")
+                continue
+            if (
+                selector.get("selected_tool") != invocation.get("selected_tool")
+                or selector.get("user_step") != invocation.get("user_step")
+            ):
+                findings.append(f"{family_id}: selector/invocation pair {variant!r} drifted")
+
+        if category == "core_invocation":
+            if source_kind != "rule_generated_candidate" or set(invocation_by_variant) != {"main"}:
+                findings.append(f"{family_id}: core family shape or provenance drifted")
+            if set(selector_by_variant).difference({"main", "missing_required"}):
+                findings.append(f"{family_id}: core family has an unexpected selector variant")
+        elif category == "selector_noncore":
+            if source_kind != "rule_generated_candidate" or len(records) != 1:
+                findings.append(f"{family_id}: non-core selector family shape drifted")
+        elif category in {"clarification", "refusal"}:
+            if source_kind != "human_authored_candidate" or len(records) != 1:
+                findings.append(f"{family_id}: null-target family shape drifted")
+        elif category == "multistep_or_recovery":
+            expected_variants = {"step_1", "step_2", "step_3"}
+            context_parts = scenario_key.split(":", 3)
+            context = context_parts[2] if len(context_parts) == 4 else ""
+            if (
+                source_kind != "human_authored_candidate"
+                or set(selector_by_variant) != expected_variants
+                or set(invocation_by_variant) != expected_variants
+                or any(context not in str(record.get("user_step") or "") for record in records)
+            ):
+                findings.append(f"{family_id}: multistep family is not scene-coherent")
+        elif category == "historical_source":
+            if set(selector_by_variant) != {"main"} or set(invocation_by_variant).difference({"main"}):
+                findings.append(f"{family_id}: historical family shape drifted")
+        else:
+            findings.append(f"{family_id}: unsupported family category {category!r}")
 
     # Cheap deterministic lexical screen.  A later reviewer may merge more
     # semantic clusters; the program never auto-accepts based on this screen.
@@ -761,40 +885,172 @@ def apply_reviews(
 
 
 def assign_family_splits(families: Sequence[Mapping[str, Any]]) -> dict[str, str]:
+    rows = {str(family["family_id"]): family for family in families}
+    if len(rows) != EXPECTED_TOTAL_FAMILIES:
+        raise C5DatasetError("split assignment requires exactly 440 unique families")
+    family_tools = {
+        family_id: {
+            str(record.get("selected_tool"))
+            for record in family.get("records") or []
+            if record.get("stage") == "invocation"
+            and record.get("selected_tool") in CORE_INVOCATION_TOOLS
+        }
+        for family_id, family in rows.items()
+    }
+    total_tool_counts = Counter(
+        tool for tools in family_tools.values() for tool in tools
+    )
+    max_eval_counts = {
+        tool: total_tool_counts[tool] - 20 for tool in CORE_INVOCATION_TOOLS
+    }
+    if any(limit < 8 for limit in max_eval_counts.values()):
+        raise C5DatasetError(
+            "tool coverage cannot support train>=20 and validation/development>=4"
+        )
+
     counts = Counter({split: 0 for split in DEVELOPMENT_SPLITS})
     category_counts = {split: Counter() for split in DEVELOPMENT_SPLITS}
     tool_counts = {split: Counter() for split in DEVELOPMENT_SPLITS}
+    noncore_counts = {split: Counter() for split in DEVELOPMENT_SPLITS}
     assignments: dict[str, str] = {}
-    ordered = sorted(
-        families,
-        key=lambda family: (
-            -int(family["category"] in {"clarification", "refusal", "multistep_or_recovery"}),
-            _hash("c5-split:" + str(family["family_id"])),
-        ),
-    )
-    for family in ordered:
-        tools = {
-            str(record.get("selected_tool"))
-            for record in family.get("records") or []
-            if record.get("selected_tool") is not None
-        }
-        candidates = [split for split in DEVELOPMENT_SPLITS if counts[split] < FAMILY_TARGETS[split]]
 
-        def score(split: str) -> tuple[float, str]:
-            fill = (counts[split] + 1) / FAMILY_TARGETS[split]
-            category_fill = category_counts[split][family["category"]] / max(counts[split], 1)
-            tool_fill = sum(tool_counts[split][tool] for tool in tools) / max(len(tools), 1)
-            return fill + 0.08 * category_fill + 0.002 * tool_fill, _hash(
-                f"c5-split:{family['family_id']}:{split}"
+    def stable_ids(candidates: Iterable[str], label: str) -> list[str]:
+        return sorted(candidates, key=lambda family_id: _hash(
+            f"c5-split:{label}:{family_id}"
+        ))
+
+    def can_assign(family_id: str, split: str) -> bool:
+        if family_id in assignments or counts[split] >= FAMILY_TARGETS[split]:
+            return False
+        if split == "train":
+            return True
+        other = "development" if split == "validation" else "validation"
+        for tool in CORE_INVOCATION_TOOLS:
+            projected = (
+                tool_counts["validation"][tool]
+                + tool_counts["development"][tool]
+                + int(tool in family_tools[family_id])
             )
+            other_required = max(0, 4 - tool_counts[other][tool])
+            if projected + other_required > max_eval_counts[tool]:
+                return False
+        return True
 
-        split = min(candidates, key=score)
-        assignments[str(family["family_id"])] = split
+    def assign(family_id: str, split: str) -> None:
+        if not can_assign(family_id, split):
+            raise C5DatasetError(f"cannot assign {family_id} to constrained split {split}")
+        family = rows[family_id]
+        assignments[family_id] = split
         counts[split] += 1
         category_counts[split][str(family["category"])] += 1
-        tool_counts[split].update(tools)
+        tool_counts[split].update(family_tools[family_id])
+        if family["category"] == "selector_noncore":
+            selected = family["records"][0].get("selected_tool")
+            noncore_counts[split][str(selected)] += 1
+
+    # Every non-core selector appears once in every split.
+    noncore_by_tool: dict[str, list[str]] = defaultdict(list)
+    for family_id, family in rows.items():
+        if family["category"] == "selector_noncore":
+            noncore_by_tool[str(family["records"][0].get("selected_tool"))].append(family_id)
+    for tool, candidates in sorted(noncore_by_tool.items()):
+        ordered = stable_ids(candidates, f"noncore:{tool}")
+        if len(ordered) != 3:
+            raise C5DatasetError(f"non-core tool {tool} must have exactly three families")
+        for split, family_id in zip(DEVELOPMENT_SPLITS, ordered):
+            assign(family_id, split)
+
+    # Clarification/refusal and multistep evidence must be present in both eval splits.
+    for category, per_eval in (("clarification", 4), ("refusal", 4)):
+        candidates = stable_ids(
+            (family_id for family_id, family in rows.items() if family["category"] == category),
+            category,
+        )
+        for split in ("validation", "development"):
+            for family_id in candidates:
+                if category_counts[split][category] >= per_eval:
+                    break
+                if family_id not in assignments:
+                    assign(family_id, split)
+
+    for split in ("validation", "development"):
+        while category_counts[split]["multistep_or_recovery"] < 4:
+            deficits = {
+                tool for tool in CORE_INVOCATION_TOOLS if tool_counts[split][tool] < 4
+            }
+            candidates = [
+                family_id for family_id, family in rows.items()
+                if family["category"] == "multistep_or_recovery"
+                and can_assign(family_id, split)
+            ]
+            if not candidates:
+                raise C5DatasetError(f"cannot place multistep coverage in {split}")
+            family_id = min(candidates, key=lambda value: (
+                -len(family_tools[value].intersection(deficits)),
+                _hash(f"c5-split:multistep:{split}:{value}"),
+            ))
+            assign(family_id, split)
+
+    # Satisfy all per-tool eval minima without consuming the 20-family train reserve.
+    for split in ("validation", "development"):
+        while any(tool_counts[split][tool] < 4 for tool in CORE_INVOCATION_TOOLS):
+            deficits = {
+                tool for tool in CORE_INVOCATION_TOOLS if tool_counts[split][tool] < 4
+            }
+            candidates = [
+                family_id for family_id, family in rows.items()
+                if family["category"] in {"core_invocation", "historical_source"}
+                and family_tools[family_id].intersection(deficits)
+                and can_assign(family_id, split)
+            ]
+            if not candidates:
+                raise C5DatasetError(f"cannot satisfy core tool minima in {split}")
+            family_id = min(candidates, key=lambda value: (
+                -len(family_tools[value].intersection(deficits)),
+                len(family_tools[value]),
+                _hash(f"c5-split:tool-min:{split}:{value}"),
+            ))
+            assign(family_id, split)
+
+    # Fill eval splits with invocation families while keeping train reserves intact.
+    for split in ("validation", "development"):
+        while counts[split] < FAMILY_TARGETS[split]:
+            candidates = [
+                family_id for family_id, family in rows.items()
+                if family["category"] in {"core_invocation", "historical_source"}
+                and can_assign(family_id, split)
+            ]
+            if not candidates:
+                raise C5DatasetError(f"cannot fill constrained split {split}")
+            family_id = min(candidates, key=lambda value: (
+                sum(tool_counts[split][tool] for tool in family_tools[value]),
+                -sum(
+                    max_eval_counts[tool]
+                    - tool_counts["validation"][tool]
+                    - tool_counts["development"][tool]
+                    for tool in family_tools[value]
+                ),
+                category_counts[split][str(rows[value]["category"])],
+                _hash(f"c5-split:fill:{split}:{value}"),
+            ))
+            assign(family_id, split)
+
+    for family_id in stable_ids(
+        (value for value in rows if value not in assignments), "train"
+    ):
+        assign(family_id, "train")
+
     if dict(counts) != FAMILY_TARGETS:
         raise C5DatasetError(f"split assignment missed exact family targets: {dict(counts)}")
+    for tool in CORE_INVOCATION_TOOLS:
+        if tool_counts["train"][tool] < 20:
+            raise C5DatasetError(f"{tool}: train has fewer than 20 families")
+        for split in ("validation", "development"):
+            if tool_counts[split][tool] < 4:
+                raise C5DatasetError(f"{tool}: {split} has fewer than 4 families")
+    for split in DEVELOPMENT_SPLITS:
+        if any(noncore_counts[split][tool] != 1 for tool in noncore_by_tool):
+            raise C5DatasetError(f"{split}: non-core selector coverage drifted")
     return assignments
 
 
@@ -849,6 +1105,25 @@ def review_template(families: Sequence[Mapping[str, Any]]) -> list[dict[str, Any
     ]
 
 
+def review_recommendations(
+    families: Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Create non-author recommendations without impersonating owner approval."""
+
+    return [
+        {
+            "schema_version": REVIEW_SCHEMA_VERSION,
+            "family_id": family["family_id"],
+            "family_sha256": _hash(_canonical(family)),
+            "agent_recommendation": "approve",
+            "automated_checks": list(CONTENT_QA_CHECKS),
+            "required_reviewer_1": OWNER_REVIEWER_ID,
+            "owner_decision": "pending",
+        }
+        for family in sorted(families, key=lambda item: item["family_id"])
+    ]
+
+
 def audit_payload(audit: DatasetAudit) -> dict[str, Any]:
     return {
         "passed": audit.passed,
@@ -869,5 +1144,5 @@ __all__ = [
     "C5DatasetError", "DATASET_ID", "EXPECTED_TOTAL_FAMILIES", "FAMILY_TARGETS",
     "apply_reviews", "assign_family_splits", "audit_draft", "audit_payload",
     "build_draft_families", "build_historical_exclusions", "freeze_accepted_dataset",
-    "load_reviews", "review_template",
+    "load_reviews", "review_recommendations", "review_template",
 ]
