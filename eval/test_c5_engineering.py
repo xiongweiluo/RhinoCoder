@@ -10,6 +10,7 @@ from training.c5_engineering import (
     C5CausalLMCollator,
     C5EngineeringError,
     C5TokenizedDataset,
+    RenderedTrainingRecord,
     load_config,
     render_development_records,
     select_overfit_smoke,
@@ -133,10 +134,31 @@ def test_rendered_records_use_assistant_only_labels_and_deterministic_smoke() ->
     assert [r.record_id for r in smoke] == [
         r.record_id for r in select_overfit_smoke(records, total=64)
     ]
-    dataset = C5TokenizedDataset(smoke[:2])
+
+
+def test_tokenized_dataset_masks_prompt_and_collates() -> None:
+    pytest.importorskip("torch", reason="training-only dependency is not installed in app CI")
+    records = [
+        RenderedTrainingRecord(
+            split="train",
+            family_id=f"family-{index}",
+            record_id=f"record-{index}",
+            stage="selector",
+            selected_tool="create_box",
+            prompt="prompt",
+            full="prompt-target",
+            target="-target",
+            prompt_tokens=2,
+            full_tokens=4,
+            prompt_token_ids=(1, 2),
+            full_token_ids=(1, 2, 3 + index, 5 + index),
+        )
+        for index in range(2)
+    ]
+    dataset = C5TokenizedDataset(records)
     collated = C5CausalLMCollator(0)([dataset[0], dataset[1]])
     assert collated["input_ids"].shape[0] == 2
-    for item, record in zip((dataset[0], dataset[1]), smoke[:2], strict=True):
+    for item, record in zip((dataset[0], dataset[1]), records, strict=True):
         prompt_size = len(record.prompt_token_ids)
         assert item["labels"][:prompt_size].tolist() == [-100] * prompt_size
         assert all(value != -100 for value in item["labels"][prompt_size:].tolist())
