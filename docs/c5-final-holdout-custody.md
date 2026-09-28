@@ -1,8 +1,8 @@
 # C5-1c：最终 holdout 独立保管与单次消费交接
 
-日期：2026-09-27。状态：**开发侧实现、公开模板和自动测试已完成；等待 `repository_owner` 在代理不可访问的环境中生成、审计并加密 80 个全新家族，再只交回公开 commitment JSON。当前 `final_holdout_rows_read=0`，不授权 GPU、训练或最终评测。**
+日期：2026-09-28。状态：**C5-1c 已完成。`repository_owner` 提交的公开 commitment 已通过校验并不可覆盖登记；80 家族、冻结分层/工具覆盖/排除绑定均有效，commitment SHA-256 为 `4fe1796cc1e5b19f7d81b79fdf883463d7bb77d6af012d9aa1900208ec35ebaa`。零读取 preflight 通过，`new_run_allowed=true`、`consumption_events=0`、`final_holdout_rows_read=0`；仍不授权正式训练或最终评测。**
 
-公开实现哈希和门禁状态见 [`eval/c5/final-holdout-gate-readiness.json`](../eval/c5/final-holdout-gate-readiness.json)；它明确保持 `owner_commitment_registered=false`、`training_authorized=false`。
+公开 commitment 见 [`eval/c5/final-holdout-commitment.json`](../eval/c5/final-holdout-commitment.json)，实现哈希和门禁状态见 [`eval/c5/final-holdout-gate-readiness.json`](../eval/c5/final-holdout-gate-readiness.json)。它们明确保持 `single_use_claim_executed=false`、`training_authorized=false`。
 
 ## 1. 职责边界
 
@@ -88,4 +88,4 @@ python tools/c5_holdout_gate.py statistics \
 
 ## 6. 当前未满足项
 
-当前尚无 owner commitment，因此 C5-1c 未完成。其后仍依次需要：C5-2 CPU/有界 GPU 工程门、C5-3 唯一正式训练、C5-4 一次性离线评测、C5-5 控制器兼容性；只有前述离线门通过，R 的最小研究收尾和 C5-6 真实 Rhino 小门才变为当前依赖。
+C5-1c 已完成，下一门是 C5-2 CPU/有界 GPU 工程验证。其后仍依次需要 C5-3 唯一正式训练、C5-4 一次性离线评测、C5-5 控制器兼容性；只有前述离线门通过，R 的最小研究收尾和 C5-6 真实 Rhino 小门才变为当前依赖。commitment 登记不等于训练授权，且本阶段绝不执行 `claim`。

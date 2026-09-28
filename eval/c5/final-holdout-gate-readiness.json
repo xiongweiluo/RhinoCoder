@@ -1,5 +1,6 @@
 {
   "commitment_template_sha256": "9dc3936991f8f119bf73a359f0d699a2134f22f97d163a6d532047ab683d0ff7",
+  "consumption_events": 0,
   "development_agent_plaintext_access": false,
   "development_dataset_freeze_sha256": "8a08059fbcaa7b8650f096106bef3d699a4240fdca9c64ad999e62904f585903",
   "final_holdout_rows_read": 0,
@@ -8,12 +9,14 @@
   "implementation_sha256": {
     "eval/test_c5_holdout_gate.py": "c237b446b49b3b31647d5bf7d8b995b87613dbaa5ad9544dbd186e49fdc6d791",
     "tools/c5_holdout_custodian.py": "682644d2ec3ce0264d53439853648bbd71250f423db923d2f811bf7a04db069a",
-    "tools/c5_holdout_gate.py": "2e0721535024b952a894e72e4c2e8863ad73589eb47b82ac4bda728ebccabcf8",
+    "tools/c5_holdout_gate.py": "a089cdaebb7cca37a5ce8933534bf2f42fcf59aa74a794f126feaa68603d2bde",
     "training/c5_holdout.py": "5be71078717ea9d40b6a310478d8d22448715de211bca25981273fba64e60d6a"
   },
-  "owner_commitment_registered": false,
+  "new_run_allowed": true,
+  "owner_commitment_registered": true,
+  "owner_commitment_sha256": "4fe1796cc1e5b19f7d81b79fdf883463d7bb77d6af012d9aa1900208ec35ebaa",
   "schema_version": "1.0",
   "single_use_claim_executed": false,
-  "status": "implementation_ready_owner_commitment_required",
+  "status": "holdout_commitment_registered_c5_1c_complete_training_not_authorized",
   "training_authorized": false
 }

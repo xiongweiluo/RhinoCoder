@@ -95,6 +95,15 @@ def template_command(output: Path) -> dict[str, Any]:
 
 def readiness_command(output: Path) -> dict[str, Any]:
     exclusions, dataset = _expected_hashes()
+    commitment_registered = DEFAULT_COMMITMENT.is_file()
+    commitment_status: dict[str, Any] = {}
+    if commitment_registered:
+        commitment_status = gate_preflight(
+            _read_json(DEFAULT_COMMITMENT),
+            DEFAULT_LEDGER,
+            expected_exclusion_sha256=exclusions,
+            expected_dataset_freeze_sha256=dataset,
+        )
     implementation = (
         ROOT / "training/c5_holdout.py",
         ROOT / "tools/c5_holdout_gate.py",
@@ -103,7 +112,11 @@ def readiness_command(output: Path) -> dict[str, Any]:
     )
     value = {
         "schema_version": "1.0",
-        "status": "implementation_ready_owner_commitment_required",
+        "status": (
+            "holdout_commitment_registered_c5_1c_complete_training_not_authorized"
+            if commitment_registered
+            else "implementation_ready_owner_commitment_required"
+        ),
         "historical_exclusions_sha256": exclusions,
         "development_dataset_freeze_sha256": dataset,
         "commitment_template_sha256": sha256_file(DEFAULT_TEMPLATE),
@@ -111,7 +124,10 @@ def readiness_command(output: Path) -> dict[str, Any]:
             path.relative_to(ROOT).as_posix(): sha256_file(path)
             for path in implementation
         },
-        "owner_commitment_registered": DEFAULT_COMMITMENT.is_file(),
+        "owner_commitment_registered": commitment_registered,
+        "owner_commitment_sha256": commitment_status.get("commitment_sha256"),
+        "consumption_events": commitment_status.get("consumption_events", 0),
+        "new_run_allowed": commitment_status.get("new_run_allowed", False),
         "development_agent_plaintext_access": False,
         "final_holdout_rows_read": 0,
         "single_use_claim_executed": False,
