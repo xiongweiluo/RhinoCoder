@@ -4,6 +4,8 @@
 
 项目状态：**C0–C3 Completed — C4 NO-GO**
 
+> **后续路线状态（2026-09-28）：**本文继续作为第一轮 B1–C4 的历史验收报告，以下配置、结果和限制均不改写。独立的 C5 已使用新实验 ID、新 dataset v2、新 train/validation/development/final holdout 和新预注册完成 C5-0/C5-1；C5-2 CPU 工程子门对 943/943 条记录的同源渲染、严格 round-trip、assistant-only label 和 token 预算核验通过，GPU 子门仍待主机、预算和一次性授权。C5 不续跑本文实验，也不把 A5/P2 重新当作未见集。详见 [C5 规划](c5-contract-aligned-qlora-plan.md)、[dataset v2 冻结报告](c5-dataset-v2-draft-report.md)和 [C5-2 工程门](c5-engineering-gate.md)。
+
 MornAI Ubuntu 22.04.4 + RTX 3090 24GB 已完成 C0–C4。C2 共 42 optimizer steps / 3 epochs；validation 结构化四指标均为 0。C3 的 45 条 A5 上，基座与 LoRA 四指标也均为 0/45，差值 0.0pp、净胜 0；独立审计通过且第二 run 已禁止。冻结 P2 真实 Rhino 配对为基座 4/30、LoRA 5/30，差值 +3.3pp、净胜 1、McNemar `p=1.0`，未达到 +10pp / 净胜 3 门槛。C4 最终裁决为 `NO-GO`，部署继续使用已验证的混合路线。
 
 ## B1：首个实验范围
@@ -200,4 +202,4 @@ Agent/Rhino 桌面兼容与本地模型兼容分别验收。Windows + NVIDIA/CUD
 - C3 一次性入口已实现并与训练入口隔离；正式 A5 运行完成，独立审计覆盖冻结血缘、先声明后读取、第二新 run 拒绝、90 条配对生成、资源事件与统计复算。
 - A5 基座/LoRA 结构化四指标均为 0/45；P2 基座/LoRA 为 4/30 与 5/30，+3.3pp、净胜 1、关键安全回退 0。两层均未达到预注册门槛，C4 已裁决 `NO-GO`。
 
-结论：不得重训同一实验或重复读取 A5。保留训练与评测资产，部署继续使用已验证的混合路线；若未来启动 dataset v2，必须创建新实验 ID、新预注册与新的未见保留集。完整结果见 [`c3-a5-holdout-report.md`](c3-a5-holdout-report.md) 与 [`c4-model-decision.md`](c4-model-decision.md)。
+结论：不得重训同一实验或重复读取 A5。保留训练与评测资产，部署继续使用已验证的混合路线；独立 C5 只能按其新实验 ID、新预注册、新 dataset v2 与新未见保留集继续。完整历史结果见 [`c3-a5-holdout-report.md`](c3-a5-holdout-report.md) 与 [`c4-model-decision.md`](c4-model-decision.md)，后续路线见 [`c5-contract-aligned-qlora-plan.md`](c5-contract-aligned-qlora-plan.md)。
