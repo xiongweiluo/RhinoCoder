@@ -1,6 +1,6 @@
 # C5：契约对齐后的第二轮 QLoRA 规划与预注册草案
 
-状态：**C5-0 与 C5-1 已完成：440/440 开发家族获仓库所有者批准，正式 320/60/60 split 已冻结；最终 80 家族的公开 commitment 已验证并不可覆盖登记，零读取 preflight 通过。当前进入 C5-2 工程门；仍不授权正式训练、最终 holdout 消费或产品切换。**
+状态：**C5-0 与 C5-1 已完成；C5-2 CPU 同源渲染、round-trip、token 与 assistant-only label 子门已通过 943/943 条记录，冻结 64 条过拟合 smoke 索引。GPU 子门仍等待主机、最多 4 GPU-hours 预算与一次性诊断授权；不授权正式训练、最终 holdout 消费或产品切换。**
 
 日期：2026-09-27。实验 ID：`rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2`。本地冻结契约 ID：`qwen25-v4-selector-v3-json-invoker-c5-v1`。机器清单与实际审计见 [C5-0/C5-1 离线冻结报告](c5-offline-freeze-report.md)、[dataset v2 冻结报告](c5-dataset-v2-draft-report.md)和 [`eval/c5/manifest.json`](../eval/c5/manifest.json)。仓库所有者是唯一 `reviewer_1` 和最终 holdout 独立保管人；开发数据审批已通过 exact-set attestation 绑定到公开哈希，训练前预注册仍须补齐 holdout 加密承诺、统计/单次消费门和工程资源决定。任何变更必须升版本，不得覆盖既有哈希。
 
@@ -28,7 +28,7 @@
 | --- | --- | --- |
 | C5-0 | 契约、数据范围、指标、阈值、预算和泄漏控制冻结 | **已通过：**最小提交 `a87c65d`、PR #2 与仓库所有者非作者签核已形成；未自动合并 |
 | C5-1 | dataset v2 构建与仓库所有者质量审查 | **已通过：**来源审计、440 家族 owner 审批、正式 320/60/60 开发 split、80 家族公开 commitment 登记及零读取 preflight 均完成 |
-| C5-2 | CPU smoke 与最多两次有界 GPU 诊断 | 只验证可训练性、梯度、显存、吞吐、checkpoint/resume；不接触最终 holdout |
+| C5-2 | CPU smoke 与最多两次有界 GPU 诊断 | **CPU 子门已通过；GPU 子门待输入。**只验证可训练性、梯度、显存、吞吐、checkpoint/resume；不接触最终 holdout |
 | C5-3 | 唯一正式 QLoRA 训练 | 冻结配置完成一个正式 run；adapter、日志、checkpoint 和环境完整导出 |
 | C5-4 | 一次性离线最终 holdout 配对 | 基座与 LoRA 同输入、同解码、逐任务配对；先声明消费后读取 |
 | C5-5 | 控制器兼容性 | 不做解析修复，输出能通过同一严格解析器、路由和安全门 |
@@ -184,8 +184,8 @@ C5 真实 Rhino 门可复用 R 已验证的隔离 headless、签名、场景、�
 1. **已完成本地冻结：**experiment/contract ID、12 个核心 invocation 工具、23 项 selector 目录、严格 parser、同源渲染、解码、2,048-token 预算与门槛机器清单；仍须受控提交和独立签核。
 2. **已完成 dataset v2 开发集冻结：**A5/P2/R 历史排除后为 103 个来源家族，337 个新家族已生成；440 家族/943 记录通过全量审计。仓库所有者作为唯一 `reviewer_1` 批准当前候选 SHA-256，440 行审核台账与正式 320/60/60 split 已锁定；不要求 `reviewer_2`。
 3. **C5-1c 已完成：**[独立保管与单次消费交接](c5-final-holdout-custody.md)已提供 owner-only 内容审计器、公开模板、不可覆盖登记、零读取 preflight、先 fsync 后开加密字节的单次 gate 和冻结统计实现。公开 commitment SHA-256 为 `4fe1796cc1e5b19f7d81b79fdf883463d7bb77d6af012d9aa1900208ec35ebaa`；正文、路径与密钥未交给开发代理，消费事件仍为 0。
-4. 冻结正式配置、checkpoint 选择规则、解码参数、统计脚本、20 条真实 Rhino 任务生成/保管协议和 `GO / MORE-DATA / NO-GO` 门槛。
-5. 明确 GPU 主机、最多 16 GPU-hours 预算、私有数据传输/导出路径和停止责任；在此之前不租赁或启动 GPU。
+4. **C5-2 CPU 子门已完成：**943/943 开发记录使用冻结契约完成同源渲染、严格 round-trip、assistant-only label 与 2,048-token 审计；实测完整序列最大 1,296，零溢出，64 条 smoke 集合已哈希冻结。详见 [C5-2 工程门](c5-engineering-gate.md)。
+5. 明确 GPU 主机、诊断阶段最多 4 GPU-hours（总预算仍为 16 GPU-hours）、私有数据传输/导出路径和停止责任；在此之前不启动 GPU。GPU 子门通过后再冻结 C5-3 正式授权、checkpoint 选择实现和模型登记细节。
 6. 在 C5-C 前选定 R 研究执行版本并关闭血缘、精确核验、最终哈希和不确定清理四类直接阻断；产品 UI/人类产品评审另行排期。
 
 任何输入未冻结时，下一步只能继续离线设计、数据审计和测试，不得创建正式 adapter 或消费最终 holdout。
