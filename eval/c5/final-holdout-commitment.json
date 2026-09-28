@@ -1,0 +1,58 @@
+{
+  "contract_id": "qwen25-v4-selector-v3-json-invoker-c5-v1",
+  "core_tool_family_counts": {
+    "boolean_difference": 6,
+    "create_box": 12,
+    "create_cylinder": 11,
+    "create_sphere": 6,
+    "get_bounding_box": 7,
+    "get_scene_summary": 5,
+    "group_objects": 6,
+    "move_object": 8,
+    "rotate_object": 6,
+    "scale_object": 5,
+    "set_object_color": 8,
+    "set_object_layer": 8
+  },
+  "custodian_attestation": {
+    "content_is_new_and_unseen": true,
+    "contract_rendering_verified": true,
+    "encrypted_before_commitment": true,
+    "group_split_and_near_duplicate_checks_passed": true,
+    "key_not_shared_with_development_agent": true,
+    "sealed_at": "2026-09-28T18:23:41.380630Z",
+    "strict_targets_verified": true
+  },
+  "custodian_identity": "repository_owner",
+  "dataset_id": "rhinocoder-c5-dataset-v2",
+  "development_agent_plaintext_access": false,
+  "encrypted_artifact": {
+    "bytes": 79408,
+    "format": "age-x25519",
+    "sha256": "a62381e9529aeecf2592462fb2da20cd86a25b18c84076a91701d257d4a94d54"
+  },
+  "exclusions": {
+    "a5_p2_r_consumed_overlap_count": 0,
+    "development_dataset_freeze_sha256": "8a08059fbcaa7b8650f096106bef3d699a4240fdca9c64ad999e62904f585903",
+    "development_family_overlap_count": 0,
+    "historical_exclusions_sha256": "ed1fa0859633da40e64001ca1646c094e140f9a06f9aa48c86a1fe8b552389fc"
+  },
+  "experiment_id": "rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2",
+  "family_count": 80,
+  "final_holdout_rows_read": 0,
+  "fingerprints": {
+    "family_merkle_root_sha256": "fc6ea0fbbc792c3f5c0f80a7661e0b7fd9006ce110f5d56080768cbb1849829b",
+    "numeric_template_merkle_root_sha256": "1abdd0755ec4609a91ca7ad8da132fcc07beb9967e274b04b802431cc98e2fde",
+    "semantic_cluster_merkle_root_sha256": "8e27837ddc001dc4e4f0c707287c9e1b66a25fa0f833d24d4449adb7243f0178"
+  },
+  "reviewer_2_required": false,
+  "schema_version": "1.0",
+  "status": "sealed_unread_final_holdout",
+  "strata_counts": {
+    "clarification": 12,
+    "error_recovery": 8,
+    "multistep": 8,
+    "refusal_or_no_tool": 12,
+    "single_step": 40
+  }
+}
