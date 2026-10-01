@@ -1,6 +1,6 @@
 # C5 GPU 执行包（2026-10-01）
 
-状态：专用实现及受测部署已完成；真实主机 19 项专项测试通过，Linux 943 条重核与原冻结 schema/渲染/token/数据哈希完全一致。overfit 已完成 128 steps 并通过独立 step1 恢复/有限 loss 门；系统诊断正在运行，工程全门与正式训练尚未完成，不提前标记通过。
+状态：专用实现及受测部署已完成；真实主机 19 项专项测试通过，Linux 943 条重核与原冻结 schema/渲染/token/数据哈希完全一致。overfit 和系统诊断均已完成，C5-2 工程全门通过；C5-3 唯一正式训练正在运行，尚未登记正式 adapter，不提前标记完成。
 
 仓库所有者明确报告续租剩余两天，并授权依次完成诊断包、GPU 工程门、正式训练、最终离线评测与控制器兼容性。实际执行授权记录在 `eval/c5/c5-execution-authorization-v3.json`，绑定原 CPU 配置的 canonical SHA-256、执行源文件和 C5-only 元数据呈现，并验证原契约/schema/逐记录 prompt-target 血缘。初版与 v2 均未执行；v3 保留初版租期截止，不因部署修复延后时间。三个授权版本原字节保留，不形成三个 GPU run。它不改写 C0–C4，不批准 PR、不授权自动合并、追加租赁或默认路由切换。
 
@@ -27,6 +27,8 @@
 ## 实际诊断与导出证据
 
 [64 条 overfit 结果](../eval/c5/gpu-overfit-result-20261001.json)记录完整 128 optimizer steps、60 个家族、独立恢复 `resumed_from=1`；同一 smoke 集合 eval loss 从 `0.5696033849671949` 降至 `0.00003856955472514301`（下降约 99.9932%）。这只证明冻结训练实现可反向传播、记忆该小集合并独立恢复，不能外推未见任务或 LoRA 相对基座的质量。第一个 step1 段约 41.45 秒，恢复段约 1,949.05 秒；预算按 durable start/finish 账本累计，不能只统计恢复段。
+
+[系统诊断结果](../eval/c5/gpu-system-result-20261001.json)为 32 个 train 家族、70 记录、26 optimizer steps；train eval loss `0.0006852567`、validation loss `0.0066594026` 均有限。没有 OOM/NaN；overfit checkpoint128 与 system checkpoint26 逐文件血缘另行核验通过。全部诊断累计 `2,424.7474` 秒（约 `0.67354 GPU-hours`），低于 4 小时/2 run 上限。正式训练另建 fresh base/adapter，不沿用诊断权重；此处 validation loss 不是最终泛化比较。
 
 [导出审计器](../tools/audit_c5_run_export.py)只遍历 overfit/system/formal 三个明确目录，不打开 final 目录。导出后核对连续 optimizer steps、有限 loss/梯度、checkpoint 每个文件、registry 与原 validation 选模、预算及 source/config/data/auth 血缘。远端与本地独立重算完整文件 manifest，二者须相同；weights/state/logs 保存于被忽略的本地私有数据目录，不放入 PR。训练/export 通过不等同于 C5 最终质量门通过。
 
