@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import hashlib
+import importlib.metadata
 import fcntl
 import json
 import os
@@ -49,6 +50,22 @@ def main():
     from peft import PeftModel, prepare_model_for_kbit_training
     from transformers import AutoModelForCausalLM, BitsAndBytesConfig
     auth = verify_authorization(a.authorization, load_config())
+    if not torch.cuda.is_available() or not torch.cuda.is_bf16_supported():
+        raise RuntimeError("final CUDA/BF16 unavailable; no consumption allowed")
+    packages = {name: importlib.metadata.version(name) for name in
+                ("torch", "transformers", "peft", "accelerate", "bitsandbytes", "safetensors")}
+    for line in (ROOT / "requirements-training.txt").read_text().splitlines():
+        if "==" in line and not line.startswith("#"):
+            name, version = line.split("==")
+            if packages.get(name, "").split("+")[0] != version:
+                raise RuntimeError("final locked training dependency drift")
+    environments = [read_json(p) for p in sorted((a.run_root / "formal").glob("environment-*.json"))]
+    if not environments or any(e["packages"] != packages or e["torch_cuda"] != torch.version.cuda
+                               or e["gpu"] != torch.cuda.get_device_name(0) for e in environments):
+        raise RuntimeError("final hardware/runtime differs from formal execution")
+    free_bytes, total_bytes = torch.cuda.mem_get_info()
+    if free_bytes < 16 * 1024**3:
+        raise RuntimeError("less than 16 GiB GPU memory currently free; no consumption allowed")
     freeze = read_json(a.final_freeze)
     lock = (a.run_root / "execution.lock").open("a+")
     fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -86,6 +103,7 @@ def main():
     if a.preflight:
         print(json.dumps({"ready":True,"adapter_sha256":registry["adapter_sha256"],
                           "budget_seconds_remaining":budget,"final_freeze_sha256":digest(freeze),
+                          "gpu_free_bytes":free_bytes,"gpu_total_bytes":total_bytes,"packages":packages,
                           "final_holdout_rows_read":0,"consumption_claim_executed":False}))
         fcntl.flock(lock.fileno(), fcntl.LOCK_UN); lock.close()
         return

@@ -15,7 +15,7 @@ FILES=("tools/run_c5_owner_final.py","tools/run_c5_final_remote.py",
        "training/c5_final_evaluation.py","training/c5_execution.py","training/c5_inventory.py",
        "training/c5_contract.py","training/tool_contract_candidate.py",
        "training/tool_contract_v3_candidate.py","training/tool_selector_v4_candidate.py",
-       "training/c5_holdout.py")
+       "training/c5_holdout.py","requirements-training.txt","requirements.txt")
 
 
 def main():
