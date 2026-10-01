@@ -15,28 +15,41 @@ FILES=("tools/run_c5_owner_final.py","tools/run_c5_final_remote.py",
        "training/c5_final_evaluation.py","training/c5_execution.py","training/c5_inventory.py",
        "training/c5_contract.py","training/tool_contract_candidate.py",
        "training/tool_contract_v3_candidate.py","training/tool_selector_v4_candidate.py",
-       "training/c5_holdout.py","requirements-training.txt","requirements.txt")
+       "training/c5_holdout.py","training/c5_engineering.py","training/c5_dataset.py",
+       "training/c5_freeze.py","training/tool_schema_inventory.py","data_pipeline/training_views.py",
+       "agent/privacy.py","requirements-training.txt","requirements.txt")
 
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--formal-result",type=Path,required=True)
     p.add_argument("--registry",type=Path,required=True)
+    p.add_argument("--export-audit",type=Path,required=True)
     p.add_argument("--output",type=Path,default=ROOT/"eval/c5/c5-final-evaluation-freeze.json")
     a=p.parse_args()
     result=read_json(a.formal_result);registry=read_json(a.registry)
     if not result.get("completed") or result.get("passed") is not True or result.get("registry")!=registry:
         raise RuntimeError("formal adapter registration not complete")
+    audit=read_json(a.export_audit)
+    if (audit.get("passed") is not True or audit.get("final_holdout_rows_read") != 0
+        or audit.get("experiment_id") != registry["experiment_id"]
+        or audit["stages"]["formal"]["result"] != result):
+        raise RuntimeError("complete exported training evidence not verified")
     revision=subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip()
     spec=ROOT/"eval/c5/offline-freeze-spec.json"
+    files=list(FILES)+[p.relative_to(ROOT).as_posix() for p in sorted((ROOT/"plugin/mcp_server").glob("*.py"))]
+    files += [name for name in ("training/__init__.py","data_pipeline/__init__.py","agent/__init__.py")
+              if (ROOT/name).is_file()]
     freeze={"schema_version":"1.0","experiment_id":registry["experiment_id"],
             "contract_id":registry["contract_id"],"code_revision":revision,
             "adapter_sha256":registry["adapter_sha256"],
             "selected_checkpoint":registry["selected_checkpoint"],
             "formal_result_sha256":sha256_file(a.formal_result),"registry_sha256":sha256_file(a.registry),
+            "export_audit_sha256":sha256_file(a.export_audit),
+            "export_file_manifest_sha256":audit["export_file_manifest_sha256"],
             "thresholds_sha256":sha256_file(spec),
             "commitment_sha256":digest(read_json(ROOT/"eval/c5/final-holdout-commitment.json")),
-            "implementation_sha256":{name:sha256_file(ROOT/name) for name in FILES},
+            "implementation_sha256":{name:sha256_file(ROOT/name) for name in files},
             "data_unlock_allowed_only_to":"repository_owner",
             "final_holdout_rows_read":0,"consumption_claim_executed":False,
             "raw_outputs_private_to_custodian":True,"new_final_runs_max":1,

@@ -15,12 +15,12 @@
 本增量优先于下方 2026-09-21 历史快照及旧执行顺序。作品集当前研发主线是“C4 真实失败 → 契约/数据诊断 → C5 独立第二轮可信实验”，不是必须证明 LoRA 有效。完整问题、数据、门槛与决策规则见 [C5 规划](docs/c5-contract-aligned-qlora-plan.md)，受审执行见 [GPU 执行包](docs/c5-gpu-execution.md)及 [PR #6](https://github.com/xiongweiluo/RhinoCoder/pull/6)。
 
 - **当前主线：**C5-0/1 与 943 条 CPU 工程子门已冻结；所有者授权现有两天租期内的任务 1–5，条件预算为诊断 4 / 正式 8 / 最终 4、总计 16 GPU-hours，不追加租赁。受测执行源 `160d1c7` 与 v3 授权保持不变。
-- **实际执行点：**C5-2 工程全门通过。64 条 overfit 完成 128 steps，独立进程从 step1 恢复，loss 由 0.569603 降至 0.00003857；系统诊断完成 32 家族/70 记录/26 steps，validation loss 0.0066594。两个最终 checkpoint 血缘独立复核通过，诊断累计 2,424.75 秒（0.67354 GPU-hours）。C5-3 唯一正式训练正在运行；最终评测与控制器兼容性尚未完成，不提前勾选。见 [overfit 结果](eval/c5/gpu-overfit-result-20261001.json)和 [系统结果](eval/c5/gpu-system-result-20261001.json)。
+- **实际执行点：**C5-2/3 完整通过。唯一正式 run 完成 697 train 记录/3 epochs/132 steps，按预定 validation 顺序选择 checkpoint132：parse/name 60/60、arguments/sequence 59/60。73 文件、约2.20GB产物完整回传，远端/本地独立审计逐字节一致，活跃执行累计1.57004 GPU-hours。见 [正式训练报告](docs/c5-formal-training-report.md)。这些是工程/开发信号，不是最终盲测或模型 GO；C5-4/5 仍未消费/运行。
 - **单次最终门：**80 家族公开 commitment 保持零消费。工程门通过才运行唯一正式配置；正式 adapter、选模、代码和阈值冻结后，只有仓库所有者的独立保管终端能 durable claim/解密。开发代理不查看明文、密钥或原始输出；C5-4 未通过不得把 C5-5 或产品标为通过。
 - **条件项与延期：**R 安全/真实 Rhino/审计证据保留，R 最小研究收尾仅在 C5-4/5 通过且进入 C5-6 时成为依赖。完整产品 UI、受控用户开放、P2b 和精简 D 不是当前训练依赖，继续延期。
 - **永久历史：**C4 `NO-GO`，A5 两路 0/45、P2 描述性 4/30 对 5/30；v8 `formal_quality_fail`、59/60；默认混合路由不变。所有者是唯一 reviewer_1 与独立保管人，不需要 reviewer_2，持续授权推送/建 PR 不包含自动 merge。
 
-当前执行顺序：`完成正在运行的 C5-3 唯一正式训练/导出 → 所有者单次 C5-4 →（离线门通过）C5-5 → 条件式 R 研究收尾/C5-6 → 冻结规则裁决`。当前代码在独立分支/OPEN PR，主线 `01647f1` 未变；不把本地或分支结果冒充 main 已接入。
+当前执行顺序：`最终代码/唯一 adapter/阈值冻结及零读取 preflight → 所有者单次 C5-4 →（离线门通过）C5-5 → 条件式 R 研究收尾/C5-6 → 冻结规则裁决`。当前代码在独立分支/OPEN PR，主线 `01647f1` 未变；不把本地或分支结果冒充 main 已接入。交互式操作见 [独立保管人交接](docs/c5-final-owner-runbook.md)。
 
 ### 历史快照
 

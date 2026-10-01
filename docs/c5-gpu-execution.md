@@ -1,6 +1,6 @@
 # C5 GPU 执行包（2026-10-01）
 
-状态：专用实现及受测部署已完成；真实主机 19 项专项测试通过，Linux 943 条重核与原冻结 schema/渲染/token/数据哈希完全一致。overfit 和系统诊断均已完成，C5-2 工程全门通过；C5-3 唯一正式训练正在运行，尚未登记正式 adapter，不提前标记完成。
+状态：C5-2/3 完整交付。两个工程 run、唯一正式132-step训练、checkpoint132 登记和73文件远端/本地逐字节导出核验均通过。最终80家族仍零消费；C5-4/5 只准备交接，不标记通过、不宣告模型GO。
 
 仓库所有者明确报告续租剩余两天，并授权依次完成诊断包、GPU 工程门、正式训练、最终离线评测与控制器兼容性。实际执行授权记录在 `eval/c5/c5-execution-authorization-v3.json`，绑定原 CPU 配置的 canonical SHA-256、执行源文件和 C5-only 元数据呈现，并验证原契约/schema/逐记录 prompt-target 血缘。初版与 v2 均未执行；v3 保留初版租期截止，不因部署修复延后时间。三个授权版本原字节保留，不形成三个 GPU run。它不改写 C0–C4，不批准 PR、不授权自动合并、追加租赁或默认路由切换。
 
@@ -26,6 +26,8 @@
 相关入口：[GPU 执行器](../tools/run_c5_gpu.py)、[执行实现](../training/c5_execution.py)、[CPU 工程门](c5-engineering-gate.md)、[总体 C5 规划](c5-contract-aligned-qlora-plan.md)。
 
 ## 实际诊断与导出证据
+
+正式结果、三候选选择、模型身份、精度口径和完整导出见 [C5-3 训练报告](c5-formal-training-report.md)；远端/本地 manifest `4344f20a…9703b` 一致。诊断与正式合计1.57004活跃 GPU-hours，没有额外训练 run；最终评测仍有独立最多4小时硬门，不自动解锁holdout。
 
 [64 条 overfit 结果](../eval/c5/gpu-overfit-result-20261001.json)记录完整 128 optimizer steps、60 个家族、独立恢复 `resumed_from=1`；同一 smoke 集合 eval loss 从 `0.5696033849671949` 降至 `0.00003856955472514301`（下降约 99.9932%）。这只证明冻结训练实现可反向传播、记忆该小集合并独立恢复，不能外推未见任务或 LoRA 相对基座的质量。第一个 step1 段约 41.45 秒，恢复段约 1,949.05 秒；预算按 durable start/finish 账本累计，不能只统计恢复段。
 

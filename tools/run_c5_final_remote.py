@@ -75,9 +75,12 @@ def main():
     registry = read_json(a.run_root / "formal/registry.json")
     if (sha256_file(a.run_root / "formal/registry.json") != freeze["registry_sha256"]
         or sha256_file(a.run_root / "formal/result.json") != freeze["formal_result_sha256"]
+        or sha256_file(a.run_root / "export-audit.json") != freeze["export_audit_sha256"]
         or sha256_file(ROOT / "eval/c5/offline-freeze-spec.json") != freeze["thresholds_sha256"]
         or digest(read_json(ROOT / "eval/c5/final-holdout-commitment.json")) != freeze["commitment_sha256"]):
         raise RuntimeError("final preregistration/result/registry/commitment drift")
+    if read_json(a.run_root / "export-audit.json")["export_file_manifest_sha256"] != freeze["export_file_manifest_sha256"]:
+        raise RuntimeError("exported evidence manifest drift")
     if registry["adapter_sha256"] != freeze["adapter_sha256"]:
         raise RuntimeError("final adapter freeze mismatch")
     context = read_json(a.run_root / "formal/context.json")

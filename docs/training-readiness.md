@@ -4,7 +4,7 @@
 
 项目状态：**C0–C3 Completed — C4 NO-GO**
 
-> **2026-10-01 C5 后续执行：**独立 C5 的 CPU/GPU 工程全门已通过，唯一正式训练正在运行。原实验 ID、配置、A5/P2、第一轮 adapter 和以下失败验收结论均不修改；此处 `NO-GO` 始终是 C4，不是对所有未来 LoRA 的永久禁令。最新实际执行、条件预算和独立保管终端见 [C5 GPU 执行包](c5-gpu-execution.md)。
+> **2026-10-01 C5 后续执行：**独立 C5 的 CPU/GPU 工程全门、唯一正式132-step训练、checkpoint132登记和73文件远端/本地逐字节导出核验均通过；最终80家族仍零消费，模型质量等待独立配对评测。原实验 ID、配置、A5/P2、第一轮 adapter 和以下失败验收结论均不修改；此处 `NO-GO` 始终是 C4，不是对所有未来 LoRA 的永久禁令。最新实际执行、条件预算和独立保管终端见 [C5 GPU 执行包](c5-gpu-execution.md)。
 
 > **后续路线状态（2026-09-28）：**本文继续作为第一轮 B1–C4 的历史验收报告，以下配置、结果和限制均不改写。独立的 C5 已使用新实验 ID、新 dataset v2、新 train/validation/development/final holdout 和新预注册完成 C5-0/C5-1；C5-2 CPU 工程子门对 943/943 条记录的同源渲染、严格 round-trip、assistant-only label 和 token 预算核验通过，GPU 子门仍待主机、预算和一次性授权。C5 不续跑本文实验，也不把 A5/P2 重新当作未见集。详见 [C5 规划](c5-contract-aligned-qlora-plan.md)、[dataset v2 冻结报告](c5-dataset-v2-draft-report.md)和 [C5-2 工程门](c5-engineering-gate.md)。
 
