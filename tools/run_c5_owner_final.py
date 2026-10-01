@@ -60,6 +60,21 @@ def main():
     a.owner_state_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
     if a.owner_state_dir.stat().st_mode & 0o077:
         raise RuntimeError("custodian state directory must be mode 0700")
+    remote_args = ["/data/conda-envs/rhinocoder/bin/python", "tools/run_c5_final_remote.py",
+        "--run-root", "/data/c5-runs-20261001", "--snapshot",
+        "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242",
+        "--snapshot-manifest", "/data/RhinoCoder-c5/base-snapshot-manifest.json",
+        "--authorization", "/data/RhinoCoder-c5/eval/c5/c5-execution-authorization-v3.json",
+        "--final-freeze", "/data/RhinoCoder-c5/eval/c5/c5-final-evaluation-freeze.json"]
+    ssh = ["ssh", "-T", "-o", "StrictHostKeyChecking=yes", "-o", "HostKeyAlgorithms=ssh-ed25519"]
+    if a.ssh_control: ssh += ["-S", str(a.ssh_control)]
+    ssh += ["-p", "22134", "linux@175.155.64.171",
+            "cd /data/RhinoCoder-c5 && " + shlex.join(remote_args)]
+    ready = subprocess.run(ssh[:-1]+[ssh[-1]+" --preflight"], text=True,
+                           capture_output=True, check=True, timeout=300)
+    preflight = json.loads(ready.stdout)
+    if preflight.get("ready") is not True or preflight["final_freeze_sha256"] != digest(freeze):
+        raise RuntimeError("remote final preflight mismatch; no claim made")
     # Do not move/remove/reset this authoritative ledger or choose a new state directory for a retry.
     claim = claim_encrypted_artifact(commitment, ciphertext,
         a.owner_state_dir / "c5-holdout-consumption.jsonl",
@@ -77,16 +92,6 @@ def main():
                    "holdout_consumed_at":claim["holdout_consumed_at"], "families":families,
                    "commitment_sha256":confirmation, "adapter_sha256":freeze["adapter_sha256"],
                    "thresholds_sha256":freeze["thresholds_sha256"], "code_revision":freeze["code_revision"]}
-        remote_args = ["/data/conda-envs/rhinocoder/bin/python", "tools/run_c5_final_remote.py",
-            "--run-root", "/data/c5-runs-20261001", "--snapshot",
-            "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242",
-            "--snapshot-manifest", "/data/RhinoCoder-c5/base-snapshot-manifest.json",
-            "--authorization", "/data/RhinoCoder-c5/eval/c5/c5-execution-authorization-v3.json",
-            "--final-freeze", "/data/RhinoCoder-c5/eval/c5/c5-final-evaluation-freeze.json"]
-        ssh = ["ssh", "-T", "-o", "StrictHostKeyChecking=yes", "-o", "HostKeyAlgorithms=ssh-ed25519"]
-        if a.ssh_control: ssh += ["-S", str(a.ssh_control)]
-        ssh += ["-p", "22134", "linux@175.155.64.171",
-                "cd /data/RhinoCoder-c5 && " + shlex.join(remote_args)]
         # Private stdin only; neither prompts nor targets occur in shell arguments/logs.
         result = subprocess.run(ssh, input=json.dumps(payload, ensure_ascii=False),
                                 text=True, capture_output=True, timeout=4*3600+120)

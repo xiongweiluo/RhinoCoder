@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import hashlib
+import fcntl
 import json
 import os
 import random
@@ -41,6 +42,7 @@ def main():
     p.add_argument("--snapshot-manifest", type=Path, required=True)
     p.add_argument("--authorization", type=Path, required=True)
     p.add_argument("--final-freeze", type=Path, required=True)
+    p.add_argument("--preflight", action="store_true")
     a = p.parse_args()
     # Check all preconditions and model identity before accepting any plaintext.
     import torch
@@ -48,23 +50,44 @@ def main():
     from transformers import AutoModelForCausalLM, BitsAndBytesConfig
     auth = verify_authorization(a.authorization, load_config())
     freeze = read_json(a.final_freeze)
+    lock = (a.run_root / "execution.lock").open("a+")
+    fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
     for name, expected in freeze["implementation_sha256"].items():
         if sha256_file(ROOT / name) != expected:
             raise RuntimeError("final evaluation code differs from freeze")
     registry = read_json(a.run_root / "formal/registry.json")
+    if (sha256_file(a.run_root / "formal/registry.json") != freeze["registry_sha256"]
+        or sha256_file(a.run_root / "formal/result.json") != freeze["formal_result_sha256"]
+        or sha256_file(ROOT / "eval/c5/offline-freeze-spec.json") != freeze["thresholds_sha256"]
+        or digest(read_json(ROOT / "eval/c5/final-holdout-commitment.json")) != freeze["commitment_sha256"]):
+        raise RuntimeError("final preregistration/result/registry/commitment drift")
     if registry["adapter_sha256"] != freeze["adapter_sha256"]:
         raise RuntimeError("final adapter freeze mismatch")
     context = read_json(a.run_root / "formal/context.json")
+    if registry["context_sha256"] != digest(context):
+        raise RuntimeError("formal registration context drift")
     verify_checkpoint(a.run_root / "formal" / registry["selected_checkpoint"], digest(context))
     for phase in ("overfit", "system", "formal"):
         if read_json(a.run_root / phase / "result.json")["passed"] is not True:
             raise RuntimeError("earlier stage not passed")
     verify_snapshot(a.snapshot, a.snapshot_manifest)
     events = [json.loads(x) for x in (a.run_root / "execution-events.jsonl").read_text().splitlines()]
+    starts = {e["segment_id"] for e in events if e["event"] == "start"}
+    finishes = {e["segment_id"] for e in events if e["event"] == "finish"}
+    if starts != finishes:
+        raise RuntimeError("unsettled GPU budget; no final consumption allowed")
     used = sum(e["seconds"] for e in events if e["event"] == "finish")
     budget = min(4*3600, 16*3600-used, auth["execution_deadline_epoch"]-time.time()-900)
     if budget <= 0: raise RuntimeError("final evaluation budget exhausted")
     final = a.run_root / "final"
+    if final.exists():
+        raise RuntimeError("final execution already exists; no new ID or rerun")
+    if a.preflight:
+        print(json.dumps({"ready":True,"adapter_sha256":registry["adapter_sha256"],
+                          "budget_seconds_remaining":budget,"final_freeze_sha256":digest(freeze),
+                          "final_holdout_rows_read":0,"consumption_claim_executed":False}))
+        fcntl.flock(lock.fileno(), fcntl.LOCK_UN); lock.close()
+        return
     final.mkdir(mode=0o700)  # Exclusive global final directory: no rerun under a new run ID.
     start = time.monotonic()
     def stop(*_): raise RuntimeError("final GPU budget stop")
@@ -133,6 +156,7 @@ def main():
         signal.setitimer(signal.ITIMER_REAL, 0)
         write_json(final / "resource-settlement.json", {"seconds":time.monotonic()-start,
                    "final_budget_seconds_max":budget, "new_run_allowed":False})
+        fcntl.flock(lock.fileno(), fcntl.LOCK_UN); lock.close()
 
 
 if __name__ == "__main__":
