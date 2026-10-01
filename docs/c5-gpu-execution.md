@@ -23,3 +23,13 @@
 离线最终门失败则停止下游，不通过追加解析修复获取 C5-5 或产品 GO。控制器验证不派发 Rhino，只核验双阶段协议、fail-closed、安全拒绝和资源；真实 Rhino 与产品裁决仍属于之后的条件门。本文件不声称这些阶段已经完成。
 
 相关入口：[GPU 执行器](../tools/run_c5_gpu.py)、[执行实现](../training/c5_execution.py)、[CPU 工程门](c5-engineering-gate.md)、[总体 C5 规划](c5-contract-aligned-qlora-plan.md)。
+
+## 部署前失效与修复记录
+
+实际环境初次没有 pytest/jsonschema/MCP，安装仓库三项锁定依赖后补齐了专项测试辅助模块；这两次均未开始模型诊断。随后真实三 split 重渲染完成 943 条 round-trip，但 schema 哈希变为 `5a444429…3ad4`、完整序列最大 1,313、lineage 变为 `b65c307a…1dcb8`，与 CPU 冻结值不符，因此拒绝放行 GPU。定位发现 pip 解析了 Pydantic 2.13.5/core2.46.5，而仓库锁定为 2.13.4/core2.46.4；只恢复依赖后再次核对 schema、token 和 lineage。不修改冻结契约、目标、阈值或训练配置，不把该失败当成模型实验，也不删除初次审计文件。
+
+## 独立保管人的最终运行入口
+
+[owner-only client](../tools/run_c5_owner_final.py)强制交互式终端；先检查 age、代码冻结和本机私有文件是否存在，再由所有者逐字输入公开 commitment SHA-256。固定私有状态目录内的 `c5-holdout-consumption.jsonl` 是权威账本，不能为重跑改目录、删除或重置。durable claim 后才在内存解密并复核三种 Merkle root；不把明文/密钥写入仓库或传给开发代理。
+
+[单次 GPU 评测入口](../tools/run_c5_final_remote.py)只接受独立保管人进程通过认证 SSH 的私有 stdin；核对正式 adapter、冻结代码和门槛，使用 counterbalanced 基座/LoRA 顺序及原严格 parser。远端 `final` 目录 exclusive 创建，另一个 run ID 也不能重跑；原始生成只在 owner-private 文件保存，开发侧仅回传聚合统计、失败分类和哈希化收据。输出检查器本身不赋予 Rhino 执行许可；C5-5 仅在 C5-4 离线门通过后判定，其报告明确不替代真实 consent/几何门。初始化/网络/解密失败若发生在 claim 后同样保持消费，不自动补跑。
