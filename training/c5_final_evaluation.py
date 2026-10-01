@@ -48,6 +48,15 @@ def controller_report(rows: Sequence[Mapping[str, Any]], offline_passed: bool) -
     dispatch = sum(r["dispatch_count"] for r in rows)
     passed = offline_passed and valid_hashes and completion >= .90 and errors == repairs == dispatch == 0
     by_stage = {}
+    failure_classes = Counter()
+    for receipt in receipts:
+        if not receipt["parsed"]:
+            label = "missing_or_out_of_scope_selection" if "output_sha256" not in receipt else receipt.get("stage", "unknown") + "_parse_or_schema"
+            failure_classes[label] += 1
+        elif receipt.get("name_exact") is False:
+            failure_classes["wrong_tool"] += 1
+        elif receipt.get("arguments_exact") is False:
+            failure_classes["wrong_arguments"] += 1
     for stage in ("selector", "invocation"):
         values = [r for r in raw_outputs if r.get("stage") == stage]
         if values:
@@ -69,5 +78,6 @@ def controller_report(rows: Sequence[Mapping[str, Any]], offline_passed: bool) -
             "generated_tokens": sum(r.get("output_tokens", 0) for r in receipts),
             "generation_seconds": sum(r.get("seconds", 0) for r in receipts),
             "by_stage": by_stage,
+            "failure_record_counts": dict(failure_classes),
             "rhino_executed": False, "product_route_authorized": False,
             "measurement_scope": "strict C5 selector/single-schema adapter and fail-closed parsing only; not live consent/geometry or general task quality"}

@@ -71,6 +71,7 @@ def main():
         if read_json(a.run_root / phase / "result.json")["passed"] is not True:
             raise RuntimeError("earlier stage not passed")
     verify_snapshot(a.snapshot, a.snapshot_manifest)
+    load_public_mcp_tools()  # Require the original schema before any claim/plaintext.
     events = [json.loads(x) for x in (a.run_root / "execution-events.jsonl").read_text().splitlines()]
     starts = {e["segment_id"] for e in events if e["event"] == "start"}
     finishes = {e["segment_id"] for e in events if e["event"] == "finish"}

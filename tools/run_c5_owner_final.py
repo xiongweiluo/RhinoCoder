@@ -9,6 +9,7 @@ state directory; use the same directory for all invocations.
 from __future__ import annotations
 
 import argparse
+import getpass
 import json
 import os
 import shlex
@@ -47,8 +48,8 @@ def main():
     for name, expected in freeze["implementation_sha256"].items():
         if sha256_file(ROOT / name) != expected:
             raise RuntimeError("local final evaluation code differs from freeze")
-    ciphertext = Path(input("Encrypted artifact path (private, not logged): ").strip()).expanduser()
-    identity = Path(input("age identity file path (private, not logged): ").strip()).expanduser()
+    ciphertext = Path(getpass.getpass("Encrypted artifact path (hidden, not logged): ").strip()).expanduser()
+    identity = Path(getpass.getpass("age identity file path (hidden, not logged): ").strip()).expanduser()
     outside_repo(ciphertext); outside_repo(identity)
     if not ciphertext.is_file() or not identity.is_file():
         raise RuntimeError("custodian files unavailable; no claim made")
