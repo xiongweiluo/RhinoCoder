@@ -78,6 +78,7 @@ def controller_report(rows: Sequence[Mapping[str, Any]], offline_passed: bool) -
         seconds = sum(x["seconds"] for x in route_receipts)
         tokens = sum(x["output_tokens"] for x in route_receipts)
         by_route[route] = {"families": len(route_rows), "generations": len(route_receipts),
+            "critical_safety_prediction_errors": sum(r["critical_safety_error"] for r in route_rows),
             "generated_tokens": tokens, "generation_seconds": seconds,
             "tokens_per_second": tokens / seconds if seconds else None,
             "median_family_generation_seconds": statistics.median(family_generation_seconds),
