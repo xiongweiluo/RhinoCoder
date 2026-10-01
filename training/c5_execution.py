@@ -31,10 +31,10 @@ from training.c5_engineering import (
 )
 from training.c5_freeze import canonical_bytes, sha256_file
 from training.tool_contract_candidate import ContractError
-from training.tool_schema_inventory import load_public_mcp_tools
+from training.c5_inventory import load_public_mcp_tools
 
 ROOT = Path(__file__).resolve().parents[1]
-EXECUTION_FILES = ("training/c5_execution.py", "tools/run_c5_gpu.py")
+EXECUTION_FILES = ("training/c5_execution.py", "tools/run_c5_gpu.py", "training/c5_engineering.py", "training/c5_inventory.py")
 PHASE_CAPS = {"overfit": 128, "system": 26, "formal": 132}
 
 
@@ -312,8 +312,12 @@ def execute(args: Any) -> dict[str, Any]:
     for filename, expected in spec["contract"]["implementation_sha256"].items():
         if sha256_file(ROOT / filename) != expected:
             raise ExecutionError("frozen contract implementation changed: " + filename)
-    if sha256_file(ROOT / "training/c5_engineering.py") != readiness["implementation_sha256"]["training/c5_engineering.py"]:
-        raise ExecutionError("frozen renderer changed")
+    lineage_payload = [{"record_id": r.record_id, "split": r.split, "stage": r.stage,
+        "prompt_sha256": hashlib.sha256(r.prompt.encode()).hexdigest(),
+        "target_sha256": hashlib.sha256(r.target.encode()).hexdigest(), "full_tokens": r.full_tokens}
+        for r in records]
+    if digest(lineage_payload) != readiness["rendered_lineage_sha256"]:
+        raise ExecutionError("rendered prompts/targets differ from original CPU freeze")
     chosen = choose_records(records, phase)
     smoke_hash = digest([r.record_id for r in select_overfit_smoke(records)])
     if smoke_hash != read_json(ROOT / "eval/c5/c5-engineering-readiness.json")["overfit_smoke"]["record_ids_sha256"]:

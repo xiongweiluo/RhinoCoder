@@ -2,7 +2,7 @@
 
 状态：专用实现已建立，实际 GPU 工程诊断/正式训练结果尚未产生，不能标记通过。
 
-仓库所有者明确报告续租剩余两天，并授权依次完成诊断包、GPU 工程门、正式训练、最终离线评测与控制器兼容性。实际执行授权记录在 `eval/c5/c5-execution-authorization-v2.json`，绑定原 CPU 配置的 canonical SHA-256 与执行源文件，并验证既有契约/渲染器/schema 血缘。初版 `c5-execution-authorization.json` 未执行，因补齐运行血缘检查而被 v2 取代，原字节保留。它不改写 C0–C4，不批准 PR、不授权自动合并、追加租赁或默认路由切换。
+仓库所有者明确报告续租剩余两天，并授权依次完成诊断包、GPU 工程门、正式训练、最终离线评测与控制器兼容性。实际执行授权记录在 `eval/c5/c5-execution-authorization-v3.json`，绑定原 CPU 配置的 canonical SHA-256、执行源文件和 C5-only 元数据呈现，并验证原契约/schema/逐记录 prompt-target 血缘。初版与 v2 均未执行；v3 保留初版租期截止，不因部署修复延后时间。三个授权版本原字节保留，不形成三个 GPU run。它不改写 C0–C4，不批准 PR、不授权自动合并、追加租赁或默认路由切换。
 
 ## 执行边界
 
@@ -27,6 +27,8 @@
 ## 部署前失效与修复记录
 
 实际环境初次没有 pytest/jsonschema/MCP，安装仓库三项锁定依赖后补齐了专项测试辅助模块；这两次均未开始模型诊断。随后真实三 split 重渲染完成 943 条 round-trip，但 schema 哈希变为 `5a444429…3ad4`、完整序列最大 1,313、lineage 变为 `b65c307a…1dcb8`，与 CPU 冻结值不符，因此拒绝放行 GPU。定位发现 pip 解析了 Pydantic 2.13.5/core2.46.5，而仓库锁定为 2.13.4/core2.46.4；只恢复依赖后再次核对 schema、token 和 lineage。不修改冻结契约、目标、阈值或训练配置，不把该失败当成模型实验，也不删除初次审计文件。
+
+**进一步核实：**恢复 Pydantic 后哈希仍为 `5a444429…3ad4`，因此依赖版本不是已证实的原因。逐字段比较 23 工具发现差异仅在说明字符串的缩进：本机 Python3.13 的注册元数据已清理 docstring 缩进，Linux Python3.11 仍保留。新增 C5-only `inspect.cleandoc` 呈现后必须严格恢复原 `151c5453…0637d`，943 条渲染还必须逐 prompt/target/token 核对原 `0c871940…4c57e`，否则不放行。原共享 schema loader、R 和 C4 未修改；CPU 首次证据不改写，Linux 重核输出另存。
 
 ## 独立保管人的最终运行入口
 

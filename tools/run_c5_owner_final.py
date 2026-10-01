@@ -81,7 +81,7 @@ def main():
             "--run-root", "/data/c5-runs-20261001", "--snapshot",
             "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242",
             "--snapshot-manifest", "/data/RhinoCoder-c5/base-snapshot-manifest.json",
-            "--authorization", "/data/RhinoCoder-c5/eval/c5/c5-execution-authorization-v2.json",
+            "--authorization", "/data/RhinoCoder-c5/eval/c5/c5-execution-authorization-v3.json",
             "--final-freeze", "/data/RhinoCoder-c5/eval/c5/c5-final-evaluation-freeze.json"]
         ssh = ["ssh", "-T", "-o", "StrictHostKeyChecking=yes", "-o", "HostKeyAlgorithms=ssh-ed25519"]
         if a.ssh_control: ssh += ["-S", str(a.ssh_control)]

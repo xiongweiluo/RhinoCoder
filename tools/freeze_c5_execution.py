@@ -14,7 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from training.c5_engineering import load_config  # noqa: E402
-from training.c5_execution import digest, execution_hashes, write_json  # noqa: E402
+from training.c5_execution import digest, execution_hashes, write_json, read_json  # noqa: E402
 
 
 def main():
@@ -22,12 +22,14 @@ def main():
     p.add_argument("--confirm-owner-request", required=True,
                    choices=["2026-10-01-two-days-complete-1-through-5"])
     p.add_argument("--output", type=Path, default=ROOT / "eval/c5/c5-execution-authorization.json")
+    p.add_argument("--preserve-lease-from", type=Path)
     args = p.parse_args()
     c = load_config(); now = time.time()
+    lease_deadline = read_json(args.preserve_lease_from)["execution_deadline_epoch"] if args.preserve_lease_from else now + 47*3600
     a = {"schema_version": "1.0", "experiment_id": c["experiment_id"], "contract_id": c["contract_id"],
          "authorized_by": "repository_owner", "authorization_recorded_epoch": now,
          "authorization_basis": "Owner message: 实际租期有两天，帮我把1-5依次全部完整高质量完成",
-         "lease_remaining_hours_reported": 48, "execution_deadline_epoch": now + 47 * 3600,
+         "lease_remaining_hours_reported": 48, "execution_deadline_epoch": lease_deadline,
          "lease_expiry_precision": "owner reports two days; conservative 47-hour execution ceiling, not provider billing verification",
          "hourly_price_verified": False, "new_rental_allowed": False,
          "diagnostic_gpu_hours_max": 4, "formal_gpu_hours_max": 8,

@@ -31,7 +31,7 @@ from training.c5_execution import (  # noqa: E402
 )
 from training.c5_final_evaluation import controller_report, verify_sealed_plaintext  # noqa: E402
 from training.c5_holdout import summarize_offline_results  # noqa: E402
-from training.tool_schema_inventory import load_public_mcp_tools  # noqa: E402
+from training.c5_inventory import load_public_mcp_tools  # noqa: E402
 
 
 def main():
