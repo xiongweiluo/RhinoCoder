@@ -9,6 +9,7 @@
 - RTX 3090 24GB、CUDA/BF16、锁定依赖与冻结基座 14/14 文件哈希已只读核查通过。模型和数据只使用明确离线路径，不允许 Hub 下载、远程代码或 A5/P2/最终 holdout 进入训练加载器。
 - 两天为所有者报告的剩余租期，不冒充服务商精确到期时间或账单确认。执行采用授权记录时起 47 小时保守上限，并再保留至少 15 分钟停止/导出余量；不自动续租。
 - 工程诊断最多两个 run、累计 4 GPU-hours；正式训练及恢复累计 8；最终必要配对生成累计 4；总上限 16。执行事件先 fsync，进程锁禁止并发，SIGALRM 硬停止；未结算的中断必须人工核实，不能绕过账本恢复。
+- 上述小时来自执行段 start/finish 的单调时钟，包含模型加载、初始 loss、训练、validation 与保存；前置 CPU 哈希/渲染、部署和网络等待不在该活跃执行计时内。它不是服务商计费/整机租用时长；所有操作仍受原 UTC 租期保守截止与导出余量约束，官方精确到期/单价未冒充已核实。
 - 64 条 overfit 索引复核 CPU 冻结哈希。第一独立进程只走到 optimizer step 1并保存模型、优化器、调度器、RNG、进度与逐文件哈希；第二进程验证完整血缘后继续同一个 run 到最多 128 步。仅有限 loss、独立恢复且相同样本 eval loss 相对下降至少 25% 才通过。
 - 只有 overfit 通过才运行一次系统诊断：确定性抽取最多 32 个 train 家族，最多 26 optimizer steps；验证有限梯度、validation loss、checkpoint 和资源。它不选正式 adapter。
 - 只有两项工程结果及代码/授权血缘匹配才启动唯一正式 run。NF4/double-quant/BF16，rank16/alpha32/dropout0.05，七类 projection，batch1/accumulation16，lr2e-4、cosine、warmup5%、paged AdamW 8-bit，3 epochs，最多 132 步；assistant-only loss，不截断。
