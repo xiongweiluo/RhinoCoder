@@ -36,10 +36,23 @@ def test_controller_gate_never_passes_if_offline_gate_failed():
     assert controller_report(_rows(),False)["status"]=="blocked_by_offline_gate"
 
 
+def test_latency_is_separated_by_route_without_claiming_live_rhino_latency():
+    rows = _rows()
+    for row in rows:
+        if row["route"] == "lora":
+            row["receipts"][0]["seconds"] = .2
+    report = controller_report(rows, True)
+    assert report["by_route"]["base"]["median_family_generation_seconds"] == .1
+    assert report["by_route"]["lora"]["median_family_generation_seconds"] == .2
+    assert "excludes" in report["by_route"]["lora"]["latency_scope"]
+    assert report["rhino_executed"] is False
+
+
 def test_controller_hash_loss_critical_error_or_repair_blocks():
-    for change in ("hash", "safety", "repair", "dispatch"):
+    for change in ("hash", "output_hash", "safety", "repair", "dispatch"):
         rows=_rows()
         if change=="hash": rows[0]["receipts"][0].pop("parser_sha256")
+        elif change=="output_hash": rows[0]["receipts"][0].pop("output_sha256")
         elif change=="safety": rows[0]["critical_safety_error"]=True
         elif change=="repair": rows[0]["repair_count"]=1
         else: rows[0]["dispatch_count"]=1

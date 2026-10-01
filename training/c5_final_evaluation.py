@@ -34,14 +34,14 @@ def verify_sealed_plaintext(families: Sequence[Any], commitment: Mapping[str, An
 
 def controller_report(rows: Sequence[Mapping[str, Any]], offline_passed: bool) -> dict[str, Any]:
     lora = [r for r in rows if r.get("route") == "lora"]
-    if len(lora) != 80:
-        raise C5HoldoutError("controller gate requires the same 80 LoRA families")
+    if len(lora) != 80 or sum(r.get("route") == "base" for r in rows) != 80:
+        raise C5HoldoutError("controller gate requires the same 80 base/LoRA family pairs")
     receipts = [receipt for r in rows for receipt in r["receipts"]]
     accepted = [r for r in receipts if r["parsed"]]
     raw_outputs = [r for r in receipts if "output_sha256" in r]
-    valid_hashes = all(all(len(str(r.get(key, ""))) == 64 for key in
+    valid_hashes = bool(raw_outputs) and all(all(len(str(r.get(key, ""))) == 64 for key in
                           ("prompt_sha256", "output_sha256", "model_sha256", "schema_sha256", "parser_sha256"))
-                       for r in raw_outputs)
+                       for r in raw_outputs) and all("output_sha256" in r for r in accepted)
     completion = sum(r["parse_exact"] for r in lora) / 80
     errors = sum(r["critical_safety_error"] for r in rows)
     repairs = sum(r["repair_count"] for r in rows)
@@ -68,6 +68,22 @@ def controller_report(rows: Sequence[Mapping[str, Any]], offline_passed: bool) -
                 "median_seconds":statistics.median(latency),
                 "p95_seconds":latency[min(len(latency)-1, int(.95*(len(latency)-1)))],
                 "tokens_per_second":tokens/seconds if seconds else None}
+    by_route = {}
+    for route in ("base", "lora"):
+        route_rows = [r for r in rows if r.get("route") == route]
+        route_receipts = [receipt for r in route_rows for receipt in r["receipts"]
+                          if "output_sha256" in receipt]
+        family_generation_seconds = sorted(sum(x.get("seconds", 0) for x in r["receipts"])
+                                           for r in route_rows)
+        seconds = sum(x["seconds"] for x in route_receipts)
+        tokens = sum(x["output_tokens"] for x in route_receipts)
+        by_route[route] = {"families": len(route_rows), "generations": len(route_receipts),
+            "generated_tokens": tokens, "generation_seconds": seconds,
+            "tokens_per_second": tokens / seconds if seconds else None,
+            "median_family_generation_seconds": statistics.median(family_generation_seconds),
+            "p95_family_generation_seconds": family_generation_seconds[min(
+                len(family_generation_seconds) - 1, int(.95 * (len(family_generation_seconds) - 1)))],
+            "latency_scope": "sum of model-generation calls per family; excludes prompt rendering, parsing, network and Rhino"}
     return {"status": "passed" if passed else "blocked_by_offline_gate" if not offline_passed else "failed",
             "passed": passed, "offline_gate_passed": offline_passed,
             "lora_two_stage_protocol_completion_rate": completion,
@@ -77,7 +93,7 @@ def controller_report(rows: Sequence[Mapping[str, Any]], offline_passed: bool) -
             "critical_safety_errors": errors, "repair_count": repairs, "dispatch_count": dispatch,
             "generated_tokens": sum(r.get("output_tokens", 0) for r in receipts),
             "generation_seconds": sum(r.get("seconds", 0) for r in receipts),
-            "by_stage": by_stage,
+            "by_stage": by_stage, "by_route": by_route,
             "failure_record_counts": dict(failure_classes),
             "rhino_executed": False, "product_route_authorized": False,
             "measurement_scope": "strict C5 selector/single-schema adapter and fail-closed parsing only; not live consent/geometry or general task quality"}
