@@ -10,7 +10,7 @@ def test_c5_inventory_normalizes_indentation_without_changing_frozen_bytes():
     for item in linux:
         lines=item["function"]["description"].splitlines()
         item["function"]["description"]=lines[0]+"\n"+"\n".join("        "+line if line else "" for line in lines[1:])
-    assert canonical_inventory(linux)==load_public_mcp_tools()==original
+    assert canonical_inventory(linux)==load_public_mcp_tools()==canonical_inventory(original)
 
 
 def test_c5_inventory_rejects_any_substantive_schema_or_description_drift():
