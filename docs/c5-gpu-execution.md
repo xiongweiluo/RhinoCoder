@@ -29,7 +29,7 @@
 
 正式结果、三候选选择、模型身份、精度口径和完整导出见 [C5-3 训练报告](c5-formal-training-report.md)；远端/本地 manifest `4344f20a…9703b` 一致。诊断与正式合计1.57004活跃 GPU-hours，没有额外训练 run；最终评测仍有独立最多4小时硬门，不自动解锁holdout。
 
-最终[代码/adapter/阈值/导出冻结](../eval/c5/c5-final-evaluation-freeze.json)为 `9a57c167…a5d8`，29源码/依赖绑定；[实际零读取preflight](../eval/c5/final-preflight-ready-20261001.json)通过。初次缺requirements.txt的部署失败保留，未消费或加载模型；补齐同一已冻结字节后才放行。训练source仍为160d1c7，最终评测source为ced0de9；后续纯文档提交不改这些实现哈希。
+最终[代码/adapter/阈值/导出冻结](../eval/c5/c5-final-evaluation-freeze.json)为 `9a57c167…a5d8`，28源码/依赖绑定；[实际零读取preflight](../eval/c5/final-preflight-ready-20261001.json)通过。初次缺requirements.txt的部署失败保留，未消费或加载模型；补齐同一已冻结字节后才放行。训练source仍为160d1c7，最终评测source为ced0de9；后续纯文档提交不改这些实现哈希。
 
 [64 条 overfit 结果](../eval/c5/gpu-overfit-result-20261001.json)记录完整 128 optimizer steps、60 个家族、独立恢复 `resumed_from=1`；同一 smoke 集合 eval loss 从 `0.5696033849671949` 降至 `0.00003856955472514301`（下降约 99.9932%）。这只证明冻结训练实现可反向传播、记忆该小集合并独立恢复，不能外推未见任务或 LoRA 相对基座的质量。第一个 step1 段约 41.45 秒，恢复段约 1,949.05 秒；预算按 durable start/finish 账本累计，不能只统计恢复段。
 
