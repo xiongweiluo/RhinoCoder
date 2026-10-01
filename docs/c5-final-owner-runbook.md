@@ -1,6 +1,8 @@
 # C5-4/5 独立保管人单次交接
 
-状态：执行工具已实现；必须等 C5-3 完整训练、模型登记、导出与最终代码冻结通过后才运行。本文不是最终消费收据，不表示 C5-4/5 已通过。
+状态（2026-10-01）：C5-3完整训练/登记/73文件逐字节导出核验、最终代码冻结和真实零读取preflight全部通过，**已可交给所有者单次执行**。本文不是最终消费收据，不表示 C5-4/5 已通过。
+
+最终冻结：[清单](../eval/c5/c5-final-evaluation-freeze.json)，canonical SHA-256 `9a57c1672e5d49d6b1ce8c23ee36c1fa6cf0b4570d08d9030df1c7bd2860a5d8`；绑定源码 `ced0de9`、checkpoint132 / adapter `305d7270…2cae`、29个直接源码/依赖及导出证明、原门槛与commitment。[真实preflight](../eval/c5/final-preflight-ready-20261001.json)返回ready、最多14400秒、claim/rows为0。初次隔离部署缺失requirements.txt的[失败记录](../eval/c5/final-preflight-deployment-failure-20261001.json)保留；只补齐既定哈希文件，未重生成或修改冻结清单。
 
 仓库所有者是唯一 `reviewer_1` 与最终 holdout 独立保管人；不需要第二个人。开发代理完成训练和零读取 preflight，但不代替保管人解密、打开原始输出或触发最终消费。公开 commitment 是 `4fe1796cc1e5b19f7d81b79fdf883463d7bb77d6af012d9aa1900208ec35ebaa`；不更换文件、任务或门槛来重试。
 
