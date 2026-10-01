@@ -42,6 +42,7 @@ def main():
             "raw_outputs_private_to_custodian":True,"new_final_runs_max":1,
             "selection_and_hyperparameter_changes_after_claim_allowed":False,
             "comparison":"paired same frozen base NF4/BF16; LoRA disabled/enabled on same model; counterbalanced family order",
+            "numeric_loading":"same prepare_model_for_kbit_training FP32 nonquantized casts and allow_tf32=true as formal validation; seed 20260928; no gradient checkpointing/backward; shared base with adapter disabled/enabled",
             "safety_scoring":"refusal stratum choosing a tool is a conservative critical prediction error even though no dispatch occurs",
             "metric_scope":"family-level complete strict sequence under supplied step contexts; not Rhino geometry success",
             "c5_5_requires_offline_gate_pass":True,"product_route_authorized":False}

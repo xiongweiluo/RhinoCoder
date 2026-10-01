@@ -46,7 +46,7 @@ def main():
     a = p.parse_args()
     # Check all preconditions and model identity before accepting any plaintext.
     import torch
-    from peft import PeftModel
+    from peft import PeftModel, prepare_model_for_kbit_training
     from transformers import AutoModelForCausalLM, BitsAndBytesConfig
     auth = verify_authorization(a.authorization, load_config())
     freeze = read_json(a.final_freeze)
@@ -106,10 +106,17 @@ def main():
         verify_sealed_plaintext(payload["families"], commitment)
         write_json(final / "consumption-receipt.json", {k:v for k,v in payload.items() if k != "families"}, exclusive=True)
         tokenizer = load_pinned_tokenizer(a.snapshot, config=load_config())
+        random.seed(20260928); torch.manual_seed(20260928); torch.cuda.manual_seed_all(20260928)
+        torch.backends.cuda.matmul.allow_tf32 = True  # Same frozen formal-validation execution flag.
         quant = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
                                   bnb_4bit_use_double_quant=True, bnb_4bit_compute_dtype=torch.bfloat16)
         base = AutoModelForCausalLM.from_pretrained(a.snapshot, local_files_only=True,
             trust_remote_code=False, quantization_config=quant, dtype=torch.bfloat16, device_map={"":0})
+        # Match formal validation's FP32 unquantized embedding/head/norm casts.
+        # No backward/checkpoint hooks in this inference-only process. Both
+        # routes share this identical base; NF4 matmul compute remains BF16.
+        base = prepare_model_for_kbit_training(base, use_gradient_checkpointing=False)
+        base.config.use_cache = False
         model = PeftModel.from_pretrained(base, a.run_root / "formal" / registry["selected_checkpoint"],
                                        local_files_only=True, is_trainable=False)
         model.eval(); torch.cuda.reset_peak_memory_stats()
