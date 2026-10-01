@@ -1,0 +1,42 @@
+# C5-4/5 独立保管人单次交接
+
+状态：执行工具已实现；必须等 C5-3 完整训练、模型登记、导出与最终代码冻结通过后才运行。本文不是最终消费收据，不表示 C5-4/5 已通过。
+
+仓库所有者是唯一 `reviewer_1` 与最终 holdout 独立保管人；不需要第二个人。开发代理完成训练和零读取 preflight，但不代替保管人解密、打开原始输出或触发最终消费。公开 commitment 是 `4fe1796cc1e5b19f7d81b79fdf883463d7bb77d6af012d9aa1900208ec35ebaa`；不更换文件、任务或门槛来重试。
+
+## 执行前必须全部成立
+
+- C5-2 两个真实工程 run 通过，C5-3 唯一正式 run 完整结束并登记固定 adapter；远端/本地逐文件导出审计一致。
+- `tools/freeze_c5_final_evaluation.py` 以实际 formal result/registry 生成不可覆盖的最终冻结记录，绑定 checkpoint、adapter、代码、阈值和 commitment；远端部署精确匹配。
+- 开发代理只运行远端 `--preflight`：`ready=true`、`final_holdout_rows_read=0`、`consumption_claim_executed=false`。这不打开加密文件、不加载模型权重、不创建 final run。
+- 保管人自己知道原来封存的 age 加密 artifact 与 identity 文件；二者不交给代理，不放到仓库或聊天，不为运行重新生成 holdout。
+- 明确唯一的私有状态目录（仓库外，0700）。若以前已经 claim，必须使用原权威台账并停止；不能换目录、删除或重置账本来取得第二次机会。
+
+## 保管人自己的交互式终端
+
+使用已通过冻结检查的 checkout 和 Python 环境，把示例中的 checkout/私有状态目录/已验证 SSH host/port 换成实际值。实例地址不固定在公开源代码中。密钥及加密 artifact 的路径会以隐藏输入提示读取，不放在命令参数、shell 历史、公开文档或聊天中。
+
+```bash
+python /verified-checkout/tools/run_c5_owner_final.py \
+  --owner-state-dir /owner-private/c5-final-state \
+  --final-freeze /verified-checkout/eval/c5/c5-final-evaluation-freeze.json \
+  --ssh-host linux@VERIFIED_HOST \
+  --ssh-port VERIFIED_PORT
+```
+
+若现有认证 master 仍有效，可另加 `--ssh-control /operator-private/ssh-control`。严格 known_hosts/ED25519 检查保持开启；不通过时先停止，不能临时关闭主机校验。
+
+依次输入隐藏的加密文件路径、隐藏的 age identity 路径，然后逐字输入完整公开 commitment SHA-256。客户端先完成真实远端 preflight，随后 append+fsync 权威台账的 claim，才解密至保管进程内存并校验三个 Merkle root。只有私有 stdin 传给认证 GPU；不写明文数据文件，不传 identity/密钥。
+
+整个最终 run 只运行一次：冻结基座/唯一 LoRA 同输入、同确定性解码，家族随机顺序、基座/LoRA 次序 counterbalanced，不修复、不重试、不用黄金选择强制 invocation。训练主机独占创建 `final` 目录；失败也不会允许换 run ID 再跑。原始生成仅保留为 owner-private 证据，开发代理不得读取。
+
+## 回传与停止规则
+
+只回传客户端输出的聚合报告（或私有状态目录中的 `c5-public-final-report.json`）；不要回传明文、密钥、加密文件路径、raw generations 或含任务正文的错误栈。开发侧可以再核对公开哈希化收据，不用结果调参。
+
+- claim 前的检查失败：没有消费，修复明确的基础设施/部署问题后才能再次 preflight；不自动修改实验设计。
+- claim 后任何解密/网络/模型/预算失败：保留原台账与 `c5-failed-consumption.json`，不自动再消费。程序只打印通用失败类型，避免泄露私有路径；保管人独立核实证据后决定后续流程。
+- C5-4 离线必要门失败：C5-5 状态为 `blocked_by_offline_gate`，保留所有结果，不靠解析修复或降低门槛放行。不能自动运行 Rhino。
+- C5-4 通过且 C5-5 严格兼容性通过：只解锁后续条件式 R 最小研究收尾/C5-6 预注册。仍不是总 `GO`，不改默认混合路线、不改 C4 `NO-GO` 或 v8 59/60 `formal_quality_fail`。
+
+相关：[GPU 执行包](c5-gpu-execution.md)、[保管历史冻结](c5-final-holdout-custody.md)、[owner client](../tools/run_c5_owner_final.py)、[最终 GPU 入口](../tools/run_c5_final_remote.py)。
