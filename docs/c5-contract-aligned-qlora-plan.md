@@ -1,5 +1,7 @@
 # C5：契约对齐后的第二轮 QLoRA 规划与预注册草案
 
+> **2026-10-01 执行增量（取代下文“等待 GPU 主机”的泛述）：**所有者报告续租剩余两天并明确授权顺序完成 C5-2/3/4/5；[GPU 专用执行包](c5-gpu-execution.md)已在 PR #6 建立，v3 条件授权绑定代码/原配置，并保持初版租期截止和 4/8/4、总计 16 GPU-hours 上限。真实主机已通过 19 项专项测试及 943 条开发数据的原 schema、prompt/target 血缘、token 和 hash 重核。部署期间的依赖/说明缩进漂移及初次失败审计保留；不改原 CPU 冻结结果。GPU 诊断仍须真实完成才能勾选 C5-2，正式训练只在工程门通过后进入；最终 holdout 仍为零消费，须由独立保管人执行单次入口。预算授权不代替 PR 所有者审核或自动合并。
+
 状态：**C5-0 与 C5-1 已完成；C5-2 CPU 同源渲染、round-trip、token 与 assistant-only label 子门已通过 943/943 条记录，冻结 64 条过拟合 smoke 索引。GPU 子门仍等待主机、最多 4 GPU-hours 预算与一次性诊断授权；不授权正式训练、最终 holdout 消费或产品切换。**
 
 日期：2026-09-27。实验 ID：`rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2`。本地冻结契约 ID：`qwen25-v4-selector-v3-json-invoker-c5-v1`。机器清单与实际审计见 [C5-0/C5-1 离线冻结报告](c5-offline-freeze-report.md)、[dataset v2 冻结报告](c5-dataset-v2-draft-report.md)和 [`eval/c5/manifest.json`](../eval/c5/manifest.json)。仓库所有者是唯一 `reviewer_1` 和最终 holdout 独立保管人；开发数据审批已通过 exact-set attestation 绑定到公开哈希，训练前预注册仍须补齐 holdout 加密承诺、统计/单次消费门和工程资源决定。任何变更必须升版本，不得覆盖既有哈希。

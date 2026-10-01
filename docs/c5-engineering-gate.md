@@ -1,5 +1,7 @@
 # C5-2 工程门：同源数据渲染与有界 GPU 诊断
 
+> **2026-10-01 后续状态：**GPU 资源/完整基座 snapshot 已核查，所有者已授权现有两天租期内的有界执行。专用代码、预算硬门、独立 step-1 恢复和正式阶段条件门见 [GPU 执行包](c5-gpu-execution.md)。Linux 重核已精确恢复原 schema/943 条渲染血缘/token 分布；初次 docstring 缩进漂移另行保留。本文以下 2026-09-28 CPU 结论仍为历史冻结，真实 GPU 诊断尚未交付结果，不标记全门通过。
+
 日期：2026-09-28。状态：**CPU 子门通过；GPU 子门等待主机、预算与显式诊断授权，不得据此启动正式训练。**
 
 本门服务于实验 `rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2`，不修改 C4，不读取最终 holdout，不调用 Rhino，也不改变默认产品路由。冻结配置见 [`eval/c5/c5-engineering-config.json`](../eval/c5/c5-engineering-config.json)，机器可读结果见 [`eval/c5/c5-engineering-readiness.json`](../eval/c5/c5-engineering-readiness.json)。
