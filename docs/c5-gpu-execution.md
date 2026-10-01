@@ -1,6 +1,6 @@
 # C5 GPU 执行包（2026-10-01）
 
-状态：专用实现及受测部署已完成；真实主机 19 项专项测试通过，Linux 943 条重核与原冻结 schema/渲染/token/数据哈希完全一致，GPU step-1 段已启动。实际 GPU 工程诊断/正式训练结果尚未产生，不能标记通过。
+状态：专用实现及受测部署已完成；真实主机 19 项专项测试通过，Linux 943 条重核与原冻结 schema/渲染/token/数据哈希完全一致。overfit 已完成 128 steps 并通过独立 step1 恢复/有限 loss 门；系统诊断正在运行，工程全门与正式训练尚未完成，不提前标记通过。
 
 仓库所有者明确报告续租剩余两天，并授权依次完成诊断包、GPU 工程门、正式训练、最终离线评测与控制器兼容性。实际执行授权记录在 `eval/c5/c5-execution-authorization-v3.json`，绑定原 CPU 配置的 canonical SHA-256、执行源文件和 C5-only 元数据呈现，并验证原契约/schema/逐记录 prompt-target 血缘。初版与 v2 均未执行；v3 保留初版租期截止，不因部署修复延后时间。三个授权版本原字节保留，不形成三个 GPU run。它不改写 C0–C4，不批准 PR、不授权自动合并、追加租赁或默认路由切换。
 
@@ -24,6 +24,12 @@
 
 相关入口：[GPU 执行器](../tools/run_c5_gpu.py)、[执行实现](../training/c5_execution.py)、[CPU 工程门](c5-engineering-gate.md)、[总体 C5 规划](c5-contract-aligned-qlora-plan.md)。
 
+## 实际诊断与导出证据
+
+[64 条 overfit 结果](../eval/c5/gpu-overfit-result-20261001.json)记录完整 128 optimizer steps、60 个家族、独立恢复 `resumed_from=1`；同一 smoke 集合 eval loss 从 `0.5696033849671949` 降至 `0.00003856955472514301`（下降约 99.9932%）。这只证明冻结训练实现可反向传播、记忆该小集合并独立恢复，不能外推未见任务或 LoRA 相对基座的质量。第一个 step1 段约 41.45 秒，恢复段约 1,949.05 秒；预算按 durable start/finish 账本累计，不能只统计恢复段。
+
+[导出审计器](../tools/audit_c5_run_export.py)只遍历 overfit/system/formal 三个明确目录，不打开 final 目录。导出后核对连续 optimizer steps、有限 loss/梯度、checkpoint 每个文件、registry 与原 validation 选模、预算及 source/config/data/auth 血缘。远端与本地独立重算完整文件 manifest，二者须相同；weights/state/logs 保存于被忽略的本地私有数据目录，不放入 PR。训练/export 通过不等同于 C5 最终质量门通过。
+
 ## 部署前失效与修复记录
 
 实际环境初次没有 pytest/jsonschema/MCP，安装仓库三项锁定依赖后补齐了专项测试辅助模块；这两次均未开始模型诊断。随后真实三 split 重渲染完成 943 条 round-trip，但 schema 哈希变为 `5a444429…3ad4`、完整序列最大 1,313、lineage 变为 `b65c307a…1dcb8`，与 CPU 冻结值不符，因此拒绝放行 GPU。定位发现 pip 解析了 Pydantic 2.13.5/core2.46.5，而仓库锁定为 2.13.4/core2.46.4；只恢复依赖后再次核对 schema、token 和 lineage。不修改冻结契约、目标、阈值或训练配置，不把该失败当成模型实验，也不删除初次审计文件。
@@ -35,5 +41,7 @@
 ## 独立保管人的最终运行入口
 
 [owner-only client](../tools/run_c5_owner_final.py)强制交互式终端；先检查 age、代码冻结和本机私有文件是否存在，再由所有者逐字输入公开 commitment SHA-256。固定私有状态目录内的 `c5-holdout-consumption.jsonl` 是权威账本，不能为重跑改目录、删除或重置。durable claim 后才在内存解密并复核三种 Merkle root；不把明文/密钥写入仓库或传给开发代理。
+
+实际 SSH `user@host`、port 由所有者通过 `--ssh-host` / `--ssh-port` 显式提供；公开入口不再固化租用实例地址，严格 known_hosts/ED25519 检查不关闭。可提供已认证的 `--ssh-control`，不会将密钥传给远端。
 
 [单次 GPU 评测入口](../tools/run_c5_final_remote.py)只接受独立保管人进程通过认证 SSH 的私有 stdin；核对正式 adapter、冻结代码和门槛，使用 counterbalanced 基座/LoRA 顺序及原严格 parser。远端 `final` 目录 exclusive 创建，另一个 run ID 也不能重跑；原始生成只在 owner-private 文件保存，开发侧仅回传聚合统计、失败分类和哈希化收据。输出检查器本身不赋予 Rhino 执行许可；C5-5 仅在 C5-4 离线门通过后判定，其报告明确不替代真实 consent/几何门。初始化/网络/解密失败若发生在 claim 后同样保持消费，不自动补跑。

@@ -12,6 +12,7 @@ import argparse
 import getpass
 import json
 import os
+import re
 import shlex
 import shutil
 import subprocess
@@ -36,10 +37,14 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--owner-state-dir", type=Path, required=True)
     p.add_argument("--final-freeze", type=Path, required=True)
+    p.add_argument("--ssh-host", required=True, help="Owner's verified user@hostname; no instance address in public source")
+    p.add_argument("--ssh-port", type=int, required=True)
     p.add_argument("--ssh-control", type=Path)
     a = p.parse_args()
     if not sys.stdin.isatty():
         raise RuntimeError("owner final tool requires the custodian's interactive terminal")
+    if not re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_.-]*@[A-Za-z0-9][A-Za-z0-9.-]*", a.ssh_host) or not 1 <= a.ssh_port <= 65535:
+        raise RuntimeError("invalid explicit SSH endpoint")
     age = shutil.which("age")
     if not age:
         raise RuntimeError("age is unavailable; install/verify it before any consumption")
@@ -69,7 +74,7 @@ def main():
         "--final-freeze", "/data/RhinoCoder-c5/eval/c5/c5-final-evaluation-freeze.json"]
     ssh = ["ssh", "-T", "-o", "StrictHostKeyChecking=yes", "-o", "HostKeyAlgorithms=ssh-ed25519"]
     if a.ssh_control: ssh += ["-S", str(a.ssh_control)]
-    ssh += ["-p", "22134", "linux@175.155.64.171",
+    ssh += ["-p", str(a.ssh_port), a.ssh_host,
             "cd /data/RhinoCoder-c5 && " + shlex.join(remote_args)]
     ready = subprocess.run(ssh[:-1]+[ssh[-1]+" --preflight"], text=True,
                            capture_output=True, check=True, timeout=300)

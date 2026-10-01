@@ -1,0 +1,20 @@
+{
+  "completed": true,
+  "context_sha256": "ff62dcb5e4f42482f014f78a07e4b80ad644dfc786d50e579b9663a503eb7acd",
+  "contract_id": "qwen25-v4-selector-v3-json-invoker-c5-v1",
+  "experiment_id": "rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2",
+  "final_holdout_rows_read": 0,
+  "final_loss": 3.856955472514301e-05,
+  "global_step": 128,
+  "initial_loss": 0.5696033849671949,
+  "passed": true,
+  "peak_allocated_bytes": 14626294784,
+  "peak_reserved_bytes": 20952645632,
+  "phase": "overfit",
+  "relative_loss_decrease": 0.9999322869987379,
+  "resumed_from": 1,
+  "rhino_called": false,
+  "seconds_this_segment": 1949.0473714720001,
+  "training_families": 60,
+  "training_records": 64
+}
