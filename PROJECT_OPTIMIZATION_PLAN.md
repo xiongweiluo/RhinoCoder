@@ -19,7 +19,7 @@
 - [ ] 当前主线：R最小研究安全收尾，随后C5-6全新20题预注册、配对真实Rhino与C5-7裁决。不得修改已冻结的12工具范围或原门槛来迁就旧执行器。
 - [x] 原模型/源码在新端口只读复核：基座14文件、checkpoint132两adapter、原最终28源码一致；GPU空闲，未加载模型或运行评测，见[资产复核v2](eval/c5/remote-assets-readonly-v2-20261002.json)。
 - [x] R生命周期子门：真实Rhino无模型/无写入open→close/删密钥→stop及原始活动内容哈希一致，125源码清单和独立审计见[草稿PR #7](https://github.com/xiongweiluo/RhinoCoder/pull/7)；不等于完整R研究安全通过。
-- [ ] R固定两写安全probe：等待所有者明确授权；新核验器/协议已准备，不能自签批准。之后才闭合几何、许可、执行、账本和完整交接。
+- [ ] R固定两写安全probe：所有者已授权A并单次尝试，第一写后核验器误拒绝合法revision0，原结果FAIL封存，第二写未执行；首写及清理经事后独立核实，不追认两写PASS。A已退休，新独立版本/spec/ID须另获批准并完成真实闭环。详见[草稿PR #7](https://github.com/xiongweiluo/RhinoCoder/pull/7)，尚不能交接为完整研究安全通过。
 - [ ] C5-6执行前门：完整12工具隔离适配/独立评分器、开发负控、全新20题与所有者排除承诺、完整血缘和有界预算均待冻结；[准备稿](docs/c5-rhino-paired-study-preregistration.md)不是正式预注册或执行授权，未生成/消费正式20题。
 - [ ] 仓库收口：C5代码/公开证据在OPEN PR #2–#6，R独立草稿PR #7已推送；所有者唯一reviewer_1决定是否合并，代理不自动merge。P2b、D和完整产品UI继续延期。
 

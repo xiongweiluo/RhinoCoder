@@ -29,9 +29,20 @@
     "unverified_cleanup_max": 0
   },
   "known_R_lifecycle_subgate": "real_Rhino_no_model_no_write_pass_independently_audited",
+  "R_fixed_two_write_attempt_A": {
+    "probe_id": "RSDEV-TWO-WRITE-20261002-A",
+    "owner_approval_received": true,
+    "runtime_source_revision": "ae74b0e13591d69c4b01fca528b50fa6d4465bf8",
+    "original_result": "two_write_research_safety_fail",
+    "write_attempts": 1,
+    "second_write_attempts": 0,
+    "posthoc_first_write_and_cleanup_verified": true,
+    "two_write_gate_passed": false,
+    "retired_no_replay": true
+  },
   "R_full_research_gate_complete": false,
   "blocking_inputs": [
-    "owner approval and independent field audit of fixed two-write research safety probe",
+    "separate versioned research spec/ID, owner approval and independent two-write field closure; attempted A is retired and must not be replayed",
     "complete isolated C5 twelve-tool dispatcher and independent geometry/attribute scorer",
     "separate development negative controls without formal task exposure",
     "twenty genuinely new tasks, family-level exclusions and repository_owner custody attestation",
