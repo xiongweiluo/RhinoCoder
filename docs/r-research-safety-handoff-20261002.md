@@ -4,6 +4,8 @@
 
 ## 本轮实际交付
 
+后续准备增量：新的 `RSDEV-TWO-WRITE-20261002-B` 已在 [B 事前冻结](r-research-two-write-B-preregistration.md)登记；130份源码绑定 `3e8ee53`，所有者已对 B spec 和 runtime freeze 双哈希明确批准单次两写。固定入口增加永久 admission/engine 两层单次 claim，禁止中断、并发、新输出路径或共享执行器绕过。干净源码快照368 passed/5 skipped、相关研究96 passed；均为CPU工程检查。**B现场尚未执行，不替代失败A，不宣称完整R门通过。**
+
 - 新版[研究生命周期](../plugin/rhino_listener/research_lifecycle.py)、[Rhino入口](../tools/r_research_safety_batch.py)、[客户端](../tools/r_research_lifecycle_smoke.py)与[独立边界核验](../plugin/rhino_listener/research_safety.py)，不修改封存v2源码/清单。仅空的独立未保存headless毫米夹具；未知身份不猜路径，不确定关闭不重试，不把排队close/stop当作清理成功。
 - 补入实际必需的两份历史通用依赖 `candidate_atomic_gate.py`、`candidate_live_idle_session.py`，不整包提交未跟踪R代码、题目或私人归档。源码清单保守覆盖已跟踪Python与锁定依赖，运行前后核查实际加载的本地依赖；Rhino侧使用新私有包命名空间，防止缓存旧候选模块冒充当前字节。
 - Rhino内嵌Python3.9首次发现训练包初始化使用`dataclass(slots=True)`，脚本在开夹具前中止，控制台失败保留。研究模块已移到Rhino兼容边界，不改正式训练/解析实现；该失败不是任务质量结果。
