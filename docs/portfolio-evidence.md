@@ -21,6 +21,7 @@ RhinoCoder 对外只使用能从版本化文件复核的指标。本页是 READM
 | 23 个 MCP 工具 | 版本清单固定工具数，并由发布一致性检查与源码装饰器计数交叉验证 | [版本清单](version-manifest.json) |
 | C3 A5 一次性评测未达到 GO 门槛 | 基座与 LoRA 在 45 条锁定 holdout 上的 parse/name/arguments/sequence exact 均为 0/45；差值 0.0pp、净胜 0，第二 run 已禁止 | [C3 A5 报告](c3-a5-holdout-report.md)、[C2 报告](c2-qlora-training-report.md)、[C3 协议](c3-final-evaluation.md) |
 | C4 模型实验裁决为 NO-GO | P2 真实 Rhino 配对描述性结果为基座 4/30、LoRA 5/30；+3.3pp、净胜 1、exact McNemar `p=1.0`、bootstrap 95% CI [0,10]pp，未达到预注册门槛；LoRA 基础设施补位事后发现超出冻结规则 | [C4 原报告](c4-model-decision.md)、[只读诊断与合规性限制](c4-posthoc-failure-diagnosis.md)、[最小化机器结果](p2-model-comparison-results.json) |
+| 独立C5离线和严格控制器门通过 | 全新80家族单次配对，sequence基座20/80、LoRA77/80，+71.25pp、净胜57，exact McNemar p≈1.39e-17；原门槛、消费/冻结血缘与公开逐家族统计复算通过，尚非真实Rhino或整体GO | [最终报告](c5-final-evaluation-report.md)、[独立公开审计](../eval/c5/final-public-audit-20261002-v2.json) |
 | 当前正式版本为 0.3.0 | Tag、GitHub Release 与在线只读演示均有公开入口；当前后续改动属于 Unreleased | [版本清单](version-manifest.json)、[发布清单](release-checklist.md) |
 
 ## 代表性可追溯链路
@@ -48,7 +49,7 @@ run.started
 ## 不应对外声称
 
 - 不声称本地模型已经能完成 Rhino 建模。`local-mock` 只是确定性的接口与安全替身。
-- 不声称 LoRA 优于基座或云模型。唯一 QLoRA 已训练，但一次性 A5 上基座/LoRA 均为 0/45，P2 也只有 4/30 对 5/30；C4 已按预注册规则裁决 `NO-GO`。
+- 不把C5冻结契约下80家族离线结构化改善外推为真实Rhino、开放世界或优于云模型。第一轮A5两路0/45、P2描述性4/30对5/30和C4 `NO-GO`保持不变，第二轮结果不追认第一轮成功。
 - 不把 P2 包装成完全盲测：它在 LoRA 训练前冻结，但已用于既有系统失败分析；C4 将其作为外部困难回归集与 A5 分层报告。
 - 不把本次 LoRA P2 描述性 5/30 说成严格遵守冻结单次基础设施补位规则的 Pass@1；[事后诊断](c4-posthoc-failure-diagnosis.md)披露 15 个任务存在超限中断记录，不事后剔除或重跑。
 - 不把 Agent/Rhino 的 Windows/macOS 兼容表述为本地模型跨平台；本地推理只声明实际验证过的平台。

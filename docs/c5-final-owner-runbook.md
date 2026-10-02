@@ -1,5 +1,7 @@
 # C5-4/5 独立保管人单次交接
 
+> **2026-10-02：原run已完成并消费，本文入口现在禁止再次执行。**公开证据已完整回收和独立审计，C5-4/5通过，见[最终报告](c5-final-evaluation-report.md)。以下说明只保留为当时交接协议，不是恢复或重跑命令；原账本和run目录不可重置。
+
 状态（2026-10-01）：C5-3完整训练/登记/73文件逐字节导出核验、最终代码冻结和真实零读取preflight全部通过，**已可交给所有者单次执行**。本文不是最终消费收据，不表示 C5-4/5 已通过。
 
 最终冻结：[清单](../eval/c5/c5-final-evaluation-freeze.json)，canonical SHA-256 `9a57c1672e5d49d6b1ce8c23ee36c1fa6cf0b4570d08d9030df1c7bd2860a5d8`；绑定源码 `ced0de9`、checkpoint132 / adapter `305d7270…2cae`、28个直接源码/依赖及导出证明、原门槛与commitment。[真实preflight](../eval/c5/final-preflight-ready-20261001.json)返回ready、最多14400秒、claim/rows为0。初次隔离部署缺失requirements.txt的[失败记录](../eval/c5/final-preflight-deployment-failure-20261001.json)保留；只补齐既定哈希文件，未重生成或修改冻结清单。

@@ -1,8 +1,10 @@
 # C5：契约对齐后的第二轮 QLoRA 规划与预注册草案
 
+> **2026-10-02当前状态：**C5-0至C5-5已完整通过。原80家族单次run完成，LoRA sequence77/80、base20/80，原离线/严格控制器门通过；五份公开文件回收及哈希化逐家族结果独立复算见[最终报告](c5-final-evaluation-report.md)。这80家族已消费，不再允许owner入口重跑。当前主线是R最小研究安全收尾→C5-6新20题预注册/真实配对→C5-7；不缩小已冻结工具范围、不更改门槛、不提前宣告整体GO或默认接入。以下较早状态为历史设计/执行记录。
+
 > **2026-10-01 执行增量（优先于下文历史草案状态）：**C5-2 工程全门已真实通过：64 条 overfit 完成 128 steps、独立 step1 恢复；32 家族/26-step 系统诊断完成，有限 loss/梯度、validation、最终 checkpoint 血缘均通过，诊断累计 0.67354 GPU-hours。C5-3 唯一正式 run 已在所有者现有两天租期和 v3 条件授权下启动，配置/选模/预算已冻结；不沿用诊断权重。详见 [GPU 专用执行包](c5-gpu-execution.md)及 PR #6。943 条开发数据与原 schema、prompt/target、token、hash 一致；部署前失败审计不删除、原 CPU 冻结不覆盖。最终 80 家族仍为零消费，只有正式产物/最终代码冻结及零读取 preflight 通过后，独立保管人才能单次执行 [交接入口](c5-final-owner-runbook.md)。不改阈值、C4/v8 历史或默认产品路线；不自动 merge。
 
-当前状态：**C5-0/1/2/3 已完成；唯一正式132-step训练、checkpoint132登记与73文件导出复核全部通过，见 [训练报告](c5-formal-training-report.md)。C5-4/5 尚未运行，不声称最终模型质量。**以下日期为原离线草案及预注册设计；配置与预算已由 2026-10-01 v3 执行授权冻结，不继续把“暂定/待主机”当作当前阻塞。
+2026-10-01训练完成时状态：**C5-0/1/2/3 已完成；唯一正式132-step训练、checkpoint132登记与73文件导出复核全部通过，见 [训练报告](c5-formal-training-report.md)。当时C5-4/5 尚未运行。**以下日期为原离线草案及预注册设计；配置与预算已由 2026-10-01 v3 执行授权冻结，不继续把“暂定/待主机”当作当前阻塞。
 
 日期：2026-09-27。实验 ID：`rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2`。本地冻结契约 ID：`qwen25-v4-selector-v3-json-invoker-c5-v1`。机器清单与实际审计见 [C5-0/C5-1 离线冻结报告](c5-offline-freeze-report.md)、[dataset v2 冻结报告](c5-dataset-v2-draft-report.md)和 [`eval/c5/manifest.json`](../eval/c5/manifest.json)。仓库所有者是唯一 `reviewer_1` 和最终 holdout 独立保管人；开发数据审批已通过 exact-set attestation 绑定到公开哈希，训练前预注册仍须补齐 holdout 加密承诺、统计/单次消费门和工程资源决定。任何变更必须升版本，不得覆盖既有哈希。
 
