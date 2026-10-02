@@ -9,6 +9,17 @@ from types import SimpleNamespace
 
 import pytest
 
+
+@pytest.fixture(autouse=True)
+def private_optin_test_directory(tmp_path, monkeypatch):
+    """Keep Mac-only runner paths out of Linux CI without changing sealed code."""
+    import tempfile
+    original = tempfile.mkdtemp
+    def in_test_directory(*args, **kwargs):
+        kwargs["dir"] = str(tmp_path)
+        return original(*args, **kwargs)
+    monkeypatch.setattr(optin, "tempfile", SimpleNamespace(mkdtemp=in_test_directory))
+
 from tools import r4_controlled_access_candidate_v2 as candidate
 from tools import r4_controlled_access_optin_v2 as optin
 from tools import r4_controlled_access_remote_guard_v2 as boundary
