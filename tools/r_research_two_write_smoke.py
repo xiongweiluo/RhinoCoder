@@ -38,6 +38,11 @@ SPEC = {
     "max_write_requests": 2, "model_calls": 0, "formal_quality_claim": False,
 }
 
+# A was attempted once and failed after its first write. A fresh output path
+# or corrected verifier does not authorize replay; a future probe requires
+# its own versioned spec, ID and external owner approval.
+RETIRED_PROBE_IDS = frozenset({"RSDEV-TWO-WRITE-20261002-A"})
+
 
 def verify_owner_approval(approval):
     require(isinstance(approval, dict) and approval.get("authorized_by") == "repository_owner"
@@ -90,10 +95,12 @@ def write_steps(session, output):
                 "envelope_payload": payload, "execution": execution, "ledger_row": ledger_row,
                 "consent_request": consent_row, "consent_events": consent.audit_events(request_id),
             }
+            # Retain raw evidence before verification, including on failure.
+            # A step file's presence is not a verified step/pass flag.
+            _private_publish(output, "step-%d.json" % number, record)
             verify_write_binding(record=record, execution=execution, ledger_row=ledger_row,
                                  consent_request=consent_row, consent_events=record["consent_events"], envelope_payload=payload)
             records.append(record)
-            _private_publish(output, "step-%d.json" % number, record)
         finally:
             consent.abort_without_human(link)
     return records
@@ -101,20 +108,25 @@ def write_steps(session, output):
 
 def run(batch, output, approval):
     verify_owner_approval(approval)
+    require(SPEC["probe_id"] not in RETIRED_PROBE_IDS, "probe ID retired after field attempt; no replay")
     require(not output.exists(), "fresh output required; safety probe cannot be rerun under same ID")
     bootstrap = _private_read(batch/"bootstrap.json")
     inventory = _private_read(batch/"source-inventory.json")
-    require(bootstrap.get("version") == 2 and bootstrap.get("model_invocation_allowed") is False, "unexpected controller")
+    require(bootstrap.get("version") == 2 and bootstrap.get("model_invocation_allowed") is False
+            and bootstrap.get("formal_quality_claim") is False and bootstrap.get("scope") == SPEC["scope"],
+            "unexpected controller")
     verify_loaded_sources(ROOT, inventory, tuple(sys.modules.values()))
     os.mkdir(output, 0o700)
     _private_publish(output, "owner-approval.json", approval)
     opened = closed = stopped = None
     records = []
     error = None
+    cleanup_verified = False
     try:
         opened = request(batch, 1, "open", SPEC["probe_id"], "empty")
         require(cleanup_plan(open_published=True, case_id=SPEC["probe_id"], opened=opened)["actions"] == ["close", "stop"],
                 "open identity unknown")
+        require(opened.get("initial_active_sha256") == bootstrap["initial_active_sha256"], "initial active hash differs")
         records = write_steps(Path(opened["session_dir"]), output)
     except BaseException as exc:
         error = type(exc).__name__+":"+str(exc)
@@ -128,13 +140,16 @@ def run(batch, output, approval):
                 closed = request(batch, 2, "close", SPEC["probe_id"], "none")
                 capture = _private_read(batch/"final-active-002.json")
                 require(closed.get("status") == "closed" and closed.get("case_id") == SPEC["probe_id"]
+                        and closed.get("key_removed") is True
                         and closed.get("session_dir") == opened["session_dir"] and capture == closed.get("final_active_capture"),
                         "closure identity differs")
                 verify_final_active_capture(capture, case_id=SPEC["probe_id"], session_dir=opened["session_dir"],
                                             initial_sha256=bootstrap["initial_active_sha256"])
                 stopped = request(batch, 3, "stop", "RSDEV-END", "none")
-                require(stopped.get("status") == "stopped" and stopped.get("had_failure") is False
+                require(stopped.get("status") == "stopped" and stopped.get("case_id") == "RSDEV-END"
+                        and stopped.get("had_failure") is False
                         and stopped.get("active_sha256_at_stop") == bootstrap["initial_active_sha256"], "stop unverified")
+                cleanup_verified = True
             except BaseException as exc:
                 error = (error+";" if error else "")+"cleanup:"+type(exc).__name__+":"+str(exc)
                 # Published close/stop are never reissued, and failure is never
@@ -156,7 +171,9 @@ def run(batch, output, approval):
         "records": records, "error": error, "opened": opened, "closed": closed, "stopped": stopped,
         "source_inventory": inventory, "model_calls": 0, "formal_quality_claim": False,
         "c5_6_authorized": False, "no_model_or_tool_retries": True,
-        "cleanup_verified": closed is not None and stopped is not None and error is None,
+        # Closure does not make a failed task pass; a task error does not erase
+        # closure already checked against the exact UI-thread receipts.
+        "cleanup_verified": cleanup_verified,
     }
     _private_publish(output, "result.json", result)
     return result

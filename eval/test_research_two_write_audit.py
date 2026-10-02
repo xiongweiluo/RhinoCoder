@@ -59,7 +59,7 @@ def fixture(tmp_path, monkeypatch):
         put(batch/("response-%03d.json" % seq), response)
     geometry = [[], [{"alias": "box-1", "min": [0., 0., 0.], "max": [347., 353., 359.]}],
                 [{"alias": "box-1", "min": [7., -11., 13.], "max": [354., 342., 372.]}]]
-    scenes = [{"revision": n+1, "scene_sha256": chr(97+n)*64,
+    scenes = [{"revision": n, "scene_sha256": chr(97+n)*64,
                "summary": {"unit": "Millimeters", "document_key": "d"*64,
                            "object_count": len(objects), "aliases": [obj["alias"] for obj in objects]},
                "objects": objects, "selected_aliases": []} for n, objects in enumerate(geometry)]

@@ -59,24 +59,25 @@ def test_loaded_untracked_dependency_or_source_drift_is_rejected(tmp_path):
 
 
 @pytest.mark.parametrize("tamper", [None, "request_sha256", "idempotency_key", "result_sha256", "consent_arguments", "task_sha256"])
-def test_execution_consent_scene_and_ledger_are_cross_bound(tamper):
+@pytest.mark.parametrize("revision", [0, 1, -1, True, 1.0])
+def test_execution_consent_scene_and_ledger_are_cross_bound(tamper, revision):
     import hashlib
     request_id = "request-12345678901234567890"
     key = hashlib.sha256(request_id.encode()).hexdigest()
     record = {"request_id": request_id, "operation": "create_box", "before_scene_sha256": "a"*64,
               "after_scene_sha256": "b"*64, "signed_arguments": {"width": 11, "depth": 13, "height": 17},
-              "before_revision": 1, "document_key": "d"*64, "task_sha256": "e"*64}
+              "before_revision": revision, "document_key": "d"*64, "task_sha256": "e"*64}
     execution = {**{k: record[k] for k in ("operation", "before_scene_sha256", "after_scene_sha256")},
                  "ledger_state": "done", "status": "done", "result_sha256": "f"*64,
                  "idempotency_key_sha256": hashlib.sha256(key.encode()).hexdigest()}
-    ledger = {"idempotency_key": key, "expected_sha256": "a"*64, "expected_revision": 1, "state": "done",
+    ledger = {"idempotency_key": key, "expected_sha256": "a"*64, "expected_revision": revision, "state": "done",
               "document_key": "d"*64, "result_sha256": "f"*64,
               "request_sha256": canonical_hash({"operation": record["operation"], "arguments": record["signed_arguments"]})}
     consent = {"request_id": request_id, "tool_name": "create_box", "status": "consumed",
                "arguments_sha256": canonical_hash(record["signed_arguments"]), "task_sha256": record["task_sha256"],
-               "scene_revision": 1, "scene_sha256": "a"*64}
+               "scene_revision": revision, "scene_sha256": "a"*64}
     payload = {"request_id": request_id, "operation": "create_box", "arguments": record["signed_arguments"],
-               "scene_revision": 1, "scene_sha256": "a"*64, "document_key": "d"*64, "task_sha256": record["task_sha256"]}
+               "scene_revision": revision, "scene_sha256": "a"*64, "document_key": "d"*64, "task_sha256": record["task_sha256"]}
     events = [{"request_id": request_id, "event_type": e} for e in
               ("requested", "approved", "consumed", "signed_handoff_issued")]
     if tamper in {"request_sha256", "idempotency_key", "result_sha256"}: ledger[tamper] = "c"*64
@@ -84,7 +85,7 @@ def test_execution_consent_scene_and_ledger_are_cross_bound(tamper):
     if tamper == "task_sha256": payload["task_sha256"] = "c"*64
     kwargs = dict(record=record, execution=execution, ledger_row=ledger, consent_events=events,
                   consent_request=consent, envelope_payload=payload)
-    if tamper:
+    if tamper or type(revision) is not int or revision < 0:
         with pytest.raises(ResearchSafetyError): verify_write_binding(**kwargs)
     else:
         assert verify_write_binding(**kwargs)

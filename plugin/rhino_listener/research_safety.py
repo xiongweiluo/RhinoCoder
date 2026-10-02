@@ -184,7 +184,10 @@ def verify_write_binding(*, record, execution, ledger_row, consent_events,
             and SHA.fullmatch(str(record.get("before_scene_sha256"))) is not None
             and record.get("before_revision") == ledger_row.get("expected_revision")
             == envelope_payload.get("scene_revision") == consent_request.get("scene_revision")
-            and type(record.get("before_revision")) is int and record["before_revision"] >= 1
+            # Empty Rhino fixtures begin at zero, as do the envelope and
+            # GivenScene contracts. Keep all identity checks and reject
+            # negative, boolean and floating-point revisions.
+            and type(record.get("before_revision")) is int and record["before_revision"] >= 0
             and record.get("document_key") == ledger_row.get("document_key") == envelope_payload.get("document_key")
             and SHA.fullmatch(str(record.get("document_key"))) is not None,
             "pre-scene chain differs")
