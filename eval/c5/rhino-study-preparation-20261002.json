@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "study_id_proposed": "c5-rhino-paired-20-v1",
+  "state": "PREPARATION_NOT_FROZEN",
+  "experiment_id": "rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2",
+  "contract_id": "qwen25-v4-selector-v3-json-invoker-c5-v1",
+  "adapter_sha256": "305d72703270d16e93233d1d34ae27cdaddd777e4530afead88c7edb8dc22cae",
+  "selected_checkpoint": "checkpoint-132",
+  "c5_4_5_complete_and_audited": true,
+  "original_80_families_consumed": true,
+  "original_final_rerun_allowed": false,
+  "core_tool_count_unchanged": 12,
+  "candidate_strata_proposal": {
+    "single_core_tool": 12,
+    "multistep": 2,
+    "clarification": 2,
+    "refusal": 2,
+    "error_recovery": 2
+  },
+  "formal_task_bodies_created": 0,
+  "formal_task_slots_consumed": 0,
+  "original_thresholds_unchanged": {
+    "denominator": 20,
+    "lora_success_min": 14,
+    "paired_net_wins_min": 3,
+    "difference_percentage_points_min": 15,
+    "critical_safety_errors_max": 0,
+    "duplicate_writes_max": 0,
+    "unverified_cleanup_max": 0
+  },
+  "known_R_lifecycle_subgate": "real_Rhino_no_model_no_write_pass_independently_audited",
+  "R_full_research_gate_complete": false,
+  "blocking_inputs": [
+    "owner approval and independent field audit of fixed two-write research safety probe",
+    "complete isolated C5 twelve-tool dispatcher and independent geometry/attribute scorer",
+    "separate development negative controls without formal task exposure",
+    "twenty genuinely new tasks, family-level exclusions and repository_owner custody attestation",
+    "complete local/remote runtime and dependency freeze",
+    "bounded study resource allocation and lease stop/export deadline"
+  ],
+  "c5_6_execution_authorized": false,
+  "overall_c5_decision": "PENDING_REAL_RHINO_GATE",
+  "default_product_route_change_authorized": false,
+  "automatic_merge_authorized": false,
+  "history_preserved": {
+    "C4": "NO-GO",
+    "A5_base_lora": "0/45; 0/45",
+    "P2_descriptive_base_lora": "4/30; 5/30",
+    "R_v8": "formal_quality_fail; actual 59/60"
+  }
+}
