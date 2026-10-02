@@ -44,21 +44,23 @@ SPEC = {
 RETIRED_PROBE_IDS = frozenset({"RSDEV-TWO-WRITE-20261002-A"})
 
 
-def verify_owner_approval(approval):
+def verify_owner_approval(approval, *, spec=None):
+    spec = SPEC if spec is None else spec
     require(isinstance(approval, dict) and approval.get("authorized_by") == "repository_owner"
-            and approval.get("probe_spec_sha256") == canonical_hash(SPEC)
+            and approval.get("probe_spec_sha256") == canonical_hash(spec)
             and approval.get("approved") is True
             and approval.get("authorization_basis") == "explicit owner reply approving fixed two-write research safety probe",
             "exact external owner approval missing; agent must not self-approve")
 
 
-def write_steps(session, output):
+def write_steps(session, output, *, spec=None):
+    spec = SPEC if spec is None else spec
     scene = V6Scene(session)
     require(not _initial(session).objects, "fixture not empty")
     tools = load_public_mcp_tools()
     consent = ConsentStore(output/"consent.sqlite3", tools)
     records = []
-    for number, explicit in enumerate(SPEC["steps"], 1):
+    for number, explicit in enumerate(spec["steps"], 1):
         before = scene.capture()
         task = json.dumps(explicit, sort_keys=True, separators=(",", ":"))
         expected = preflight(task, scene=scene, tools=tools)
@@ -106,14 +108,20 @@ def write_steps(session, output):
     return records
 
 
-def run(batch, output, approval):
-    verify_owner_approval(approval)
-    require(SPEC["probe_id"] not in RETIRED_PROBE_IDS, "probe ID retired after field attempt; no replay")
+def run(batch, output, approval, *, spec=None):
+    spec = SPEC if spec is None else spec
+    verify_owner_approval(approval, spec=spec)
+    require(spec["probe_id"] not in RETIRED_PROBE_IDS, "probe ID retired after field attempt; no replay")
+    if canonical_hash(spec) != canonical_hash(SPEC):
+        # A future spec cannot use the shared engine as a backdoor around its
+        # frozen entry/one-attempt admission. Only fixed B is implemented.
+        from tools.r_research_two_write_v2 import begin_engine
+        begin_engine(batch, output, approval, spec)
     require(not output.exists(), "fresh output required; safety probe cannot be rerun under same ID")
     bootstrap = _private_read(batch/"bootstrap.json")
     inventory = _private_read(batch/"source-inventory.json")
     require(bootstrap.get("version") == 2 and bootstrap.get("model_invocation_allowed") is False
-            and bootstrap.get("formal_quality_claim") is False and bootstrap.get("scope") == SPEC["scope"],
+            and bootstrap.get("formal_quality_claim") is False and bootstrap.get("scope") == spec["scope"],
             "unexpected controller")
     verify_loaded_sources(ROOT, inventory, tuple(sys.modules.values()))
     os.mkdir(output, 0o700)
@@ -123,27 +131,27 @@ def run(batch, output, approval):
     error = None
     cleanup_verified = False
     try:
-        opened = request(batch, 1, "open", SPEC["probe_id"], "empty")
-        require(cleanup_plan(open_published=True, case_id=SPEC["probe_id"], opened=opened)["actions"] == ["close", "stop"],
+        opened = request(batch, 1, "open", spec["probe_id"], "empty")
+        require(cleanup_plan(open_published=True, case_id=spec["probe_id"], opened=opened)["actions"] == ["close", "stop"],
                 "open identity unknown")
         require(opened.get("initial_active_sha256") == bootstrap["initial_active_sha256"], "initial active hash differs")
-        records = write_steps(Path(opened["session_dir"]), output)
+        records = write_steps(Path(opened["session_dir"]), output, spec=spec)
     except BaseException as exc:
         error = type(exc).__name__+":"+str(exc)
     finally:
         if opened is None and (batch/"response-001.json").exists():
             try: opened = _private_read(batch/"response-001.json")
             except BaseException: pass
-        plan = cleanup_plan(open_published=(batch/"request-001.json").exists(), case_id=SPEC["probe_id"], opened=opened)
+        plan = cleanup_plan(open_published=(batch/"request-001.json").exists(), case_id=spec["probe_id"], opened=opened)
         if plan["actions"] == ["close", "stop"]:
             try:
-                closed = request(batch, 2, "close", SPEC["probe_id"], "none")
+                closed = request(batch, 2, "close", spec["probe_id"], "none")
                 capture = _private_read(batch/"final-active-002.json")
-                require(closed.get("status") == "closed" and closed.get("case_id") == SPEC["probe_id"]
+                require(closed.get("status") == "closed" and closed.get("case_id") == spec["probe_id"]
                         and closed.get("key_removed") is True
                         and closed.get("session_dir") == opened["session_dir"] and capture == closed.get("final_active_capture"),
                         "closure identity differs")
-                verify_final_active_capture(capture, case_id=SPEC["probe_id"], session_dir=opened["session_dir"],
+                verify_final_active_capture(capture, case_id=spec["probe_id"], session_dir=opened["session_dir"],
                                             initial_sha256=bootstrap["initial_active_sha256"])
                 stopped = request(batch, 3, "stop", "RSDEV-END", "none")
                 require(stopped.get("status") == "stopped" and stopped.get("case_id") == "RSDEV-END"
@@ -167,7 +175,7 @@ def run(batch, output, approval):
         _backup_ledger(Path(opened["session_dir"])/"fixture.sqlite3", output/"fixture.sqlite3", expected={"done": 2})
     result = {
         "status": "two_write_research_safety_pass_not_model_quality" if passed else "two_write_research_safety_fail",
-        "probe_spec": SPEC, "probe_spec_sha256": canonical_hash(SPEC), "owner_approval": approval,
+        "probe_spec": spec, "probe_spec_sha256": canonical_hash(spec), "owner_approval": approval,
         "records": records, "error": error, "opened": opened, "closed": closed, "stopped": stopped,
         "source_inventory": inventory, "model_calls": 0, "formal_quality_claim": False,
         "c5_6_authorized": False, "no_model_or_tool_retries": True,

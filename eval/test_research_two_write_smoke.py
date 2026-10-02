@@ -50,7 +50,7 @@ def test_cpu_task_failure_is_distinct_from_verified_cleanup(tmp_path, monkeypatc
         "formal_quality_claim": False, "scope": spec["scope"], "initial_active_sha256": digest})
     _private_publish(batch, "source-inventory.json", {})
     monkeypatch.setattr(module, "verify_loaded_sources", lambda *args: None)
-    def fail_write(*args):
+    def fail_write(*args, **kwargs):
         raise RuntimeError("synthetic task failure")
     monkeypatch.setattr(module, "write_steps", fail_write)
     calls = []
