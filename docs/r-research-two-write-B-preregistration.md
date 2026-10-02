@@ -1,6 +1,6 @@
 # R 研究安全开发烟测 B：事前冻结
 
-2026-10-02。状态：**源码/spec 已冻结；所有者已对 B 两个精确哈希批准单次两写，现场尚未执行。** 人类实际回复为“以 repository_owner 身份授权上述 B spec 和源码冻结的单次两写烟测”；不得将这一批准扩展为其他 probe、模型或正式20题授权。不属于 C5 最终 holdout，不是模型质量评测，不覆盖十二工具。原失败 A 永久保留、退休；本版本不是 A 的重跑或追认。
+2026-10-02。当前后续状态：**B 已在事前冻结提交 `b77e71e` 双 CI 通过后单次完成，两工具研究安全子门独立审计通过。** 下文是执行前固定的范围与规则，不因结果修改。人类实际回复为“以 repository_owner 身份授权上述 B spec 和源码冻结的单次两写烟测”；不得将这一批准扩展为其他 probe、模型或正式20题授权。不属于 C5 最终 holdout，不是模型质量评测，不覆盖十二工具。原失败 A 永久保留、退休；本版本不是 A 的重跑或追认。
 
 ## 身份与固定范围
 
@@ -42,6 +42,14 @@
 
 ## 工程准备状态
 
-源码冻结前干净跟踪文件快照：368 passed / 5 skipped；相关研究 CPU 正负控 96 passed。这些证明 admission、revision 边界和证据核验逻辑，不是 B 现场成功。文档/公开冻结随后提交，远端 CI 须按最新提交复核。仅记录实际人类批准，尚无 claim、现场结果或新的正式20题；公开报告留空直到真实独立审计完成。
+源码冻结前干净跟踪文件快照：368 passed / 5 skipped；相关研究 CPU 正负控 96 passed。这些证明 admission、revision 边界和证据核验逻辑，不是现场证明。执行前冻结提交 `b77e71e` 的两项 CI（37057182987、37057187072）已通过。
+
+## 执行后增量：不得修改事前门槛
+
+[独立公开现场审计](../eval/r_research/two-write-B-audit-20261002.json)从实际文件与数据库核实 B 两笔唯一写入、两行 done、两份 consumed 许可/八个事件，真实 capture 的整个对象集合和两步精确 bbox、逐步场景链均通过。两个永久 claim 已核实；夹具关闭、实际密钥不存在、控制器停止，活动内容四次 SHA-256 均为 `de8fa7924ad4cf7fbeffdbe982f0b559a77eca7a8cf1f24175df642404ec6cfa`。模型/GPU/holdout 调用均0，无重试。
+
+现场原 result/owner receipt/两步记录、两个永久 claim、batch 九份JSON及本次 fixture captures/执行/场景组件/载荷，共104份原JSON，已逐文件保存至忽略的700私有 `data/training/c5/research-two-write-20261002-B`；fixture及consent采用SQLite一致backup，独立只读 `quick_check`、逐行一致与公开证据哈希复核通过。不复制密钥或其他 R 目录；临时原件及失败A仍保留。B永久不可再执行，原 A仍FAIL。
+
+本次结项仅为 `independently_verified_fixed_two_write_safety_only`，不是完整 R 或 C5-6 PASS；完整12工具/评分/开发负控、新20题和排除确认、远端运行血缘、研究预算/租期冻结仍需完成。
 
 PR #7 保留 draft，所有者唯一 reviewer_1 决定合并；无需 reviewer_2。持续推送/建 PR 授权不包含自动 merge。C4 NO-GO、v8 formal_quality_fail/59/60、原 C5 已消费80家族和默认混合路线全部不变。

@@ -4,7 +4,7 @@
 
 ## 本轮实际交付
 
-后续准备增量：新的 `RSDEV-TWO-WRITE-20261002-B` 已在 [B 事前冻结](r-research-two-write-B-preregistration.md)登记；130份源码绑定 `3e8ee53`，所有者已对 B spec 和 runtime freeze 双哈希明确批准单次两写。固定入口增加永久 admission/engine 两层单次 claim，禁止中断、并发、新输出路径或共享执行器绕过。干净源码快照368 passed/5 skipped、相关研究96 passed；均为CPU工程检查。**B现场尚未执行，不替代失败A，不宣称完整R门通过。**
+后续已执行增量：新的 `RSDEV-TWO-WRITE-20261002-B` 在 [B 事前冻结](r-research-two-write-B-preregistration.md)登记；130份源码绑定 `3e8ee53`，所有者明确批准两个哈希，冻结提交`b77e71e`双CI通过后单次两写并[独立现场审计通过](../eval/r_research/two-write-B-audit-20261002.json)。两笔唯一执行/两行done/两份consumed许可及八事件、精确几何与场景链、关闭/实际密钥删除/stop/活动内容哈希均核实；模型/GPU/holdout0。永久双claim禁止中断、并发、新输出或共享入口绕过；104份原JSON及两份一致DB backup私有归档经哈希/逐行复核。干净源码快照368 passed/5 skipped、相关研究96 passed仅为CPU工程检查。**B只闭合两工具研究子门，不替代失败A，不宣称完整R门或C5-6通过。**
 
 - 新版[研究生命周期](../plugin/rhino_listener/research_lifecycle.py)、[Rhino入口](../tools/r_research_safety_batch.py)、[客户端](../tools/r_research_lifecycle_smoke.py)与[独立边界核验](../plugin/rhino_listener/research_safety.py)，不修改封存v2源码/清单。仅空的独立未保存headless毫米夹具；未知身份不猜路径，不确定关闭不重试，不把排队close/stop当作清理成功。
 - 补入实际必需的两份历史通用依赖 `candidate_atomic_gate.py`、`candidate_live_idle_session.py`，不整包提交未跟踪R代码、题目或私人归档。源码清单保守覆盖已跟踪Python与锁定依赖，运行前后核查实际加载的本地依赖；Rhino侧使用新私有包命名空间，防止缓存旧候选模块冒充当前字节。
@@ -51,4 +51,4 @@ CPU负控覆盖未知/迟到open、关闭超时不重试、错case/序号/fixtur
 
 只关闭研究直接阻断；产品loopback UI、逐步预览-发送绑定、真实用户开放、在途停用UX和人类产品评审仍延期。仓库所有者唯一必需reviewer_1；不要求reviewer_2；代理不能替代批准。持续授权推送/创建PR不包含自动merge。
 
-下一门：以新的研究版本/实验ID/spec批准执行修复后的两写烟测，再独立审计几何-许可-账本-清理闭环；不得恢复或重跑A。闭环未完成前，不交接为完整研究安全通过，不启动C5-6正式20题。
+下一门：两工具闭环已由独立 B 完成，A及B均不再执行；完成远端 C5 模型/源码血缘交接及完整十二工具工程门、新20题所有者排除/预算冻结后，才可进入 C5-6正式配对。当前仍不交接为完整研究安全通过，不启动正式20题。
