@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "probe_id": "C5DEV-MODELBRIDGE-20261003-A",
+  "state": "PREEXECUTION_FREEZE_COMPLETE_WAITING_DIRECT_OWNER_APPROVAL",
+  "source_revision": "2e6ba5ca16c2989ddbe27334022cf240ae780ceb",
+  "spec_canonical_sha256": "4911e6cd54f0f4523be4980b3973ae7419c98087ad3f378182658b8ae62edfac",
+  "runtime_freeze_canonical_sha256": "bb697a085832dded52aed18ff027b545c566fa84f1c99688bd88193d4ddea369",
+  "source_file_count": 143,
+  "mac_cpu_preflight": {
+    "tokenizer_files_verified_against_original_base_manifest": 6,
+    "max_input_plus_output_reserve_tokens": 1757,
+    "max_sequence_tokens": 2048,
+    "model_calls": 0
+  },
+  "remote_readonly_preflight": {
+    "base_snapshot_files_verified": 14,
+    "adapter_files_verified": 2,
+    "installed_distribution_files_verified": 21614,
+    "environment_sha256": "536eac7d25305a89ca3d3ad06fa23eb0eca1e3ac8df889cc84dfb7fa7f2b9fca",
+    "gpu": "NVIDIA GeForce RTX 3090 24576 MiB",
+    "loader_import_closure_passed": true,
+    "cuda_initialized": false,
+    "model_loaded": false,
+    "generation_calls": 0,
+    "holdout_rows_read": 0,
+    "known_package_record_anomaly": "pip metadata references absent pip3.13 launcher; explicitly excluded and frozen"
+  },
+  "local_checks": {
+    "pytest_passed": 516,
+    "pytest_skipped": 8,
+    "secret_scan_passed": true,
+    "release_data_audit_passed": true,
+    "release_consistency_passed": true,
+    "rhino_python_3_9_syntax_passed": true
+  },
+  "new_owner_approval_present": false,
+  "new_development_run_started": false,
+  "formal_twenty_tasks_created_or_consumed": false,
+  "original_eighty_holdout_accessed": false,
+  "default_route_changed": false,
+  "complete_C5_engineering_gate_passed": false,
+  "overall_C5_GO": false
+}

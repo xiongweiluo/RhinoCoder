@@ -2,6 +2,8 @@
 
 2026-10-03后续状态为 `CPU_FOUNDATION_AND_NATIVE12_CONTROL_VERIFIED_NOT_COMPLETE_MODEL_GATE`。原2026-10-02交付仅为CPU基础；随后新的原生单次控制通过，不追认CPU测试为现场成功。这仍不是完整模型工程门、正式20题或 C5 GO。
 
+> 后续模型桥准备增量：新增[隔离开发预注册](c5-modelbridge-development-preregistration.md)与实际源码/环境冻结，状态为待所有者新精确批准、未运行真实模型；下方“尚未冻结/旧截止”是本CPU基础交付时的历史文字。[v2资源边界](../eval/c5/rhino-resource-boundary-v2-20261003.json)已据所有者精确时区回复更新截止，但仍不是执行许可。完整工程门依旧未关闭。
+
 ## 已落实的边界
 
 | 模块 | 实现及验证范围 | 不能据此声称 |
