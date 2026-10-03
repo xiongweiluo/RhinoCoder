@@ -25,9 +25,9 @@ from plugin.rhino_listener.c5_research_provenance import SourceGuard
 from training.c5_modelbridge_runtime import Budget,file_sha,runtime_preflight,verify_loaded_environment
 from training.c5_model_transport import OneShotModelSession,strict_json,frame,LIMIT
 
-ID = 'C5DEV-MODELBRIDGE-20261003-A'
-STATE = Path('/data/c5-modelbridge-state-20261003-A')
-SOURCE = Path('/data/RhinoCoder-c5-modelbridge-A')
+ID = 'C5DEV-MODELBRIDGE-20261003-B'
+STATE = Path('/data/c5-modelbridge-state-20261003-B')
+SOURCE = Path('/data/RhinoCoder-c5-modelbridge-B')
 ENV = Path('/data/conda-envs/rhinocoder')
 ASSET = Path('/data/RhinoCoder-c5')
 ADAPTER = Path('/data/c5-runs-20261001/formal/checkpoint-132')
@@ -87,8 +87,8 @@ def import_preflight():
 def approved_scope(*,check_budget=True):
     # No stdin/model is touched before complete source/spec/resource approval.
     require(ROOT==SOURCE and sys.platform=='linux','fixed Linux deployment required')
-    spec = public(ROOT/'eval/c5/modelbridge-development-spec-20261003.json')
-    freeze = public(ROOT/'eval/c5/modelbridge-runtime-freeze-20261003.json')
+    spec = public(ROOT/'eval/c5/modelbridge-development-spec-20261003-b.json')
+    freeze = public(ROOT/'eval/c5/modelbridge-runtime-freeze-20261003-b.json')
     require(spec['execution_ready'] is True and freeze['execution_ready'] is True
             and spec['probe_id']==freeze['probe_id']==ID and freeze['spec_sha256']==digest(spec),
             'complete NEW development freeze missing; draft cannot execute')
@@ -101,7 +101,7 @@ def approved_scope(*,check_budget=True):
     guard = SourceGuard(ROOT,freeze['source_files'],freeze['source_inventory_sha256'],
                         project_prefixes=('agent','training','tools','plugin','data_pipeline'))
     guard()
-    require(file_sha(ROOT/'eval/c5/modelbridge-development-spec-20261003.json')==freeze['spec_file_sha256'],
+    require(file_sha(ROOT/'eval/c5/modelbridge-development-spec-20261003-b.json')==freeze['spec_file_sha256'],
             'actual development spec bytes differ')
     assets,inventory,snapshot = preflight()
     require(assets['environment_sha256']==freeze['environment_sha256'] and assets['adapter_sha256']==spec['adapter_sha256'],

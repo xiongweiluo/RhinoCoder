@@ -13,8 +13,8 @@ from training.c5_model_transport import strict_json,LIMIT
 from training.c5_modelbridge_runtime import file_sha
 
 ROOT=Path(__file__).resolve().parents[1]
-STATE=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/modelbridge-development-state-20261003-A')
-ID='C5DEV-MODELBRIDGE-20261003-A'
+STATE=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/modelbridge-development-state-20261003-B')
+ID='C5DEV-MODELBRIDGE-20261003-B'
 SOCKET=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/ssh-24206.control')
 
 
@@ -48,12 +48,12 @@ def mac_origins():
 
 
 def scope():
-    spec=public(ROOT/'eval/c5/modelbridge-development-spec-20261003.json')
-    freeze=public(ROOT/'eval/c5/modelbridge-runtime-freeze-20261003.json')
+    spec=public(ROOT/'eval/c5/modelbridge-development-spec-20261003-b.json')
+    freeze=public(ROOT/'eval/c5/modelbridge-runtime-freeze-20261003-b.json')
     require(spec['probe_id']==freeze['probe_id']==ID and spec['execution_ready'] is True
             and freeze['execution_ready'] is True and spec['mac_state_root']==str(STATE)
             and freeze['spec_sha256']==digest(spec),'new complete modelbridge freeze missing')
-    require(file_sha(ROOT/'eval/c5/modelbridge-development-spec-20261003.json')==freeze['spec_file_sha256'],
+    require(file_sha(ROOT/'eval/c5/modelbridge-development-spec-20261003-b.json')==freeze['spec_file_sha256'],
             'actual development spec bytes differ')
     require(all(file_sha(ROOT/name)==sha for name,sha in freeze['fixed_public_files'].items()),
             'actual Mac fixed public configuration bytes differ')

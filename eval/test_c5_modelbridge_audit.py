@@ -84,7 +84,7 @@ def test_budget_owner_expiry_requires_export_reserve_and_original_cap():
 
 def test_public_spec_does_not_claim_owner_approval_or_formal_scope():
     from tools.c5_modelbridge_common import ROOT,public
-    spec=public(ROOT/'eval/c5/modelbridge-development-spec-20261003.json')
+    spec=public(ROOT/'eval/c5/modelbridge-development-spec-20261003-b.json')
     assert spec['state']=='FROZEN_AWAITING_EXACT_OWNER_APPROVAL'
     assert spec['holdout_calls']==spec['training_calls']==0
     assert spec['formal_task_reuse_allowed'] is False

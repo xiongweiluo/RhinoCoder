@@ -18,9 +18,9 @@ from tools.c5_modelbridge_common import ROOT,public
 from training.c5_model_transport import strict_json,LIMIT
 from training.c5_modelbridge_runtime import file_sha
 
-TARGET=ROOT/'eval/c5/modelbridge-runtime-freeze-20261003.json'
-SPEC=ROOT/'eval/c5/modelbridge-development-spec-20261003.json'
-BOUNDARY=ROOT/'eval/c5/rhino-resource-boundary-v2-20261003.json'
+TARGET=ROOT/'eval/c5/modelbridge-runtime-freeze-20261003-b.json'
+SPEC=ROOT/'eval/c5/modelbridge-development-spec-20261003-b.json'
+BOUNDARY=ROOT/'eval/c5/rhino-resource-boundary-v3-20261003.json'
 
 
 def source_files():
@@ -40,12 +40,16 @@ def build():
     resource=public(BOUNDARY)
     require(resource['owner_reported_expiry_utc']=='2026-10-04T18:00:00Z'
             and resource['latest_generation_cutoff_utc']=='2026-10-04T17:45:00Z'
-            and resource['execution_authorized'] is False,'owner resource reply is not execution permission')
+            and resource['new_b_execution_authorized'] is False
+            and resource['retired_a_actual_elapsed_seconds_including_load_and_idle']<18
+            and resource['new_b_max_seconds']==3500
+            and resource['combined_a_plus_b_ceiling_seconds']<3600,
+            'new B residual development boundary differs')
     local=preflight(include_manifest=True)
-    command=('cd /data/RhinoCoder-c5-modelbridge-A && '
+    command=('cd /data/RhinoCoder-c5-modelbridge-B && '
              '/data/conda-envs/rhinocoder/bin/python -B -m tools.run_c5_modelbridge_worker preflight')
     remote=strict_json(subprocess.check_output(ssh_args()+[command],timeout=240))
-    import_command=('cd /data/RhinoCoder-c5-modelbridge-A && '
+    import_command=('cd /data/RhinoCoder-c5-modelbridge-B && '
              '/data/conda-envs/rhinocoder/bin/python -B -m tools.run_c5_modelbridge_worker import-preflight')
     imports=strict_json(subprocess.check_output(ssh_args()+[import_command],timeout=240))
     require(remote['status']=='modelbridge_readonly_preflight_not_execution_authority'
@@ -80,12 +84,12 @@ def build():
         'execution_ready':True,'source_revision':revision,'spec_sha256':digest(spec),
         'spec_file_sha256':file_sha(SPEC),'source_files':sources,
         'source_inventory_sha256':digest(sources),'fixed_public_files':fixed,
-        'resource_boundary_v2_file_sha256':file_sha(BOUNDARY),
+        'resource_boundary_v3_file_sha256':file_sha(BOUNDARY),
         'resource_boundary':{'owner_confirmed':True,'provider_expiry_epoch':1791136800,
             'hard_stop_epoch':1791136800,'export_reserve_seconds':900,
-            'development_max_seconds':3600,'prior_cumulative_seconds':7200,
+            'development_max_seconds':3500,'prior_cumulative_seconds':7218,
             'original_cumulative_max_seconds':57600},
-        'prior_cumulative_accounting_note':'7200 seconds is a conservative reserve; public active use approximately 1.72828 GPU-hours, not provider billing',
+        'prior_cumulative_accounting_note':'7218 seconds reserves 7200 prior seconds plus the retired A actual 17.614 seconds, rounded upward; public prior active use approximately 1.72828 GPU-hours, not provider billing',
         'environment_sha256':remote['environment_sha256'],
         'remote_import_preflight':imports,
         'remote_environment_summary':{'python':remote['environment']['python'],

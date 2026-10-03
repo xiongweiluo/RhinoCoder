@@ -9,8 +9,8 @@ import uuid
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
-STATE=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/modelbridge-development-state-20261003-A')
-ID='C5DEV-MODELBRIDGE-20261003-A'
+STATE=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/modelbridge-development-state-20261003-B')
+ID='C5DEV-MODELBRIDGE-20261003-B'
 
 
 def start():
@@ -37,8 +37,8 @@ def start():
             return result
         return json.loads(path.read_text(),object_pairs_hook=pairs,
                           parse_constant=lambda _:(_ for _ in ()).throw(ValueError('nonfinite public JSON')))
-    spec=public(ROOT/'eval/c5/modelbridge-development-spec-20261003.json')
-    freeze=public(ROOT/'eval/c5/modelbridge-runtime-freeze-20261003.json')
+    spec=public(ROOT/'eval/c5/modelbridge-development-spec-20261003-b.json')
+    freeze=public(ROOT/'eval/c5/modelbridge-runtime-freeze-20261003-b.json')
     native.require(spec['probe_id']==freeze['probe_id']==ID and spec['execution_ready'] is True
                    and freeze['execution_ready'] is True and freeze['spec_sha256']==native.digest(spec)
                    and spec['mac_state_root']==str(STATE),'new complete development freeze required')
@@ -50,7 +50,7 @@ def start():
     source=provenance.SourceGuard(ROOT,freeze['source_files'],freeze['source_inventory_sha256'],project_prefixes=(namespace,))
     source()
     import hashlib
-    native.require(hashlib.sha256((ROOT/'eval/c5/modelbridge-development-spec-20261003.json').read_bytes()).hexdigest()
+    native.require(hashlib.sha256((ROOT/'eval/c5/modelbridge-development-spec-20261003-b.json').read_bytes()).hexdigest()
                    ==freeze['spec_file_sha256'],'actual spec file bytes differ')
     native.require(sys.version_info[:2]==(3,9) and str(Rhino.RhinoApp.Version)==freeze['rhino_version'],
                    'actual embedded Python/Rhino build differs')

@@ -12,7 +12,7 @@ import time
 
 from .c5_research_channel import publish_json,read_json,remove_private_key
 from .c5_research_gate import ResearchGate,signature
-from .c5_research_native import NativeDoc,require,digest
+from .c5_research_native import NativeDoc,require,digest,active_content_digest
 from .candidate_atomic_gate import RhinoAtomicGate,rhino_scene_digest
 from .c5_research_session import IdleBridge
 
@@ -27,7 +27,11 @@ class DevelopmentHub:
     def __init__(self,state,spec,freeze,schemas,source,active,*,clock=time.time):
         self.state,self.spec,self.freeze,self.schemas,self.source = state,spec,freeze,schemas,source
         self.active,self.active_serial = active,int(active.RuntimeSerialNumber)
-        self.initial_active = rhino_scene_digest(active)
+        # A's watermark-bearing digest was over-sensitive: read-only Rhino
+        # ScriptEditor commands advance global object/undo counters. Keep
+        # those counters for mutable fixture atomicity, but use the same
+        # content-only protection already used by NativeDoc for the active UI.
+        self.initial_active = active_content_digest(active)
         self.clock,self.seq = clock,1
         self.secret = bytes.fromhex(read_json(state,'hub.key')['key_hex'])
         self.child,self.fixture = None,None
@@ -40,7 +44,7 @@ class DevelopmentHub:
         self.source()
         require(Rhino.RhinoApp.IsOnMainThread and Rhino.RhinoDoc.ActiveDoc is not None
                 and int(Rhino.RhinoDoc.ActiveDoc.RuntimeSerialNumber)==self.active_serial
-                and rhino_scene_digest(self.active)==self.initial_active,'actual active document changed')
+                and active_content_digest(self.active)==self.initial_active,'actual active document changed')
 
     def attach(self):
         import Rhino

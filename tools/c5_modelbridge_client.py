@@ -29,12 +29,12 @@ from training.c5_execution import load_config,load_pinned_tokenizer
 from training.c5_contract import render_selection,render_invocation,CORE_INVOCATION_TOOLS
 
 TOKENIZER=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/modelbridge-tokenizer/c03e6d358207e414f1eca0bb1891e29f1db0e242')
-REMOTE_STATE='/data/c5-modelbridge-state-20261003-A'
-REMOTE_SOURCE='/data/RhinoCoder-c5-modelbridge-A'
+REMOTE_STATE='/data/c5-modelbridge-state-20261003-B'
+REMOTE_SOURCE='/data/RhinoCoder-c5-modelbridge-B'
 
 
 def preflight(*,include_manifest=False):
-    spec=public(ROOT/'eval/c5/modelbridge-development-spec-20261003.json')
+    spec=public(ROOT/'eval/c5/modelbridge-development-spec-20261003-b.json')
     tokenizer=load_pinned_tokenizer(TOKENIZER,config=load_config())
     tools=load_public_mcp_tools()
     # Hypothetical CPU rendering only, not oracle forcing a model selection.
