@@ -66,7 +66,15 @@ class DevelopmentHub:
                 and hmac.compare_digest(envelope['signature'],signature(self.secret,p)), 'hub control scope/TTL/signature rejected')
         self.control_ids.add(p['request_id'])
         if p['action']=='stop':
-            require(p['slot_id'] is None and (self.child is None or self.child.stopped),'cannot stop hub with live/uncertain child')
+            # A partially opened NEW fixture can coexist with a previously
+            # stopped child. Only the bridge bound to the CURRENT retained
+            # fixture may attest closure. Never report hub cleanup while a
+            # created-but-unbridged document could still be alive.
+            current_closed=(self.fixture is None or
+                (self.child is not None and self.child.gate.backend.doc is self.fixture
+                 and self.child.stopped and self.child.gate.backend.closed))
+            require(p['slot_id'] is None and current_closed,
+                    'cannot stop hub with live/unbridged/uncertain current fixture')
             import Rhino
             # Known never-opened ephemeral keys only. No evidence/claims or R
             # files are deleted; actual opened children removed their own key.
