@@ -2,7 +2,7 @@
 
 2026-10-03后续状态为 `CPU_FOUNDATION_AND_NATIVE12_CONTROL_VERIFIED_NOT_COMPLETE_MODEL_GATE`。原2026-10-02交付仅为CPU基础；随后新的原生单次控制通过，不追认CPU测试为现场成功。这仍不是完整模型工程门、正式20题或 C5 GO。
 
-> 后续模型桥状态（优先于下方历史段落）：[A 事前预注册](c5-modelbridge-development-preregistration.md)获精确批准后单次启动，但首个 Rhino hub open 即[失败退休](c5-modelbridge-development-failure.md)，生成/夹具/派发/holdout均为0；另获批准的人工安全收尾已删除九份临时密钥并解绑 hook，不追认为冻结 clean stop。[新 B 预注册与完整冻结](c5-modelbridge-development-b-preregistration.md)已建立，待新双 CI 和新精确所有者批准，尚未执行。[v3资源用量边界](../eval/c5/rhino-resource-boundary-v3-20261003.json)计入 A 的17.614秒并把B开发上限设为3500秒。下方“尚未冻结/旧截止”是本CPU基础交付时的历史文字；完整模型工程门依旧未关闭。
+> 后续模型桥状态（优先于下方历史段落）：[A 事前预注册](c5-modelbridge-development-preregistration.md)获精确批准后单次启动，但首个 Rhino hub open 即[失败退休](c5-modelbridge-development-failure.md)，生成/夹具/派发/holdout均为0；另获批准的人工安全收尾已删除九份临时密钥并解绑 hook，不追认为冻结 clean stop。[新 B](c5-modelbridge-development-b-result.md)经独立预注册、双 CI 和新精确批准后单次完成，真实模型/许可/Rhino/清理开发工程门审计通过，正式20题与整体C5质量门仍未执行/裁决。A+B实际开发GPU时间约340.027秒；[v3资源边界](../eval/c5/rhino-resource-boundary-v3-20261003.json)及原租期截止不变。下方“尚未冻结/旧截止”是本CPU基础交付时的历史文字。
 
 ## 已落实的边界
 
