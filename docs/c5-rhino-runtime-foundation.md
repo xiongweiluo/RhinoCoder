@@ -1,6 +1,6 @@
 # C5-6 十二工具研究运行边界：CPU 基础交付
 
-2026-10-02。状态为 `CPU_FOUNDATION_ONLY_NOT_FIELD_GATE`。这是完整工程门中的可审核基础模块，不是已冻结的运行器、正式20题、现场成功或 C5 GO。
+2026-10-03后续状态为 `CPU_FOUNDATION_AND_NATIVE12_CONTROL_VERIFIED_NOT_COMPLETE_MODEL_GATE`。原2026-10-02交付仅为CPU基础；随后新的原生单次控制通过，不追认CPU测试为现场成功。这仍不是完整模型工程门、正式20题或 C5 GO。
 
 ## 已落实的边界
 
@@ -35,12 +35,12 @@ Rhino 内模块仅依赖 Python3.9 标准库和 RhinoCommon，不导入训练包
 
 新增 CPU 测试覆盖严格双阶段、全部12参数边界、只读/零写/TTL/错误作用域、真实 SQLite 预留/消费/跨实例重签拒绝、源场景漂移、几何假阳性、私有 I/O、source/import与假UI稳定/超时/关闭/stop。另有完整十二步 native-control 假UI/文件/SQLite wire 与每步独立评分/负控；这不是模型输出，不借用模型交接表伪造模型调用。全仓回归与 secret/release/diff 检查记录在本次分支交付及 CI；测试全部合成，不运行模型、Rhino 或正式题。
 
-2026-10-03形成[固定 native12 开发预注册](c5-native12-development-preregistration.md)与独立新 ScriptEditor/Mac 驱动/审计入口。当前准备冻结源码并等待新精确批准；没有调用该入口或消费 native probe，R B 不重跑。该本地门模型/GPU/holdout0，即使通过仍不关闭完整模型/真实任务工程门。
+2026-10-03形成[固定 native12 开发预注册](c5-native12-development-preregistration.md)与独立新 ScriptEditor/Mac 驱动/审计入口。源码3106ea4/203文件、预执行e5524f4双CI和两个精确哈希批准后，`C5DEV-NATIVE12-20261003-A`单次现场执行并[独立审计通过](../eval/c5/native12-development-audit-20261003.json)：全12工具、10签名变更请求/2只读、终端无效HMAC零派发、每步几何/许可/账本/稳定读回、关闭/删钥/stop/活动文档保护均核实。74原JSON和两份一致DB backup私有封存，不归档密钥。该probe已消费、禁止重放，R B不重跑；模型/GPU/holdout0，不关闭完整模型/真实任务工程门。上表“不能据此声称”是原CPU基础自身的边界，现场子门只由这份独立实际报告支持，不由合成测试追认。
 
-完整工程门尚未关闭。仍需一组有新 ID/spec/源码冻结和人类批准的独立开发验证，完成：
+完整工程门尚未关闭。以下1/2是已完成的原生子门边界，3/4仍需有新 ID/spec/源码冻结和人类批准的独立开发验证：
 
-1. Rhino 官方 ScriptEditor/UI Idle 生命周期桥：实际 loaded import/源码清单、私有通道、各步稳定读回、关闭回调/registry 消失、实际密钥删除和 stop 原始证据。单独调用 `Dispose` 或返回布尔值不代替该审计。
-2. 全12原生 API 和独立评分断言的真实开发正控/负控；超时/漂移/重放/不确定状态失败后不自动重试，不使用任何正式题。
+1. 已闭合此次原生控制的 Rhino 官方 ScriptEditor/UI Idle 生命周期桥：实际源码/import守卫、私有通道、各步稳定读回、关闭回调/registry消失、实际密钥删除和stop原始证据。后续模型运行仍须独立绑定新冻结，不能沿用此已消费probe。
+2. 已闭合固定全12原生 API/独立评分正控及终端无效HMAC现场负控；超时/漂移/重放/不确定状态的其它故障路径只有CPU测试证据，不宣称均已现场验证。后续工程验证仍禁止失败自动重试或使用正式题。
 3. 新 C5 专用远端模型调用入口及实际闭包/环境冻结，复用已核实的原基座和 checkpoint132；落实[新资源边界](../eval/c5/rhino-resource-boundary-20261002.json)的开发≤1、正式≤3、合计≤4且原累计≤16 GPU-hours，沿用更早原停止截止及900秒导出预留。所有者已直接确认还有两天并同意配额，不将近似租期冒充服务商精确到期；该批准不是新烟测或正式运行批准。原最终 run/80 家族永久不重跑、不读取。
 4. 模型原始回执→许可→签名→原生台账→稳定几何→生命周期的完整独立联合审计。两个局部审计器均故意返回 `formal_task_passed=false`，尚不能组装成完整任务判定。
 

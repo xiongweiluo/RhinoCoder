@@ -21,11 +21,11 @@
 - [x] R生命周期子门：真实Rhino无模型/无写入open→close/删密钥→stop及原始活动内容哈希一致，125源码清单和独立审计见[草稿PR #7](https://github.com/xiongweiluo/RhinoCoder/pull/7)；不等于完整R研究安全通过。
 - [x] R固定两写安全子门：A仍为退休FAIL；所有者另对新B两个精确哈希批准，`RSDEV-TWO-WRITE-20261002-B`在事前冻结双CI通过后单次执行并独立审计通过。130源码绑定`3e8ee53`，两笔唯一写入/两行done/两份consumed许可及八事件、精确盒体与位移、关闭/实际删密钥/stop/活动内容哈希均核实，模型/GPU/holdout0。104份原JSON和一致DB backup私有封存；A和B均禁止再执行。详见[草稿PR #7](https://github.com/xiongweiluo/RhinoCoder/pull/7)，**只闭合两工具子门，不是完整R交接或十二工具C5门通过**。
 - [x] R研究证据/原C5资产身份交接：所有者已恢复Mac认证；[最新只读v3](eval/c5/remote-assets-readonly-v3-20261002.json)核对远端43源码/依赖清单、原最终28源码、固定14文件基座和checkpoint132两adapter，均无漂移；当时GPU11MiB/0%。R PR #7另记本地130与远端身份交接，不重绑旧R模型。**不等于新的C5模型适配、完整研究执行/import闭包或预算冻结**，这些进入下一十二工具工程门；未加载模型、未读holdout或写远端。
-- [ ] C5-6执行前门：完整12工具隔离适配/独立评分器、开发负控、全新20题与所有者排除承诺、完整血缘和有界预算均待冻结；[准备稿](docs/c5-rhino-paired-study-preregistration.md)不是正式预注册或执行授权，未生成/消费正式20题。
+- [ ] C5-6执行前门：原生12工具隔离适配/独立评分和固定正负控已局部通过；真实模型运输/联合工程审计、全新20题与所有者排除承诺、完整运行血缘和正式执行边界仍待冻结；[准备稿](docs/c5-rhino-paired-study-preregistration.md)不是正式预注册或执行授权，未生成/消费正式20题。
 - [x] C5十二工具CPU基础：[独立交付边界](docs/c5-rhino-runtime-foundation.md)实现原完整schema、严格模型步、别名真实读回、原生12工具/活动保护、许可先消费/持久交接、单任务签名/原子账本、几何与只读交叉审计、私有一次性I/O；不接入默认路线。
-- [ ] CPU基础后仍须完成实际UI/Idle生命周期桥、模型运输/新运行血缘、原生正负控和联合审计，另行冻结新研究spec与有界预算；CPU通过不代表完整C5工程门或正式20题通过，不能复用B批准。
-- [ ] 2026-10-03下一独立开发门：[native12预注册](docs/c5-native12-development-preregistration.md)建立全12工具固定单次正控及终端无效签名负控，配套ScriptEditor/私有Mac驱动/每步独立审计。全程模型/GPU/holdout0；先完整源码冻结、CI和新spec+runtime双哈希人类批准，当前尚未现场执行，不复用B授权。
-- [x] native12源码事前冻结：`3106ea4`完整203文件、inventory `29afc13e…77916`、spec `41209157…5a3e`、runtime freeze `8ea7df13…363aa`；全仓474 passed/8 skipped，release/secret/diff通过。冻结只覆盖新native开发控制，不覆盖完整模型调用/正式20题；实际执行仍等待新的精确所有者批准与预执行CI，未创建claim/密钥/fixture。
+- [ ] 当前独立交付：真实冻结模型运输/新运行血缘与联合工程审计。实际UI/Idle生命周期和全12原生正控/无效HMAC负控已在新native12中闭合，但模型调用仍为0；须另行冻结新开发spec、完整模型/环境闭包、资源与精确批准。不能复用已消费的native12或B批准，也不能先生成/消费正式20题。
+- [x] 2026-10-03原生开发子门：[native12预注册及后续记录](docs/c5-native12-development-preregistration.md)按新精确所有者批准单次执行，全12工具、10签名变更请求/2只读、终端无效HMAC零派发通过[独立实际审计](eval/c5/native12-development-audit-20261003.json)。每步几何/属性/只读/非目标、10 done/2 read/10 consumed/40事件/12 native-control交接、关闭/实际删钥/stop/活动文档不变均核实。74原JSON和两份一致DB backup私有封存；probe永久禁止重跑。模型/GPU/holdout0，完整C5工程门仍false，不是模型质量或整体GO。
+- [x] native12源码事前冻结：`3106ea4`完整203文件、inventory `29afc13e…77916`、spec `41209157…5a3e`、runtime freeze `8ea7df13…363aa`；全仓474 passed/8 skipped，release/secret/diff通过。预执行`e5524f4`双CI通过后取得两个哈希的新直接批准才创建claim/密钥/fixture；没有事后修订源码、断言或阈值。冻结仅覆盖已消费的native开发控制，不覆盖模型调用/正式20题。
 - [x] 新资源边界：所有者直接确认“gpu还有两天，同意”，登记开发≤1/正式≤3/合计≤4、原累计≤16 GPU-hours；[资源记录](eval/c5/rhino-resource-boundary-20261002.json)保留原更早停止截止2026-10-03T14:50:50Z和900秒导出预留。近似租期不是服务商精确到期；不解锁模型/正式题，当前新GPU用量0。
 - [ ] 仓库收口：C5代码/公开证据在OPEN PR #2–#6，R独立草稿PR #7已推送；所有者唯一reviewer_1决定是否合并，代理不自动merge。P2b、D和完整产品UI继续延期。
 

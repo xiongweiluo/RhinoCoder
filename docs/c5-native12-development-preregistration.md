@@ -1,6 +1,6 @@
-# C5 十二工具原生开发控制：单次冻结准备
+# C5 十二工具原生开发控制：事前冻结与单次实际结果
 
-2026-10-03。`C5DEV-NATIVE12-20261003-A`，**尚未执行、没有人类批准，不是正式20题或模型质量评测**。它与已经消费的 R B 不同，不能继承 B 的授权。
+2026-10-03。`C5DEV-NATIVE12-20261003-A` 已在事前双CI通过、所有者对下列两个精确哈希直接批准后单次执行，并通过只读独立审计。**这是已消费的原生开发控制，不是正式20题、模型质量评测或整体C5 GO；禁止重跑。** 它与已经消费的 R B 不同，没有继承 B 的授权。[公开审计](../eval/c5/native12-development-audit-20261003.json)保留实际结论和私有原始证据的哈希。
 
 [固定 spec](../eval/c5/native12-development-spec-20261003.json)限定新的独立、未保存 headless 毫米夹具，实际活动空白文档永不作为目标。固定全12工具每种一次：盒体/球/圆柱、位移/90度旋转/非均匀缩放、图层/RGB/分组、bbox/场景只读、圆柱减球 Boolean。最多十笔**有签名的变更请求**与两笔只读；group/Boolean 内可有多个原生对象改动，不伪装成仅十次底层对象变更。
 
@@ -18,7 +18,15 @@
 
 运行源码先提交，随后记录该不可变 revision 的完整 Python/固定 schema/spec 清单与 SHA-256；预执行文档/冻结提交的 CI 必须通过。**只有直接人类批准精确 spec 和 runtime freeze 两个哈希后，才可生成批准台账并启动。** 本文不是该批准，代理不代签。
 
-事前源码已固定在 `3106ea461850775b64253ba2c938ff808f677e57`，完整203文件（201 Python及固定schema/spec）清单见[运行冻结](../eval/c5/native12-runtime-freeze-20261003.json)，inventory SHA-256 `29afc13e5ca121906ea80b511134b680c230429b1371a98aea072a62ac977916`。spec canonical SHA-256 `412091578b788a364397a0ac8165f8eaad9e4bfd60dea1431fa902c4b2185a3e`；runtime freeze canonical SHA-256 `8ea7df13c412df749f01aa162415f42e5e5c4cd9b46b4ca8bfb7d0d6540363aa`。Rhino8/内嵌Python3.9运行族被校验，实际build/version须写入原始engine记录；这不是完整C5模型/依赖环境冻结。完整本地回归474 passed/8 skipped，release/secret/diff通过；本段仍等待预执行提交CI和新的直接人类批准，未生成批准文件/claim/密钥/夹具。
+事前源码已固定在 `3106ea461850775b64253ba2c938ff808f677e57`，完整203文件（201 Python及固定schema/spec）清单见[运行冻结](../eval/c5/native12-runtime-freeze-20261003.json)，inventory SHA-256 `29afc13e5ca121906ea80b511134b680c230429b1371a98aea072a62ac977916`。spec canonical SHA-256 `412091578b788a364397a0ac8165f8eaad9e4bfd60dea1431fa902c4b2185a3e`；runtime freeze canonical SHA-256 `8ea7df13c412df749f01aa162415f42e5e5c4cd9b46b4ca8bfb7d0d6540363aa`。Rhino8/内嵌Python3.9运行族被校验，实际build/version写入原始engine记录；这不是完整C5模型/依赖环境冻结。完整本地回归474 passed/8 skipped，release/secret/diff通过。原事前准备状态确实未生成批准文件/claim/密钥/夹具；随后预执行提交 `e5524f4955dd9b3f2a56041be0cbfb8d71a41a6c` 双CI分别在14:02:42Z/14:03:06Z通过，才取得新的直接人类批准并执行，没有事后改动 spec、断言或源码。
+
+## 2026-10-03 单次实际执行与封存
+
+所有者的实际回复为“以 repository_owner 身份批准上述 spec 和 runtime freeze 的单次原生开发控制”。据此登记精确批准台账及三道永久 claim，仅调用一次 prepare、一次官方 ScriptEditor 入口、一次 drive；只读 audit 不重新派发。实际 Rhino `8.21.25188.17002` / Python `3.9.10`，全12工具每步原始立即回执与至少三个稳定 Idle 样本均核对通过；中间实体、变换、属性、非目标不变、两个只读结果及最终 Boolean 的独立断言全部通过。
+
+原始SQLite和回执交叉核对为十行 write done、两行 read done、十份 consumed 许可、四十事件和十二份 `c5_native_control_handoff`；没有伪造模型输出或使用模型交接表。第25请求无效HMAC返回 `handoff signature rejected`，没有 execute回执或新账本行；第26/27请求完成关闭、实际删除密钥和同回调停hook，保留 `stop.had_failure=true`，它表示预注册的拒绝负控而非未报告错误。活动文档身份及内容SHA-256 `de8fa7924ad4cf7fbeffdbe982f0b559a77eca7a8cf1f24175df642404ec6cfa`前后不变，独立fixture从registry消失。
+
+74份原始JSON（含三道claim）及两份一致SQLite backup已私有封存，目录700/文件600，两个backup `quick_check=ok`且独立计数相符；逐文件哈希见公开审计。没有归档密钥、holdout正文或模型输出，删钥后不声称重新验证原HMAC。原状态根和证据继续保留，不因封存而解除单次屏障。所有模型/GPU/holdout调用均为0，完整C5工程门仍为false；原R A/B、原80家族消费结论与默认路线均不变。
 
 ## 与 C5 主线的关系
 
