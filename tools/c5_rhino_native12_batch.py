@@ -51,6 +51,8 @@ def frozen_json(path):
 
 def start():
     import Rhino
+    native.require(sys.version_info[:2]==(3,9) and int(Rhino.RhinoApp.Version.Major)==8,
+                   'frozen runtime family requires Rhino8 embedded Python3.9')
     spec=frozen_json(ROOT/'eval/c5/native12-development-spec-20261003.json')
     freeze=frozen_json(ROOT/'eval/c5/native12-runtime-freeze-20261003.json')
     schemas=frozen_json(ROOT/'eval/c5/rhino-runtime-schema-v1.json')['core_parameters']
@@ -77,7 +79,9 @@ def start():
     native.require(fixture is not None,'headless creation failed; manual reconciliation')
     package._FIXTURE=fixture
     channel.publish_json(OUTPUT,'engine-created.json',{'fixture_serial':int(fixture.RuntimeSerialNumber),
-                         'active_serial':int(active.RuntimeSerialNumber),'runtime_freeze_sha256':native.digest(freeze)})
+                         'active_serial':int(active.RuntimeSerialNumber),'runtime_freeze_sha256':native.digest(freeze),
+                         'rhino_version':str(Rhino.RhinoApp.Version),'python_version':sys.version,
+                         'python_major_minor':[3,9],'rhino_major':8})
     fixture.ModelUnitSystem=Rhino.UnitSystem.Millimeters
     fixture.ModelAbsoluteTolerance=0.000001
     backend=native.NativeDoc(fixture,active,schemas)

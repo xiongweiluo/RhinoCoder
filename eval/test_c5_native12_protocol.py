@@ -83,7 +83,8 @@ def synthetic(tmp_path,monkeypatch):
     for kind in ('admission.claim','engine-started'):
         publish_json(state,ID+'.'+kind+'.json',{'probe_id':ID,'runtime_freeze_sha256':digest(freeze),'replay_allowed':False})
     publish_json(output,'handoff.key',{'key_hex':(b'x'*32).hex()})
-    publish_json(output,'engine-created.json',{'fixture_serial':2,'active_serial':1,'runtime_freeze_sha256':digest(freeze)})
+    publish_json(output,'engine-created.json',{'fixture_serial':2,'active_serial':1,'runtime_freeze_sha256':digest(freeze),
+                 'python_major_minor':[3,9],'rhino_major':8,'rhino_version':'SYNTHETIC_RHINO8_NOT_ACTUAL','python_version':'SYNTHETIC_PY39_NOT_ACTUAL'})
     backend=Native(schemas)
     durable=RhinoAtomicGate(output/'fixture.sqlite3','synthetic-only',lambda:digest(backend.scene),create_ledger=True)
     gate=ResearchGate(backend,durable,b'x'*32,digest(freeze),task_sha256=hashlib.sha256(TASK.encode()).hexdigest(),max_writes=10,max_reads=2)

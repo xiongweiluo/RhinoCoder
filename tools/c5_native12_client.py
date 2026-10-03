@@ -233,6 +233,8 @@ def audit():
     capture=close['close_capture']
     bootstrap=read_json(OUTPUT,'bootstrap.json')
     created=read_json(OUTPUT,'engine-created.json')
+    require(created['python_major_minor']==[3,9] and created['rhino_major']==8
+            and created['rhino_version'] and created['python_version'],'actual runtime family/version not recorded')
     require(created['fixture_serial']==bootstrap['fixture_serial']
             and created['active_serial']==bootstrap['active_serial']
             and created['runtime_freeze_sha256']==bootstrap['owner_freeze_sha256']==digest(freeze)
@@ -251,6 +253,7 @@ def audit():
             'signed_write_requests':bound['write_count'],'signed_read_requests':bound['read_count'],
             'terminal_invalid_signature_rejected_no_dispatch':True,
             'native_tools_covered':12,'model_calls':0,'gpu_calls':0,'formal_holdout_calls':0,
+            'rhino_version':created['rhino_version'],'python_version':created['python_version'],
             'formal_quality_claim':False,'complete_C5_engineering_gate_passed':False}
 
 
