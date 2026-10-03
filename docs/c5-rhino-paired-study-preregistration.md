@@ -6,6 +6,8 @@
 
 [C5-4/5](c5-final-evaluation-report.md)已通过；原80家族已经永久消费。本稿只整理下一门的执行要求，不更改此前的契约、模型或阈值，不建立另一个离线最终 run。
 
+当前缺项与保管/一次性消费边界已单列于[全新20题交接门](c5-rhino-formal20-handoff.md)。该交接设计稿也不是正式题承诺、完整执行冻结或批准。
+
 ## 不可修改的身份与质量门
 
 - 原实验：`rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2`；新研究阶段 ID 暂定 `c5-rhino-paired-20-v1`，不复用任何 R 正式 run ID。
