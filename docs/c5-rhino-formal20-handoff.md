@@ -16,6 +16,22 @@
 
 保管人侧的排除必须在**家族与模板族**层面完成，而非只比对数字或 ID：冻结 train/validation/development 440 家族，公开 A5/P2 与 R 已消费材料，C5 原 80 家族私有正文，以及 A/B/native12 的所有开发题均在比较范围。至少拒绝 exact ID/文本、数值模板相同、同一几何操作序列的轻微改写和近重复；对无法自动判断的语义相似项，由保管人私下审阅并替换于封存前。原 80 只在保管人环境比对，代理不得凭公开 Merkle root 假称已经完成逐题排除。保管人只回传零重合声明及所比较资料的身份哈希，不回传匹配文本。
 
+仓库现提供[保管人侧自动排除预检](../tools/c5_rhino_formal20_owner_exclusion.py)，**本轮只用合成数据测试，未对真实候选或原80运行**。它要求私有候选 JSONL 恰为20行，各行含 `family_id`、`template_family`、`stratum`、`primary_tool`（12个 `core_tool` 各唯一对应原核心工具）和 `task_text`；另四层分别为 `multistep`、`clarification`、`refusal`、`error_recovery` 各2行。保管人还必须输入原80私有明文、三份已冻结的 train/validation/development 和至少一份其他已消费开发题的 JSONL。工具先核对原80对公开 Merkle root 的身份、440文件 SHA与历史排除文件绑定，然后检查 ID、数值模板和归一化文本近重复（0.92阈值）；终端只打印无正文的聚合结果或错误类别，不打印路径、题目或匹配项。它**不**替代 R 完整题库收集、语义相似人工裁决、夹具/评分答案验证、加密封存或正式承诺；即使通过仍固定 `formal_commitment_ready=false`。
+
+仅由保管人于代理不可访问的终端，使用本人私有实际路径替换下列占位符运行；不要把替换后的命令或明文/密钥贴到聊天：
+
+```bash
+python tools/c5_rhino_formal20_owner_exclusion.py \
+  --candidate /owner-private/new-rhino-20.jsonl \
+  --original80 /owner-private/original-c5-80.jsonl \
+  --development /owner-private/frozen/train.jsonl \
+  --development /owner-private/frozen/validation.jsonl \
+  --development /owner-private/frozen/development.jsonl \
+  --extra-exclusion-jsonl /owner-private/all-consumed-development-and-r-tasks.jsonl
+```
+
+这份 `extra` 必须由保管人完整汇总 A/B/native12 与所有 R 已消费开发任务；工具只验证输入非空，**不能自动证明清单完整**。预检通过后仍需人工审阅和新的正式承诺构建/注册入口，不能把预检输出直接当作仓库公开承诺。原80与正式候选的私有正文不得由本助手读取。
+
 ## 先冻结执行，再领取题目
 
 正式执行代码需在任何题目明文进入运行环境之前，使用**与正式集不重合的合成开发夹具**完成 CPU 契约、Rhino 安全生命周期、故障注入、独立评分器和远端资源预检。随后事前冻结并双 CI 验证：完整源码/import 闭包与实际环境字节、基座 revision 和 checkpoint132 adapter、原 23 项 selector/12 项 invocation 与严格 parser、输入／输出 token 和解码、固定 20 题排序及 base/LoRA 各 20 槽反平衡、逐任务新夹具、许可/账本/清理、分层评分器、统计/阈值、密文身份、精确 GPU 与租期边界、未知回执与失败停止条件。不能复用 B 的 ID、claim、私有状态或所有者授权。
@@ -32,7 +48,7 @@
 
 ## 当前尚缺的可验证交付
 
-1. 正式 20 题的保管人侧私有生成／排除核验工具和通过记录，以及只含元数据的公开承诺；目前不存在可核实的新 20 题承诺。
+1. 正式 20 题的保管人侧私有生成、完整额外排除清单、上述自动预检通过和人工语义审阅记录，以及只含元数据的公开承诺；目前只有自动预检工具，没有可核实的新 20 题承诺。
 2. 新正式 ID、通用 20 题/40 槽运行器与独立评分器、合成题预执行证据、实际源码／环境／资源 runtime freeze 和双 CI。B 的八槽硬编码开发入口不能直接用于正式运行。
 3. 所有者对新正式 spec/runtime 两个精确哈希的**单独批准**、新持久消费账本和运行前实时租期/GPU/Rhino 空白活动文档复核。B 的批准只适用于 B。
 
