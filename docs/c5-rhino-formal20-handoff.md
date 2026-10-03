@@ -16,7 +16,7 @@
 
 保管人侧的排除必须在**家族与模板族**层面完成，而非只比对数字或 ID：冻结 train/validation/development 440 家族，公开 A5/P2 与 R 已消费材料，C5 原 80 家族私有正文，以及 A/B/native12 的所有开发题均在比较范围。至少拒绝 exact ID/文本、数值模板相同、同一几何操作序列的轻微改写和近重复；对无法自动判断的语义相似项，由保管人私下审阅并替换于封存前。原 80 只在保管人环境比对，代理不得凭公开 Merkle root 假称已经完成逐题排除。保管人只回传零重合声明及所比较资料的身份哈希，不回传匹配文本。
 
-仓库现提供[保管人侧自动排除预检](../tools/c5_rhino_formal20_owner_exclusion.py)，**本轮只用合成数据测试，未对真实候选或原80运行**。它要求私有候选 JSONL 恰为20行，各行含 `family_id`、`template_family`、`stratum`、`primary_tool`（12个 `core_tool` 各唯一对应原核心工具）和 `task_text`；另四层分别为 `multistep`、`clarification`、`refusal`、`error_recovery` 各2行。保管人还必须输入原80私有明文、三份已冻结的 train/validation/development 和至少一份其他已消费开发题的 JSONL。工具先核对原80对公开 Merkle root 的身份、440文件 SHA与历史排除文件绑定，然后检查 ID、数值模板和归一化文本近重复（0.92阈值）；终端只打印无正文的聚合结果或错误类别，不打印路径、题目或匹配项。它**不**替代 R 完整题库收集、语义相似人工裁决、夹具/评分答案验证、加密封存或正式承诺；即使通过仍固定 `formal_commitment_ready=false`。
+仓库现提供[保管人侧自动排除预检](../tools/c5_rhino_formal20_owner_exclusion.py)，**本轮只用合成数据测试，未对真实候选或原80运行**。完整私有13字段 case 结构、20题分层、夹具/评分规则和逐项保管指引见[保管人准备规范](c5-rhino-formal20-owner-preparation.md)。保管人还必须输入原80私有明文、三份已冻结的 train/validation/development 和至少一份其他已消费开发题的 JSONL。工具先核对原80对公开 Merkle root 的身份、440文件 SHA与历史排除文件绑定，然后检查 ID、数值模板和归一化文本近重复（0.92阈值）；终端只打印无正文的聚合结果或错误类别，不打印路径、题目或匹配项。它**不**替代 R 完整题库收集、语义相似人工裁决、夹具/评分答案验证、加密封存或正式承诺；即使通过仍固定 `formal_commitment_ready=false`。
 
 仅由保管人于代理不可访问的终端，使用本人私有实际路径替换下列占位符运行；不要把替换后的命令或明文/密钥贴到聊天：
 

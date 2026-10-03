@@ -23,6 +23,7 @@ if str(ROOT) not in sys.path:
 
 from data_pipeline.training_views import numeric_template_signature  # noqa: E402
 from training.c5_contract import CORE_INVOCATION_TOOLS  # noqa: E402
+from training.c5_formal20_plan import FormalPlanError, validate_families  # noqa: E402
 from training.c5_holdout import canonical_bytes, sha256_file  # noqa: E402
 
 
@@ -168,6 +169,51 @@ def audit_candidates(candidates: list[dict], development: list[dict], original80
     }
 
 
+def preflight_paths(candidate: Path, original80: Path, development_paths: list[Path],
+                    extra_paths: list[Path]) -> tuple[list[dict], dict, dict]:
+    """Owner-only private read. Return no text in the aggregate report/bindings."""
+    worktrees = _worktrees()
+    for path in (candidate, original80, *extra_paths):
+        _require_owner_private_path(path, worktrees)
+    if candidate.resolve() == original80.resolve():
+        raise ExclusionPreflightError("candidate_and_original80_inputs_must_differ")
+    if len(development_paths) != 3 or not extra_paths:
+        raise ExclusionPreflightError("complete_development_and_extra_exclusions_required")
+    freeze = _json(ROOT / "eval/c5/dataset-v2-freeze-manifest.json")
+    original_commitment = _json(ROOT / "eval/c5/final-holdout-commitment.json")
+    historical = _json(ROOT / "eval/c5/historical-exclusions.json")
+    freeze_sha = sha256_file(ROOT / "eval/c5/dataset-v2-freeze-manifest.json")
+    historical_sha = sha256_file(ROOT / "eval/c5/historical-exclusions.json")
+    if (original_commitment["exclusions"]["development_dataset_freeze_sha256"] != freeze_sha or
+        original_commitment["exclusions"]["historical_exclusions_sha256"] != historical_sha):
+        raise ExclusionPreflightError("public_exclusion_identity_mismatch")
+    frozen = {item["path"]: item for item in freeze["artifacts"]}
+    development = []
+    seen = set()
+    for path in development_paths:
+        item = frozen.get(path.name)
+        if item is None or path.name in seen or sha256_file(path) != item["sha256"]:
+            raise ExclusionPreflightError("frozen_development_split_identity_mismatch")
+        development.extend(_jsonl(path, expected=item["families"]))
+        seen.add(path.name)
+    if seen != {"train.jsonl", "validation.jsonl", "development.jsonl"}:
+        raise ExclusionPreflightError("incomplete_frozen_development_splits")
+    extra = [row for path in extra_paths for row in _jsonl(path)]
+    candidates = validate_families(_jsonl(candidate, expected=20))
+    report = audit_candidates(
+        candidates, development,
+        _jsonl(original80, expected=80), extra,
+        original_root=original_commitment["fingerprints"]["family_merkle_root_sha256"],
+        historical_numeric_hashes=set(historical["all_historical_numeric_text_hashes"]),
+    )
+    bindings = {"development_dataset_freeze_sha256": freeze_sha,
+                "historical_exclusions_sha256": historical_sha,
+                "original80_public_commitment_file_sha256": sha256_file(ROOT / "eval/c5/final-holdout-commitment.json"),
+                "original80_family_merkle_root_sha256": original_commitment["fingerprints"]["family_merkle_root_sha256"],
+                "additional_exclusion_file_sha256": sorted(sha256_file(path) for path in extra_paths)}
+    return candidates, report, bindings
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--candidate", type=Path, required=True)
@@ -176,42 +222,12 @@ def main() -> int:
     parser.add_argument("--extra-exclusion-jsonl", type=Path, action="append", required=True)
     args = parser.parse_args()
     try:
-        worktrees = _worktrees()
-        for path in (args.candidate, args.original80):
-            _require_owner_private_path(path, worktrees)
-        if args.candidate.resolve() == args.original80.resolve():
-            raise ExclusionPreflightError("candidate_and_original80_inputs_must_differ")
-        if len(args.development) != 3:
-            raise ExclusionPreflightError("exactly_three_frozen_development_splits_required")
-        freeze = _json(ROOT / "eval/c5/dataset-v2-freeze-manifest.json")
-        original_commitment = _json(ROOT / "eval/c5/final-holdout-commitment.json")
-        historical = _json(ROOT / "eval/c5/historical-exclusions.json")
-        if (original_commitment["exclusions"]["development_dataset_freeze_sha256"] !=
-                sha256_file(ROOT / "eval/c5/dataset-v2-freeze-manifest.json") or
-            original_commitment["exclusions"]["historical_exclusions_sha256"] !=
-                sha256_file(ROOT / "eval/c5/historical-exclusions.json")):
-            raise ExclusionPreflightError("public_exclusion_identity_mismatch")
-        frozen = {item["path"]: item for item in freeze["artifacts"]}
-        development = []
-        seen = set()
-        for path in args.development:
-            item = frozen.get(path.name)
-            if item is None or path.name in seen or sha256_file(path) != item["sha256"]:
-                raise ExclusionPreflightError("frozen_development_split_identity_mismatch")
-            development.extend(_jsonl(path, expected=item["families"]))
-            seen.add(path.name)
-        if seen != {"train.jsonl", "validation.jsonl", "development.jsonl"}:
-            raise ExclusionPreflightError("incomplete_frozen_development_splits")
-        extra = [row for path in args.extra_exclusion_jsonl for row in _jsonl(path)]
-        report = audit_candidates(
-            _jsonl(args.candidate, expected=20), development,
-            _jsonl(args.original80, expected=80), extra,
-            original_root=original_commitment["fingerprints"]["family_merkle_root_sha256"],
-            historical_numeric_hashes=set(historical["all_historical_numeric_text_hashes"]),
-        )
-    except (ExclusionPreflightError, KeyError, TypeError, OSError, ValueError) as exc:
+        _, report, _ = preflight_paths(args.candidate, args.original80,
+                                      args.development, args.extra_exclusion_jsonl)
+    except (ExclusionPreflightError, FormalPlanError, KeyError, TypeError, OSError, ValueError) as exc:
         # Never print paths, prompts, IDs, or matches in owner terminal output.
-        category = str(exc) if isinstance(exc, ExclusionPreflightError) else "invalid_input_or_identity"
+        category = str(exc) if isinstance(exc, ExclusionPreflightError) else (
+            "formal_case_schema_invalid" if isinstance(exc, FormalPlanError) else "invalid_input_or_identity")
         print(json.dumps({"status": "owner_private_preflight_failed", "category": category}), file=sys.stderr)
         return 1
     print(json.dumps(report, ensure_ascii=False, sort_keys=True))

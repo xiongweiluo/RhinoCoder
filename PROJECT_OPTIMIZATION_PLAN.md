@@ -10,7 +10,7 @@
 
 ## 当前快照与跨对话续接
 
-### 近期任务索引：2026-10-03 C5 模型桥 B 工程门通过；当前转入全新20题正式冻结
+### 近期任务索引：2026-10-03 C5 模型桥 B 工程门通过；正式20题核心与保管人准备入口已备、现场冻结仍待完成
 
 最新优先状态：C5-0至C5-5已通过。原run `c5-final-3d26f1a4b89eb38766647e93` 完整完成80家族/160路线槽，公开五文件回传哈希与远端一致，逐家族评分、唯一消费、冻结血缘及统计经独立公开审计核对；LoRA sequence77/80对base20/80、+71.25pp/净胜57，parse77/80，澄清/拒绝各12/12、安全预测错误0。见[最终评测与审计报告](docs/c5-final-evaluation-report.md)。这不是整体C5 GO，也未执行Rhino；80家族已消费，禁止再次调用owner最终入口或更换run ID。
 
@@ -25,6 +25,7 @@
 - [x] C5十二工具CPU基础：[独立交付边界](docs/c5-rhino-runtime-foundation.md)实现原完整schema、严格模型步、别名真实读回、原生12工具/活动保护、许可先消费/持久交接、单任务签名/原子账本、几何与只读交叉审计、私有一次性I/O；不接入默认路线。
 - [x] 已消费并退休的独立开发探针：`C5DEV-MODELBRIDGE-20261003-A` 的[事前预注册](docs/c5-modelbridge-development-preregistration.md)、spec `4911e6cd…62edfac` 与修正后 runtime freeze `1cb2adb2…f6cb73` 均得到仓库所有者直接精确批准；初版 `bb697a08…ea369` 从未批准或运行。双 CI、CPU 1757/2048 token 和资源/源码只读核查通过后单次启动。首个 hub `open` 返回 `actual active document changed`，驱动[记录 FAIL/退休](eval/c5/modelbridge-development-failure-20261003.json)，不可重跑。模型已加载但生成请求0、headless夹具0、工具派发0、holdout读取0；含加载/等待17.614秒，远端 worker 已停止、GPU空闲。只读检查见同一活动文档serial与零对象，但摘要水位随只读ScriptEditor变化，守卫过敏是强假设而非已证实唯一原因。仓库所有者另行精确批准 `aa269cc2…8fa0f38` 收尾脚本后，核实无夹具/无engine claim、解绑 Idle hook、实际删除九份临时密钥并留私有台账；**这是手工安全收尾，不是冻结 clean stop 或工程门通过**。
 - [x] B 独立开发工程门：`C5DEV-MODELBRIDGE-20261003-B` 的[事前预注册与冻结](docs/c5-modelbridge-development-b-preregistration.md)绑定源码 `608008f`、spec规范化SHA `be91b9b3…537de9`、runtime freeze规范化SHA `686c3a1c…7e54b4`、144源码及实际环境；双 CI 与所有者直接精确批准先于 admission。八槽单次执行、11生成阶段、LoRA真实写1／读1，全部槽安全关闭和九份密钥删除；[独立联合审计](eval/c5/modelbridge-development-audit-20261003-b.json)确认工程门通过、holdout读取0、远端含加载/空闲322.413秒、GPU已空闲。基座开发写/读/澄清失败与仅8槽样本限制原样报告；B永久禁止重放，不是正式20题或整体C5 GO。
+- [x] C5-6 正式研究的**离线核心准备**：[40槽一次性协调器、独立评分器与公开冻结预检](docs/c5-rhino-formal20-engineering-readiness.md)已用合成题验证；[保管人侧20题格式、私下排除预检及无正文公开承诺命令](docs/c5-rhino-formal20-owner-preparation.md)已给出。公开 [draft spec](eval/c5/rhino-formal20-spec-draft.json) 固定 `execution_ready=false`。这不是现场正式运行器完成、最终题承诺、真实40槽评测、正式批准或 C5-6 PASS；真实Mac/Rhino/GPU适配器与逐原始记录独立联合审计仍缺，不能复用B授权。
 - [ ] 当前独立交付：仅在 B 工程门通过的基础上，按[全新20题独立保管与正式交接门](docs/c5-rhino-formal20-handoff.md)建立**真正新的20个任务家族**，完成训练/验证/开发/A5/P2/R及所有已消费开发题排除，并由独立保管人私下核对原C5已消费80家族；冻结任务、顺序、评分器、基座/LoRA与执行源码、正式≤3小时预算和终止规则，再取得新的精确正式批准。交接设计稿不是已建立的承诺或执行授权；不能把B开发题混入正式集，也不能在正式批准前运行40路线槽。
 - [x] 正式20题保管人侧**非消费自动排除预检入口**已提供并用合成数据测试：核对原80对公开Merkle身份、440冻结开发文件、历史模板、额外已消费题及20题分层/核心工具覆盖；真实20题/原80正文**未由代理运行或读取**。预检不能证明R清单完整或语义不重合，也不是公开承诺、执行冻结或正式授权；见[交接门](docs/c5-rhino-formal20-handoff.md)。
 - [x] 2026-10-03原生开发子门：[native12预注册及后续记录](docs/c5-native12-development-preregistration.md)按新精确所有者批准单次执行，全12工具、10签名变更请求/2只读、终端无效HMAC零派发通过[独立实际审计](eval/c5/native12-development-audit-20261003.json)。每步几何/属性/只读/非目标、10 done/2 read/10 consumed/40事件/12 native-control交接、关闭/实际删钥/stop/活动文档不变均核实。74原JSON和两份一致DB backup私有封存；probe永久禁止重跑。模型/GPU/holdout0，完整C5工程门仍false，不是模型质量或整体GO。
@@ -32,7 +33,7 @@
 - [x] 新资源边界：先前[2026-10-02记录](eval/c5/rhino-resource-boundary-20261002.json)的较早截止，是精确时间未知时的保守边界；所有者随后明确回复到期为 **2026-10-04 20:00 Europe/Zurich（18:00 UTC）**。[v2记录](eval/c5/rhino-resource-boundary-v2-20261003.json)只据该本人报告更新截止；生成最迟19:45当地时间停止，预留≥900秒导出，开发≤1/正式≤3/合计≤4、原累计≤16 GPU-hours。A 实际加载/等待17.614秒后，[v3用量记录](eval/c5/rhino-resource-boundary-v3-20261003.json)把 B 上限缩为3500秒，A+B上界<3600秒；服务商时间戳仍未独立验证。资源确认不等于 B 或正式20题执行批准，不自动续租。
 - [ ] 仓库收口：C5代码/公开证据在OPEN PR #2–#6，R独立草稿PR #7已推送；所有者唯一reviewer_1决定是否合并，代理不自动merge。P2b、D和完整产品UI继续延期。
 
-当前有效顺序为 `A失败退休/人工安全收尾已完成 → B八槽模型桥工程门已通过 → 全新20题/排除承诺和正式冻结批准 → 单次40槽真实配对 → C5-7裁决与公开报告 → 所有者审核PR`。前一门失败时记录 FAIL/退休并重新决策，不机械推进后续门。原C4 NO-GO、C5离线80家族已消费、v8失败和默认混合路由均不改判。
+当前有效顺序为 `A失败退休/人工安全收尾已完成 → B八槽模型桥工程门已通过 → 正式核心/保管人准备入口已备 → 现场适配与原始联合审计的开发门 + 所有者私下全新20题/排除承诺 → 完整正式冻结/双CI/新精确批准 → 单次40槽真实配对 → C5-7裁决与公开报告 → 所有者审核PR`。前一门失败时记录 FAIL/退休并重新决策，不机械推进后续门。原C4 NO-GO、C5离线80家族已消费、v8失败和默认混合路由均不改判。
 
 以下2026-10-01内容是最终消费前的历史执行快照，其“零消费/等待owner”不再是当前状态；不覆盖当时冻结记录。
 

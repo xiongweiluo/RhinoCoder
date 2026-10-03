@@ -8,6 +8,8 @@
 
 当前缺项与保管/一次性消费边界已单列于[全新20题交接门](c5-rhino-formal20-handoff.md)。该交接设计稿也不是正式题承诺、完整执行冻结或批准。
 
+> **2026-10-03 代码准备状态：**[正式协调器/独立评分器/冻结缺项](c5-rhino-formal20-engineering-readiness.md)及[保管人侧20题准备规范与私下预检命令](c5-rhino-formal20-owner-preparation.md)已建立、仅在合成题上测试。公开 draft 仍为 `execution_ready=false`；尚无现场Mac/Rhino/GPU正式适配器、逐原始记录联合审计、20题公开承诺或新的正式授权，不得据此执行。
+
 ## 不可修改的身份与质量门
 
 - 原实验：`rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2`；新研究阶段 ID 暂定 `c5-rhino-paired-20-v1`，不复用任何 R 正式 run ID。
