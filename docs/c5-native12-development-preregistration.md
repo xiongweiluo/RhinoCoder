@@ -18,6 +18,8 @@
 
 运行源码先提交，随后记录该不可变 revision 的完整 Python/固定 schema/spec 清单与 SHA-256；预执行文档/冻结提交的 CI 必须通过。**只有直接人类批准精确 spec 和 runtime freeze 两个哈希后，才可生成批准台账并启动。** 本文不是该批准，代理不代签。
 
+事前源码已固定在 `3106ea461850775b64253ba2c938ff808f677e57`，完整203文件（201 Python及固定schema/spec）清单见[运行冻结](../eval/c5/native12-runtime-freeze-20261003.json)，inventory SHA-256 `29afc13e5ca121906ea80b511134b680c230429b1371a98aea072a62ac977916`。spec canonical SHA-256 `412091578b788a364397a0ac8165f8eaad9e4bfd60dea1431fa902c4b2185a3e`；runtime freeze canonical SHA-256 `8ea7df13c412df749f01aa162415f42e5e5c4cd9b46b4ca8bfb7d0d6540363aa`。Rhino8/内嵌Python3.9运行族被校验，实际build/version须写入原始engine记录；这不是完整C5模型/依赖环境冻结。完整本地回归474 passed/8 skipped，release/secret/diff通过；本段仍等待预执行提交CI和新的直接人类批准，未生成批准文件/claim/密钥/夹具。
+
 ## 与 C5 主线的关系
 
 模型、GPU、原80家族、正式20题和任何 holdout 调用均为0；不得运行训练、原最终入口或旧 R 正式 run。该本地 native 开发门不消耗 GPU 配额，不延长租期。[GPU资源边界](../eval/c5/rhino-resource-boundary-20261002.json)仍仅批准开发≤1/正式≤3/合计≤4、原累计≤16 GPU-hours，沿用更早停止截止；没有完整门禁前不启动模型。

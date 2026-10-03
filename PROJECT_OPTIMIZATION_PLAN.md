@@ -25,6 +25,7 @@
 - [x] C5十二工具CPU基础：[独立交付边界](docs/c5-rhino-runtime-foundation.md)实现原完整schema、严格模型步、别名真实读回、原生12工具/活动保护、许可先消费/持久交接、单任务签名/原子账本、几何与只读交叉审计、私有一次性I/O；不接入默认路线。
 - [ ] CPU基础后仍须完成实际UI/Idle生命周期桥、模型运输/新运行血缘、原生正负控和联合审计，另行冻结新研究spec与有界预算；CPU通过不代表完整C5工程门或正式20题通过，不能复用B批准。
 - [ ] 2026-10-03下一独立开发门：[native12预注册](docs/c5-native12-development-preregistration.md)建立全12工具固定单次正控及终端无效签名负控，配套ScriptEditor/私有Mac驱动/每步独立审计。全程模型/GPU/holdout0；先完整源码冻结、CI和新spec+runtime双哈希人类批准，当前尚未现场执行，不复用B授权。
+- [x] native12源码事前冻结：`3106ea4`完整203文件、inventory `29afc13e…77916`、spec `41209157…5a3e`、runtime freeze `8ea7df13…363aa`；全仓474 passed/8 skipped，release/secret/diff通过。冻结只覆盖新native开发控制，不覆盖完整模型调用/正式20题；实际执行仍等待新的精确所有者批准与预执行CI，未创建claim/密钥/fixture。
 - [x] 新资源边界：所有者直接确认“gpu还有两天，同意”，登记开发≤1/正式≤3/合计≤4、原累计≤16 GPU-hours；[资源记录](eval/c5/rhino-resource-boundary-20261002.json)保留原更早停止截止2026-10-03T14:50:50Z和900秒导出预留。近似租期不是服务商精确到期；不解锁模型/正式题，当前新GPU用量0。
 - [ ] 仓库收口：C5代码/公开证据在OPEN PR #2–#6，R独立草稿PR #7已推送；所有者唯一reviewer_1决定是否合并，代理不自动merge。P2b、D和完整产品UI继续延期。
 
