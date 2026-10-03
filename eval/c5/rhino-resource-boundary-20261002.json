@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "state": "OWNER_RESOURCE_BOUNDARY_NOT_EXECUTION_AUTHORIZATION",
+  "scope": "C5-6 development compatibility and new real-Rhino paired study only",
+  "owner_role": "repository_owner",
+  "approval_basis": "direct human reply to the resource-boundary question: gpu还有两天，同意",
+  "recorded_at_utc": "2026-10-02T20:51:00Z",
+  "lease_evidence": {
+    "kind": "owner_reported_remaining_two_days_not_provider_timestamp",
+    "provider_exact_expiry_utc": null,
+    "provider_hourly_price_verified": false,
+    "new_rental_or_restart_allowed": false
+  },
+  "conservative_hard_stop_utc": "2026-10-03T14:50:50Z",
+  "stop_basis": "retain the earlier original v3 cutoff; do not infer an extension from an approximate two-day report",
+  "stop_and_export_reserve_seconds": 900,
+  "new_allocation_gpu_hours": {
+    "development_max": 1,
+    "formal_pairing_max": 3,
+    "combined_max": 4,
+    "within_original_cumulative_max": 16
+  },
+  "prior_public_active_usage_approx_gpu_hours": 1.72828,
+  "prior_usage_is_not_provider_billing_or_elapsed_lease": true,
+  "new_allocation_usage_gpu_hours": 0,
+  "execution_authorized": false,
+  "required_before_any_model_generation": [
+    "owner-approved new development spec and complete actual source/import/model/environment freeze",
+    "bounded monotonic GPU and wall-clock accounting with hard-stop and export reserve enforced",
+    "lease and cumulative accounting recheck immediately before the job",
+    "no original final run, private 80-family body or holdout entry access"
+  ],
+  "required_before_formal_pairing": [
+    "twelve-tool development and independent safety/geometry/lifecycle gates pass",
+    "twenty genuinely new tasks and repository_owner private exclusion attestation",
+    "frozen order, thresholds, source, model, scorer and interruption policy",
+    "explicit formal study approval"
+  ],
+  "training_or_checkpoint_change_allowed": false,
+  "original_final_rerun_allowed": false,
+  "default_route_change_allowed": false,
+  "automatic_merge_allowed": false
+}

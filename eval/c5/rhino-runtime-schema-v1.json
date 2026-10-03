@@ -1,0 +1,293 @@
+{
+  "contract_id": "qwen25-v4-selector-v3-json-invoker-c5-v1",
+  "core_parameters": {
+    "boolean_difference": {
+      "properties": {
+        "input0_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Input0 Ids",
+          "type": "array"
+        },
+        "input1_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Input1 Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "input0_ids",
+        "input1_ids"
+      ],
+      "title": "boolean_differenceArguments",
+      "type": "object"
+    },
+    "create_box": {
+      "properties": {
+        "depth": {
+          "title": "Depth",
+          "type": "number"
+        },
+        "height": {
+          "title": "Height",
+          "type": "number"
+        },
+        "width": {
+          "title": "Width",
+          "type": "number"
+        }
+      },
+      "required": [
+        "width",
+        "depth",
+        "height"
+      ],
+      "title": "create_boxArguments",
+      "type": "object"
+    },
+    "create_cylinder": {
+      "properties": {
+        "height": {
+          "title": "Height",
+          "type": "number"
+        },
+        "radius": {
+          "title": "Radius",
+          "type": "number"
+        }
+      },
+      "required": [
+        "radius",
+        "height"
+      ],
+      "title": "create_cylinderArguments",
+      "type": "object"
+    },
+    "create_sphere": {
+      "properties": {
+        "radius": {
+          "title": "Radius",
+          "type": "number"
+        }
+      },
+      "required": [
+        "radius"
+      ],
+      "title": "create_sphereArguments",
+      "type": "object"
+    },
+    "get_bounding_box": {
+      "properties": {
+        "object_id": {
+          "title": "Object Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "object_id"
+      ],
+      "title": "get_bounding_boxArguments",
+      "type": "object"
+    },
+    "get_scene_summary": {
+      "properties": {},
+      "title": "get_scene_summaryArguments",
+      "type": "object"
+    },
+    "group_objects": {
+      "properties": {
+        "group_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Group Name"
+        },
+        "object_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Object Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "object_ids"
+      ],
+      "title": "group_objectsArguments",
+      "type": "object"
+    },
+    "move_object": {
+      "properties": {
+        "object_id": {
+          "title": "Object Id",
+          "type": "string"
+        },
+        "translate_x": {
+          "title": "Translate X",
+          "type": "number"
+        },
+        "translate_y": {
+          "title": "Translate Y",
+          "type": "number"
+        },
+        "translate_z": {
+          "title": "Translate Z",
+          "type": "number"
+        }
+      },
+      "required": [
+        "object_id",
+        "translate_x",
+        "translate_y",
+        "translate_z"
+      ],
+      "title": "move_objectArguments",
+      "type": "object"
+    },
+    "rotate_object": {
+      "properties": {
+        "angle_degrees": {
+          "title": "Angle Degrees",
+          "type": "number"
+        },
+        "axis": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Axis"
+        },
+        "center_point": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Center Point"
+        },
+        "object_id": {
+          "title": "Object Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "object_id",
+        "angle_degrees"
+      ],
+      "title": "rotate_objectArguments",
+      "type": "object"
+    },
+    "scale_object": {
+      "properties": {
+        "center_point": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Center Point"
+        },
+        "object_id": {
+          "title": "Object Id",
+          "type": "string"
+        },
+        "scale_factor": {
+          "items": {
+            "type": "number"
+          },
+          "title": "Scale Factor",
+          "type": "array"
+        }
+      },
+      "required": [
+        "object_id",
+        "scale_factor"
+      ],
+      "title": "scale_objectArguments",
+      "type": "object"
+    },
+    "set_object_color": {
+      "properties": {
+        "b": {
+          "title": "B",
+          "type": "integer"
+        },
+        "g": {
+          "title": "G",
+          "type": "integer"
+        },
+        "object_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Object Ids",
+          "type": "array"
+        },
+        "r": {
+          "title": "R",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "object_ids",
+        "r",
+        "g",
+        "b"
+      ],
+      "title": "set_object_colorArguments",
+      "type": "object"
+    },
+    "set_object_layer": {
+      "properties": {
+        "layer_name": {
+          "title": "Layer Name",
+          "type": "string"
+        },
+        "object_id": {
+          "title": "Object Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "object_id",
+        "layer_name"
+      ],
+      "title": "set_object_layerArguments",
+      "type": "object"
+    }
+  },
+  "core_parameters_sha256": "4b5710c2b7f13513fd3355654d22bff6b5631be53ba3bbd20472c09063f40bf6",
+  "original_full_schema_sha256": "151c5453bf92f83343e93e53013bfc8f3518e5b6a7e9e2fc49e97ba863b0637d",
+  "schema_version": 1
+}

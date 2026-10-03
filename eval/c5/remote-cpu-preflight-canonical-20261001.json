@@ -1,0 +1,76 @@
+{
+  "assistant_only_labels_verified": 943,
+  "config_sha256": "85fb5658b8fe787297f968595ddcdb2754da86efd0e96af2af79bf00675c8810",
+  "contract_id": "qwen25-v4-selector-v3-json-invoker-c5-v1",
+  "dataset_freeze_manifest_sha256": "8a08059fbcaa7b8650f096106bef3d699a4240fdca9c64ad999e62904f585903",
+  "dataset_id": "rhinocoder-c5-dataset-v2",
+  "experiment_id": "rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2",
+  "families": {
+    "development": 60,
+    "train": 320,
+    "validation": 60
+  },
+  "final_holdout_rows_read": 0,
+  "formal_training_authorized": false,
+  "gpu_used": false,
+  "implementation_sha256": {
+    "eval/test_c5_engineering.py": "444fffd7202b6c714cc90906bc570078baa414e9c1f5d8bc06a336a7271a7a31",
+    "tools/run_c5_engineering.py": "6efd45e14ff9813ae13cc3c03c13c9f04ddf03e848e623e2d62a773ca3bec53b",
+    "training/c5_engineering.py": "1d4e5b045a10a6f92b7c3230926aa6502805192e15c5c348bd81992ba69e49f2"
+  },
+  "model_weights_loaded": false,
+  "overfit_smoke": {
+    "executed": false,
+    "invocation_records": 32,
+    "invocation_tool_counts": {
+      "boolean_difference": 3,
+      "create_box": 7,
+      "create_cylinder": 1,
+      "create_sphere": 1,
+      "get_bounding_box": 4,
+      "get_scene_summary": 2,
+      "group_objects": 4,
+      "move_object": 1,
+      "rotate_object": 3,
+      "scale_object": 1,
+      "set_object_color": 4,
+      "set_object_layer": 1
+    },
+    "record_ids_sha256": "9ecac16f2cd68a78760896e185e7ed20f5c94ef5d9f7b3eca2971afffba0adc8",
+    "records": 64,
+    "selector_records": 32
+  },
+  "passed": true,
+  "public_tool_schema_sha256": "151c5453bf92f83343e93e53013bfc8f3518e5b6a7e9e2fc49e97ba863b0637d",
+  "records": {
+    "development": 120,
+    "train": 697,
+    "validation": 126
+  },
+  "rendered_lineage_sha256": "0c871940fe28f43195f9cec2811956bb2694fb9a28e13b1d9d73122c3a14c57e",
+  "rhino_contacted": false,
+  "schema_version": "1.0",
+  "single_use_claim_executed": false,
+  "stage_records": {
+    "invocation": 407,
+    "selector": 536
+  },
+  "status": "cpu_contract_and_data_gate_passed_gpu_diagnostics_pending",
+  "strict_roundtrip_records": 943,
+  "tokenizer_config_sha256": "959e7f1d9a1b7641a6d6ce05ca97b75c7894fcb66cbe5a040406458fb1128ee4",
+  "tokenizer_revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+  "tokens": {
+    "full_max": 1296,
+    "full_median": 764,
+    "full_min": 434,
+    "label_max": 39,
+    "label_median": 9,
+    "label_min": 7,
+    "max_sequence_length": 2048,
+    "overflow_policy": "reject",
+    "overflow_records": 0,
+    "prompt_max": 1272,
+    "prompt_median": 755,
+    "prompt_min": 419
+  }
+}

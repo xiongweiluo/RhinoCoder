@@ -1,0 +1,40 @@
+{
+  "authorization_basis": "Owner message: 实际租期有两天，帮我把1-5依次全部完整高质量完成",
+  "authorization_recorded_epoch": 1790871197.0016398,
+  "authorized_by": "repository_owner",
+  "conditional_formal_execution_authorized": true,
+  "contract_id": "qwen25-v4-selector-v3-json-invoker-c5-v1",
+  "diagnostic_gpu_hours_max": 4,
+  "diagnostic_runs_max": 2,
+  "engineering_config_sha256": "85fb5658b8fe787297f968595ddcdb2754da86efd0e96af2af79bf00675c8810",
+  "execution_deadline_epoch": 1791039050.1048589,
+  "execution_sha256": {
+    "tools/run_c5_gpu.py": "7ffcce4757d9817974bece1538d065843bc7394c5cc82744c2ba46379f53d934",
+    "training/c5_engineering.py": "1d4e5b045a10a6f92b7c3230926aa6502805192e15c5c348bd81992ba69e49f2",
+    "training/c5_execution.py": "dc4db19a7947e60977d4654c5c723ab7e6151947b5392a4d83fe8b2c577032a8",
+    "training/c5_inventory.py": "a2250fd3342af016d9df6e9abc19ab1e82f60075b79ea33da4c922c74ad8e041"
+  },
+  "experiment_id": "rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2",
+  "final_claim_requires_owner_custody_execution": true,
+  "final_gpu_hours_max": 4,
+  "formal_gpu_hours_max": 8,
+  "formal_requires_engineering_pass": true,
+  "holdout_access_during_training": false,
+  "hourly_price_verified": false,
+  "lease_expiry_precision": "owner reports two days; conservative 47-hour execution ceiling, not provider billing verification",
+  "lease_remaining_hours_reported": 48,
+  "new_rental_allowed": false,
+  "operational_failure_policy": "stop, preserve report and complete checkpoints; no automatic configuration changes or extra diagnostic runs",
+  "product_route_switch_authorized": false,
+  "schema_version": "1.0",
+  "selection_order": [
+    "sequence_exact",
+    "arguments_exact",
+    "parse_exact",
+    "eval_loss"
+  ],
+  "selection_tie_break": "earliest_checkpoint",
+  "stop_export_reserve_seconds": 900,
+  "total_gpu_hours_max": 16,
+  "validation_candidates": "epoch checkpoints 44/88/132 only; periodic recovery checkpoints are not candidates"
+}

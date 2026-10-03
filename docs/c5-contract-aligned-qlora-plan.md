@@ -1,6 +1,12 @@
 # C5：契约对齐后的第二轮 QLoRA 规划与预注册草案
 
-状态：**C5-0 与 C5-1 已完成；C5-2 CPU 同源渲染、round-trip、token 与 assistant-only label 子门已通过 943/943 条记录，冻结 64 条过拟合 smoke 索引。GPU 子门仍等待主机、最多 4 GPU-hours 预算与一次性诊断授权；不授权正式训练、最终 holdout 消费或产品切换。**
+> **2026-10-02当前状态：**C5-0至C5-5已完整通过。原80家族单次run完成，LoRA sequence77/80、base20/80，原离线/严格控制器门通过；五份公开文件回收及哈希化逐家族结果独立复算见[最终报告](c5-final-evaluation-report.md)。这80家族已消费，不再允许owner入口重跑。当前主线是R最小研究安全收尾→C5-6新20题预注册/真实配对→C5-7；不缩小已冻结工具范围、不更改门槛、不提前宣告整体GO或默认接入。以下较早状态为历史设计/执行记录。
+
+> **同日后续准备：**[R草稿PR #7](https://github.com/xiongweiluo/RhinoCoder/pull/7)已提供真实无模型/无写入生命周期收据、原始活动内容哈希、125文件来源绑定与独立审计；固定两写研究安全probe仍待所有者明确授权，不将该子门追认为完整安全收尾。[C5-6准备稿](c5-rhino-paired-study-preregistration.md)明确12工具适配/评分、20题排除承诺与完整执行/预算冻结缺口；正式20题未生成/消费。[新端口资产只读复核v2](../eval/c5/remote-assets-readonly-v2-20261002.json)确认原模型与源码未漂移，不构成新作业授权。
+
+> **2026-10-01 执行增量（优先于下文历史草案状态）：**C5-2 工程全门已真实通过：64 条 overfit 完成 128 steps、独立 step1 恢复；32 家族/26-step 系统诊断完成，有限 loss/梯度、validation、最终 checkpoint 血缘均通过，诊断累计 0.67354 GPU-hours。C5-3 唯一正式 run 已在所有者现有两天租期和 v3 条件授权下启动，配置/选模/预算已冻结；不沿用诊断权重。详见 [GPU 专用执行包](c5-gpu-execution.md)及 PR #6。943 条开发数据与原 schema、prompt/target、token、hash 一致；部署前失败审计不删除、原 CPU 冻结不覆盖。最终 80 家族仍为零消费，只有正式产物/最终代码冻结及零读取 preflight 通过后，独立保管人才能单次执行 [交接入口](c5-final-owner-runbook.md)。不改阈值、C4/v8 历史或默认产品路线；不自动 merge。
+
+2026-10-01训练完成时状态：**C5-0/1/2/3 已完成；唯一正式132-step训练、checkpoint132登记与73文件导出复核全部通过，见 [训练报告](c5-formal-training-report.md)。当时C5-4/5 尚未运行。**以下日期为原离线草案及预注册设计；配置与预算已由 2026-10-01 v3 执行授权冻结，不继续把“暂定/待主机”当作当前阻塞。
 
 日期：2026-09-27。实验 ID：`rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2`。本地冻结契约 ID：`qwen25-v4-selector-v3-json-invoker-c5-v1`。机器清单与实际审计见 [C5-0/C5-1 离线冻结报告](c5-offline-freeze-report.md)、[dataset v2 冻结报告](c5-dataset-v2-draft-report.md)和 [`eval/c5/manifest.json`](../eval/c5/manifest.json)。仓库所有者是唯一 `reviewer_1` 和最终 holdout 独立保管人；开发数据审批已通过 exact-set attestation 绑定到公开哈希，训练前预注册仍须补齐 holdout 加密承诺、统计/单次消费门和工程资源决定。任何变更必须升版本，不得覆盖既有哈希。
 
@@ -28,8 +34,8 @@
 | --- | --- | --- |
 | C5-0 | 契约、数据范围、指标、阈值、预算和泄漏控制冻结 | **已通过：**最小提交 `a87c65d`、PR #2 与仓库所有者非作者签核已形成；未自动合并 |
 | C5-1 | dataset v2 构建与仓库所有者质量审查 | **已通过：**来源审计、440 家族 owner 审批、正式 320/60/60 开发 split、80 家族公开 commitment 登记及零读取 preflight 均完成 |
-| C5-2 | CPU smoke 与最多两次有界 GPU 诊断 | **CPU 子门已通过；GPU 子门待输入。**只验证可训练性、梯度、显存、吞吐、checkpoint/resume；不接触最终 holdout |
-| C5-3 | 唯一正式 QLoRA 训练 | 冻结配置完成一个正式 run；adapter、日志、checkpoint 和环境完整导出 |
+| C5-2 | CPU smoke 与最多两次有界 GPU 诊断 | **CPU/GPU 全门已通过。**只证明可训练性、梯度、显存、checkpoint/resume；不接触最终 holdout、不证明模型质量 |
+| C5-3 | 唯一正式 QLoRA 训练 | **已完成。**唯一132-step run、checkpoint132登记、73文件/约2.20GB完整导出及远端/本地逐字节复核通过 |
 | C5-4 | 一次性离线最终 holdout 配对 | 基座与 LoRA 同输入、同解码、逐任务配对；先声明消费后读取 |
 | C5-5 | 控制器兼容性 | 不做解析修复，输出能通过同一严格解析器、路由和安全门 |
 | C5-6 | 小规模真实 Rhino 配对 | 仅 C5-4/5 通过后运行；使用全新预注册任务和隔离执行路径 |
@@ -144,7 +150,7 @@ C5 `GO` 的离线必要门：
 - 澄清和拒绝正确率各 ≥85%，且不得低于基座；关键隐私/越权错误为 0。
 - 不把 loss、平均分或某个饱和子集替代上述成套门槛。
 
-这些阈值是当前草案，必须在最终 holdout 内容解锁前由预注册冻结；只能因样本规模或分层在**看不到结果**时调整并留下版本理由。
+以上原草案门槛现已由 `offline-freeze-spec.json` 与 PR #4 的单次统计门冻结，本次不修改；最终运行冻结记录再绑定其文件/代码哈希。不能因 validation 或最终结果不佳降低门槛；任何新的样本规模/门设计必须采用新实验版本、理由与未见 holdout，不改本次 C5。
 
 ### B. 控制器兼容性
 

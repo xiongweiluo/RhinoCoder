@@ -1,0 +1,256 @@
+{
+  "authorization_sha256": "87b4640ad6e05a50e491404d48d5f28038ed931b116d7a0b2eb7e61572ba4f44",
+  "execution_revision": "160d1c7256bc5bb01a835cef8ea5f4b3f5a02326",
+  "experiment_id": "rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2",
+  "export_file_manifest_sha256": "4344f20ad5fe1a5f4cf37a6d84406dd49098f9ddb3bf83218600dbab1309703b",
+  "exported_bytes": 2197879663,
+  "exported_files": 73,
+  "files": {
+    "execution-events.jsonl": "e143d11992cc4e8c78f2f7d935b1cc806217e97baeff16752bd063a52fb36133",
+    "formal/checkpoint-120/README.md": "ce8e37c022277bf7f69c3c2081d727b4aaa19ee604121adb9fb228aff0b67ae7",
+    "formal/checkpoint-120/adapter_config.json": "8a776a47b085b787b7c7f3c9b068aed8c0f018278de2b94bf66130f5542d6d4f",
+    "formal/checkpoint-120/adapter_model.safetensors": "b057156c0f8bf158dc7e1310da5fb63dc528ee78738efb16db10bba5c14ac90d",
+    "formal/checkpoint-120/lineage.json": "f49f3e09d3fbabe87dd54f00422f3eaade57ef9c498946a7e358b858ad4c4e41",
+    "formal/checkpoint-120/progress.json": "15dd76bdb4e7496da1c2cc354db89d75e2e8b36cb5f870d487077a1b126a10f5",
+    "formal/checkpoint-120/state.pt": "81469b73b6c4492640769633740303677b27362eb977477c1f02028479fa7695",
+    "formal/checkpoint-130/README.md": "ce8e37c022277bf7f69c3c2081d727b4aaa19ee604121adb9fb228aff0b67ae7",
+    "formal/checkpoint-130/adapter_config.json": "8a776a47b085b787b7c7f3c9b068aed8c0f018278de2b94bf66130f5542d6d4f",
+    "formal/checkpoint-130/adapter_model.safetensors": "d0a4df96a390aea3b1f429b049298bfec2ef2d9e50e06c4e4563904f06b0831a",
+    "formal/checkpoint-130/lineage.json": "8fc6d93be3fe5ed4f1090d5ffccac9028a17f777d1c422320b1b5ee6600ff748",
+    "formal/checkpoint-130/progress.json": "376bc79194853f3487eaf2f68cc3a5b04da506a3ca43ea335f7acf9de9dc8b3f",
+    "formal/checkpoint-130/state.pt": "0b76144c998bd3f61d0c05cedb7a6568c601f68769768dcb49b00a5156450b8f",
+    "formal/checkpoint-132/README.md": "ce8e37c022277bf7f69c3c2081d727b4aaa19ee604121adb9fb228aff0b67ae7",
+    "formal/checkpoint-132/adapter_config.json": "8a776a47b085b787b7c7f3c9b068aed8c0f018278de2b94bf66130f5542d6d4f",
+    "formal/checkpoint-132/adapter_model.safetensors": "da8acdcde2671aa397534b35369fe4a84b9d150f80f7b7026a4366a770be2883",
+    "formal/checkpoint-132/lineage.json": "bdb85d857a9a67380790c4c533da374622a884590731e2fdc5fade589af3c13b",
+    "formal/checkpoint-132/progress.json": "2d32b872de404bffad45e1440c5a8d332d1a327baba175bc92197930ae03da10",
+    "formal/checkpoint-132/state.pt": "561004bffc7d3d92ddb1abd60617b3c7ecdbeee6d4540abadfc5ac7356c26202",
+    "formal/context.json": "6ec91f04c9a5a3ffba3c5eff553e235903e8383a08dc11c8569f01dffa64214a",
+    "formal/environment-formal-1790874886885066468.json": "38b9ea6a964cb75401237930195591d0655d05811393b475ad742a94d09b51bf",
+    "formal/metrics.jsonl": "d73915d3e1182514a8cf688e4a517b7876846cf9e84acef75e7c98a82e87f78c",
+    "formal/registry.json": "bfd59c37d255f8679803291e49fa2ced83f43e7c5e15c892fc4e8d743381c485",
+    "formal/result.json": "1a89fbdb392e98bb61d88736b0d80bb79d19098d898218eb837582b440958b9a",
+    "formal/validation-132.json": "c4bc199962ff85692d2e75bc6fc2b28c3314e61a2d4cdf5aa32ef01e87d678c2",
+    "formal/validation-44.json": "de67eb57fb992d6bf26a1a9e64e3e0d0dd57cb7c835d919ee958575e6afcd296",
+    "formal/validation-88.json": "ae0c2cac8fcaa33063b3d3ae1a83f57f25814310b6e16c9a844deefd4c51f540",
+    "overfit/checkpoint-1/README.md": "ce8e37c022277bf7f69c3c2081d727b4aaa19ee604121adb9fb228aff0b67ae7",
+    "overfit/checkpoint-1/adapter_config.json": "391c400f6b0c17f09ba0868aeaae07725b07f9a619919ee657bd648f0f8e2240",
+    "overfit/checkpoint-1/adapter_model.safetensors": "9481b47949ae0d2fc846779a638d0269ac5870e69d9b80d61c14b14f033732cc",
+    "overfit/checkpoint-1/lineage.json": "8bd7daf939c3c293fe180d789093a16971a19ad70e95be6a40ff944fa87c6b2a",
+    "overfit/checkpoint-1/progress.json": "ebf162b21339da1454b14512edad03f821ba992be697517ca0aa81523ee6516e",
+    "overfit/checkpoint-1/state.pt": "00c8b4cf291b8551443e4387dc94faa6b3827f6ab2fdb7a48efdd7a94880f140",
+    "overfit/checkpoint-120/README.md": "ce8e37c022277bf7f69c3c2081d727b4aaa19ee604121adb9fb228aff0b67ae7",
+    "overfit/checkpoint-120/adapter_config.json": "c2593fdbe23943bdfcca206663d16f463555e1a7c4c70e9f9514649fd7773e24",
+    "overfit/checkpoint-120/adapter_model.safetensors": "714dec042d880f008882a6061006b36d24bd2a8353f28d11ec0cfd596ecb87cb",
+    "overfit/checkpoint-120/lineage.json": "209bc9a790f374bd502595e292c6057d7cf8f0a7499636a9cdc5a493fe31ffe6",
+    "overfit/checkpoint-120/progress.json": "5376fc22a220d8b9e76e7399754f902000f57a2fa0e56e567f4e64f18efb4643",
+    "overfit/checkpoint-120/state.pt": "40a496658af965c03928fe0fea2941d8df750cc6729369b80f799a52e66857d7",
+    "overfit/checkpoint-128/README.md": "ce8e37c022277bf7f69c3c2081d727b4aaa19ee604121adb9fb228aff0b67ae7",
+    "overfit/checkpoint-128/adapter_config.json": "c2593fdbe23943bdfcca206663d16f463555e1a7c4c70e9f9514649fd7773e24",
+    "overfit/checkpoint-128/adapter_model.safetensors": "b32a2cafa6d18da5c3903888c9b9c99f4ce82ddca5aa998d94a3a556d5954d34",
+    "overfit/checkpoint-128/lineage.json": "1a51f18dc553d9445670de7179a48b2c75b0ae1dc52d303f147c689270d1751c",
+    "overfit/checkpoint-128/progress.json": "94c0b10e5f9702cc2b99b592b9a746e71de8e6a33437903dcf9140e782d09e6d",
+    "overfit/checkpoint-128/state.pt": "38774d378a337098aee8dace39668bea7f111258613f920b880bd728542aaf3c",
+    "overfit/context.json": "120a6fab494cab8040b9e156a3c443e44acd88ec4b5a8cf6dc2bf3d27864daf9",
+    "overfit/environment-overfit-1790871752519733201.json": "ff06d98b031a60d56692d2179fb7414557872081bf40e3ff9343dbba6728ad6f",
+    "overfit/environment-overfit-1790872046142642780.json": "66ea3e0a940af0863df56c86b6317a1cbffc47f086d7e97ffe991772b2a8a9b1",
+    "overfit/metrics.jsonl": "7211a66035425e45fc037a7d60b3efc35badde993bee7402132c25bff44bdca4",
+    "overfit/paused.json": "5f7df90aef09319cf2f5086c6b41a430c84d5a6262a4e573111cdfb0edf92c06",
+    "overfit/result.json": "38e190e604b3a153cb44a296680896e15aac802dab1e98a1aaa5b43125d6ecce",
+    "system/checkpoint-10/README.md": "ce8e37c022277bf7f69c3c2081d727b4aaa19ee604121adb9fb228aff0b67ae7",
+    "system/checkpoint-10/adapter_config.json": "c5d4861448680190cd9f744c1aa52608103575704aaa7a24be7e67c89b49a539",
+    "system/checkpoint-10/adapter_model.safetensors": "502cb7fc9c52535f7dc0a25550920c2ccf74cda142b5c7209ff85f639e717556",
+    "system/checkpoint-10/lineage.json": "d73821ddcc1afae03a41bce887697d5f59457c48cb1d3e15a5262c65146e7422",
+    "system/checkpoint-10/progress.json": "991ced5b38221acb221697b6650d93fb3bce90de6bd36ea54803bc6df92cff0a",
+    "system/checkpoint-10/state.pt": "6147c018d56c01b7d4b8ed51f32f7c0ecbff6e1ee00961c54d28ca5f7f2453c8",
+    "system/checkpoint-20/README.md": "ce8e37c022277bf7f69c3c2081d727b4aaa19ee604121adb9fb228aff0b67ae7",
+    "system/checkpoint-20/adapter_config.json": "c5d4861448680190cd9f744c1aa52608103575704aaa7a24be7e67c89b49a539",
+    "system/checkpoint-20/adapter_model.safetensors": "dc9ee4794ad31881c2a7ef9d757576f1a6cd5f061dbf5408d98425ac2e231e86",
+    "system/checkpoint-20/lineage.json": "e16a411f8daae9948292862d108e81de63652fe3f1617cf48dd00c453bc99008",
+    "system/checkpoint-20/progress.json": "da4c0f4509cfdcec4b273db8fdb3ee30e487653d1c4d74e256c1ac1198753fe1",
+    "system/checkpoint-20/state.pt": "72fc1b5d781a36a7dd42b0d75edab8d29843bc87453652d9ba7108ac673708af",
+    "system/checkpoint-26/README.md": "ce8e37c022277bf7f69c3c2081d727b4aaa19ee604121adb9fb228aff0b67ae7",
+    "system/checkpoint-26/adapter_config.json": "c5d4861448680190cd9f744c1aa52608103575704aaa7a24be7e67c89b49a539",
+    "system/checkpoint-26/adapter_model.safetensors": "50ecd5dc6e290006fb6bca4ec06d3a915c7c38310a87b12a94017123413fd5ce",
+    "system/checkpoint-26/lineage.json": "0d3af404b4f42cf2efe864c947a118ee31a14510bfd2c59d1c42071c363370e0",
+    "system/checkpoint-26/progress.json": "8d3a10559d1e0a83411256022eabebde3211399665f43ea4700048321fa41900",
+    "system/checkpoint-26/state.pt": "b9c3058e78650ad24404612d883f886a199cc7cb5d58a000b6676dbf046b4f9e",
+    "system/context.json": "6c5653dd293d7e09cb00bef5b517f66f11bf8821af6a8b026f9a27b084c04105",
+    "system/environment-system-1790874226573131902.json": "e441f6ba80b38fc003f8dcc13d3d1b20a43d356f8df8476ee5a6d9462388645f",
+    "system/metrics.jsonl": "50b8a8760aac41c5fc7bd753413d1d9d12bb71e11cd090c801e861689771c4de",
+    "system/result.json": "67eff49672c17559ad03e64a2f5f818f1c8f016c937ccba03d1923834d40c104"
+  },
+  "final_holdout_rows_read": 0,
+  "gpu_hours": {
+    "formal": 0.8964994914355556,
+    "overfit": 0.5529170624033332,
+    "system": 0.120623874416389
+  },
+  "passed": true,
+  "product_route_authorized": false,
+  "rhino_called": false,
+  "schema_version": "1.0",
+  "scope": "training/export integrity, not model quality",
+  "stages": {
+    "formal": {
+      "context_sha256": "817a0737c64914e3c2f350866232ae623eb3772e80016bbb67961b645ef4a38f",
+      "grad_norm_range": [
+        0.0006961208418942988,
+        1.6534560918807983
+      ],
+      "loss_range": [
+        7.072625771797902e-05,
+        0.6658206908032298
+      ],
+      "optimizer_rows": 132,
+      "result": {
+        "completed": true,
+        "context_sha256": "817a0737c64914e3c2f350866232ae623eb3772e80016bbb67961b645ef4a38f",
+        "contract_id": "qwen25-v4-selector-v3-json-invoker-c5-v1",
+        "experiment_id": "rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2",
+        "final_holdout_rows_read": 0,
+        "final_loss": 0.0004146369434548854,
+        "global_step": 132,
+        "initial_loss": 0.5448526382082846,
+        "passed": true,
+        "peak_allocated_bytes": 14864003584,
+        "peak_reserved_bytes": 23502782464,
+        "phase": "formal",
+        "registry": {
+          "adapter_sha256": "305d72703270d16e93233d1d34ae27cdaddd777e4530afead88c7edb8dc22cae",
+          "base_revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+          "context_sha256": "817a0737c64914e3c2f350866232ae623eb3772e80016bbb67961b645ef4a38f",
+          "contract_id": "qwen25-v4-selector-v3-json-invoker-c5-v1",
+          "experiment_id": "rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2",
+          "files": {
+            "adapter_config.json": "8a776a47b085b787b7c7f3c9b068aed8c0f018278de2b94bf66130f5542d6d4f",
+            "adapter_model.safetensors": "da8acdcde2671aa397534b35369fe4a84b9d150f80f7b7026a4366a770be2883"
+          },
+          "final_holdout_rows_read": 0,
+          "product_route_authorized": false,
+          "selected_checkpoint": "checkpoint-132",
+          "selection_order": [
+            "sequence_exact",
+            "arguments_exact",
+            "parse_exact",
+            "eval_loss"
+          ],
+          "tie_break": "earliest_checkpoint",
+          "validation_candidates": [
+            {
+              "arguments_exact": 0.9666666666666667,
+              "eval_loss": 0.004208928729331958,
+              "parse_exact": 1.0,
+              "sequence_exact": 0.9666666666666667,
+              "step": 44,
+              "tool_name_exact": 0.9833333333333333
+            },
+            {
+              "arguments_exact": 0.9833333333333333,
+              "eval_loss": 0.0008649209549976005,
+              "parse_exact": 1.0,
+              "sequence_exact": 0.9833333333333333,
+              "step": 88,
+              "tool_name_exact": 1.0
+            },
+            {
+              "arguments_exact": 0.9833333333333333,
+              "eval_loss": 0.0008472924928499861,
+              "parse_exact": 1.0,
+              "sequence_exact": 0.9833333333333333,
+              "step": 132,
+              "tool_name_exact": 1.0
+            }
+          ]
+        },
+        "relative_loss_decrease": 0.9992389925011314,
+        "resumed_from": null,
+        "rhino_called": false,
+        "seconds_this_segment": 3227.391948221999,
+        "training_families": 320,
+        "training_records": 697
+      },
+      "verified_checkpoints": {
+        "checkpoint-120": "f49f3e09d3fbabe87dd54f00422f3eaade57ef9c498946a7e358b858ad4c4e41",
+        "checkpoint-130": "8fc6d93be3fe5ed4f1090d5ffccac9028a17f777d1c422320b1b5ee6600ff748",
+        "checkpoint-132": "bdb85d857a9a67380790c4c533da374622a884590731e2fdc5fade589af3c13b"
+      }
+    },
+    "overfit": {
+      "context_sha256": "ff62dcb5e4f42482f014f78a07e4b80ad644dfc786d50e579b9663a503eb7acd",
+      "grad_norm_range": [
+        0.0002485172590240836,
+        1.6422830820083618
+      ],
+      "loss_range": [
+        2.1148520033875684e-05,
+        0.7448581599164754
+      ],
+      "optimizer_rows": 128,
+      "result": {
+        "completed": true,
+        "context_sha256": "ff62dcb5e4f42482f014f78a07e4b80ad644dfc786d50e579b9663a503eb7acd",
+        "contract_id": "qwen25-v4-selector-v3-json-invoker-c5-v1",
+        "experiment_id": "rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2",
+        "final_holdout_rows_read": 0,
+        "final_loss": 3.856955472514301e-05,
+        "global_step": 128,
+        "initial_loss": 0.5696033849671949,
+        "passed": true,
+        "peak_allocated_bytes": 14626294784,
+        "peak_reserved_bytes": 20952645632,
+        "phase": "overfit",
+        "relative_loss_decrease": 0.9999322869987379,
+        "resumed_from": 1,
+        "rhino_called": false,
+        "seconds_this_segment": 1949.0473714720001,
+        "training_families": 60,
+        "training_records": 64
+      },
+      "verified_checkpoints": {
+        "checkpoint-1": "8bd7daf939c3c293fe180d789093a16971a19ad70e95be6a40ff944fa87c6b2a",
+        "checkpoint-120": "209bc9a790f374bd502595e292c6057d7cf8f0a7499636a9cdc5a493fe31ffe6",
+        "checkpoint-128": "1a51f18dc553d9445670de7179a48b2c75b0ae1dc52d303f147c689270d1751c"
+      }
+    },
+    "system": {
+      "context_sha256": "4b910e5756db2b42dbed7231990057d45d9157d07707a86e3e2c57a093e92f35",
+      "grad_norm_range": [
+        0.0062898024916648865,
+        1.4590678215026855
+      ],
+      "loss_range": [
+        0.00048127490542052936,
+        0.5710612181574106
+      ],
+      "optimizer_rows": 26,
+      "result": {
+        "completed": true,
+        "context_sha256": "4b910e5756db2b42dbed7231990057d45d9157d07707a86e3e2c57a093e92f35",
+        "contract_id": "qwen25-v4-selector-v3-json-invoker-c5-v1",
+        "experiment_id": "rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2",
+        "final_holdout_rows_read": 0,
+        "final_loss": 0.000685256682689734,
+        "global_step": 26,
+        "initial_loss": 0.5295280666888824,
+        "passed": true,
+        "peak_allocated_bytes": 14727983104,
+        "peak_reserved_bytes": 20258488320,
+        "phase": "system",
+        "relative_loss_decrease": 0.9987059105535716,
+        "resumed_from": null,
+        "rhino_called": false,
+        "seconds_this_segment": 434.2377709680004,
+        "training_families": 32,
+        "training_records": 70,
+        "validation_loss": 0.0066594025777285135
+      },
+      "verified_checkpoints": {
+        "checkpoint-10": "d73821ddcc1afae03a41bce887697d5f59457c48cb1d3e15a5262c65146e7422",
+        "checkpoint-20": "e16a411f8daae9948292862d108e81de63652fe3f1617cf48dd00c453bc99008",
+        "checkpoint-26": "0d3af404b4f42cf2efe864c947a118ee31a14510bfd2c59d1c42071c363370e0"
+      }
+    }
+  },
+  "total_gpu_hours": 1.5700404282552778
+}

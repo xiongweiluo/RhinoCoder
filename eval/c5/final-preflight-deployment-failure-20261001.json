@@ -1,0 +1,16 @@
+{
+  "status": "preclaim_deployment_failure",
+  "date": "2026-10-01",
+  "final_freeze_sha256": "9a57c1672e5d49d6b1ce8c23ee36c1fa6cf0b4570d08d9030df1c7bd2860a5d8",
+  "error_type": "FileNotFoundError",
+  "missing_frozen_file": "requirements.txt",
+  "reason": "The isolated initial training deployment included requirements-training.txt but omitted the non-training dependency lock text; final closure now requires both frozen files.",
+  "repair": "Deploy the exact already-frozen requirements.txt bytes; do not change the freeze or package versions.",
+  "model_weights_loaded": false,
+  "plaintext_opened": false,
+  "encrypted_artifact_opened": false,
+  "final_holdout_rows_read": 0,
+  "consumption_claim_executed": false,
+  "final_run_created": false,
+  "default_route_changed": false
+}

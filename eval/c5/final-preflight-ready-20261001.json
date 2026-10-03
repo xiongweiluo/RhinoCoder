@@ -1,0 +1,23 @@
+{
+  "ready": true,
+  "adapter_sha256": "305d72703270d16e93233d1d34ae27cdaddd777e4530afead88c7edb8dc22cae",
+  "budget_seconds_remaining": 14400,
+  "final_freeze_sha256": "9a57c1672e5d49d6b1ce8c23ee36c1fa6cf0b4570d08d9030df1c7bd2860a5d8",
+  "gpu_free_bytes": 25147932672,
+  "gpu_total_bytes": 25430786048,
+  "packages": {
+    "torch": "2.10.0+cu126",
+    "transformers": "5.2.0",
+    "peft": "0.18.1",
+    "accelerate": "1.12.0",
+    "bitsandbytes": "0.49.2",
+    "safetensors": "0.7.0"
+  },
+  "final_holdout_rows_read": 0,
+  "consumption_claim_executed": false,
+  "model_weights_loaded": false,
+  "plaintext_opened": false,
+  "encrypted_artifact_opened": false,
+  "final_run_created": false,
+  "scope": "Observed remote --preflight success after exact frozen requirements.txt deployment; no owner client/claim/model generation was executed."
+}
