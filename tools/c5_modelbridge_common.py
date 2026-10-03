@@ -55,6 +55,8 @@ def scope():
             and freeze['spec_sha256']==digest(spec),'new complete modelbridge freeze missing')
     require(file_sha(ROOT/'eval/c5/modelbridge-development-spec-20261003.json')==freeze['spec_file_sha256'],
             'actual development spec bytes differ')
+    require(all(file_sha(ROOT/name)==sha for name,sha in freeze['fixed_public_files'].items()),
+            'actual Mac fixed public configuration bytes differ')
     approval=read_json(STATE,'owner-approval.json')
     require(approval=={'probe_id':ID,'actor':'repository_owner','approved':True,'spec_sha256':digest(spec),
                       'runtime_freeze_sha256':digest(freeze),

@@ -259,8 +259,9 @@ def audit():
                  task=plan['steps'][0],freeze_sha=digest(freeze),model_identity=freeze['model_identities'][plan['route']],tokenizer=tokenizer)
         native_writes+=chain['ledger']['write_count'];native_reads+=chain['ledger']['read_count'];generations+=chain['model_generation_calls']
         last=receipts[-1]['after'] if receipts else record['capture']['native']
-        audit_lifecycle(read_json(directory,'bootstrap.json'),read_json(directory,'engine-created.json'),
+        lifecycle=audit_lifecycle(read_json(directory,'bootstrap.json'),read_json(directory,'engine-created.json'),
                         slot_result['close'],slot_result['stop'],last,freeze['source_inventory_sha256'],key_present=(directory/'handoff.key').exists())
+        require(lifecycle['had_failure'] is False,'native lifecycle reported a failure')
         kind=slot.split('-')[0];observed=record['response']['observation']
         if kind=='write':
             quality[slot]=bool(receipts) and audit_geometry(receipts[0]['before'],receipts[0]['after'],spec['independent_write_assertions'])['geometry_passed']
@@ -304,7 +305,8 @@ def audit():
     require(stopped==result['hub_stop'] and stopped['opened_slots']==spec['slot_order']
             and stopped['active_serial']==bootstrap['active_serial'] and stopped['active_sha256']==bootstrap['active_sha256']
             and stopped['hub_key_absence']=={'key_removed':True,'actual_absence_checked':True}
-            and stopped['hook_removed_in_same_callback'] is True and not (STATE/'hub.key').exists(),'actual hub closure differs')
+            and stopped['hook_removed_in_same_callback'] is True and stopped['had_failure'] is False
+            and not (STATE/'hub.key').exists(),'actual hub closure differs')
     guard()
     require(generations<=spec['generation_calls_max'] and generations>=8,'generation count/budget differs')
     gate=native_writes>=1 and native_reads>=1 and all(r['error'] is None for r in result['slots']) \

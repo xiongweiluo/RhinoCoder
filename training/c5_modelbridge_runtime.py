@@ -44,7 +44,7 @@ def installed_environment(prefix):
     prefix = Path(prefix)
     require(prefix.is_absolute() and prefix.resolve()==prefix and Path(sys.prefix).resolve()==prefix,
             'dedicated environment root differs')
-    inventory,packages = {},{}
+    inventory,packages,missing_metadata_files = {},{},[]
     for dist in importlib.metadata.distributions():
         name = dist.metadata.get('Name','').lower().replace('_','-')
         require(name and name not in packages and dist.files,'unknown/duplicate environment distribution')
@@ -54,6 +54,13 @@ def installed_environment(prefix):
             path = Path(dist.locate_file(item)).absolute()
             # wheel ../../bin entries normalize lexically, never follow symlinks.
             path = Path(os.path.normpath(path))
+            # The provider's pip metadata was built by Python 3.13 but this
+            # dedicated interpreter is 3.11: a stale, non-loadable pip3.13
+            # launcher is the sole observed missing RECORD entry. Retain the
+            # anomaly in the frozen report rather than inventing its bytes.
+            if name=='pip' and str(item)=='../../../bin/pip3.13' and not path.exists():
+                missing_metadata_files.append('pip:'+str(item))
+                continue
             require(path.is_relative_to(prefix) and path.resolve()==path,'environment asset path escapes/symlink')
             key = path.relative_to(prefix).as_posix()
             actual = file_sha(path)
@@ -63,9 +70,11 @@ def installed_environment(prefix):
         packages[name] = {'version':dist.version,'file_count':len(files),'inventory_sha256':digest(files)}
     executable = Path(sys.executable).resolve(strict=True)
     require(executable.is_relative_to(prefix),'foreign Python executable')
+    require(missing_metadata_files==['pip:../../../bin/pip3.13'],
+            'unexpected missing package metadata file')
     report = {'python':sys.version,'executable_sha256':file_sha(executable),
               'platform':platform.platform(),'packages':packages,'inventory_sha256':digest(inventory),
-              'distribution_file_count':len(inventory)}
+              'distribution_file_count':len(inventory),'missing_metadata_files':missing_metadata_files}
     return report,inventory
 
 

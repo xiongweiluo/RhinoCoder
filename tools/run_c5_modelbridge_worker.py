@@ -51,11 +51,37 @@ def preflight():
             'original selected model registration differs')
     require(all(file_sha(ADAPTER/name)==sha for name,sha in registry['files'].items()),'selected adapter bytes drift')
     environment,inventory = runtime_preflight(ENV)
+    source_files={p.relative_to(ROOT).as_posix():file_sha(p) for folder in ('agent','training','tools','plugin','data_pipeline')
+                  for p in sorted((ROOT/folder).rglob('*.py'))}
+    source_files['eval/c5/rhino-runtime-schema-v1.json']=file_sha(ROOT/'eval/c5/rhino-runtime-schema-v1.json')
+    fixed_public={name:file_sha(ROOT/name) for name in (
+        'requirements-training.txt','requirements.txt','eval/c5/c5-engineering-config.json',
+        'eval/c5/gpu-formal-registry-20261001.json')}
     return {**environment,'snapshot':verified,'adapter_sha256':registry['adapter_sha256'],
             'adapter_files':registry['files'],'source_files':{
-                p.relative_to(ROOT).as_posix():file_sha(p) for folder in ('agent','training','tools','plugin','data_pipeline')
-                for p in sorted((ROOT/folder).rglob('*.py'))},
+                **source_files},'fixed_public_files':fixed_public,
             'status':'modelbridge_readonly_preflight_not_execution_authority'},inventory,snapshot
+
+
+def import_preflight():
+    """Read-only loader-import closure; no model construction or CUDA call."""
+    assets,inventory,_=preflight()
+    guard=SourceGuard(ROOT,assets['source_files'],digest(assets['source_files']),
+                      project_prefixes=('agent','training','tools','plugin','data_pipeline'))
+    import torch
+    from peft import PeftModel,prepare_model_for_kbit_training
+    from transformers import AutoModelForCausalLM,BitsAndBytesConfig
+    from training.c5_execution import generation,load_config,load_pinned_tokenizer
+    require(all(x is not None for x in (PeftModel,prepare_model_for_kbit_training,
+            AutoModelForCausalLM,BitsAndBytesConfig,generation,load_config,load_pinned_tokenizer)),
+            'actual pinned loader imports missing')
+    guard();verify_loaded_environment(ENV,inventory)
+    require(not torch.cuda.is_initialized(),'loader import preflight unexpectedly initialized CUDA')
+    return {'status':'read_only_loader_import_closure_verified_not_execution_authority',
+            'environment_sha256':assets['environment_sha256'],
+            'source_inventory_sha256':digest(assets['source_files']),
+            'torch_version':torch.__version__,'cuda_initialized':torch.cuda.is_initialized(),
+            'model_loaded':False,'holdout_rows_read':0,'generation_calls':0}
 
 
 def approved_scope(*,check_budget=True):
@@ -80,6 +106,9 @@ def approved_scope(*,check_budget=True):
     assets,inventory,snapshot = preflight()
     require(assets['environment_sha256']==freeze['environment_sha256'] and assets['adapter_sha256']==spec['adapter_sha256'],
             'actual model/environment drift')
+    require(assets['source_files']==freeze['source_files']
+            and assets['fixed_public_files']==freeze['fixed_public_files'],
+            'actual deployed project/config source differs')
     # A precise newly approved resource boundary is mandatory, not old auth.
     budget = Budget(freeze['resource_boundary']) if check_budget else None
     return spec,freeze,guard,assets,inventory,snapshot,budget
@@ -178,10 +207,12 @@ def export():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode',choices=('preflight','serve','export'))
+    parser.add_argument('mode',choices=('preflight','import-preflight','serve','export'))
     args = parser.parse_args()
     if args.mode=='preflight':
         result,_,_ = preflight(); print(json.dumps(result,sort_keys=True))
+    elif args.mode=='import-preflight':
+        print(json.dumps(import_preflight(),sort_keys=True))
     elif args.mode=='export':
         print(frame(export()).decode(),end='')
     else: serve()

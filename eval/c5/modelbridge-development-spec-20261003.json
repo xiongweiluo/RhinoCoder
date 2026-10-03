@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "probe_id": "C5DEV-MODELBRIDGE-20261003-A",
-  "state": "DRAFT_NOT_FROZEN_NOT_APPROVED",
+  "state": "FROZEN_AWAITING_EXACT_OWNER_APPROVAL",
   "scope": "new development compatibility and joint audit only, not formal twenty tasks",
   "remote_source_root": "/data/RhinoCoder-c5-modelbridge-A",
   "remote_state_root": "/data/c5-modelbridge-state-20261003-A",
@@ -56,13 +56,15 @@
   "original_final_entry_allowed": false,
   "holdout_calls": 0,
   "training_calls": 0,
+  "formal_task_reuse_allowed": false,
+  "source_authority_note": "Only a separate direct owner approval of this spec SHA-256 and the complete runtime freeze SHA-256 can admit the single development run. Prior native12/R/80-family grants do not apply.",
   "automatic_retry_allowed": false,
   "automatic_merge_allowed": false,
-  "execution_ready": false,
-  "pending_before_freeze": [
-    "actual source deployment/import and GPU environment byte inventory",
-    "new precise provider expiry and owner-confirmed hard stop/export reserve",
-    "fixed Mac/Rhino lifecycle runner and joint audit integration",
-    "pre-execution CI and new exact spec/runtime owner approval"
+  "execution_ready": true,
+  "pending_before_execution": [
+    "new direct repository_owner approval of exact spec and complete runtime freeze SHA-256",
+    "new private permanent Mac and GPU admission roots/claims under the approved single probe ID",
+    "fresh usable blank active Rhino document and current GPU lease/budget recheck",
+    "single-use development only; no final holdout or formal twenty-task access"
   ]
 }

@@ -88,13 +88,31 @@ def validate_response(value, sent, model_identity_sha256):
             'response duration differs')
     observed,generated = value['observation'],value['generation_receipts']
     require(isinstance(observed,dict) and observed.get('contract_id')==CONTRACT_ID
+            and set(observed) in ({'contract_id','status','calls','user_step_sha256','scene_binding',
+                                   'name','arguments','repair_count','dispatch_count'},
+                                  {'contract_id','status','calls','user_step_sha256','scene_binding',
+                                   'name','arguments','repair_count','dispatch_count','error_type'})
+            and observed.get('status') in {'abstained_no_dispatch','unsupported_for_c5_no_dispatch',
+                'selector_contract_failure_no_dispatch','invocation_contract_failure_no_dispatch',
+                'schema_valid_not_authorized','operational_failure_no_retry'}
             and observed.get('scene_binding') is None
             and all(type(observed.get(k)) is int and observed[k]==0 for k in ('repair_count','dispatch_count'))
             and observed.get('user_step_sha256')==hashlib.sha256(step_input(sent['task'],sent['scene']).encode()).hexdigest(),
             'remote observation binding/contract differs')
-    require(isinstance(generated,list) and len(generated)==len(observed.get('calls',[])) <= 2,'generation receipt count differs')
+    require(isinstance(observed.get('calls'),list) and isinstance(generated,list)
+            and 1 <= len(generated)==len(observed['calls']) <= 2
+            and [c.get('stage') for c in observed['calls']]==['selector','invocation'][:len(observed['calls'])],
+            'generation receipt count/stage differs')
+    require((observed['status']=='schema_valid_not_authorized') ==
+            (len(observed['calls'])==2 and observed['calls'][-1].get('parsed') is True
+             and isinstance(observed.get('name'),str) and isinstance(observed.get('arguments'),dict)),
+            'successful structured call status differs')
     for i,(call,generation) in enumerate(zip(observed['calls'],generated)):
-        require(generation['stage']==call['stage']==('selector' if i==0 else 'invocation')
+        require(isinstance(call,dict) and set(call) in (
+                {'stage','prompt_sha256','generation_attempted','parsed'},
+                {'stage','prompt_sha256','generation_attempted','parsed','raw','output_sha256'})
+                and call['generation_attempted'] is True and type(call['parsed']) is bool
+                and generation['stage']==call['stage']==('selector' if i==0 else 'invocation')
                 and type(generation['tokens']) is int and 0 <= generation['tokens'] <= DECODE_CONFIG[call['stage']+'_max_new_tokens']
                 and type(generation['seconds']) in (int,float) and math.isfinite(generation['seconds']) and generation['seconds'] >= 0
                 and generation['prompt_sha256']==call['prompt_sha256']
