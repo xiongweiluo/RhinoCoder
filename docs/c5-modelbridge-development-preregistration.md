@@ -5,7 +5,8 @@
 ## 冻结身份与作用域
 
 - 新 ID：`C5DEV-MODELBRIDGE-20261003-A`；[固定开发 spec](../eval/c5/modelbridge-development-spec-20261003.json)规范化 SHA-256 为 `4911e6cd54f0f4523be4980b3973ae7419c98087ad3f378182658b8ae62edfac`，文件字节 SHA-256 为 `596fdcab282b5935ac545148ea89dfd33c8841c965882b46de5e9f0332743225`。
-- [完整 runtime freeze](../eval/c5/modelbridge-runtime-freeze-20261003.json)规范化 SHA-256 为 `bb697a085832dded52aed18ff027b545c566fa84f1c99688bd88193d4ddea369`，文件字节 SHA-256 为 `fccf909a6f4fbef30e53a6d930bcd02ef1fe14118a78e8d8e04243f36997aa2c`；执行源修订 `2e6ba5ca16c2989ddbe27334022cf240ae780ceb`，143份项目源码/原schema绑定。规范化哈希用于所有者批准与运行记录；文件哈希用于部署字节一致性。
+- [当前有效的完整 runtime freeze](../eval/c5/modelbridge-runtime-freeze-20261003.json)规范化 SHA-256 为 `1cb2adb2161ba2f14b2c80b703cc38e3573621a5a86014cf5c15b72883f6cb73`，文件字节 SHA-256 为 `34d5d5a9afb72c87bb53ac8f25254325ecd8fbe16373133fd6b7e462550fdf5b`；执行源修订 `168974b20cad5a472500bfbcc17817fb2c9419ad`，143份项目源码/原schema绑定。规范化哈希用于所有者批准与运行记录；文件哈希用于部署字节一致性。
+- 初版冻结 `bb697a085832dded52aed18ff027b545c566fa84f1c99688bd88193d4ddea369` **从未获得批准/运行，现已[封存为被取代的预执行证据](../eval/c5/modelbridge-runtime-freeze-superseded-20261003.json)**。复核发现新夹具创建后、子桥完全附着前失败时，旧hub可能错误借用上一槽已停止子桥的状态；现要求当前保留的夹具必须与当前已关闭/停止的子桥是同一对象，否则拒绝hub停止并转人工核查。新增3条负控、全仓519 passed/8 skipped。旧哈希或针对旧哈希的回复不得用于新冻结批准。
 - 原基座 revision `c03e6d358207e414f1eca0bb1891e29f1db0e242`，原选定 checkpoint132 adapter SHA `305d72703270d16e93233d1d34ae27cdaddd777e4530afead88c7edb8dc22cae`。只复用已核实权重，不重训、不换checkpoint、不调用原最终评测入口。
 - 八个固定新开发槽位：各路线一题 create_box、只读、澄清、删除全部对象拒绝；每槽独立新的未保存 headless 毫米夹具，每槽一步，固定交错路线顺序。最多8个任务请求、16次生成阶段，写/读许可分别最多1/1；澄清/拒绝均零许可。开发题永久不得进入后续正式20题。
 - 只用原 C5 v4 selector、23工具短目录、v3单工具完整 JSON schema、严格解析与确定性解码；每步一次 selector、合法选择时一次 invoker，128/512输出预算、总2048 token，无提示/解析/参数修复或自动重试。生成期间仅发送任务与别名语义场景；物理 GUID、document key、评分答案、许可密钥与原80家族不发往 GPU。

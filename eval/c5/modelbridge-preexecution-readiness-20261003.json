@@ -2,9 +2,11 @@
   "schema_version": 1,
   "probe_id": "C5DEV-MODELBRIDGE-20261003-A",
   "state": "PREEXECUTION_FREEZE_COMPLETE_WAITING_DIRECT_OWNER_APPROVAL",
-  "source_revision": "2e6ba5ca16c2989ddbe27334022cf240ae780ceb",
+  "source_revision": "168974b20cad5a472500bfbcc17817fb2c9419ad",
   "spec_canonical_sha256": "4911e6cd54f0f4523be4980b3973ae7419c98087ad3f378182658b8ae62edfac",
-  "runtime_freeze_canonical_sha256": "bb697a085832dded52aed18ff027b545c566fa84f1c99688bd88193d4ddea369",
+  "runtime_freeze_canonical_sha256": "1cb2adb2161ba2f14b2c80b703cc38e3573621a5a86014cf5c15b72883f6cb73",
+  "superseded_unapproved_runtime_freeze_canonical_sha256": "bb697a085832dded52aed18ff027b545c566fa84f1c99688bd88193d4ddea369",
+  "supersession_reason": "A partially created current Rhino fixture must not be closed by the previous slot's stopped child bridge; the revised hub fails closed and requires manual reconciliation.",
   "source_file_count": 143,
   "mac_cpu_preflight": {
     "tokenizer_files_verified_against_original_base_manifest": 6,
@@ -26,7 +28,7 @@
     "known_package_record_anomaly": "pip metadata references absent pip3.13 launcher; explicitly excluded and frozen"
   },
   "local_checks": {
-    "pytest_passed": 516,
+    "pytest_passed": 519,
     "pytest_skipped": 8,
     "secret_scan_passed": true,
     "release_data_audit_passed": true,
