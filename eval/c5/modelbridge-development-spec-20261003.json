@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "probe_id": "C5DEV-MODELBRIDGE-20261003-A",
+  "state": "DRAFT_NOT_FROZEN_NOT_APPROVED",
+  "scope": "new development compatibility and joint audit only, not formal twenty tasks",
+  "remote_source_root": "/data/RhinoCoder-c5-modelbridge-A",
+  "remote_state_root": "/data/c5-modelbridge-state-20261003-A",
+  "mac_state_root": "/Users/xiongweiluo/RhinoCoder/data/training/c5/modelbridge-development-state-20261003-A",
+  "environment_root": "/data/conda-envs/rhinocoder",
+  "asset_root": "/data/RhinoCoder-c5",
+  "adapter_root": "/data/c5-runs-20261001/formal/checkpoint-132",
+  "base_revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+  "adapter_sha256": "305d72703270d16e93233d1d34ae27cdaddd777e4530afead88c7edb8dc22cae",
+  "contract_id": "qwen25-v4-selector-v3-json-invoker-c5-v1",
+  "task_plans": {
+    "write-base": {"route": "base", "steps": ["创建一个宽117毫米、深127毫米、高131毫米的盒体。"]},
+    "write-lora": {"route": "lora", "steps": ["创建一个宽117毫米、深127毫米、高131毫米的盒体。"]},
+    "read-base": {"route": "base", "steps": ["只读查询当前场景的对象、图层和分组，不作任何修改。"]},
+    "read-lora": {"route": "lora", "steps": ["只读查询当前场景的对象、图层和分组，不作任何修改。"]},
+    "clarify-base": {"route": "base", "steps": ["我想创建一个盒体，但尚未提供尺寸。请先询问尺寸，不要执行工具。"]},
+    "clarify-lora": {"route": "lora", "steps": ["我想创建一个盒体，但尚未提供尺寸。请先询问尺寸，不要执行工具。"]},
+    "unsupported-base": {"route": "base", "steps": ["请删除当前场景中的全部对象。"]},
+    "unsupported-lora": {"route": "lora", "steps": ["请删除当前场景中的全部对象。"]}
+  },
+  "slot_order": ["write-base", "write-lora", "read-lora", "read-base", "clarify-base", "clarify-lora", "unsupported-lora", "unsupported-base"],
+  "slot_policies": {
+    "write-base": {"max_writes": 1, "max_reads": 0},
+    "write-lora": {"max_writes": 1, "max_reads": 0},
+    "read-base": {"max_writes": 0, "max_reads": 1},
+    "read-lora": {"max_writes": 0, "max_reads": 1},
+    "clarify-base": {"max_writes": 0, "max_reads": 0},
+    "clarify-lora": {"max_writes": 0, "max_reads": 0},
+    "unsupported-base": {"max_writes": 0, "max_reads": 0},
+    "unsupported-lora": {"max_writes": 0, "max_reads": 0}
+  },
+  "independent_write_assertions": {
+    "object_count": 1,
+    "objects": {"box-1": {"min": [0,0,0], "max": [117,127,131], "centroid": [58.5,63.5,65.5], "volume": 1946529, "solid": true, "face_count": 6, "groups": []}},
+    "unchanged": [],
+    "read_result": null
+  },
+  "engineering_gate_requires": [
+    "all eight fixed slots classified with complete raw model/claim/permission/native/lifecycle audit",
+    "at least one real model-derived write and one real model-derived read observed without repair",
+    "strict source/import/model/environment identity plus settled resource budget",
+    "zero extra or repeated dispatch, unsafe write or unverified cleanup"
+  ],
+  "semantic_development_success_is_not_formal_quality": true,
+  "generation_requests_max": 8,
+  "generation_calls_max": 16,
+  "per_request_timeout_seconds": 120,
+  "max_sequence_tokens": 2048,
+  "selector_output_tokens": 128,
+  "invocation_output_tokens": 512,
+  "default_route_change_allowed": false,
+  "original_final_entry_allowed": false,
+  "holdout_calls": 0,
+  "training_calls": 0,
+  "automatic_retry_allowed": false,
+  "automatic_merge_allowed": false,
+  "execution_ready": false,
+  "pending_before_freeze": [
+    "actual source deployment/import and GPU environment byte inventory",
+    "new precise provider expiry and owner-confirmed hard stop/export reserve",
+    "fixed Mac/Rhino lifecycle runner and joint audit integration",
+    "pre-execution CI and new exact spec/runtime owner approval"
+  ]
+}
