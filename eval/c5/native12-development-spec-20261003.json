@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "probe_id": "C5DEV-NATIVE12-20261003-A",
+  "status": "FIXED_DEVELOPMENT_PROPOSAL_NOT_EXECUTION_AUTHORIZATION",
+  "scope": "one new independent unsaved headless Millimeters fixture, native engineering controls only",
+  "model_calls": 0,
+  "gpu_calls": 0,
+  "formal_holdout_calls": 0,
+  "formal_quality_claim": false,
+  "signed_write_requests_max": 10,
+  "signed_read_requests_max": 2,
+  "message_requests_max": 40,
+  "fixture_objects_max": 16,
+  "single_attempt_only": true,
+  "automatic_retry_or_replay": false,
+  "model_or_expected_output_repair": false,
+  "active_document_write_allowed": false,
+  "terminal_negative_control": {
+    "after_all_twelve_positive_steps": true,
+    "kind": "one deliberately invalid HMAC execute envelope",
+    "expected_error": "handoff signature rejected",
+    "expected_dispatches": 0,
+    "expected_new_ledger_rows": 0,
+    "must_block_later_execution": true,
+    "only_signed_close_and_stop_follow": true,
+    "stop_had_failure_must_truthfully_be_true": true
+  },
+  "fixed_state_root": "/Users/xiongweiluo/RhinoCoder/data/training/c5/native12-development-state",
+  "steps": [
+    {"name":"create_box","arguments":{"width":17,"depth":19,"height":23}},
+    {"name":"create_sphere","arguments":{"radius":5}},
+    {"name":"create_cylinder","arguments":{"radius":3,"height":7}},
+    {"name":"move_object","arguments":{"object_id":"box-1","translate_x":11,"translate_y":13,"translate_z":17}},
+    {"name":"rotate_object","arguments":{"object_id":"box-1","angle_degrees":90,"axis":[0,0,1],"center_point":[0,0,0]}},
+    {"name":"scale_object","arguments":{"object_id":"box-1","scale_factor":[2,3,4],"center_point":[0,0,0]}},
+    {"name":"set_object_layer","arguments":{"object_id":"box-1","layer_name":"C5DEV::native12"}},
+    {"name":"set_object_color","arguments":{"object_ids":["box-1"],"r":37,"g":83,"b":149}},
+    {"name":"group_objects","arguments":{"object_ids":["box-1","cylinder-3"],"group_name":"native12_group"}},
+    {"name":"get_bounding_box","arguments":{"object_id":"box-1"}},
+    {"name":"get_scene_summary","arguments":{}},
+    {"name":"boolean_difference","arguments":{"input0_ids":["cylinder-3"],"input1_ids":["sphere-2"]}}
+  ],
+  "independent_assertions": {
+    "box_final": {"alias":"box-1","min":[-64,33,68],"max":[-26,84,160],"centroid":[-45,58.5,114],"volume":178296,"solid":true,"face_count":6,"layer":"C5DEV::native12","color":[37,83,149],"groups":["native12_group"]},
+    "difference_final": {"alias":"difference-4","min":[-3,-3,4],"max":[3,3,7],"volume_pi_multiple":22.333333333333332,"solid":true,"face_count":3,"groups":[]},
+    "final_object_count": 2,
+    "final_group_members": {"native12_group":["box-1"]},
+    "absolute_tolerance": 0.000001,
+    "relative_tolerance": 0.000001,
+    "geometry_assertions_not_model_inputs": true
+  },
+  "known_atomic_scope": "Ten mutation requests are not ten primitive object changes: group attributes and Boolean add/delete are multiple native mutations within one durable reservation. Partial or uncertain work stops all later mutations and is independently classified.",
+  "required_before_execution": [
+    "complete batch, Mac client, independent auditor and source/import freeze",
+    "clean regression and CI at the exact source revision",
+    "direct human approval binding this new probe spec and runtime freeze hashes",
+    "fixed-root admission and engine claims, not fresh output folder recovery",
+    "active blank document identity confirmed and no other live research fixture"
+  ]
+}
