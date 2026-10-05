@@ -20,7 +20,8 @@ CONTROL_KEYS = {'version','request_id','task_sha256','owner_freeze_sha256','acti
 
 
 class IdleBridge:
-    def __init__(self, gate, directory, *, key_name, source_sha256, guard_source, clock=time.time, monotonic=time.monotonic):
+    def __init__(self, gate, directory, *, key_name, source_sha256, guard_source, clock=time.time, monotonic=time.monotonic,
+                 max_messages=64):
         import Rhino
         require(Rhino.RhinoApp.IsOnMainThread, 'Idle bridge must start on Rhino UI thread')
         require(isinstance(source_sha256,str) and SHA.fullmatch(source_sha256)
@@ -35,6 +36,8 @@ class IdleBridge:
         self.gate, self.directory, self.key_name = gate, Path(directory), key_name
         self.source_sha, self.guard_source = source_sha256, guard_source
         self.clock, self.monotonic = clock, monotonic
+        require(type(max_messages) is int and max_messages in {64, 128}, 'bounded Idle message policy required')
+        self.max_messages = max_messages
         self.seq, self.pending, self.blocked, self.stopped, self.attached = 1, None, False, False, False
         self.close_attempted, self.control_ids = False, set()
         self._callback = self.tick
@@ -156,7 +159,7 @@ class IdleBridge:
                 if self.settle() is not None: self.seq += 1
                 return
             if not (self.directory/name).exists(): return
-            require(self.seq<=64, 'bounded fixture message count exceeded')
+            require(self.seq<=self.max_messages, 'bounded fixture message count exceeded')
             result = self.handle(read_json(self.directory,name))
             if result is not None:
                 publish_json(self.directory,'response-%04d.json'%self.seq,result)

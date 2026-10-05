@@ -21,13 +21,14 @@ from training.c5_contract import BASE_MODEL_REVISION, CONTRACT_ID, CORE_INVOCATI
 from training.c5_formal20_plan import STUDY_ID, STRATA
 
 
-SOURCE_FOLDERS = ("agent", "training", "tools", "plugin", "data_pipeline")
+SOURCE_FOLDERS = ("agent", "training", "tools", "plugin", "data_pipeline", "eval")
 PUBLIC_FILES = (
     "eval/c5/rhino-formal20-spec-draft.json",
     "eval/c5/rhino-runtime-schema-v1.json",
     "eval/c5/gpu-formal-registry-20261001.json",
     "eval/c5/c5-engineering-config.json",
     "requirements-training.txt", "requirements.txt",
+    "eval/c5/rhino-formal20-runtime-freeze-draft.json",
 )
 
 
@@ -84,6 +85,11 @@ def report() -> dict:
         "gpu_model_calls": 0,
         "real_rhino_calls": 0,
         "actual_mac_rhino_gpu_import_closure_verified": False,
+        "field_adapter_sources_present": all((ROOT / n).is_file() for n in (
+            'tools/run_c5_formal20_worker.py', 'tools/c5_rhino_formal20_batch.py',
+            'tools/c5_formal20_owner_run.py', 'training/c5_formal20_adapters.py',
+            'training/c5_formal20_joint_audit.py')),
+        "new_live_field_probe_run": False,
         "remaining": list(draft["pending_before_execution"]),
     }
 

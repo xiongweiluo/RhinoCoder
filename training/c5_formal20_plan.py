@@ -150,6 +150,8 @@ def validate_families(families: Sequence[Mapping[str, Any]]) -> list[dict[str, A
     if not isinstance(families, (tuple, list)) or len(families) != 20:
         raise FormalPlanError("exactly_twenty_families_required")
     cases = [validate_case(item) for item in families]
+    if len(_canonical(cases)) > 512 * 1024:
+        raise FormalPlanError('private_family_package_exceeds_channel_budget')
     if Counter(case["stratum"] for case in cases) != STRATA:
         raise FormalPlanError("formal_strata_mismatch")
     core = [case["primary_tool"] for case in cases if case["stratum"] == "core_tool"]

@@ -75,7 +75,7 @@ def step_input(task, scene):
     return rendered
 
 
-def invoke_step(tokenizer, generate, user_step, *, scene_binding=None):
+def invoke_step(tokenizer, generate, user_step, *, scene_binding=None, privacy_guard=None):
     """Exactly one selector and, only if legal, one invocation generation.
 
     Returns the raw outputs for private research evidence. Does not grant
@@ -93,7 +93,8 @@ def invoke_step(tokenizer, generate, user_step, *, scene_binding=None):
     result = {"contract_id": CONTRACT_ID, "status": "not_started", "calls": [],
               "user_step_sha256":hashlib.sha256(user_step.encode()).hexdigest(), "scene_binding":scene_binding,
               "name": None, "arguments": None, "repair_count": 0, "dispatch_count": 0}
-    if classify_request(user_step).action is not PrivacyAction.ALLOW_CLOUD:
+    if (classify_request(user_step).action is not PrivacyAction.ALLOW_CLOUD
+            if privacy_guard is None else not privacy_guard(user_step)):
         return {**result, "status": "privacy_refused_no_generation"}
     tools = load_public_mcp_tools()
     selected = None

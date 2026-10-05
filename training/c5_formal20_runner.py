@@ -187,6 +187,13 @@ class FormalRunner:
                         # permission before signing, and use native actual scene.
                         receipt = self.native.execute_observation(slot_id=slot_id, task_text=task,
                             response=response, before=before)
+                        if receipt.get('status') == 'known_prepermission_rejection_no_dispatch':
+                            require(receipt.get('permission_reserved') is False and receipt.get('native_dispatches') == 0,
+                                'known rejection must precede all permission/dispatch')
+                            step['execution_rejection'] = receipt
+                            record['steps'].append(step)
+                            publish_json(self.state, slot_id + '-step-%d.record.json' % step_index, step)
+                            break  # Score a task failure; never retry its call.
                         require(isinstance(receipt, Mapping) and receipt.get("status") == "done"
                                 and receipt.get("payload", {}).get("operation") == name
                                 and receipt["payload"].get("arguments") == observed.get("arguments"),
@@ -259,8 +266,8 @@ class FormalRunner:
             # Only narrow execution plans cross adapter boundaries. Scorer
             # operations/assertions never reach either model or Rhino setup.
             self.model.prepare(model_plans, freeze_sha256=freeze_sha)
+            native_started = True  # Partial key preparation also needs cleanup/reconciliation.
             self.native.prepare({"slot_order": order, "plans": native_plans}, freeze_sha256=freeze_sha)
-            native_started = True  # A partial attach needs explicit finish proof.
             self.native.start()
             model_started = True  # Partial startup still requires bounded stop.
             self.model.start()

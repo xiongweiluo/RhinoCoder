@@ -69,7 +69,12 @@ def validate_request(value):
     require(isinstance(value['task'],str) and len(value['task'].encode()) <= 4096,'bounded task required')
     outbound = step_input(value['task'],value['scene'])  # Physical IDs/scoring fields rejected.
     from agent.privacy import classify_request,PrivacyAction
-    require(classify_request(outbound).action is PrivacyAction.ALLOW_CLOUD,'privacy refused before remote transmission')
+    if value['probe_id'] == 'c5-rhino-paired-20-v1':
+        from training.c5_formal20_privacy import allowed
+        privacy_allowed = allowed(value['task'], value['scene'])
+    else:
+        privacy_allowed = classify_request(outbound).action is PrivacyAction.ALLOW_CLOUD
+    require(privacy_allowed,'privacy refused before remote transmission')
     # Extra fail-closed restriction of this DEVELOPMENT wire only. Never
     # relax/change the default product privacy classifier or redact-and-send.
     require(not re.search(r'身份证|护照|密码|API[_ -]?KEY|(?<!\d)\d{17}[\dXx](?!\d)',outbound,re.I),
@@ -186,7 +191,12 @@ class OneShotModelSession:
                 raise
             return raw
         with self.route_context(sent['route']):
-            observed = invoke_step(self.tokenizer,generate,step_input(sent['task'],sent['scene']))
+            privacy_guard = None
+            if self.probe_id == 'c5-rhino-paired-20-v1':
+                from training.c5_formal20_privacy import allowed
+                privacy_guard = lambda rendered: (rendered == step_input(sent['task'], sent['scene'])
+                    and allowed(sent['task'], sent['scene']))
+            observed = invoke_step(self.tokenizer,generate,step_input(sent['task'],sent['scene']), privacy_guard=privacy_guard)
         value = {'protocol':PROTOCOL,'request_sha256':digest(sent),'runtime_freeze_sha256':self.freeze,
                  'model_identity_sha256':self.identities[sent['route']],'observation':observed,
                  'generation_receipts':receipts,'seconds':time.monotonic()-started,
