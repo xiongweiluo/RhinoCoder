@@ -21,6 +21,7 @@ from training.c5_formal20_plan import (
 )
 from training.c5_modelbridge_joint_audit import semantic
 from training.c5_rhino_adapter import step_input
+from training.c5_formal20_public_progress import publish_progress
 
 
 class FormalModel(Protocol):
@@ -245,8 +246,20 @@ class FormalRunner:
                   "slots_attempted": 0, "route_slots_required": 40,
                   "error_type": None, "c5_6_gate_claim": False}
         self._generation_stages = 0
+        progress_start=time.monotonic()
+        progress_sequence=slots_finished=0
+        def progress(phase, *, complete=True):
+            nonlocal progress_sequence
+            publish_progress(self.state,phase=phase,sequence=progress_sequence,
+                slots_attempted=result['slots_attempted'],slots_finished=slots_finished,
+                confirmed_generation_stages=self._generation_stages,counters_complete=complete,
+                elapsed_seconds=time.monotonic()-progress_start,runtime_freeze_sha256=freeze_sha,
+                public_commitment_sha256=self.spec['public_commitment_sha256'])
+            progress_sequence+=1
         model_started = native_started = False
         try:
+            progress('started_before_private_loader')
+            progress('owner_private_loader_started')
             cases = validate_families(load_cases_after_claim())
             require(family_merkle_root(cases) == self.spec["family_merkle_root_sha256"],
                     "private family commitment differs")
@@ -255,6 +268,7 @@ class FormalRunner:
                     "frozen paired slot schedule differs")
             by_id = {case["family_id"]: case for case in cases}
             self._guard()
+            progress('preparing_adapters')
             model_plans = {slot["slot_id"]: {"route": slot["route"],
                 "steps": [model_view(by_id[slot["family_id"]])] * by_id[slot["family_id"]]["max_steps"]}
                 for slot in order}
@@ -276,6 +290,8 @@ class FormalRunner:
                 self._guard()
                 record = self._slot(slot, by_id[slot["family_id"]], freeze_sha, first_prompts)
                 result["slots_attempted"] += 1
+                if record['close']=='closed' and record['stop']=='stopped':slots_finished+=1
+                progress('route_slot_finished',complete=record['error_type'] is None)
                 if record["error_type"] or record["close"] != "closed" or record["stop"] != "stopped":
                     raise FormalRunError("slot uncertain/incomplete; no next slot or replay")
             require(result["slots_attempted"] == 40, "forty route slots incomplete")
@@ -297,4 +313,7 @@ class FormalRunner:
                     result["error_type"] = result["error_type"] or type(exc).__name__
                     result["status"] = "formal_incomplete_no_replay"
             publish_json(self.state, "formal20.run-result.json", result)
+            progress('execution_complete_awaiting_owner_audit' if result['status']==
+                'formal_execution_complete_awaiting_independent_audit' else 'stopped_incomplete_no_replay',
+                complete=result['error_type'] is None)
         return result

@@ -105,7 +105,7 @@ def audit():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=('preflight', 'run', 'audit'))
+    parser.add_argument('mode', choices=('preflight', 'progress', 'run', 'audit'))
     parser.add_argument('--sealed-package', type=Path)
     parser.add_argument('--identity-file', type=Path)
     args = parser.parse_args()
@@ -113,6 +113,10 @@ def main():
         if args.mode == 'preflight':
             require(args.sealed_package is None and args.identity_file is None, 'public preflight accepts no private inputs')
             value = preparation_report()
+        elif args.mode == 'progress':
+            require(args.sealed_package is None and args.identity_file is None, 'progress accepts no private inputs')
+            from training.c5_formal20_public_progress import read_public_progress
+            value=read_public_progress(MAC_STATE)
         elif args.mode == 'run':
             require(args.sealed_package is not None and args.identity_file is not None, 'owner terminal sealed inputs required')
             value = run(args.sealed_package, args.identity_file)

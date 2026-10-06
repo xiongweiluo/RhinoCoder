@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "probe_id": "C5OBS-HOSTPROV-20261006-A",
+  "purpose": "existing_host_capability_only_not_clean_baseline",
+  "state": "PREPARED_WAITING_NEW_EXACT_OWNER_APPROVAL",
+  "observer_prepared": true,
+  "source_root": "/Users/xiongweiluo/RhinoCoder/data/training/c5/host-observer-source-20261006-A",
+  "state_root": "/Users/xiongweiluo/RhinoCoder/data/training/c5/host-observer-state-20261006-A",
+  "expected_rhino_version": "8.21.25188.17002",
+  "expected_embedded_python_major_minor": [
+    3,
+    9
+  ],
+  "max_seconds": 180,
+  "time_cap_kind": "checked_between_actions_not_preemptive_CLR_timeout",
+  "max_subscriptions": 1,
+  "max_canary_assemblies": 2,
+  "max_empty_types": 1,
+  "canary_names": {
+    "subscribed": "C5OBS_20261006_A_SUBSCRIBED",
+    "detached": "C5OBS_20261006_A_DETACHED"
+  },
+  "canary_access": "Run_noncollectible_until_host_exit",
+  "code_read_roots": [
+    "/Applications/Rhino 8.app",
+    "/System/Library",
+    "/usr/lib",
+    "/Users/xiongweiluo/.rhinocode/py39-rh8",
+    "/Users/xiongweiluo/Library/Application Support/McNeel/Rhinoceros/packages/8.0",
+    "/Users/xiongweiluo/.codex/worktrees/c5-engineering-gate/RhinoCoder",
+    "/Users/xiongweiluo/.codex/worktrees/r-controlled-access-review/RhinoCoder",
+    "/Users/xiongweiluo/RhinoCoder/data/training/c5/host-observer-source-20261006-A"
+  ],
+  "code_read_exact_files": [
+    "/Applications/Rhino 8.app/Contents/MacOS/Rhinoceros"
+  ],
+  "model_allowed": false,
+  "tool_dispatch_allowed": false,
+  "fixture_allowed": false,
+  "holdout_allowed": false,
+  "default_route_change_allowed": false,
+  "legacy_guard_relaxation_allowed": false,
+  "automatic_retry_allowed": false,
+  "model_gpu_seconds": 0,
+  "formal_route_slots_consumed": 0,
+  "expected_actions": [
+    "attach one AssemblyLoad delegate",
+    "snapshot baseline",
+    "create one empty non-collectible subscribed canary assembly",
+    "snapshot empty canary",
+    "create one empty public type without invoking it",
+    "snapshot changed visible type surface",
+    "remove exact delegate",
+    "create second empty non-collectible detached sentinel",
+    "snapshot and test callback silence",
+    "seal raw journal and emit hash-only public receipt"
+  ],
+  "limits": [
+    "Existing interactive host not accepted as clean research baseline.",
+    "AssemblyLoad coverage is measured with one controlled canary, not proven complete.",
+    "Reflection fingerprints do not prove emitted bytes, DynamicMethods or causal generator origin.",
+    "Two empty canary assemblies remain until natural host exit; no forced restart, unload or deletion.",
+    "Fail/unknown receipt never replays this ID. Failed delegate removal requires separate explicit reconciliation approval.",
+    "No change to current formal/runtime byte-origin admission policy."
+  ]
+}

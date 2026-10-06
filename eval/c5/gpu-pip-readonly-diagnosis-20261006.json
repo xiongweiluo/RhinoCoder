@@ -1,0 +1,18 @@
+{
+  "status": "read_only_packaging_metadata_diagnosis_not_execution_authority",
+  "ssh_port": 22159,
+  "python": "3.11.16",
+  "pip_version": "26.2.1",
+  "pip_record_script_existence": {"../../../bin/pip": true, "../../../bin/pip3": true, "../../../bin/pip3.13": false},
+  "environment_python_exists": true,
+  "existing_b_loader_import_preflight_passed": true,
+  "existing_b_loader_preflight_environment_sha256": "536eac7d25305a89ca3d3ad06fa23eb0eca1e3ac8df889cc84dfb7fa7f2b9fca",
+  "classification": "dangling_RECORD_console_script_reference_distinct_from_loader_import_failure",
+  "historical_installation_root_cause_proven": false,
+  "environment_modified": false,
+  "pip_install_or_upgrade_called": false,
+  "model_loaded": false,
+  "cuda_initialized_by_check": false,
+  "holdout_rows_read": 0,
+  "future_freeze_note": "Retain the actual missing entry and freeze installed runtime bytes/import proof; any explicit exception or environment repair must be visible in the new approved scope, never silently ignore or inherit B approval."
+}
