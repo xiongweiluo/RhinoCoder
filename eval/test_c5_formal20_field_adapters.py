@@ -201,6 +201,10 @@ def setup_field(tmp_path,monkeypatch):
     wire=SyntheticWire(remote,spec,freeze,policy)
     sock=SimpleNamespace(is_socket=lambda:True,close=lambda:None)
     monkeypatch.setattr(adapters,'SSH_SOCKET',sock)
+    pin = tmp_path / 'synthetic-known-hosts'
+    pin.write_text('synthetic public host pin\n')
+    monkeypatch.setattr(adapters,'SSH_KNOWN_HOSTS',pin)
+    monkeypatch.setattr(adapters,'SSH_KNOWN_HOSTS_SHA',adapters.file_sha(pin))
     fakeprocess=SimpleNamespace(stdin=io.BytesIO(),stdout=io.BytesIO(),wait=lambda **_:0)
     model=adapters.ModelAdapter(state,spec,freeze,guard=lambda:None,
         process_factory=lambda *args,**kwargs:fakeprocess,pipe_factory=lambda *args,**kwargs:wire)

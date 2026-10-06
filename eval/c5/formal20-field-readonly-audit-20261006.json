@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "recorded_date": "2026-10-06",
+  "status": "PUBLIC_COMMITMENT_REGISTERED_ACTUAL_RHINO_CLOSURE_BLOCKED_NOT_EXECUTION_AUTHORITY",
+  "execution_ready": false,
+  "actual_mac_rhino_gpu_import_closure_verified": false,
+  "new_live_synthetic_field_probe_run": false,
+  "formal_model_calls": 0,
+  "formal_route_slots_consumed": 0,
+  "private_formal_rows_read_by_agent": 0,
+  "original80_rows_read_by_agent": 0,
+  "fixtures_created": 0,
+  "tool_dispatches": 0,
+  "idle_hooks_attached": 0,
+  "readonly_rhino_diagnostic_invocations": 3,
+  "public_commitment": {
+    "file": "eval/c5/rhino-formal20-public-commitment-v1.json",
+    "file_sha256": "726ad282775568bd63472ea8fa164ab489996c8fd0cd47126585e1cf7eb40745",
+    "canonical_sha256": "41c92c723df663782000a4e34934a371a2a552e5ef27d6052b7c6d07656ebaf4",
+    "metadata_validator_passed": true,
+    "family_count": 20,
+    "route_slots": 40,
+    "custodian_manual_review_reported_complete": true,
+    "custodian_roundtrip_reported_byte_identical": true,
+    "private_case_roots_or_cipher_correspondence_recomputed_by_agent": false,
+    "additional_exclusion_file_sha256": "f8343ca0d2c65ed790aa032ca5d02d7141e8ccef321751c7b32674ae13445d46"
+  },
+  "ssh": {
+    "host": "175.155.64.171",
+    "port": 22159,
+    "ed25519_fingerprint": "SHA256:PW+vIRRrOBl66FAaU0iN6WmbLuYt/wPhZxwMZpObjFI",
+    "owner_previously_verified_same_host_identity": true,
+    "pin_file_sha256": "ae41a99e39f76b1be352f0098439b126fe5b8465c358b8dabbb7a71e53d2d1a9",
+    "global_known_hosts_changed": false,
+    "authenticated_master_verified": true
+  },
+  "remote_readonly": {
+    "source_root_observed": "/data/RhinoCoder-c5-modelbridge-B",
+    "source_is_retired_b_not_new_formal_deployment": true,
+    "source_file_count": 144,
+    "snapshot": {
+      "files": 14,
+      "manifest_sha256": "5b9ad4c8257ed072cfdee022e4b92303ffc849f53014dbf76d0986b3d1428cdd",
+      "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242"
+    },
+    "adapter_sha256": "305d72703270d16e93233d1d34ae27cdaddd777e4530afead88c7edb8dc22cae",
+    "adapter_files": {
+      "adapter_config.json": "8a776a47b085b787b7c7f3c9b068aed8c0f018278de2b94bf66130f5542d6d4f",
+      "adapter_model.safetensors": "da8acdcde2671aa397534b35369fe4a84b9d150f80f7b7026a4366a770be2883"
+    },
+    "environment_sha256": "536eac7d25305a89ca3d3ad06fa23eb0eca1e3ac8df889cc84dfb7fa7f2b9fca",
+    "environment_inventory_sha256": "63949937efff447472e2ff07856588cfd965248e5402ff0229c8a0776dfdeb41",
+    "distribution_file_count": 21614,
+    "missing_metadata_files": [
+      "pip:../../../bin/pip3.13"
+    ],
+    "gpu_observation": "NVIDIA GeForce RTX 3090, 24576 MiB, 11 MiB, 0 %, 550.107.02",
+    "model_loaded": false,
+    "gpu_generation_calls": 0,
+    "holdout_rows_read": 0,
+    "formal20_remote_state_present": false,
+    "retired_a_elapsed_seconds": 17.613689741992857,
+    "retired_b_elapsed_seconds": 322.4134741070011,
+    "retired_a_plus_b_elapsed_seconds": 340.027163848994,
+    "old_probes_replayed": false,
+    "loader_import_preflight": {
+      "cuda_initialized": false,
+      "environment_sha256": "536eac7d25305a89ca3d3ad06fa23eb0eca1e3ac8df889cc84dfb7fa7f2b9fca",
+      "generation_calls": 0,
+      "holdout_rows_read": 0,
+      "model_loaded": false,
+      "source_inventory_sha256": "d8a9d0dec615343839fc9cfcad5233313300b7d539fec6232cde286de54dcc8f",
+      "status": "read_only_loader_import_closure_verified_not_execution_authority",
+      "torch_version": "2.10.0+cu126"
+    }
+  },
+  "rhino_readonly": {
+    "rhino_version": "8.21.25188.17002",
+    "python_major_minor": [
+      3,
+      9
+    ],
+    "source_inventory_sha256": "ecc69a325c9f4a8c7172da4cff7887efa428bc5512e68b196a4aaa0a15962aff",
+    "active_before_sha256": "de8fa7924ad4cf7fbeffdbe982f0b559a77eca7a8cf1f24175df642404ec6cfa",
+    "active_after_sha256": "de8fa7924ad4cf7fbeffdbe982f0b559a77eca7a8cf1f24175df642404ec6cfa",
+    "active_serial": 268435457,
+    "active_object_count": 0,
+    "live_research_namespaces": [],
+    "unverifiable_origins": [
+      {
+        "kind": "nonabsolute_python_origin",
+        "module": "CLR",
+        "origin": "unknown"
+      },
+      {
+        "kind": "nonabsolute_python_origin",
+        "module": "clr",
+        "origin": "unknown"
+      },
+      {
+        "assembly": "Anonymously Hosted DynamicMethods Assembly, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+        "dynamic": true,
+        "kind": "nonfile_clr_assembly"
+      },
+      {
+        "assembly": "__Python_Runtime_Generated_Assembly0, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+        "dynamic": true,
+        "kind": "nonfile_clr_assembly"
+      },
+      {
+        "assembly": "Snippets, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+        "dynamic": true,
+        "kind": "nonfile_clr_assembly"
+      },
+      {
+        "assembly": "Snippets.scripting, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+        "dynamic": true,
+        "kind": "nonfile_clr_assembly"
+      }
+    ],
+    "file_backed_partial_count": 339
+  },
+  "diagnostic_report_file_sha256": {
+    "first": "08fe05d13e197631e0027a5c4bcbcf603f7ef518e9797adbdfe94490231e9954",
+    "origin_v2": "d235f1356c176f5aea854784b9d426e4c9eb62a3c042c2e86c4b09cec0e39053",
+    "partial_inventory_v3": "94210ee8c7e3cb165af24ecfd06b06d9e97fe8207643b31d12760c98d2a3b661"
+  },
+  "resource_boundary": "eval/c5/rhino-resource-boundary-v5-20261006.json",
+  "notes": [
+    "Three read-only diagnostics, not failed or consumed experiments. No started claim, model loading or headless fixture was authorized or performed.",
+    "339 file-backed Python/CLR/host files have partial hash evidence, not a complete byte-frozen runtime. CLR/clr unknown and four dynamic assemblies remain blockers; current strict admission rule is unchanged.",
+    "The empty strict environment inventory digest in raw diagnostics is NOT proof; partial inventory cannot set any closure or live-probe passed flag.",
+    "Remote pip metadata references a missing bin/pip3.13 entry. Investigate distribution consistency before a new execution freeze.",
+    "Renewed deadline and passed public metadata validation do not replace exact new development/formal approval; no new runtime/spec execution hashes exist.",
+    "Original 80 permanently consumed, C4 NO-GO, v8 formal_quality_fail/59 of60, default hybrid routing and old A/B decisions remain unchanged."
+  ],
+  "mac_readonly": {
+    "status": "mac_modelbridge_cpu_preflight_not_execution_authority",
+    "mac_environment_file_count": 3551,
+    "mac_environment_sha256": "69c346719ec7ffd8264ec22fdcfb1ca13ae4156b1600e51a8c0afc77a487bf20",
+    "max_input_plus_output_reserve_tokens": 1757,
+    "model_calls": 0,
+    "gpu_calls": 0,
+    "holdout_calls": 0,
+    "rendered_task_scope": "old B public development tasks hypothetical CPU only, not a new live probe or formal20 proof"
+  },
+  "design_authorization": {
+    "actor": "repository_owner",
+    "direct_reply": "同意设计新溯源方案，现行门禁保持封锁",
+    "scope": "design_and_synthetic_validation_only",
+    "runtime_admission_policy_changed": false,
+    "model_or_fixture_or_formal_execution_authorized": false,
+    "design_file": "docs/c5-host-provenance-design.md",
+    "synthetic_design_tests": 21
+  }
+}

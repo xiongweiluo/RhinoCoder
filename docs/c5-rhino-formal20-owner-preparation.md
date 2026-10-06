@@ -1,5 +1,7 @@
 # C5-6 正式 20 题：保管人侧准备规范（不含题目）
 
+> **2026-10-06最新状态（优先于下方历史准备记录）：**新20题[公开承诺已登记并通过元数据核验](c5-formal20-public-registration-and-field-blockers.md)，所有者私下自动排除/人工审核及age回读声明已收到；代理未读正文、密文或密钥。实际Rhino的CLR/clr未知来源及四个动态非文件程序集阻塞现行字节冻结；新的[宿主溯源方案](c5-host-provenance-design.md)仅获设计/合成验证授权，不放宽现行门禁。正式消费/模型调用0、`execution_ready=false`。新租期为2026-10-07 19:00 Europe/Zurich到期、18:45停止生成、至少900秒导出，见[v5记录](../eval/c5/rhino-resource-boundary-v5-20261006.json)；GPU-hours与精确批准要求不变。
+
 2026-10-05。此页只定义**私有候选包格式与预检方法**；仓库里没有新 20 题正文或答案。仓库所有者本人是唯一 `reviewer_1` 和独立保管人；不要把候选 JSONL、原 80 明文、答案、密钥、实际私有路径或替换了占位符的命令发送给代理、放进仓库/PR，或放到 GPU 开发目录。本页和[公开 draft](../eval/c5/rhino-formal20-spec-draft.json)均为 `execution_ready=false`，不能启动正式运行。
 
 ## 一份家族对应一行私有 JSONL
@@ -65,7 +67,7 @@ python tools/c5_formal20_owner_commitment.py \
 
 输出使用不可覆盖创建；成功时终端只给出无正文的承诺 SHA 与计数。只把**生成的公开承诺 JSON**交回，且交回前自行确认其中没有正文、答案、私有路径或密钥；不要把候选/密文/声明/原80发给代理。公开承诺只包含密文 SHA/字节数/格式、20 家族 Merkle root、分层/工具覆盖、反平衡顺序哈希、排除输入身份哈希、零重合声明和签署时间，仍固定 `execution_ready=false`。它经开发侧只读验证、真实适配器和独立原始证据审计准备完成、完整 spec/runtime 两个**新**哈希冻结并获你单独精确批准后，才可能登记一次性 `started` 并解密执行。B 的批准和八槽结果均不能替代该门。[整体边界](c5-rhino-formal20-handoff.md)继续适用。
 
-开发侧收到**仅此公开 JSON**后，可运行以下只读预检；本轮因为尚未收到承诺，没有对真实公开承诺运行：
+开发侧2026-10-06已收到**仅此公开 JSON**并通过下列只读元数据校验，规范化SHA为`41c92c72…56ebaf4`。本命令仍可校验公开登记，不需重跑保管人私有预检或重新解密：
 
 ```bash
 python tools/c5_formal20_public_preflight.py \

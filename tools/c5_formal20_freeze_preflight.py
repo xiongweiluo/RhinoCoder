@@ -29,6 +29,8 @@ PUBLIC_FILES = (
     "eval/c5/c5-engineering-config.json",
     "requirements-training.txt", "requirements.txt",
     "eval/c5/rhino-formal20-runtime-freeze-draft.json",
+    "eval/c5/rhino-formal20-public-commitment-v1.json",
+    "eval/c5/rhino-resource-boundary-v5-20261006.json",
 )
 
 
@@ -64,6 +66,12 @@ def report() -> dict:
     source = {path.relative_to(ROOT).as_posix(): _sha(path)
               for folder in SOURCE_FOLDERS for path in sorted((ROOT / folder).rglob("*.py"))}
     public = {name: _sha(ROOT / name) for name in PUBLIC_FILES}
+    from tools.c5_formal20_public_preflight import preflight, _strict_public
+    commitment = preflight(ROOT / 'eval/c5/rhino-formal20-public-commitment-v1.json')
+    value = _strict_public(ROOT / 'eval/c5/rhino-formal20-public-commitment-v1.json')
+    if (commitment['public_commitment_sha256'] != draft.get('public_commitment_sha256')
+            or any(value[k] != draft.get(k) for k in ('family_merkle_root_sha256', 'slot_order_sha256', 'slot_seed'))):
+        raise ValueError('registered public commitment/draft differs')
     if not source or len(public) != len(PUBLIC_FILES):
         raise ValueError("public/source inventory incomplete")
     return {
@@ -79,6 +87,9 @@ def report() -> dict:
         "adapter_sha256": registry["adapter_sha256"],
         "execution_ready": False,
         "owner_approval_received": False,
+        "registered_public_commitment_metadata_validated": True,
+        "public_commitment_sha256": commitment['public_commitment_sha256'],
+        "owner_private_attestations_not_agent_plaintext_verification": True,
         "private_task_files_opened": 0,
         "original80_rows_read": 0,
         "formal_route_slots_consumed": 0,

@@ -1,5 +1,7 @@
 # C5：契约对齐后的第二轮 QLoRA 规划与预注册草案
 
+> **2026-10-06最新状态（优先于下方历史准备记录）：**新20题[公开承诺已登记并通过元数据核验](c5-formal20-public-registration-and-field-blockers.md)，所有者私下自动排除/人工审核及age回读声明已收到；代理未读正文、密文或密钥。实际Rhino的CLR/clr未知来源及四个动态非文件程序集阻塞现行字节冻结；新的[宿主溯源方案](c5-host-provenance-design.md)仅获设计/合成验证授权，不放宽现行门禁。正式消费/模型调用0、`execution_ready=false`。新租期为2026-10-07 19:00 Europe/Zurich到期、18:45停止生成、至少900秒导出，见[v5记录](../eval/c5/rhino-resource-boundary-v5-20261006.json)；GPU-hours与精确批准要求不变。
+
 > **2026-10-02当前状态：**C5-0至C5-5已完整通过。原80家族单次run完成，LoRA sequence77/80、base20/80，原离线/严格控制器门通过；五份公开文件回收及哈希化逐家族结果独立复算见[最终报告](c5-final-evaluation-report.md)。这80家族已消费，不再允许owner入口重跑。当前主线是R最小研究安全收尾→C5-6新20题预注册/真实配对→C5-7；不缩小已冻结工具范围、不更改门槛、不提前宣告整体GO或默认接入。以下较早状态为历史设计/执行记录。
 
 > **同日后续准备：**[R草稿PR #7](https://github.com/xiongweiluo/RhinoCoder/pull/7)已提供真实无模型/无写入生命周期收据、原始活动内容哈希、125文件来源绑定与独立审计；固定两写研究安全probe仍待所有者明确授权，不将该子门追认为完整安全收尾。[C5-6准备稿](c5-rhino-paired-study-preregistration.md)明确12工具适配/评分、20题排除承诺与完整执行/预算冻结缺口；正式20题未生成/消费。[新端口资产只读复核v2](../eval/c5/remote-assets-readonly-v2-20261002.json)确认原模型与源码未漂移，不构成新作业授权。

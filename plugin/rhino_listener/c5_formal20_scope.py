@@ -12,7 +12,10 @@ MAC_STATE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-state-
 REMOTE_STATE = Path('/data/c5-rhino-formal20-state-v1')
 REMOTE_SOURCE = Path('/data/RhinoCoder-c5-formal20-v1')
 REMOTE_ENV = Path('/data/conda-envs/rhinocoder')
-SSH_SOCKET = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/ssh-24206.control')
+SSH_SOCKET = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/ssh-22159.control')
+SSH_PORT = 22159
+SSH_KNOWN_HOSTS = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/known-hosts-22159')
+SSH_KNOWN_HOSTS_SHA = 'ae41a99e39f76b1be352f0098439b126fe5b8465c358b8dabbb7a71e53d2d1a9'
 SPEC_FILE = 'eval/c5/rhino-formal20-spec-v1.json'
 FREEZE_FILE = 'eval/c5/rhino-formal20-runtime-freeze-v1.json'
 BASE_REVISION = 'c03e6d358207e414f1eca0bb1891e29f1db0e242'
@@ -57,7 +60,8 @@ def authority(spec, freeze, approval, *, clock=time.time, check_time=True):
         require(isinstance(spec.get(key), str) and SHA.fullmatch(spec[key]), 'formal public binding missing')
     fixed = {'mac_state_root': str(MAC_STATE), 'remote_state_root': str(REMOTE_STATE),
         'remote_source_root': str(REMOTE_SOURCE), 'remote_environment_root': str(REMOTE_ENV),
-        'ssh_socket': str(SSH_SOCKET), 'ssh_host': '175.155.64.171', 'ssh_port': 24206, 'ssh_user': 'linux'}
+        'ssh_socket': str(SSH_SOCKET), 'ssh_host': '175.155.64.171', 'ssh_port': SSH_PORT, 'ssh_user': 'linux',
+        'ssh_known_hosts_file': str(SSH_KNOWN_HOSTS), 'ssh_known_hosts_file_sha256': SSH_KNOWN_HOSTS_SHA}
     require(all(spec.get(k) == v for k, v in fixed.items()), 'formal fixed deployment differs')
     require(type(spec.get('per_request_timeout_seconds')) is int
         and 1 <= spec['per_request_timeout_seconds'] <= 180

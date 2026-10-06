@@ -1,5 +1,7 @@
 # C5-6：真实 Rhino 20 题配对门——执行预注册准备稿
 
+> **2026-10-06最新状态（优先于下方历史准备记录）：**新20题[公开承诺已登记并通过元数据核验](c5-formal20-public-registration-and-field-blockers.md)，所有者私下自动排除/人工审核及age回读声明已收到；代理未读正文、密文或密钥。实际Rhino的CLR/clr未知来源及四个动态非文件程序集阻塞现行字节冻结；新的[宿主溯源方案](c5-host-provenance-design.md)仅获设计/合成验证授权，不放宽现行门禁。正式消费/模型调用0、`execution_ready=false`。新租期为2026-10-07 19:00 Europe/Zurich到期、18:45停止生成、至少900秒导出，见[v5记录](../eval/c5/rhino-resource-boundary-v5-20261006.json)；GPU-hours与精确批准要求不变。
+
 2026-10-02。**状态：准备稿、尚未冻结、未生成/消费正式20题，禁止据此启动执行。**
 
 > **2026-10-05 后续状态（优先于下方历史资源/代码缺项）：**[正式现场适配器与独立联合审计](c5-rhino-formal20-engineering-readiness.md)已经实现，仅用CPU合成开发题验证40槽签名/账本/多步/清理及篡改拒绝；未运行新的实际Rhino/GPU探针。实际环境/import闭包、新合成现场探针批准及正式20题承诺/冻结/精确批准仍缺，`execution_ready=false`。新的隔离公开场景标签隐私检查不改模型提示/schema或默认产品隐私，但须进入新冻结与开发验证。所有者精确确认续租至**2026-10-06 22:00 Europe/Zurich（20:00 UTC）**，21:45停止生成/至少900秒导出；[v4记录](../eval/c5/rhino-resource-boundary-v4-20261005.json)只更新截止，不扩大GPU-hours预算或授予执行权限。

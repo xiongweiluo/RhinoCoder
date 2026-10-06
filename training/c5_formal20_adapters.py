@@ -13,7 +13,10 @@ import subprocess
 import time
 from pathlib import Path
 
-from plugin.rhino_listener.c5_formal20_scope import STUDY_ID, REMOTE_SOURCE, REMOTE_ENV, SSH_SOCKET, native_plans
+from plugin.rhino_listener.c5_formal20_scope import (
+    STUDY_ID, REMOTE_SOURCE, REMOTE_ENV, SSH_SOCKET, SSH_PORT, SSH_KNOWN_HOSTS,
+    SSH_KNOWN_HOSTS_SHA, native_plans,
+)
 from plugin.rhino_listener.c5_research_channel import publish_json, read_json, remove_private_key
 from plugin.rhino_listener.c5_research_gate import signature
 from plugin.rhino_listener.c5_research_native import digest, require
@@ -222,9 +225,12 @@ class ModelAdapter:
     def start(self):
         self.guard()
         require(SSH_SOCKET.is_socket(), 'existing authenticated formal SSH socket required')
+        require(SSH_KNOWN_HOSTS.is_file() and SSH_KNOWN_HOSTS.resolve() == SSH_KNOWN_HOSTS
+            and file_sha(SSH_KNOWN_HOSTS) == SSH_KNOWN_HOSTS_SHA, 'formal pinned SSH host identity differs')
         self.stderr_fd = os.open(self.state / 'worker-stderr.txt', os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         args = ['ssh', '-T', '-S', str(SSH_SOCKET), '-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=yes',
-            '-o', 'HostKeyAlgorithms=ssh-ed25519', '-p', '24206', 'linux@175.155.64.171',
+            '-o', 'UserKnownHostsFile=' + str(SSH_KNOWN_HOSTS), '-o', 'HostKeyAlgorithms=ssh-ed25519',
+            '-p', str(SSH_PORT), 'linux@175.155.64.171',
             'cd ' + str(REMOTE_SOURCE) + ' && ' + str(REMOTE_ENV / 'bin/python') + ' -B -m tools.run_c5_formal20_worker serve']
         self.process = self.process_factory(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=self.stderr_fd)
         self.pipe = self.pipe_factory(self.process, timeout=self.spec['per_request_timeout_seconds'])
