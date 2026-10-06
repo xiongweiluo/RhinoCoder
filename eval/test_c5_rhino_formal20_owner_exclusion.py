@@ -71,6 +71,16 @@ class Formal20OwnerExclusionTests(unittest.TestCase):
             audit_candidates(self.candidates, self.development, self.original80, self.extra,
                              original_root="0" * 64, historical_numeric_hashes=set())
 
+    def test_later_user_step_overlap_fails(self):
+        self.original80[0]['records'].append({'user_step': self.candidates[0]['task_text']})
+        with self.assertRaisesRegex(ExclusionPreflightError, 'numeric_template_overlap'):
+            self.audit()
+
+    def test_historical_template_family_overlap_fails(self):
+        self.extra[0]['template_family'] = self.candidates[0]['template_family']
+        with self.assertRaisesRegex(ExclusionPreflightError, 'candidate_template_family_overlap'):
+            self.audit()
+
     def test_missing_extra_exclusions_fail_closed(self):
         self.extra = []
         with self.assertRaisesRegex(ExclusionPreflightError, "incomplete_exclusion_population"):

@@ -100,6 +100,15 @@ def _text(row: dict) -> str:
     raise ExclusionPreflightError("missing_comparable_task_text")
 
 
+def _texts(row: dict) -> list[str]:
+    """Include later user steps too, without comparing target/answer fields."""
+    values = [_text(row)]
+    for record in row.get('records', []) if isinstance(row.get('records'), list) else []:
+        if isinstance(record, dict) and isinstance(record.get('user_step'), str) and record['user_step'].strip():
+            values.append(record['user_step'].strip())
+    return list(dict.fromkeys(values))
+
+
 def _merkle_root(rows: list[dict]) -> str:
     nodes = sorted(hashlib.sha256(canonical_bytes(row)).digest() for row in rows)
     if not nodes:
@@ -142,8 +151,12 @@ def audit_candidates(candidates: list[dict], development: list[dict], original80
                       if row.get("family_id") is not None}
     if set(ids) & historical_ids:
         raise ExclusionPreflightError("candidate_family_id_overlap")
+    historical_templates = {row['template_family'] for row in development + original80 + extra
+                            if isinstance(row.get('template_family'), str)}
+    if set(templates) & historical_templates:
+        raise ExclusionPreflightError('candidate_template_family_overlap')
     candidate_text = [numeric_template_signature(_text(row)) for row in candidates]
-    excluded_text = [numeric_template_signature(_text(row)) for row in development + original80 + extra]
+    excluded_text = [numeric_template_signature(text) for row in development + original80 + extra for text in _texts(row)]
     if len(set(candidate_text)) != 20:
         raise ExclusionPreflightError("candidate_numeric_template_reuse")
     excluded = set(excluded_text)
