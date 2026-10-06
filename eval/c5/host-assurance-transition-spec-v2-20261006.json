@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "policy_id": "c5-frozen-source-trusted-host-visible-continuity-v2",
+  "purpose": "guarantee_transition_preparation_only_no_execution",
+  "scope": "C5 independent development and formal comparison studies only; not default product security",
+  "assumptions": {
+    "entire_baseline_host_process_including_opaque_artifacts_is_trusted": true,
+    "no_untrusted_or_adversarial_inprocess_code_assumed": true,
+    "operator_research_exclusivity_is_required_not_technically_proven": true,
+    "reflection_does_not_prove_emitted_bytes_or_causal_origin": true,
+    "snapshot_checks_do_not_exclude_transient_between_checkpoint_changes": true,
+    "native_image_unverified_categories_are_not_automatically_os_or_benign": true,
+    "legacy_complete_byte_closure_remains_false": true,
+    "no_product_security_or_default_route_switch_authorized": true
+  },
+  "default_admission_enabled": false,
+  "model_or_fixture_or_holdout_authorized": false,
+  "old_complete_byte_closure_claim_replacement_allowed": false,
+  "host_preparation_option": "owner-declared exclusive research window in existing empty Rhino process; explicitly NOT a newly launched clean process",
+  "host_preparation_requirements": [
+    "Owner dedicates current empty Rhino instance to research; no other scripts, modeling, remote clients or plugin-setting changes during a separately approved study.",
+    "Existing third-party plugins and old opaque artifacts remain and are part of the explicitly trusted host, not proven benign by names or inventory.",
+    "Use fresh frozen private project namespaces and independent headless fixtures after separate precise study approval; do not rerun C5OBS A/B/native12/original80.",
+    "Fully declared import/type/controller warmup must finish before sealing the new study baseline; actual operations/subscriptions/fixtures/models require their own study spec/runtime approval.",
+    "Reject every observed new module/assembly/instance/native image, changed visible surface/file bytes, incomplete/error/dropped event or active document drift after baseline sealing; no dynamic allowlist updates or retry."
+  ],
+  "non_guarantees": [
+    "No full emitted-code/hidden DynamicMethods proof or causal generator-source proof.",
+    "No clean-host/process-isolation assertion; host exclusivity is an operational owner attestation.",
+    "No proof against same-process/local-host compromise or between-snapshot transient mutations.",
+    "No inference that all 1088 unresolved native image entries are OS cache or harmless."
+  ],
+  "unchanged_controls": [
+    "original model revisions/checkpoint132 and v4/v3 contract",
+    "strict parsing, alias/scene binding, signed permission, durable at-most-once ledger and actual cleanup",
+    "formal20 sealed public commitment and owner-only plaintext/key/private audit",
+    "14/20 LoRA, paired net>=3, critical/duplicate/unverified cleanup0",
+    "no model/fixture/holdout from this transition consent; later exact development/formal two-hash gates",
+    "C4 NO-GO; v8 formal_quality_fail59/60; original80 consumed; default hybrid route unchanged"
+  ],
+  "basis_probe_id": "C5OBS-HOSTPROV-20261006-A",
+  "basis_external_seal_sha256": "b023f6cdaa162702fb6dbae0cf4bd5556ce2da3eedfa65de397307654d3fb5f9",
+  "state": "PROPOSED_WAIT_DIRECT_OWNER_GUARANTEE_AND_HOST_PREPARATION_DECISION"
+}

@@ -2,6 +2,8 @@
 
 2026-10-06。持续Goal覆盖六项终点，目前处于第1项；下文只是待批准的观察能力探针，**不是整体交付完成、现场工程门通过或正式20题授权**。原设计和保证边界见[溯源设计](c5-host-provenance-design.md)。
 
+**同日晚间后续优先状态：**所有者已批准两个精确哈希，单次约12.233秒完成、17记录及外部sealSHA经冻结独立审计通过，见[实际结果](../eval/c5/host-observer-result-20261006-a.json)。probe消费退休、禁止重放；detach静默和活动内容不变核实，模型/夹具/holdout0。以下准备/未执行文字保留事前记录，不再代表当前待办。实际native来源缺口和下一所有者决定见[新的保证/宿主方案](c5-host-assurance-transition-v2.md)，不是执行默认门禁已放宽。
+
 ## 已实现，尚未执行
 
 - [注入式记录器](../plugin/rhino_listener/c5_host_observer.py)：固定ID `C5OBS-HOSTPROV-20261006-A`，永久started、不可覆盖原始记录、序号/单调时间/前向SHA链与不可覆盖seal；外部终端receipt绑定seal，避免只靠可整体重写的本地hash链。
