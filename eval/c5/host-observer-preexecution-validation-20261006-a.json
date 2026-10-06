@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "probe_id": "C5OBS-HOSTPROV-20261006-A",
+  "status": "SOURCE_DEPLOYMENT_CPU_VALIDATED_WAIT_EXACT_OBSERVER_OWNER_APPROVAL",
+  "source_revision": "7aa21d9416a61d34fea06a26c1c604907e6bfc8f",
+  "source_files": 255,
+  "source_inventory_sha256": "efde00e8d8448eff7dabbb6e65eebb4987459e1ec50e366fb171f21481d74e35",
+  "spec_sha256": "2519df373049cc2a2e2451b99a7bb35e4db953efec86ca98035782b71f520296",
+  "runtime_freeze_sha256": "33557bbd7fc657e76c4b3964f3877282d599d7e1cccb5e782eb5dd1385ab7d7f",
+  "deployed_source_guard_verified": true,
+  "known_host_file_count": 339,
+  "known_host_file_hashes_rechecked": true,
+  "full_pytest": {
+    "passed": 631,
+    "skipped": 8
+  },
+  "new_tests": {
+    "observer_raw_journal_audit_and_authority": 23,
+    "private_safe_progress_and_origin_privacy": 12
+  },
+  "compileall_passed": true,
+  "secret_scan_passed": true,
+  "release_consistency_passed": true,
+  "diff_check_passed": true,
+  "local_document_links_checked": 65,
+  "broken_links": 0,
+  "actual_CLR_constructed": false,
+  "subscription_started": false,
+  "canary_assemblies_created": 0,
+  "fixtures_created": 0,
+  "model_calls": 0,
+  "formal_route_slots_consumed": 0,
+  "private_formal_rows_read": 0,
+  "legacy_byte_closure_verified": false,
+  "formal_execution_ready": false,
+  "whole_six_part_goal_complete": false,
+  "notes": [
+    "Independent tracked-source copy permits other authorized work without changing frozen observer source.",
+    "The 339 known code-file hashes are not a complete runtime origin closure.",
+    "New head's two CI checks must be verified before requesting this exact capability approval. No current observer approval file/started claim exists."
+  ]
+}

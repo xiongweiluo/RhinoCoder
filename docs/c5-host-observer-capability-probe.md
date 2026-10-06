@@ -20,6 +20,8 @@
 
 正式批准材料为[spec](../eval/c5/host-observer-spec-20261006-a.json)及生成的runtime freeze；提交/部署manifest、CPU全仓测试、两个CI通过后集中请求其规范化SHA。未收到该批准，不创建observer state/claim，不订阅、不生成canary；目前只有可审阅代码/spec。
 
+后续冻结准备已完成：[runtime freeze](../eval/c5/host-observer-runtime-freeze-20261006-a.json)绑定提交`7aa21d9`的255份源码，独立部署于`/Users/xiongweiluo/RhinoCoder/data/training/c5/host-observer-source-20261006-A`；SourceGuard和339已知host文件字节重新核对通过。spec规范化SHA为`2519df373049cc2a2e2451b99a7bb35e4db953efec86ca98035782b71f520296`，runtime规范化SHA为`33557bbd7fc657e76c4b3964f3877282d599d7e1cccb5e782eb5dd1385ab7d7f`。CPU全仓631 passed/8 skipped与35项新增测试见[验证记录](../eval/c5/host-observer-preexecution-validation-20261006-a.json)。截至登记未获得本探针批准，也未创建其state/claim、订阅或canary；这些哈希不是新开发工程门或正式20题的运行批准对象。
+
 ## 探针正控通过也不提供的保证
 
 AssemblyLoad并不覆盖既有程序集内修改；结构快照也不能排除两次快照之间的瞬时变更，或证明隐藏DynamicMethods、发射字节、因果生成器来源。native shared-cache映像可能没有可哈希磁盘文件，反射也可能有不可见内容；逐项保留缺口，不能名字白名单放行。API语义核对依据[Microsoft AssemblyBuilder](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.assemblybuilder.definedynamicassembly?view=net-8.0)与[AssemblyLoad](https://learn.microsoft.com/en-us/dotnet/api/system.appdomain.assemblyload?view=net-8.0)。

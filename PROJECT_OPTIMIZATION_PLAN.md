@@ -18,7 +18,7 @@
 - [x] 第4项的[无正文公开进度接口](training/c5_formal20_public_progress.py)已预备，12项相关合成/隐私负控通过；正式started后缺少metadata返回UNKNOWN/no-replay，不谎称零生成。读取当前状态仍是正式未started；不读取题/答案/key/密文，不创建消费。
 - [x] [pip缺项只读诊断](eval/c5/gpu-pip-readonly-diagnosis-20261006.json)：解释器3.11.16、pip26.2.1，RECORD列pip/pip3/pip3.13，其中仅pip3.13缺失。旧B loader imports已通过；它是console-script metadata缺项，不是已证明模型依赖加载失败，也未证明历史安装根因。无安装/升级；新freeze须保留缺项及明确审阅，不默默忽略。
 - [x] [PR依赖/审核交接](docs/c5-pr-stack-review-handoff-20261006.md)已核实并准备；#2→#3→#4→#5→#6堆叠，#7独立Draft。所有者唯一reviewer_1决定merge，不自动合并，不打包主工作区9个现有tracked修改或认证材料。
-- [ ] **当前待批准对象**：单次`C5OBS-HOSTPROV-20261006-A`能力探针，仅现有空白Rhino中一次订阅、两份空非收集canary程序集及一个空type，无工具/模型/holdout；它不是clean baseline或正式门。独立只含tracked Python的source部署与spec/runtime、全仓631 passed/8 skipped已准备构建，推送后需核实新SHA双CI再集中请求两个精确哈希。当前尚未批准/执行。
+- [ ] **当前待批准对象**：单次`C5OBS-HOSTPROV-20261006-A`能力探针，仅现有空白Rhino中一次订阅、两份空非收集canary程序集及一个空type，无工具/模型/holdout；它不是clean baseline或正式门。[独立冻结与验证](eval/c5/host-observer-preexecution-validation-20261006-a.json)已完成255份tracked源码部署、339已知host文件重新核对和全仓631 passed/8 skipped，绑定源码`7aa21d9`；spec `2519df37…520296`/runtime `33557bbd…ab7d7f`两个精确哈希待新head双CI成功后集中批准。当前尚未批准/执行，整体Goal未完成。
 - [ ] 真实能力/独立审计完成后才能判断新保证/专用宿主方案可行性，明确另获必要批准后推进新开发门；不得按名称放行、把结构指纹称字节证明或重复老B/native12。正式20题公开承诺已登记，无需重做；新增开发题排除由保管人私下进行。
 - [ ] 工程门通过后继续正式完整冻结/双CI/单独新精确批准→单次40槽→保管人原始证据审计→C5-7/报告→所有者PR收口。固定LoRA≥14/20、净胜≥3，关键安全/重复写/未核实清理0；默认路线/C4 NO-GO/v8 formal_quality_fail59/60/原80消费不改变。
 
