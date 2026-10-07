@@ -4,6 +4,8 @@
 
 ## 最终可审阅冻结
 
+**后续状态：**上述C两个哈希已获本人批准并单次执行。加载就绪/前两槽关闭通过，但第三read-lora原生回执未知导致FAIL/永久退休；迟到readonly done只读保全，不追认及时收到。当前仍有一个已知空夹具、7key及3个待精确解除delegate，见[C结果与独立收尾边界](c5-hostassurance-development-c-result.md)。下文“未批准/未运行”只保留事前历史；不能复用C批准重跑或安全收尾，后者需要新独立批准。
+
 [spec](../eval/c5/hostassurance-development-spec-20261007-c.json)规范化SHA-256：`f4615ed83ff1daded75f5c8c7fba4c68e4f2f262ac7ce445d04515b44771e583`。
 
 [runtime freeze](../eval/c5/hostassurance-development-runtime-freeze-20261007-c.json)规范化SHA-256：`bbbbca84474d5cd397f2e011775cb17b50f6f4a7328c6cee339a4aedf13090d1`。
