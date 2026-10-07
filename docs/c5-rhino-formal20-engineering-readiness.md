@@ -1,5 +1,7 @@
 # C5-6 正式运行工程准备：核心、评分与冻结缺项
 
+> **2026-10-07当前状态（优先）：**[D已完成单次8槽和完整独立工程审计](c5-hostassurance-development-d-result.md)，无需重放或为了更多成功启动E。正式旧草案仍未适配新有限host/完整验收时序；[40槽合成容量与资源复核](c5-formal20-capacity-and-resource-review.md)证实1403来源检查超过开发512上限，原D实际时序也提示正式3小时耗尽风险。新有限quota原型/CPU负控和2048 normal＋256 cleanup/4096 journal、正式5/研究6小时提案待本人接受；现行预算/门禁未变，没有真实正式状态或消费。公开承诺复用、代理不读题/答案/key；范围接受之后才完成正式适配与完整冻结/双CI/两个精确哈希及本人单次消费。下方“观察只有设计/无承诺/租期旧值”均保留对应历史，不代表当前。
+
 > **2026-10-06最新状态（优先于下方历史准备记录）：**新20题[公开承诺已登记并通过元数据核验](c5-formal20-public-registration-and-field-blockers.md)，所有者私下自动排除/人工审核及age回读声明已收到；代理未读正文、密文或密钥。实际Rhino的CLR/clr未知来源及四个动态非文件程序集阻塞现行字节冻结；新的[宿主溯源方案](c5-host-provenance-design.md)仅获设计/合成验证授权，不放宽现行门禁。正式消费/模型调用0、`execution_ready=false`。新租期为2026-10-07 19:00 Europe/Zurich到期、18:45停止生成、至少900秒导出，见[v5记录](../eval/c5/rhino-resource-boundary-v5-20261006.json)；GPU-hours与精确批准要求不变。
 
 2026-10-05。当前状态：**`FIELD_ADAPTERS_CPU_SYNTHETIC_AUDIT_VERIFIED_NOT_LIVE_FROZEN_OR_AUTHORIZED`**。现场适配器、保管人入口和独立原始证据审计已实现，并仅用 CPU 合成开发题验证；没有新的现场运行、最终 holdout 承诺、真实40槽配对结果、C5-6 PASS 或整体 C5 `GO`。[B 八槽模型桥工程门](c5-modelbridge-development-b-result.md)已独立通过，但其 ID、状态目录、八题、授权和结果均不得转为正式运行。

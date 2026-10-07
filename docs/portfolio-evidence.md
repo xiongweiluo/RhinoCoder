@@ -23,6 +23,7 @@ RhinoCoder 对外只使用能从版本化文件复核的指标。本页是 READM
 | C4 模型实验裁决为 NO-GO | P2 真实 Rhino 配对描述性结果为基座 4/30、LoRA 5/30；+3.3pp、净胜 1、exact McNemar `p=1.0`、bootstrap 95% CI [0,10]pp，未达到预注册门槛；LoRA 基础设施补位事后发现超出冻结规则 | [C4 原报告](c4-model-decision.md)、[只读诊断与合规性限制](c4-posthoc-failure-diagnosis.md)、[最小化机器结果](p2-model-comparison-results.json) |
 | 独立C5离线和严格控制器门通过 | 全新80家族单次配对，sequence基座20/80、LoRA77/80，+71.25pp、净胜57，exact McNemar p≈1.39e-17；原门槛、消费/冻结血缘与公开逐家族统计复算通过，尚非真实Rhino或整体GO | [最终报告](c5-final-evaluation-report.md)、[独立公开审计](../eval/c5/final-public-audit-20261002-v2.json) |
 | C5现场开发失败保留，C遗留有限安全收尾完成 | A/B/C工程失败退休；C部分原生写/读不等于完整八槽通过。独立核实精确空夹具关闭、七key删除与委托解除，58记录/39请求绑定封存；host连续性仍blocked，正式20题未消费、C5-7未裁决 | [C失败](c5-hostassurance-development-c-result.md)、[收尾B与独立审计](c5-retired-c-cleanup-b-result.md)、[公开哈希索引](../eval/c5/hostassurance-c-cleanup-result-20261007-b.json) |
+| C5独立D现场工程门通过，不是正式质量GO | 新单次8槽/10生成阶段、模型导出写1/读1、97连续记录/67请求锚、指定清理和完整时序独立核实；基座写/读失败保留，已排除train家族不具有盲测代表性。正式20题未读/未消费，当前核查40槽容量与预算 | [D结果与限制](c5-hostassurance-development-d-result.md)、[独立工程审计](../eval/c5/hostassurance-development-independent-audit-20261007-d.json)、[正式容量/资源复核](c5-formal20-capacity-and-resource-review.md) |
 | 当前正式版本为 0.3.0 | Tag、GitHub Release 与在线只读演示均有公开入口；当前后续改动属于 Unreleased | [版本清单](version-manifest.json)、[发布清单](release-checklist.md) |
 
 ## 代表性可追溯链路

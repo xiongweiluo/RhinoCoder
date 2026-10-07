@@ -1,5 +1,9 @@
 # 独立D工程门：完整验收时序与结算证明
 
+## 最终开发状态（2026-10-07）
+
+[单次实际结果与独立审计](c5-hostassurance-development-d-result.md)已完成，D工程门PASS并永久退休；下方执行/准备描述保留历史。8槽/10生成阶段/写1读1、有限host连续性与完整时序、指定关闭删钥和准确解除均核实，不是正式质量或整体C5 GO。正式20题仍未读/消费，不能借D批准运行；不因D通过再运行E。
+
 ## 2026-10-07实际执行续接
 
 本人已直接批准下列完整spec/runtime，发布`cbc5f3d`双CI 37674926137/37674935702成功。新Mac/Linux state与精确owner grant已登记；CPU prepare、唯一ScriptEditor入口与首次Idle基线完成，单次drive启动。尚未完成八槽或独立审计，不报告工程PASS。正式20题零读取/消费。[扩大路线授权](../eval/c5/continuation-expanded-owner-authorization-20261007.json)允许后续正式/E准备及核查后PR合并，但不存在尚未形成的新正式/E精确执行grant；不修改D预算或重试语义。以下“待批准/未运行”是事前冻结历史。
