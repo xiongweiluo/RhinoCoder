@@ -1,10 +1,20 @@
 # C5 新保证下的独立开发工程门 A（2026-10-07）
 
-这是六项持续交付的第2项，**未运行、未完成实际冻结、未获精确运行批准**。第1项 C5OBS A 已单次消费、独立能力审计通过并退休，不重放。所有者已接受[较弱保证 spec](../eval/c5/host-assurance-transition-spec-v2-20261006.json)及[单独决定记录](../eval/c5/host-assurance-transition-owner-approval-v2-20261006.json)；这不是当前开发运行授权。
+这是六项持续交付的第2项，**完整冻结准备已完成，未运行、未获精确运行批准**。第1项 C5OBS A 已单次消费、独立能力审计通过并退休，不重放。所有者已接受[较弱保证 spec](../eval/c5/host-assurance-transition-spec-v2-20261006.json)及[单独决定记录](../eval/c5/host-assurance-transition-owner-approval-v2-20261006.json)；这不是当前开发运行授权。
+
+## 最终可审阅冻结（唯一当前版本）
+
+[spec](../eval/c5/hostassurance-development-spec-20261007-a.json)规范化SHA：`4b18343e33284833f84a6e812e2a2290de595f14e01f57d22e1db9afe45bcc47`。
+
+[runtime freeze](../eval/c5/hostassurance-development-runtime-freeze-20261007-a.json)规范化SHA：`87ae2ab908073ec8ed7822ee360b85768649af5f3406d4b4c634185d5880f532`。
+
+[预执行独立复核](../eval/c5/hostassurance-development-preexecution-validation-20261007-a.json)绑定源码`28f6fb6`、270源码条目和339可读host文件、三份spec/runtime字节相同；完整701 passed/8 skipped，源码提交双CI成功，发布冻结材料的最新head双CI仍须核对后才请求批准。原始ActorSource、默认路由与旧完整字节守卫不改变；Mac/GPU开发状态与正式状态均不存在，新的模型/现场/holdout调用0。
+
+未执行准备曾发现Mac AppleDouble人口问题，已[记录并修正](../eval/c5/hostassurance-unexecuted-deployment-diagnosis-20261007.json)；首份未批准runtime `69d3b8f8…1cf0f7`在现场旁车人口复核后[撤销并保留归档](../eval/c5/hostassurance-unapproved-freeze-supersession-20261007.json)，不能批准或执行。最终源码传输ack超时后只读核实全部277份已完整到达、全部源/配置SHA正确，**没有重传或覆盖**；随后完成imports及O_EXCL冻结。这些是零调用准备问题，不是实验失败、重跑或事后改判。
 
 ## 固定独立范围
 
-新 ID `C5DEV-HOSTASSURANCE-20261007-A`，详见[待冻结 spec](../eval/c5/hostassurance-development-spec-20261007-a.json)。新的 Mac/GPU 源码和永久状态根；不借用 B/native12/R/观察器或原80的授权、状态、claim 或输出，不改权重、契约、阈值或默认路线。
+新 ID `C5DEV-HOSTASSURANCE-20261007-A`，详见上述冻结。新的 Mac/GPU 源码和永久状态根；不借用 B/native12/R/观察器或原80的授权、状态、claim 或输出，不改权重、契约、阈值或默认路线。
 
 八槽来自四个**已经冻结并由保管人排除的训练家族**，完全复用原文本：圆柱半径7/高17、只读场景摘要、缺参布尔澄清、删除审计失败记录的拒绝。train 原文件 SHA `69cdcfbf…7b192a` 与家族/selector文本均在 CPU 预检核对；不是额外生成语义家族，不读原80/新20题。slot交叉顺序与两路模型相同，最多8请求/16阶段；每槽最多1写或1读，其余0许可。
 

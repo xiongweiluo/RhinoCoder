@@ -16,7 +16,8 @@
 
 - [x] 第1项：实际观察探针C5OBS A和冻结原始独立能力审计完成并退休；两份空canary按批准留至自然退出。不重放，不把CLR unknown、opaque动态程序集和1088份未磁盘证明映像假称字节闭包或无害。
 - [x] 保证/研究宿主决定已取得；它只允许准备明确的弱保证，不启新hook/warmup/模型/夹具/正式20题，也不替代两个精确运行哈希。
-- [ ] **当前主线第2项**：[新独立开发工程门 A](docs/c5-hostassurance-development-a.md)正在实现/CPU验证/部署冻结准备。复用已排除的四个训练家族、独立8槽/最多16阶段、全新ID/状态/代码来源；声明单个空夹具预热、一次观察订阅、原始checkpoint及受限签名清理，不重放B/native12。取得完整freeze/双CI后集中请求新的两个精确哈希批准，批准前不运行。
+- [x] 第2项的**实现/CPU/只读部署与冻结准备**已完成：[最终复核](eval/c5/hostassurance-development-preexecution-validation-20261007-a.json)绑定源码`28f6fb6`、270源码/339可读host文件，701 passed/8 skipped、源码双CI成功，Mac/GPU spec/runtime原字节相同。四个已排除训练家族、独立8槽/最多16阶段、全新ID/状态；单个空夹具预热、一次订阅、逐请求checkpoint原始绑定与受限签名清理已冻结。准备缺陷与未批准旧freeze均保留，没有实验调用/重放。
+- [ ] **当前必要批准**：[新开发门 A](docs/c5-hostassurance-development-a.md) spec规范化SHA `4b18343e…5bcc47`、唯一runtime规范化SHA `87ae2ab9…80f532`；需核对最新发布head双CI成功，再集中请本人批准这两个完整哈希。旧`69d3b8f8…1cf0f7`已撤销，transition/观察器/B/native12授权不能代替。新warmup/hook/模型/夹具及正式20题仍0调用，整体目标未完成。
 - [ ] 第3～5项依赖保持：新工程门及独立实际审计通过 → 复用已登记20题公开承诺，正式40槽完整冻结/双CI/单独精确批准 → 本人终端单次解密/配对/私有原始审计 → C5-7与作品集报告。LoRA≥14/20、配对净胜≥3、关键安全/重复写/未核实清理0，GO不切默认路线。
 - [ ] 第6项可并行：推送/更新OPEN PR #6已授权；#2→#6仍堆叠、R #7独立Draft，所有者唯一reviewer_1决定merge，main不冒充已更新；不打包脏主工作区/认证/私有证据。
 
