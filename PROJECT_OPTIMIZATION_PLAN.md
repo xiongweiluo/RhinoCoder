@@ -10,6 +10,12 @@
 
 ## 当前快照与跨对话续接
 
+### 近期任务索引：2026-10-07 本人选择只准备逐项只读诊断，尚不执行
+
+本人选择“准备逐项只读诊断的冻结材料”，不是新现场批准。收尾A已单次失败退休；新的`C5DIAG-HOSTASSURANCE-C-20261007-A`只诊断，不关闭/删钥/解除/订阅，不调用模型/GPU/工具/holdout，不重放A或进入D。[诊断规范](docs/c5-retired-c-live-diagnosis-preparation.md)和代码/独立汇总审计/CPU控制正在形成完整冻结，必须最新双CI及另一份两个精确哈希批准后才现场单次运行。
+
+CPU只读账本提供新线索：当前candidate_scene revision1与历史expected0不同，但不能证明唯一现场原因或变化时刻。旧snapshot会写事务刷新revision，新只读诊断禁止snapshot、重置或修复state；仅只读SQL与冻结场景摘要比较。admission先于Rhino导入/现场读取，逐项保留false/unknown，非安全UI线程不得读取文档、不自动调度回调。原C结果SHA不变、7key和未核实夹具/委托仍阻塞安全闭环；正式20题未读、不重复索要公开承诺。
+
 ### 近期任务索引：2026-10-07 最小安全收尾A现场前置拒绝；待本人决定安全诊断/接管
 
 本人精确批准`C5SAFE-HOSTASSURANCE-C-20261007-A` spec `1df5aeb6…8971bc` / runtime `3a58cf7a…7dfd9b`后，按`bf0bbf8`双CI冻结单次Run。实际脚本138行报 `actual known empty fixture/active binding differs`，发生在effects claim之前；没有重试、删钥、关闭或准确解除成功记录。[结果与独立只读审计](docs/c5-hostassurance-c-cleanup-attempt-a-result.md)确认原C失败字节未变、7key仍在、后五槽无新claim，55份未封存前缀与39份请求绑定核对一致；不是完整宿主连续性/安全闭环PASS。

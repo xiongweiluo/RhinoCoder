@@ -147,6 +147,7 @@ def audit():
         con.execute('PRAGMA query_only=ON')
         reads = [dict(r) for r in con.execute('SELECT * FROM c5_read')]
         writes = con.execute('SELECT COUNT(*) FROM candidate_write').fetchone()[0]
+        scene_rows = [dict(r) for r in con.execute('SELECT document_key,revision,scene_sha256 FROM candidate_scene')]
     finally:
         con.close()
     require(writes == 0 and reads == [{'request_id': payload['request_id'], 'payload_sha256': digest(payload),
@@ -164,6 +165,10 @@ def audit():
             'raw_host_prefix_inventory_sha256': digest({p.name: file_sha(p) for p in paths}),
             'raw_host_kinds': kinds, 'raw_request_checkpoint_bindings': bindings,
             'late_read_done_rows': 1, 'late_read_write_rows': 0, 'late_reply_reclassified_as_timely': False,
+            'stored_candidate_scene_matches_historical_expected': scene_rows == [payload['expected']],
+            'stored_candidate_scene_revisions': [r['revision'] for r in scene_rows],
+            'historical_expected_revision': payload['expected']['revision'],
+            'stored_revision_difference_unique_cause_proven': False,
             'retained_remote_record_count': 21, 'remote_bundle_sha256': file_sha(bundle_path),
             'host_external_seal_available': False, 'complete_host_continuity_audit_pass': False,
             'live_fixture_registry_absence_verified': False, 'live_delegate_detach_verified': False,

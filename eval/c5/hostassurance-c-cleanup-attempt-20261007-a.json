@@ -33,6 +33,8 @@
   "late_read_done_rows": 1,
   "late_read_write_rows": 0,
   "late_reply_reclassified_as_timely": false,
+  "subsequent_CPU_only_ledger_observation": {"stored_candidate_scene_revision":1,"historical_expected_revision":0,"stored_candidate_scene_matches_history":false,"unique_live_failed_subcondition_or_change_time_proven":false},
+  "snapshot_helper_purity_caveat": "Frozen RhinoAtomicGate.snapshot invokes a write transaction and can increment candidate_scene revision when the digest changes. New readonly diagnosis must not call snapshot or reset state. The failure traceback alone cannot show which short-circuit term was false.",
   "retained_remote_record_count": 21,
   "remote_bundle_sha256": "c812e297b1b83d0f9489b800410d4f5cbef7d6f280c8fb4e0b669e61da26a4d2",
   "host_external_seal_available": false,
