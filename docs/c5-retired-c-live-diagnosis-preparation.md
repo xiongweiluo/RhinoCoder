@@ -32,3 +32,15 @@
 [spec](../eval/c5/hostassurance-c-live-diagnosis-spec-20261007-a.json)和新runtime冻结待源码提交、实际字节复核及发布双CI完成后集中给出两个规范化SHA。runtime完整引用原C canonical/file SHA、289/339库存与新增入口/独立审计两份源码字节，源自已批准限定宿主，不依赖GPU/SSH可用性。
 
 准备与测试不是现场运行许可；正式执行授权仍false。本地未创建新owner grant/admission/结果，也没有部署或运行wrapper。只允许CPU、文档与PR更新，不自动运行；诊断完成后先提交审计和下一安全收尾方案，由本人另行决定/批准。C失败、默认混合、C4 NO-GO、v8 formal_quality_fail59/60不变。
+
+## 最终准备冻结（尚未现场批准/执行）
+
+最终源码`8fc2c2bef91356c755f107c921f7e231bc579fca`，新入口字节SHA `c69ab1e2a5c0608d50df788ed89696a37c09d305c6c96ac48ed9a3c65e4b41de`。
+
+- spec规范化SHA-256：`8a2e0218d956cae322a0b5c44a11fde5731fc1140417750eb19d4c8d383c9e01`。
+- [runtime冻结](../eval/c5/hostassurance-c-live-diagnosis-runtime-20261007-a.json)规范化SHA-256：`e7a7728342fc0e6e4579312510113d9a9d1d38ef1a72aab1fd526be22a9b56db`。
+- [独立预执行复核](../eval/c5/hostassurance-c-live-diagnosis-preexecution-20261007-a.json)：原289源码/339可读host重新核对，新入口与独立审计两份字节绑定；全仓844 passed/8 skipped，新诊断/独立审计42项、加原收尾专项共75项；Python3.9、secret/release/link/diff通过。
+
+先前未批准、未运行的runtime `e9ef34ee…192247e` 已[原字节封存](../eval/c5/hostassurance-c-live-diagnosis-runtime-unapproved-e9ef34ee.json)，不再有效。修正仅为独立审计严格区分整数1/0与布尔true/false，并增加两项负控；未扩大操作/保证范围、未执行或重试。唯一有效待批准runtime为上述`e7a77283…a9b56db`，spec未变。
+
+完整旧C runtime canonical/file SHA均引用，原C结果与真实收尾A观察SHA绑定；不是把整个脏工作区打包或声称完整动态代码闭包。现场保证仅沿用已接受的opaque宿主选择，诊断不依赖GPU/SSH、不增加GPU预算。当前new owner grant/admission/result/failure均不存在，调用0。最终发布head双CI成功后才集中请求新的两个精确哈希批准，准备路线选择或旧收尾A批准均不能替代。

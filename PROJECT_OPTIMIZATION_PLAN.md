@@ -16,6 +16,9 @@
 
 CPU只读账本提供新线索：当前candidate_scene revision1与历史expected0不同，但不能证明唯一现场原因或变化时刻。旧snapshot会写事务刷新revision，新只读诊断禁止snapshot、重置或修复state；仅只读SQL与冻结场景摘要比较。admission先于Rhino导入/现场读取，逐项保留false/unknown，非安全UI线程不得读取文档、不自动调度回调。原C结果SHA不变、7key和未核实夹具/委托仍阻塞安全闭环；正式20题未读、不重复索要公开承诺。
 
+- [x] 只读诊断源码/独立审计/实际289与339字节复核及唯一有效冻结准备完成：源码`8fc2c2b`，全仓844 passed/8 skipped，新专项42、合并旧收尾专项75通过；整数布尔伪装负控补齐，未批准旧runtime e9ef34ee封存。没有新现场grant/admission或运行。
+- [ ] 最新发布head双CI成功后，集中请本人精确批准诊断spec `8a2e0218d956cae322a0b5c44a11fde5731fc1140417750eb19d4c8d383c9e01` / runtime `e7a7728342fc0e6e4579312510113d9a9d1d38ef1a72aab1fd526be22a9b56db`。旧收尾A/C运行批准不可复用；批准后仅单次只读诊断与独立审计，不自动cleanup或D。
+
 ### 近期任务索引：2026-10-07 最小安全收尾A现场前置拒绝；待本人决定安全诊断/接管
 
 本人精确批准`C5SAFE-HOSTASSURANCE-C-20261007-A` spec `1df5aeb6…8971bc` / runtime `3a58cf7a…7dfd9b`后，按`bf0bbf8`双CI冻结单次Run。实际脚本138行报 `actual known empty fixture/active binding differs`，发生在effects claim之前；没有重试、删钥、关闭或准确解除成功记录。[结果与独立只读审计](docs/c5-hostassurance-c-cleanup-attempt-a-result.md)确认原C失败字节未变、7key仍在、后五槽无新claim，55份未封存前缀与39份请求绑定核对一致；不是完整宿主连续性/安全闭环PASS。
