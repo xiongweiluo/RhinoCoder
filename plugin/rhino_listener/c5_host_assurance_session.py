@@ -16,18 +16,21 @@ from .c5_research_channel import publish_json
 from .c5_research_native import digest, require
 
 DEV_ID = 'C5DEV-HOSTASSURANCE-20261007-A'
+DEV_B_ID = 'C5DEV-HOSTASSURANCE-20261007-B'
 STUDIES = {
     DEV_ID: 'direct repository_owner approval of new host-assurance development spec and complete runtime freeze',
+    DEV_B_ID: 'direct repository_owner approval of new host-assurance development spec and complete runtime freeze',
     'c5-rhino-paired-20-v1': 'direct repository_owner approval of complete C5-6 formal20 spec and runtime freeze',
 }
 
 
-def host_policy(transition, transition_approval):
+def host_policy(transition, transition_approval, *, study_id=DEV_ID):
     validate_transition(transition, transition_approval)
     return {'policy_id': POLICY, 'transition_spec_sha256': digest(transition),
         'transition_approval_sha256': digest(transition_approval), 'legacy_byte_closure_verified': False,
         'checkpoint_limit': 512, 'max_subscriptions': 1, 'canary_assemblies': 0,
-        'baseline_sealing': 'after_declared_import_type_controller_warmup_before_any_model_generation',
+        'baseline_sealing': ('first_idle_after_explicit_entry_return_release_before_model_generation'
+            if study_id==DEV_B_ID else 'after_declared_import_type_controller_warmup_before_any_model_generation'),
         'event_policy': 'no_new_events_or_visible_changes_after_seal_no_exceptions',
         'detach_proof': 'exact_delegate_remove_call_and_observed_queue_only_not_full_handler_absence'}
 
@@ -42,7 +45,7 @@ def validate_study_binding(spec, freeze, approval, transition, transition_approv
     require(type(approval.get('approved')) is bool and approval == {'study_id': study, 'actor': 'repository_owner', 'approved': True,
         'spec_sha256': digest(spec), 'runtime_freeze_sha256': digest(freeze),
         'approval_basis': STUDIES[study]}, 'new exact study grant required; transition alone cannot run')
-    policy = host_policy(transition, transition_approval)
+    policy = host_policy(transition, transition_approval,study_id=study)
     require(spec.get('host_assurance') == freeze.get('host_assurance') == policy
         and spec['host_assurance']['legacy_byte_closure_verified'] is False
         and freeze['host_assurance']['legacy_byte_closure_verified'] is False

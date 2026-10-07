@@ -4,6 +4,8 @@
 
 ## 最终可审阅冻结（唯一当前版本）
 
+**后续状态（2026-10-07）：**本人已批准这两个最终哈希，A单次执行后因入口返回造成`__main__`来源变化而FAIL/退休；生成0、模型夹具0、工具0、holdout0，空warmup关闭与九key实际缺席/stop独立交叉核实。见[A结果与下一边界](c5-hostassurance-development-a-result.md)。下文批准前状态是历史，不再索要或使用A批准；现在只准备独立B，不能借此授权运行。
+
 [spec](../eval/c5/hostassurance-development-spec-20261007-a.json)规范化SHA：`4b18343e33284833f84a6e812e2a2290de595f14e01f57d22e1db9afe45bcc47`。
 
 [runtime freeze](../eval/c5/hostassurance-development-runtime-freeze-20261007-a.json)规范化SHA：`87ae2ab908073ec8ed7822ee360b85768649af5f3406d4b4c634185d5880f532`。
