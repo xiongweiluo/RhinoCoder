@@ -33,6 +33,13 @@ def _write(path,raw):
     with os.fdopen(fd,'wb') as stream:stream.write(raw);stream.flush();os.fsync(stream.fileno())
 
 
+def verify_archive_population(archive,names):
+    actual=subprocess.check_output(['tar','-tf','-'],input=archive).decode().splitlines()
+    require(len(actual)==len(names) and set(actual)==set(names)
+        and all(not Path(n).name.startswith('._') for n in actual),
+        'archive contains unexpected metadata/directory/file; never transfer it')
+
+
 def build():
     require(not MAC_SOURCE.exists() and not (ROOT/FREEZE).exists(), 'new source/freeze already exists; do not overwrite')
     require(not subprocess.check_output(['git','status','--porcelain','--untracked-files=all'],cwd=ROOT,text=True).strip(),
@@ -61,7 +68,9 @@ def build():
         require(raw==(ROOT/n).read_bytes(),'deployed tracked source differs')
         _write(MAC_SOURCE/n,raw)
     # Only the list above is in this transport, not the repository/worktree.
-    archive=subprocess.check_output(['tar','-cf','-','-T','-'],cwd=MAC_SOURCE,input=('\n'.join(names)+'\n').encode())
+    archive=subprocess.check_output(['tar','--no-xattrs','--no-mac-metadata','-cf','-','-T','-'],
+        cwd=MAC_SOURCE,input=('\n'.join(names)+'\n').encode())
+    verify_archive_population(archive,names)
     command='test ! -e '+str(REMOTE_SOURCE)+' && test ! -e '+str(REMOTE_STATE)+' && mkdir -m 700 '+str(REMOTE_SOURCE)+' && tar -xf - -C '+str(REMOTE_SOURCE)
     subprocess.run(ssh_args()+[command],input=archive,check=True,timeout=120)
     prefix='cd '+str(REMOTE_SOURCE)+' && /data/conda-envs/rhinocoder/bin/python -B -m tools.run_c5_hostassurance_dev_worker '
