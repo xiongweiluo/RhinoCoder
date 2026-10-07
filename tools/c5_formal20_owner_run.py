@@ -41,12 +41,12 @@ def commitment(spec):
     return value
 
 
-def sealed_loader(sealed, identity, commitment_value, freeze):
+def sealed_loader(sealed, identity, commitment_value, freeze, *, state=MAC_STATE, repository_root=None):
     """Closure only; actual package/key checks and decryption occur after started."""
     def load():
         from tools.c5_rhino_formal20_owner_exclusion import _require_owner_private_path, _worktrees
-        require((MAC_STATE / 'formal20.started.json').is_file(), 'formal consumption missing before private input')
-        roots = _worktrees()
+        require((state / 'formal20.started.json').is_file(), 'formal consumption missing before private input')
+        roots = _worktrees() if repository_root is None else _worktrees(repository_root=repository_root)
         for path in (sealed, identity):
             _require_owner_private_path(path, roots)
             require(path.is_absolute() and path.resolve() == path and path.is_file(), 'formal private input type invalid')
@@ -64,7 +64,7 @@ def sealed_loader(sealed, identity, commitment_value, freeze):
         require(result.returncode == 0 and 0 < len(result.stdout) <= 8 * 1024 * 1024, 'formal decryption failed/bound exceeded')
         from training.c5_formal20_plan import validate_families
         cases = validate_families([strict_json(line) for line in result.stdout.splitlines() if line.strip()])
-        publish_json(MAC_STATE, 'private-cases.json', cases)
+        publish_json(state, 'private-cases.json', cases)
         return cases
     return load
 

@@ -1,5 +1,7 @@
 # C5-6 正式 20 题：保管人侧准备规范（不含题目）
 
+> **2026-10-08当前续接：**本人私下准备/排除/人工审核/加密回读和公开承诺登记均保留；无需重新生成或发送它们。D完整工程PASS后，按已接受容量/资源进行[formal v2适配及完整冻结](c5-formal20-v2-execution-preparation.md)，未正式运行或消费。只有新完整spec/runtime两个精确哈希获单独批准后，才交付本人私有TTY运行/审计命令；不调用下方旧v1运行入口、不发送实际题面/路径/identity。当前资源日期和有限宿主保证以v2准备页为准，下方状态均是历史。
+
 > **2026-10-06最新状态（优先于下方历史准备记录）：**新20题[公开承诺已登记并通过元数据核验](c5-formal20-public-registration-and-field-blockers.md)，所有者私下自动排除/人工审核及age回读声明已收到；代理未读正文、密文或密钥。实际Rhino的CLR/clr未知来源及四个动态非文件程序集阻塞现行字节冻结；新的[宿主溯源方案](c5-host-provenance-design.md)仅获设计/合成验证授权，不放宽现行门禁。正式消费/模型调用0、`execution_ready=false`。新租期为2026-10-07 19:00 Europe/Zurich到期、18:45停止生成、至少900秒导出，见[v5记录](../eval/c5/rhino-resource-boundary-v5-20261006.json)；GPU-hours与精确批准要求不变。
 
 2026-10-05。此页只定义**私有候选包格式与预检方法**；仓库里没有新 20 题正文或答案。仓库所有者本人是唯一 `reviewer_1` 和独立保管人；不要把候选 JSONL、原 80 明文、答案、密钥、实际私有路径或替换了占位符的命令发送给代理、放进仓库/PR，或放到 GPU 开发目录。本页和[公开 draft](../eval/c5/rhino-formal20-spec-draft.json)均为 `execution_ready=false`，不能启动正式运行。

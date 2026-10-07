@@ -1,5 +1,7 @@
 # 正式40槽观察容量与资源边界复核
 
+**2026-10-08续接优先：**本人已精确接受本页提案，仅授权正式适配/CPU/冻结准备；[接受记录](../eval/c5/formal20-capacity-owner-acceptance-20261007.json)、[v7边界](../eval/c5/rhino-resource-boundary-v7-formal20-20261007.json)及[formal v2准备](c5-formal20-v2-execution-preparation.md)优先于下方“待接受/现行3/4小时”的历史。正式5/研究6小时边界已接受但尚无新GPU使用；实际运行仍须完整冻结/双CI/两个精确哈希。旧D/v6/512实现不改，20题仍未读/消费，不续租/付款。
+
 2026-10-07。[D已实际通过完整工程门](c5-hostassurance-development-d-result.md)，不重跑、不要求E。正式20题公开承诺已登记；本次没有读题、解密、消费、模型/GPU或Rhino操作。
 
 ## 已证实的适配缺项，不是扩大产品或观察范围

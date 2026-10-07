@@ -24,6 +24,8 @@ def _sha_record(value): return hashlib.sha256(frame(value)).hexdigest()
 
 
 def audit_remote(state, spec, freeze):
+    v2=spec.get('field_protocol_version')==2
+    formal_cap,research_cap=(18000,21600) if v2 else (10800,14400)
     stop = read_json(state, 'worker-stop-response.json')
     require(stop.get('status') == 'formal_worker_stopped' and stop.get('runtime_freeze_sha256') == digest(freeze)
         and stop.get('request_sha256') == digest({'kind': 'formal_stop', 'study_id': STUDY_ID,
@@ -32,6 +34,7 @@ def audit_remote(state, spec, freeze):
     raw = stop['raw_records']
     required = {'bootstrap.json', 'loaded-runtime.json', 'worker-summary.json', 'resource-settlement.json',
         'formal20.worker-started.claim.json'}
+    if v2: required |= {'worker-startup-ready.json','worker-bootstrap-response.json','owner-approval.json'}
     require(set(raw) == required, 'formal remote lifecycle population differs')
     require(raw['bootstrap.json'] == read_json(state, 'worker-bootstrap-request.json')
         and raw['bootstrap.json']['plans'] == read_json(state, 'model-plans-hashed.json')
@@ -39,8 +42,18 @@ def audit_remote(state, spec, freeze):
     require(raw['formal20.worker-started.claim.json'] == {'study_id': STUDY_ID,
         'runtime_freeze_sha256': digest(freeze), 'replay_allowed': False}, 'formal worker permanent claim differs')
     ready = read_json(state, 'worker-bootstrap-response.json')
-    require(ready == {'status': 'formal_worker_ready', 'request_sha256': digest(raw['bootstrap.json']),
-        'runtime_freeze_sha256': digest(freeze), 'model_identities': freeze['model_identities']}, 'formal model ready binding differs')
+    expected_ready={'status':'formal_worker_ready','request_sha256':digest(raw['bootstrap.json']),
+        'runtime_freeze_sha256':digest(freeze),'model_identities':freeze['model_identities']}
+    if v2:
+        from training.c5_startup_audit import audit_startup_ready
+        expected_ready['startup_receipt']=read_json(state,'worker-startup-ready.json')
+        audit_startup_ready(expected_ready['startup_receipt'],raw['worker-startup-ready.json'],freeze,STUDY_ID)
+        require(raw['worker-bootstrap-response.json']==expected_ready
+            and raw['owner-approval.json']=={'study_id':STUDY_ID,'actor':'repository_owner','approved':True,
+                'spec_sha256':digest(spec),'runtime_freeze_sha256':digest(freeze),
+                'approval_basis':'direct repository_owner approval of complete C5-6 formal20 spec and runtime freeze'},
+            'formal raw ready/grant inventory differs')
+    require(ready==expected_ready,'formal model ready binding differs')
     assets, loaded = stop['asset_environment_preflight'], raw['loaded-runtime.json']
     require(assets['source_files'] == freeze['source_files'] and assets['source_inventory_sha256'] == freeze['source_inventory_sha256']
         and assets['fixed_public_files'] == freeze['fixed_public_files'] and assets['environment_sha256'] == freeze['environment_sha256']
@@ -59,14 +72,14 @@ def audit_remote(state, spec, freeze):
     for k in ('elapsed_seconds_including_load_and_idle', 'cap_seconds', 'start_epoch', 'stop_epoch'):
         require(type(resource[k]) in (int, float) and math.isfinite(resource[k]), 'formal finite settlement required')
     elapsed = resource['elapsed_seconds_including_load_and_idle']
-    require(0 <= elapsed <= resource['cap_seconds'] <= boundary['formal_max_seconds'] <= 10800
+    require(0 <= elapsed <= resource['cap_seconds'] <= boundary['formal_max_seconds'] <= formal_cap
         and boundary['prior_cumulative_seconds'] + elapsed <= 57600
-        and boundary['prior_research_seconds'] + elapsed <= 14400
+        and boundary['prior_research_seconds'] + elapsed <= research_cap
         and resource['start_epoch'] <= resource['stop_epoch'] <= spec['model_generation_cutoff_epoch'], 'formal resource ceiling exceeded')
     summary = raw['worker-summary.json']
     keys = summary['attempted_keys']
     require(isinstance(keys, list) and len(keys) == len(set(keys)) == summary['requests']
-        and 40 <= len(keys) <= 120 and type(summary['generation_stages']) is int
+        and 40 <= len(keys) <= (56 if v2 else 120) and type(summary['generation_stages']) is int
         and summary['generation_stages'] <= spec['max_generation_stages'], 'formal worker attempts/count differs')
     all_records, stages = dict(raw), 0
     for key in keys:
@@ -216,6 +229,7 @@ def audit_slot(state, case, slot, result, freeze, tokenizer):
 def audit_run(state, cases, spec, freeze, tokenizer, *, source_guard):
     """Custodian-only post-run audit; caller checks exact authority/public freeze."""
     source_guard()
+    formal_cap,research_cap=(18000,21600) if spec.get('field_protocol_version')==2 else (10800,14400)
     cases = validate_families(cases); order = slot_order(cases, seed=spec['slot_seed'])
     require(family_merkle_root(cases) == spec['family_merkle_root_sha256']
         and slot_order_sha256(order) == spec['slot_order_sha256'], 'formal private case/order commitment differs')
@@ -252,10 +266,10 @@ def audit_run(state, cases, spec, freeze, tokenizer, *, source_guard):
         ('elapsed_seconds_including_load_and_idle', 'cap_seconds', 'start_epoch', 'stop_epoch')),
         'formal finite Mac resource amounts required')
     elapsed = local['elapsed_seconds_including_load_and_idle']
-    require(0 <= elapsed <= local['cap_seconds'] <= boundary['formal_max_seconds']
+    require(0 <= elapsed <= local['cap_seconds'] <= boundary['formal_max_seconds'] <= formal_cap
         and local['start_epoch'] <= local['stop_epoch'] <= spec['model_generation_cutoff_epoch']
         and boundary['prior_cumulative_seconds'] + elapsed <= 57600
-        and boundary['prior_research_seconds'] + elapsed <= 14400, 'formal Mac resource ceiling exceeded')
+        and boundary['prior_research_seconds'] + elapsed <= research_cap, 'formal Mac resource ceiling exceeded')
     remote = audit_remote(state, spec, freeze)
     by_id = {c['family_id']: c for c in cases}; scored, keys, first_prompts = [], [], {}
     for slot in order:

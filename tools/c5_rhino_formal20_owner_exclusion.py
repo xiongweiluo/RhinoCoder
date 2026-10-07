@@ -51,15 +51,15 @@ def _require_owner_private_path(path: Path, worktrees: list[Path]):
         raise ExclusionPreflightError("owner_private_input_must_be_outside_all_worktrees")
 
 
-def _worktrees() -> list[Path]:
+def _worktrees(*, repository_root: Path = ROOT) -> list[Path]:
     try:
-        raw = subprocess.check_output(["git", "worktree", "list", "--porcelain"], cwd=ROOT,
+        raw = subprocess.check_output(["git", "worktree", "list", "--porcelain"], cwd=repository_root,
                                       stderr=subprocess.DEVNULL, timeout=10).decode("utf-8")
     except (OSError, subprocess.SubprocessError, UnicodeError) as exc:
         raise ExclusionPreflightError("cannot_verify_worktree_boundaries") from exc
     roots = [Path(line.removeprefix("worktree ")).resolve()
              for line in raw.splitlines() if line.startswith("worktree ")]
-    if not roots or ROOT.resolve() not in roots:
+    if not roots or repository_root.resolve() not in roots:
         raise ExclusionPreflightError("cannot_verify_worktree_boundaries")
     return roots
 

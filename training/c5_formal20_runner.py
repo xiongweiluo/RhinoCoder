@@ -54,6 +54,11 @@ def validate_authority(spec: Mapping[str, Any], freeze: Mapping[str, Any], appro
     """Exact fresh formal grant; B/native12/R approvals are not reusable."""
     require(isinstance(spec, Mapping) and isinstance(freeze, Mapping) and isinstance(approval, Mapping),
             "complete formal authority records required")
+    formal_cap = 10800
+    if spec.get('field_protocol_version') == 2:
+        from plugin.rhino_listener.c5_formal20_policy_v2 import validate_formal_binding
+        validate_formal_binding(spec, freeze, approval)
+        formal_cap = 18000
     require(spec.get("study_id") == freeze.get("study_id") == approval.get("study_id") == STUDY_ID
             and spec.get("execution_ready") is True and freeze.get("execution_ready") is True,
             "draft formal freeze cannot execute")
@@ -80,7 +85,7 @@ def validate_authority(spec: Mapping[str, Any], freeze: Mapping[str, Any], appro
             and spec["lease_expiry_epoch"] - spec["model_generation_cutoff_epoch"] >= spec["export_reserve_seconds"]
             and time.time() < spec["model_generation_cutoff_epoch"]
             and type(spec.get("formal_gpu_seconds_max")) is int
-            and 0 < spec["formal_gpu_seconds_max"] <= 10800,
+            and 0 < spec["formal_gpu_seconds_max"] <= formal_cap,
             "formal resource/cutoff boundary missing")
     require(type(spec.get("max_generation_stages")) is int
             and 40 <= spec["max_generation_stages"] <= 240,

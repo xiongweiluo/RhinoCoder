@@ -1,0 +1,7 @@
+{
+  "proposal_id": "C5FORMAL20-OBSERVATION-CAPACITY-20261007-V2",
+  "proposal_sha256": "81b799b1e936c588f51ac41ea11c2d9975044302d9d2f5c037866b78ec349efb",
+  "actor": "repository_owner",
+  "accepted": true,
+  "scope": "formal_adapter_cpu_audit_and_freeze_preparation_only_no_execution"
+}

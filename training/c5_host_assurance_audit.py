@@ -27,7 +27,12 @@ def _raw_snapshot(value):
     require({'CLR', 'clr'} <= {r['module'] for r in value['python_origins']}, 'raw CLR bindings missing')
 
 
-def audit_host_continuity(state, study_id, freeze_sha, source_sha, external_seal_sha):
+def audit_host_continuity(state, study_id, freeze_sha, source_sha, external_seal_sha, *,
+                          normal_limit=512, cleanup_limit=None, journal_limit=1040):
+    require(type(normal_limit) is int and type(journal_limit) is int
+        and (cleanup_limit is None or type(cleanup_limit) is int)
+        and (normal_limit,cleanup_limit,journal_limit) in ((512,None,1040),(2048,256,4096)),
+        'exact legacy or reviewed formal observation bounds required')
     started = read_json(state, 'host-continuity.started.json')
     require(started == {'study_id': study_id, 'runtime_freeze_sha256': freeze_sha, 'replay_allowed': False},
         'independent permanent study claim differs')
@@ -38,7 +43,7 @@ def audit_host_continuity(state, study_id, freeze_sha, source_sha, external_seal
     require(all(seal.get(k) is False for k in ('complete_handler_absence_proven', 'legacy_byte_closure_verified',
         'causal_origin_or_emitted_bytes_proven', 'execution_authority')), 'stronger assurance falsely claimed')
     count = seal['record_count']
-    require(type(count) is int and 3 <= count <= 1040, 'raw host record population bound')
+    require(type(count) is int and 3 <= count <= journal_limit, 'raw host record population bound')
     sidecars=set()
     if (state/'host-continuity-ready.json').exists():
         require(read_json(state,'host-continuity-ready.json') == {'study_id':study_id,
@@ -57,7 +62,7 @@ def audit_host_continuity(state, study_id, freeze_sha, source_sha, external_seal
     head = digest({'study_id': study_id, 'runtime_freeze_sha256': freeze_sha,
         'policy_id': POLICY, 'source_inventory_sha256': source_sha})
     require(seal['genesis_sha256'] == head, 'raw host genesis differs')
-    previous_time, baseline, kinds, failed, normal_count = -1, None, [], False, 0
+    previous_time, baseline, kinds, failed, normal_count, cleanup_count = -1, None, [], False, 0, 0
     for n in range(count):
         row = read_json(state, 'host-continuity-%04d.json' % n)
         require(set(row) == {'schema_version', 'study_id', 'policy_id', 'runtime_freeze_sha256', 'sequence',
@@ -100,8 +105,13 @@ def audit_host_continuity(state, study_id, freeze_sha, source_sha, external_seal
                 require((p['continuity_error_type'] is None) == same, 'producer drift/error verdict differs from raw')
                 if not same: failed = True
                 if kind == 'checkpoint':
-                    require('detach_attempt' not in kinds and normal_count < 512, 'dispatch checkpoint after detach/exhaustion')
+                    require('detach_attempt' not in kinds and normal_count < normal_limit, 'dispatch checkpoint after detach/exhaustion')
                     normal_count += 1
+                else:
+                    cleanup_count += 1
+                    require(cleanup_limit is None or cleanup_count <= cleanup_limit,'cleanup checkpoint capacity exceeded')
+                require(cleanup_limit is not None or normal_count+cleanup_count <= 512,
+                    'legacy combined checkpoint capacity exceeded')
         if kind == 'detached':
             require(p == {'exact_remove_call_completed': True, 'complete_handler_absence_proven': False},
                 'detach observation is not full handler absence proof')
@@ -122,12 +132,13 @@ def audit_host_continuity(state, study_id, freeze_sha, source_sha, external_seal
         'execution_authority': False}
 
 
-def audit_request_checkpoint_bindings(state, slot_order, freeze_sha):
+def audit_request_checkpoint_bindings(state, slot_order, freeze_sha, *, journal_limit=1040):
     """Bind every raw signed hub/native request to the anchored source check.
 
     Owner-side only for private formal execution evidence. No network/host
     operation. The whole chain must be audited separately against receipt.
     """
+    require(type(journal_limit) is int and journal_limit in {1040,4096},'exact raw binding journal bound required')
     count=0
     for directory,prefix,check_prefix in [(state,'hub-request-','hub-host-check-')] + [
         (state/slot,'request-','host-check-') for slot in slot_order]:
@@ -139,7 +150,7 @@ def audit_request_checkpoint_bindings(state, slot_order, freeze_sha):
             check=read_json(directory,check_prefix+path.name[len(prefix):])
             require(set(check)=={'request_sha256','host_record_sha256','host_sequence','runtime_freeze_sha256'}
                 and check['request_sha256']==digest(sent) and check['runtime_freeze_sha256']==freeze_sha
-                and type(check['host_sequence']) is int and 0<=check['host_sequence']<1040,
+                and type(check['host_sequence']) is int and 0<=check['host_sequence']<journal_limit,
                 'raw request/freeze host-check binding differs')
             row=read_json(state,'host-continuity-%04d.json'%check['host_sequence'])
             require(row['record_sha256']==check['host_record_sha256']

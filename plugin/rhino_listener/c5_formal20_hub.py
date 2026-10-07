@@ -18,7 +18,8 @@ from .c5_research_session import IdleBridge
 
 
 class FormalHub:
-    def __init__(self, state, spec, freeze, plans, schemas, source, active, *, clock=time.time):
+    def __init__(self, state, spec, freeze, plans, schemas, source, active, *, clock=time.time,
+                 bridge_factory=IdleBridge, seed_guard=lambda: None):
         self.state, self.spec, self.freeze, self.plans = state, spec, freeze, native_plans(plans)
         require(digest(plans['slot_order']) == spec['slot_order_sha256'], 'formal private order commitment differs')
         self.schemas, self.source, self.active = schemas, source, active
@@ -29,6 +30,7 @@ class FormalHub:
         self.opened, self.control_ids = [], set()
         self.blocked, self.stopped, self.attached = False, False, False
         self._callback = self.tick
+        self.bridge_factory, self.seed_guard = bridge_factory, seed_guard
 
     def guard(self):
         import Rhino
@@ -102,6 +104,7 @@ class FormalHub:
         fixture.ModelAbsoluteTolerance = 0.000001
         backend = NativeDoc(fixture, self.active, self.schemas)
         for index, row in enumerate(plan['fixture_recipe']):
+            self.seed_guard()
             # Seed operations are authorized fixture setup, not model writes.
             publish_json(directory, 'seed-%02d.claim.json' % index, {'index': index, 'operation': row['operation'],
                 'arguments': row['arguments'], 'runtime_freeze_sha256': digest(self.freeze), 'replay_allowed': False})
@@ -110,13 +113,14 @@ class FormalHub:
             after = backend.readback()
             publish_json(directory, 'seed-%02d.result.json' % index, {'index': index, 'before': before,
                 'after': after, 'result': result, 'operation': row['operation'], 'arguments': row['arguments']})
+        if plan['fixture_recipe']: self.seed_guard()
         atomic = RhinoAtomicGate(directory / 'fixture.sqlite3', str(fixture.RuntimeSerialNumber),
             lambda: rhino_scene_digest(fixture), create_ledger=True)
         secret = bytes.fromhex(read_json(directory, 'handoff.key')['key_hex'])
         gate = ResearchGate(backend, atomic, secret, digest(self.freeze),
             task_sha256=hashlib.sha256(plan['task_text'].encode()).hexdigest(),
             max_writes=plan['max_writes'], max_reads=plan['max_reads'])
-        self.child = IdleBridge(gate, directory, key_name='handoff.key',
+        self.child = self.bridge_factory(gate, directory, key_name='handoff.key',
             source_sha256=self.freeze['source_inventory_sha256'], guard_source=self.source, max_messages=128)
         self.child.attach()
         return {'status': 'slot_opened', 'slot_id': slot, 'fixture_serial': int(fixture.RuntimeSerialNumber)}

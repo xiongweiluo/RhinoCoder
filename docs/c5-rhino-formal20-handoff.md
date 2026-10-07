@@ -1,5 +1,7 @@
 # C5-6 全新 20 题：独立保管与正式运行交接门
 
+> **2026-10-08当前续接：**[D实际完整工程门](c5-hostassurance-development-d-result.md)已PASS并退休；本人已接受有限容量/正式5小时资源提案，仅继续[formal v2准备](c5-formal20-v2-execution-preparation.md)。已登记承诺`41c92c72…ebaf4`原样复用，不再要求生成/发送20题。正式执行仍需新完整spec/runtime两个精确哈希及单独批准，私有TTY解密/审计只由本人执行；目前无正式消费。下方旧门、草案和日期均为历史，不可用作执行入口或当前状态。
+
 > **2026-10-06最新状态（优先于下方历史准备记录）：**新20题[公开承诺已登记并通过元数据核验](c5-formal20-public-registration-and-field-blockers.md)，所有者私下自动排除/人工审核及age回读声明已收到；代理未读正文、密文或密钥。实际Rhino的CLR/clr未知来源及四个动态非文件程序集阻塞现行字节冻结；新的[宿主溯源方案](c5-host-provenance-design.md)仅获设计/合成验证授权，不放宽现行门禁。正式消费/模型调用0、`execution_ready=false`。新租期为2026-10-07 19:00 Europe/Zurich到期、18:45停止生成、至少900秒导出，见[v5记录](../eval/c5/rhino-resource-boundary-v5-20261006.json)；GPU-hours与精确批准要求不变。
 
 2026-10-03。状态：**交接设计稿；20 题未建立、未冻结、未读取或消费，正式运行未获批准。**[模型桥 B](c5-modelbridge-development-b-result.md)只关闭了八槽开发工程兼容性门。本文不能用作 `claim`、模型生成、Rhino 写入或整体 C5 `GO` 的授权。
