@@ -1,6 +1,16 @@
-# C5 独立开发 C：显式加载就绪与分阶段时限（准备中、未批准、未运行）
+# C5 独立开发 C：显式加载就绪与分阶段时限（完整冻结/待精确批准/未运行）
 
 当前六项持续交付的第2项。B已[失败退休并独立核实安全收尾](c5-hostassurance-development-b-result.md)，A也保持失败；不修配置重跑旧ID、不追认及时收到B迟到回执。B有限可见连续性PASS，不是整个工程门或LoRA质量裁决。
+
+## 最终可审阅冻结
+
+[spec](../eval/c5/hostassurance-development-spec-20261007-c.json)规范化SHA-256：`f4615ed83ff1daded75f5c8c7fba4c68e4f2f262ac7ce445d04515b44771e583`。
+
+[runtime freeze](../eval/c5/hostassurance-development-runtime-freeze-20261007-c.json)规范化SHA-256：`bbbbca84474d5cd397f2e011775cb17b50f6f4a7328c6cee339a4aedf13090d1`。
+
+[独立预执行复核](../eval/c5/hostassurance-development-preexecution-validation-20261007-c.json)绑定源码`3988063`、289源码条目/339可读宿主文件/297部署文件，全部源/config/spec/runtime三处字节一致；退休B源字节核实不变。Mac外部3552文件、上下文1767/2048、同一基座/checkpoint132/GPU环境、无CUDA初始化/模型加载、pip唯一缺项保留。769 passed/8 skipped，51项C专门正负控，密钥/版本/diff/文档链接通过。源码push/PR双CI `37621913026` / `37621921475`成功；最终发布head仍须双CI成功后才集中请求批准。当前无C运行状态或新grant；`execution_ready=true`只表示材料已冻结，不是实际执行授权。
+
+完整runtime上传ack超时后未重传/覆盖，改做只读精确核对，已确认三处完整297文件与全部SHA一致；该准备问题不是模型操作、不证明网络后续永不超时，也不是C已执行。
 
 ## 唯一修复边界
 

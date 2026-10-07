@@ -15,7 +15,8 @@
 本人批准B最终spec/runtime后按`aab4a5f`/发布`eab34f4`双CI单次执行。[B结果与独立审计](docs/c5-hostassurance-development-b-result.md)确认15份外部锚定host记录与5份请求绑定通过，A的时序漂移未再出现；但首槽120秒回执未知，整个工程FAIL/永久退休。实际1个基座selector/0invocation/LoRA/工具/holdout；迟到原始结果只读保全不追认及时收到。一个空warmup与一个模型夹具registry关闭、九key实际缺席、两hook精确remove、活动不变、worker退出/GPU空闲均核实。
 
 - [x] B精确批准、单次执行、有限连续性独立PASS和完整失败/清理核对完成；不能重放、改判或用其连续性PASS授权正式20题。
-- [ ] **当前主线**：[C新运输生命周期准备](docs/c5-hostassurance-development-c.md)：加载/字节检查后先发绑定身份和零消费的ready，driver核对后才开首模型夹具/发任务；startup≤180与request≤180分别冻结。全部字节检查、4个train家族/8槽/最多16阶段和严格解析/模型/门槛/默认路线不变。只允许代码/CPU/只读部署冻结准备；完整独立核对和双CI后需新C两个精确哈希批准，不能复用B批准。
+- [x] **当前主线的准备交付**：[C新运输生命周期完整冻结](docs/c5-hostassurance-development-c.md)及[独立复核](eval/c5/hostassurance-development-preexecution-validation-20261007-c.json)完成。加载/字节检查后先发绑定身份和零消费的ready，driver核对后才开首模型夹具/发任务；startup≤180与request≤180分别冻结。769 passed/8 skipped、51项专门正负控，289源码/339可读host/297部署文件三处字节及实际模型/环境核对、源码双CI成功；未执行准备缺陷与上传未知ack均保留且只读完成核对，无重放。
+- [ ] **当前必要批准**：最终发布head双CI成功后，请本人批准C spec规范化SHA `f4615ed8…771e583`与runtime规范化SHA `bbbbca84…13090d1`。全部字节检查、4个train家族/8槽/最多16阶段和严格解析/模型/门槛/默认路线不变。无C新grant/状态/现场/模型/holdout，A/B/native12批准不可复用；批准后才单次执行及独立原始审计，准备通过不是工程门通过。
 - [ ] C实际八槽工程及独立审计通过→复用已登记20题公开承诺的正式冻结/双CI/另获精确批准→本人终端单次40槽及私有审计→C5-7/作品集→本人明确决定PR/main收口。整体目标仍未完成。
 
 开发累计495.654412秒，剩余≤3104.345588秒（新cap3104）；今日18:45苏黎世停止/19:00到期，900秒导出、正式3/研究4/原16 GPU-hours不扩大。下面A/B“待批准/准备中”的索引均保留为各自事前历史，不再作为当前待办。C4 NO-GO、v8 formal_quality_fail59/60、默认混合路线不变；PR分支更新不冒充main合并。
