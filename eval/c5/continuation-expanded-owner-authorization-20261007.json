@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "actor": "repository_owner",
+  "recorded_at_utc": "2026-10-07T19:54:52Z",
+  "direct_owner_message": "均可批准，正式20题、E、续租和 PR 合并也确认在此批准范围内",
+  "d_exact_execution_authorized": true,
+  "d_study_id": "C5DEV-HOSTASSURANCE-20261007-D",
+  "d_spec_sha256": "f6970ec438080cd57a77ad34063bdda052d98886c29123ca1e6ac32ba79f3a2a",
+  "d_runtime_freeze_sha256": "8ed3bade6d2629937cc341f3e2a8aea77a2c8cc86adeeabfc7a7f07251484a31",
+  "formal20_route_authorized_subject_to_engineering_gate_and_new_exact_freeze": true,
+  "formal20_exact_execution_authorized": false,
+  "e_preparation_authorized_if_needed_after_d_evidence_review": true,
+  "e_exact_execution_authorized": false,
+  "renewal_intent_authorized_but_duration_price_limit_and_new_deadline_unspecified": true,
+  "automatic_unbounded_renewal_authorized": false,
+  "pr_merge_explicitly_authorized_subject_to_current_head_dependency_ci_and_scope_checks": true,
+  "reviewer_1": "repository_owner",
+  "agent_is_human_reviewer": false,
+  "private_formal20_body_answers_or_keys_read_by_agent": false,
+  "historical_conclusions_and_default_hybrid_route_unchanged": true
+}
