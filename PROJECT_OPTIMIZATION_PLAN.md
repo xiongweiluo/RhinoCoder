@@ -15,7 +15,8 @@
 本人精确批准的`C5DEV-HOSTASSURANCE-20261007-A`已经单次消费并**FAIL/退休、禁止重跑**。[原始结果及审计](eval/c5/hostassurance-development-result-20261007-a.json)确认空warmup关闭、实际模型加载后首个模型槽被来源守卫拒绝；生成/模型夹具/工具/holdout均0。仅`__main__`文件来源在runpy返回后消失，其他可见库存稳定；这是明确工程时序诊断，不是LoRa质量裁决。11记录外部Command History回执锚复算、签名stop、九份key实际缺席、活动不变、worker退出/GPU空闲均核实；失败不追认PASS。
 
 - [x] 原A直接批准、单次执行、独立失败原始审计和批准范围内安全停止已完成；保留全部历史证据与原freeze，不再索要或使用A批准。
-- [ ] **当前主线**：[B时序修复准备](docs/c5-hostassurance-development-b.md)：显式entry返回release＋第一非command Idle单次seal；不忽略/白名单`__main__`，不改严格比较，不增加模型/工具/任务面。真实runpy、release失败、传输人口合成正负控已通过；完成独立B源码/环境/预算冻结、双CI，再请求B新的两个精确哈希批准。当前B没有run/现场授权。
+- [x] **当前主线的准备交付**：[B时序修复完整冻结](docs/c5-hostassurance-development-b.md)及[独立复核](eval/c5/hostassurance-development-preexecution-validation-20261007-b.json)完成：显式entry返回release＋第一非command Idle单次seal；不忽略/白名单`__main__`，不改严格比较，不增加模型/工具/任务面。724 passed/8 skipped，23项专门正负控；279源码/339可读host/287部署文件精确SHA、实际环境与模型/预算核对、源码双CI成功。
+- [ ] **当前必要批准**：最终发布head双CI成功后，请本人批准B spec规范化SHA `bf09d927…4a50f7d`及runtime规范化SHA `241b72ba…539d7d`。没有新grant/运行状态，现场与模型/holdout调用0；A批准不能复用。批准后才单次执行并独立原始审计，不能把准备PASS写成工程门PASS。
 - [ ] B工程门和独立实际审计通过，才进入原登记20题正式完整冻结/双CI/另获精确批准→单次40槽/本人私有审计→C5-7/作品集→本人决定PR合并。此依赖尚未满足，不能自动推进正式消费。
 
 开发累计377.815661秒，剩余≤3222.184339秒（取整3222）；今日2026-10-07 **18:45苏黎世停止生成、19:00到期**，900秒导出和正式3/研究4/原16 GPU-hours不扩大。C4 NO-GO、v8 formal_quality_fail59/60和默认混合路线均不变。下面的“当前A待批准”仅为当日执行前历史，不再作为现在的待办。整体六项交付未完成。
