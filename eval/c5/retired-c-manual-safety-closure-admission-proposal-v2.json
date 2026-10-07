@@ -1,0 +1,31 @@
+{
+  "decision_id": "C5SAFE-CLOSURE-ADMISSION-20261007-V2",
+  "status": "proposal_only_wait_owner_decision",
+  "authorization_kind": "prepare_new_manual_safety_closure_only_not_execution",
+  "retired_study_id": "C5DEV-HOSTASSURANCE-20261007-C",
+  "completed_diagnosis_id": "C5DIAG-HOSTASSURANCE-C-20261007-A",
+  "completed_diagnosis_external_packet_sha256": "441db693f2f95d29b2345d31cc543945da1ca5481b4964c191e29048c3b6377b",
+  "fixture_serial": 268435475,
+  "active_serial": 268435457,
+  "active_content_sha256": "de8fa7924ad4cf7fbeffdbe982f0b559a77eca7a8cf1f24175df642404ec6cfa",
+  "proposed_safety_only_admission": [
+    "Unique original retained C owner and no pending operation; original3-slot failure and prior2 slots closed remain immutable",
+    "Future exact-approved entry rechecks actual safe UI/backend thread, same475 headless unsaved fixture registered and empty, same active457/content, never another document",
+    "Verify original readonly request HMAC historically, late done empty geometry/3stable samples and one completed read/zero candidate_write ledger without replay or TTL override for execution",
+    "Reverify complete original C frozen289 source/339 readable host files and new standalone closure bytes",
+    "Do NOT require old atomic expected0 equality solely for safety Dispose; explicitly retain stored revision/current digest drift as uncertainty, without snapshot, update, reset or validation repair"
+  ],
+  "future_maximum_effects_subject_to_separate_execution_approval": {"known_empty_fixture_closes":1,"specified_ephemeral_key_file_removes":7,"exact_idle_delegate_removes":2,"existing_assemblyload_delegate_removes":1,"new_fixture_subscription_model_gpu_tool_holdout_calls":0},
+  "require_future_new_spec_runtime_and_double_CI": true,
+  "require_future_owner_exact_two_hash_execution_approval": true,
+  "sticky_admission_before_any_live_inspection_required": true,
+  "all_logical_ledger_rows_and_original_C_failure_preserved": true,
+  "no_atomic_snapshot_reset_or_repair": true,
+  "research_and_product_write_atomic_guards_unchanged": true,
+  "unknown_or_failure_no_retry": true,
+  "no_full_atomic_unchanged_host_zero_effects_or_handler_absence_claim": true,
+  "no_memory_or_external_key_copy_erasure_claim": true,
+  "cleanup_execution_authorized": false,
+  "model_D_formal20_lease_extension_PR_merge_authorized": false,
+  "default_route_changed": false
+}

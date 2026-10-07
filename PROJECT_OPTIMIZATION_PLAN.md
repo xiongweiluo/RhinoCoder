@@ -10,6 +10,16 @@
 
 ## 当前快照与跨对话续接
 
+### 近期任务索引：2026-10-07 单次只读诊断完成；当前原子绑定不一致，需本人决定安全关闭判据
+
+本人精确批准`C5DIAG-HOSTASSURANCE-C-20261007-A`的spec8a2e0218/runtime e7a77283后，按`bc26556`双CI单次执行、永久admission先于现场读取。[实际结果与独立审计](docs/c5-retired-c-live-diagnosis-result.md)核对真实UI外部packet `441db693…b6377b`：当前线程、active457/content、fixture475 registry/headless/unsaved/owner及空几何均通过；历史revision0、存储revision1、当前scene摘要彼此不一致。原C失败与诊断前后账本未变，snapshot/关闭/读删key/解除/模型/GPU/holdout均0。诊断退休，不重跑，不是安全闭环PASS。
+
+- [x] 唯一有效诊断冻结、本人精确批准、单次实际只读检查和有限独立回执审计完成；不把当前结果追认为原收尾A唯一因果或完整宿主无瞬变证明。
+- [ ] **当前必要本人决定/门禁**：[人工安全关闭判据提案](eval/c5/retired-c-manual-safety-closure-admission-proposal-v2.json)：只为精确空夹具安全Dispose，允许保留原atomic drift而不要求历史expected0相等；须精确身份/当前空几何/历史只读done零write/源码检查，禁止snapshot或state修复，不影响模型/产品写门。本人接受只授权下一份收尾B代码/冻结准备；真正执行仍需新完整spec/runtime、双CI、两个精确哈希。否则本人手工接管；目前不实施或执行新判据。
+- [ ] 一个原空夹具、7指定key、两Idle及AssemblyLoad仍待准确安全收尾，55宿主记录未seal。安全交接前无新开发/模型/正式20题；交接后先报告与路线选择，**不自动D**。
+
+当前C和收尾A失败保留，默认混合、C4 NO-GO、v8 formal_quality_fail59/60不变。开发累计1129.012194秒未增加，本次诊断GPU0、无自动续租/合并；租期18:45停止生成/19:00苏黎世到期不变。以下“诊断待批准/未执行”保留为事前历史，已由本次结果替代。
+
 ### 近期任务索引：2026-10-07 本人选择只准备逐项只读诊断，尚不执行
 
 本人选择“准备逐项只读诊断的冻结材料”，不是新现场批准。收尾A已单次失败退休；新的`C5DIAG-HOSTASSURANCE-C-20261007-A`只诊断，不关闭/删钥/解除/订阅，不调用模型/GPU/工具/holdout，不重放A或进入D。[诊断规范](docs/c5-retired-c-live-diagnosis-preparation.md)和代码/独立汇总审计/CPU控制正在形成完整冻结，必须最新双CI及另一份两个精确哈希批准后才现场单次运行。
