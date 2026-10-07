@@ -27,6 +27,24 @@ def test_off_ui_receipt_proves_no_document_reads_not_cleanup():
     assert r['cleanup_authorized'] is False and r['execution_authority'] is False
 
 
+def test_integer_claim_cannot_impersonate_false_boolean():
+    s, f, a, c, p = records(); c['replay_allowed'] = 0
+    with pytest.raises(ValueError): audit_diagnosis(s, f, a, c, p, digest(p))
+
+
+def test_safe_UI_positive_and_integer_thread_negative_are_distinct():
+    s, f, a, c, p = records()
+    for name in ('rhino_ui_thread_flag', 'active_document_present', 'active_serial_matches',
+                 'active_content_matches', 'fixture_registry_present', 'fixture_serial_matches',
+                 'fixture_headless_unsaved', 'backend_document_serial_matches'):
+        p['checks'][name] = {'status': 'observed', 'value': True}
+    p['checks']['cached_owner'].update(backend_closed=False, hub_fixture_matches_backend=True, backend_serial_matches=True)
+    p['checks']['fixture_geometry_summary'] = {'status': 'observed', 'value': {'empty': True}}
+    assert audit_diagnosis(s, f, a, c, p, digest(p))['cleanup_authorized'] is False
+    p['checks']['rhino_ui_thread_flag']['value'] = 1
+    with pytest.raises(ValueError): audit_diagnosis(s, f, a, c, p, digest(p))
+
+
 @pytest.mark.parametrize('bad', ['old_grant', 'old_claim', 'external', 'cleanup', 'geometry_off_ui',
                                 'snapshot', 'ledger_changed', 'original_changed', 'whole_host_claim', 'compare_lie'])
 def test_independent_scope_and_raw_graph_negative_controls(bad):

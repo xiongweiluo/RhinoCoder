@@ -28,7 +28,7 @@ def audit_diagnosis(spec, freeze, approval, claim, packet, external_packet_sha25
     expected = {'study_id': ID, 'actor': 'repository_owner', 'approved': True,
                 'spec_sha256': digest(spec), 'runtime_freeze_sha256': digest(freeze), 'scope': SCOPE}
     require(digest(approval) == digest(expected)
-            and claim == {'study_id': ID, 'runtime_freeze_sha256': digest(freeze), 'replay_allowed': False},
+            and digest(claim) == digest({'study_id': ID, 'runtime_freeze_sha256': digest(freeze), 'replay_allowed': False}),
             'independent new one-use grant/claim differs')
     require(packet['study_id'] == ID and packet['runtime_freeze_sha256'] == digest(freeze)
             and digest(packet) == external_packet_sha256, 'actual external diagnosis receipt differs')
@@ -43,10 +43,11 @@ def audit_diagnosis(spec, freeze, approval, claim, packet, external_packet_sha25
             and packet['historical_expected_state'] == spec['historical_expected_state'],
             'logical ledger/original failure not preserved')
     checks = packet['checks']
-    require(checks['stored_scene_matches_history'] == {'status': 'observed',
-            'value': packet['stored_scene_rows'] == [spec['historical_expected_state']]}, 'stored state comparison differs')
+    require(digest(checks['stored_scene_matches_history']) == digest({'status': 'observed',
+            'value': packet['stored_scene_rows'] == [spec['historical_expected_state']]}), 'stored state comparison differs')
     def true(name):
-        return checks.get(name) == {'status': 'observed', 'value': True}
+        value = checks.get(name)
+        return isinstance(value, dict) and set(value) == {'status', 'value'} and value['status'] == 'observed' and value['value'] is True
     if not true('rhino_ui_thread_flag') or checks['cached_owner']['backend_thread_matches'] is not True:
         require(not {'active_document_present', 'active_serial_matches', 'active_content_sha256_before',
                     'fixture_registry_present', 'fixture_geometry_summary', 'current_frozen_scene_digest'} & set(checks),
