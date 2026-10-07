@@ -1,0 +1,23 @@
+{
+  "adapter_files": {
+    "adapter_config.json": "8a776a47b085b787b7c7f3c9b068aed8c0f018278de2b94bf66130f5542d6d4f",
+    "adapter_model.safetensors": "da8acdcde2671aa397534b35369fe4a84b9d150f80f7b7026a4366a770be2883"
+  },
+  "base_manifest_sha256": "5b9ad4c8257ed072cfdee022e4b92303ffc849f53014dbf76d0986b3d1428cdd",
+  "base_revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+  "base_snapshot_files_verified": 14,
+  "c5_6_authorized": false,
+  "checked_date": "2026-10-07",
+  "evaluation_started": false,
+  "frozen_implementation_files_verified": 28,
+  "gpu_observation": "NVIDIA GeForce RTX 3090, 24576 MiB, 11 MiB, 0 %",
+  "holdout_rows_read": 0,
+  "model_loaded": false,
+  "remote_writes": 0,
+  "scope": "Fixed original assets and28-source lineage only, not a future engineering complete runtime freeze",
+  "selected_checkpoint": "checkpoint-132",
+  "source_inventory_file_count": 43,
+  "source_inventory_sha256": "48763df919de37fd3aff0877737b6a1d2a18bc6c6ec2508d880a58ad424d5bdf",
+  "source_revision_label": "160d1c7256bc5bb01a835cef8ea5f4b3f5a02326",
+  "status": "readonly_assets_verified_not_study_authorization"
+}

@@ -1,5 +1,7 @@
 # C5/R PR依赖与所有者审核交接
 
+后续资源说明（2026-10-07）：本人纠正实际租期并要求继续准备，[v6边界](../eval/c5/rhino-resource-boundary-v6-20261007.json)更新为10月8日22:00苏黎世/21:45停止生成；GPU-hours和运行/合并门禁不变。[C只读时序诊断](c5-retired-c-lifecycle-timing-diagnosis.md)完成但没有新工程PASS或后继执行授权。下文“租期结束/等待路线选择”保留为此前状态，不以此断言当前服务商停租。
+
 ## 2026-10-07 后续核查与当前审核边界
 
 以下10月6日表格保留历史；本节优先。API和本地Git共同核实：main仍`01647f1cee38e2f09dd1d561289bfd42f103b9c5`，#2～#6均OPEN/非Draft，#7 OPEN/Draft。GitHub当前均报告MERGEABLE，但这只是当时合并可计算性，不能替代本人审核或合并授权。本人仍为唯一reviewer_1，代理不代签。
