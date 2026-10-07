@@ -60,6 +60,15 @@ def test_c_entry_import_does_not_arm_or_execute():
     assert callable(entry.start) and not hasattr(entry,'ENTRY_RETURN_BARRIER')
 
 
+def test_all_independent_c_source_and_state_constants_are_not_retired_b():
+    from plugin.rhino_listener import c5_hostassurance_development_scope_c as scope
+    from tools import c5_hostassurance_dev_client_c as client,run_c5_hostassurance_dev_worker_c as worker
+    s=public(ROOT,SPEC)
+    assert str(scope.REMOTE_SOURCE)==client.REMOTE_SOURCE==str(worker.SOURCE)==s['remote_source_root']=='/data/RhinoCoder-c5-hostassurance-dev-C'
+    assert str(scope.REMOTE_STATE)==client.REMOTE_STATE==str(worker.STATE)==s['remote_state_root']=='/data/c5-hostassurance-dev-state-20261007-C'
+    assert str(scope.MAC_SOURCE)==s['mac_source_root']=='/Users/xiongweiluo/RhinoCoder/data/training/c5/hostassurance-dev-source-20261007-C'
+
+
 def test_static_driver_orders_ready_before_all_claims_and_fixture_open():
     import inspect
     from tools.c5_hostassurance_dev_client_c import drive

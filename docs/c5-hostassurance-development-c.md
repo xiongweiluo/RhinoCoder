@@ -14,6 +14,8 @@
 
 ## 保证、资源与现场门禁
 
+一次未执行准备曾发现复制的remote-source仍指向退休B；`test ! -e`在传输前拒绝，未覆盖B、未建C远端源/状态或runtime，现场/模型/holdout调用0。[诊断归档](../eval/c5/hostassurance-c-unexecuted-path-preflight-20261007.json)和本地未批准源副本保留；全部C常量已一致修正并新增跨入口source/state回归测试。它不是C执行失败或重跑，不存在可批准的旧C runtime。
+
 仍采用本人已接受的整个opaque宿主信任＋冻结源码/可读文件＋可见checkpoint有限保证。旧默认/正式完整byte闭包守卫不放宽；legacy_byte_closure_verified=false。不声称完整代码发射字节、因果来源、clean进程、无瞬变或完整handler absence。pip唯一metadata缺项原样显式保留，不安装/升级。
 
 退休开发累计**495.6544117410086秒**（B117.8387508240121），剩余**3104.3455882589915秒**，新cap取整3104；保守原累计prior7695.654411741009秒。今日2026-10-07 **18:45苏黎世停止生成、19:00到期**，至少900秒导出，正式3/研究4/原16 GPU-hours不扩张，不自动续租。所有预检/CPU/部署冻结不代表运行许可。

@@ -13,7 +13,7 @@ from .c5_research_provenance import SourceGuard
 ID = DEV_C_ID
 MAC_SOURCE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/hostassurance-dev-source-20261007-C')
 STATE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/hostassurance-dev-state-20261007-C')
-REMOTE_SOURCE = Path('/data/RhinoCoder-c5-hostassurance-dev-B')
+REMOTE_SOURCE = Path('/data/RhinoCoder-c5-hostassurance-dev-C')
 REMOTE_STATE = Path('/data/c5-hostassurance-dev-state-20261007-C')
 ENV = Path('/data/conda-envs/rhinocoder')
 SOCKET = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/ssh-22159.control')

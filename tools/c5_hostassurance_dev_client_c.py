@@ -33,7 +33,7 @@ from training.c5_startup_audit import audit_startup_ready
 
 TOKENIZER=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/modelbridge-tokenizer/c03e6d358207e414f1eca0bb1891e29f1db0e242')
 REMOTE_STATE='/data/c5-hostassurance-dev-state-20261007-C'
-REMOTE_SOURCE='/data/RhinoCoder-c5-hostassurance-dev-B'
+REMOTE_SOURCE='/data/RhinoCoder-c5-hostassurance-dev-C'
 
 
 def preflight(*,include_manifest=False):

@@ -7,7 +7,7 @@
   "scope": "Distinct B after A fail/retire with zero generations; corrected entry-return/first-Idle temporal admission, not a replay or weaker continuity rule",
   "mac_source_root": "/Users/xiongweiluo/RhinoCoder/data/training/c5/hostassurance-dev-source-20261007-C",
   "mac_state_root": "/Users/xiongweiluo/RhinoCoder/data/training/c5/hostassurance-dev-state-20261007-C",
-  "remote_source_root": "/data/RhinoCoder-c5-hostassurance-dev-B",
+  "remote_source_root": "/data/RhinoCoder-c5-hostassurance-dev-C",
   "remote_state_root": "/data/c5-hostassurance-dev-state-20261007-C",
   "environment_root": "/data/conda-envs/rhinocoder",
   "asset_root": "/data/RhinoCoder-c5",

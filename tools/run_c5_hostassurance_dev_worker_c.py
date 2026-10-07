@@ -28,7 +28,7 @@ from training.c5_startup_transport import startup_receipt
 
 ID = 'C5DEV-HOSTASSURANCE-20261007-C'
 STATE = Path('/data/c5-hostassurance-dev-state-20261007-C')
-SOURCE = Path('/data/RhinoCoder-c5-hostassurance-dev-B')
+SOURCE = Path('/data/RhinoCoder-c5-hostassurance-dev-C')
 ENV = Path('/data/conda-envs/rhinocoder')
 ASSET = Path('/data/RhinoCoder-c5')
 ADAPTER = Path('/data/c5-runs-20261001/formal/checkpoint-132')

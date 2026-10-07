@@ -1,0 +1,17 @@
+{
+  "study_id": "C5DEV-HOSTASSURANCE-20261007-C",
+  "source_revision": "59a3778f3c0229892771cbeba53228b17c9ca145",
+  "status": "unexecuted_preparation_rejected_before_transfer_no_runtime_created",
+  "diagnosis": "Date-suffixed C paths were distinct, but three remote source constants and public spec still named retired B. test ! -e retired B rejected before mkdir/tar.",
+  "retired_b_source_not_overwritten": true,
+  "remote_c_source_created": false,
+  "mac_c_state_created": false,
+  "gpu_c_state_created": false,
+  "runtime_freeze_created": false,
+  "new_owner_approval_received": false,
+  "model_generation_calls": 0,
+  "new_rhino_calls": 0,
+  "holdout_rows_read": 0,
+  "local_unapproved_source_preservation": "/Users/xiongweiluo/RhinoCoder/data/training/c5/hostassurance-dev-source-20261007-C-unexecuted-59a3778",
+  "repair_boundary": "Correct all C roots consistently and add cross-entry constant regression before clean committed redeployment. This is preparation, not an executed study or replay; no frozen/approved C version exists."
+}
