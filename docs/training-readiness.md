@@ -1,5 +1,7 @@
 # B1–B4 LoRA 训练就绪与 C0–C2 验收报告
 
+> **2026-10-07后续状态（优先）：**C5-0～5与原80家族单次离线结果已完成，checkpoint132不重训、原80不重读。实际观察探针与本人接受的较弱宿主保证已记录；HOSTASSURANCE A/B/C现场工程均失败退休，不能再将“仅设计/模型调用0”当作当前整个C5状态。[C收尾B有限安全关闭与独立审计完成](c5-retired-c-cleanup-b-result.md)：指定夹具/key/准确委托处理已核实，原C失败/atomic drift/host blocked保留，不证明完整闭包或工程PASS。正式新20题仍未被代理读取/消费，`execution_ready=false`，新完整工程门/正式冻结和精确批准/C5-7均缺；GPU原10月7日19:00苏黎世租期已到期，不自动续租/准备D。现等待本人路线选择，[PR审核交接](c5-pr-stack-review-handoff-20261006.md)可独立准备但不能自动merge。下方10月6日及更早结论为当时历史，不改C4 NO-GO/默认混合。
+
 > **2026-10-06最新状态（优先于下方历史准备记录）：**新20题[公开承诺已登记并通过元数据核验](c5-formal20-public-registration-and-field-blockers.md)，所有者私下自动排除/人工审核及age回读声明已收到；代理未读正文、密文或密钥。实际Rhino的CLR/clr未知来源及四个动态非文件程序集阻塞现行字节冻结；新的[宿主溯源方案](c5-host-provenance-design.md)仅获设计/合成验证授权，不放宽现行门禁。正式消费/模型调用0、`execution_ready=false`。新租期为2026-10-07 19:00 Europe/Zurich到期、18:45停止生成、至少900秒导出，见[v5记录](../eval/c5/rhino-resource-boundary-v5-20261006.json)；GPU-hours与精确批准要求不变。
 
 最近更新：2026-09-21
