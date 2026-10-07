@@ -10,6 +10,16 @@
 
 ## 当前快照与跨对话续接
 
+### 近期任务索引：2026-10-07 本人接受V2仅准备收尾B；尚未实际清理
+
+本人接受`C5SAFE-CLOSURE-ADMISSION-20261007-V2` canonical c103d9b9，仅授权准备新`C5SAFE-HOSTASSURANCE-C-20261007-B`。[B准备与独立审核](docs/c5-retired-c-cleanup-b-preparation.md)已实现永久admission、V2仅空文档安全Dispose、不调用snapshot/修复账本、原历史HMAC/readonly done及固定逻辑行/源码检查、准确两Idle/既有AssemblyLoad/七key处理和独立raw结果审计；新CPU40、全仓884 passed/8 skipped，仍无B执行grant/admission/wrapper或现场调用。
+
+- [x] 只读诊断完成并退休、V2判据本人接受（只准备）、B代码/CPU测试与只读证据核对完成；原C/收尾A失败与state drift保留。
+- [ ] 实际289源码/339可读host和新执行闭包完整冻结、最新发布双CI成功后，集中请求B新spec/runtime两个精确哈希。接受判据或旧A/诊断批准不能替代执行批准。
+- [ ] B单次关闭475、删除七指定key、准确解除两Idle/原AssemblyLoad并封存原链/独立审计，只在新精确批准后；未知不重试，手工安全收尾不等于C PASS。交接后先提交审计与研究路线选择，**不自动D**。
+
+本轮准备/未来B均GPU0，不依赖SSH，不扩大18:45生成停止/19:00苏黎世租期或GPU-hours，不自动续租/合并。C5正式20题仍未读/消费，原公开承诺复用；C4 NO-GO、v8 formal_quality_fail59/60、默认混合不变。
+
 ### 近期任务索引：2026-10-07 单次只读诊断完成；当前原子绑定不一致，需本人决定安全关闭判据
 
 本人精确批准`C5DIAG-HOSTASSURANCE-C-20261007-A`的spec8a2e0218/runtime e7a77283后，按`bc26556`双CI单次执行、永久admission先于现场读取。[实际结果与独立审计](docs/c5-retired-c-live-diagnosis-result.md)核对真实UI外部packet `441db693…b6377b`：当前线程、active457/content、fixture475 registry/headless/unsaved/owner及空几何均通过；历史revision0、存储revision1、当前scene摘要彼此不一致。原C失败与诊断前后账本未变，snapshot/关闭/读删key/解除/模型/GPU/holdout均0。诊断退休，不重跑，不是安全闭环PASS。
