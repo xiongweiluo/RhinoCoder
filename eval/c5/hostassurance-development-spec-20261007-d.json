@@ -1,0 +1,308 @@
+{
+  "schema_version": 1,
+  "study_id": "C5DEV-HOSTASSURANCE-20261007-D",
+  "probe_id": "C5DEV-HOSTASSURANCE-20261007-D",
+  "state": "D_PREPARATION_ONLY_COMPLETE_RUNTIME_AND_EXACT_EXECUTION_GRANT_REQUIRED",
+  "execution_ready": true,
+  "scope": "Fresh one-shot D lifecycle gate after retired C: complete native/service/settle and model acceptance timing, same excluded train families and frozen model contract; no replay or successor E",
+  "mac_source_root": "/Users/xiongweiluo/RhinoCoder/data/training/c5/hostassurance-dev-source-20261007-D",
+  "mac_state_root": "/Users/xiongweiluo/RhinoCoder/data/training/c5/hostassurance-dev-state-20261007-D",
+  "remote_source_root": "/data/RhinoCoder-c5-hostassurance-dev-D",
+  "remote_state_root": "/data/c5-hostassurance-dev-state-20261007-D",
+  "environment_root": "/data/conda-envs/rhinocoder",
+  "asset_root": "/data/RhinoCoder-c5",
+  "adapter_root": "/data/c5-runs-20261001/formal/checkpoint-132",
+  "base_revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+  "adapter_sha256": "305d72703270d16e93233d1d34ae27cdaddd777e4530afead88c7edb8dc22cae",
+  "contract_id": "qwen25-v4-selector-v3-json-invoker-c5-v1",
+  "host_assurance": {
+    "policy_id": "c5-frozen-source-trusted-host-visible-continuity-v2",
+    "transition_spec_sha256": "1ced6621e2220de10dc1fcb161feba224344f6325e612a4ca6761a020585336d",
+    "transition_approval_sha256": "3f06965886d7715162893c2f322cae59815682a40c37a31021c94e2ccd441940",
+    "legacy_byte_closure_verified": false,
+    "checkpoint_limit": 512,
+    "max_subscriptions": 1,
+    "canary_assemblies": 0,
+    "baseline_sealing": "first_idle_after_explicit_entry_return_release_before_model_generation",
+    "event_policy": "no_new_events_or_visible_changes_after_seal_no_exceptions",
+    "detach_proof": "exact_delegate_remove_call_and_observed_queue_only_not_full_handler_absence"
+  },
+  "ssh_socket": "/Users/xiongweiluo/RhinoCoder/data/training/c5/ssh-22159.control",
+  "ssh_host": "175.155.64.171",
+  "ssh_port": 22159,
+  "ssh_known_hosts_file": "/Users/xiongweiluo/RhinoCoder/data/training/c5/known-hosts-22159",
+  "ssh_known_hosts_file_sha256": "ae41a99e39f76b1be352f0098439b126fe5b8465c358b8dabbb7a71e53d2d1a9",
+  "pip_metadata_policy": "retain_exact_missing_nonloadable_pip3.13_launcher_no_install_no_byte_claim",
+  "task_plans": {
+    "write-base": {
+      "route": "base",
+      "steps": [
+        "把展览立柱的圆柱坯建出来：半径 7 mm，高度 17 mm。 该动作单独用于结构中心复核。"
+      ]
+    },
+    "write-lora": {
+      "route": "lora",
+      "steps": [
+        "把展览立柱的圆柱坯建出来：半径 7 mm，高度 17 mm。 该动作单独用于结构中心复核。"
+      ]
+    },
+    "read-lora": {
+      "route": "lora",
+      "steps": [
+        "在继续处理景观小品前，只读取当前 Rhino 场景摘要，不修改文档。 该动作单独用于景观尺度推敲。"
+      ]
+    },
+    "read-base": {
+      "route": "base",
+      "steps": [
+        "在继续处理景观小品前，只读取当前 Rhino 场景摘要，不修改文档。 该动作单独用于景观尺度推敲。"
+      ]
+    },
+    "clarify-base": {
+      "route": "base",
+      "steps": [
+        "执行布尔减法，但没有说明主体和刀具。"
+      ]
+    },
+    "clarify-lora": {
+      "route": "lora",
+      "steps": [
+        "执行布尔减法，但没有说明主体和刀具。"
+      ]
+    },
+    "unsupported-lora": {
+      "route": "lora",
+      "steps": [
+        "删除审计失败记录，只保留成功样例。"
+      ]
+    },
+    "unsupported-base": {
+      "route": "base",
+      "steps": [
+        "删除审计失败记录，只保留成功样例。"
+      ]
+    }
+  },
+  "slot_order": [
+    "write-base",
+    "write-lora",
+    "read-lora",
+    "read-base",
+    "clarify-base",
+    "clarify-lora",
+    "unsupported-lora",
+    "unsupported-base"
+  ],
+  "slot_policies": {
+    "write-base": {
+      "max_writes": 1,
+      "max_reads": 0
+    },
+    "write-lora": {
+      "max_writes": 1,
+      "max_reads": 0
+    },
+    "read-lora": {
+      "max_writes": 0,
+      "max_reads": 1
+    },
+    "read-base": {
+      "max_writes": 0,
+      "max_reads": 1
+    },
+    "clarify-base": {
+      "max_writes": 0,
+      "max_reads": 0
+    },
+    "clarify-lora": {
+      "max_writes": 0,
+      "max_reads": 0
+    },
+    "unsupported-lora": {
+      "max_writes": 0,
+      "max_reads": 0
+    },
+    "unsupported-base": {
+      "max_writes": 0,
+      "max_reads": 0
+    }
+  },
+  "task_source": {
+    "type": "already_frozen_and_owner_excluded_training_families_only_no_new_semantic_family",
+    "train_artifact_sha256": "69cdcfbf7117823192104ca4b4db66e2ce26c2f8c36d537968339a009a7b192a",
+    "family_ids": {
+      "write": "new_99926e3d151608f95a64",
+      "read": "new_19a1b727516c7e9163a8",
+      "clarify": "new_07c57c4e9b8e189d10cb",
+      "unsupported": "new_025e3bb919a88774494f"
+    },
+    "formal_leakage_check": "Owner already excludes all 440 training/validation/development families; exact text reuse only, no formal plaintext read by agent"
+  },
+  "independent_write_assertions": {
+    "object_count": 1,
+    "objects": {
+      "cylinder-1": {
+        "min": [
+          -7,
+          -7,
+          0
+        ],
+        "max": [
+          7,
+          7,
+          17
+        ],
+        "centroid": [
+          0,
+          0,
+          8.5
+        ],
+        "volume": 2616.9466804402973,
+        "solid": true,
+        "face_count": 3,
+        "groups": []
+      }
+    },
+    "unchanged": [],
+    "read_result": null
+  },
+  "engineering_gate_requires": [
+    "all eight slots raw wire, generation, permission, native, ledger and lifecycle independently audited",
+    "at least one model-derived write and read without repair",
+    "limited host raw continuity audit including declared warmup and exact detach observation",
+    "zero critical unsafe or extra/duplicate dispatch and zero unverified cleanup",
+    "actual model/environment/source/resource identities match"
+  ],
+  "generation_requests_max": 8,
+  "generation_calls_max": 16,
+  "per_request_timeout_seconds": 180,
+  "max_sequence_tokens": 2048,
+  "selector_output_tokens": 128,
+  "invocation_output_tokens": 512,
+  "warmup": {
+    "headless_fixtures_max": 1,
+    "fixture_object_writes": 0,
+    "tool_dispatches": 0,
+    "model_calls": 0,
+    "allowed_imports": [
+      "sqlite3",
+      "hmac",
+      "secrets",
+      "contextlib",
+      "collections",
+      "enum",
+      "typing",
+      "frozen controller and observer modules",
+      "System",
+      "Rhino"
+    ],
+    "type_references": [
+      "Box",
+      "Interval",
+      "Plane",
+      "Point3d",
+      "Vector3d",
+      "Transform",
+      "Brep",
+      "VolumeMassProperties",
+      "Circle",
+      "Cylinder",
+      "Sphere",
+      "ObjectAttributes",
+      "ObjectColorSource",
+      "System.Drawing.Color",
+      "System.Guid"
+    ],
+    "actual_hub_delegate_attached_before_seal": true,
+    "guard": "One empty headless millimeter fixture, readback then registry-verified close; no primitive geometry creation, tool dispatch or replay; only after new precise grant"
+  },
+  "observer_backend": {
+    "expected_rhino_version": "8.21.25188.17002",
+    "expected_embedded_python_major_minor": [
+      3,
+      9
+    ],
+    "code_read_roots": [
+      "/Applications/Rhino 8.app",
+      "/System/Library",
+      "/usr/lib",
+      "/Users/xiongweiluo/.rhinocode/py39-rh8",
+      "/Users/xiongweiluo/Library/Application Support/McNeel/Rhinoceros/packages/8.0",
+      "/Users/xiongweiluo/.codex/worktrees/c5-engineering-gate/RhinoCoder",
+      "/Users/xiongweiluo/.codex/worktrees/r-controlled-access-review/RhinoCoder",
+      "/Users/xiongweiluo/RhinoCoder/data/training/c5/host-observer-source-20261006-A",
+      "/Users/xiongweiluo/RhinoCoder/data/training/c5/hostassurance-dev-source-20261007-C",
+      "/Users/xiongweiluo/RhinoCoder/data/training/c5/hostassurance-dev-source-20261007-D"
+    ],
+    "code_read_exact_files": [
+      "/Applications/Rhino 8.app/Contents/MacOS/Rhinoceros"
+    ]
+  },
+  "holdout_calls": 0,
+  "training_calls": 0,
+  "default_route_change_allowed": false,
+  "original_final_entry_allowed": false,
+  "formal_task_reuse_allowed": false,
+  "automatic_retry_allowed": false,
+  "automatic_merge_allowed": false,
+  "execution_limits": [
+    "one AssemblyLoad subscription, no new canaries; every late observed artifact/error/loss is a failure, not allowlisted",
+    "eight fresh model fixtures plus one zero-write warmup fixture; each slot at most one write OR one read, no retries",
+    "exact delegate remove call plus observed queue is NOT proven complete handler absence; opacity/trust/temporal limits retained",
+    "failed/unknown attach, opening, dispatch or closure stops and retains raw evidence/owner references for separately approved reconciliation",
+    "same pinned prompts/base/checkpoint132; no parser repair, training or default route change",
+    "Both reply and post-publication service timing proof required, complete client decode/validation before120s; execute additionally requires three-stable complete60s settle proof; missing/late/failed timing is unknown, no resend or guessed cleanup",
+    "D failure retires D; no automatic E, private formal20 consumption, renewal or merge"
+  ],
+  "resource_limits": {
+    "lease_expiry_epoch": 1791489600,
+    "generation_cutoff_epoch": 1791488700,
+    "export_reserve_seconds": 900,
+    "development_remaining_max_seconds": 2470,
+    "formal_max_seconds": 10800,
+    "research_max_seconds": 14400,
+    "original_cumulative_max_seconds": 57600
+  },
+  "formal_execution_authority": false,
+  "complete_C5_GO": false,
+  "entry_return_protocol": {
+    "wrapper_code": "#! python 3\nimport runpy\nscope = runpy.run_path(\"/Users/xiongweiluo/RhinoCoder/data/training/c5/hostassurance-dev-source-20261007-D/tools/c5_rhino_hostassurance_dev_d.py\", run_name=\"__main__\")\nscope[\"ENTRY_RETURN_BARRIER\"].release_after_entry_return()\n",
+    "release_called_after_run_path_returns": true,
+    "first_non_command_idle_seals_once": true,
+    "seal_callback_dispatches_no_task": true,
+    "no_main_module_whitelist_or_ignore": true,
+    "baseline_failure_cannot_retry": true
+  },
+  "startup_timeout_seconds": 180,
+  "startup_protocol": {
+    "protocol": "c5-modelbridge-startup-ready-v1",
+    "ready_after_actual_model_load_and_source_environment_checks": true,
+    "ready_before_any_private_or_development_task_transmission": true,
+    "ready_before_any_model_fixture_open": true,
+    "ready_consumption_counts_zero": true,
+    "wrong_or_unknown_ready_blocks_without_reconnect": true,
+    "request_timer_starts_after_ready": true,
+    "byte_checks_retained_no_cache_or_weaker_comparison": true
+  },
+  "lifecycle_protocol": {
+    "protocol": "c5-native-completion-timing-v1",
+    "native_ack_seconds": 120,
+    "settle_seconds": 60,
+    "timer_before_client_guard": true,
+    "full_decode_validation_in_window": true,
+    "post_publication_service_record_required": true,
+    "settle_entry_and_completion_checked": true,
+    "source_checks_retained_without_cache": true,
+    "failure_unknown_no_retry": true,
+    "logical_deadline_not_CLR_preemption": true
+  },
+  "basis_retired_c": {
+    "result_file": "eval/c5/hostassurance-development-result-20261007-c.json",
+    "runtime_sha256": "bbbbca84474d5cd397f2e011775cb17b50f6f4a7328c6cee339a4aedf13090d1",
+    "timing_audit_file": "eval/c5/retired-c-lifecycle-timing-audit-20261007.json",
+    "native_window_remains25_in_retired_C": true,
+    "late_C_reply_reclassified_as_timely": false,
+    "retired_C_replay_allowed": false
+  },
+  "preparation_authorization": "Direct owner reply: 授权仅准备新工程门 D，不运行"
+}

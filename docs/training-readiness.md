@@ -1,5 +1,7 @@
 # B1–B4 LoRA 训练就绪与 C0–C2 验收报告
 
+> **2026-10-07 D仅准备授权（优先）：**本人明确“授权仅准备新工程门D，不运行”。[D生命周期代码/合成和独立审核](c5-hostassurance-development-d.md)已备，当前形成全新实际部署/完整runtime冻结与双CI；实际运行仍需新的spec/runtime两精确哈希。40新控制、全仓956 passed/8 skipped不是现场PASS，不重跑A/B/C、不自动E或正式20题；原V2/模型/数据契约和v6 GPU上限不变。下方“不自动D/范围待澄清”是此前历史，已由此明确准备授权替代，但没有运行权限。
+
 > **2026-10-07恢复准备状态（优先）：**本人确认租期尚在并要求继续，新截止为2026-10-08 22:00苏黎世、21:45停止生成/900秒导出，见[v6](../eval/c5/rhino-resource-boundary-v6-20261007.json)。原GPU-hours不变。已完成[C原始时序CPU诊断](c5-retired-c-lifecycle-timing-diagnosis.md)与固定基座/checkpoint132/GPU只读核对，未运行模型/Rhino/正式20题。新租期不修改已运行冻结或追认C，后继范围和新spec/runtime精确批准仍须分别明确；原“不自动D”不以租期确认绕过。下面租期已结束/等待选择是旧v5边界下历史，并非新的服务商到期核验。
 
 > **2026-10-07后续状态（优先）：**C5-0～5与原80家族单次离线结果已完成，checkpoint132不重训、原80不重读。实际观察探针与本人接受的较弱宿主保证已记录；HOSTASSURANCE A/B/C现场工程均失败退休，不能再将“仅设计/模型调用0”当作当前整个C5状态。[C收尾B有限安全关闭与独立审计完成](c5-retired-c-cleanup-b-result.md)：指定夹具/key/准确委托处理已核实，原C失败/atomic drift/host blocked保留，不证明完整闭包或工程PASS。正式新20题仍未被代理读取/消费，`execution_ready=false`，新完整工程门/正式冻结和精确批准/C5-7均缺；GPU原10月7日19:00苏黎世租期已到期，不自动续租/准备D。现等待本人路线选择，[PR审核交接](c5-pr-stack-review-handoff-20261006.md)可独立准备但不能自动merge。下方10月6日及更早结论为当时历史，不改C4 NO-GO/默认混合。
