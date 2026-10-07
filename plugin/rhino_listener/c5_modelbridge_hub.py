@@ -24,7 +24,7 @@ class DevelopmentHub:
     The entry checks the exact human record, source freeze and prepared scope.
     Unknown/partial opening retains the actual fixture reference for audit.
     """
-    def __init__(self,state,spec,freeze,schemas,source,active,*,clock=time.time):
+    def __init__(self,state,spec,freeze,schemas,source,active,*,clock=time.time,bridge_factory=IdleBridge):
         self.state,self.spec,self.freeze,self.schemas,self.source = state,spec,freeze,schemas,source
         self.active,self.active_serial = active,int(active.RuntimeSerialNumber)
         # A's watermark-bearing digest was over-sensitive: read-only Rhino
@@ -33,6 +33,7 @@ class DevelopmentHub:
         # content-only protection already used by NativeDoc for the active UI.
         self.initial_active = active_content_digest(active)
         self.clock,self.seq = clock,1
+        self.bridge_factory = bridge_factory
         self.secret = bytes.fromhex(read_json(state,'hub.key')['key_hex'])
         self.child,self.fixture = None,None
         self.opened,self.control_ids = [],set()
@@ -126,7 +127,7 @@ class DevelopmentHub:
         policy=self.spec['slot_policies'][slot]
         gate=ResearchGate(backend,atomic,secret,digest(self.freeze),task_sha256=hashlib.sha256(task.encode()).hexdigest(),
                           max_writes=policy['max_writes'],max_reads=policy['max_reads'])
-        self.child=IdleBridge(gate,directory,key_name='handoff.key',
+        self.child=self.bridge_factory(gate,directory,key_name='handoff.key',
                  source_sha256=self.freeze['source_inventory_sha256'],guard_source=self.source)
         self.child.attach()
         return {'status':'slot_opened','slot_id':slot,'fixture_serial':int(fixture.RuntimeSerialNumber)}
