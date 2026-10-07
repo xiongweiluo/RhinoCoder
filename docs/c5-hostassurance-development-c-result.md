@@ -17,3 +17,7 @@
 spec规范化SHA-256：`1df5aeb6a2e842eee03b6121028572f8efc6c694b210e870de1a1c389c8971bc`；[runtime完整引用清单](../eval/c5/hostassurance-c-cleanup-runtime-20261007.json)规范化SHA-256：`3a58cf7aef648ea1aef929aad5726a1d1e314ce05506b739c5bf06e15d7dfd9b`。唯一新脚本[源码](../tools/c5_hostassurance_retired_c_cleanup.py)字节SHA-256 `ea358f7cb79465f86b34a6dff649318e026e1a7b1a47a8e0efbcd4ea60f42b42`；完整原C runtime文件和规范化SHA均绑定，原289源码及339可读文件再次通过原scope核对。CPU纯前置/授权正负控22项通过；最新发布双CI成功之前不请求实际收尾授权。
 
 脚本自身可能使观察到的Python来源发生批准范围内的变化；仍如实保留drift，不加白名单、不伪称整个场内连续性PASS或完整handler absence。确认安全交接之前，不再启动新开发或正式运行。
+
+## 后续：最小安全收尾A已批准，但单次前置检查失败
+
+本人精确批准上述cleanup spec/runtime后，脚本在138行实际组合现场绑定检查处拒绝，尚未建立effects claim；没有关闭/删钥/解除/封存结果。7key与55份未封存记录仍在，原C失败字节未变。[单次收尾失败与独立只读审计](c5-hostassurance-c-cleanup-attempt-a-result.md)保留真实traceback、39份请求绑定与未封存前缀核对，不能把它当安全闭环。收尾A永久退休，不重试或改检查；当前等待本人选择新精确批准的逐项只读诊断或本人手工接管。**不自动进入D，不读取正式20题。**前文“待cleanup批准”为当时历史，现已由此次失败状态替代。
