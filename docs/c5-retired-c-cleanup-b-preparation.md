@@ -1,5 +1,7 @@
 # C最小人工安全收尾B：V2判据准备，待独立精确执行批准
 
+后续状态（2026-10-07）：下文保留事前准备与门禁。本人精确批准后已单次执行并退休，[有限安全关闭与独立原始审计](c5-retired-c-cleanup-b-result.md)完成；原C失败及host blocked/drift不变，不自动D或正式20题。“待批准/未执行”仅描述当时状态。
+
 本人已接受[安全关闭判据V2](../eval/c5/retired-c-manual-safety-closure-admission-proposal-v2.json) canonical SHA `c103d9b9…ae172f`，并明确[仅授权准备收尾B](../eval/c5/retired-c-manual-safety-closure-owner-decision-v2.json)。这不是执行许可。C、收尾A及[只读诊断](c5-retired-c-live-diagnosis-result.md)全部保留、退休，不重跑。
 
 ## 唯一变化与不变边界

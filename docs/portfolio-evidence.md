@@ -22,6 +22,7 @@ RhinoCoder 对外只使用能从版本化文件复核的指标。本页是 READM
 | C3 A5 一次性评测未达到 GO 门槛 | 基座与 LoRA 在 45 条锁定 holdout 上的 parse/name/arguments/sequence exact 均为 0/45；差值 0.0pp、净胜 0，第二 run 已禁止 | [C3 A5 报告](c3-a5-holdout-report.md)、[C2 报告](c2-qlora-training-report.md)、[C3 协议](c3-final-evaluation.md) |
 | C4 模型实验裁决为 NO-GO | P2 真实 Rhino 配对描述性结果为基座 4/30、LoRA 5/30；+3.3pp、净胜 1、exact McNemar `p=1.0`、bootstrap 95% CI [0,10]pp，未达到预注册门槛；LoRA 基础设施补位事后发现超出冻结规则 | [C4 原报告](c4-model-decision.md)、[只读诊断与合规性限制](c4-posthoc-failure-diagnosis.md)、[最小化机器结果](p2-model-comparison-results.json) |
 | 独立C5离线和严格控制器门通过 | 全新80家族单次配对，sequence基座20/80、LoRA77/80，+71.25pp、净胜57，exact McNemar p≈1.39e-17；原门槛、消费/冻结血缘与公开逐家族统计复算通过，尚非真实Rhino或整体GO | [最终报告](c5-final-evaluation-report.md)、[独立公开审计](../eval/c5/final-public-audit-20261002-v2.json) |
+| C5现场开发失败保留，C遗留有限安全收尾完成 | A/B/C工程失败退休；C部分原生写/读不等于完整八槽通过。独立核实精确空夹具关闭、七key删除与委托解除，58记录/39请求绑定封存；host连续性仍blocked，正式20题未消费、C5-7未裁决 | [C失败](c5-hostassurance-development-c-result.md)、[收尾B与独立审计](c5-retired-c-cleanup-b-result.md)、[公开哈希索引](../eval/c5/hostassurance-c-cleanup-result-20261007-b.json) |
 | 当前正式版本为 0.3.0 | Tag、GitHub Release 与在线只读演示均有公开入口；当前后续改动属于 Unreleased | [版本清单](version-manifest.json)、[发布清单](release-checklist.md) |
 
 ## 代表性可追溯链路

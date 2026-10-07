@@ -10,7 +10,19 @@
 
 ## 当前快照与跨对话续接
 
-### 近期任务索引：2026-10-07 本人接受V2仅准备收尾B；尚未实际清理
+### 近期任务索引：2026-10-07 收尾B有限安全关闭已审计；等待路线选择，不自动D
+
+本人对B spec `505891816aa4cc471816689c31aa774deadfc30384828c7fe0ac7031bd900100` / runtime `2aab184fd2a54545dc8c3c2b75cc9f55ca02a0dc0b6cd52dea0e03da4d4dae3d`精确批准后，按源码`2a1f6f2`/发布`143fafa`双CI单次执行。[实际结果与独立审计](docs/c5-retired-c-cleanup-b-result.md)核实唯一空fixture475关闭/registry缺席、七指定key删除、两Idle和既有AssemblyLoad精确remove、active457/content不变、原C失败字节/全部逻辑账本不变。无snapshot/状态修复，atomic expected0/stored1 drift保留；模型/GPU/工具/holdout/新夹具/新订阅均0。B永久退休，无重试。
+
+- [x] B完整冻结、双CI、本人两个精确哈希批准、单次执行、实际UI外部回执与有限独立安全审计完成；原遗留夹具/指定key/精确委托已处理，私有开发证据留原目录。
+- [x] 全部58份host记录及39请求绑定独立重放、外部seal锚核实；最后cleanup checkpoint的Python来源不同于基线，原始结论仍为`blocked=true / host_continuity_failed_or_incomplete_no_replay`。安全Dispose通过不等于C工程或连续性PASS，完整handler absence/内存和外部key擦除均未证明。
+- [ ] **当前唯一必要本人决定**：暂停现场模型路线并交付截至当前证据的阶段报告/PR审核材料（建议），或另行确定继续研究与资源边界。不得自动准备/运行D；原A/B/C及收尾A失败保留，不能只延长超时或复用授权。
+- [ ] **条件项，尚未满足**：新的独立完整八槽工程门与审计→复用已登记20题承诺的正式冻结/双CI/精确批准→本人终端单次40槽/私有审计→C5-7。当前正式20题未读/未消费、正式spec未获执行批准，C5-7未裁决；不因安全收尾完成自动进入后续。
+- [ ] PR/main收口仍由唯一reviewer_1本人明确决定；推送/更新PR授权不含merge。不打包脏主工作区/认证/私有题目。R历史证据保留，完整UI/用户开放/P2b/精简D继续延期。
+
+原2026-10-07 18:45苏黎世停止生成/19:00到期已结束，收尾B无GPU/SSH依赖，不改变租期或预算、不自动续租。开发累计1129.012194秒未增加，剩余GPU-hours不等于有效租期授权。C4 NO-GO、v8 formal_quality_fail59/60、默认混合不变；整体六项Goal仍未完成。以下旧索引均为对应阶段历史，不再列作当前待办。
+
+### 历史准备索引：2026-10-07 本人接受V2仅准备收尾B；当时尚未实际清理
 
 本人接受`C5SAFE-CLOSURE-ADMISSION-20261007-V2` canonical c103d9b9，仅授权准备新`C5SAFE-HOSTASSURANCE-C-20261007-B`。[B准备与独立审核](docs/c5-retired-c-cleanup-b-preparation.md)已实现永久admission、V2仅空文档安全Dispose、不调用snapshot/修复账本、原历史HMAC/readonly done及固定逻辑行/源码检查、准确两Idle/既有AssemblyLoad/七key处理和独立raw结果审计；新CPU40、全仓884 passed/8 skipped，仍无B执行grant/admission/wrapper或现场调用。
 
@@ -21,7 +33,7 @@
 
 本轮准备/未来B均GPU0，不依赖SSH，不扩大18:45生成停止/19:00苏黎世租期或GPU-hours，不自动续租/合并。C5正式20题仍未读/消费，原公开承诺复用；C4 NO-GO、v8 formal_quality_fail59/60、默认混合不变。
 
-### 近期任务索引：2026-10-07 单次只读诊断完成；当前原子绑定不一致，需本人决定安全关闭判据
+### 历史诊断索引：2026-10-07 单次只读诊断完成；当时需本人决定安全关闭判据
 
 本人精确批准`C5DIAG-HOSTASSURANCE-C-20261007-A`的spec8a2e0218/runtime e7a77283后，按`bc26556`双CI单次执行、永久admission先于现场读取。[实际结果与独立审计](docs/c5-retired-c-live-diagnosis-result.md)核对真实UI外部packet `441db693…b6377b`：当前线程、active457/content、fixture475 registry/headless/unsaved/owner及空几何均通过；历史revision0、存储revision1、当前scene摘要彼此不一致。原C失败与诊断前后账本未变，snapshot/关闭/读删key/解除/模型/GPU/holdout均0。诊断退休，不重跑，不是安全闭环PASS。
 
@@ -31,7 +43,7 @@
 
 当前C和收尾A失败保留，默认混合、C4 NO-GO、v8 formal_quality_fail59/60不变。开发累计1129.012194秒未增加，本次诊断GPU0、无自动续租/合并；租期18:45停止生成/19:00苏黎世到期不变。以下“诊断待批准/未执行”保留为事前历史，已由本次结果替代。
 
-### 近期任务索引：2026-10-07 本人选择只准备逐项只读诊断，尚不执行
+### 历史准备索引：2026-10-07 本人选择只准备逐项只读诊断，当时尚不执行
 
 本人选择“准备逐项只读诊断的冻结材料”，不是新现场批准。收尾A已单次失败退休；新的`C5DIAG-HOSTASSURANCE-C-20261007-A`只诊断，不关闭/删钥/解除/订阅，不调用模型/GPU/工具/holdout，不重放A或进入D。[诊断规范](docs/c5-retired-c-live-diagnosis-preparation.md)和代码/独立汇总审计/CPU控制正在形成完整冻结，必须最新双CI及另一份两个精确哈希批准后才现场单次运行。
 
@@ -40,7 +52,7 @@ CPU只读账本提供新线索：当前candidate_scene revision1与历史expecte
 - [x] 只读诊断源码/独立审计/实际289与339字节复核及唯一有效冻结准备完成：源码`8fc2c2b`，全仓844 passed/8 skipped，新专项42、合并旧收尾专项75通过；整数布尔伪装负控补齐，未批准旧runtime e9ef34ee封存。没有新现场grant/admission或运行。
 - [ ] 最新发布head双CI成功后，集中请本人精确批准诊断spec `8a2e0218d956cae322a0b5c44a11fde5731fc1140417750eb19d4c8d383c9e01` / runtime `e7a7728342fc0e6e4579312510113d9a9d1d38ef1a72aab1fd526be22a9b56db`。旧收尾A/C运行批准不可复用；批准后仅单次只读诊断与独立审计，不自动cleanup或D。
 
-### 近期任务索引：2026-10-07 最小安全收尾A现场前置拒绝；待本人决定安全诊断/接管
+### 历史失败索引：2026-10-07 最小安全收尾A现场前置拒绝；当时待本人决定安全诊断/接管
 
 本人精确批准`C5SAFE-HOSTASSURANCE-C-20261007-A` spec `1df5aeb6…8971bc` / runtime `3a58cf7a…7dfd9b`后，按`bf0bbf8`双CI冻结单次Run。实际脚本138行报 `actual known empty fixture/active binding differs`，发生在effects claim之前；没有重试、删钥、关闭或准确解除成功记录。[结果与独立只读审计](docs/c5-hostassurance-c-cleanup-attempt-a-result.md)确认原C失败字节未变、7key仍在、后五槽无新claim，55份未封存前缀与39份请求绑定核对一致；不是完整宿主连续性/安全闭环PASS。
 
@@ -50,7 +62,7 @@ CPU只读账本提供新线索：当前candidate_scene revision1与历史expecte
 
 本次模型/GPU/工具/正式20题调用0，累计开发1129.012194秒、剩余2470.987806秒和今日18:45停止生成/19:00苏黎世到期不扩张；不自动续租。正式工程门、C5-7与本人明确PR/main收口未完成。C4 NO-GO、v8 formal_quality_fail59/60和默认混合不变。以下“待cleanup批准/可评估下一开发”仅为此前历史，已被本人要求先收尾审计/路线选择且不自动D的边界替代。
 
-### 近期任务索引：2026-10-07 C 运输握手通过，第三槽原生回执未知；先单独安全收尾
+### 历史失败索引：2026-10-07 C 运输握手通过，第三槽原生回执未知；当时先单独安全收尾
 
 [C 单次实际结果](docs/c5-hostassurance-development-c-result.md)：本人批准两个精确哈希后，按源码`3988063`/发布`cff7c5e`双CI单次执行。GPU零消费ready及三份模型回执收到，基座首槽和LoRA写槽实际关闭/stop；第三read-lora的唯一只读回执约25.623秒才到，超过冻结25秒原生窗口，驱动停止、不重发、不补题、不追认及时收到。C永久FAIL/退休，不是八槽工程PASS或质量裁决。
 
