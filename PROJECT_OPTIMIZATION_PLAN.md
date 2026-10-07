@@ -16,6 +16,7 @@
 
 - [x] 只读诊断完成并退休、V2判据本人接受（只准备）、B代码/CPU测试与只读证据核对完成；原C/收尾A失败与state drift保留。
 - [ ] 实际289源码/339可读host和新执行闭包完整冻结、最新发布双CI成功后，集中请求B新spec/runtime两个精确哈希。接受判据或旧A/诊断批准不能替代执行批准。
+- [x] B唯一有效执行冻结与[独立预执行复核](eval/c5/hostassurance-c-cleanup-preexecution-20261007-b.json)已完成：源码`2a1f6f2`、七份新执行/审计依赖代码、完整原C289/339与八份开发证据及逻辑行hash重新核对，未读任何key正文或正式20题。最新发布双CI通过后待本人批准spec `505891816aa4cc471816689c31aa774deadfc30384828c7fe0ac7031bd900100` / runtime `2aab184fd2a54545dc8c3c2b75cc9f55ca02a0dc0b6cd52dea0e03da4d4dae3d`；无新执行许可或现场状态。
 - [ ] B单次关闭475、删除七指定key、准确解除两Idle/原AssemblyLoad并封存原链/独立审计，只在新精确批准后；未知不重试，手工安全收尾不等于C PASS。交接后先提交审计与研究路线选择，**不自动D**。
 
 本轮准备/未来B均GPU0，不依赖SSH，不扩大18:45生成停止/19:00苏黎世租期或GPU-hours，不自动续租/合并。C5正式20题仍未读/消费，原公开承诺复用；C4 NO-GO、v8 formal_quality_fail59/60、默认混合不变。

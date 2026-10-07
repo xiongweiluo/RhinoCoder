@@ -31,3 +31,13 @@ CPU合成控制40项通过：V2状态漂移仅可用于精确empty Dispose、错
 ## 当前执行门禁
 
 [spec](../eval/c5/hostassurance-c-cleanup-spec-20261007-b.json)、runtime和独立预执行复核在实际字节及source revision冻结后集中列两个精确哈希。最终发布双CI成功且本人新直接批准之前，不创建B grant/admission/wrapper、不运行入口。只读GPU资源非依赖、本次GPU0，不自动续租或合并；main仍由本人决定，脏主工作区/私有认证材料不打包。
+
+## 唯一有效待批准冻结
+
+源码`2a1f6f2bf71e04511c558c87a5a038017f660305`；B入口字节SHA `05d3fa3ab5813c169b4898001507fc5e6c6d45132a879612f2cf249eb2a492d6`。
+
+- spec规范化SHA-256：`505891816aa4cc471816689c31aa774deadfc30384828c7fe0ac7031bd900100`。
+- [runtime](../eval/c5/hostassurance-c-cleanup-runtime-20261007-b.json)规范化SHA-256：`2aab184fd2a54545dc8c3c2b75cc9f55ca02a0dc0b6cd52dea0e03da4d4dae3d`。
+- [独立预执行复核](../eval/c5/hostassurance-c-cleanup-preexecution-20261007-b.json)绑定完整旧C runtime canonical/file SHA、289/339重新字节验证、新B/审计/历史纯验证器及raw审计依赖七份代码、八份指定开发证据文件和逻辑账本SHA。所有新代码字节与上述Git revision一致。执行环境只用原Mac/Rhino，不加载GPU/模型或读取训练/holdout语料。
+
+884 passed/8 skipped、40项B专项与Python3.9/secret/release/link/diff通过；现场执行grant/admission/effects/result/failure仍不存在。最新发布双CI成功后才请本人批准上述两个完整哈希，最多一次安全收尾及独立原始审计。没有保证原C整体连续性通过；blocked/drift须保留，不自动D或最终20题。
