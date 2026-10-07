@@ -4,6 +4,8 @@
 
 ## 最终可审阅冻结
 
+**后续执行状态：**本人已批准上述最终两个哈希，B单次执行后因首请求远端回执未知而FAIL/永久退休；有限宿主连续性独立PASS，实际1次基座selector、0invocation/LoRA/工具/holdout，迟到结果只读保全，清理已核实。见[B结果](c5-hostassurance-development-b-result.md)。下文未批准/未执行状态仅为事前历史，不再索要B批准或复用B运行；当前只准备新C运输生命周期修复，仍需其独立两个精确哈希批准。
+
 [spec](../eval/c5/hostassurance-development-spec-20261007-b.json)规范化SHA-256：`bf09d927c79ff1d36338e93fbf1d235c4d905cdce18353c017a916d854a50f7d`。
 
 [runtime freeze](../eval/c5/hostassurance-development-runtime-freeze-20261007-b.json)规范化SHA-256：`241b72baf3fe0c72e684e7783fd3b5935aa24dc4fe2c1f33af6b8a9efe539d7d`。

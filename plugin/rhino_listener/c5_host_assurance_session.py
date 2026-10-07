@@ -17,9 +17,11 @@ from .c5_research_native import digest, require
 
 DEV_ID = 'C5DEV-HOSTASSURANCE-20261007-A'
 DEV_B_ID = 'C5DEV-HOSTASSURANCE-20261007-B'
+DEV_C_ID = 'C5DEV-HOSTASSURANCE-20261007-C'
 STUDIES = {
     DEV_ID: 'direct repository_owner approval of new host-assurance development spec and complete runtime freeze',
     DEV_B_ID: 'direct repository_owner approval of new host-assurance development spec and complete runtime freeze',
+    DEV_C_ID: 'direct repository_owner approval of new host-assurance development spec and complete runtime freeze',
     'c5-rhino-paired-20-v1': 'direct repository_owner approval of complete C5-6 formal20 spec and runtime freeze',
 }
 
@@ -30,7 +32,7 @@ def host_policy(transition, transition_approval, *, study_id=DEV_ID):
         'transition_approval_sha256': digest(transition_approval), 'legacy_byte_closure_verified': False,
         'checkpoint_limit': 512, 'max_subscriptions': 1, 'canary_assemblies': 0,
         'baseline_sealing': ('first_idle_after_explicit_entry_return_release_before_model_generation'
-            if study_id==DEV_B_ID else 'after_declared_import_type_controller_warmup_before_any_model_generation'),
+            if study_id in {DEV_B_ID,DEV_C_ID} else 'after_declared_import_type_controller_warmup_before_any_model_generation'),
         'event_policy': 'no_new_events_or_visible_changes_after_seal_no_exceptions',
         'detach_proof': 'exact_delegate_remove_call_and_observed_queue_only_not_full_handler_absence'}
 
