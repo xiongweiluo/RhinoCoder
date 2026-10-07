@@ -102,6 +102,10 @@ def scope(root, *, private_prefixes, check_time=True):
     project = SourceGuard(root,freeze['source_files'],freeze['source_inventory_sha256'],project_prefixes=private_prefixes)
     def guard():
         project()
+        require(file_sha(root/SPEC)==freeze['spec_file_sha256']
+            and digest(public(root,FREEZE))==binding['runtime_freeze_sha256']
+            and read_json(state,'owner-approval.json')==approval,
+            'new approved spec/runtime/grant changed after admission')
         require(all(file_sha(root/n) == sha for n,sha in freeze['fixed_public_files'].items()), 'fixed public config drift')
         if root == MAC_SOURCE:
             require(all(file_sha(Path(n)) == sha for n,sha in freeze['frozen_observed_host_files'].items()),

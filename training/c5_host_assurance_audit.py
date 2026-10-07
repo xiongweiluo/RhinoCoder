@@ -39,8 +39,20 @@ def audit_host_continuity(state, study_id, freeze_sha, source_sha, external_seal
         'causal_origin_or_emitted_bytes_proven', 'execution_authority')), 'stronger assurance falsely claimed')
     count = seal['record_count']
     require(type(count) is int and 3 <= count <= 1040, 'raw host record population bound')
+    sidecars=set()
+    if (state/'host-continuity-ready.json').exists():
+        require(read_json(state,'host-continuity-ready.json') == {'study_id':study_id,
+            'runtime_freeze_sha256':freeze_sha,'legacy_byte_closure_verified':False,
+            'sealed_before_model_generation':True}, 'actual readiness sidecar differs')
+        sidecars.add('host-continuity-ready.json')
+    if (state/'host-continuity-terminal-receipt.json').exists():
+        require(read_json(state,'host-continuity-terminal-receipt.json') == {'study_id':study_id,
+            'seal_sha256':external_seal_sha,'journal_head_sha256':seal['journal_head_sha256'],
+            'record_count':count,'blocked':seal['blocked'],'execution_authority':False},
+            'actual terminal sidecar differs from external receipt')
+        sidecars.add('host-continuity-terminal-receipt.json')
     require({p.name for p in state.glob('host-continuity-*.json')} ==
-        {'host-continuity-%04d.json' % n for n in range(count)} | {'host-continuity-seal.json'},
+        {'host-continuity-%04d.json' % n for n in range(count)} | {'host-continuity-seal.json'} | sidecars,
         'missing/extra raw host record')
     head = digest({'study_id': study_id, 'runtime_freeze_sha256': freeze_sha,
         'policy_id': POLICY, 'source_inventory_sha256': source_sha})

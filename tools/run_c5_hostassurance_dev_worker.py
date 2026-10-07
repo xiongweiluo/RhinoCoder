@@ -98,8 +98,17 @@ def approved_scope(*,check_budget=True):
     approval = read_json(STATE,'owner-approval.json')
     from plugin.rhino_listener.c5_hostassurance_development_scope import authority,TRANSITION,CONSENT
     authority(spec,freeze,approval,public(ROOT/TRANSITION),public(ROOT/CONSENT),check_time=check_budget)
-    guard = SourceGuard(ROOT,freeze['source_files'],freeze['source_inventory_sha256'],
+    project = SourceGuard(ROOT,freeze['source_files'],freeze['source_inventory_sha256'],
                         project_prefixes=('agent','training','tools','plugin','data_pipeline'))
+    def guard():
+        project()
+        require(file_sha(ROOT/'eval/c5/hostassurance-development-spec-20261007-a.json')==freeze['spec_file_sha256']
+            and digest(public(ROOT/'eval/c5/hostassurance-development-runtime-freeze-20261007-a.json'))==digest(freeze)
+            and read_json(STATE,'owner-approval.json')==approval,
+            'actual approved worker spec/runtime/grant drifted after admission')
+        require(all(file_sha(ROOT/n)==sha for n,sha in freeze['fixed_public_files'].items()),
+            'actual approved worker public config drifted')
+        return freeze['source_inventory_sha256']
     guard()
     require(file_sha(ROOT/'eval/c5/hostassurance-development-spec-20261007-a.json')==freeze['spec_file_sha256'],
             'actual development spec bytes differ')

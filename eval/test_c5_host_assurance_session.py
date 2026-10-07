@@ -176,3 +176,19 @@ def test_every_raw_request_requires_correct_anchored_host_checkpoint(tmp_path,mu
             'raw_requests_bound_to_anchored_checkpoints']==1
     else:
         with pytest.raises(NativeError):audit_request_checkpoint_bindings(s.state,['write-base'],s.binding['runtime_freeze_sha256'])
+
+
+@pytest.mark.parametrize('mutation',[None,'ready','terminal','extra_sidecar'])
+def test_actual_entry_sidecars_are_bound_not_ignored_or_counted_as_extra_raw_records(tmp_path,mutation):
+    s,_=session(tmp_path);s.seal_baseline();receipt=s.finish()
+    ready={'study_id':DEV_ID,'runtime_freeze_sha256':s.binding['runtime_freeze_sha256'],
+        'legacy_byte_closure_verified':False,'sealed_before_model_generation':True}
+    terminal=copy.deepcopy(receipt)
+    if mutation=='ready':ready['legacy_byte_closure_verified']=True
+    elif mutation=='terminal':terminal['seal_sha256']='0'*64
+    publish_json(s.state,'host-continuity-ready.json',ready)
+    publish_json(s.state,'host-continuity-terminal-receipt.json',terminal)
+    if mutation=='extra_sidecar':publish_json(s.state,'host-continuity-unknown.json',{})
+    if mutation is None:assert audit(s,receipt)['limited_visible_continuity_verified']
+    else:
+        with pytest.raises(NativeError):audit(s,receipt)
