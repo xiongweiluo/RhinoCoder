@@ -17,6 +17,8 @@
 - [x] D独立scope/入口/worker/prepare与完整原生/model/startup验收时序、post-publication service与60秒结算证明、独立raw sidecar库存/期限审计实现。原生120秒从client guard前计时，完整解码/验收后复核；原始model frame不改写，全部来源检查与原V2有限保证保留，不声称CLR硬抢占。
 - [x] 40新CPU控制、相关95控制、全仓956 passed/8 skipped、Py3.9/secret/release/diff通过；四已排除train家族/原8交叉槽/模型/契约不变，CPU1767/2048 token。此前C时序诊断和原资产身份保留，所有旧失败/源码字节不变。
 - [ ] 当前主线：只部署已跟踪执行代码/指定公开配置到新独立D源码目录，完成实际Mac/GPU环境/已加载依赖/模型/339可读host字节完整冻结与独立复核；最新发布双CI成功后请求D新spec/runtime两个精确哈希。只有准备授权，不运行prepare/entry/drive/serve，不建新运行state或密钥。
+- [x] D完整冻结及[独立准备复核](eval/c5/hostassurance-development-preexecution-validation-20261007-d.json)完成：源码01a9b37双CI成功，316源/schema/326部署文件三处逐字节核对，339host/3552 Mac外部/21614分发/960标准库/libpython/14基座/两adapter重哈希、加载器CUDA未初始化/模型未加载、环境536eac7d与原异常保留。两处独立脚本类型/合法HF链接假设在准备中修正，不改任何冻结或模型。D source已部署，但两地运行state/grant/keys/claim均无。
+- [ ] 当前必要批准：完整公开材料最新发布head双CI成功后，集中请本人精确批准D spec `f6970ec438080cd57a77ad34063bdda052d98886c29123ca1e6ac32ba79f3a2a` / runtime `8ed3bade6d2629937cc341f3e2a8aea77a2c8cc86adeeabfc7a7f07251484a31`；在此之前不调用prepare/entry/drive/serve。上项部署冻结待办已由完成项替代，仅保留其原依赖说明。
 - [ ] 条件项：本人精确D批准→单次八槽与完整独立现场审计；失败/未知退休，不自动E。工程通过→已登记20题正式冻结/双CI/另外精确批准→本人单次40槽/私有审计→C5-7。20题未读/消费，不能越门或把合成当现场。
 
 资源仍[v6](eval/c5/rhino-resource-boundary-v6-20261007.json)：10月8日22:00苏黎世/21:45停止生成、900秒导出；D≤2470秒、原开发1/正式3/研究4/累计16 GPU-hours不扩张。未来续约不自动更新此次冻结。PR审核准备保留，merge仍由本人明确决定；R历史证据不改，整体六项未完成，默认混合/C4 NO-GO/v8 formal_quality_fail59/60不变。

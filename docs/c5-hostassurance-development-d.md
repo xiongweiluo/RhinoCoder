@@ -1,5 +1,15 @@
 # 独立D工程门：完整验收时序与结算证明，仅准备／未运行
 
+## 唯一有效完整冻结（待最新发布双CI及本人精确运行批准）
+
+源码 `01a9b374d1be5ee41edd1a7d159dad84cc8bee77` 双CI 37671447516/37671455721通过；[独立准备复核](../eval/c5/hostassurance-development-preexecution-validation-20261007-d.json)验证316执行源/schema、326部署文件在Git/Mac/Linux逐字节与人口一致，339可读host、3552 Mac外部、21614 Linux分发/960标准库/libpython、14基座/两adapter独立重哈希。加载器实际导入CUDA未初始化/模型未加载；独立环境与模型重放不导入torch。pip原唯一缺项保留。新的Mac/Linux D运行state与grant/key/claim/fixture/subscription均不存在。
+
+- spec规范化SHA-256：`f6970ec438080cd57a77ad34063bdda052d98886c29123ca1e6ac32ba79f3a2a`。
+- [完整runtime](../eval/c5/hostassurance-development-runtime-freeze-20261007-d.json)规范化SHA-256：`8ed3bade6d2629937cc341f3e2a8aea77a2c8cc86adeeabfc7a7f07251484a31`。
+- runtime文件字节SHA-256：`d33d8aed077ecd803b06defc7f9dfc4b5379783b288a5ba05cdc1fa33d44175f`；环境SHA `536eac7d…f2b9fca`。
+
+独立检查脚本先误把snapshot.files计数14当成清单，再错误拒绝HF缓存的合法内部链接；两处仅修正检查脚本，按原哈希锁定manifest及approved-root containment对解析后的实际权重重验通过。源码/spec/runtime/任何资产未变、没有真实D尝试。代码/环境路径仍拒绝链接，不把修正描述为保证放宽。下文“完整冻结仍要形成”为事前过程，已由本节完整材料替代；最新**发布head**双CI之后才请求上述两个精确哈希运行批准，源码CI不替代发布CI。
+
 2026-10-07本人明确“授权仅准备新工程门D，不运行”，见[准备授权记录](../eval/c5/hostassurance-d-preparation-owner-authorization-20261007.json)。新ID `C5DEV-HOSTASSURANCE-20261007-D`，独立源码/状态目录；旧A/B/C、收尾与原80均退休，不重放、改判或复用批准。D失败或未知则退休，**不自动E**；正式20题和PR merge另取授权。
 
 ## 为什么不是只延长超时

@@ -1,0 +1,53 @@
+{
+  "study_id": "C5DEV-HOSTASSURANCE-20261007-D",
+  "status": "COMPLETE_D_PREPARATION_INDEPENDENTLY_VERIFIED_NOT_EXECUTION_AUTHORITY",
+  "owner_preparation_authorized": true,
+  "owner_exact_execution_approval_received": false,
+  "spec_canonical_sha256": "f6970ec438080cd57a77ad34063bdda052d98886c29123ca1e6ac32ba79f3a2a",
+  "runtime_canonical_sha256": "8ed3bade6d2629937cc341f3e2a8aea77a2c8cc86adeeabfc7a7f07251484a31",
+  "runtime_file_sha256": "d33d8aed077ecd803b06defc7f9dfc4b5379783b288a5ba05cdc1fa33d44175f",
+  "source_revision": "01a9b374d1be5ee41edd1a7d159dad84cc8bee77",
+  "source_double_ci": [
+    37671447516,
+    37671455721
+  ],
+  "source_files": 316,
+  "exact_Git_Mac_Linux_deployment_files": 326,
+  "all_source_bytes_and_populations_verified": true,
+  "known_host_file_bytes_verified": 339,
+  "mac_external_file_bytes_verified": 3552,
+  "linux_distribution_file_bytes_verified": 21614,
+  "linux_stdlib_file_bytes_verified": 960,
+  "libpython_bytes_verified": true,
+  "base_snapshot_files_verified": 14,
+  "adapter_files_verified": 2,
+  "environment_sha256": "536eac7d25305a89ca3d3ad06fa23eb0eca1e3ac8df889cc84dfb7fa7f07251484a31",
+  "missing_metadata_files": [
+    "pip:../../../bin/pip3.13"
+  ],
+  "gpu_loader_import_preflight_cuda_initialized": false,
+  "gpu_loader_import_preflight_model_loaded": false,
+  "independent_dependency_replay_imported_torch": false,
+  "cpu_new_tests": 40,
+  "cpu_related_tests": 95,
+  "cpu_all_passed": 956,
+  "cpu_all_skipped": 8,
+  "cpu_max_input_plus_output_tokens": 1767,
+  "max_sequence_tokens": 2048,
+  "mac_state_exists": false,
+  "remote_state_exists": false,
+  "new_grant_keys_claims_subscriptions_fixtures_or_model_generations": 0,
+  "formal20_reads": 0,
+  "retired_studies_replayed": false,
+  "default_route_changed": false,
+  "whole_byte_closure_or_handler_absence_or_CLR_preemption_proven": false,
+  "original_C_failure_and_cleanup_history_preserved": true,
+  "execution_authorized": false,
+  "formal20_or_E_or_merge_authorized": false,
+  "independent_audit_script_repairs": [
+    "snapshot.files is frozen count14, not an identity map; read the hash-locked base manifest's14 file identities",
+    "HF snapshot internal symlinks follow existing approved-root containment policy; hash resolved regular targets, do not relax source/environment no-symlink checks"
+  ],
+  "audit_script_repairs_changed_frozen_source_spec_runtime_or_model_assets": false,
+  "next_gate": "Latest publication double CI success, then separate direct repository_owner approval of exact D spec/runtime hashes; preparation consent cannot execute."
+}
