@@ -12,10 +12,13 @@
 
 ### 近期任务索引：2026-10-09 v4正式单次停止，不可重跑；当前失败与安全审计
 
+**当前优先更新：**[单次worker安全停止及独立GPU释放核查完成](eval/c5/formal20-v4-worker-stop-result-20261009-a.json)。完整发布8d5d8b0双CI通过、本人另批精确spec/runtime后，仅一次pidfd SIGTERM；PID43776消失、GPU计算进程为空、显存11 MiB。本人确认未捕获外部host回执，缺项不可修造；原正式失败/消费不改。当前主线为[保管人失败审计入口的冻结准备](docs/c5-formal20-incomplete-audit-preparation.md)→已有证据的C5-7如实裁决/作品集报告→PR审核收口，不再准备恢复或重跑原20题。下方待停止/远端未核实是此前时点。
+
 本人已恢复诊断认证；只读发现原worker43776仍占约18.7GB GPU内存，PID/boot/start tick/UID/固定公开argv/cwd/executable字节核对通过。当前第一优先是[独立单次worker停止准备](docs/c5-formal20-v4-worker-safe-stop.md)：CPU/完整runtime/双CI后另请两精确哈希批准，仅一次pidfd SIGTERM，不恢复模型或20题。真正信号仍未授权/未发；GPU驻留不能被本地SSH255或结算替代。之后才完成保管人侧失败/安全审计与C5-7。
 
 - [x] 安全停止源码0366c46双CI成功、27针对性CPU控制/全仓1060 passed/8 skipped；[完整runtime与独立准备核查](eval/c5/formal20-v4-worker-stop-preexecution-validation-20261009-a.json)核对三处源码/spec和三部署文件、1341系统stdlib/12映像、真实入口环境及精确目标身份。检查器对/usr路径假设已纠正，冻结和真实guard不改；pidfd/信号/私有读取0。
-- [ ] 当前必要门：完整发布双CI→新的安全停止spec a555bbe8…b4b9fef/runtime2e5386a3…9f60dbc两完整哈希批准→一次精确pidfd SIGTERM及独立GPU释放核查。截止10月9日02:00苏黎世，不借原正式批准或新source/state目录重跑评测。
+- [x] 完整发布双CI通过，本人另批安全停止spec a555bbe8…b4b9fef/runtime2e5386a3…9f60dbc；截止前仅一次精确pidfd SIGTERM并独立核实GPU释放，不借原正式批准或新source/state目录重跑评测。
+- [ ] 保管人失败审计入口已实现、CPU合成控制通过；完成独立公共部署/字节冻结/发布审核后，由本人仅核查已有私有证据，不重读密文/identity。部分核查不能代替缺失外部锚、完整联合审计或质量估计。
 
 [正式停止记录与限制](docs/c5-formal20-v4-incomplete-result.md)：本人私下输入后已跨永久消费屏障，公开`stopped_incomplete_no_replay`/BrokenPipeError/SSH退出255，0/40槽尝试完成、确认阶段0但计数不完整；原入口已结束。不是基座/LoRA各0/20或几何质量结论，不重读/解密/重跑这20题。41已知key文件缺席、host seal sidecar存在，但独立外部回执未从现场UI捕获、完整私有/清理审计未完成；远端GPU驻留也待只读核实。结算monotonic1512秒与wall2506秒相差994秒，原记录不改、不臆断休眠因果。当前先恢复只读诊断认证、准备保管人侧失败审计与如实裁决/报告；不追加E、训练、题目或降低门槛。下面零题等待/未消费均为各自历史时点。
 

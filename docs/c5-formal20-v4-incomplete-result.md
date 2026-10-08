@@ -2,6 +2,10 @@
 
 2026-10-09（Europe/Zurich）。[公开停止观察](../eval/c5/formal20-v4-public-stop-observation-20261009.json)优先于[此前零题准备](../eval/c5/formal20-v4-public-zero-stage-observation-20261008.json)。原唯一spec/runtime、批准、源码与所有历史结论不改。本文不是完整独立私有审计或C5-7最终裁决。
 
+### 后续安全观察（优先）
+
+本人明确确认未捕获HOST_EXTERNAL_RECEIPT，只可见ARM_WAIT和HOST_READY。已按新的两精确哈希批准单次停止孤立worker；[独立观察](../eval/c5/formal20-v4-worker-stop-result-20261009-a.json)核实PID43776缺席、GPU计算进程为空、显存11 MiB，仅一次SIGTERM，无模型/Rhino/私有读取。此前“远端未核实/认证缺席”为原观察时点；GPU释放不补齐外部锚或宿主清理。已补[失败审计CPU核心与边界](c5-formal20-incomplete-audit-preparation.md)，实际保管人审计入口尚未冻结或执行，仍无质量分数/整体GO。
+
 ## 已证实与尚未证实
 
 - 本人完成私有路径输入后，永久`formal20.started`已写入；公开状态为`stopped_incomplete_no_replay`，结果错误类`BrokenPipeError`，SSH子进程退出255，原本人入口PID61346已不存在。固定20题已跨过一次性消费屏障，不允许重新解密、换ID、补题或重跑。

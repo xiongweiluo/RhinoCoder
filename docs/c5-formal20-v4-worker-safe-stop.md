@@ -1,6 +1,12 @@
 # 原formal20孤立worker的单次安全停止准备
 
-2026-10-09（Europe/Zurich）。**仅准备，未发送信号；完整runtime/双CI和新的两精确哈希批准未完成。**这不是新评测、恢复原20题、E或质量结论。
+2026-10-09（Europe/Zurich）。**单次安全停止及独立GPU释放核查完成。**这不是新评测、恢复原20题、E或质量结论。
+
+## 实际单次结果（优先于下方准备时点）
+
+[闭合结果与独立观察](../eval/c5/formal20-v4-worker-stop-result-20261009-a.json)：完整发布8d5d8b0双CI37858723634/37858730104成功后，本人直接批准下述两个精确哈希。新grant独立回读，唯一execute入口只发一次pidfd SIGTERM、同一fd退出核实；另一只读进程在01:39:55苏黎世核对/proc/43776缺席、GPU计算进程为空、显存11/24576 MiB（此前18744 MiB）、利用率0%。admission/单信号尝试/producer结果独立回读通过，原磁盘证据未改，无模型/Rhino/私题调用或重试。
+
+核实范围仅该worker退出及该时点GPU资源释放；不证明内存擦除、Rhino全部委托缺席、宿主连续性或正式私有完整审计。本人明确确认未捕获HOST_EXTERNAL_RECEIPT，不能用seal SHA补造锚。原formal v4 consumed/incomplete、C失败与历史结论不改；下一项是[保管人失败审计准备](c5-formal20-incomplete-audit-preparation.md)，不恢复原20题。下文“等待发布/批准、未发信号”为各自准备时点，保留原证据。
 
 ## 完整准备和独立复核
 
