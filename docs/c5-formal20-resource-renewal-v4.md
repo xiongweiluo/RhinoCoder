@@ -1,5 +1,7 @@
 # 正式20题资源续接 v4（未启动研究，协议仍v2）
 
+> **批准后最新交接：**[完整字节复核和两地公共grant独立回读](../eval/c5/formal20-v4-postapproval-validation-20261008.json)已完成；固定SSH恢复，各state仅一份owner-approval.json，无claim/key/模型/Rhino/私有消费。只待核对唯一v4包装并协调本人TTY/zero-stage WAIT后单次arm，实际新host基线还未观察。以下认证缺席/尚无grant是恢复前历史，获批两个哈希不改、无需再次批准。
+
 > 当前优先：本人已直接批准[唯一v4两个精确哈希](../eval/c5/formal20-owner-approval-v4-20261008.json)，发布fe7dc5e双CI37839227851/37839234469成功。批准后Mac355文件/host339/tokenizer6/age复核通过；固定SSH socket已缺席，远端复核被认证拒绝，尚未建立v4 state/grant或运行。先恢复认证并只读核对远端，再两地公共grant/唯一包装/本人TTY；不再次请求同一批准。以下待批准/待CI段落是此前准备历史，冻结字节及10月9日16:39最晚入口不变。
 
 2026-10-08。本人直接确认服务商到期为**2026-10-09 22:00 Europe/Zurich（UTC+2）**。这是本人报告，不冒称已独立核验服务商计费。原v3精确批准已收到，但在任何admission前错过16:39启动窗口，见[停止证据](../eval/c5/formal20-v3-pre-admission-window-stop-20261008.json)；两地旧grant可恢复封存，claim/key/模型/Rhino/私有消费均0。不要运行旧v2/v3包装，不再次请求20题/原80/密钥或重新封存。
