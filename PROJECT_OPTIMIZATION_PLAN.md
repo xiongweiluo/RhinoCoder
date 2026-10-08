@@ -14,6 +14,9 @@
 
 本人已恢复诊断认证；只读发现原worker43776仍占约18.7GB GPU内存，PID/boot/start tick/UID/固定公开argv/cwd/executable字节核对通过。当前第一优先是[独立单次worker停止准备](docs/c5-formal20-v4-worker-safe-stop.md)：CPU/完整runtime/双CI后另请两精确哈希批准，仅一次pidfd SIGTERM，不恢复模型或20题。真正信号仍未授权/未发；GPU驻留不能被本地SSH255或结算替代。之后才完成保管人侧失败/安全审计与C5-7。
 
+- [x] 安全停止源码0366c46双CI成功、27针对性CPU控制/全仓1060 passed/8 skipped；[完整runtime与独立准备核查](eval/c5/formal20-v4-worker-stop-preexecution-validation-20261009-a.json)核对三处源码/spec和三部署文件、1341系统stdlib/12映像、真实入口环境及精确目标身份。检查器对/usr路径假设已纠正，冻结和真实guard不改；pidfd/信号/私有读取0。
+- [ ] 当前必要门：完整发布双CI→新的安全停止spec a555bbe8…b4b9fef/runtime2e5386a3…9f60dbc两完整哈希批准→一次精确pidfd SIGTERM及独立GPU释放核查。截止10月9日02:00苏黎世，不借原正式批准或新source/state目录重跑评测。
+
 [正式停止记录与限制](docs/c5-formal20-v4-incomplete-result.md)：本人私下输入后已跨永久消费屏障，公开`stopped_incomplete_no_replay`/BrokenPipeError/SSH退出255，0/40槽尝试完成、确认阶段0但计数不完整；原入口已结束。不是基座/LoRA各0/20或几何质量结论，不重读/解密/重跑这20题。41已知key文件缺席、host seal sidecar存在，但独立外部回执未从现场UI捕获、完整私有/清理审计未完成；远端GPU驻留也待只读核实。结算monotonic1512秒与wall2506秒相差994秒，原记录不改、不臆断休眠因果。当前先恢复只读诊断认证、准备保管人侧失败审计与如实裁决/报告；不追加E、训练、题目或降低门槛。下面零题等待/未消费均为各自历史时点。
 
 [现场零阶段公开观察](eval/c5/formal20-v4-public-zero-stage-observation-20261008.json)：本人已准备唯一v4四行并确认TTY WAIT；零阶段claim/未失败和150秒内余量核对后，代理只按一次Run，实际Rhino返回ARM_WAIT及HOST_READY_ZERO_PRIVATE_ROWS。worker/联合zero-readiness回执已出现，本人入口PID61346仍存活；21:46:38 UTC闭合公开进度仍为formal未启动、0槽/0确认生成阶段，等待本人在当前终端私下填写封存age/identity路径。模型已加载和现场arm已执行，不能再沿用下方“无模型/Rhino/claim/key”的准备快照；这些是各自先前时点，保留不改。回执和进度不是最终私有审计或质量GO；代理不读取私题/答案/key/原始模型证据，不补槽/重Run/重启入口，冻结和默认混合不改。

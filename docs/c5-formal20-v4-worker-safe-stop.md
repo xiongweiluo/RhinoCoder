@@ -2,6 +2,12 @@
 
 2026-10-09（Europe/Zurich）。**仅准备，未发送信号；完整runtime/双CI和新的两精确哈希批准未完成。**这不是新评测、恢复原20题、E或质量结论。
 
+## 完整准备和独立复核
+
+[runtime](../eval/c5/formal20-v4-worker-stop-runtime-20261009-a.json)与[独立核查](../eval/c5/formal20-v4-worker-stop-preexecution-validation-20261009-a.json)已形成。源码0366c46双CI37856617361/37856623340成功，本地全仓1060 passed/8 skipped、最终针对性27控制通过。三份实际部署文件与Git/本地字节一致，1341系统stdlib/12映像、解释器和真实入口inspect-runtime环境比对通过；UID/boot/start tick/固定公开argv/cwd/executable匹配，新的state/grant/admission缺席。独立检查器首次仅接受/usr的假设错在标准库链接到/etc/python3.10/sitecustomize.py；已重新核对解析后的实际人口及原冻结SHA，不改源码/spec/runtime或真正guard，也不加载site。没有打开pidfd或发送信号。
+
+唯一spec规范化SHA `a555bbe8d3a921cd81ebc43b28a81de8d124c5453cc8473015ff9a0b2f4b9fef`、runtime规范化SHA `2e5386a3a51caad22bedd460984eec149eeb8f42ec4917c9b419252369f60dbc`；当前等待完整发布双CI后集中请求本人新精确批准。源码字节SHA76573dcb…d1ccbc1，旧正式v4批准不复用。本节不是执行授权或实际停止结果，02:00苏黎世截止仍严格有效。
+
 只读恢复认证后，nvidia-smi显示原worker PID43776占18744 MiB、GPU利用率0%。固定公开argv/cwd、UID1000、boot_id、启动tick451535及解释器字节已核实；本地SSH255并不证明远端退出。原正式消费/失败/磁盘证据不改，不能重新发送bootstrap或模型请求。远端驻留时间必须纳入资源风险，不能只引用本地结算1512秒。
 
 ## 精确范围
