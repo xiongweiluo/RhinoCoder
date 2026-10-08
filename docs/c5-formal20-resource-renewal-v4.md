@@ -1,5 +1,7 @@
 # 正式20题资源续接 v4（未启动研究，协议仍v2）
 
+> **2026-10-09正式停止优先：**本页标题及以下“未启动/零题等待”都是资源准备历史。[唯一正式运行已跨消费后停止](c5-formal20-v4-incomplete-result.md)，BrokenPipeError/SSH255、0槽、计数不完整，不重跑/再解密；原日期与冻结不改。资源monotonic1512/wall2506秒差994秒，原结算不重写，远端驻留与完整清理尚需只读/保管人审计；不继续使用最晚启动窗口来重新执行。
+
 > **实际零阶段优先：**本人确认WAIT后，唯一v4包装已单次Run，实际宿主及模型zero-ready回执已出现，见[公开观察](../eval/c5/formal20-v4-public-zero-stage-observation-20261008.json)。本人入口仍存活，等待当前TTY私有路径输入；21:46:38 UTC闭合公开进度尚无formal.started/0槽，不能把此前“无模型/现场操作”当当前状态，也不把零题就绪当正式质量或最终私有审计通过。原五小时预算包含加载和等待，不缩减、不重启或重Run；本页标题的“未启动”指正式私有消费，以下准备段落保留其历史时点。
 
 > **批准后最新交接：**[完整字节复核和两地公共grant独立回读](../eval/c5/formal20-v4-postapproval-validation-20261008.json)已完成；固定SSH恢复，各state仅一份owner-approval.json，无claim/key/模型/Rhino/私有消费。只待核对唯一v4包装并协调本人TTY/zero-stage WAIT后单次arm，实际新host基线还未观察。以下认证缺席/尚无grant是恢复前历史，获批两个哈希不改、无需再次批准。
