@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path: sys.path.insert(0, str(ROOT))
 
 from plugin.rhino_listener.c5_formal20_scope_v2 import (
-    STUDY_ID, REMOTE_SOURCE, REMOTE_STATE, REMOTE_ENV, SPEC_FILE, FREEZE_FILE, authority,
+    STUDY_ID, REMOTE_SOURCE, REMOTE_STATE, REMOTE_ENV, SPEC_FILE, FREEZE_FILE, RESOURCE_FILE, authority,
 )
 from plugin.rhino_listener.c5_research_channel import publish_json, read_json, private_directory
 from plugin.rhino_listener.c5_research_native import require, digest
@@ -39,7 +39,7 @@ PUBLIC_FILES = ('eval/c5/rhino-runtime-schema-v1.json', 'eval/c5/gpu-formal-regi
     'eval/c5/host-assurance-transition-owner-approval-v2-20261006.json',
     'eval/c5/hostassurance-development-independent-audit-20261007-d.json',
     'eval/c5/rhino-formal20-public-commitment-v1.json',
-    'eval/c5/rhino-resource-boundary-v7-formal20-20261007.json',
+    RESOURCE_FILE,
     'eval/c5/final-holdout-commitment.json',
     'eval/c5/dataset-v2-freeze-manifest.json',
     'eval/c5/historical-exclusions.json')

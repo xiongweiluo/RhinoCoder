@@ -7,11 +7,12 @@ unknown/partial deployment must be inspected, not overwritten/replayed.
 """
 import json
 import os
+import shlex
 import subprocess
 from pathlib import Path
 
 from plugin.rhino_listener.c5_formal20_scope_v2 import (
-    STUDY_ID,MAC_SOURCE,MAC_STATE,REMOTE_SOURCE,REMOTE_STATE,SPEC_FILE,FREEZE_FILE)
+    STUDY_ID,MAC_SOURCE,MAC_STATE,REMOTE_SOURCE,REMOTE_STATE,SPEC_FILE,FREEZE_FILE,RESOURCE_FILE)
 from plugin.rhino_listener.c5_formal20_policy_v2 import validate_acceptance
 from plugin.rhino_listener.c5_research_native import require,digest
 from training.c5_model_transport import strict_json,LIMIT
@@ -51,6 +52,38 @@ def verify_deployed_public_commitment():
     require(value['public_commitment_sha256']=='41c92c723df663782000a4e34934a371a2a552e5ef27d6052b7c6d07656ebaf4',
         'actual deployed public commitment dependency closure differs')
     return value
+
+
+PUBLIC_RUNTIME_RECEIVER = """
+import hashlib,json,os,sys
+from pathlib import Path
+path=Path(sys.argv[1]);size=int(sys.argv[2]);expected=sys.argv[3]
+assert path.is_absolute() and path.resolve()==path
+assert 0<size<=1048576 and len(expected)==64
+raw=sys.stdin.buffer.read(size)
+assert len(raw)==size and hashlib.sha256(raw).hexdigest()==expected
+fd=os.open(str(path),os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)
+with os.fdopen(fd,'wb') as stream:
+ stream.write(raw);stream.flush();os.fsync(stream.fileno())
+print(json.dumps({'bytes':size,'sha256':expected},sort_keys=True),flush=True)
+"""
+
+
+def transfer_new_public_runtime(raw):
+    """Exact-length public transfer; no EOF-dependent tee or overwrite.
+
+    Only preparation metadata. Unknown transfer outcome is inspected, never
+    resent; this changes neither the formal protocol nor execution authority.
+    """
+    import hashlib
+    require(type(raw) is bytes and 0<len(raw)<=LIMIT,'bounded new public runtime required')
+    expected=hashlib.sha256(raw).hexdigest()
+    target=REMOTE_SOURCE/FREEZE_FILE
+    command=('/data/conda-envs/rhinocoder/bin/python -B -c '+shlex.quote(PUBLIC_RUNTIME_RECEIVER)
+        +' '+shlex.quote(str(target))+' '+str(len(raw))+' '+expected)
+    receipt=strict_json(subprocess.check_output(ssh_args()+[command],input=raw,timeout=30))
+    require(receipt=={'bytes':len(raw),'sha256':expected},'complete new public runtime write receipt differs')
+    return receipt
 
 
 def build():
@@ -108,7 +141,7 @@ def build():
         and imports['cuda_initialized'] is False and imports['model_loaded'] is False
         and imports['generation_calls']==0 and assets['environment']['missing_metadata_files']==['pip:../../../bin/pip3.13'],
         'actual formal dependency/source/model identities differ')
-    resource=public('eval/c5/rhino-resource-boundary-v7-formal20-20261007.json')['formal_resource_boundary']
+    resource=public(RESOURCE_FILE)['formal_resource_boundary']
     freeze={'schema_version':1,'study_id':STUDY_ID,'field_protocol_version':2,'execution_ready':True,
         'spec_sha256':digest(spec),'spec_file_sha256':file_sha(ROOT/SPEC_FILE),'source_revision':revision,
         'mac_source_root':str(MAC_SOURCE),'remote_source_root':str(REMOTE_SOURCE),
@@ -137,8 +170,7 @@ def build():
     raw=(json.dumps(freeze,ensure_ascii=False,sort_keys=True,indent=2)+'\n').encode()
     require(len(raw)<=LIMIT,'bounded complete formal freeze required')
     _write(MAC_SOURCE/FREEZE_FILE,raw);_write(ROOT/FREEZE_FILE,raw)
-    remote='test ! -e '+str(REMOTE_SOURCE/FREEZE_FILE)+' && umask 077 && tee '+str(REMOTE_SOURCE/FREEZE_FILE)+' >/dev/null'
-    subprocess.run(ssh_args()+[remote],input=raw,check=True,timeout=30)
+    transfer_new_public_runtime(raw)
     require(all(file_sha(MAC_SOURCE/n)==sha for n,sha in sources.items()),'formal deployed Mac bytes differ')
     return {'study_id':STUDY_ID,'spec_sha256':digest(spec),'runtime_freeze_sha256':digest(freeze),
         'source_revision':revision,'source_file_count':len(sources),'known_host_file_count':len(host),

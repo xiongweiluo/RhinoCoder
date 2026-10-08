@@ -10,17 +10,18 @@ from .c5_research_native import digest, require
 from .c5_formal20_policy_v2 import validate_formal_binding
 
 STUDY_ID = 'c5-rhino-paired-20-v1'
-MAC_SOURCE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-source-v3')
-MAC_STATE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-state-v3')
-REMOTE_STATE = Path('/data/c5-rhino-formal20-state-v3')
-REMOTE_SOURCE = Path('/data/RhinoCoder-c5-formal20-v3')
+MAC_SOURCE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-source-v4')
+MAC_STATE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-state-v4')
+REMOTE_STATE = Path('/data/c5-rhino-formal20-state-v4')
+REMOTE_SOURCE = Path('/data/RhinoCoder-c5-formal20-v4')
 REMOTE_ENV = Path('/data/conda-envs/rhinocoder')
 SSH_SOCKET = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/ssh-22159.control')
 SSH_PORT = 22159
 SSH_KNOWN_HOSTS = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/known-hosts-22159')
 SSH_KNOWN_HOSTS_SHA = 'ae41a99e39f76b1be352f0098439b126fe5b8465c358b8dabbb7a71e53d2d1a9'
-SPEC_FILE = 'eval/c5/rhino-formal20-spec-v3.json'
-FREEZE_FILE = 'eval/c5/rhino-formal20-runtime-freeze-v3.json'
+SPEC_FILE = 'eval/c5/rhino-formal20-spec-v4.json'
+FREEZE_FILE = 'eval/c5/rhino-formal20-runtime-freeze-v4.json'
+RESOURCE_FILE = 'eval/c5/rhino-resource-boundary-v8-formal20-20261008.json'
 BASE_REVISION = 'c03e6d358207e414f1eca0bb1891e29f1db0e242'
 BASE_IDENTITY = '63f7de2f37a997c829ec98eaf617cdc78808586bc9df1139a90c030c4d76ebae'
 ADAPTER_IDENTITY = '305d72703270d16e93233d1d34ae27cdaddd777e4530afead88c7edb8dc22cae'
