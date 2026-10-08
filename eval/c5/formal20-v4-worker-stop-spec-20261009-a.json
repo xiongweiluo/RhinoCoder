@@ -1,0 +1,26 @@
+{
+  "cleanup_id": "C5SAFE-FORMAL20-V4-WORKER-20261009-A",
+  "study_id": "c5-rhino-paired-20-v1",
+  "retired_runtime_sha256": "9f72a0491b49bbb5f21dd83e6c87bb16530218a375593e0308e69caee134f1a3",
+  "source_root": "/data/c5-formal20-worker-stop-source-20261009-A",
+  "state_root": "/data/c5-formal20-worker-stop-state-20261009-A",
+  "not_after_epoch": 1791504000,
+  "signal": "SIGTERM",
+  "signals_max": 1,
+  "exit_wait_seconds": 30,
+  "model_or_holdout_calls_max": 0,
+  "disk_evidence_modified": false,
+  "retry_allowed": false,
+  "sigkill_allowed": false,
+  "kernel_trusted_not_byte_proven": true,
+  "target": {
+    "pid": 43776,
+    "uid": 1000,
+    "start_ticks": 451535,
+    "boot_id": "c8ec6a1e-7d0b-4ef1-bfd3-1e4ed0fe5777",
+    "cwd": "/data/RhinoCoder-c5-formal20-v4",
+    "argv": ["/data/conda-envs/rhinocoder/bin/python", "-B", "-m", "tools.run_c5_formal20_worker_v2", "serve"],
+    "executable_path": "/data/conda-envs/rhinocoder/bin/python3.11",
+    "executable_sha256": "1b473ff72cfa63de341095fa5192c0d030ac06a56c995d77de3626098f81e055"
+  }
+}
