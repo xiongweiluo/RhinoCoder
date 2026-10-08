@@ -39,7 +39,10 @@ PUBLIC_FILES = ('eval/c5/rhino-runtime-schema-v1.json', 'eval/c5/gpu-formal-regi
     'eval/c5/host-assurance-transition-owner-approval-v2-20261006.json',
     'eval/c5/hostassurance-development-independent-audit-20261007-d.json',
     'eval/c5/rhino-formal20-public-commitment-v1.json',
-    'eval/c5/rhino-resource-boundary-v7-formal20-20261007.json')
+    'eval/c5/rhino-resource-boundary-v7-formal20-20261007.json',
+    'eval/c5/final-holdout-commitment.json',
+    'eval/c5/dataset-v2-freeze-manifest.json',
+    'eval/c5/historical-exclusions.json')
 
 
 def public(path):

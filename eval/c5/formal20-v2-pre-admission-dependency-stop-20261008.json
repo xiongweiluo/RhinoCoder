@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "study_id": "c5-rhino-paired-20-v1",
+  "status": "V2_AUTHORIZATION_RETIRED_BEFORE_ANY_ADMISSION_OR_PRIVATE_CONSUMPTION",
+  "old_spec_sha256": "9f27e0ad16dbd1a46d200e5e258d64d5e02ccf49219c584b47bc3272b7368592",
+  "old_runtime_sha256": "83f2f8974b95bea2f1120a7340d5c7a781a005e14aaafd3ff74239d9d415faba",
+  "old_spec_runtime_source_assets_or_historical_results_modified": false,
+  "old_exact_owner_approval_was_received": true,
+  "independent_deployed_public_preflight_exit_code": 1,
+  "independent_deployed_public_preflight_category": "invalid_public_commitment",
+  "root_cause_confirmed": "three transitive public JSON dependencies absent in the deployed source root; preflight had only been verified in the complete Git checkout",
+  "missing_public_dependencies": [
+    "eval/c5/final-holdout-commitment.json",
+    "eval/c5/dataset-v2-freeze-manifest.json",
+    "eval/c5/historical-exclusions.json"
+  ],
+  "checks_that_did_not_prove_deployed_entry_readiness": [
+    "all declared 350 files matched their manifest",
+    "CPU forty-slot harness injected commitment/preflight data",
+    "worktree public commitment validation passed"
+  ],
+  "mac_and_remote_grants_preserved_recoverably_as": "owner-approval.retired-no-execution.json",
+  "active_grants_removed_to_prevent_accidental_old_entry": true,
+  "zero_stage_claims": 0,
+  "formal_consumption_claims": 0,
+  "temporary_keys": 0,
+  "model_calls": 0,
+  "Rhino_scripts_warmups_fixtures_subscriptions_or_tools_executed": 0,
+  "private20_or_original80_plaintext_reads": 0,
+  "formal20_consumption": 0,
+  "LoRA_quality_or_engineering_result_claimed": false,
+  "new_deployment_revision": 3,
+  "field_protocol_version_unchanged": 2,
+  "study_and_registered_public_commitment_unchanged": true,
+  "repair_scope": "include three public hash-bound dependencies, validate the actual isolated deployed root before runtime preparation, use new immutable source/state/spec/runtime deployment paths",
+  "new_exact_spec_runtime_approval_required": true,
+  "model_contract_tools_thresholds_resource_limits_and_default_route_changed": false,
+  "cpu_deployed_dependency_regressions": 6,
+  "cpu_full_suite_passed": 1026,
+  "cpu_full_suite_skipped": 8,
+  "cpu_full_suite_elapsed_seconds": 592.82,
+  "overall_goal_complete": false
+}

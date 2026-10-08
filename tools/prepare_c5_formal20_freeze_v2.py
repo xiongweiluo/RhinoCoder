@@ -37,6 +37,22 @@ def mac_preflight():
     return {**cpu,'mac_environment':external_origins()}
 
 
+def verify_deployed_public_commitment():
+    """Exercise the real deployed ROOT, not the complete Git checkout.
+
+    Public JSON/hash inputs only. No grant, key, claim, private loader or
+    model. A missing transitive public dependency blocks runtime preparation.
+    """
+    raw=subprocess.check_output([
+        '/opt/anaconda3/bin/python','-B','-m','tools.c5_formal20_public_preflight',
+        '--commitment',str(MAC_SOURCE/'eval/c5/rhino-formal20-public-commitment-v1.json')],
+        cwd=MAC_SOURCE,timeout=30)
+    value=strict_json(raw)
+    require(value['public_commitment_sha256']=='41c92c723df663782000a4e34934a371a2a552e5ef27d6052b7c6d07656ebaf4',
+        'actual deployed public commitment dependency closure differs')
+    return value
+
+
 def build():
     require(not MAC_SOURCE.exists() and not MAC_STATE.exists() and not (ROOT/FREEZE_FILE).exists(),
         'new formal source/state/freeze must be absent; no overwrite')
@@ -77,6 +93,7 @@ def build():
         raw=subprocess.check_output(['git','show',revision+':'+n],cwd=ROOT)
         require(raw==(ROOT/n).read_bytes(),'tracked Git/working source differs')
         _write(MAC_SOURCE/n,raw)
+    deployed_public_preflight=verify_deployed_public_commitment()
     archive=subprocess.check_output(['tar','--no-xattrs','--no-mac-metadata','-czf','-','-T','-'],
         cwd=MAC_SOURCE,input=('\n'.join(names)+'\n').encode())
     verify_archive_population(archive,names)
@@ -115,6 +132,7 @@ def build():
         'resource_boundary':resource,'decryption_executable':str(age),'decryption_executable_sha256':age_sha,
         'legacy_byte_closure_verified':False,'new_exact_owner_approval_received':False,'study_executed':False,
         'actual_new_formal_host_baseline_observed':False,'formal_holdout_rows_read':0,
+        'deployed_public_commitment_preflight':deployed_public_preflight,
         'execution_ready_meaning':'complete prepared freeze, NOT execution authority; separate exact two-hash approval required'}
     raw=(json.dumps(freeze,ensure_ascii=False,sort_keys=True,indent=2)+'\n').encode()
     require(len(raw)<=LIMIT,'bounded complete formal freeze required')
