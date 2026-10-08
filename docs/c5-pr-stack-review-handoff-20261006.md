@@ -1,5 +1,13 @@
 # C5/R PR依赖与所有者审核交接
 
+## 2026-10-08 v3批准与启动前停止后的当前审核快照
+
+[v3冻结准备](c5-formal20-deployment-v3-readiness.md)源码`d27258f`/发布`5d629bc7a503e259fc32ea766c4a47bef0d18362`双CI成功；本人[精确确认两哈希](../eval/c5/formal20-owner-approval-v3-20261008.json)，两地grant登记及批准后完整重哈希通过。但16:39苏黎世窗口已过，[启动前停止](../eval/c5/formal20-v3-pre-admission-window-stop-20261008.json)核实入口/claim/key/模型/Rhino/正式消费均0，grant可恢复封存；不是研究失败、质量NO-GO或整体C5 GO。当前等实际新租期，不通过merge解除资源/现场/保管门禁。
+
+完整分页GitHub文件人口与本地Git一致：#2 12、#3 18、#4 12、#5 10、#6 **336**、#7 63。GitHub短`files`只给#6前100项，不能当完整范围；这次核查覆盖全列表，不声称只凭文件名完成全部代码内容安全审核。真实祖先链main01647f1→#2 c444f5f→#3 86235f7→#4 19b44f3→#5 da2fc6d→#6 5d629bc成立，各head双CI成功；#7 ea85df0仍独立Draft。详情与完整SHA见[当时API/Git审核记录](https://github.com/xiongweiluo/RhinoCoder/pull/6#issuecomment-6061805185)。本次批准/停止文档发布会再次更新#6 head，merge前须核对实际新head/CI。
+
+main未变，未merge/retarget。本人唯一reviewer_1；#2仍等此前执行安全审查所要求的精确PR/head决定，不绕过，不打包九份主工作区修改、认证或私有证据。以下旧head/待批准/无grant均为历史，由本节和后续实际发布CI记录覆盖；冻结源码字节仍为d27258f，不随批准/停止文档发布改变。
+
 ## 2026-10-08当前续接
 
 正式[完整冻结与独立准备复核](c5-formal20-v2-execution-preparation.md)已完成；执行源码5399281的push37702904130/PR37702910598成功，现发布runtime/独立核查材料，最新发布head双CI另需核实。两地正式run/grant不存在，没有模型/Rhino/题目消费，不把准备冻结合并解释为执行批准。main和下方PR依赖未改变；第6项收口仍需所有者的精确merge决定，不覆盖脏主工作区。下方“准备代码继续更新”等对应上一阶段。
