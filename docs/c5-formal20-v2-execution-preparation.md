@@ -1,5 +1,11 @@
 # 正式20题 v2：已接受范围后的代码与冻结准备
 
+## 2026-10-08精确正式批准（当前状态）
+
+本人已直接批准[spec9f27e0ad/runtime83f2f897的单次冻结范围运行](../eval/c5/formal20-owner-approval-v2-20261008.json)。完整冻结发布0175f9e双CI37763903722/37763911706成功；下方“未获批准”及freeze内false字段均保留原准备时点，不改不可变spec/runtime。只有此次真实owner record可建立两地grant，CPU合成grant、容量接受或旧D授权不复用。
+
+收到批准时，SSH旧通道Broken pipe/认证拒绝；已请求恢复连接。Mac350部署文件与完整时间窗口复核通过，尚未创建state/grant或任何一次性claim、key、模型、Rhino夹具/订阅；正式题/答案/密钥未被代理读取。连接恢复后只读核对远端并建立一次性授权，然后才给本人TTY命令。截止和失败/未知不重试不变；不用旧owner run，不重放D，不重复封存承诺。
+
 2026-10-08。D实际完整工程门PASS保留并退休；本人已接受容量/资源提案`81b799b1…49efb`，[接受记录](../eval/c5/formal20-capacity-owner-acceptance-20261007.json)只授权本次适配/CPU/冻结准备，不是正式执行许可。新正式Source/State使用v2独立目录；公开study ID仍`c5-rhino-paired-20-v1`，既有承诺`41c92c72…ebaf4`、20家族/40槽/seed20261003不变，旧v1从未运行，不追认旧草案就绪。
 
 ## 当前完整冻结与独立复核（未获执行批准）
