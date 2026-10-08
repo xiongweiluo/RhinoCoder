@@ -15,3 +15,17 @@
 [v1公共准备停止](../eval/c5/formal20-v4-incomplete-audit-public-preparation-v1-stop.json)仅创建两公共源码，`-S`下缺jsonschema导致inspect-runtime拒绝；没有review-runtime、owner audit admission或私有读取。v1保留且不覆盖/重跑，不是新的正式消费。v2保持`-I -S -B`，只显式呈现原Mac冻结已包含的`/opt/anaconda3/lib/python3.13/site-packages`，导入前重新核对其已冻结可读字节，导入后验证实际外部依赖仍在原清单；不调用site.main、不执行.pth。新review-runtime同时冻结实际sys.path和可读已加载外部文件，真实owner审计先验证这些字节后再加载核心/读私有证据。CPU真实隔离子进程只导入公共测试源码验证此修复，不接触原state。
 
 **当前仅v3候选可交付：**v2公共导入及199外部文件冻结已形成，但未运行owner audit。独立核查发现原清单不包含jsonschema包的静态schema资源；不假称全部依赖资源字节闭包。此失败审计本来只须证明已存案例与原Merkle/顺序/计划相同，不需重做参数语义验证。因此v3改为独立标准库Merkle/顺序重算、严格七文件读取与O_EXCL摘要；不导入旧工程/语义验证器、site-packages或Rhino，也不执行.pth。CPU逐项比较新算法与原算法（四个seed），真实`-I -S -B`子进程验证无项目/第三方导入；新增摘要明确`case_semantic_or_arguments_schema_revalidated=false`。这是缩小到原有部分核查目的，不降低完整正式联合审计或GO门槛；v1/v2公共包及v2冻结原样保留，均无owner audit claim/私有读取，不再使用。
+
+## 唯一v3公共冻结与保管人交接
+
+[review-runtime](../eval/c5/formal20-v4-incomplete-audit-review-runtime-v3-20261009-a.json)规范化SHA：`53ca57a54087d98a8d26e2eca7be80d1d34f7e881c42cde82336cd9865ee3bb0`。源码d886452，三份公共文件Git/本地/部署字节独立比对、69可读外部文件逐一重哈希、真实隔离入口inspect-runtime环境再次比较通过；[准备核查](../eval/c5/formal20-v4-incomplete-audit-preexecution-validation-v3-20261009-a.json)记录原始时点。真实私有读取0、owner state尚缺席、39针对性CPU控制通过；最终源码/完整发布双CI仍须核实后才交接真实命令。不会为CI状态反复改写冻结。
+
+本人终端最终命令模板（**只有代理另行核实双CI完成后才运行**）：
+
+```sh
+/opt/anaconda3/bin/python3.13 -I -S -B \
+  /Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-failure-audit-source-v3/c5_formal20_owner_failure_audit.py \
+  audit --freeze-sha256 53ca57a54087d98a8d26e2eca7be80d1d34f7e881c42cde82336cd9865ee3bb0
+```
+
+无需密码/密文/identity路径或HOST_EXTERNAL_RECEIPT，不解密、不启动Rhino/模型，只有本人能通过TTY条件。成功只导出闭合JSON和新增的owner-public-incomplete-audit-summary，不输出题目、答案、任务哈希或家族ID。`existing_40_plan_schedule_binding_verified`仅表示承诺顺序、派生计划与已存model-plans/native-prepared元数据绑定：**不读取native-plans正文，也不证明模型收到/正确执行了计划**。结果中的完整审计、宿主连续性/清理、质量估计永远不在此入口追认；失败保留新audit admission，不重跑，不运行旧owner_run_v2或旧Rhino包装。本人只回传该闭合JSON，私有文件留本地；随后依据缺失证据与既定规则形成C5-7裁决，而不是继续新实验。

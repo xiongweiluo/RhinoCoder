@@ -20,6 +20,8 @@
 - [x] 完整发布双CI通过，本人另批安全停止spec a555bbe8…b4b9fef/runtime2e5386a3…9f60dbc；截止前仅一次精确pidfd SIGTERM并独立核实GPU释放，不借原正式批准或新source/state目录重跑评测。
 - [ ] 保管人失败审计入口已实现、CPU合成控制通过；完成独立公共部署/字节冻结/发布审核后，由本人仅核查已有私有证据，不重读密文/identity。部分核查不能代替缺失外部锚、完整联合审计或质量估计。
 
+[唯一v3部分失败审计包与独立核查](eval/c5/formal20-v4-incomplete-audit-preexecution-validation-v3-20261009-a.json)已形成：标准库独立重算，不加载旧项目/site-packages，69实际外部文件及源码/环境核对通过；review-runtime规范化SHA53ca57a5…5ee3bb0，39专项CPU控制通过，最终源码/完整发布双CI待核实。原v1公共依赖缺失和v2静态资源缺项保留，均无owner audit/private读取。之后唯一必要本人操作是终端只读审计已有七记录并返回闭合摘要；这不是恢复评测，不给缺失质量/安全证据追认PASS。
+
 [正式停止记录与限制](docs/c5-formal20-v4-incomplete-result.md)：本人私下输入后已跨永久消费屏障，公开`stopped_incomplete_no_replay`/BrokenPipeError/SSH退出255，0/40槽尝试完成、确认阶段0但计数不完整；原入口已结束。不是基座/LoRA各0/20或几何质量结论，不重读/解密/重跑这20题。41已知key文件缺席、host seal sidecar存在，但独立外部回执未从现场UI捕获、完整私有/清理审计未完成；远端GPU驻留也待只读核实。结算monotonic1512秒与wall2506秒相差994秒，原记录不改、不臆断休眠因果。当前先恢复只读诊断认证、准备保管人侧失败审计与如实裁决/报告；不追加E、训练、题目或降低门槛。下面零题等待/未消费均为各自历史时点。
 
 [现场零阶段公开观察](eval/c5/formal20-v4-public-zero-stage-observation-20261008.json)：本人已准备唯一v4四行并确认TTY WAIT；零阶段claim/未失败和150秒内余量核对后，代理只按一次Run，实际Rhino返回ARM_WAIT及HOST_READY_ZERO_PRIVATE_ROWS。worker/联合zero-readiness回执已出现，本人入口PID61346仍存活；21:46:38 UTC闭合公开进度仍为formal未启动、0槽/0确认生成阶段，等待本人在当前终端私下填写封存age/identity路径。模型已加载和现场arm已执行，不能再沿用下方“无模型/Rhino/claim/key”的准备快照；这些是各自先前时点，保留不改。回执和进度不是最终私有审计或质量GO；代理不读取私题/答案/key/原始模型证据，不补槽/重Run/重启入口，冻结和默认混合不改。
