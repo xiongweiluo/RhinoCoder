@@ -12,7 +12,16 @@
 - [六项公开部署回归](../eval/test_c5_formal20_deployed_public_dependencies.py)验证所有依赖入清单、实际隔离根正控、缺失各JSON负控、准备器确实针对部署根。19相关控制及全仓1026 passed/8 skipped通过；CPU不操作真实模型/Rhino或私有资料。
 - 模型/revision/checkpoint132、契约/12工具/严格解析、顺序/评分、≥14/20/净胜≥3/安全与重复写/未核实清理0、有限host保证、normal2048/cleanup256/journal4096/3稳定60秒均不变。正式5/研究6/开发1/原16小时和10月8日21:45停止/22:00到期不扩大；最晚16:39开始，不自动续租或降低预算窗口。
 
-当前仅准备修正部署：源码双CI→窄清单新部署→实际部署公开预检/完整冻结与独立重哈希→发布双CI→**新spec/runtime两个精确哈希批准**。旧83f2批准不能自动应用到新的字节；v3未授权运行、未创建运行state。包装路径将改为source-v3，不能运行目前Rhino缓冲区内旧source-v2包装；待新精确批准后再核对唯一四行。
+源码双CI、窄清单新部署、实际部署公开预检/完整冻结与独立重哈希已完成，见[独立预执行核查](../eval/c5/formal20-v3-preexecution-validation-20261008.json)。冻结源码为`d27258f`，双CI37780147813/37780156280成功；337源码/15指定公开文件，加spec/runtime共354文件，Git/Mac/Linux人口与字节一致。3552 Mac外部、339已知可读host、6 tokenizer、age、21614 Linux分发、960标准库/libpython/解释器、14基座及两adapter已独立重哈希。GPU loader预检未初始化CUDA或加载模型；原pip metadata缺项不隐瞒或安装修补。
+
+第一次准备在SSH边界中断；恢复后先只读证明远端新source/state均不存在，再从该确定边界继续首次部署，未重放整个准备器、覆盖文件或建立运行state。runtime传输取得精确长度/SHA回执，再独立核对完整字节。保活不证明五小时连接稳定；断线仍可能使唯一运行失败，不能因此补槽或重试。
+
+当前待最新发布双CI成功，再请求**新spec/runtime两个精确哈希批准**：
+
+- [spec-v3](../eval/c5/rhino-formal20-spec-v3.json)规范化SHA-256：`5e11b001538768a05f2475a0f52722e0f78b985f2381926404af19e37e92a525`
+- [runtime-v3](../eval/c5/rhino-formal20-runtime-freeze-v3.json)规范化SHA-256：`5ff14cf43a5cb7277ad27661e061c55b830a9e4ec9f51775624f8c6faac39bcf`
+
+旧83f2批准不能自动应用到新字节；v3未授权运行、未创建state/grant，正式消费仍0。包装将改为source-v3，不能运行目前Rhino缓冲区内旧source-v2包装；待新精确批准后再核对唯一四行。
 
 ## 责任隔离与后续
 
