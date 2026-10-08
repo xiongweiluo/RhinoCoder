@@ -1,5 +1,7 @@
 # 正式20题资源续接 v4（未启动研究，协议仍v2）
 
+> **实际零阶段优先：**本人确认WAIT后，唯一v4包装已单次Run，实际宿主及模型zero-ready回执已出现，见[公开观察](../eval/c5/formal20-v4-public-zero-stage-observation-20261008.json)。本人入口仍存活，等待当前TTY私有路径输入；21:46:38 UTC闭合公开进度尚无formal.started/0槽，不能把此前“无模型/现场操作”当当前状态，也不把零题就绪当正式质量或最终私有审计通过。原五小时预算包含加载和等待，不缩减、不重启或重Run；本页标题的“未启动”指正式私有消费，以下准备段落保留其历史时点。
+
 > **批准后最新交接：**[完整字节复核和两地公共grant独立回读](../eval/c5/formal20-v4-postapproval-validation-20261008.json)已完成；固定SSH恢复，各state仅一份owner-approval.json，无claim/key/模型/Rhino/私有消费。只待核对唯一v4包装并协调本人TTY/zero-stage WAIT后单次arm，实际新host基线还未观察。以下认证缺席/尚无grant是恢复前历史，获批两个哈希不改、无需再次批准。
 
 > 当前优先：本人已直接批准[唯一v4两个精确哈希](../eval/c5/formal20-owner-approval-v4-20261008.json)，发布fe7dc5e双CI37839227851/37839234469成功。批准后Mac355文件/host339/tokenizer6/age复核通过；固定SSH socket已缺席，远端复核被认证拒绝，尚未建立v4 state/grant或运行。先恢复认证并只读核对远端，再两地公共grant/唯一包装/本人TTY；不再次请求同一批准。以下待批准/待CI段落是此前准备历史，冻结字节及10月9日16:39最晚入口不变。

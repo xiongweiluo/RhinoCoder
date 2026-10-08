@@ -1,5 +1,7 @@
 # B1–B4 LoRA 训练就绪与 C0–C2 验收报告
 
+> **2026-10-08实际零阶段（当前优先）：**[唯一v4包装/本人WAIT及单次Run公开观察](../eval/c5/formal20-v4-public-zero-stage-observation-20261008.json)记录实际HOST_READY、worker/zero-readiness回执和本人入口存活；21:46:38 UTC正式仍未启动、0槽/0确认生成阶段，等待本人在同一TTY私下输入既有封存路径。现场arm和模型加载已发生，下方“无模型/claim/key/仍待包装”只属先前准备历史。代理不读私有数据或原始证据、不补Run，最终质量/独立审计尚未完成，原训练/冻结/门槛/默认混合不改。
+
 > **2026-10-08批准后交接（当前优先）：**固定SSH已恢复，[两地355文件/完整依赖模型重哈希及公共grant独立回读](../eval/c5/formal20-v4-postapproval-validation-20261008.json)通过，两地各仅owner-approval.json，无claim/key/模型/Rhino/正式消费。当前核对唯一source-v4四行包装后由本人TTY单次入口，收到zero-stage WAIT再单次Rhino arm；实际新host基线尚未观察，不把文件复核当现场通过。原冻结和资源不改，以下待认证/尚无grant为恢复前历史。
 
 > **2026-10-08 v4批准续接（当前优先）：**本人已直接批准[正式v4精确spec/runtime](../eval/c5/formal20-owner-approval-v4-20261008.json)，发布fe7dc5e双CI成功。本地355文件/host339/tokenizer6/age批准后再核对通过；原SSH认证socket缺席，远端只读核查被认证拒绝。当前恢复认证后完成两地复核和公共grant，再唯一source-v4包装/本人TTY单次入口及私下审计；尚无正式运行或私有消费。不改冻结、训练、门槛和默认路线，不再次请求同一批准。以下待批准段落为此前时点。

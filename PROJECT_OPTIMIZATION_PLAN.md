@@ -10,7 +10,9 @@
 
 ## 当前快照与跨对话续接
 
-### 近期任务索引：2026-10-08 v4精确批准与两地grant已核对，待唯一包装和保管人交接
+### 近期任务索引：2026-10-08 v4单次零题就绪通过，等待保管人私下输入
+
+[现场零阶段公开观察](eval/c5/formal20-v4-public-zero-stage-observation-20261008.json)：本人已准备唯一v4四行并确认TTY WAIT；零阶段claim/未失败和150秒内余量核对后，代理只按一次Run，实际Rhino返回ARM_WAIT及HOST_READY_ZERO_PRIVATE_ROWS。worker/联合zero-readiness回执已出现，本人入口PID61346仍存活；21:46:38 UTC闭合公开进度仍为formal未启动、0槽/0确认生成阶段，等待本人在当前终端私下填写封存age/identity路径。模型已加载和现场arm已执行，不能再沿用下方“无模型/Rhino/claim/key”的准备快照；这些是各自先前时点，保留不改。回执和进度不是最终私有审计或质量GO；代理不读取私题/答案/key/原始模型证据，不补槽/重Run/重启入口，冻结和默认混合不改。
 
 [批准后独立复核与两地grant](eval/c5/formal20-v4-postapproval-validation-20261008.json)已完成：本人恢复固定连接，355三地公共文件、Mac3552/host339/tokenizer6/age及Linux21614/stdlib960/解释器/libpython、14基座/两adapter全部重哈希匹配；pip原缺项保留。两地各仅一份公共owner-approval.json，规范化SHA `88c1eacb2e96ebcda0a0aa33693a37bdb40c529d1616d67423e2907c2f6cca6e`，独立回读通过。无claim/key/模型/Rhino/私有消费，实际新host基线尚未观察；编辑器仍为重复旧v2包装，已请本人仅替换为唯一v4四行、不Run。当前只待核对包装，再本人TTY单次入口及zero-stage WAIT协调。下段“认证缺席/尚无grant”为本次恢复前历史，不再次要求同一精确批准。
 
@@ -28,7 +30,8 @@
 - [x] 本人恢复SSH后只读确认354文件均正确、唯一公共runtime从未创建、原接收器已停止；从确定边界O_EXCL补齐这一份公共元数据，180秒是准备传输观察，不改正式期限。原[中断状态](eval/c5/formal20-v4-preparation-status-20261008.json)/准备器退出1保留，无整个准备器重跑或覆盖。现[完整独立核查](eval/c5/formal20-v4-preexecution-validation-20261008.json)通过：338源码/355三地文件、完整Mac/Linux/模型重哈希，v4 state/grant/模型/Rhino/消费0；不证明原超时唯一原因或五小时SSH稳定。
 - [x] 最新完整冻结发布`fe7dc5e`双CI成功；本人精确批准spec `1ce7dba2a75a853a6a2b8d81027235c442586f30718f05dc177f64a04b002fa7` / runtime `9f72a0491b49bbb5f21dd83e6c87bb16530218a375593e0308e69caee134f1a3`，记录与冻结分开，不改变已冻结字节。
 - [x] 固定SSH恢复、批准后两地完整字节复核及一次性公共grant/独立回读完成；GPU空闲，不加载模型，冻结及旧证据不改。
-- [ ] 当前唯一主线：核对唯一source-v4包装→本人TTY单次入口及zero-stage WAIT→单次Rhino arm/40槽/本人私有独立审计；不重做封存/工程门、不重放旧入口或新E。
+- [x] 唯一source-v4包装和本人WAIT核对、单次Rhino arm/宿主及模型zero-ready已观察；这不是40槽完成或正式质量门通过。
+- [ ] 当前唯一主线：本人在同一运行TTY私下输入既有封存age/identity路径→单次40槽→实际外部host seal/本人私有独立审计→C5-7；代理只读闭合公开进度，不重读原80、不补槽或重启。
 - [ ] 条件项：新资源冻结及精确批准→唯一对应包装→本人TTY单次入口→零题ready→40槽→本人私下审计/公开摘要→C5-7/报告；仍无正式执行，不补槽、不修解析、换ID重跑或切默认路线。
 - [ ] PR/main：修正源码`d27258f`双CI37780147813/37780156280成功，完整冻结继续发布至#6；main01647f1及主工作区9份修改不动。#2仍需安全审查要求的实际head明确merge确认，#7独立Draft，不扩大R/UI。
 
