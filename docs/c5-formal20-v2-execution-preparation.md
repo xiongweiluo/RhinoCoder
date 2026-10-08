@@ -2,6 +2,18 @@
 
 2026-10-08。D实际完整工程门PASS保留并退休；本人已接受容量/资源提案`81b799b1…49efb`，[接受记录](../eval/c5/formal20-capacity-owner-acceptance-20261007.json)只授权本次适配/CPU/冻结准备，不是正式执行许可。新正式Source/State使用v2独立目录；公开study ID仍`c5-rhino-paired-20-v1`，既有承诺`41c92c72…ebaf4`、20家族/40槽/seed20261003不变，旧v1从未运行，不追认旧草案就绪。
 
+## 当前完整冻结与独立复核（未获执行批准）
+
+[独立预执行核查](../eval/c5/formal20-v2-preexecution-validation-20261008.json)已完成。源码`5399281778908f210f24b1579cc54c8733909777` push37702904130/PR37702910598均成功；最终源码CI1019 passed/9 skipped（与Mac全仓1019/8及最后8项owner回归区分）。336份源码、含公开配置/spec/runtime共350文件在Git/Mac/Linux精确清单与字节一致；3552 Mac外部/339可读host/6 tokenizer/age、21614 Linux分发/960标准库/libpython、14基座/两adapter独立重哈希。实际loader import未初始化CUDA或构造模型；另一路独立环境重放不导入torch。pip原缺项保留，不安装或伪造。
+
+- spec规范化SHA-256：`9f27e0ad16dbd1a46d200e5e258d64d5e02ccf49219c584b47bc3272b7368592`。
+- [runtime](../eval/c5/rhino-formal20-runtime-freeze-v2.json)规范化SHA-256：`83f2f8974b95bea2f1120a7340d5c7a781a005e14aaafd3ff74239d9d415faba`。
+- runtime文件669516字节，字节SHA-256：`4d8480e9ca384c9bd67d5ee865215046c9c965d57c8861f203ed36c275b9bf87`。
+
+最后远端runtime写入的SSH回执30秒超时，准备器退出1，**不声称准备器正常退出**。未重跑或重传；只读核实远端完整字节/350文件人口及无遗留tee，与本地精确一致后确认这次单次写入实际完成。独立检查器的相对/绝对路径断言错误仅修正检查器，不改冻结。另发现D旧公开准备摘要环境标签69位笔误；原D文件原样保留，此处按实际D runtime重建正确环境SHA`536eac7d25305a89ca3d3ad06fa23eb0eca1e3ac8df889cc84dfb7fa7f2b9fca`，D原spec/runtime/资产/结果不变。
+
+两地正式state/grant/key/claim均不存在，现场/模型/正式消费0。新实际host基线没有观察，必须在**新精确批准后的单次zero-stage**形成；此处只证明已冻结可读文件和已接受的整个opaque宿主信任范围，不是全部代码字节闭包。最新发布head双CI成功后才请求上述两个哈希正式批准，不借准备/旧D/一般继续授权运行。
+
 ## 新入口顺序与职责隔离
 
 1. [保管人入口](../tools/c5_formal20_owner_run_v2.py)在本人TTY内先核对新完整spec/runtime和新的精确owner grant、已登记公开承诺、完整5小时窗口。一次性zero-started先于任何现场准备；不是holdout消费。未获精确批准不得调用。
@@ -29,8 +41,8 @@ normal2048、独立cleanup256、journal4096；最多8结算采样，仍须3稳�
 
 CPU准备中先修正合成夹具漏schema/admission；另发现并修复真实代码的部署根worktree查询、远端raw inventory漏owner-approval、前置ready失败不能允许后续发送、完整host就绪期限，以及已结算远端process不可二次stop/publication。修正均在正式数据未读和冻结前，未放宽审计或修改旧D部署。
 
-2026-10-08本次只读检查：339可读host文件逐字节无漂移、固定Mac v2 source/state缺席、age可解析为真实二进制；原SSH master存在但远端通道Broken pipe，20秒date核查超时、直连只返回认证拒绝。尚未开始部署/生成runtime哈希；等待本人恢复认证，CPU/源码CI可独立完成。不要将部分身份核查写成完整三处部署冻结。
+2026-10-08早先只读检查：339可读host文件逐字节无漂移、当时Mac v2 source/state缺席，原SSH通道Broken pipe。本人恢复认证后完成顶部完整部署与独立核查；早先外部访问阻塞已解除，不能据该历史段再次要求恢复连接或断言runtime缺席。
 
 [显式清单冻结准备器](../tools/prepare_c5_formal20_freeze_v2.py)仅从干净已提交代码复制已跟踪Python与指定公开配置；不打包脏主工作区、认证、原始开发证据或任何语料。先重新核实已知339可读host字节、Mac依赖/tokenizer/age、远端环境/loader import/模型资产与pip原缺项，CUDA未初始化、模型未加载；旧D观察不冒充新的formal live baseline。新实际baseline只能在新精确批准后的zero-stage生成。
 
-完成全部CPU/静态、源码双CI、独立部署/完整manifest与原始字节复核、发布双CI后，集中提供新正式spec/runtime两个完整哈希。本人接受本页范围、旧D批准或一般继续都不能代替它们。之后只提供本人私有终端命令，不读取实际20题。整体六项目标仍未完成；C4 NO-GO、v8 formal_quality_fail59/60、原80永久消费、R历史和默认混合保持不变。
+全部CPU/静态、源码双CI、独立部署/完整manifest与原始字节复核已完成；最新发布双CI后集中请求顶部两个完整哈希正式批准。本人接受本页范围、旧D批准或一般继续都不能代替它们。之后才提供本人私有终端命令，不读取实际20题。整体六项目标仍未完成；C4 NO-GO、v8 formal_quality_fail59/60、原80永久消费、R历史和默认混合保持不变。

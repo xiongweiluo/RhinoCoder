@@ -10,16 +10,17 @@
 
 ## 当前快照与跨对话续接
 
-### 近期任务索引：2026-10-08 容量/资源提案已接受，formal v2代码/CPU及完整冻结准备中
+### 近期任务索引：2026-10-08 formal v2完整冻结/独立复核完成，待发布双CI及新精确批准
 
 本人精确接受`81b799b1e936c588f51ac41ea11c2d9975044302d9d2f5c037866b78ec349efb`，见[接受记录](eval/c5/formal20-capacity-owner-acceptance-20261007.json)；仅正式适配/CPU/冻结准备，不运行。[formal v2](docs/c5-formal20-v2-execution-preparation.md)采用独立v2源码/状态目录、同一已登记20题承诺；旧D完整PASS/部署与所有旧失败保持。
 
 - [x] 新策略、有限host session/hub、完整native/model/startup验收时序、保管人入口、worker与独立私有/公开摘要审计适配实现。先host/model zero-ready，再无回显路径/永久claim/解密；原有source、HMAC、128/41、安全关闭与三稳定不省略。专项控制包含晚启动、完整就绪期限、私有初始化失败及部分部署不可覆盖；最终源码全仓/双CI和部署冻结继续核查，尚不代表现场通过。
-- [ ] 当前主线：全仓/静态与源码双CI→仅已跟踪清单部署、Mac/GPU依赖/资产/已知可读host/age完整冻结与独立复核→发布双CI→本人新正式spec/runtime两个精确哈希批准。实际20题/密文/key仍未被代理读取，formal state/grant/模型/Rhino/消费均0；不能把准备的execution_ready当批准。
+- [x] [完整正式runtime与独立预执行核查](eval/c5/formal20-v2-preexecution-validation-20261008.json)完成：源码5399281双CI成功，336源/350部署文件Git/Mac/Linux逐字节一致，3552 Mac/339可读host/6tokenizer/age及21614分发/960标准库/libpython/14基座/两adapter重哈希、loader CUDA未初始化/模型未加载。末尾写入SSH回执超时后只读确认完整文件/无遗留writer，未重传/覆盖，不写准备器退出0；旧D摘要哈希标签笔误只作后续更正，不改历史冻结/结论。
+- [ ] 当前主线：最新发布双CI成功后，请本人精确批准spec `9f27e0ad16dbd1a46d200e5e258d64d5e02ccf49219c584b47bc3272b7368592` / runtime `83f2f8974b95bea2f1120a7340d5c7a781a005e14aaafd3ff74239d9d415faba`。实际20题/密文/key未被代理读取，两地formal state/grant/模型/Rhino/消费均0；不能把准备的execution_ready、CPU合成grant或旧D批准当执行权。
 - [ ] 条件项：新精确正式批准及本人私有TTY→一次40槽→独立保管审计/不含正文的公共摘要→C5-7/作品集。门槛≥14/20、净胜≥3、安全/重复写/未核实清理0不改；不补题/不重跑/不自动默认接入。
-- [ ] PR：D结果/容量材料`29ab4b7`双CI已通过、#6 OPEN；准备代码继续更新。main01647f1未变；#2精确merge仍被执行安全审查阻断，等待其要求的本人实际PR/head确认，不绕过、不覆盖9份主工作区修改。
+- [ ] PR：源码`5399281`双CI37702904130/37702910598已通过、#6 OPEN；完整冻结审核材料继续发布，最新发布head另需双CI。main01647f1未变；#2精确merge仍被执行安全审查阻断，等待其要求的本人实际PR/head确认，不绕过、不覆盖9份主工作区修改。
 
-本次只读复核确认已知339可读host字节未漂移、Mac新source/state均未建立。SSH master虽仍存在，远端通道Broken pipe；20秒只读date核查未完成，直连仅返回认证拒绝。已请求本人恢复同端口认证，期间继续CPU/源码CI，不建立部分远端冻结或运行状态。
+本人恢复同端口认证后，已独立核实完整新source/runtime、GPU11MiB/0%及两地正式state缺席。早先SSH失效已解除，现等待发布CI/精确批准，不重做已登记承诺或要求发送私有资料。
 
 新[formal v7](eval/c5/rhino-resource-boundary-v7-formal20-20261007.json)为正式5/研究6、开发1/原16不变，10月8日21:45苏黎世停止生成/22:00到期，900秒导出；本人最晚16:39开始以保留完整窗口及zero-stage余量。预算接受不自动运行/续租/付款。无需另开E；R、P2b、完整UI/用户开放/精简D边界不扩张，整体Goal未完成。
 
