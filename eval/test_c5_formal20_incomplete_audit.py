@@ -114,3 +114,11 @@ def test_changed_existing_case_or_hashed_model_plan_refuses():
             values['model-plans-hashed.json']['F01-base']['max_steps'] += 1
         with pytest.raises(RuntimeError):
             audit_pre_slot_failure(values.__getitem__, spec, freeze)
+
+
+@pytest.mark.parametrize('seed', [0, 1, 20261003, 2**64 - 1])
+def test_independent_stdlib_commitment_and_schedule_match_original(seed):
+    from training import c5_formal20_incomplete_audit as audit
+    cases = cases20()
+    assert audit.family_merkle_root(cases) == family_merkle_root(cases)
+    assert audit.slot_order(cases, seed) == slot_order(cases, seed=seed)

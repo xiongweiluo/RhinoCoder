@@ -15,15 +15,14 @@ import sys
 from pathlib import Path
 
 ID = 'C5AUDIT-FORMAL20-V4-INCOMPLETE-20261009-A'
-SOURCE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-failure-audit-source-v2')
-STATE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-failure-audit-state-v2')
+SOURCE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-failure-audit-source-v3')
+STATE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-failure-audit-state-v3')
 ORIGINAL = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-source-v4')
 EVIDENCE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-state-v4')
 SPEC_SHA = '1ce7dba2a75a853a6a2b8d81027235c442586f30718f05dc177f64a04b002fa7'
 RUNTIME_SHA = '9f72a0491b49bbb5f21dd83e6c87bb16530218a375593e0308e69caee134f1a3'
 CORE = 'c5_formal20_incomplete_audit.py'
 ENTRY = 'c5_formal20_owner_failure_audit.py'
-DEPENDENCIES = Path('/opt/anaconda3/lib/python3.13/site-packages')
 
 
 def require(ok):
@@ -76,22 +75,48 @@ def public_original():
 
 
 def load_core(freeze):
-    # Explicit byte-frozen dependency root, NOT site.main()/pth execution.
-    require(DEPENDENCIES.is_dir() and DEPENDENCIES.resolve() == DEPENDENCIES)
-    original_files = freeze['mac_environment']['file_sha256']
-    dependency_files = {n: sha for n, sha in original_files.items()
-        if Path(n).is_relative_to(DEPENDENCIES)}
-    require(dependency_files and all(file_sha(Path(n)) == sha for n, sha in dependency_files.items()))
-    sys.path.append(str(DEPENDENCIES))
-    sys.path.insert(0, str(ORIGINAL))
+    # Binding audit needs stdlib hashes/schedule only, not semantic validators.
+    # Do not import retired runtime code or any site-packages/data resources.
     scope = runpy.run_path(str(SOURCE / CORE), run_name='c5_failure_audit_core')
-    from plugin.rhino_listener.c5_research_provenance import SourceGuard
-    guard = SourceGuard(ORIGINAL, freeze['source_files'], freeze['source_inventory_sha256'],
-        project_prefixes=('agent', 'training', 'tools', 'plugin', 'data_pipeline'))
+    def guard():
+        require(all(file_sha(ORIGINAL / n) == sha for n, sha in freeze['source_files'].items())
+            and all(file_sha(ORIGINAL / n) == sha for n, sha in freeze['fixed_public_files'].items()))
     guard()
-    require(all(original_files.get(n) == sha for n, sha in environment()['readable_loaded_external_files'].items()
-        if Path(n).is_relative_to(DEPENDENCIES)))
     return scope['audit_pre_slot_failure'], guard
+
+
+def private_json(name):
+    require(name in {'formal20.started.json', 'formal20.run-result.json', 'public-progress.json',
+        'private-cases.json', 'native-prepared.json', 'model-plans-hashed.json', 'resource-settlement.json'})
+    require(EVIDENCE.resolve() == EVIDENCE)
+    root = os.open(EVIDENCE, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    try:
+        info = os.fstat(root)
+        require(info.st_uid == os.getuid() and stat.S_IMODE(info.st_mode) == 0o700)
+        fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW, dir_fd=root)
+        try:
+            info = os.fstat(fd)
+            require(stat.S_ISREG(info.st_mode) and info.st_uid == os.getuid()
+                and stat.S_IMODE(info.st_mode) == 0o600 and 0 < info.st_size <= 1048576)
+            with os.fdopen(fd, 'rb', closefd=False) as stream: raw = stream.read(1048577)
+            require(len(raw) == info.st_size)
+            return json.loads(raw, object_pairs_hook=pairs,
+                parse_constant=lambda _: (_ for _ in ()).throw(ValueError('nonfinite evidence')))
+        finally: os.close(fd)
+    finally: os.close(root)
+
+
+def publish_new(name, value):
+    require(name in {'owner-audit-admission.json', 'owner-public-incomplete-audit-summary.json'}
+        and STATE.resolve() == STATE and STATE.stat().st_uid == os.getuid()
+        and stat.S_IMODE(STATE.stat().st_mode) == 0o700)
+    raw = json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(',', ':'), allow_nan=False).encode() + b'\n'
+    require(len(raw) <= 16384)
+    fd = os.open(STATE / name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(fd, 'wb') as stream: stream.write(raw); stream.flush(); os.fsync(stream.fileno())
+    root = os.open(STATE, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    try: os.fsync(root)
+    finally: os.close(root)
 
 
 def environment():
@@ -136,14 +161,13 @@ def audit_owner(expected_sha):
     guard()
     require(not os.path.lexists(STATE) and STATE.parent.resolve() == STATE.parent)
     STATE.mkdir(mode=0o700)
-    from plugin.rhino_listener.c5_research_channel import read_json, publish_json
-    publish_json(STATE, 'owner-audit-admission.json', {'audit_id': ID,
+    publish_new('owner-audit-admission.json', {'audit_id': ID,
         'review_runtime_sha256': expected_sha, 'actor': 'repository_owner',
         'original_runtime_sha256': RUNTIME_SHA, 'replay_allowed': False})
-    summary = audit(lambda name: read_json(EVIDENCE, name), spec, original)
+    summary = audit(private_json, spec, original)
     guard()
     summary = {**summary, 'audit_id': ID, 'review_runtime_sha256': expected_sha}
-    publish_json(STATE, 'owner-public-incomplete-audit-summary.json', summary)
+    publish_new('owner-public-incomplete-audit-summary.json', summary)
     return summary
 
 

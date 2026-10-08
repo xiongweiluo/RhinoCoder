@@ -13,3 +13,5 @@
 ## 公共部署导入回归
 
 [v1公共准备停止](../eval/c5/formal20-v4-incomplete-audit-public-preparation-v1-stop.json)仅创建两公共源码，`-S`下缺jsonschema导致inspect-runtime拒绝；没有review-runtime、owner audit admission或私有读取。v1保留且不覆盖/重跑，不是新的正式消费。v2保持`-I -S -B`，只显式呈现原Mac冻结已包含的`/opt/anaconda3/lib/python3.13/site-packages`，导入前重新核对其已冻结可读字节，导入后验证实际外部依赖仍在原清单；不调用site.main、不执行.pth。新review-runtime同时冻结实际sys.path和可读已加载外部文件，真实owner审计先验证这些字节后再加载核心/读私有证据。CPU真实隔离子进程只导入公共测试源码验证此修复，不接触原state。
+
+**当前仅v3候选可交付：**v2公共导入及199外部文件冻结已形成，但未运行owner audit。独立核查发现原清单不包含jsonschema包的静态schema资源；不假称全部依赖资源字节闭包。此失败审计本来只须证明已存案例与原Merkle/顺序/计划相同，不需重做参数语义验证。因此v3改为独立标准库Merkle/顺序重算、严格七文件读取与O_EXCL摘要；不导入旧工程/语义验证器、site-packages或Rhino，也不执行.pth。CPU逐项比较新算法与原算法（四个seed），真实`-I -S -B`子进程验证无项目/第三方导入；新增摘要明确`case_semantic_or_arguments_schema_revalidated=false`。这是缩小到原有部分核查目的，不降低完整正式联合审计或GO门槛；v1/v2公共包及v2冻结原样保留，均无owner audit claim/私有读取，不再使用。

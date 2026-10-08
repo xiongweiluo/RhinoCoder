@@ -65,7 +65,7 @@ def test_owner_reads_existing_records_once_and_writes_only_new_closed_summary(tm
 @pytest.mark.parametrize('drift', ['hash', 'source', 'environment', 'existing-state'])
 def test_pre_read_guards_refuse_before_any_private_record(tmp_path, monkeypatch, drift):
     freeze, _ = setup(tmp_path, monkeypatch)
-    monkeypatch.setattr('plugin.rhino_listener.c5_research_channel.read_json',
+    monkeypatch.setattr(entry, 'private_json',
         lambda *args: pytest.fail('private record accessed despite failed guard'))
     sha = entry.digest(freeze)
     if drift == 'hash': sha = 'd' * 64
@@ -103,13 +103,30 @@ def test_entry_has_no_model_decryption_rhino_or_process_executor():
     assert not names & {'kill', 'pidfd_send_signal', 'remove', 'unlink', 'rmtree', 'Popen'}
 
 
-def test_isolated_no_site_cpu_import_uses_explicit_dependency_root_only():
-    import jsonschema
-    dependency = str(Path(jsonschema.__file__).resolve().parents[1])
-    root = str(Path(__file__).resolve().parents[1])
+def test_isolated_no_site_cpu_core_has_no_site_or_project_imports():
+    core = str(Path(__file__).resolve().parents[1] / 'training/c5_formal20_incomplete_audit.py')
     code = ('import sys; assert sys.flags.isolated and sys.flags.no_site; '
-        'sys.path.append(' + repr(dependency) + '); sys.path.insert(0,' + repr(root) + '); '
-        'import training.c5_formal20_plan; print("isolated_public_import_ok")')
+        'import runpy; runpy.run_path(' + repr(core) + '); '
+        'assert "jsonschema" not in sys.modules; '
+        'assert not any(n.startswith(("training", "plugin")) for n in sys.modules); '
+        'print("isolated_public_import_ok")')
     result = subprocess.run([sys.executable, '-I', '-S', '-B', '-c', code],
         capture_output=True, text=True, timeout=30)
     assert result.returncode == 0 and result.stdout.strip() == 'isolated_public_import_ok'
+
+
+@pytest.mark.parametrize('name', ['hub.key', 'worker-stderr.txt', '../private-cases.json', 'model-raw.json'])
+def test_private_reader_refuses_outside_exact_seven_file_allowlist(name, monkeypatch):
+    monkeypatch.setattr(entry.os, 'open', lambda *args, **kwargs: pytest.fail('forbidden file opened'))
+    with pytest.raises(RuntimeError): entry.private_json(name)
+
+
+def test_private_reader_rejects_symlink_and_duplicate_keys(tmp_path, monkeypatch):
+    evidence = tmp_path / 'synthetic'; evidence.mkdir(mode=0o700)
+    monkeypatch.setattr(entry, 'EVIDENCE', evidence)
+    target = evidence / 'public-progress.json'
+    target.write_text('{"duplicate":1,"duplicate":2}')
+    target.chmod(0o600)
+    with pytest.raises(RuntimeError): entry.private_json(target.name)
+    (evidence / 'private-cases.json').symlink_to(target)
+    with pytest.raises(OSError): entry.private_json('private-cases.json')

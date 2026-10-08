@@ -6,12 +6,44 @@ Never decrypts, loads a model, reads a key, repairs or resumes a run.
 """
 import hashlib
 import math
+import json
+import random
 
-from plugin.rhino_listener.c5_research_native import digest, require
-from training.c5_formal20_plan import (
-    STUDY_ID, family_merkle_root, slot_order, slot_order_sha256, validate_families,
-)
-from training.c5_formal20_public_progress import validate_progress
+STUDY_ID = 'c5-rhino-paired-20-v1'
+
+
+def require(ok, reason):
+    if not ok: raise RuntimeError(reason)
+
+
+def canonical(value):
+    return json.dumps(value, ensure_ascii=False, sort_keys=True,
+        separators=(',', ':'), allow_nan=False).encode()
+
+
+def digest(value):
+    return hashlib.sha256(canonical(value)).hexdigest()
+
+
+def family_merkle_root(cases):
+    require(isinstance(cases, list) and len(cases) == 20, 'existing case population differs')
+    nodes = sorted(hashlib.sha256(canonical(case)).digest() for case in cases)
+    while len(nodes) > 1:
+        if len(nodes) % 2: nodes.append(nodes[-1])
+        nodes = [hashlib.sha256(nodes[n] + nodes[n + 1]).digest() for n in range(0, len(nodes), 2)]
+    return nodes[0].hex()
+
+
+def slot_order(cases, seed):
+    ids = sorted(c['family_id'] for c in cases)
+    require(len(set(ids)) == 20 and type(seed) is int, 'existing family identity/seed differs')
+    random.Random(seed).shuffle(ids)
+    result = []
+    for n, family in enumerate(ids):
+        routes = ('base', 'lora') if n < 10 else ('lora', 'base')
+        result.extend({'slot_id': 'F%02d-%s' % (n + 1, route), 'family_id': family, 'route': route}
+            for route in routes)
+    return result
 
 
 def audit_pre_slot_failure(read, spec, freeze):
@@ -34,18 +66,33 @@ def audit_pre_slot_failure(read, spec, freeze):
             'slots_attempted': 0, 'route_slots_required': 40,
             'error_type': 'BrokenPipeError', 'c5_6_gate_claim': False})
             and type(result['slots_attempted']) is int, 'pre-slot failure scope differs')
-    progress = validate_progress(read('public-progress.json'))
+    progress = read('public-progress.json')
+    require(set(progress) == {'schema_version', 'study_id', 'phase', 'sequence',
+        'started_claim_present', 'route_slots_required', 'slots_attempted', 'slots_finished',
+        'confirmed_generation_stages', 'counters_complete', 'elapsed_seconds',
+        'runtime_freeze_sha256', 'public_commitment_sha256', 'formal_execution_authority',
+        'private_content_included', 'replay_allowed', 'independent_audit_complete'}
+        and type(progress['schema_version']) is int and progress['schema_version'] == 1
+        and progress['study_id'] == STUDY_ID and progress['started_claim_present'] is True
+        and type(progress['route_slots_required']) is int and progress['route_slots_required'] == 40
+        and all(progress[k] is False for k in ('formal_execution_authority', 'private_content_included',
+            'replay_allowed', 'independent_audit_complete')), 'closed incomplete progress differs')
+    require(all(type(progress[k]) is int and 0 <= progress[k] <= 256 for k in
+        ('sequence', 'slots_attempted', 'slots_finished', 'confirmed_generation_stages'))
+        and type(progress['elapsed_seconds']) in (int, float)
+        and math.isfinite(progress['elapsed_seconds']) and progress['elapsed_seconds'] >= 0,
+        'incomplete progress counter types differ')
     require(progress['runtime_freeze_sha256'] == digest(freeze)
             and progress['public_commitment_sha256'] == spec['public_commitment_sha256']
             and progress['phase'] == 'stopped_incomplete_no_replay'
             and progress['slots_attempted'] == progress['slots_finished'] == 0
             and progress['confirmed_generation_stages'] == 0
             and progress['counters_complete'] is False, 'incomplete progress differs')
-    cases = validate_families(read('private-cases.json'))
+    cases = read('private-cases.json')
     require(family_merkle_root(cases) == spec['family_merkle_root_sha256'],
             'existing private case commitment differs')
-    order = slot_order(cases, seed=spec['slot_seed'])
-    require(slot_order_sha256(order) == spec['slot_order_sha256'], 'existing schedule differs')
+    order = slot_order(cases, spec['slot_seed'])
+    require(digest(order) == spec['slot_order_sha256'], 'existing schedule differs')
     by_id = {c['family_id']: c for c in cases}
     native = {'slot_order': order, 'plans': {}}
     models = {}
@@ -75,6 +122,7 @@ def audit_pre_slot_failure(read, spec, freeze):
             'spec_sha256': digest(spec), 'runtime_freeze_sha256': digest(freeze),
             'consumption_and_existing_cases_binding_verified': True,
             'existing_40_plan_schedule_binding_verified': True,
+            'case_semantic_or_arguments_schema_revalidated': False,
             'recorded_slots_attempted': 0, 'recorded_slots_finished': 0,
             'recorded_generation_stages': 0, 'actual_generation_total': None,
             'model_quality_scores_available': False, 'paired_summary': None,
