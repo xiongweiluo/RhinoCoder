@@ -12,9 +12,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-failure-audit-source-v1')
-STATE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-failure-audit-state-v1')
-OUT = ROOT / 'eval/c5/formal20-v4-incomplete-audit-review-runtime-20261009-a.json'
+SOURCE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-failure-audit-source-v2')
+STATE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-failure-audit-state-v2')
+OUT = ROOT / 'eval/c5/formal20-v4-incomplete-audit-review-runtime-v2-20261009-a.json'
 FILES = {'c5_formal20_owner_failure_audit.py': 'tools/c5_formal20_owner_failure_audit.py',
          'c5_formal20_incomplete_audit.py': 'training/c5_formal20_incomplete_audit.py'}
 

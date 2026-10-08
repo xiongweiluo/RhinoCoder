@@ -9,3 +9,7 @@
 [独立本人入口](../tools/c5_formal20_owner_failure_audit.py)使用新公共源码/审计元数据目录，不在旧source-v4里加文件或改旧runtime。`-I -S -B`隔离解释器，TTY条件先于原证据访问；先核对固定v4两哈希与338源码、审计自身字节及实际可读外部运行时，再永久audit admission，读取上述七份已有记录，末次核对后仅追加闭合公开摘要。密文/identity、密钥、stderr、模型帧/协议、Rhino均不访问。新运行时仍信任内核/未列opaque映像，不称全OS字节闭包；缺少外部锚不因新摘要而被修复。
 
 [公共准备器](../tools/prepare_c5_formal20_incomplete_audit.py)只复制已登记源码并调用`inspect-runtime`（私有证据读取0），O_EXCL形成独立新review-runtime，未知/已有目录不覆盖；它不能触发`audit`。CPU负控覆盖TTY先行、源码/环境/冻结漂移、已有admission、失败保留claim、错误脱敏、无模型/解密/信号/删除入口。冻结审核完成前不给出真实执行命令。本人入口失败不自动重跑，不重读密文或启动新评测；未具备的完整连续性、清理和质量证据如实列为缺失，不能通过新审计追认原失败成功；C5-7按既定证据完整性规则裁决，任何后续新研究须另行决定。
+
+## 公共部署导入回归
+
+[v1公共准备停止](../eval/c5/formal20-v4-incomplete-audit-public-preparation-v1-stop.json)仅创建两公共源码，`-S`下缺jsonschema导致inspect-runtime拒绝；没有review-runtime、owner audit admission或私有读取。v1保留且不覆盖/重跑，不是新的正式消费。v2保持`-I -S -B`，只显式呈现原Mac冻结已包含的`/opt/anaconda3/lib/python3.13/site-packages`，导入前重新核对其已冻结可读字节，导入后验证实际外部依赖仍在原清单；不调用site.main、不执行.pth。新review-runtime同时冻结实际sys.path和可读已加载外部文件，真实owner审计先验证这些字节后再加载核心/读私有证据。CPU真实隔离子进程只导入公共测试源码验证此修复，不接触原state。

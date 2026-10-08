@@ -1,6 +1,8 @@
 """Synthetic owner evidence only; no original source/state or field access."""
 import ast
 import json
+import subprocess
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -27,7 +29,8 @@ def setup(tmp_path, monkeypatch):
     source = tmp_path / 'public-source'; source.mkdir(mode=0o700)
     freeze = {'audit_id': entry.ID, 'original_spec_sha256': entry.SPEC_SHA,
         'original_runtime_sha256': entry.RUNTIME_SHA,
-        'source_files': {entry.CORE: 'b' * 64, entry.ENTRY: 'b' * 64}, 'environment': {'synthetic': True}}
+        'source_files': {entry.CORE: 'b' * 64, entry.ENTRY: 'b' * 64},
+        'environment': {'synthetic': True, 'readable_loaded_external_files': {'/synthetic/runtime.py': 'b' * 64}}}
     monkeypatch.setattr(entry, 'SOURCE', source)
     monkeypatch.setattr(entry, 'STATE', tmp_path / 'new-audit-metadata')
     monkeypatch.setattr(entry, 'EVIDENCE', evidence)
@@ -36,7 +39,7 @@ def setup(tmp_path, monkeypatch):
     monkeypatch.setattr(entry, 'public_original', lambda: (spec, original))
     monkeypatch.setattr(entry, 'public_json', lambda _: freeze)
     monkeypatch.setattr(entry, 'file_sha', lambda _: 'b' * 64)
-    monkeypatch.setattr(entry, 'environment', lambda: {'synthetic': True})
+    monkeypatch.setattr(entry, 'environment', lambda: dict(freeze['environment']))
     monkeypatch.setattr(entry, 'load_core', lambda _: (audit_pre_slot_failure, lambda: None))
     return freeze, values
 
@@ -98,3 +101,15 @@ def test_entry_has_no_model_decryption_rhino_or_process_executor():
     assert not imports & {'torch', 'transformers', 'Rhino', 'clr', 'subprocess', 'socket'}
     names = {n.attr for n in ast.walk(tree) if isinstance(n, ast.Attribute)}
     assert not names & {'kill', 'pidfd_send_signal', 'remove', 'unlink', 'rmtree', 'Popen'}
+
+
+def test_isolated_no_site_cpu_import_uses_explicit_dependency_root_only():
+    import jsonschema
+    dependency = str(Path(jsonschema.__file__).resolve().parents[1])
+    root = str(Path(__file__).resolve().parents[1])
+    code = ('import sys; assert sys.flags.isolated and sys.flags.no_site; '
+        'sys.path.append(' + repr(dependency) + '); sys.path.insert(0,' + repr(root) + '); '
+        'import training.c5_formal20_plan; print("isolated_public_import_ok")')
+    result = subprocess.run([sys.executable, '-I', '-S', '-B', '-c', code],
+        capture_output=True, text=True, timeout=30)
+    assert result.returncode == 0 and result.stdout.strip() == 'isolated_public_import_ok'

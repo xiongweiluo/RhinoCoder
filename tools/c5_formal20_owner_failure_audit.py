@@ -15,14 +15,15 @@ import sys
 from pathlib import Path
 
 ID = 'C5AUDIT-FORMAL20-V4-INCOMPLETE-20261009-A'
-SOURCE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-failure-audit-source-v1')
-STATE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-failure-audit-state-v1')
+SOURCE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-failure-audit-source-v2')
+STATE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-failure-audit-state-v2')
 ORIGINAL = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-source-v4')
 EVIDENCE = Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/formal20-state-v4')
 SPEC_SHA = '1ce7dba2a75a853a6a2b8d81027235c442586f30718f05dc177f64a04b002fa7'
 RUNTIME_SHA = '9f72a0491b49bbb5f21dd83e6c87bb16530218a375593e0308e69caee134f1a3'
 CORE = 'c5_formal20_incomplete_audit.py'
 ENTRY = 'c5_formal20_owner_failure_audit.py'
+DEPENDENCIES = Path('/opt/anaconda3/lib/python3.13/site-packages')
 
 
 def require(ok):
@@ -75,12 +76,21 @@ def public_original():
 
 
 def load_core(freeze):
+    # Explicit byte-frozen dependency root, NOT site.main()/pth execution.
+    require(DEPENDENCIES.is_dir() and DEPENDENCIES.resolve() == DEPENDENCIES)
+    original_files = freeze['mac_environment']['file_sha256']
+    dependency_files = {n: sha for n, sha in original_files.items()
+        if Path(n).is_relative_to(DEPENDENCIES)}
+    require(dependency_files and all(file_sha(Path(n)) == sha for n, sha in dependency_files.items()))
+    sys.path.append(str(DEPENDENCIES))
     sys.path.insert(0, str(ORIGINAL))
     scope = runpy.run_path(str(SOURCE / CORE), run_name='c5_failure_audit_core')
     from plugin.rhino_listener.c5_research_provenance import SourceGuard
     guard = SourceGuard(ORIGINAL, freeze['source_files'], freeze['source_inventory_sha256'],
         project_prefixes=('agent', 'training', 'tools', 'plugin', 'data_pipeline'))
     guard()
+    require(all(original_files.get(n) == sha for n, sha in environment()['readable_loaded_external_files'].items()
+        if Path(n).is_relative_to(DEPENDENCIES)))
     return scope['audit_pre_slot_failure'], guard
 
 
@@ -99,7 +109,7 @@ def environment():
         files[str(path)] = file_sha(path)
     executable = Path(sys.executable).resolve(strict=True)
     files[str(executable)] = file_sha(executable)
-    return {'python': sys.version, 'executable': str(executable),
+    return {'python': sys.version, 'executable': str(executable), 'sys_path': list(sys.path),
             'readable_loaded_external_files': files,
             'kernel_and_unlisted_opaque_runtime_trusted_not_byte_proven': True}
 
@@ -117,6 +127,8 @@ def audit_owner(expected_sha):
         require(digest(public_json(SOURCE / 'review-runtime.json')) == expected_sha
                 and all(file_sha(SOURCE / n) == sha for n, sha in audit_freeze['source_files'].items()))
     guard_bytes()  # Before loading new audit code or existing private evidence.
+    require(all(file_sha(Path(n)) == sha for n, sha in
+        audit_freeze['environment']['readable_loaded_external_files'].items()))
     audit, guard_project = load_core(original)
     def guard():
         guard_bytes(); guard_project()
