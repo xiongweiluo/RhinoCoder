@@ -1,0 +1,108 @@
+{
+  "base_model": {
+    "expected_vram_gb": {
+      "minimum": 16,
+      "recommended": 24
+    },
+    "id": "Qwen/Qwen2.5-Coder-7B-Instruct",
+    "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+    "tokenizer": {
+      "id": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+      "tokenizer_config_sha256": "959e7f1d9a1b7641a6d6ce05ca97b75c7894fcb66cbe5a040406458fb1128ee4"
+    }
+  },
+  "checkpoint": {
+    "formal_root": "data/training/runs/rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2",
+    "resume": "auto",
+    "save_steps": 10,
+    "save_total_limit": 3
+  },
+  "contract_id": "qwen25-v4-selector-v3-json-invoker-c5-v1",
+  "data": {
+    "dataset_id": "rhinocoder-c5-dataset-v2",
+    "freeze_manifest": "eval/c5/dataset-v2-freeze-manifest.json",
+    "splits": {
+      "development": {
+        "families": 60,
+        "records": 120,
+        "sha256": "1e7ad89dfe6a0e3f63bb7fab3ee2c7eb011ef9408c745d2add14661454d2786e"
+      },
+      "train": {
+        "families": 320,
+        "records": 697,
+        "sha256": "69cdcfbf7117823192104ca4b4db66e2ce26c2f8c36d537968339a009a7b192a"
+      },
+      "validation": {
+        "families": 60,
+        "records": 126,
+        "sha256": "839b5fadd6de95b621a66da17e4b642d379fb920b4405499573473932275b370"
+      }
+    }
+  },
+  "diagnostics": {
+    "development_runs_max": 2,
+    "gpu_authorized": false,
+    "gpu_hours_max": 4,
+    "overfit_checkpoint_step": 1,
+    "overfit_loss_relative_decrease_min": 0.25,
+    "overfit_max_optimizer_steps": 128,
+    "overfit_samples": 64,
+    "overfit_selector_samples": 32,
+    "overfit_invocation_samples": 32,
+    "system_diagnostic_max_optimizer_steps": 26,
+    "system_diagnostic_train_families_max": 32,
+    "system_diagnostic_formal_steps_fraction_max": 0.2,
+    "system_diagnostic_train_families_fraction_max": 0.1
+  },
+  "experiment_id": "rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2",
+  "holdout_policy": {
+    "claim_allowed": false,
+    "content_read_allowed": false,
+    "final_holdout_rows_read": 0
+  },
+  "lora": {
+    "alpha": 32,
+    "bias": "none",
+    "dropout": 0.05,
+    "method": "QLoRA",
+    "quantization": {
+      "bits": 4,
+      "compute_dtype": "bfloat16",
+      "double_quant": true,
+      "type": "nf4"
+    },
+    "rank": 16,
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ]
+  },
+  "schema_version": "1.0",
+  "status": "c5_2_cpu_authorized_gpu_pending",
+  "formal_training_authorized": false,
+  "training": {
+    "bf16": true,
+    "data_seed": 20260928,
+    "epochs": 3,
+    "gradient_accumulation_steps": 16,
+    "gradient_checkpointing": true,
+    "learning_rate": 0.0002,
+    "lr_scheduler": "cosine",
+    "max_grad_norm": 1.0,
+    "max_sequence_length": 2048,
+    "optimizer": "paged_adamw_8bit",
+    "overflow_policy": "reject",
+    "per_device_eval_batch_size": 1,
+    "per_device_train_batch_size": 1,
+    "seed": 20260928,
+    "tf32": true,
+    "warmup_ratio": 0.05,
+    "weight_decay": 0.01
+  }
+}
