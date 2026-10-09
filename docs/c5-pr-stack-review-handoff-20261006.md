@@ -1,5 +1,11 @@
 # C5/R PR依赖与所有者审核交接
 
+## 最新会话结束与合并准备（2026-10-09）
+
+本人正常退出研究Rhino；[独立进程观察](../eval/c5/formal20-v4-owner-host-exit-observation-20261009.json)确认PID9831及Rhinoceros缺席，当前会话交接已结束，不追认历史完整清理/联合审计。C5-7 NO-GO和本人部分摘要保持原文件不变。退出前结项提交`c00a588b6f030632a69c763d4b0f442b760e9009`的push37924850701/PR37924862607双CI成功，全仓1115 passed/8 skipped。本次退出记录将形成新head，最终审核以该head及新双CI为准；main仍`01647f1cee38e2f09dd1d561289bfd42f103b9c5`，未合并。
+
+待本人集中明确批准实际#2→#3→#4→#5→#6各head的普通merge-commit后，逐依赖核对/必要时retarget到main、验证合并后CI。保留所有分支，不squash/rebase/force-push，不包装脏主工作区或私有材料；#7保持独立Draft，不包含在此C5收口。合并不恢复正式20题或将整体Goal追认完成。以下是各发布前历史快照。
+
 ## 本人失败核查后C5-7结项与最新合并门（2026-10-09）
 
 [本人闭合摘要](../eval/c5/formal20-v4-owner-incomplete-audit-summary-20261009.json)已与实际公开输出/冻结部署核对一致；[C5-7按原规则NO-GO](c5-research-evidence-and-decision-report.md)结束当前LoRa路线，不改80离线结果、默认混合或历史C4/R。完整40槽/联合审计/宿主清理未完成，不用merge来追认PASS；安全交接仍保留未核实状态。

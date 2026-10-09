@@ -1,5 +1,7 @@
 # C5 formal20 v4：单次基础设施停止，质量结果不可用
 
+**最新会话交接：**本人正常退出研究Rhino，独立只读核对原PID9831及Rhinoceros进程缺席，见[独立退出观察](../eval/c5/formal20-v4-owner-host-exit-observation-20261009.json)。当前研究会话已结束；下面“宿主安全交接未完成”是退出前状态。历史完整清理、连续性、外部锚、40槽及联合审计仍未核实，不改原C5-7 NO-GO、摘要/裁决哈希或质量null，不重新执行任何入口。
+
 2026-10-09（Europe/Zurich）。[公开停止观察](../eval/c5/formal20-v4-public-stop-observation-20261009.json)优先于[此前零题准备](../eval/c5/formal20-v4-public-zero-stage-observation-20261008.json)。原唯一spec/runtime、批准、源码与所有历史结论不改。本文不是完整独立私有审计或C5-7最终裁决。
 
 **本人执行后的最终路线状态：**[部分失败核查](../eval/c5/formal20-v4-owner-incomplete-audit-summary-20261009.json)已完成并与本人回传及冻结字节核对一致，保留完整联合/宿主清理未核实与质量null。[C5-7独立裁决为NO-GO](c5-research-evidence-and-decision-report.md)，依据预注册证据不完整条件，不是两模型0/20或LoRA能力失败。下文待审计/待裁决均为当时历史；不重跑审计或研究、不追加E，宿主安全交接与PR/main仍未完成。
