@@ -1,5 +1,7 @@
 # formal20失败审计：保管人入口准备（不是新评测）
 
+> **2026-10-09本人执行后状态（优先）：**本人已单次运行唯一v3，消费/案例承诺与计划绑定核实，闭合摘要与本地公开文件/冻结字节独立比较一致，见[摘要](../eval/c5/formal20-v4-owner-incomplete-audit-summary-20261009.json)。完整联合审计、宿主连续性/清理仍未核实，质量不可估计；[C5-7按原规则登记NO-GO](c5-research-evidence-and-decision-report.md)。不要重复下文命令，不要求再解密/发私有文件；所有“尚待执行/待摘要”为准备时点历史。原摘要的not_decided_here保持原样，裁决是独立新增记录。
+
 2026-10-09，CPU核查核心与独立保管人TTY入口已实现，完整公共部署冻结/发布审核与本人执行仍待完成。实际正式v4已消费并停止，绝不重复解密、恢复模型、补槽或再次运行Rhino包装。本人已明确确认未捕获HOST_EXTERNAL_RECEIPT；不从producer seal补造外部锚。
 
 [审计核心](../training/c5_formal20_incomplete_audit.py)仅由保管人侧未来冻结入口读取七份**已有**记录：started、run-result、public-progress、private-cases、native-prepared、model-plans-hashed、resource-settlement。以同一正式spec/runtime重新核对消费绑定、20家族Merkle、40槽顺序及两类窄计划绑定。代理只使用[既有合成家族CPU测试](../eval/test_c5_formal20_incomplete_audit.py)，不调用此核心读取真实状态；私有案例仅在本人终端参与校验，不向代理导出正文、答案、家族ID或任务哈希。

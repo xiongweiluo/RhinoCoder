@@ -1,5 +1,13 @@
 # C5/R PR依赖与所有者审核交接
 
+## 本人失败核查后C5-7结项与最新合并门（2026-10-09）
+
+[本人闭合摘要](../eval/c5/formal20-v4-owner-incomplete-audit-summary-20261009.json)已与实际公开输出/冻结部署核对一致；[C5-7按原规则NO-GO](c5-research-evidence-and-decision-report.md)结束当前LoRa路线，不改80离线结果、默认混合或历史C4/R。完整40槽/联合审计/宿主清理未完成，不用merge来追认PASS；安全交接仍保留未核实状态。
+
+发布本结项材料前API核实#2～#6仍开放、#7仍Draft，main仍01647f1。#6核查时head80a4af72b402da293ba6ce744c3d0f275d2c3b1c的双CI37864169231/37864173004成功；完整API/Git人口369一致、各实际base均为head祖先。新结项提交将更新#6 head，须以最终实际SHA/CI作所有者审核材料，不假称80a4af7为后续head。
+
+当前只准备审核/推送，**不执行合并**。本人仍唯一reviewer_1，旧#2精确head合并确认要求不绕过；新明确决定须指定PR/head/merge方式，随后逐依赖检查自动retarget/main CI。#7保持独立Draft，其产品UI/用户开放并非C5 NO-GO结项依赖，不自动扩大。主工作区九份修改与私有认证/任务/原始R证据不打包。
+
 ## 2026-10-09正式失败及独立资源收尾后的审核快照（当前）
 
 本次直接GitHub API核实main仍`01647f1cee38e2f09dd1d561289bfd42f103b9c5`，#2～#6 OPEN/非Draft，#7仍独立OPEN/Draft。实际base依赖main→#2→#3→#4→#5→#6；#7基于main，不作为LoRA结论替代。下方10月8日“未消费/等租期”是当时记录，不再作为当前状态。

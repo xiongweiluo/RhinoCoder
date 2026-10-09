@@ -1,6 +1,14 @@
-# C5研究证据与C5-7裁决材料
+# C5研究证据与C5-7最终裁决
 
-2026-10-09，Europe/Zurich。**当前是证据盘点与裁决材料，不是最终C5-7裁决或总体Goal完成证明。**正式20题已消费且单次失败，不恢复、补题、补槽、换ID复跑或重新解密。保管人已有失败证据的只读摘要尚未收到；源码/冻结/CPU/CI完成不能替代它。
+2026-10-09，Europe/Zurich。**C5-7最终裁决：NO-GO（正式现场证据不完整，当前LoRA路线不进入产品接入）。**[机器裁决](../eval/c5/c5-final-decision-20261009.json)与[本人部分失败核查摘要](../eval/c5/formal20-v4-owner-incomplete-audit-summary-20261009.json)分开登记；不改原摘要的`not_decided_here`。正式20题已消费且单次失败，不恢复、补题、补槽、换ID复跑或重新解密。此裁决不是完成40槽、完整联合审计或总体Goal完成证明；研究宿主清理仍未核实、PR/main尚未收口。
+
+## 裁决与本人证据登记
+
+本人终端已单次执行冻结v3只读入口并回传闭合JSON。代理仅核对这份公开摘要：与本地固定公开输出逐字段一致，review-runtime及部署源码字节匹配，**没有读取案例/答案/密钥/模型原始帧或再次执行审计**。摘要规范化SHA `0c3fc7fd0564167397b505dcc24c86da4c1595f677ba097aaca7a420a4875716`；原保管人公开文件字节SHA `8e58a1eef2ddae7eecb508850e282bd93cd6075a47ea7d3240fbad3484012e4c`。仓库排版副本保持同一规范化值，原字节SHA不是仓库排版副本的文件SHA。
+
+已核实消费/既有案例承诺与40槽计划绑定；**没有**重做案例语义/参数schema、完整联合审计、宿主连续性或清理验证。摘要的`remote_gpu_absence_verified=false`表示该入口没有验证GPU，不否定[另获批准的独立worker停止观察](../eval/c5/formal20-v4-worker-stop-result-20261009-a.json)；二者不互相追写。停止观察仅是当时PID/GPU释放证据，不宣称当前整机状态、Rhino清理或内存擦除。
+
+[只读裁决一致性检查](../tools/audit_c5_final_decision.py)绑定上述公开摘要及原停止/独立资源证据、核对未变的预注册阈值和NO-GO规则。其CPU负控拒绝伪造GO/MORE-DATA、把未知填0、修改阈值/原摘要或宣告总体完成；这只是文档/公开证据一致性检查，不替代缺失的完整私有原始审计。
 
 ## 实验问题与可支持的结论
 
@@ -20,8 +28,8 @@
 | 正式20题冻结/批准 | [v4独立冻结复核](../eval/c5/formal20-v4-preexecution-validation-20261008.json)、[精确批准](../eval/c5/formal20-owner-approval-v4-20261008.json) | 原公开承诺、模型/源码/环境/40槽顺序/评分/预算绑定与独立批准 | 冻结/批准不证明成功执行 |
 | 正式40槽与完整私有审计 | [单次公开停止记录](../eval/c5/formal20-v4-public-stop-observation-20261009.json)、[失败报告](c5-formal20-v4-incomplete-result.md) | 已消费、formal_incomplete_no_replay、BrokenPipeError、SSH255，槽尝试/完成0 | 40槽未完成；counters_complete=false，实际生成总量未知；没有完整独立联合审计或配对质量估计 |
 | 失败后的资源安全收尾 | [新精确批准单次停止与独立GPU观察](../eval/c5/formal20-v4-worker-stop-result-20261009-a.json) | 一次pidfd SIGTERM后PID43776缺席、计算进程为空、显存11MiB | 不证明Rhino全部委托缺席、内存擦除或历史连续性 |
-| 保管人部分失败核查 | [唯一v3包与操作边界](c5-formal20-incomplete-audit-preparation.md) | 公共部署/69外部文件/实际隔离环境独立核对，源码和完整发布两组双CI成功 | 本人尚未执行；即使七记录绑定核查通过，也不是完整联合/安全/质量审计PASS |
-| C5-7和PR/main收口 | [预注册决策规则](c5-contract-aligned-qlora-plan.md#d-最终决策)、[PR交接](c5-pr-stack-review-handoff-20261006.md) | GO门槛不改，默认混合不改，PR可审 | 最终裁决登记/作品集结项、所有者精确merge决定及合并后CI尚缺 |
+| 保管人部分失败核查 | [本人闭合摘要](../eval/c5/formal20-v4-owner-incomplete-audit-summary-20261009.json)、[冻结入口](c5-formal20-incomplete-audit-preparation.md) | 本人单次核查七份已有记录，消费/案例承诺与计划绑定核实，公开摘要独立比对通过 | 不是完整联合/安全/质量审计PASS；未重解密或重跑 |
+| C5-7和PR/main收口 | [机器裁决](../eval/c5/c5-final-decision-20261009.json)、[PR交接](c5-pr-stack-review-handoff-20261006.md) | NO-GO按原证据完整性规则登记；报告/公开状态同步，默认混合不改 | 40槽与完整审计未完成；研究宿主清理仍未核实，所有者精确merge决定及合并后CI尚缺 |
 
 ## 正式迁移门：没有分数，不是零分
 
@@ -34,12 +42,12 @@
 
 ## 裁决边界与不自动继续的路线
 
-现有证据已阻断GO。[原规则](c5-contract-aligned-qlora-plan.md#d-最终决策)把证据不完整列为NO-GO条件；最终C5-7需结合本人已有失败核查、剩余安全缺项和证据登记，不能为得到GO变更完整性要求。工程失败/证据不足与“LoRA无几何能力”是不同命题，不把后者写成已证事实。
+现有证据阻断GO。[原规则](c5-contract-aligned-qlora-plan.md#d-最终决策)把证据不完整列为NO-GO条件；本人失败核查进一步保留完整联合/连续性/清理false、配对估计null，故登记**NO-GO**，不修改14/20、净胜3、安全0或完整性要求。MORE-DATA要求安全无回退及有界可解释缺口，本次没有足够证据证明这些条件，不能把基础设施中断包装成这种分支。工程失败/证据不足与“LoRA无几何能力”是不同命题，不把后者写成已证事实。
 
 MORE-DATA不是重读原80/这20题、补槽、重新解密、调prompt/修解析后换ID重跑的许可。若最终结束当前路线，保留训练adapter、dataset/审核/排除资产、所有失败与工程证据；任何未来新研究要另定目的、数据和事前批准，不由本报告自动启动E或续租。GO即使在另一个可信独立研究成立，也不能自动切换默认混合路线。
 
 R两写B与后续开发安全证据、A/B/C失败、C有限收尾及v8 formal_quality_fail/59/60不改判；R成功不替代LoRA效应验证。R产品UI/用户开放、P2b和精简D不是当前失败审计依赖，仍延期。
 
-## 当前唯一必要的本人操作
+## 剩余收口，不恢复评测
 
-[已冻结命令](c5-formal20-incomplete-audit-preparation.md#唯一v3公共冻结与保管人交接)只在本人Mac终端读取**已有**七记录，返回闭合JSON，不提供任务、答案、密钥或私有路径。代理不代为执行，不再要求新承诺或解密。没有本人摘要就保留pending，不把计划或本报告草案当作审计结果。
+本人操作已完成，**不要再次运行审计命令或旧owner/正式入口**，不再要求新承诺/私有文件。当前LoRa研究路线按NO-GO结束，训练/数据/adapter/所有失败证据保留；后续只做必要研究宿主安全交接及所有者审核后的PR/main收口。宿主清理未核实，保持研究独占，不默认回到普通建模/其他客户端；需要本人安全处置或新的精确批准方案，不能以本裁决追认历史清理成功。最终合并不解除任何现场或holdout门禁。

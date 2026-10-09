@@ -25,7 +25,7 @@ Current release: [`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/t
 
 > **Honest boundary:** `local-mock` is an interface/safety test double, not real local inference. P2a is externally authored and automatically executed, not human UI usability; P2b is postponed. First-round C4 remains NO-GO: A5 both0/45, descriptive P2 base4/30 vs LoRA5/30. Independent C5 demonstrates structured improvement on its frozen contract and80-family offline set, not real-Rhino geometry or open-world quality. Its [single formal20 run](docs/c5-formal20-v4-incomplete-result.md) crossed consumption, then stopped before the first route with BrokenPipeError/SSH exit255; paired quality is unavailable, replay is forbidden, and failure/safety audit remains pending. It does not rewrite C4; the verified hybrid route remains the default.
 
-The [cross-stage evidence and C5-7 decision materials](docs/c5-research-evidence-and-decision-report.md) separate completed training/offline/development evidence from the incomplete formal study. Independent worker shutdown/GPU release was verified; partial custodian checks cannot certify the missing full field audit or final decision. The overall delivery remains incomplete.
+The [final C5-7 decision is NO-GO](docs/c5-research-evidence-and-decision-report.md) because formal field evidence is incomplete, not because LoRA scored 0/20 or lacks geometric capability. Custodian checks verified consumption/case/plan bindings; the 40 slots, full joint audit and host cleanup remain unverified and paired quality is unavailable. Training/offline gains and failure assets are retained; no product promotion or default-route switch. Necessary safety handoff and PR/main closeout remain incomplete.
 
 ## Why this is more than an “LLM + tools” demo
 

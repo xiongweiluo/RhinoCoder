@@ -2,6 +2,8 @@
 
 2026-10-09（Europe/Zurich）。[公开停止观察](../eval/c5/formal20-v4-public-stop-observation-20261009.json)优先于[此前零题准备](../eval/c5/formal20-v4-public-zero-stage-observation-20261008.json)。原唯一spec/runtime、批准、源码与所有历史结论不改。本文不是完整独立私有审计或C5-7最终裁决。
 
+**本人执行后的最终路线状态：**[部分失败核查](../eval/c5/formal20-v4-owner-incomplete-audit-summary-20261009.json)已完成并与本人回传及冻结字节核对一致，保留完整联合/宿主清理未核实与质量null。[C5-7独立裁决为NO-GO](c5-research-evidence-and-decision-report.md)，依据预注册证据不完整条件，不是两模型0/20或LoRA能力失败。下文待审计/待裁决均为当时历史；不重跑审计或研究、不追加E，宿主安全交接与PR/main仍未完成。
+
 ### 后续安全观察（优先）
 
 本人明确确认未捕获HOST_EXTERNAL_RECEIPT，只可见ARM_WAIT和HOST_READY。已按新的两精确哈希批准单次停止孤立worker；[独立观察](../eval/c5/formal20-v4-worker-stop-result-20261009-a.json)核实PID43776缺席、GPU计算进程为空、显存11 MiB，仅一次SIGTERM，无模型/Rhino/私有读取。此前“远端未核实/认证缺席”为原观察时点；GPU释放不补齐外部锚或宿主清理。已补[失败审计CPU核心与边界](c5-formal20-incomplete-audit-preparation.md)，实际保管人审计入口尚未冻结或执行，仍无质量分数/整体GO。

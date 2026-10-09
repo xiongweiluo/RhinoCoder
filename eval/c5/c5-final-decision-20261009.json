@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "experiment_id": "rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2",
+  "formal_study_id": "c5-rhino-paired-20-v1",
+  "phase": "C5-7",
+  "decision": "NO-GO",
+  "decision_basis": "preregistered_evidence_incomplete_not_model_quality_failure",
+  "decision_rule_reference": "docs/c5-contract-aligned-qlora-plan.md#d-最终决策",
+  "owner_summary_canonical_sha256": "0c3fc7fd0564167397b505dcc24c86da4c1595f677ba097aaca7a420a4875716",
+  "custodian_original_public_summary_raw_file_sha256": "8e58a1eef2ddae7eecb508850e282bd93cd6075a47ea7d3240fbad3484012e4c",
+  "custodian_summary_matches_direct_human_reply_and_frozen_deployment": true,
+  "formal_stop_observation_canonical_sha256": "e930d9576ac4dba8996ec3584d7e00aca68dcc9e672aab14795f394acd80a94f",
+  "worker_stop_result_canonical_sha256": "9ef3ee7cdc17f75109986c1a79ed9fce59ba51d5a306b44c3be710083bb4ca25",
+  "thresholds": {
+    "lora_success_min": 14,
+    "paired_net_wins_min": 3,
+    "difference_percentage_points_min": 15,
+    "critical_safety_errors_max": 0,
+    "duplicate_writes_max": 0,
+    "unverified_cleanup_max": 0
+  },
+  "formal_metrics": {
+    "base_success": null,
+    "lora_success": null,
+    "paired_net_wins": null,
+    "difference_percentage_points": null,
+    "confidence_interval": null,
+    "critical_safety_errors": null,
+    "duplicate_writes": null,
+    "unverified_cleanup_count": null,
+    "actual_generation_total": null
+  },
+  "no_go_evidence": {
+    "formal_40_slots_complete": false,
+    "full_independent_joint_audit_complete": false,
+    "independent_external_host_anchor_captured": false,
+    "host_cleanup_verified": false,
+    "formal_paired_quality_estimate_available": false
+  },
+  "independent_worker_shutdown": {
+    "target_exit_and_gpu_release_observed": true,
+    "observation_epoch": 1791502795.0425153,
+    "not_certification_of_host_cleanup_or_current_machine_state": true
+  },
+  "disposition": {
+    "current_c5_lora_product_promotion_authorized": false,
+    "current_lora_research_route_ended": true,
+    "preserve_training_dataset_adapter_and_all_failure_evidence": true,
+    "original80_or_formal20_replay_allowed": false,
+    "new_research_or_training_or_e_automatically_authorized": false,
+    "rent_or_default_route_change_or_pr_merge_authorized": false,
+    "model_capacity_failure_proven": false
+  },
+  "c5_7_decision_and_report_registered": true,
+  "formal_40_slot_evaluation_or_full_audit_retroactively_completed": false,
+  "remaining_research_host_cleanup_verification": "unresolved_not_certified_by_this_decision",
+  "pr_and_main_closeout_complete": false,
+  "whole_goal_complete": false,
+  "private_content_included": false,
+  "agent_private_cases_or_keys_or_raw_model_frames_read": 0,
+  "model_or_rhino_or_decryption_calls_for_decision": 0
+}

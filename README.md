@@ -31,7 +31,7 @@ RhinoCoder 是一个面向 Rhino 8 的可验证空间设计 Agent。它把自然
 
 研究续接：独立[D单次现场工程门](docs/c5-hostassurance-development-d-result.md)已核实小规模模型→许可→Rhino→账本→清理链路；不是未见20题质量结果或整体C5 GO。[正式20题唯一运行](docs/c5-formal20-v4-incomplete-result.md)已跨消费屏障后因管道/SSH异常在第一槽前停止，真实配对质量不可用、不可重跑；失败与安全审计仍待完成，默认混合路线未切换。
 
-[跨阶段证据与C5-7材料](docs/c5-research-evidence-and-decision-report.md)公开已有成果、正式失败和缺项；独立GPU安全停止已核实，但保管人部分核查、完整现场审计和最终裁决不能互相替代，整体Goal仍未完成。
+[C5-7最终裁决：NO-GO](docs/c5-research-evidence-and-decision-report.md)，依据正式现场证据不完整；本人部分失败核查已核实消费/案例与计划绑定，但40槽未完成、质量不可估计、完整联合/宿主清理未核实。不是LoRa 0/20或能力失败，不进入产品接入，训练/离线77/80与失败资产保留；默认混合未切换，必要安全交接与PR/main仍缺，整体Goal未完成。
 
 - **完成必须有几何证据**：模型说“完成”不算完成；系统重新读取 Rhino 场景，并核对数量、尺寸、颜色和空间关系。
 - **隐私门先于模型和 MCP**：Critical 请求提前阻断，High 强制本地且禁止云 fallback，Medium 先最小化再出站；关闭普通路由也不能绕过。
