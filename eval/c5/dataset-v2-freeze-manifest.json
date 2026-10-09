@@ -1,0 +1,86 @@
+{
+  "accepted_family_count": 440,
+  "artifacts": [
+    {
+      "families": 320,
+      "path": "train.jsonl",
+      "records": 697,
+      "sha256": "69cdcfbf7117823192104ca4b4db66e2ce26c2f8c36d537968339a009a7b192a"
+    },
+    {
+      "families": 60,
+      "path": "validation.jsonl",
+      "records": 126,
+      "sha256": "839b5fadd6de95b621a66da17e4b642d379fb920b4405499573473932275b370"
+    },
+    {
+      "families": 60,
+      "path": "development.jsonl",
+      "records": 120,
+      "sha256": "1e7ad89dfe6a0e3f63bb7fab3ee2c7eb011ef9408c745d2add14661454d2786e"
+    }
+  ],
+  "audit": {
+    "category_counts": {
+      "clarification": 20,
+      "core_invocation": 240,
+      "historical_source": 103,
+      "multistep_or_recovery": 24,
+      "refusal": 20,
+      "selector_noncore": 33
+    },
+    "family_count": 440,
+    "findings": [],
+    "full_token_max": 1296,
+    "invocation_tool_families": {
+      "boolean_difference": 32,
+      "create_box": 73,
+      "create_cylinder": 29,
+      "create_sphere": 28,
+      "get_bounding_box": 28,
+      "get_scene_summary": 29,
+      "group_objects": 32,
+      "move_object": 28,
+      "rotate_object": 32,
+      "scale_object": 32,
+      "set_object_color": 32,
+      "set_object_layer": 32
+    },
+    "passed": true,
+    "prompt_token_max": 1272,
+    "prompt_token_min": 419,
+    "record_count": 943,
+    "source_kind_counts": {
+      "golden_trace_after_historical_exclusion": 103,
+      "human_authored_candidate": 64,
+      "rule_generated_candidate": 273
+    },
+    "stage_counts": {
+      "invocation": 407,
+      "selector": 536
+    }
+  },
+  "candidate_draft_sha256": "468d32aaac63e3c1ce0d91e032dd618115cb50bf97c9c9a997e43bec75271ced",
+  "contract_id": "qwen25-v4-selector-v3-json-invoker-c5-v1",
+  "dataset_id": "rhinocoder-c5-dataset-v2",
+  "experiment_id": "rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2",
+  "family_targets": {
+    "development": 60,
+    "train": 320,
+    "validation": 60
+  },
+  "final_holdout_included": false,
+  "final_holdout_rows_read": 0,
+  "formal_assignment_sha256": "39b49d733e2f2ea7735728877dfc1b66c00dbaa42f8bb352e86c41ee306e0ee4",
+  "formal_split_locked": true,
+  "owner_approval_manifest_sha256": "8e47c3e46c3dfab39ad3d86265d57bf56c2ba8fd4896d4067fecdcf5a29b621c",
+  "owner_approved_family_count": 440,
+  "pipeline_id": "c5-dataset-v2-builder-v2",
+  "private_manifest_sha256": "8dbb4d55a188e9f5603d3b6bd309fb2d25f56dcb970b157e526ee5d1800aa4c6",
+  "reviewer_1": "repository_owner",
+  "reviewer_2_required": false,
+  "schema_version": "1.0",
+  "split_seed": "rhinocoder-c5-family-v1",
+  "status": "formal_development_split_locked_training_not_authorized",
+  "training_authorized": false
+}

@@ -1,0 +1,59 @@
+{
+  "agent_recommendation_sha256": "d4fc5e1d879795748e0e696191ecaa66869285ac1e0ddbdd1a0d635252113fd9",
+  "agent_recommended_approve_count": 440,
+  "agent_self_approval_allowed": false,
+  "audit": {
+    "category_counts": {
+      "clarification": 20,
+      "core_invocation": 240,
+      "historical_source": 103,
+      "multistep_or_recovery": 24,
+      "refusal": 20,
+      "selector_noncore": 33
+    },
+    "family_count": 440,
+    "findings": [],
+    "full_token_max": 1296,
+    "invocation_tool_families": {
+      "boolean_difference": 32,
+      "create_box": 73,
+      "create_cylinder": 29,
+      "create_sphere": 28,
+      "get_bounding_box": 28,
+      "get_scene_summary": 29,
+      "group_objects": 32,
+      "move_object": 28,
+      "rotate_object": 32,
+      "scale_object": 32,
+      "set_object_color": 32,
+      "set_object_layer": 32
+    },
+    "passed": true,
+    "prompt_token_max": 1272,
+    "prompt_token_min": 419,
+    "record_count": 943,
+    "source_kind_counts": {
+      "golden_trace_after_historical_exclusion": 103,
+      "human_authored_candidate": 64,
+      "rule_generated_candidate": 273
+    },
+    "stage_counts": {
+      "invocation": 407,
+      "selector": 536
+    }
+  },
+  "audited_family_count": 440,
+  "candidate_draft_sha256": "468d32aaac63e3c1ce0d91e032dd618115cb50bf97c9c9a997e43bec75271ced",
+  "dataset_id": "rhinocoder-c5-dataset-v2",
+  "final_holdout_read": false,
+  "final_holdout_rows_read": 0,
+  "owner_approved_family_count": 0,
+  "quality_corrections": [
+    "multistep_scene_coherence_v1"
+  ],
+  "required_reviewer_1": "repository_owner",
+  "reviewer_2_required": false,
+  "schema_version": "1.0",
+  "status": "agent_quality_audit_passed_owner_approval_required",
+  "training_authorized": false
+}

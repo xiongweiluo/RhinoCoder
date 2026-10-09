@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from tools.freeze_c5_offline import freeze_spec
 from training.c5_freeze import (
     C5FreezeError,
     SourceTask,
@@ -106,3 +107,27 @@ def test_public_manifest_audit_detects_isolation_tampering(tmp_path: Path) -> No
     )
     manifest["isolation"]["final_holdout_read"] = True
     assert "isolation declaration is missing or unsafe" in validate_public_manifest(manifest)
+
+
+def test_freeze_spec_records_owner_only_governance() -> None:
+    spec = freeze_spec({}, {
+        "audit": {
+            "conservative_family_count": 129,
+            "new_development_families_required": 311,
+        }
+    })
+    governance = spec["repository_governance"]
+    assert governance["authority_identity"] == "repository_owner"
+    assert governance["pull_requests"] == {
+        "required_reviewer_count": 1,
+        "reviewer_1_identity": "repository_owner",
+        "reviewer_2_required": False,
+        "agent_self_approval_allowed": False,
+    }
+    assert governance["git_operations"] == {
+        "automatic_branch_push_authorized": True,
+        "automatic_pull_request_create_or_update_authorized": True,
+        "automatic_merge_authorized": False,
+    }
+    assert spec["holdout_custody"]["custodian_identity"] == "repository_owner"
+    assert spec["dataset"]["required_reviewer_count"] == 1

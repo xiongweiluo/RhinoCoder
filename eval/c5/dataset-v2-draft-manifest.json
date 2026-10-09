@@ -1,0 +1,52 @@
+{
+  "accepted_family_count": 0,
+  "audit": {
+    "category_counts": {
+      "clarification": 20,
+      "core_invocation": 240,
+      "historical_source": 103,
+      "multistep_or_recovery": 24,
+      "refusal": 20,
+      "selector_noncore": 33
+    },
+    "family_count": 440,
+    "findings": [],
+    "full_token_max": 1296,
+    "invocation_tool_families": {
+      "boolean_difference": 32,
+      "create_box": 73,
+      "create_cylinder": 29,
+      "create_sphere": 28,
+      "get_bounding_box": 28,
+      "get_scene_summary": 29,
+      "group_objects": 32,
+      "move_object": 28,
+      "rotate_object": 32,
+      "scale_object": 32,
+      "set_object_color": 32,
+      "set_object_layer": 32
+    },
+    "passed": true,
+    "prompt_token_max": 1272,
+    "prompt_token_min": 419,
+    "record_count": 943,
+    "source_kind_counts": {
+      "golden_trace_after_historical_exclusion": 103,
+      "human_authored_candidate": 64,
+      "rule_generated_candidate": 273
+    },
+    "stage_counts": {
+      "invocation": 407,
+      "selector": 536
+    }
+  },
+  "draft_path": "data/training/c5/v2/draft-families.jsonl",
+  "draft_sha256": "468d32aaac63e3c1ce0d91e032dd618115cb50bf97c9c9a997e43bec75271ced",
+  "final_holdout_read": false,
+  "final_holdout_rows_read": 0,
+  "historical_exclusions_sha256": "ed1fa0859633da40e64001ca1646c094e140f9a06f9aa48c86a1fe8b552389fc",
+  "review_template_sha256": "1014f91dc54508bd74de50e5af93fe3124ec5155b510c899f94e652b6da955de",
+  "schema_version": "1.0",
+  "status": "candidate_review_required",
+  "training_authorized": false
+}
