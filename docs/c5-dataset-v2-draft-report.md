@@ -48,7 +48,7 @@
 
 正式冻结结果为 train 320 家族/697 记录、validation 60/126、development 60/120；split 文件 SHA-256 分别为 `69cdcfbf…b192a`、`839b5fad…b370`、`1e7ad89d…786e`。当前 `accepted_family_count=440`、`owner_approved_family_count=440`、`formal_split_locked=true`、`training_authorized=false`、`final_holdout_rows_read=0`。私有候选、attestation、审核台账和 split 正文位于 Git 忽略目录；公开仓库只保存不可逆哈希、聚合统计和状态清单。
 
-C5-1b 的开发数据接受与正式 split lock 已完成。C5-1c 的最终 80 家族 holdout 加密承诺、统计脚本与一次性 gate 仍未完成；因此本次冻结不授权进入 GPU smoke、正式训练或 holdout 读取。
+C5-1b 的开发数据接受与正式 split lock 已完成。[C5-1c 独立保管交接](c5-final-holdout-custody.md)也已完成：最终 80 家族的公开 commitment 已校验并不可覆盖登记，统计脚本与 append-only 单次 gate 通过测试，正文/路径/密钥未进入开发代理上下文，`final_holdout_rows_read=0`。下一门是 C5-2 工程验证；本次登记不自动授权正式训练或 holdout 读取。
 
 复核命令：
 

@@ -639,7 +639,12 @@ def audit_draft(
     *,
     tokenizer: Any | None = None,
     require_reviews: bool = False,
+    expected_family_count: int = EXPECTED_TOTAL_FAMILIES,
+    minimum_core_tool_families: int = 20,
+    source_policy: str = "development",
 ) -> DatasetAudit:
+    if source_policy not in {"development", "repository_owner_holdout"}:
+        raise C5DatasetError(f"unsupported dataset source policy: {source_policy}")
     findings: list[str] = []
     family_ids: set[str] = set()
     record_ids: set[str] = set()
@@ -673,6 +678,8 @@ def audit_draft(
         scenario_keys.add(scenario_key)
         source_hashes = list(family.get("source_task_hashes") or [])
         if category == "historical_source":
+            if source_policy == "repository_owner_holdout":
+                findings.append(f"{family_id}: historical sources are forbidden in final holdout")
             if source_kind != "golden_trace_after_historical_exclusion" or not source_hashes:
                 findings.append(f"{family_id}: historical provenance is incomplete")
             for source_hash in source_hashes:
@@ -780,22 +787,41 @@ def audit_draft(
                 findings.append(f"{family_id}: selector/invocation pair {variant!r} drifted")
 
         if category == "core_invocation":
-            if source_kind != "rule_generated_candidate" or set(invocation_by_variant) != {"main"}:
+            expected_source = (
+                "rule_generated_candidate"
+                if source_policy == "development"
+                else "repository_owner_holdout"
+            )
+            if source_kind != expected_source or set(invocation_by_variant) != {"main"}:
                 findings.append(f"{family_id}: core family shape or provenance drifted")
             if set(selector_by_variant).difference({"main", "missing_required"}):
                 findings.append(f"{family_id}: core family has an unexpected selector variant")
         elif category == "selector_noncore":
-            if source_kind != "rule_generated_candidate" or len(records) != 1:
+            expected_source = (
+                "rule_generated_candidate"
+                if source_policy == "development"
+                else "repository_owner_holdout"
+            )
+            if source_kind != expected_source or len(records) != 1:
                 findings.append(f"{family_id}: non-core selector family shape drifted")
         elif category in {"clarification", "refusal"}:
-            if source_kind != "human_authored_candidate" or len(records) != 1:
+            expected_source = (
+                "human_authored_candidate"
+                if source_policy == "development"
+                else "repository_owner_holdout"
+            )
+            if source_kind != expected_source or len(records) != 1:
                 findings.append(f"{family_id}: null-target family shape drifted")
         elif category == "multistep_or_recovery":
             expected_variants = {"step_1", "step_2", "step_3"}
             context_parts = scenario_key.split(":", 3)
             context = context_parts[2] if len(context_parts) == 4 else ""
             if (
-                source_kind != "human_authored_candidate"
+                source_kind != (
+                    "human_authored_candidate"
+                    if source_policy == "development"
+                    else "repository_owner_holdout"
+                )
                 or set(selector_by_variant) != expected_variants
                 or set(invocation_by_variant) != expected_variants
                 or any(context not in str(record.get("user_step") or "") for record in records)
@@ -816,11 +842,15 @@ def audit_draft(
             if SequenceMatcher(None, left, right).ratio() >= NEAR_DUPLICATE_RATIO:
                 findings.append(f"near-duplicate family candidates: {left_id}, {right_id}")
 
-    if len(family_ids) != EXPECTED_TOTAL_FAMILIES:
-        findings.append(f"expected 440 families, found {len(family_ids)}")
+    if len(family_ids) != expected_family_count:
+        findings.append(
+            f"expected {expected_family_count} families, found {len(family_ids)}"
+        )
     for name in CORE_INVOCATION_TOOLS:
-        if len(invocation_families[name]) < 20:
-            findings.append(f"{name}: only {len(invocation_families[name])} invocation families")
+        if len(invocation_families[name]) < minimum_core_tool_families:
+            findings.append(
+                f"{name}: only {len(invocation_families[name])} invocation families"
+            )
     return DatasetAudit(
         passed=not findings,
         findings=findings,
