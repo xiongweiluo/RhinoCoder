@@ -14,6 +14,18 @@
 
 **当前优先更新：**[单次worker安全停止及独立GPU释放核查完成](eval/c5/formal20-v4-worker-stop-result-20261009-a.json)。完整发布8d5d8b0双CI通过、本人另批精确spec/runtime后，仅一次pidfd SIGTERM；PID43776消失、GPU计算进程为空、显存11 MiB。本人确认未捕获外部host回执，缺项不可修造；原正式失败/消费不改。当前主线为[保管人失败审计入口的冻结准备](docs/c5-formal20-incomplete-audit-preparation.md)→已有证据的C5-7如实裁决/作品集报告→PR审核收口，不再准备恢复或重跑原20题。下方待停止/远端未核实是此前时点。
 
+当前审计包准备**已完成**：源码d886452双CI37861948495/37861952950、完整冻结发布1d3b226双CI37862239259/37862244090全成功，全仓1099 passed/8 skipped、39专项控制和69实际外部文件独立核对通过，唯一v3命令已交接。当前仍缺本人闭合摘要（仅只读检查新audit目录/公开summary缺席，不读私有证据）；不要再次准备审计包或要求重做承诺。
+
+- [x] 有限来源观察器/新保证的本人接受、独立D现场工程门、正式v4完整冻结与精确批准已分别取得证据，不重放旧实验。
+- [x] 正式唯一尝试及失败封存、孤立worker单次停止与GPU释放核查已完成；**并非40槽完成、真实质量PASS或完整宿主清理证明**。
+- [ ] 本人运行已有失败只读核查，代理仅接收闭合公开JSON；部分核查不替代外部锚、完整联合审计或配对质量。
+- [ ] [C5-7全链路报告/裁决材料](docs/c5-research-evidence-and-decision-report.md)已备，最终裁决登记/作品集结项仍缺；GO受证据完整性阻断，不自动MORE-DATA/E或复用20题。
+- [ ] [实际PR/main审核交接](docs/c5-pr-stack-review-handoff-20261006.md)已更新：#2～#6开放、#7草稿、main不变，merge仍按本人最新精确决定和合并后CI，不打包脏主工作区。
+
+### 历史续接快照：worker停止准备与formal v2/v3/v4
+
+以下保留各自当时状态；未勾选的旧准备/待运行/未消费分支不构成当前待办，当前主线只以上述最新索引为准。
+
 本人已恢复诊断认证；只读发现原worker43776仍占约18.7GB GPU内存，PID/boot/start tick/UID/固定公开argv/cwd/executable字节核对通过。当前第一优先是[独立单次worker停止准备](docs/c5-formal20-v4-worker-safe-stop.md)：CPU/完整runtime/双CI后另请两精确哈希批准，仅一次pidfd SIGTERM，不恢复模型或20题。真正信号仍未授权/未发；GPU驻留不能被本地SSH255或结算替代。之后才完成保管人侧失败/安全审计与C5-7。
 
 - [x] 安全停止源码0366c46双CI成功、27针对性CPU控制/全仓1060 passed/8 skipped；[完整runtime与独立准备核查](eval/c5/formal20-v4-worker-stop-preexecution-validation-20261009-a.json)核对三处源码/spec和三部署文件、1341系统stdlib/12映像、真实入口环境及精确目标身份。检查器对/usr路径假设已纠正，冻结和真实guard不改；pidfd/信号/私有读取0。

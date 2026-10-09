@@ -1,5 +1,24 @@
 # C5/R PR依赖与所有者审核交接
 
+## 2026-10-09正式失败及独立资源收尾后的审核快照（当前）
+
+本次直接GitHub API核实main仍`01647f1cee38e2f09dd1d561289bfd42f103b9c5`，#2～#6 OPEN/非Draft，#7仍独立OPEN/Draft。实际base依赖main→#2→#3→#4→#5→#6；#7基于main，不作为LoRA结论替代。下方10月8日“未消费/等租期”是当时记录，不再作为当前状态。
+
+| PR | 核查时head | 实际base |
+| --- | --- | --- |
+| #2 | c444f5f732e7d05dd81cded955dee712d1488383 | main |
+| #3 | 86235f77185f8a557136cae5e8fd2be77ebd6d77 | codex/c5-contract-freeze |
+| #4 | 19b44f36276cd0a0c7805da1b9851b93fa47e0b8 | codex/c5-dataset-v2 |
+| #5 | da2fc6d8bef7b1c06ff63e73d7d6ff76fcad5bbb | codex/c5-holdout-gate |
+| #6 | 1d3b226a325fb1f5e5f9f2e91cbb728a045ede71（本次文档发布前） | codex/c5-engineering-gate |
+| #7 | ea85df0918147da13d58d5210269fed54f9876ef | main（Draft） |
+
+#6在上述head的完整分页API人口368文件，94,359新增/13删除行；不是只看GitHub短files的前100项，也**不是已完成全部内容人工审核**。该head push37862239259/PR37862244090成功，独立审计源码d886452的两CI亦成功；本次只更新报告/状态文档，将产生新head及CI，不改已交接审计包的字节或SHA。审核合并仍需实际最新head，不能把旧CI自动当新head通过。
+
+当前审核重点见[完整证据盘点](c5-research-evidence-and-decision-report.md)：原80离线门/D开发门通过与正式20题单次失败分别保留；缺外部锚、40槽和完整审计，质量不可估计。新精确批准的worker停止仅核实进程/GPU释放，不能追认Rhino安全PASS。唯一v3保管人部分核查已准备且两组双CI通过，尚待本人；代码/报告merge也不解除任何私有或现场门禁。
+
+本人仍唯一reviewer_1。此前#2合并被执行审查要求精确PR/head确认、尚未执行，不能换接口绕过；最终C5-7/报告和实际head审核完成后，再按本人具体决定逐依赖合并及核对main CI。主工作区九份修改保持原样（diff SHA b407093a…8aa6c），不reset/pull覆盖，不打包认证、私有题目或整批R证据；#7不自动转Ready，不扩大产品UI/用户开放。
+
 ## 2026-10-08 v3批准与启动前停止后的当前审核快照
 
 [v3冻结准备](c5-formal20-deployment-v3-readiness.md)源码`d27258f`/发布`5d629bc7a503e259fc32ea766c4a47bef0d18362`双CI成功；本人[精确确认两哈希](../eval/c5/formal20-owner-approval-v3-20261008.json)，两地grant登记及批准后完整重哈希通过。但16:39苏黎世窗口已过，[启动前停止](../eval/c5/formal20-v3-pre-admission-window-stop-20261008.json)核实入口/claim/key/模型/Rhino/正式消费均0，grant可恢复封存；不是研究失败、质量NO-GO或整体C5 GO。当前等实际新租期，不通过merge解除资源/现场/保管门禁。
