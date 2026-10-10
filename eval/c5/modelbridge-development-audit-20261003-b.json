@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "probe_id": "C5DEV-MODELBRIDGE-20261003-B",
+  "status": "independent_modelbridge_development_audit_complete_not_formal_quality",
+  "spec_sha256": "be91b9b3ae28a18d69781b8c23d78341ea8be74177ce347895cfb97b93537de9",
+  "runtime_freeze_sha256": "686c3a1cc2b04c24e974353857983500b221fe2c107d99d4e31caf631b7e54b4",
+  "frozen_source_revision": "608008fc22c766ee03cc725dd87f68585e835839",
+  "owner_approval": "repository_owner directly approved the exact B spec and runtime hashes before admission",
+  "preexecution_ci": "both PR #6 validate jobs passed on 59ce05e before B admission",
+  "single_use_scope": {
+    "development_slots": 8,
+    "model_requests": 8,
+    "generation_stages": 11,
+    "generation_stages_max": 16,
+    "new_headless_fixtures": 8,
+    "native_writes": 1,
+    "native_reads": 1,
+    "formal_holdout_reads": 0,
+    "training_calls": 0,
+    "replay_allowed": false
+  },
+  "paired_development_outcomes": {
+    "write-base": {"observation": "selector_contract_failure_no_dispatch", "native_dispatch": false, "semantic_pass": false},
+    "write-lora": {"observation": "schema_valid_not_authorized", "native_dispatch": true, "semantic_pass": true},
+    "read-lora": {"observation": "schema_valid_not_authorized", "native_dispatch": true, "semantic_pass": true},
+    "read-base": {"observation": "invocation_contract_failure_no_dispatch", "native_dispatch": false, "semantic_pass": false},
+    "clarify-base": {"observation": "selector_contract_failure_no_dispatch", "native_dispatch": false, "semantic_pass": false},
+    "clarify-lora": {"observation": "abstained_no_dispatch", "native_dispatch": false, "semantic_pass": true},
+    "unsupported-lora": {"observation": "abstained_no_dispatch", "native_dispatch": false, "semantic_pass": true},
+    "unsupported-base": {"observation": "abstained_no_dispatch", "native_dispatch": false, "semantic_pass": true}
+  },
+  "independent_joint_audit": {
+    "all_eight_slots_classified": true,
+    "model_to_native_chain": "raw Mac model request/response, remote generation claims and raw receipts, signed permission, native immediate/stable readbacks, geometry and two SQLite ledgers cross-checked",
+    "lora_write_geometry_passed": true,
+    "lora_read_semantic_scene_passed": true,
+    "slot_operational_error_count": 0,
+    "all_slots_closed_and_stopped": true,
+    "hub_stopped_without_failure": true,
+    "all_nine_ephemeral_keys_absent": true,
+    "remote_worker_exit_code": 0,
+    "remote_worker_status": "worker_stopped_no_replay",
+    "remote_development_evidence_records_exported_read_only": 42,
+    "complete_C5_engineering_gate_passed": true,
+    "formal_quality_claim": false
+  },
+  "resource_settlement": {
+    "start_utc": "2026-10-03T17:14:17.880Z",
+    "stop_utc": "2026-10-03T17:19:40.293Z",
+    "elapsed_seconds_including_load_and_idle": 322.4134741070011,
+    "development_cap_seconds": 3500,
+    "retired_a_elapsed_seconds": 17.613689741992857,
+    "a_plus_b_elapsed_seconds": 340.027163848994,
+    "original_development_allocation_seconds": 3600,
+    "gpu_afterward": "NVIDIA GeForce RTX 3090, 11 MiB used, 0% utilization",
+    "peak_allocated_bytes": 8316292096,
+    "peak_reserved_bytes": 19501416448
+  },
+  "decision_boundary": "This passes only the new C5 real-model/Rhino engineering compatibility development gate. Its eight public development slots are neither the new 20-task formal set nor an estimate of general Rhino quality. The original C5 offline 80-family result remains separate; no overall C5 GO, default-route switch, PR approval or merge follows automatically.",
+  "next_required_gate": "Generate and freeze genuinely new formal 20 task families, independently exclude train/validation/development/A5/P2/R and privately exclude original consumed C5 80, then obtain a separate exact owner approval before 40-route real Rhino pairing."
+}

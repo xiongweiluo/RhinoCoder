@@ -1,0 +1,9 @@
+{
+  "decision_id": "C5SAFE-CLOSURE-ADMISSION-20261007-V2",
+  "actor": "repository_owner",
+  "accepted": true,
+  "decision_spec_sha256": "c103d9b97982411010119713dbc1a6bdb711e0ce7cd29b154ede6b8c19ae172f",
+  "scope": "prepare_new_manual_safety_closure_only_not_execution",
+  "actual_cleanup_execution_approved": false,
+  "approval_basis": "Direct owner answer: 接受新安全判据，仅准备收尾B"
+}

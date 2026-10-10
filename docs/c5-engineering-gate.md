@@ -1,5 +1,7 @@
 # C5-2 工程门：同源数据渲染与有界 GPU 诊断
 
+> **2026-10-01 后续状态：**C5-2 GPU 子门已真实通过：64 条 overfit 完成 128 steps 并独立恢复，随后 32 家族/26-step 系统诊断完成；loss/梯度/validation、最终 checkpoint 血缘与累计 0.67354 GPU-hours 均通过冻结门。专用代码、结果和预算硬门见 [GPU 执行包](c5-gpu-execution.md)。Linux 重核已精确恢复原 schema/943 条渲染血缘/token 分布；初次 docstring 缩进漂移另行保留。本文以下 2026-09-28 CPU 结论仍为历史冻结，原配置/报告不覆盖；C5-3 在既有条件授权下进入唯一正式 run，不读取最终 holdout。
+
 日期：2026-09-28。状态：**CPU 子门通过；GPU 子门等待主机、预算与显式诊断授权，不得据此启动正式训练。**
 
 本门服务于实验 `rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2`，不修改 C4，不读取最终 holdout，不调用 Rhino，也不改变默认产品路由。冻结配置见 [`eval/c5/c5-engineering-config.json`](../eval/c5/c5-engineering-config.json)，机器可读结果见 [`eval/c5/c5-engineering-readiness.json`](../eval/c5/c5-engineering-readiness.json)。

@@ -1,0 +1,29 @@
+{
+  "audit_id": "C5AUDIT-FORMAL20-V4-INCOMPLETE-20261009-A",
+  "status": "public_stdlib_only_audit_package_independently_verified_not_owner_audit",
+  "review_runtime_sha256": "53ca57a54087d98a8d26e2eca7be80d1d34f7e881c42cde82336cd9865ee3bb0",
+  "source_revision": "d886452420c201fc18c38e7d571854155c498998",
+  "source_files": {
+    "c5_formal20_incomplete_audit.py": "d9993c4394c893a694352d2a3206d539c81f79cf98bca9f8c6e45be9f69491a1",
+    "c5_formal20_owner_failure_audit.py": "d0a452967b886d0eb00f365491e1529380d034caec635a4ec27855762e0c3c00"
+  },
+  "git_local_deployed_sources_identical": true,
+  "review_runtime_local_and_deployed_bytes_identical": true,
+  "actual_isolated_environment_matches_freeze": true,
+  "loaded_external_files_independently_rehashed": 69,
+  "stdlib_only_no_site_packages_or_retired_project_import": true,
+  "new_owner_audit_state_absent": true,
+  "actual_private_evidence_reads": 0,
+  "model_or_rhino_calls": 0,
+  "latest_scoped_cpu_controls_passed": 39,
+  "earlier_full_repository_passed": 1089,
+  "earlier_full_repository_skipped": 8,
+  "final_stdlib_source_full_tests_and_dual_ci_pending_at_preparation": true,
+  "owner_audit_executed": false,
+  "persisted_native_plan_body_read": false,
+  "native_preparation_check_is_expected_hash_metadata_binding_only": true,
+  "full_formal_joint_audit_or_host_cleanup_claim": false,
+  "external_host_receipt_captured": false,
+  "source_v1_and_v2_preserved_not_executed_as_owner_audit": true,
+  "formal_replay_allowed": false
+}

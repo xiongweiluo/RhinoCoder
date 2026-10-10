@@ -1,0 +1,16 @@
+{
+  "audit_id": "C5AUDIT-FORMAL20-V4-INCOMPLETE-20261009-A",
+  "status": "public_package_v1_import_refused_preserved_not_owner_audit",
+  "source_revision": "23c0e62046f9fcdd9e2e5308e5b6598b0f068e5e",
+  "error_type": "ModuleNotFoundError",
+  "independently_identified_public_dependency": "jsonschema",
+  "isolated_no_site_import_requires_explicit_dependency_search_root": true,
+  "public_source_files_created": 2,
+  "review_runtime_created": false,
+  "owner_audit_admission_created": false,
+  "private_evidence_reads": 0,
+  "model_or_rhino_calls": 0,
+  "public_package_v1_replayed_or_overwritten": false,
+  "original_formal_result_changed": false,
+  "formal_replay_allowed": false
+}

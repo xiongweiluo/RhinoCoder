@@ -8,6 +8,14 @@ RhinoCoder 对外只使用能从版本化文件复核的指标。本页是 READM
 
 ## 核心指标与来源
 
+**最新安全交接：**本人正常退出研究Rhino，独立进程观察确认原PID9831和Rhinoceros缺席，见[单独记录](../eval/c5/formal20-v4-owner-host-exit-observation-20261009.json)。当前会话已结束，不追认历史完整清理/联合审计；当前剩余交付为本人审核后的PR/main收口，以下安全交接未完成/待摘要为退出前历史。
+
+当前最终裁决：[C5-7 NO-GO](c5-research-evidence-and-decision-report.md)，原因是正式现场证据不完整，不是模型质量0/20。本人已有失败核查已完成，消费/案例与计划绑定核实，但完整联合/宿主清理未核实，质量不可估计；原训练、80家族77/80对20/80、D工程和全部失败资产保留。当前LoRa路线不进入产品接入，不追认C4/R成功，不自动新研究；必要安全交接与PR/main仍缺。下方待本人/待最终裁决为原快照。
+
+2026-10-09当前研究状态：[正式20题单次运行已跨消费后在第一槽前因BrokenPipeError/SSH255停止](c5-formal20-v4-incomplete-result.md)，0槽不等于两模型各0/20；计数不完整，质量与完整安全审计未完成，不重跑。下表C收尾/D工程“20题未消费”为各自10月7日的历史时点，不是当前消费状态；原离线80家族结果和D工程证据保留，不自动支持整体GO。
+
+[全链路证据与C5-7材料](c5-research-evidence-and-decision-report.md)将训练/离线/工程/正式质量分开。已另获精确批准单次停止原worker并独立确认GPU释放；本人只读失败审计尚待闭合摘要，缺失外部host锚及完整联合审计不会被部分核查追认PASS。当前报告不是最终C5-7或main已接入证明。
+
 | 公开表述 | 固定口径 | 证据 |
 |---|---|---|
 | 黄金数据 500/500、46 个标签 | 四道准入门全部通过；A7 新增 200 条，8 类覆盖缺口达到计划量 | [A7 覆盖与边际价值报告](a7-500-marginal-value.md) |
@@ -21,6 +29,9 @@ RhinoCoder 对外只使用能从版本化文件复核的指标。本页是 READM
 | 23 个 MCP 工具 | 版本清单固定工具数，并由发布一致性检查与源码装饰器计数交叉验证 | [版本清单](version-manifest.json) |
 | C3 A5 一次性评测未达到 GO 门槛 | 基座与 LoRA 在 45 条锁定 holdout 上的 parse/name/arguments/sequence exact 均为 0/45；差值 0.0pp、净胜 0，第二 run 已禁止 | [C3 A5 报告](c3-a5-holdout-report.md)、[C2 报告](c2-qlora-training-report.md)、[C3 协议](c3-final-evaluation.md) |
 | C4 模型实验裁决为 NO-GO | P2 真实 Rhino 配对描述性结果为基座 4/30、LoRA 5/30；+3.3pp、净胜 1、exact McNemar `p=1.0`、bootstrap 95% CI [0,10]pp，未达到预注册门槛；LoRA 基础设施补位事后发现超出冻结规则 | [C4 原报告](c4-model-decision.md)、[只读诊断与合规性限制](c4-posthoc-failure-diagnosis.md)、[最小化机器结果](p2-model-comparison-results.json) |
+| 独立C5离线和严格控制器门通过 | 全新80家族单次配对，sequence基座20/80、LoRA77/80，+71.25pp、净胜57，exact McNemar p≈1.39e-17；原门槛、消费/冻结血缘与公开逐家族统计复算通过，尚非真实Rhino或整体GO | [最终报告](c5-final-evaluation-report.md)、[独立公开审计](../eval/c5/final-public-audit-20261002-v2.json) |
+| C5现场开发失败保留，C遗留有限安全收尾完成 | A/B/C工程失败退休；C部分原生写/读不等于完整八槽通过。独立核实精确空夹具关闭、七key删除与委托解除，58记录/39请求绑定封存；host连续性仍blocked，正式20题未消费、C5-7未裁决 | [C失败](c5-hostassurance-development-c-result.md)、[收尾B与独立审计](c5-retired-c-cleanup-b-result.md)、[公开哈希索引](../eval/c5/hostassurance-c-cleanup-result-20261007-b.json) |
+| C5独立D现场工程门通过，不是正式质量GO | 新单次8槽/10生成阶段、模型导出写1/读1、97连续记录/67请求锚、指定清理和完整时序独立核实；基座写/读失败保留，已排除train家族不具有盲测代表性。正式20题未读/未消费，当前核查40槽容量与预算 | [D结果与限制](c5-hostassurance-development-d-result.md)、[独立工程审计](../eval/c5/hostassurance-development-independent-audit-20261007-d.json)、[正式容量/资源复核](c5-formal20-capacity-and-resource-review.md) |
 | 当前正式版本为 0.3.0 | Tag、GitHub Release 与在线只读演示均有公开入口；当前后续改动属于 Unreleased | [版本清单](version-manifest.json)、[发布清单](release-checklist.md) |
 
 ## 代表性可追溯链路
@@ -48,7 +59,7 @@ run.started
 ## 不应对外声称
 
 - 不声称本地模型已经能完成 Rhino 建模。`local-mock` 只是确定性的接口与安全替身。
-- 不声称 LoRA 优于基座或云模型。唯一 QLoRA 已训练，但一次性 A5 上基座/LoRA 均为 0/45，P2 也只有 4/30 对 5/30；C4 已按预注册规则裁决 `NO-GO`。
+- 不把C5冻结契约下80家族离线结构化改善外推为真实Rhino、开放世界或优于云模型。第一轮A5两路0/45、P2描述性4/30对5/30和C4 `NO-GO`保持不变，第二轮结果不追认第一轮成功。
 - 不把 P2 包装成完全盲测：它在 LoRA 训练前冻结，但已用于既有系统失败分析；C4 将其作为外部困难回归集与 A5 分层报告。
 - 不把本次 LoRA P2 描述性 5/30 说成严格遵守冻结单次基础设施补位规则的 Pass@1；[事后诊断](c4-posthoc-failure-diagnosis.md)披露 15 个任务存在超限中断记录，不事后剔除或重跑。
 - 不把 Agent/Rhino 的 Windows/macOS 兼容表述为本地模型跨平台；本地推理只声明实际验证过的平台。

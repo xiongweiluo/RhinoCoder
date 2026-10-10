@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "study_id": "c5-rhino-paired-20-v1",
+  "field_protocol_version": 2,
+  "status": "cpu_preparation_verified_final_source_dual_ci_and_actual_runtime_freeze_required",
+  "capacity_proposal_sha256": "81b799b1e936c588f51ac41ea11c2d9975044302d9d2f5c037866b78ec349efb",
+  "spec_canonical_sha256": "9f27e0ad16dbd1a46d200e5e258d64d5e02ccf49219c584b47bc3272b7368592",
+  "full_suite_before_final_owner_stop_guard": {
+    "command": "/opt/anaconda3/bin/python -m pytest -q -p no:cacheprovider",
+    "passed": 1019,
+    "skipped": 8,
+    "elapsed_seconds": 263.27
+  },
+  "final_owner_stop_guard_regression": {
+    "test_file": "eval/test_c5_formal20_owner_v2.py",
+    "passed": 8,
+    "elapsed_seconds": 0.20,
+    "settled_process_not_stopped_or_published_twice": true
+  },
+  "new_specialized_test_population": {
+    "policy_budget_host": 16,
+    "forty_route_joint_audit_and_tamper": 14,
+    "framed_cpu_wire_and_complete_deadlines": 7,
+    "owner_private_boundary_and_readiness": 8,
+    "freeze_no_overwrite_dirty_and_acceptance_admission": 5
+  },
+  "py39_ast_modules_verified": 13,
+  "secret_scan_passed": true,
+  "release_consistency_passed": true,
+  "release_version": "0.3.0",
+  "mcp_tool_count": 23,
+  "changed_planning_document_links_verified": true,
+  "git_diff_check_passed": true,
+  "synthetic_limitations": [
+    "model_Rhino_and_SSH_injected_test_doubles_not_actual_formal_execution",
+    "real_signatures_SQLite_file_protocol_raw_timing_and_independent_score_replay",
+    "existing_repository_synthetic_task_text_only_no_new_private_families",
+    "no_full_CLR_byte_closure_or_live_v2_host_baseline_proven"
+  ],
+  "mac_known_readable_host_files_rehashed": 339,
+  "mac_known_readable_host_file_drift_count": 0,
+  "mac_formal_v2_source_absent": true,
+  "mac_formal_v2_state_absent": true,
+  "remote_access": "existing_master_broken_pipe_readonly_date_20_seconds_timeout_direct_batch_authentication_denied",
+  "remote_formal_v2_directory_absence_verified_this_stage": false,
+  "actual_complete_runtime_freeze_prepared": false,
+  "new_exact_formal_owner_approval_received": false,
+  "new_field_operations": 0,
+  "new_model_generation_calls": 0,
+  "formal_holdout_rows_read_by_development_agent": 0,
+  "formal_holdout_consumption": 0,
+  "execution_authorized": false,
+  "default_product_route_changed": false,
+  "overall_goal_complete": false
+}

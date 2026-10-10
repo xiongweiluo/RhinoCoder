@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "study_id": "C5DEV-HOSTASSURANCE-20261007-A",
+  "preparation_source_revision": "92d9e8351ab5a52a3e779baae3cc8077ad91e91c",
+  "status": "unexecuted_deployment_preflight_refused_metadata_population",
+  "observed_appledouble_file_count": 276,
+  "failure_gate": "SourceGuard source inventory bound before loader imports",
+  "cause_of_preparation_failure": "Mac tar AppleDouble metadata counted as extra source files; not a model or Rhino failure",
+  "complete_runtime_freeze_created": false,
+  "precise_study_approval_received": false,
+  "study_state_created": false,
+  "model_loaded": false,
+  "generation_calls": 0,
+  "rhino_calls": 0,
+  "formal_holdout_rows_read": 0,
+  "gpu_observation_after_refusal": "NVIDIA GeForce RTX 3090, 11 MiB, 0 %",
+  "corrective_preparation": "preserve both unexecuted source deployments with explicit archive rename; disable xattrs/Mac metadata and verify exact tar population before transmission",
+  "source_guard_bound_relaxed": false,
+  "run_or_experiment_replay_authorized": false
+}

@@ -1,0 +1,8 @@
+{
+  "study_id": "c5-rhino-paired-20-v1",
+  "actor": "repository_owner",
+  "approved": true,
+  "spec_sha256": "1ce7dba2a75a853a6a2b8d81027235c442586f30718f05dc177f64a04b002fa7",
+  "runtime_freeze_sha256": "9f72a0491b49bbb5f21dd83e6c87bb16530218a375593e0308e69caee134f1a3",
+  "approval_basis": "direct repository_owner approval of complete C5-6 formal20 spec and runtime freeze"
+}

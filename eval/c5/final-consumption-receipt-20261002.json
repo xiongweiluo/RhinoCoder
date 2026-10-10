@@ -1,0 +1,9 @@
+{
+  "adapter_sha256": "305d72703270d16e93233d1d34ae27cdaddd777e4530afead88c7edb8dc22cae",
+  "code_revision": "ced0de98bfb1ca7de581bc98c6fcbcb290a62cdf",
+  "commitment_sha256": "4fe1796cc1e5b19f7d81b79fdf883463d7bb77d6af012d9aa1900208ec35ebaa",
+  "custodian_identity": "repository_owner",
+  "holdout_consumed_at": "2026-10-02T14:07:44.327037Z",
+  "run_id": "c5-final-3d26f1a4b89eb38766647e93",
+  "thresholds_sha256": "4339efb64d34654898930a5800be85d647878af3ea6705b41fb88e8ae79fc545"
+}

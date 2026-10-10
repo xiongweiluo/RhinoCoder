@@ -1,0 +1,90 @@
+{
+  "all_eight_slots_classified": true,
+  "complete_C5_engineering_gate_passed": true,
+  "development_semantic_outcomes": {
+    "clarify-base": true,
+    "clarify-lora": true,
+    "read-base": false,
+    "read-lora": true,
+    "unsupported-base": true,
+    "unsupported-lora": true,
+    "write-base": false,
+    "write-lora": true
+  },
+  "formal_quality_claim": false,
+  "generation_calls": 10,
+  "gpu_wall_seconds": 1278.215921310999,
+  "holdout_calls": 0,
+  "host_assurance_audit": {
+    "causal_origin_or_emitted_bytes_proven": false,
+    "complete_handler_absence_proven": false,
+    "execution_authority": false,
+    "legacy_byte_closure_verified": false,
+    "limited_visible_continuity_verified": true,
+    "normal_checkpoint_count": 73,
+    "policy_id": "c5-frozen-source-trusted-host-visible-continuity-v2",
+    "raw_external_seal_sha256": "346bf8bc3b4c1b6c6f7fe5a7ccbb8e64ef9f709cdb875c436c7eae5663d2b5a8",
+    "record_count": 97,
+    "status": "limited_host_continuity_audit_verified",
+    "study_id": "C5DEV-HOSTASSURANCE-20261007-D"
+  },
+  "host_request_bindings": {
+    "execution_authority": false,
+    "raw_requests_bound_to_anchored_checkpoints": 67
+  },
+  "legacy_byte_closure_verified": false,
+  "model_completion_timing_audit": {
+    "execution_authority": false,
+    "model_requests_with_complete_timing": 8,
+    "startup_timing_verified": true
+  },
+  "native_completion_timing_audits": [
+    {
+      "execution_authority": false,
+      "native_requests_with_complete_timing": 9
+    },
+    {
+      "execution_authority": false,
+      "native_requests_with_complete_timing": 4
+    },
+    {
+      "execution_authority": false,
+      "native_requests_with_complete_timing": 23
+    },
+    {
+      "execution_authority": false,
+      "native_requests_with_complete_timing": 11
+    },
+    {
+      "execution_authority": false,
+      "native_requests_with_complete_timing": 4
+    },
+    {
+      "execution_authority": false,
+      "native_requests_with_complete_timing": 4
+    },
+    {
+      "execution_authority": false,
+      "native_requests_with_complete_timing": 4
+    },
+    {
+      "execution_authority": false,
+      "native_requests_with_complete_timing": 4
+    },
+    {
+      "execution_authority": false,
+      "native_requests_with_complete_timing": 4
+    }
+  ],
+  "native_reads": 1,
+  "native_writes": 1,
+  "probe_id": "C5DEV-HOSTASSURANCE-20261007-D",
+  "replay_allowed": false,
+  "startup_audit": {
+    "execution_authority": false,
+    "formal_quality_claim": false,
+    "startup_record_identity_and_zero_counts_verified": true
+  },
+  "status": "independent_modelbridge_development_audit_complete_not_formal_quality",
+  "warmup_fixture_closed": true
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "status": "owner_accepted_formal_preparation_boundary_not_execution_authority",
+  "acceptance_sha256_basis": "81b799b1e936c588f51ac41ea11c2d9975044302d9d2f5c037866b78ec349efb",
+  "previous_development_freezes_and_v6_unchanged": true,
+  "provider_expiry_owner_reported_not_independently_billing_verified": "2026-10-08T22:00:00+02:00",
+  "generation_cutoff": "2026-10-08T21:45:00+02:00",
+  "development_max_seconds_unchanged": 3600,
+  "formal_resource_boundary": {
+    "owner_confirmed": true,
+    "provider_expiry_epoch": 1791489600,
+    "generation_cutoff_epoch": 1791488700,
+    "export_reserve_seconds": 900,
+    "formal_max_seconds": 18000,
+    "prior_cumulative_seconds": 9607.228115136008,
+    "original_cumulative_max_seconds": 57600,
+    "prior_research_seconds": 2407.228115136008,
+    "research_cumulative_max_seconds": 21600
+  },
+  "new_exact_formal_spec_runtime_approval_required_before_any_field_operation": true,
+  "formal_holdout_consumption_authorized": false,
+  "new_gpu_usage_recorded": false,
+  "rental_or_payment_authorized_by_this_record": false,
+  "default_route_changed": false
+}

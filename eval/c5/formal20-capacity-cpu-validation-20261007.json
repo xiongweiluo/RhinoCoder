@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "status": "capacity_prototype_and_synthetic_characterization_verified_not_formal_field_ready",
+  "source_git_parent": "d718b1220b105bc17406cc10bdb648f155a55367",
+  "proposal_sha256": "81b799b1e936c588f51ac41ea11c2d9975044302d9d2f5c037866b78ec349efb",
+  "source_files": {
+    "eval/test_c5_formal20_observation_capacity.py": "f694b41cce5f029d190055029fa9919410a417931d09b636e642025ff675a831",
+    "plugin/rhino_listener/c5_formal20_observation_capacity.py": "173bf6174c14d33bc59097e41668b184d3177dd35b3f0ac532d7a416e8afe546",
+    "tools/c5_formal20_capacity_synthetic.py": "86bb12b9c35c47769200c9000fc72da8ae158f64dfb7ded0000aa6470183d202"
+  },
+  "new_cpu_tests_passed": 14,
+  "full_regression_passed": 970,
+  "full_regression_skipped": 8,
+  "full_regression_seconds": 97.57,
+  "python_39_ast_passed": true,
+  "secret_and_release_checks_passed": true,
+  "synthetic_matrix": {
+    "route_slots": 40,
+    "model_requests": 56,
+    "generation_stages": 104,
+    "source_guard_calls": 1403,
+    "native_request_count": 1136,
+    "maximum_child_request_count": 67,
+    "fake_model_and_fake_Rhino": true,
+    "real_signer_sqlite_and_file_protocol": true,
+    "formal_quality_claim": false
+  },
+  "d_resource_illustration": {
+    "model_count": 8,
+    "model_mean_complete_seconds": 93.4232560468663,
+    "model_max_complete_seconds": 134.81161425000755,
+    "native_count": 58,
+    "native_mean_complete_seconds": 6.277045032361739,
+    "illustrative_56_model_plus_1136_native_seconds": 12362.425495387448,
+    "formal_runtime_or_unique_cause_proven": false
+  },
+  "owner_private_cases_answers_ciphertexts_or_keys_read": false,
+  "real_model_Rhino_GPU_holdout_calls": 0,
+  "new_formal_state_or_grant_created": false,
+  "formal_session_channel_worker_and_private_audit_integration_completed": false,
+  "new_capacity_or_budget_scope_accepted": false,
+  "formal_execution_authorized": false,
+  "default_product_guard_changed": false
+}

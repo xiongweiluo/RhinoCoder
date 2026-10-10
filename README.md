@@ -21,12 +21,17 @@ RhinoCoder 是一个面向 Rhino 8 的可验证空间设计 Agent。它把自然
 | **隐私审计 0 敏感发现** | 12 条红队、1,609 条 Trace、7,016 行 SQLite、3 份 Replay 及模拟日志/请求面；[A4 报告](docs/privacy-red-team-report.md) |
 | **C3 A5 一次性评测完成，未达到 GO 门槛** | 基座与 LoRA 在 45 条锁定 holdout 上的结构化四指标均为 0/45；差值 0.0pp、净胜 0，第二 run 已禁止；[C3 报告](docs/c3-a5-holdout-report.md) |
 | **C4 决策：NO-GO** | 冻结 P2 真实 Rhino 配对的描述性结果为基座 4/30、LoRA 5/30，差值 +3.3pp、净胜 1、McNemar `p=1.0`，未达到 +10pp / 净胜 3 门槛；事后发现 LoRA 基础设施补位超出冻结规则，见[诊断与限制](docs/c4-posthoc-failure-diagnosis.md)；[C4 原报告](docs/c4-model-decision.md) |
+| **独立 C5 离线与严格控制器门通过** | 全新80家族单次配对，sequence基座20/80、LoRA77/80，+71.25pp、净胜57；原门槛与公开逐家族复算通过。尚未完成真实Rhino迁移门，不是整体GO或默认接入；[C5最终报告](docs/c5-final-evaluation-report.md) |
 
 当前正式版本：[`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0)。招聘者可直接打开[在线只读演示](https://rhinocoder-demo.xiongweiluo1.chatgpt.site)，无需 Rhino、模型密钥或安装；Unreleased 证据补充了[真实 Rhino 单窗口短片](docs/assets/rhinocoder-real-rhino-demo.mov)与[结果帧](docs/assets/rhinocoder-real-rhino-result.png)。短片由已逐帧复核的真实 Rhino 执行前/后窗口帧组成，不是连续桌面录屏，也不包含音频或真实项目数据。
 
-> **诚实边界：** `local-mock` 只是确定性的本地接口与安全替身，证明统一后端、隐私强制路由和禁止云端降级；它不是能完成 Rhino 建模的真实本地模型。P2a 是外部用户出题、Agent 自动执行的困难集，不是真人操作 UI 的可用性研究；P2b 延期。MornAI RTX 3090 上的 C0–C4 已完成：A5 基座/LoRA 均为 0/45；冻结 P2 真实 Rhino 配对为 4/30 对 5/30，+3.3pp、净胜 1，未达到预注册门槛，最终裁决为 `NO-GO`。不能声称 LoRA 优于基座或能可靠完成 Rhino 建模，部署继续采用已验证的混合路线。
+> **诚实边界：** `local-mock` 只是确定性的本地接口与安全替身，证明统一后端、隐私强制路由和禁止云端降级；它不是能完成 Rhino 建模的真实本地模型。P2a 是外部用户出题、Agent 自动执行的困难集，不是真人操作 UI 的可用性研究；P2b 延期。第一轮 C0–C4 的 A5 两路0/45、P2描述性4/30对5/30及C4 `NO-GO`永久保留。独立C5只证明在冻结双阶段契约和80家族离线集上的结构化改善，不证明真实Rhino几何或开放世界质量，不能追认第一轮成功；默认部署仍为现有混合路线。
 
 ## 为什么这个项目不是普通 “LLM + 工具” Demo
+
+研究续接：独立[D单次现场工程门](docs/c5-hostassurance-development-d-result.md)已核实小规模模型→许可→Rhino→账本→清理链路；不是未见20题质量结果或整体C5 GO。[正式20题唯一运行](docs/c5-formal20-v4-incomplete-result.md)已跨消费屏障后因管道/SSH异常在第一槽前停止，真实配对质量不可用、不可重跑；失败与安全审计仍待完成，默认混合路线未切换。
+
+[C5-7最终裁决：NO-GO](docs/c5-research-evidence-and-decision-report.md)，依据正式现场证据不完整；本人部分失败核查已核实消费/案例与计划绑定，但40槽未完成、质量不可估计、完整联合/历史宿主清理未核实。不是LoRa 0/20或能力失败，不进入产品接入，训练/离线77/80与失败资产保留；默认混合未切换。本人已正常退出研究Rhino且[独立进程缺席核对](eval/c5/formal20-v4-owner-host-exit-observation-20261009.json)完成当前会话交接，不追认历史清理或内存擦除；PR/main尚未收口，整体Goal未完成。
 
 - **完成必须有几何证据**：模型说“完成”不算完成；系统重新读取 Rhino 场景，并核对数量、尺寸、颜色和空间关系。
 - **隐私门先于模型和 MCP**：Critical 请求提前阻断，High 强制本地且禁止云 fallback，Medium 先最小化再出站；关闭普通路由也不能绕过。
@@ -213,7 +218,7 @@ python tools/audit_p2_results.py
 
 - 主要真实验收环境为 macOS 15.6 arm64 + Rhino 8；Windows、Intel Mac、多人并发与另一台物理 Mac 尚未完成发布验收。
 - 固定 30 题已经饱和；100% Pass@1 证明该契约下的稳定性，不证明开放世界、困难集或真实用户工作流成功率。
-- `local-mock` 不执行真实本地推理；MornAI RTX 3090 已完成 GPU smoke/resume、唯一正式 QLoRA 与一次性 A5 配对，但基座/LoRA 结构化四指标均为 0/45，仍未产生可对外声称的本地模型效果。
+- `local-mock` 不执行真实本地推理；第一轮A5两路0/45和C4 NO-GO不变。独立C5已产生冻结契约下80家族离线结构化改善，真实Rhino迁移、产品集成和默认切换仍未授权，见[C5报告](docs/c5-final-evaluation-report.md)。
 - 首轮模型实验只运行一个预注册 QLoRA 主配置，并允许 `GO / MORE-DATA / NO-GO`；Agent/Rhino 的 Windows/macOS 兼容不等于本地模型跨平台，本地推理只声明实际验证过的平台。
 - P2a 外部用户出题的自动化困难集已完成，18/30 有效基线通过；5 次已续跑的连接中断完整保留。002/014 的补充真实 Rhino 拓扑证据已完成，但不改变冻结失败与总体分数；P2b 真人操作 UI 验证延期。
 - 完整 30 题真实基准需要交互式 Rhino 和模型 API；CI 只运行离线检查。

@@ -30,7 +30,7 @@ from training.c5_contract import (
 from training.c5_dataset import DATASET_ID, DEVELOPMENT_SPLITS
 from training.c5_freeze import canonical_bytes, sha256_file
 from training.tool_contract_candidate import ContractError
-from training.tool_schema_inventory import load_public_mcp_tools
+from training.c5_inventory import load_public_mcp_tools
 
 
 ROOT = Path(__file__).resolve().parent.parent

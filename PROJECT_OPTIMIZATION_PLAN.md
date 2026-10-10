@@ -1,14 +1,322 @@
 # RhinoCoder 项目优化计划
 
-**版本：** v4.3
+**版本：** v5.0
 
-**更新日期：** 2026-09-21
+**更新日期：** 2026-10-09（顶部当前状态；下方历史快照保留原记录）
 
 **目标：** 在保持 Rhino Agent 工程质量、可复现评测和安全边界的前提下，把项目升级为招聘者在 5 分钟内能看懂、能运行、能验证价值的 AI 全栈作品集，并以真实用户和锁定实验决定后续模型与产品路线。
 
 计划采用里程碑制。每个里程碑只有通过验收门槛后才能进入下一阶段，避免用功能数量代替系统成熟度。
 
 ## 当前快照与跨对话续接
+
+### 近期任务索引：2026-10-09 C5-7 NO-GO、本人退出会话；当前PR/main收口
+
+**当前最终路线：C5-7 NO-GO，依据正式现场证据不完整，不是LoRA质量零分。**本人已单次完成[冻结v3部分失败核查](eval/c5/formal20-v4-owner-incomplete-audit-summary-20261009.json)，与回传/部署字节核对一致；[机器裁决](eval/c5/c5-final-decision-20261009.json)及[最终研究报告](docs/c5-research-evidence-and-decision-report.md)保持40槽未完成、完整联合/宿主清理未核实、质量/实际生成总量null。当前LoRa研发路线结束并保留资产，不进入产品接入，不自动MORE-DATA/E、训练、复跑或续租；默认混合/C4/v8/R独立结论不改。
+
+- [x] 本人单次已有失败核查、公开闭合摘要归档与冻结血缘独立核对；这是部分证据绑定，不追认完整审计PASS。
+- [x] C5-7按原证据不完整规则登记NO-GO、最终报告/README/索引/状态同步；不降低14/20、净胜3或安全0门。
+- [x] 当前研究宿主会话结束交接：本人正常退出，独立只读确认原PID9831及Rhinoceros进程缺席，见[单独退出记录](eval/c5/formal20-v4-owner-host-exit-observation-20261009.json)。代理没有关闭/保存/丢弃/新脚本；仅证明观察时点会话结束，不追认历史完整清理、连续性或内存擦除。
+- [ ] 实际PR/head审核及本人明确合并决定→逐依赖合并/main CI；#7仍独立Draft，不扩大R产品UI。主工作区九份修改不打包/覆盖。
+
+以下待本人/待裁决/计划再执行是对应此前历史，已由本节覆盖；**不要再次运行已完成的本人审计命令**。整体Goal仍不完成：正式40槽/完整审计没有被补造，main收口仍缺；当前会话结束交接已完成，原审计和裁决文件的历史未核实字段及哈希不修改。
+
+**当前优先更新：**[单次worker安全停止及独立GPU释放核查完成](eval/c5/formal20-v4-worker-stop-result-20261009-a.json)。完整发布8d5d8b0双CI通过、本人另批精确spec/runtime后，仅一次pidfd SIGTERM；PID43776消失、GPU计算进程为空、显存11 MiB。本人确认未捕获外部host回执，缺项不可修造；原正式失败/消费不改。当前主线为[保管人失败审计入口的冻结准备](docs/c5-formal20-incomplete-audit-preparation.md)→已有证据的C5-7如实裁决/作品集报告→PR审核收口，不再准备恢复或重跑原20题。下方待停止/远端未核实是此前时点。
+
+当前审计包准备**已完成**：源码d886452双CI37861948495/37861952950、完整冻结发布1d3b226双CI37862239259/37862244090全成功，全仓1099 passed/8 skipped、39专项控制和69实际外部文件独立核对通过，唯一v3命令已交接。当前仍缺本人闭合摘要（仅只读检查新audit目录/公开summary缺席，不读私有证据）；不要再次准备审计包或要求重做承诺。
+
+- [x] 有限来源观察器/新保证的本人接受、独立D现场工程门、正式v4完整冻结与精确批准已分别取得证据，不重放旧实验。
+- [x] 正式唯一尝试及失败封存、孤立worker单次停止与GPU释放核查已完成；**并非40槽完成、真实质量PASS或完整宿主清理证明**。
+- [ ] 本人运行已有失败只读核查，代理仅接收闭合公开JSON；部分核查不替代外部锚、完整联合审计或配对质量。
+- [ ] [C5-7全链路报告/裁决材料](docs/c5-research-evidence-and-decision-report.md)已备，最终裁决登记/作品集结项仍缺；GO受证据完整性阻断，不自动MORE-DATA/E或复用20题。
+- [ ] [实际PR/main审核交接](docs/c5-pr-stack-review-handoff-20261006.md)已更新：#2～#6开放、#7草稿、main不变，merge仍按本人最新精确决定和合并后CI，不打包脏主工作区。
+
+### 历史续接快照：worker停止准备与formal v2/v3/v4
+
+以下保留各自当时状态；未勾选的旧准备/待运行/未消费分支不构成当前待办，当前主线只以上述最新索引为准。
+
+本人已恢复诊断认证；只读发现原worker43776仍占约18.7GB GPU内存，PID/boot/start tick/UID/固定公开argv/cwd/executable字节核对通过。当前第一优先是[独立单次worker停止准备](docs/c5-formal20-v4-worker-safe-stop.md)：CPU/完整runtime/双CI后另请两精确哈希批准，仅一次pidfd SIGTERM，不恢复模型或20题。真正信号仍未授权/未发；GPU驻留不能被本地SSH255或结算替代。之后才完成保管人侧失败/安全审计与C5-7。
+
+- [x] 安全停止源码0366c46双CI成功、27针对性CPU控制/全仓1060 passed/8 skipped；[完整runtime与独立准备核查](eval/c5/formal20-v4-worker-stop-preexecution-validation-20261009-a.json)核对三处源码/spec和三部署文件、1341系统stdlib/12映像、真实入口环境及精确目标身份。检查器对/usr路径假设已纠正，冻结和真实guard不改；pidfd/信号/私有读取0。
+- [x] 完整发布双CI通过，本人另批安全停止spec a555bbe8…b4b9fef/runtime2e5386a3…9f60dbc；截止前仅一次精确pidfd SIGTERM并独立核实GPU释放，不借原正式批准或新source/state目录重跑评测。
+- [ ] 保管人失败审计入口已实现、CPU合成控制通过；完成独立公共部署/字节冻结/发布审核后，由本人仅核查已有私有证据，不重读密文/identity。部分核查不能代替缺失外部锚、完整联合审计或质量估计。
+
+[唯一v3部分失败审计包与独立核查](eval/c5/formal20-v4-incomplete-audit-preexecution-validation-v3-20261009-a.json)已形成：标准库独立重算，不加载旧项目/site-packages，69实际外部文件及源码/环境核对通过；review-runtime规范化SHA53ca57a5…5ee3bb0，39专项CPU控制通过，最终源码/完整发布双CI待核实。原v1公共依赖缺失和v2静态资源缺项保留，均无owner audit/private读取。之后唯一必要本人操作是终端只读审计已有七记录并返回闭合摘要；这不是恢复评测，不给缺失质量/安全证据追认PASS。
+
+[正式停止记录与限制](docs/c5-formal20-v4-incomplete-result.md)：本人私下输入后已跨永久消费屏障，公开`stopped_incomplete_no_replay`/BrokenPipeError/SSH退出255，0/40槽尝试完成、确认阶段0但计数不完整；原入口已结束。不是基座/LoRA各0/20或几何质量结论，不重读/解密/重跑这20题。41已知key文件缺席、host seal sidecar存在，但独立外部回执未从现场UI捕获、完整私有/清理审计未完成；远端GPU驻留也待只读核实。结算monotonic1512秒与wall2506秒相差994秒，原记录不改、不臆断休眠因果。当前先恢复只读诊断认证、准备保管人侧失败审计与如实裁决/报告；不追加E、训练、题目或降低门槛。下面零题等待/未消费均为各自历史时点。
+
+[现场零阶段公开观察](eval/c5/formal20-v4-public-zero-stage-observation-20261008.json)：本人已准备唯一v4四行并确认TTY WAIT；零阶段claim/未失败和150秒内余量核对后，代理只按一次Run，实际Rhino返回ARM_WAIT及HOST_READY_ZERO_PRIVATE_ROWS。worker/联合zero-readiness回执已出现，本人入口PID61346仍存活；21:46:38 UTC闭合公开进度仍为formal未启动、0槽/0确认生成阶段，等待本人在当前终端私下填写封存age/identity路径。模型已加载和现场arm已执行，不能再沿用下方“无模型/Rhino/claim/key”的准备快照；这些是各自先前时点，保留不改。回执和进度不是最终私有审计或质量GO；代理不读取私题/答案/key/原始模型证据，不补槽/重Run/重启入口，冻结和默认混合不改。
+
+[批准后独立复核与两地grant](eval/c5/formal20-v4-postapproval-validation-20261008.json)已完成：本人恢复固定连接，355三地公共文件、Mac3552/host339/tokenizer6/age及Linux21614/stdlib960/解释器/libpython、14基座/两adapter全部重哈希匹配；pip原缺项保留。两地各仅一份公共owner-approval.json，规范化SHA `88c1eacb2e96ebcda0a0aa33693a37bdb40c529d1616d67423e2907c2f6cca6e`，独立回读通过。无claim/key/模型/Rhino/私有消费，实际新host基线尚未观察；编辑器仍为重复旧v2包装，已请本人仅替换为唯一v4四行、不Run。当前只待核对包装，再本人TTY单次入口及zero-stage WAIT协调。下段“认证缺席/尚无grant”为本次恢复前历史，不再次要求同一精确批准。
+
+本人直接批准[唯一v4两个精确哈希](eval/c5/formal20-owner-approval-v4-20261008.json)；发布`fe7dc5e`双CI37839227851/37839234469成功。批准后本地355文件/已知host339/tokenizer6/age再次核对通过，但SSH认证socket已缺席，远端只读核查被认证拒绝；两地grant尚未登记、本地v4 state缺席，正式入口/模型/Rhino/私有消费均未启动。当前先恢复固定连接并重新核对远端，随后两地仅登记公共批准，再核对唯一source-v4四行包装及本人TTY单次入口；不再次要求同一批准、不重做承诺、不重跑准备器。以下“待精确批准”为此前时点，仍不等于现场执行或整体GO。10月9日16:39苏黎世最晚启动、21:45停止生成、22:00到期不变。
+
+本人批准的旧v2在真正启动前被[实际部署公开预检](docs/c5-formal20-deployment-v3-readiness.md)阻断：三份传递公开JSON未入清单。原350字节核查和CPU注入不能证明部署入口完整；旧两地grant可恢复改名保留，未执行脚本/模型、无claim/key/私题消费。不改旧冻结或LoRA结论。
+
+- [x] 证实缺项、停用旧入口且保留批准/冻结；三份公开哈希依赖入清单，加入实际部署根CLI预检、独立v3 source/state/spec路径。6新负控/正控、19相关、全仓1026 passed/8 skipped通过。
+- [x] 修正源码`d27258f`双CI成功；v3窄部署与[完整runtime/独立核查](eval/c5/formal20-v3-preexecution-validation-20261008.json)通过，337源/354文件三地字节一致、真实部署公开预检通过、完整环境/模型重哈希、无state/grant/私有消费。首次SSH中断经证明远端缺席后从确定边界续接，非覆盖或重放；保活不保证正式连接稳定。
+- [x] 冻结发布`5d629bc`双CI37787935070/37787943417成功；本人直接确认新spec `5e11b001538768a05f2475a0f52722e0f78b985f2381926404af19e37e92a525` / runtime `5ff14cf43a5cb7277ad27661e061c55b830a9e4ec9f51775624f8c6faac39bcf`，见[精确批准记录](eval/c5/formal20-owner-approval-v3-20261008.json)。批准后完整字节/模型/环境再核对通过，两地新state各仅一份owner-approval.json，grant规范化SHA为`8cb21445e18e6d1ff45a1ca17c4b29f47f62c0be08b51e88abbce5adc4bcaef0`；无claim/key/订阅/夹具/模型或私有消费。旧9f27/83f2批准不复用。
+- [x] [启动前窗口停止记录](eval/c5/formal20-v3-pre-admission-window-stop-20261008.json)：本人精确批准有效收到，但唯一包装/本人TTY交接未在16:39前完成；未调用owner/Rhino入口、无claim/key/模型/私题。两地各仅一份grant，随后可恢复改名保留，并各加一份停止元数据；旧v3入口不得运行，冻结字节/模型/承诺不改。这不是研究尝试或质量NO-GO。
+- [x] 本人直接确认新实际到期**2026-10-09 22:00苏黎世UTC+2**；[v8资源边界](eval/c5/rhino-resource-boundary-v8-formal20-20261008.json)只顺延日期，正式5/研究6/开发1/原16、prior账本、完整zero-stage/900秒导出不增减，不自动续租/付款。
+- [ ] 当前主线：[未启动研究资源续接v4](docs/c5-formal20-resource-renewal-v4.md)实现/CPU→全仓与源码双CI→窄清单新部署/实际公开预检/完整依赖模型冻结与独立重哈希→发布双CI→新两精确哈希批准。复用承诺/模型/D工程证据，同一未消费study，旧v3批准不复用；不重新封存/要求发送20题、工程门或新E。
+- [x] v4源码`67f131d`双CI成功，本地1033 passed/8 skipped、Linux push1032 passed/9 skipped；首次部署形成本地runtime及实际Mac公开预检，本地355文件/完整Mac字节独立复核通过。
+- [x] 本人恢复SSH后只读确认354文件均正确、唯一公共runtime从未创建、原接收器已停止；从确定边界O_EXCL补齐这一份公共元数据，180秒是准备传输观察，不改正式期限。原[中断状态](eval/c5/formal20-v4-preparation-status-20261008.json)/准备器退出1保留，无整个准备器重跑或覆盖。现[完整独立核查](eval/c5/formal20-v4-preexecution-validation-20261008.json)通过：338源码/355三地文件、完整Mac/Linux/模型重哈希，v4 state/grant/模型/Rhino/消费0；不证明原超时唯一原因或五小时SSH稳定。
+- [x] 最新完整冻结发布`fe7dc5e`双CI成功；本人精确批准spec `1ce7dba2a75a853a6a2b8d81027235c442586f30718f05dc177f64a04b002fa7` / runtime `9f72a0491b49bbb5f21dd83e6c87bb16530218a375593e0308e69caee134f1a3`，记录与冻结分开，不改变已冻结字节。
+- [x] 固定SSH恢复、批准后两地完整字节复核及一次性公共grant/独立回读完成；GPU空闲，不加载模型，冻结及旧证据不改。
+- [x] 唯一source-v4包装和本人WAIT核对、单次Rhino arm/宿主及模型zero-ready已观察；这不是40槽完成或正式质量门通过。
+- [x] 本人私下输入并触发唯一formal消费；单次运行因BrokenPipeError停止，原始失败保持，不能将该完成项误读成40槽完成或质量PASS。
+- [ ] 当前唯一主线：失败后远端只读核查→保管人侧已有失败/不完整证据及安全审计→C5-7按原规则裁决与作品集报告；不重新解密/消费、不修运行后重试或追加新E。
+- [ ] 条件项：新资源冻结及精确批准→唯一对应包装→本人TTY单次入口→零题ready→40槽→本人私下审计/公开摘要→C5-7/报告；仍无正式执行，不补槽、不修解析、换ID重跑或切默认路线。
+- [ ] PR/main：修正源码`d27258f`双CI37780147813/37780156280成功，完整冻结继续发布至#6；main01647f1及主工作区9份修改不动。#2仍需安全审查要求的实际head明确merge确认，#7独立Draft，不扩大R/UI。
+
+原v3冻结10月8日16:39窗口已过，原字节/截止不改。新v4准备使用本人确认的10月9日16:39最晚开始、21:45停生成/22:00到期及900秒导出，但仍须新冻结批准；不硬跑或自动续租。下方v2/v3“待连接/已批准待运行”为此前历史，由本节启动前停止/新准备覆盖。
+
+### 历史索引：2026-10-08 formal v2精确正式批准收到，随后在admission前停止
+
+本人已直接以repository_owner批准[正式spec/runtime两个精确哈希](eval/c5/formal20-owner-approval-v2-20261008.json)的冻结范围单次运行；发布0175f9e双CI37763903722/37763911706成功。[formal v2](docs/c5-formal20-v2-execution-preparation.md)采用独立v2源码/状态目录、同一已登记20题承诺；旧D完整PASS/部署与所有旧失败保持。之前仅准备接受记录和冻结时的approval=false保留为历史，不改冻结字节或再次请求同一批准。
+
+- [x] 新策略、有限host session/hub、完整native/model/startup验收时序、保管人入口、worker与独立私有/公开摘要审计适配实现。先host/model zero-ready，再无回显路径/永久claim/解密；原有source、HMAC、128/41、安全关闭与三稳定不省略。专项控制包含晚启动、完整就绪期限、私有初始化失败及部分部署不可覆盖；最终源码全仓/双CI和部署冻结继续核查，尚不代表现场通过。
+- [x] [完整正式runtime与独立预执行核查](eval/c5/formal20-v2-preexecution-validation-20261008.json)完成：源码5399281双CI成功，336源/350部署文件Git/Mac/Linux逐字节一致，3552 Mac/339可读host/6tokenizer/age及21614分发/960标准库/libpython/14基座/两adapter重哈希、loader CUDA未初始化/模型未加载。末尾写入SSH回执超时后只读确认完整文件/无遗留writer，未重传/覆盖，不写准备器退出0；旧D摘要哈希标签笔误只作后续更正，不改历史冻结/结论。
+- [x] 发布0175f9e双CI成功，本人批准spec `9f27e0ad16dbd1a46d200e5e258d64d5e02ccf49219c584b47bc3272b7368592` / runtime `83f2f8974b95bea2f1120a7340d5c7a781a005e14aaafd3ff74239d9d415faba`；此批准与源码/运行准备通过分开记录，不等于已执行或GO。
+- [ ] 当前主线：恢复Mac SSH认证→只读重新核对两地冻结/状态缺席/资产与预算→建立两地一次性grant→本人私有TTY启动→单次Rhino零题ready→本人单次40槽与私有审计→C5-7/作品集。实际题目/答案/key不交给代理。门槛≥14/20、净胜≥3、安全/重复写/未核实清理0不改；不补题/不重跑/不自动默认接入。
+- [ ] PR：源码`5399281`双CI37702904130/37702910598已通过、#6 OPEN；完整冻结审核材料继续发布，最新发布head另需双CI。main01647f1未变；#2精确merge仍被执行安全审查阻断，等待其要求的本人实际PR/head确认，不绕过、不覆盖9份主工作区修改。
+
+收到精确批准时，之前只读SSH通道已断开（Broken pipe/随后认证拒绝），已请本人重新建立同端口认证；Mac完整冻结字节和完整五小时窗口重新核对通过，但尚未建立state/grant、没有启动模型/Rhino或消费。此处等待外部连接，不以观察超时断言研究失败，也不重做已登记承诺或请求题目正文。
+
+新[formal v7](eval/c5/rhino-resource-boundary-v7-formal20-20261007.json)为正式5/研究6、开发1/原16不变，10月8日21:45苏黎世停止生成/22:00到期，900秒导出；本人最晚16:39开始以保留完整窗口及zero-stage余量。预算接受不自动运行/续租/付款。无需另开E；R、P2b、完整UI/用户开放/精简D边界不扩张，整体Goal未完成。
+
+### 历史索引：2026-10-07 D完整工程门PASS；当前进入正式20题适配与冻结准备
+
+[D实际结果](docs/c5-hostassurance-development-d-result.md)和[独立联合审计](eval/c5/hostassurance-development-independent-audit-20261007-d.json)优先于下方“drive进行中”。D单次8槽完成/worker退出0，原始连续性97份/请求锚67/模型请求8/生成阶段10通过；模型导出写1读1，全部指定夹具/key/准确委托清理核实。基座写/读失败、历史A/B/C失败及较弱保证局限保留，不是正式质量或整体GO。
+
+- [x] D八槽工程门、独立实际外部seal/完整原始链路与资源审计完成，永久退休，不重放。开发累计2407.228115秒、剩余1192.771885秒；原保守累计9607.228115秒。正式3/研究4/原16 GPU-hours和v6租期不扩张。
+- [ ] 当前主线：正式40槽运行器采用新的有限host/完整时序适配，CPU合成核对容量与私有审计链，再部署冻结全部源码/环境/模型/顺序/评分器/预算；双CI后请本人精确批准新正式spec/runtime。原512-checkpoint开发容量不是正式40槽已验证容量；必要容量/保证范围变化须先交可审阅方案。
+- [x] [40槽容量/资源复核与纯quota原型](docs/c5-formal20-capacity-and-resource-review.md)完成：仅仓库合成数据、真实签名/SQLite、模拟模型/几何，40槽/56请求/104生成阶段/1403来源检查/1136原生请求/单槽67；14项新负控通过，真实操作0。原512不足以直接复用；原D平均完成时序的示意外推也提示正式3小时耗尽风险，不声称全现场耗时保证。
+- [ ] 当前必要本人范围决定：接受[有限容量/资源提案](eval/c5/formal20-observation-capacity-proposal-20261007.json)后才继续其正式集成：normal2048/独立cleanup256/journal4096、最多8结算采样仍3稳定且完整60秒，正式5/研究6小时、开发1/原16不变；仅准备授权，不是正式运行批准。现行512/正式3/研究4仍有效，不自动实施扩容、不续租。后续完整正式两哈希单独批准及保管职责隔离不变。
+- [ ] 条件项：本人精确正式批准及本人终端保管操作→一次40槽→独立私有证据审计→C5-7及作品集报告。复用原已登记公开承诺，代理不读题/答案/key，当前正式消费0；门槛LoRA≥14/20、净胜≥3、安全/重复写/未核实清理0不变。
+- [ ] PR收口：本人扩大合并授权已登记，但执行安全审查拒绝#2命令启动，main仍01647f1；等待其要求的精确PR/head确认，不绕过审查。其他已授权的正式代码/CPU/文档继续推进。
+- E不是必需依赖，不为扩张现场证据自动启动。续租意向不代替具体时长/费用上限；完整UI/用户开放/P2b/精简D仍延期。整体六项未完成，默认混合/C4 NO-GO/v8 formal_quality_fail59/60不变。
+
+### 历史执行索引：2026-10-07 D精确批准后单次执行；扩大路线授权已登记
+
+[本人扩大授权记录](eval/c5/continuation-expanded-owner-authorization-20261007.json)及此前对D完整spec/runtime的直接批准优先于下方“仅准备/待批准”历史。D发布`cbc5f3d`双CI成功；固定Mac/Linux新state及精确grant已建立，prepare、单次Rhino入口与首次Idle基线准备通过，单次drive已启动。结果尚待完整原始证据和独立审计，不写工程PASS；正式20题仍零读取/消费。
+
+- 当前主线：完成D八槽单次链路及独立联合审计，未知/失败停止、不重试；只有完整工程门通过才继续已登记20题正式冻结和新精确批准。
+- 本人明确扩大正式20题/E路线与PR合并授权。尚无新正式/E完整冻结哈希，路线同意不生成精确执行grant；D结果复盘前不进入E。保管人私下解密、消费和审计隔离不变。
+- PR收口可独立推进：先核对实际head/base、依赖、CI和范围，再按本人明确合并授权处理，不代签人类reviewer_1，不覆盖脏主工作区。
+- 续租意向获授权但时长/价格上限未指定，不自动付款、续租或扩充GPU-hours。D仍严格使用v6截止及2470秒固定预算；正式质量门槛、C4 NO-GO、v8 formal_quality_fail59/60和默认混合均不变。
+
+整体六项仍未完成；以下索引是对应阶段历史，由本节当前事实续接。
+
+### 历史准备索引：2026-10-07 本人仅授权准备D；新生命周期代码/合成已验证，待完整冻结
+
+本人明确“授权仅准备新工程门D，不运行”，[D准备与审核边界](docs/c5-hostassurance-development-d.md)和[直接准备授权记录](eval/c5/hostassurance-d-preparation-owner-authorization-20261007.json)优先于下方等待范围确认状态。新独立ID `C5DEV-HOSTASSURANCE-20261007-D`；不重跑C，不自动E，未创建D state/grant/fixture/订阅或模型。
+
+- [x] D独立scope/入口/worker/prepare与完整原生/model/startup验收时序、post-publication service与60秒结算证明、独立raw sidecar库存/期限审计实现。原生120秒从client guard前计时，完整解码/验收后复核；原始model frame不改写，全部来源检查与原V2有限保证保留，不声称CLR硬抢占。
+- [x] 40新CPU控制、相关95控制、全仓956 passed/8 skipped、Py3.9/secret/release/diff通过；四已排除train家族/原8交叉槽/模型/契约不变，CPU1767/2048 token。此前C时序诊断和原资产身份保留，所有旧失败/源码字节不变。
+- [ ] 当前主线：只部署已跟踪执行代码/指定公开配置到新独立D源码目录，完成实际Mac/GPU环境/已加载依赖/模型/339可读host字节完整冻结与独立复核；最新发布双CI成功后请求D新spec/runtime两个精确哈希。只有准备授权，不运行prepare/entry/drive/serve，不建新运行state或密钥。
+- [x] D完整冻结及[独立准备复核](eval/c5/hostassurance-development-preexecution-validation-20261007-d.json)完成：源码01a9b37双CI成功，316源/schema/326部署文件三处逐字节核对，339host/3552 Mac外部/21614分发/960标准库/libpython/14基座/两adapter重哈希、加载器CUDA未初始化/模型未加载、环境536eac7d与原异常保留。两处独立脚本类型/合法HF链接假设在准备中修正，不改任何冻结或模型。D source已部署，但两地运行state/grant/keys/claim均无。
+- [ ] 当前必要批准：完整公开材料最新发布head双CI成功后，集中请本人精确批准D spec `f6970ec438080cd57a77ad34063bdda052d98886c29123ca1e6ac32ba79f3a2a` / runtime `8ed3bade6d2629937cc341f3e2a8aea77a2c8cc86adeeabfc7a7f07251484a31`；在此之前不调用prepare/entry/drive/serve。上项部署冻结待办已由完成项替代，仅保留其原依赖说明。
+- [ ] 条件项：本人精确D批准→单次八槽与完整独立现场审计；失败/未知退休，不自动E。工程通过→已登记20题正式冻结/双CI/另外精确批准→本人单次40槽/私有审计→C5-7。20题未读/消费，不能越门或把合成当现场。
+
+资源仍[v6](eval/c5/rhino-resource-boundary-v6-20261007.json)：10月8日22:00苏黎世/21:45停止生成、900秒导出；D≤2470秒、原开发1/正式3/研究4/累计16 GPU-hours不扩张。未来续约不自动更新此次冻结。PR审核准备保留，merge仍由本人明确决定；R历史证据不改，整体六项未完成，默认混合/C4 NO-GO/v8 formal_quality_fail59/60不变。
+
+### 历史恢复索引：2026-10-07 本人要求继续并确认新租期；当时未授权后继准备
+
+本人说明“租期还未结束，我这边会及时续约，请继续”，并确认当前到期为**2026-10-08 22:00苏黎世（UTC+2）**；[v6资源边界](eval/c5/rhino-resource-boundary-v6-20261007.json)最迟21:45停止生成并保留900秒导出，不扩大开发1/正式3/研究4/原16 GPU-hours，不自动续约。旧v5的19:00边界仍保留为历史；此前到期判断不是服务商实际到期核验，新本人报告优先，不反向修改旧运行冻结。
+
+- [x] [恢复准备记录](eval/c5/field-route-continuation-owner-decision-20261007.json)和新资源边界登记；原SSH master仍活跃，固定14基座/两adapter/原28源码/43库存及GPU空闲只读核查完成，未加载模型/写远端或读取holdout。这不是新完整runtime冻结。
+- [x] [C生命周期CPU时序诊断](docs/c5-retired-c-lifecycle-timing-diagnosis.md)完成：58原记录/39请求绑定复核，read9后3 checkpoint间隔共19.124544秒、同目录请求回复mtime差25.622973秒；不证明独占源校验耗时/唯一根因或及时收到。32新控制（包括密钥/任意私有路径读取前拒绝）、全仓916 passed/8 skipped，原C FAIL/host blocked/atomic drift不改判。
+- [ ] 当前必要范围确认：本人此前要求不自动提出/进入D；“请继续”不代替后继现场运行精确批准。先澄清是否允许准备一个全新独立生命周期工程门的代码/CPU/冻结；未创建后继ID/spec/grant、没有现场/模型执行。方案必须解决阶段验收/逻辑期限/原始时间证据，不能只增大超时、跳过来源检查或重放C。
+- [ ] 条件项：新完整八槽工程门与独立审计→20题完整正式冻结/双CI/本人两个精确哈希批准→本人终端单次40槽/私有审计→C5-7；当前20题未读/消费、正式执行仍未获批。既有公开承诺复用，门槛不变。
+- [x] R/原C有限安全收尾及PR审核准备完成；#2～#6 OPEN/#7独立Draft/main01647f1，merge另需本人实际head/范围决定。模型训练、默认路线、私有数据及脏主工作区均不动。
+
+整体六项目标未完成；新租期解除旧资源日期阻塞，不解除后继范围、现场精确批准、正式消费与merge门禁。以下收尾B/租期结束/等待路线说明保留为当时状态，由本节续接。
+
+### 历史收尾索引：2026-10-07 收尾B有限安全关闭已审计；当时等待路线选择
+
+本人对B spec `505891816aa4cc471816689c31aa774deadfc30384828c7fe0ac7031bd900100` / runtime `2aab184fd2a54545dc8c3c2b75cc9f55ca02a0dc0b6cd52dea0e03da4d4dae3d`精确批准后，按源码`2a1f6f2`/发布`143fafa`双CI单次执行。[实际结果与独立审计](docs/c5-retired-c-cleanup-b-result.md)核实唯一空fixture475关闭/registry缺席、七指定key删除、两Idle和既有AssemblyLoad精确remove、active457/content不变、原C失败字节/全部逻辑账本不变。无snapshot/状态修复，atomic expected0/stored1 drift保留；模型/GPU/工具/holdout/新夹具/新订阅均0。B永久退休，无重试。
+
+- [x] B完整冻结、双CI、本人两个精确哈希批准、单次执行、实际UI外部回执与有限独立安全审计完成；原遗留夹具/指定key/精确委托已处理，私有开发证据留原目录。
+- [x] 全部58份host记录及39请求绑定独立重放、外部seal锚核实；最后cleanup checkpoint的Python来源不同于基线，原始结论仍为`blocked=true / host_continuity_failed_or_incomplete_no_replay`。安全Dispose通过不等于C工程或连续性PASS，完整handler absence/内存和外部key擦除均未证明。
+- [ ] **当前唯一必要本人决定**：暂停现场模型路线并交付截至当前证据的阶段报告/PR审核材料（建议），或另行确定继续研究与资源边界。不得自动准备/运行D；原A/B/C及收尾A失败保留，不能只延长超时或复用授权。
+- [ ] **条件项，尚未满足**：新的独立完整八槽工程门与审计→复用已登记20题承诺的正式冻结/双CI/精确批准→本人终端单次40槽/私有审计→C5-7。当前正式20题未读/未消费、正式spec未获执行批准，C5-7未裁决；不因安全收尾完成自动进入后续。
+- [ ] PR/main收口仍由唯一reviewer_1本人明确决定；推送/更新PR授权不含merge。不打包脏主工作区/认证/私有题目。R历史证据保留，完整UI/用户开放/P2b/精简D继续延期。
+- [x] [PR依赖与所有者审核交接](docs/c5-pr-stack-review-handoff-20261006.md)已同步10月7日实际六个head/base/双CI、祖先关系与变更范围，分开已完成训练/离线、失败现场/安全收尾、未运行正式层；main仍01647f1、#2～#6 OPEN、#7独立Draft。这是可审阅收口准备，不是本人已审核、merge或整体Goal完成。若本人选择merge，须指定实际head/范围与方式，每次依赖/CI重新核对。
+
+原2026-10-07 18:45苏黎世停止生成/19:00到期已结束，收尾B无GPU/SSH依赖，不改变租期或预算、不自动续租。开发累计1129.012194秒未增加，剩余GPU-hours不等于有效租期授权。C4 NO-GO、v8 formal_quality_fail59/60、默认混合不变；整体六项Goal仍未完成。以下旧索引均为对应阶段历史，不再列作当前待办。
+
+### 历史准备索引：2026-10-07 本人接受V2仅准备收尾B；当时尚未实际清理
+
+本人接受`C5SAFE-CLOSURE-ADMISSION-20261007-V2` canonical c103d9b9，仅授权准备新`C5SAFE-HOSTASSURANCE-C-20261007-B`。[B准备与独立审核](docs/c5-retired-c-cleanup-b-preparation.md)已实现永久admission、V2仅空文档安全Dispose、不调用snapshot/修复账本、原历史HMAC/readonly done及固定逻辑行/源码检查、准确两Idle/既有AssemblyLoad/七key处理和独立raw结果审计；新CPU40、全仓884 passed/8 skipped，仍无B执行grant/admission/wrapper或现场调用。
+
+- [x] 只读诊断完成并退休、V2判据本人接受（只准备）、B代码/CPU测试与只读证据核对完成；原C/收尾A失败与state drift保留。
+- [ ] 实际289源码/339可读host和新执行闭包完整冻结、最新发布双CI成功后，集中请求B新spec/runtime两个精确哈希。接受判据或旧A/诊断批准不能替代执行批准。
+- [x] B唯一有效执行冻结与[独立预执行复核](eval/c5/hostassurance-c-cleanup-preexecution-20261007-b.json)已完成：源码`2a1f6f2`、七份新执行/审计依赖代码、完整原C289/339与八份开发证据及逻辑行hash重新核对，未读任何key正文或正式20题。最新发布双CI通过后待本人批准spec `505891816aa4cc471816689c31aa774deadfc30384828c7fe0ac7031bd900100` / runtime `2aab184fd2a54545dc8c3c2b75cc9f55ca02a0dc0b6cd52dea0e03da4d4dae3d`；无新执行许可或现场状态。
+- [ ] B单次关闭475、删除七指定key、准确解除两Idle/原AssemblyLoad并封存原链/独立审计，只在新精确批准后；未知不重试，手工安全收尾不等于C PASS。交接后先提交审计与研究路线选择，**不自动D**。
+
+本轮准备/未来B均GPU0，不依赖SSH，不扩大18:45生成停止/19:00苏黎世租期或GPU-hours，不自动续租/合并。C5正式20题仍未读/消费，原公开承诺复用；C4 NO-GO、v8 formal_quality_fail59/60、默认混合不变。
+
+### 历史诊断索引：2026-10-07 单次只读诊断完成；当时需本人决定安全关闭判据
+
+本人精确批准`C5DIAG-HOSTASSURANCE-C-20261007-A`的spec8a2e0218/runtime e7a77283后，按`bc26556`双CI单次执行、永久admission先于现场读取。[实际结果与独立审计](docs/c5-retired-c-live-diagnosis-result.md)核对真实UI外部packet `441db693…b6377b`：当前线程、active457/content、fixture475 registry/headless/unsaved/owner及空几何均通过；历史revision0、存储revision1、当前scene摘要彼此不一致。原C失败与诊断前后账本未变，snapshot/关闭/读删key/解除/模型/GPU/holdout均0。诊断退休，不重跑，不是安全闭环PASS。
+
+- [x] 唯一有效诊断冻结、本人精确批准、单次实际只读检查和有限独立回执审计完成；不把当前结果追认为原收尾A唯一因果或完整宿主无瞬变证明。
+- [ ] **当前必要本人决定/门禁**：[人工安全关闭判据提案](eval/c5/retired-c-manual-safety-closure-admission-proposal-v2.json)：只为精确空夹具安全Dispose，允许保留原atomic drift而不要求历史expected0相等；须精确身份/当前空几何/历史只读done零write/源码检查，禁止snapshot或state修复，不影响模型/产品写门。本人接受只授权下一份收尾B代码/冻结准备；真正执行仍需新完整spec/runtime、双CI、两个精确哈希。否则本人手工接管；目前不实施或执行新判据。
+- [ ] 一个原空夹具、7指定key、两Idle及AssemblyLoad仍待准确安全收尾，55宿主记录未seal。安全交接前无新开发/模型/正式20题；交接后先报告与路线选择，**不自动D**。
+
+当前C和收尾A失败保留，默认混合、C4 NO-GO、v8 formal_quality_fail59/60不变。开发累计1129.012194秒未增加，本次诊断GPU0、无自动续租/合并；租期18:45停止生成/19:00苏黎世到期不变。以下“诊断待批准/未执行”保留为事前历史，已由本次结果替代。
+
+### 历史准备索引：2026-10-07 本人选择只准备逐项只读诊断，当时尚不执行
+
+本人选择“准备逐项只读诊断的冻结材料”，不是新现场批准。收尾A已单次失败退休；新的`C5DIAG-HOSTASSURANCE-C-20261007-A`只诊断，不关闭/删钥/解除/订阅，不调用模型/GPU/工具/holdout，不重放A或进入D。[诊断规范](docs/c5-retired-c-live-diagnosis-preparation.md)和代码/独立汇总审计/CPU控制正在形成完整冻结，必须最新双CI及另一份两个精确哈希批准后才现场单次运行。
+
+CPU只读账本提供新线索：当前candidate_scene revision1与历史expected0不同，但不能证明唯一现场原因或变化时刻。旧snapshot会写事务刷新revision，新只读诊断禁止snapshot、重置或修复state；仅只读SQL与冻结场景摘要比较。admission先于Rhino导入/现场读取，逐项保留false/unknown，非安全UI线程不得读取文档、不自动调度回调。原C结果SHA不变、7key和未核实夹具/委托仍阻塞安全闭环；正式20题未读、不重复索要公开承诺。
+
+- [x] 只读诊断源码/独立审计/实际289与339字节复核及唯一有效冻结准备完成：源码`8fc2c2b`，全仓844 passed/8 skipped，新专项42、合并旧收尾专项75通过；整数布尔伪装负控补齐，未批准旧runtime e9ef34ee封存。没有新现场grant/admission或运行。
+- [ ] 最新发布head双CI成功后，集中请本人精确批准诊断spec `8a2e0218d956cae322a0b5c44a11fde5731fc1140417750eb19d4c8d383c9e01` / runtime `e7a7728342fc0e6e4579312510113d9a9d1d38ef1a72aab1fd526be22a9b56db`。旧收尾A/C运行批准不可复用；批准后仅单次只读诊断与独立审计，不自动cleanup或D。
+
+### 历史失败索引：2026-10-07 最小安全收尾A现场前置拒绝；当时待本人决定安全诊断/接管
+
+本人精确批准`C5SAFE-HOSTASSURANCE-C-20261007-A` spec `1df5aeb6…8971bc` / runtime `3a58cf7a…7dfd9b`后，按`bf0bbf8`双CI冻结单次Run。实际脚本138行报 `actual known empty fixture/active binding differs`，发生在effects claim之前；没有重试、删钥、关闭或准确解除成功记录。[结果与独立只读审计](docs/c5-hostassurance-c-cleanup-attempt-a-result.md)确认原C失败字节未变、7key仍在、后五槽无新claim，55份未封存前缀与39份请求绑定核对一致；不是完整宿主连续性/安全闭环PASS。
+
+- [x] 收尾A精确批准、一次现场尝试、真实traceback保全和只读原始证据复核完成；原C与收尾A均失败退休，不复用批准或以无claim为由重跑。
+- [ ] **当前必要本人决定**：分解组合现场条件的新只读诊断（新独立冻结/精确批准；不顺带cleanup），或本人手工接管遗留实例后审计。失败子条件尚未知，不猜测UI线程/文档/registry/几何/状态，不放宽检查、不强杀宿主。
+- [ ] 仍须核实一个遗留夹具、7key、两Idle及AssemblyLoad的安全收尾并封存证据；未完成前阻断新模型/开发与正式20题。安全闭环后先提交审计和路线选择，**不自动准备或进入D**。
+
+本次模型/GPU/工具/正式20题调用0，累计开发1129.012194秒、剩余2470.987806秒和今日18:45停止生成/19:00苏黎世到期不扩张；不自动续租。正式工程门、C5-7与本人明确PR/main收口未完成。C4 NO-GO、v8 formal_quality_fail59/60和默认混合不变。以下“待cleanup批准/可评估下一开发”仅为此前历史，已被本人要求先收尾审计/路线选择且不自动D的边界替代。
+
+### 历史失败索引：2026-10-07 C 运输握手通过，第三槽原生回执未知；当时先单独安全收尾
+
+[C 单次实际结果](docs/c5-hostassurance-development-c-result.md)：本人批准两个精确哈希后，按源码`3988063`/发布`cff7c5e`双CI单次执行。GPU零消费ready及三份模型回执收到，基座首槽和LoRA写槽实际关闭/stop；第三read-lora的唯一只读回执约25.623秒才到，超过冻结25秒原生窗口，驱动停止、不重发、不补题、不追认及时收到。C永久FAIL/退休，不是八槽工程PASS或质量裁决。
+
+- [x] C精确批准、单次执行、只读核对实际3请求/5生成阶段及远端停止完成；模型/GPU已退出并恢复空闲。LoRA有部分实际写/读证据，不能代替八槽独立门。
+- [ ] **当前第一优先级/必要批准**：[C最小安全收尾](docs/c5-hostassurance-development-c-result.md)：唯一已知空夹具268435475、7份临时key、两Idle＋原AssemblyLoad尚未完成核实收尾，55份host记录尚未seal。只允许CPU/只读准备，新的cleanup spec/runtime冻结/双CI及本人单独批准后，单次关闭/删钥/精确detach/保全原始审计；无新工具/模型/GPU/夹具/订阅/holdout，不改原C FAIL。
+- [ ] 清理独立核实、研究宿主可交接后，才评估带source/settle成本的原生时间边界和下一独立开发冻结；不无限扩大观察器或复用C ID/批准。正式20题仍需完整新八槽工程PASS及独立审计、正式冻结/双CI/另一份精确批准，原公开承诺不重索，正文/答案/密钥不读取。
+
+开发累计1129.012194秒，剩余≤2470.987806秒，所有新执行资源仍需精确冻结；原今天18:45苏黎世停止/19:00到期、900秒导出、正式3/研究4/原16 GPU-hours不自动扩张或续租。正式门、C5-7报告及本人明确PR/main收口均未完成；C4 NO-GO、v8 formal_quality_fail59/60、默认混合不变，下面C“待批准”保留为执行前历史。
+
+### C 执行前历史索引：2026-10-07 B 连续性通过但运输 FAIL/退休；当时准备独立 C
+
+本人批准B最终spec/runtime后按`aab4a5f`/发布`eab34f4`双CI单次执行。[B结果与独立审计](docs/c5-hostassurance-development-b-result.md)确认15份外部锚定host记录与5份请求绑定通过，A的时序漂移未再出现；但首槽120秒回执未知，整个工程FAIL/永久退休。实际1个基座selector/0invocation/LoRA/工具/holdout；迟到原始结果只读保全不追认及时收到。一个空warmup与一个模型夹具registry关闭、九key实际缺席、两hook精确remove、活动不变、worker退出/GPU空闲均核实。
+
+- [x] B精确批准、单次执行、有限连续性独立PASS和完整失败/清理核对完成；不能重放、改判或用其连续性PASS授权正式20题。
+- [x] **当前主线的准备交付**：[C新运输生命周期完整冻结](docs/c5-hostassurance-development-c.md)及[独立复核](eval/c5/hostassurance-development-preexecution-validation-20261007-c.json)完成。加载/字节检查后先发绑定身份和零消费的ready，driver核对后才开首模型夹具/发任务；startup≤180与request≤180分别冻结。769 passed/8 skipped、51项专门正负控，289源码/339可读host/297部署文件三处字节及实际模型/环境核对、源码双CI成功；未执行准备缺陷与上传未知ack均保留且只读完成核对，无重放。
+- [ ] **当前必要批准**：最终发布head双CI成功后，请本人批准C spec规范化SHA `f4615ed8…771e583`与runtime规范化SHA `bbbbca84…13090d1`。全部字节检查、4个train家族/8槽/最多16阶段和严格解析/模型/门槛/默认路线不变。无C新grant/状态/现场/模型/holdout，A/B/native12批准不可复用；批准后才单次执行及独立原始审计，准备通过不是工程门通过。
+- [ ] C实际八槽工程及独立审计通过→复用已登记20题公开承诺的正式冻结/双CI/另获精确批准→本人终端单次40槽及私有审计→C5-7/作品集→本人明确决定PR/main收口。整体目标仍未完成。
+
+开发累计495.654412秒，剩余≤3104.345588秒（新cap3104）；今日18:45苏黎世停止/19:00到期，900秒导出、正式3/研究4/原16 GPU-hours不扩大。下面A/B“待批准/准备中”的索引均保留为各自事前历史，不再作为当前待办。C4 NO-GO、v8 formal_quality_fail59/60、默认混合路线不变；PR分支更新不冒充main合并。
+
+### B 执行前历史索引：2026-10-07 新开发 A 单次失败/安全停止；当时准备独立 B
+
+本人精确批准的`C5DEV-HOSTASSURANCE-20261007-A`已经单次消费并**FAIL/退休、禁止重跑**。[原始结果及审计](eval/c5/hostassurance-development-result-20261007-a.json)确认空warmup关闭、实际模型加载后首个模型槽被来源守卫拒绝；生成/模型夹具/工具/holdout均0。仅`__main__`文件来源在runpy返回后消失，其他可见库存稳定；这是明确工程时序诊断，不是LoRa质量裁决。11记录外部Command History回执锚复算、签名stop、九份key实际缺席、活动不变、worker退出/GPU空闲均核实；失败不追认PASS。
+
+- [x] 原A直接批准、单次执行、独立失败原始审计和批准范围内安全停止已完成；保留全部历史证据与原freeze，不再索要或使用A批准。
+- [x] **当前主线的准备交付**：[B时序修复完整冻结](docs/c5-hostassurance-development-b.md)及[独立复核](eval/c5/hostassurance-development-preexecution-validation-20261007-b.json)完成：显式entry返回release＋第一非command Idle单次seal；不忽略/白名单`__main__`，不改严格比较，不增加模型/工具/任务面。724 passed/8 skipped，23项专门正负控；279源码/339可读host/287部署文件精确SHA、实际环境与模型/预算核对、源码双CI成功。
+- [ ] **当前必要批准**：最终发布head双CI成功后，请本人批准B spec规范化SHA `bf09d927…4a50f7d`及runtime规范化SHA `241b72ba…539d7d`。没有新grant/运行状态，现场与模型/holdout调用0；A批准不能复用。批准后才单次执行并独立原始审计，不能把准备PASS写成工程门PASS。
+- [ ] B工程门和独立实际审计通过，才进入原登记20题正式完整冻结/双CI/另获精确批准→单次40槽/本人私有审计→C5-7/作品集→本人决定PR合并。此依赖尚未满足，不能自动推进正式消费。
+
+开发累计377.815661秒，剩余≤3222.184339秒（取整3222）；今日2026-10-07 **18:45苏黎世停止生成、19:00到期**，900秒导出和正式3/研究4/原16 GPU-hours不扩大。C4 NO-GO、v8 formal_quality_fail59/60和默认混合路线均不变。下面的“当前A待批准”仅为当日执行前历史，不再作为现在的待办。整体六项交付未完成。
+
+### 执行前历史索引：2026-10-07 保证选择已批准；当时正在准备新独立开发 A
+
+所有者已直接接受新保证spec规范化SHA `1ced6621…585336d`及现有空白Rhino独占准备方式，见[独立记录](eval/c5/host-assurance-transition-owner-approval-v2-20261006.json)。整体六项目标尚未完成，中断后已按本人“继续”恢复工作；不把观察通过、CPU测试或CI当整体完成。
+
+- [x] 第1项：实际观察探针C5OBS A和冻结原始独立能力审计完成并退休；两份空canary按批准留至自然退出。不重放，不把CLR unknown、opaque动态程序集和1088份未磁盘证明映像假称字节闭包或无害。
+- [x] 保证/研究宿主决定已取得；它只允许准备明确的弱保证，不启新hook/warmup/模型/夹具/正式20题，也不替代两个精确运行哈希。
+- [x] 第2项的**实现/CPU/只读部署与冻结准备**已完成：[最终复核](eval/c5/hostassurance-development-preexecution-validation-20261007-a.json)绑定源码`28f6fb6`、270源码/339可读host文件，701 passed/8 skipped、源码双CI成功，Mac/GPU spec/runtime原字节相同。四个已排除训练家族、独立8槽/最多16阶段、全新ID/状态；单个空夹具预热、一次订阅、逐请求checkpoint原始绑定与受限签名清理已冻结。准备缺陷与未批准旧freeze均保留，没有实验调用/重放。
+- [ ] **当前必要批准**：[新开发门 A](docs/c5-hostassurance-development-a.md) spec规范化SHA `4b18343e…5bcc47`、唯一runtime规范化SHA `87ae2ab9…80f532`；需核对最新发布head双CI成功，再集中请本人批准这两个完整哈希。旧`69d3b8f8…1cf0f7`已撤销，transition/观察器/B/native12授权不能代替。新warmup/hook/模型/夹具及正式20题仍0调用，整体目标未完成。
+- [ ] 第3～5项依赖保持：新工程门及独立实际审计通过 → 复用已登记20题公开承诺，正式40槽完整冻结/双CI/单独精确批准 → 本人终端单次解密/配对/私有原始审计 → C5-7与作品集报告。LoRA≥14/20、配对净胜≥3、关键安全/重复写/未核实清理0，GO不切默认路线。
+- [ ] 第6项可并行：推送/更新OPEN PR #6已授权；#2→#6仍堆叠、R #7独立Draft，所有者唯一reviewer_1决定merge，main不冒充已更新；不打包脏主工作区/认证/私有证据。
+
+当前租期仍为今日2026-10-07 **19:00 Europe/Zurich到期，18:45停止生成**，900秒导出；只读GPU空闲、认证端口22159恢复。开发剩余上限3259秒、正式3/研究4/原累计16 GPU-hours不扩大；执行前复核用量，无自动续租。以下2026-10-06各增量保留当时状态，旧“待保证决定/观察批准”不再作为当前待办。
+
+### 近期任务索引：2026-10-06 实际观察能力已独立审计通过；新保证与研究专用窗口须由所有者决定
+
+六项持续Goal仍active。首个观察能力探针得到所有者两个精确哈希批准后，按源码`7aa21d9`、事前`1002dcd`双CI单次执行并封存，见[实际结果](eval/c5/host-observer-result-20261006-a.json)。17记录/外部seal/冻结独立入口复算通过，约12.233秒；事件正控、同实例空type变化、detach后回调静默均核实，活动文档不变/0对象，模型/夹具/工具/holdout0。ID已消费退休，不能重放；两个空程序集依批准保留至宿主退出。
+
+- [x] 第1项观察器原型、原始连续性记录、合成负控及**实际能力审计**已完成。225原程序集在四快照之间表面稳定，新增只有两份批准canary；CLR/clr绑定稳定但仍unknown。不是clean-host或完整字节闭包/因果来源证明，不是新开发工程门。
+- [x] 实测1166 native映像，仅78文件型字节可核对，860在原许可根/后缀之外、228无可读普通文件；不能称1088项全是OS缓存或无害。旧完整字节守卫继续拒绝，不能靠名字白名单修复。
+- [x] 已据实际结果实现[新保证的纯数据检查原型](plugin/rhino_listener/c5_host_assurance_v2.py)及15项合成正负控，原默认/正式入口未集成或放宽。完整[新保证/研究宿主方案](docs/c5-host-assurance-transition-v2.md)及[独立决定spec](eval/c5/host-assurance-transition-spec-v2-20261006.json)已备：冻结源码/可读文件＋显式信任整个批准宿主opaque基线＋可见checkpoint连续性；明确不声称完整发射字节、因果来源、clean进程或连续无瞬变。
+- [ ] **当前必要决定**：所有者接受这一较弱且不同的研究保证，并声明当前空白Rhino在获批研究时作为独占窗口（不关闭进程/禁用插件、不把既有opaque代码追认为clean）；或坚持旧完整字节要求，暂停现场模型推进。旧观察/B/native12/持续代码授权不能替代此决定。该决定仅允许继续准备，**不授权实际warmup/订阅/夹具/模型或正式20题**。
+- [ ] 决定到位后连续推进新开发ID/入口、声明warmup和observer连续性集成、实际Mac/tokenizer/GPU/source/预算准备→双CI及两个新精确哈希→单次开发全链路/独立审计→正式20题完整冻结/单独批准→保管人40槽/私有原始审计→C5-7/作品集→所有者PR/main收口。不重做原80/公开承诺/旧探针，不改门槛或默认路线。
+
+公开进度接口、pip缺项诊断及PR依赖审核已先行交付；未进入实际Model工程门。资源仍是2026-10-07 19:00 Europe/Zurich到期，18:45停止生成，至少900秒导出；GPU-hours不扩大。以下同日较早的“观察未执行/待批准”只保留历史状态。
+
+### 近期任务索引：2026-10-06 持续Goal已建立，观察器/独立审计与合成验证已实现；首次实际订阅仍待精确批准
+
+所有者把六项作为同一持续终点，已建立当前线程active Goal：`真实来源处理 → 新独立开发工程门 → 正式20题冻结/单独批准 → 保管人40槽/独立审计 → C5-7/作品集 → 经所有者决定的PR/main收口`。完成代码、测试、提交或CI不结束整体目标；继续推进授权代码/CPU合成/只读核查/部署冻结与PR，真实订阅、宿主/保证变化、开发与正式运行分别按门禁批准。
+
+- [x] [观察器原型/原始日志/独立审计/宿主规范](docs/c5-host-observer-capability-probe.md)已实现：CLR实例、MVID、可见类型/签名、Python绑定、native image与不可验证项；不可覆盖journal/外部seal锚定，canary正控/同实例结构变化及detach负控。23项新合成测试通过，**真实subscription、canary、fixture、模型与holdout均未运行**，原执行保证和守卫未放宽。
+- [x] 第4项的[无正文公开进度接口](training/c5_formal20_public_progress.py)已预备，12项相关合成/隐私负控通过；正式started后缺少metadata返回UNKNOWN/no-replay，不谎称零生成。读取当前状态仍是正式未started；不读取题/答案/key/密文，不创建消费。
+- [x] [pip缺项只读诊断](eval/c5/gpu-pip-readonly-diagnosis-20261006.json)：解释器3.11.16、pip26.2.1，RECORD列pip/pip3/pip3.13，其中仅pip3.13缺失。旧B loader imports已通过；它是console-script metadata缺项，不是已证明模型依赖加载失败，也未证明历史安装根因。无安装/升级；新freeze须保留缺项及明确审阅，不默默忽略。
+- [x] [PR依赖/审核交接](docs/c5-pr-stack-review-handoff-20261006.md)已核实并准备；#2→#3→#4→#5→#6堆叠，#7独立Draft。所有者唯一reviewer_1决定merge，不自动合并，不打包主工作区9个现有tracked修改或认证材料。
+- [ ] **当前待批准对象**：单次`C5OBS-HOSTPROV-20261006-A`能力探针，仅现有空白Rhino中一次订阅、两份空非收集canary程序集及一个空type，无工具/模型/holdout；它不是clean baseline或正式门。[独立冻结与验证](eval/c5/host-observer-preexecution-validation-20261006-a.json)已完成255份tracked源码部署、339已知host文件重新核对和全仓631 passed/8 skipped，绑定源码`7aa21d9`；spec `2519df37…520296`/runtime `33557bbd…ab7d7f`两个精确哈希待新head双CI成功后集中批准。当前尚未批准/执行，整体Goal未完成。
+- [ ] 真实能力/独立审计完成后才能判断新保证/专用宿主方案可行性，明确另获必要批准后推进新开发门；不得按名称放行、把结构指纹称字节证明或重复老B/native12。正式20题公开承诺已登记，无需重做；新增开发题排除由保管人私下进行。
+- [ ] 工程门通过后继续正式完整冻结/双CI/单独新精确批准→单次40槽→保管人原始证据审计→C5-7/报告→所有者PR收口。固定LoRA≥14/20、净胜≥3，关键安全/重复写/未核实清理0；默认路线/C4 NO-GO/v8 formal_quality_fail59/60/原80消费不改变。
+
+当前资源仍为2026-10-07 **19:00 Europe/Zurich到期，18:45停止生成**，≥900秒导出；开发≤1/正式≤3/研究≤4/原累计≤16 GPU-hours不扩大。观察能力探针GPU用量0，不自动续租。必要批准到位后从断点继续，不重新索要公开承诺、不把本次实现当整体完成。
+
+以下同日较早快照中的“下一交付仅设计”已由持续实施授权与以上新交付替代，历史结论/证据仍保留。
+
+### 近期任务索引：2026-10-06 公开承诺已登记；实际 Rhino 动态代码闭包阻塞，未获新执行批准
+
+当前研发主线仍为 C5 独立第二轮可信实验。C5-0至C5-5、原80离线77/80对20/80及R/B/native12历史结果不改判；整体C5尚未GO。最新无正文证据与阻塞详见[公开登记/现场诊断](docs/c5-formal20-public-registration-and-field-blockers.md)，优先于下方当日较早的准备快照。
+
+- [x] 新20题公开承诺已原字节登记并通过严格元数据校验：规范化SHA `41c92c72…56ebaf4`，固定20家族/40槽，完整12工具覆盖及排除输入绑定。所有者私下完成自动排除/人工审核并报告加密回读一致；代理只验证[公开JSON](eval/c5/rhino-formal20-public-commitment-v1.json)，未读候选、原80、密文或密钥，未独立重算私有根。`execution_ready=false`、正式消费/模型调用0。
+- [x] 当前端口22159的身份pin与认证核对完成；未冻结的正式适配器和draft已同步新端口/socket及known_hosts字节校验，不改已退休B。远端3090空闲，基座14文件与checkpoint132 adapter身份相同，A+B结算约340.027秒，正式状态目录不存在。[只读审计](eval/c5/formal20-field-readonly-audit-20261006.json)不是新正式源码部署/实际完整依赖冻结；pip缺失metadata引用仍需处理。
+- [x] [v5租期记录](eval/c5/rhino-resource-boundary-v5-20261006.json)：所有者确认2026-10-07 **19:00 Europe/Zurich到期，18:45停止生成**、≥15分钟导出。仅延长截止，不扩大开发1/正式3/研究4/原累计16 GPU-hours；服务商独立核实和执行前用量复核仍需完成，不能自动续租或推定批准。
+- [ ] **当前主线阻塞**：实际Rhino8.21/Python3.9的CLR/clr为`unknown`，另有四个动态非文件程序集，不能满足现行全部字节冻结守卫。三次只读诊断未创建夹具/hook或调用模型，活动文档保持0对象且前后内容相同；339文件来源仅为部分库存。守卫未放宽、闭包/现场probe通过标志均false，不能据此冻结或启动新开发探针。
+- [x] 所有者已明确授权仅设计/合成验证。[宿主/生成器与动态来源设计稿](docs/c5-host-provenance-design.md)及纯数据候选验证器/21项合成正负控已完成；显式承认opaque宿主信任假设，既不证明发射字节/因果来源，也不能用于执行授权。原环境守卫/正式门禁不改，未附加实际观察hook或运行warmup。
+- [ ] **接下来独立交付**：补齐独立实际溯源观察器原型、受控专用宿主准备规范及原始连续性审计，验证动态记录/事件覆盖是否可行；当前设计的21项合成测试不能替代该证据。实证可核实、策略另获审核后，才准备新独立合成现场探针ID及完整spec/runtime、双CI、两个新精确哈希批准。不要重复索要已登记承诺或读取私有20题；必要的新增开发题重合排除由保管人私下执行。
+- [ ] **条件项**：新的现场工程门通过→正式20题完整冻结/双CI/两个新精确哈希批准→保管人单次40槽执行/独立审计→C5-7及作品集报告。LoRA≥14/20、净胜≥3、关键安全/重复写/未核实清理0不变；GO也不自动切默认路线。现有draft、公开承诺或广义“全部完成”不授权运行。
+- [ ] **并行仓库收口**：分支`codex/c5-gpu-pipeline`/OPEN PR #6承载本轮工作，base为`codex/c5-engineering-gate`，不是main。核查时main仍`01647f1`；#2–#6待所有者唯一reviewer_1决定合并，R #7仍独立Draft，不自动merge。保留原失败/安全证据，不打包脏主工作区；产品UI/开放、P2b、D延期。
+
+当前有效顺序：`公开登记完成 → 解除真实嵌入式闭包阻塞 → 新精确批准的合成现场门 → 新正式冻结/单独批准 → 单次40槽/独立审计 → C5-7 → 所有者PR审核`。租期和推送授权均不能跨过现场或正式门禁。
+
+### 历史准备增量：2026-10-06（公开承诺登记前）
+
+以下当日较早记录中的“预检/公开承诺仍缺”、v4截止和旧准备顺序已由上方最新索引替代；保留当时观察，不作为当前待办。
+
+最新优先状态：C5-0至C5-5已通过。原run `c5-final-3d26f1a4b89eb38766647e93` 完整完成80家族/160路线槽，公开五文件回传哈希与远端一致，逐家族评分、唯一消费、冻结血缘及统计经独立公开审计核对；LoRA sequence77/80对base20/80、+71.25pp/净胜57，parse77/80，澄清/拒绝各12/12、安全预测错误0。见[最终评测与审计报告](docs/c5-final-evaluation-report.md)。这不是整体C5 GO，也未执行Rhino；80家族已消费，禁止再次调用owner最终入口或更换run ID。
+
+- [x] C5-4 一次性离线门：完整回收、独立计数/McNemar/bootstrap复算、原门槛通过，原run和账本封存。
+- [x] C5-5 严格C5控制器门：协议完成96.25%、accepted schema100%、原始生成哈希覆盖完整、repair/dispatch/critical errors均0。
+- [ ] 当前主线：R两工具安全证据及原生全12工具单次正/负控已保留。C5 模型桥 A 在首个 Rhino `open` [失败退休、禁止重放，另获批准的人工安全收尾完成](docs/c5-modelbridge-development-failure.md)。新 ID B 经双 CI 和所有者精确批准后单次完成，**[真实模型→许可→原生 Rhino→清理的开发工程门已独立审计通过](docs/c5-modelbridge-development-b-result.md)**，但八槽开发语义仍有基座失败，非正式质量门或整体 GO。当前建立全新20题、独立排除承诺、正式40路线槽的预注册/冻结；正式批准前不运行。不得修改原12工具范围/门槛，不扩张R产品UI。
+- [x] 原模型/源码在新端口只读复核：基座14文件、checkpoint132两adapter、原最终28源码一致；GPU空闲，未加载模型或运行评测，见[资产复核v2](eval/c5/remote-assets-readonly-v2-20261002.json)。
+- [x] R生命周期子门：真实Rhino无模型/无写入open→close/删密钥→stop及原始活动内容哈希一致，125源码清单和独立审计见[草稿PR #7](https://github.com/xiongweiluo/RhinoCoder/pull/7)；不等于完整R研究安全通过。
+- [x] R固定两写安全子门：A仍为退休FAIL；所有者另对新B两个精确哈希批准，`RSDEV-TWO-WRITE-20261002-B`在事前冻结双CI通过后单次执行并独立审计通过。130源码绑定`3e8ee53`，两笔唯一写入/两行done/两份consumed许可及八事件、精确盒体与位移、关闭/实际删密钥/stop/活动内容哈希均核实，模型/GPU/holdout0。104份原JSON和一致DB backup私有封存；A和B均禁止再执行。详见[草稿PR #7](https://github.com/xiongweiluo/RhinoCoder/pull/7)，**只闭合两工具子门，不是完整R交接或十二工具C5门通过**。
+- [x] R研究证据/原C5资产身份交接：所有者已恢复Mac认证；[最新只读v3](eval/c5/remote-assets-readonly-v3-20261002.json)核对远端43源码/依赖清单、原最终28源码、固定14文件基座和checkpoint132两adapter，均无漂移；当时GPU11MiB/0%。R PR #7另记本地130与远端身份交接，不重绑旧R模型。**不等于新的C5模型适配、完整研究执行/import闭包或预算冻结**，这些进入下一十二工具工程门；未加载模型、未读holdout或写远端。
+- [x] C5-6模型执行前工程门：原生12工具隔离适配/独立评分和固定正负控，以及新 B 的真实模型运输、签名许可、原生读写和完整联合审计已通过。B 仅为八槽开发兼容性，不自动满足全新20题与所有者排除承诺、正式运行血缘和执行批准；[20题准备稿](docs/c5-rhino-paired-study-preregistration.md)仍非正式执行授权，未生成/消费正式20题。
+- [x] C5十二工具CPU基础：[独立交付边界](docs/c5-rhino-runtime-foundation.md)实现原完整schema、严格模型步、别名真实读回、原生12工具/活动保护、许可先消费/持久交接、单任务签名/原子账本、几何与只读交叉审计、私有一次性I/O；不接入默认路线。
+- [x] 已消费并退休的独立开发探针：`C5DEV-MODELBRIDGE-20261003-A` 的[事前预注册](docs/c5-modelbridge-development-preregistration.md)、spec `4911e6cd…62edfac` 与修正后 runtime freeze `1cb2adb2…f6cb73` 均得到仓库所有者直接精确批准；初版 `bb697a08…ea369` 从未批准或运行。双 CI、CPU 1757/2048 token 和资源/源码只读核查通过后单次启动。首个 hub `open` 返回 `actual active document changed`，驱动[记录 FAIL/退休](eval/c5/modelbridge-development-failure-20261003.json)，不可重跑。模型已加载但生成请求0、headless夹具0、工具派发0、holdout读取0；含加载/等待17.614秒，远端 worker 已停止、GPU空闲。只读检查见同一活动文档serial与零对象，但摘要水位随只读ScriptEditor变化，守卫过敏是强假设而非已证实唯一原因。仓库所有者另行精确批准 `aa269cc2…8fa0f38` 收尾脚本后，核实无夹具/无engine claim、解绑 Idle hook、实际删除九份临时密钥并留私有台账；**这是手工安全收尾，不是冻结 clean stop 或工程门通过**。
+- [x] B 独立开发工程门：`C5DEV-MODELBRIDGE-20261003-B` 的[事前预注册与冻结](docs/c5-modelbridge-development-b-preregistration.md)绑定源码 `608008f`、spec规范化SHA `be91b9b3…537de9`、runtime freeze规范化SHA `686c3a1c…7e54b4`、144源码及实际环境；双 CI 与所有者直接精确批准先于 admission。八槽单次执行、11生成阶段、LoRA真实写1／读1，全部槽安全关闭和九份密钥删除；[独立联合审计](eval/c5/modelbridge-development-audit-20261003-b.json)确认工程门通过、holdout读取0、远端含加载/空闲322.413秒、GPU已空闲。基座开发写/读/澄清失败与仅8槽样本限制原样报告；B永久禁止重放，不是正式20题或整体C5 GO。
+- [x] C5-6 正式**源码/合成工程交付**：[40槽现场适配器、一次性协调器、独立原始联合审计与公开冻结预检](docs/c5-rhino-formal20-engineering-readiness.md)已实现，仅用CPU合成题验证签名许可/持久账本、播种、二/三写、严格输出、关闭删钥、原始库存、预算及篡改负控。新增保管人/嵌入式Rhino/双路worker入口，不复用B八槽。原模型契约/提示不变；新隔离公开场景标签隐私策略须事前冻结，默认产品隐私不放宽。[保管人规范](docs/c5-rhino-formal20-owner-preparation.md)已同步age、大小/权限、无正文公开承诺和预检命令。两个[spec草案](eval/c5/rhino-formal20-spec-draft.json)/[runtime模板](eval/c5/rhino-formal20-runtime-freeze-draft.json)仍为`execution_ready=false`，不是实际现场闭包、全12工具新现场验证、最终题承诺、正式批准、C5-6 PASS或整体GO。
+- [ ] 当前独立交付：只读复核当前Mac/Rhino/GPU源码、资产、已加载依赖与剩余用量，准备**全新、仅合成开发题**的现场工程探针spec/runtime冻结和双CI，交所有者精确批准后才能运行；本轮未执行任何新探针，不能借B/native12授权。并行由保管人按[全新20题交接门](docs/c5-rhino-formal20-handoff.md)独立准备/排除/审阅/加密，只交公开承诺。待新现场工程门通过后再冻结正式40槽、顺序/评分器/模型/源码/预算及终止规则，另取正式新精确批准。不能把任何已用开发题混入正式集，不能在正式批准前运行40槽。
+- [x] 正式20题保管人侧**非消费自动排除预检入口**已提供并用合成数据测试：核对原80对公开Merkle身份、440冻结开发文件、历史模板、额外已消费题及20题分层/核心工具覆盖；真实20题/原80正文**未由代理运行或读取**。预检不能证明R清单完整或语义不重合，也不是公开承诺、执行冻结或正式授权；见[交接门](docs/c5-rhino-formal20-handoff.md)。
+- [x] 2026-10-06 [历史补充排除清单与私有终端命令](docs/c5-formal20-history-exclusion-handoff.md)：已从1860份可定位来源生成仓库外1013条/1002文本保守超集，R v6/v7/v8各60题、稳定性60写任务、C5 A/B/native12与冻结开发集全部user_step纳入；不提交整批R证据。预检补齐后续步骤与旧template_family复用拒绝。所有者报告新20题已准备，**代理未读正文、预检尚待本人运行、公开承诺仍缺**；人工完整性/语义审核不能由此追认。现场开发门与正式冻结/精确批准仍是独立依赖。
+- [x] 2026-10-03原生开发子门：[native12预注册及后续记录](docs/c5-native12-development-preregistration.md)按新精确所有者批准单次执行，全12工具、10签名变更请求/2只读、终端无效HMAC零派发通过[独立实际审计](eval/c5/native12-development-audit-20261003.json)。每步几何/属性/只读/非目标、10 done/2 read/10 consumed/40事件/12 native-control交接、关闭/实际删钥/stop/活动文档不变均核实。74原JSON和两份一致DB backup私有封存；probe永久禁止重跑。模型/GPU/holdout0，完整C5工程门仍false，不是模型质量或整体GO。
+- [x] native12源码事前冻结：`3106ea4`完整203文件、inventory `29afc13e…77916`、spec `41209157…5a3e`、runtime freeze `8ea7df13…363aa`；全仓474 passed/8 skipped，release/secret/diff通过。预执行`e5524f4`双CI通过后取得两个哈希的新直接批准才创建claim/密钥/fixture；没有事后修订源码、断言或阈值。冻结仅覆盖已消费的native开发控制，不覆盖模型调用/正式20题。
+- [x] 最新资源边界：所有者10月5日报告续租，并精确确认 **2026-10-06 22:00 Europe/Zurich到期（20:00 UTC）**，最迟21:45当地停止生成，保留≥900秒导出。[v4记录](eval/c5/rhino-resource-boundary-v4-20261005.json)只更新截止，不扩大开发≤1/正式≤3/研究合计≤4、原累计≤16 GPU-hours；A+B已用340.027秒，执行前重新核实用量/服务商/GPU。旧[v2](eval/c5/rhino-resource-boundary-v2-20261003.json)/[v3](eval/c5/rhino-resource-boundary-v3-20261003.json)的10月4日截止保持为历史，不再作为当前边界。本人租期确认不是新探针或正式20题的执行授权，不自动续租。
+- [ ] 仓库收口：C5代码/公开证据在OPEN PR #2–#6，R独立草稿PR #7已推送；所有者唯一reviewer_1决定是否合并，代理不自动merge。P2b、D和完整产品UI继续延期。
+
+当前有效顺序为 `A失败退休/人工安全收尾已完成 → B八槽模型桥工程门已通过 → 正式现场适配器/联合审计CPU合成验证已备 → 当前环境闭包与新精确批准的合成现场开发门 + 所有者私下全新20题/排除承诺 → 完整正式冻结/双CI/新精确批准 → 单次40槽真实配对 → C5-7裁决与公开报告 → 所有者审核PR`。前一门失败时记录 FAIL/退休并重新决策，不机械推进后续门。原C4 NO-GO、C5离线80家族已消费、v8失败和默认混合路由均不改判。
+
+以下2026-10-01内容是最终消费前的历史执行快照，其“零消费/等待owner”不再是当前状态；不覆盖当时冻结记录。
+
+### 历史执行增量：2026-10-01
+
+本增量优先于下方 2026-09-21 历史快照及旧执行顺序。作品集当前研发主线是“C4 真实失败 → 契约/数据诊断 → C5 独立第二轮可信实验”，不是必须证明 LoRA 有效。完整问题、数据、门槛与决策规则见 [C5 规划](docs/c5-contract-aligned-qlora-plan.md)，受审执行见 [GPU 执行包](docs/c5-gpu-execution.md)及 [PR #6](https://github.com/xiongweiluo/RhinoCoder/pull/6)。
+
+- **当前主线：**C5-0/1 与 943 条 CPU 工程子门已冻结；所有者授权现有两天租期内的任务 1–5，条件预算为诊断 4 / 正式 8 / 最终 4、总计 16 GPU-hours，不追加租赁。受测执行源 `160d1c7` 与 v3 授权保持不变。
+- **实际执行点：**C5-2/3 完整通过。唯一正式 run 完成 697 train 记录/3 epochs/132 steps，按预定 validation 顺序选择 checkpoint132：parse/name 60/60、arguments/sequence 59/60。73 文件、约2.20GB产物完整回传，远端/本地独立审计逐字节一致，活跃执行累计1.57004 GPU-hours。见 [正式训练报告](docs/c5-formal-training-report.md)。这些是工程/开发信号，不是最终盲测或模型 GO；C5-4/5 仍未消费/运行。
+- **单次最终门：**80 家族公开 commitment 保持零消费。工程门通过才运行唯一正式配置；正式 adapter、选模、代码和阈值冻结后，只有仓库所有者的独立保管终端能 durable claim/解密。开发代理不查看明文、密钥或原始输出；C5-4 未通过不得把 C5-5 或产品标为通过。
+- **条件项与延期：**R 安全/真实 Rhino/审计证据保留，R 最小研究收尾仅在 C5-4/5 通过且进入 C5-6 时成为依赖。完整产品 UI、受控用户开放、P2b 和精简 D 不是当前训练依赖，继续延期。
+- **永久历史：**C4 `NO-GO`，A5 两路 0/45、P2 描述性 4/30 对 5/30；v8 `formal_quality_fail`、59/60；默认混合路由不变。所有者是唯一 reviewer_1 与独立保管人，不需要 reviewer_2，持续授权推送/建 PR 不包含自动 merge。
+
+2026-10-01当时执行顺序为 `owner单次C5-4 → C5-5 → 条件式R/C5-6 → 裁决`。现已完成前两门，当前有效顺序为 `R研究安全收尾 → C5-6新20题冻结 → 真实配对 → C5-7 → 独立产品决策`。最终冻结 `9a57c167…a5d8` 与源码 `ced0de9` 不变；交接入口仅保留为历史，不得再次执行。代码在独立分支/OPEN PR，主线 `01647f1` 未变，不冒充已接入。
+
+### 历史快照
 
 当前状态（2026-09-21）：
 
@@ -37,7 +345,7 @@
 4. C0–C4 已完成；禁止重训同一实验或重复消费 A5。C4 为 `NO-GO`，保留训练/评测资产并继续已验证的混合路线；任何 dataset v2 必须使用新实验 ID、新预注册和新的未见保留集。
 5. P0 验收后项目即进入可投递状态；P1、P2、C 和精简 D 是持续迭代，不作为开始投递的前置条件。
 
-当前执行顺序：`P0/P1/P2a 已完成 → C0–C4 已完成（NO-GO）→ 精简 D`。P2b 可独立延期，不阻塞模型实验或投递。
+2026-09-21 的旧执行顺序为 `P0/P1/P2a 已完成 → C0–C4 已完成（NO-GO）→ 精简 D`；已由上方 C5 主线增量替代。P2b 与精简 D 延期，不阻塞 C5 或投递。
 
 ## 核心完成标准
 

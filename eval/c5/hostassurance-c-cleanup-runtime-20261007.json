@@ -1,0 +1,22 @@
+{
+  "cleanup_script_sha256": "ea358f7cb79465f86b34a6dff649318e026e1a7b1a47a8e0efbcd4ea60f42b42",
+  "embedded_python_major_minor": [
+    3,
+    9
+  ],
+  "execution_authorized": false,
+  "guarantee": "same accepted trusted opaque host, no complete byte/causal/transient/handler absence proof",
+  "known_host_file_count": 339,
+  "new_holdout_rows_read": 0,
+  "new_model_calls": 0,
+  "new_subscriptions": 0,
+  "original_source_file_count": 289,
+  "original_source_inventory_sha256": "bd9594c703bf953f5638ba4436a78b20164a6440510de25f64d1077e9c849672",
+  "retired_runtime_canonical_sha256": "bbbbca84474d5cd397f2e011775cb17b50f6f4a7328c6cee339a4aedf13090d1",
+  "retired_runtime_file_sha256": "dc9a6708843bba203181c56a6f16d0210e90bc506d3226e5a7b10be023bc3a9a",
+  "retired_runtime_path": "/Users/xiongweiluo/RhinoCoder/data/training/c5/hostassurance-dev-source-20261007-C/eval/c5/hostassurance-development-runtime-freeze-20261007-c.json",
+  "rhino_version": "8.21.25188.17002",
+  "runtime_closure_binding": "Complete approved C runtime by exact canonical AND file SHA, plus this sole new script byte SHA. No GPU/model runtime used.",
+  "spec_sha256": "1df5aeb6a2e842eee03b6121028572f8efc6c694b210e870de1a1c389c8971bc",
+  "study_id": "C5SAFE-HOSTASSURANCE-C-20261007-A"
+}

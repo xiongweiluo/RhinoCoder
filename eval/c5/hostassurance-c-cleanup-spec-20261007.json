@@ -1,0 +1,43 @@
+{
+  "study_id": "C5SAFE-HOSTASSURANCE-C-20261007-A",
+  "retired_study_id": "C5DEV-HOSTASSURANCE-20261007-C",
+  "retired_runtime_sha256": "bbbbca84474d5cd397f2e011775cb17b50f6f4a7328c6cee339a4aedf13090d1",
+  "fixture_serial": 268435475,
+  "active_serial": 268435457,
+  "active_content_sha256": "de8fa7924ad4cf7fbeffdbe982f0b559a77eca7a8cf1f24175df642404ec6cfa",
+  "geometry_tool_dispatches": 0,
+  "model_calls": 0,
+  "gpu_calls": 0,
+  "holdout_calls": 0,
+  "new_fixtures": 0,
+  "new_subscriptions": 0,
+  "fixture_closes_max": 1,
+  "ephemeral_keys_remove_max": 7,
+  "idle_exact_remove_calls_max": 2,
+  "assemblyload_exact_remove_calls_max": 1,
+  "original_result_rewrite_allowed": false,
+  "replay_allowed": false,
+  "complete_handler_absence_claimed": false,
+  "logical_budget_seconds": 180,
+  "hard_preemption_of_blocking_clr_claimed": false,
+  "source": "tools/c5_hostassurance_retired_c_cleanup.py",
+  "wrapper_code": "#! python 3\nimport runpy\nrunpy.run_path(\"/Users/xiongweiluo/.codex/worktrees/c5-engineering-gate/RhinoCoder/tools/c5_hostassurance_retired_c_cleanup.py\", run_name=\"__main__\")\n",
+  "required_preconditions": [
+    "New direct repository_owner exact cleanup spec/runtime approval, source self-hash and original complete C freeze bytes",
+    "Unique retained C owner; prior two slots closed; child read-lora seq10 with no pending operation; hub seq4; no future fixture claims",
+    "Late original request9 get_scene_summary done with same empty before/after, three stable samples, matching original HMAC and completed single read/zero write ledger",
+    "Actual current headless fixture 268435475 registered and empty; active268435457 and content unchanged; actual scene binding matches original read"
+  ],
+  "effects": [
+    "Durable one-use manual cleanup claim before any effect; retire/block retained owner, remove its exact child and hub Idle delegates",
+    "Dispose only the known empty read-lora fixture once and verify actual registry absence",
+    "Remove only its key, five proven never-opened slot keys and hub key; verify actual absence, retain all other files/evidence",
+    "Finish existing observer with exact AssemblyLoad remove call and raw journal/seal receipt, no new subscription or canary",
+    "Preserve original FAIL/result bytes. Manual script may produce visible origin drift; retain and audit it, never whitelist or claim full field continuity PASS"
+  ],
+  "failure_rule": "Unknown/precondition failure stops without retry or guessed closure. Durable claim prevents another run. Partial effects retained for independent audit and any separate next decision.",
+  "execution_authorized": false,
+  "formal20_authorized": false,
+  "default_route_change_allowed": false,
+  "automatic_merge_allowed": false
+}

@@ -1,0 +1,12 @@
+{
+  "actor": "repository_owner",
+  "decision": "continue_authorized_CPU_readonly_and_freeze_preparation",
+  "approval_basis": ["租期还未结束，我这边会及时续约，请继续", "瑞士时间10.8晚上10点"],
+  "resource_boundary_file": "eval/c5/rhino-resource-boundary-v6-20261007.json",
+  "new_live_study_execution_authorized": false,
+  "formal20_execution_authorized": false,
+  "retired_study_replay_authorized": false,
+  "changed_host_guarantee_authorized": false,
+  "automatic_rental_or_merge_authorized": false,
+  "next_boundary": "Complete consumed-development timing and lifecycle diagnosis plus CPU preparation; any new actual subscription, warmup, model or fixture operation still requires a distinct complete freeze, double CI and owner exact spec/runtime approval. No retired A/B/C replay or automatic successor execution."
+}

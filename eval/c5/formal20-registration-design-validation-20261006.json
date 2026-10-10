@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "status": "CPU_SYNTHETIC_DESIGN_AND_PUBLIC_REGISTRATION_VALIDATED_NOT_EXECUTION_AUTHORITY",
+  "recorded_date": "2026-10-06",
+  "tested_source_base_commit": "8023a243853efbdea03b607212dac5701eca43b0",
+  "source_file_count": 245,
+  "source_inventory_sha256": "b7334d7f1a3dd0f80e10992bcec7411994958c77ef6b141213bee18858cdd803",
+  "full_pytest": {
+    "passed": 596,
+    "skipped": 8
+  },
+  "new_synthetic_tests": {
+    "readonly_metadata_and_pin": 7,
+    "host_provenance_design": 21
+  },
+  "compileall_passed": true,
+  "secret_scan_passed": true,
+  "release_consistency_passed": true,
+  "diff_check_passed": true,
+  "actual_host_dynamic_provenance_audit_passed": false,
+  "legacy_byte_closure_passed": false,
+  "new_live_field_probe_run": false,
+  "formal_model_calls": 0,
+  "formal_route_slots_consumed": 0,
+  "private_formal_rows_read": 0,
+  "execution_ready": false,
+  "notes": [
+    "Unit tests and candidate metadata are synthetic only. The three actual read-only Rhino diagnostics are separately recorded as blocked, not simulated live passes.",
+    "No observer hooks, warmup, model loading or new field study execution. Direct owner authorization covers design and synthetic tests only.",
+    "Two remote CI validations are required after pushing the tested change, not inferred from base 8023a24 checks."
+  ]
+}

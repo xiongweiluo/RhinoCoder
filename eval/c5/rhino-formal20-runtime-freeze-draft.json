@@ -1,0 +1,42 @@
+{
+  "study_id": "c5-rhino-paired-20-v1",
+  "state": "TEMPLATE_ONLY_NOT_FROZEN_NOT_AUTHORIZED",
+  "execution_ready": false,
+  "spec_sha256": null,
+  "spec_file_sha256": null,
+  "source_files": {},
+  "source_inventory_sha256": null,
+  "fixed_public_files": {},
+  "mac_source_root": null,
+  "mac_environment": {"python": null, "file_sha256": {}, "inventory_sha256": null},
+  "rhino_version": null,
+  "rhino_environment_files": {},
+  "environment_sha256": null,
+  "actual_mac_rhino_gpu_import_closure_verified": false,
+  "synthetic_field_probe_independent_audit_passed": false,
+  "model_identities": {
+    "base": "63f7de2f37a997c829ec98eaf617cdc78808586bc9df1139a90c030c4d76ebae",
+    "lora": "305d72703270d16e93233d1d34ae27cdaddd777e4530afead88c7edb8dc22cae"
+  },
+  "tokenizer_dir": null,
+  "tokenizer_file_sha256": {},
+  "decryption_executable": null,
+  "decryption_executable_sha256": null,
+  "resource_boundary": {
+    "owner_confirmed": false,
+    "provider_expiry_epoch": null,
+    "generation_cutoff_epoch": null,
+    "export_reserve_seconds": 900,
+    "formal_max_seconds": 10800,
+    "prior_cumulative_seconds": null,
+    "original_cumulative_max_seconds": 57600,
+    "prior_research_seconds": null,
+    "research_cumulative_max_seconds": 14400
+  },
+  "notes": [
+    "No private content, key, owner grant or actual environment proof is in this template.",
+    "Resolve full loaded Mac/tokenizer/Rhino Python and CLR/worker dependency closures and source bytes; dynamic or unknown CLR origins fail closed.",
+    "Do not set proof flags from CPU mocks, historic B authorization, elapsed lease duration or a passing PR alone.",
+    "Freeze actual public commitment and exact current expiry, calculate prior usage, reserve export time, then request new precise owner approval before any formal started claim."
+  ]
+}

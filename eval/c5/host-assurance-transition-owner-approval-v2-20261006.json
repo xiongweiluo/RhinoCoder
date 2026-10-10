@@ -1,0 +1,7 @@
+{
+  "actor": "repository_owner",
+  "approved": true,
+  "policy_id": "c5-frozen-source-trusted-host-visible-continuity-v2",
+  "transition_spec_sha256": "1ced6621e2220de10dc1fcb161feba224344f6325e612a4ca6761a020585336d",
+  "approval_basis": "direct owner acceptance of weaker host assurance and research-exclusive preparation; no study execution"
+}

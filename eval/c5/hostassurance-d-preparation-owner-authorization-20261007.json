@@ -1,0 +1,11 @@
+{
+  "actor": "repository_owner",
+  "scope": "prepare_new_single_attempt_D_code_CPU_audit_and_freeze_only",
+  "approval_basis": "Direct owner reply: 授权仅准备新工程门 D，不运行",
+  "preparation_authorized": true,
+  "study_execution_authorized": false,
+  "new_subscription_or_fixture_or_model_authorized": false,
+  "formal20_or_successor_E_authorized": false,
+  "automatic_renewal_or_merge_authorized": false,
+  "new_exact_spec_runtime_approval_required": true
+}

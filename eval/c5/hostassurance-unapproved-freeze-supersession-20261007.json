@@ -1,0 +1,18 @@
+{
+  "study_id": "C5DEV-HOSTASSURANCE-20261007-A",
+  "status": "preparation_freeze_superseded_before_any_precise_approval_or_execution",
+  "superseded_runtime_canonical_sha256": "69d3b8f87f5f4af35f120786ef13258ffaa0c9896ddc6435e21612a8a41cf0f7",
+  "superseded_source_revision": "614b0d9b8fce29a9051b6545f5aeca85dcd1bf56",
+  "preserved_runtime_file": "hostassurance-development-runtime-freeze-unapproved-614b0d9.json",
+  "reason": "Review of actual entry directory shape found two known metadata sidecars absent from audit population; fixed with exact sidecar value validation plus synthetic positive/tamper controls. Also bind spec/runtime/grant drift at every source checkpoint.",
+  "owner_precise_approval_received": false,
+  "study_admission_claim_created": false,
+  "study_executed": false,
+  "model_calls": 0,
+  "rhino_warmup_or_subscription_calls": 0,
+  "holdout_rows_read": 0,
+  "metadata_deployment_readonly_checks_passed": true,
+  "source_and_freeze_preserved_without_deletion": true,
+  "old_freeze_execution_allowed": false,
+  "new_complete_freeze_double_ci_and_exact_approval_required": true
+}

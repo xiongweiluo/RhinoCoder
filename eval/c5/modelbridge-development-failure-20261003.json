@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "probe_id": "C5DEV-MODELBRIDGE-20261003-A",
+  "spec_sha256": "4911e6cd54f0f4523be4980b3973ae7419c98087ad3f378182658b8ae62edfac",
+  "runtime_freeze_sha256": "1cb2adb2161ba2f14b2c80b703cc38e3573621a5a86014cf5c15b72883f6cb73",
+  "status": "FAIL_RETIRED_NO_REPLAY",
+  "scope": "one owner-approved development compatibility probe, not C5 final holdout or a formal Rhino pairing",
+  "owner_approval": "repository_owner directly approved the exact two hashes before admission",
+  "ci": "both PR #6 validate jobs passed before execution",
+  "observed_failure": {
+    "first_hub_open_response": "hub_failed_no_retry: NativeError: actual active document changed",
+    "driver_result": "modelbridge_fail_retired_no_replay: known native slot opening failed",
+    "opened_slots": 0,
+    "engine_started_claims": 0,
+    "headless_fixtures_created": 0,
+    "native_tool_dispatches": 0,
+    "model_generation_requests": 0,
+    "formal_holdout_calls": 0
+  },
+  "resource_settlement": {
+    "remote_worker_status": "worker_stopped_no_replay",
+    "elapsed_seconds_including_load_and_idle": 17.613689741992857,
+    "cap_seconds": 3600,
+    "gpu_afterward": "NVIDIA GeForce RTX 3090, 11 MiB used, 0% utilization",
+    "model_was_loaded": true,
+    "replay_allowed": false
+  },
+  "read_only_rhino_reconciliation": {
+    "active_document_serial": 268435457,
+    "bootstrap_active_serial": 268435457,
+    "active_object_count": 0,
+    "hub_blocked": true,
+    "hub_attached_at_report_time": true,
+    "child_or_fixture_present": false,
+    "initial_active_scene_digest": "ac8884129142808102528cf0466db5a4bf62d4a8a674b7afad6587fcd5a439c5",
+    "later_active_scene_digests": [
+      "711e9984dca2450e4782346c46b53136c898a0fe741dfba1029eaa424afe678d",
+      "b5c1e0076746dbaa918f19784c5ef6b20928142306be58a66e7ee955ad2480a9",
+      "61267bfb014c46bc6993af2c5d4c758e72fc1b6dcb4dd0782bbbf0e5fae352ad"
+    ],
+    "read_only_scripteditor_counter_samples": {
+      "global_object_runtime_serial_next": [707, 715],
+      "active_next_undo_record_serial": [11, 13]
+    },
+    "read_only_content_digest_control": {
+      "global_object_runtime_serial_next": [723, 731],
+      "active_next_undo_record_serial": [15, 17],
+      "legacy_scene_digest": [
+        "cf86bfa3c235e308615a19b0e4dd597c2a14d410bd0e78a22dc72d517e16f684",
+        "984f2d00a1b42ebf8e7130e7e3c69007cf4c1710241c6cc3554f943e35bcd6bc"
+      ],
+      "native_active_content_digest_both": "de8fa7924ad4cf7fbeffdbe982f0b559a77eca7a8cf1f24175df642404ec6cfa"
+    }
+  },
+  "diagnosis": "The active document stayed on the same runtime serial and had zero objects, while its legacy scene digest changed. The digest includes global object and active undo watermarks; both increased during read-only ScriptEditor inspection. A second paired read-only control changed both watermarks and the legacy digest again while NativeDoc's content-only digest stayed identical. This strongly supports an over-sensitive active-document guard, but the exact counter at the first rejected hub command was not recorded. Preserve this as a failure hypothesis, not proof of the sole cause.",
+  "safety_status_at_report_time": "A separate exact owner approval authorized one-shot manual safety closure script SHA-256 aa269cc2d825fcffd89d13f0037c2306d545329fe1406fb14c87747c18fa0f38. Its private postfailure approval/claim/result and Rhino command-history success were verified: no fixture/engine claim, blocked Idle hook detached, nine never-used ephemeral keys actually absent. This is explicitly not the frozen clean stop or a probe success; A remains FAIL/retired.",
+  "next_gate": "Before any new probe, freeze a new ID/source/spec/runtime with a content-only active-document guard and obtain a new exact owner approval. Neither A nor its keys may be reused.",
+  "formal_quality_claim": false,
+  "overall_c5_go": false,
+  "default_product_route_changed": false
+}

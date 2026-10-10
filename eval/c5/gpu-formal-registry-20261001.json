@@ -1,0 +1,47 @@
+{
+  "adapter_sha256": "305d72703270d16e93233d1d34ae27cdaddd777e4530afead88c7edb8dc22cae",
+  "base_revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+  "context_sha256": "817a0737c64914e3c2f350866232ae623eb3772e80016bbb67961b645ef4a38f",
+  "contract_id": "qwen25-v4-selector-v3-json-invoker-c5-v1",
+  "experiment_id": "rhinocoder-qwen25-coder-7b-c5-contract-qlora-v2",
+  "files": {
+    "adapter_config.json": "8a776a47b085b787b7c7f3c9b068aed8c0f018278de2b94bf66130f5542d6d4f",
+    "adapter_model.safetensors": "da8acdcde2671aa397534b35369fe4a84b9d150f80f7b7026a4366a770be2883"
+  },
+  "final_holdout_rows_read": 0,
+  "product_route_authorized": false,
+  "selected_checkpoint": "checkpoint-132",
+  "selection_order": [
+    "sequence_exact",
+    "arguments_exact",
+    "parse_exact",
+    "eval_loss"
+  ],
+  "tie_break": "earliest_checkpoint",
+  "validation_candidates": [
+    {
+      "arguments_exact": 0.9666666666666667,
+      "eval_loss": 0.004208928729331958,
+      "parse_exact": 1.0,
+      "sequence_exact": 0.9666666666666667,
+      "step": 44,
+      "tool_name_exact": 0.9833333333333333
+    },
+    {
+      "arguments_exact": 0.9833333333333333,
+      "eval_loss": 0.0008649209549976005,
+      "parse_exact": 1.0,
+      "sequence_exact": 0.9833333333333333,
+      "step": 88,
+      "tool_name_exact": 1.0
+    },
+    {
+      "arguments_exact": 0.9833333333333333,
+      "eval_loss": 0.0008472924928499861,
+      "parse_exact": 1.0,
+      "sequence_exact": 0.9833333333333333,
+      "step": 132,
+      "tool_name_exact": 1.0
+    }
+  ]
+}
