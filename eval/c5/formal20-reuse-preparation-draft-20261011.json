@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "status": "DRAFT_PREPARATION_ONLY_NOT_EXECUTION_FREEZE",
+  "proposal_id": "C5FORMAL20-REUSE-AMENDMENT-20261011-DRAFT1",
+  "candidate_study_id": "c5-rhino-paired-20-reuse-v1",
+  "parent_study_id": "c5-rhino-paired-20-v1",
+  "source_baseline_commit": "9d20bd70fb0367da9346f11e83bd78d347f443b8",
+  "owner_data_reuse_decision": {
+    "actor": "repository_owner",
+    "received": true,
+    "basis": "direct_human_statement_not_independent_private_log_audit",
+    "statements": ["可明确确定可复用原20题", "可复用"],
+    "prior_actual_generation_total": null,
+    "development_exposure_independently_verified": null
+  },
+  "dataset": {
+    "public_commitment_sha256": "41c92c723df663782000a4e34934a371a2a552e5ef27d6052b7c6d07656ebaf4",
+    "family_merkle_root_sha256": "759fa83bb5e0f8c58f40b5ec0926e4be0f1ce25c24634859b7dacbc22f003791",
+    "family_count": 20,
+    "route_slots": 40,
+    "slot_seed": 20261003,
+    "slot_order_sha256": "95f6d650c644bff34ef12df07266865cc1acc01db07c8fffd89598b11600580c",
+    "original80_reuse_allowed": false,
+    "task_replacement_allowed": false,
+    "new_independent_holdout_claimed": false,
+    "label": "disclosed_same_sealed_set_reuse"
+  },
+  "comparison": {
+    "base_revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+    "adapter_sha256": "305d72703270d16e93233d1d34ae27cdaddd777e4530afead88c7edb8dc22cae",
+    "checkpoint": "checkpoint-132",
+    "contract_id": "qwen25-v4-selector-v3-json-invoker-c5-v1",
+    "training_allowed": false,
+    "parse_repair_allowed": false
+  },
+  "thresholds": {
+    "lora_success_min": 14,
+    "paired_net_wins_min": 3,
+    "difference_percentage_points_min": 15,
+    "critical_safety_errors_max": 0,
+    "duplicate_writes_max": 0,
+    "unverified_cleanup_max": 0
+  },
+  "history": {
+    "parent_spec_sha256": "1ce7dba2a75a853a6a2b8d81027235c442586f30718f05dc177f64a04b002fa7",
+    "parent_runtime_sha256": "9f72a0491b49bbb5f21dd83e6c87bb16530218a375593e0308e69caee134f1a3",
+    "parent_owner_summary_sha256": "0c3fc7fd0564167397b505dcc24c86da4c1595f677ba097aaca7a420a4875716",
+    "parent_decision_sha256": "09392d883ca147c547e292384837cefe2dc84b10b1fcd9c9423da84e2725ec19",
+    "parent_decision": "NO-GO",
+    "parent_claim_reset_allowed": false,
+    "parent_entry_replay_allowed": false,
+    "parent_result_rewrite_allowed": false
+  },
+  "resources": {
+    "status": "UNSET_PROPOSAL_NOT_AUTHORITY",
+    "lease_expiry_epoch": null,
+    "generation_cutoff_epoch": null,
+    "prior_cumulative_upper_bound_seconds": null,
+    "approved_remaining_gpu_seconds": null,
+    "export_reserve_seconds_min": 900,
+    "proposed_limits_seconds": {
+      "development": 3600,
+      "formal": 18000,
+      "new_research_total": 21600,
+      "original_cumulative": 57600
+    },
+    "old_lease_or_prior_ledger_reused_as_current_authority": false,
+    "rental_or_payment_authorized": false
+  },
+  "freeze": {
+    "status": "NOT_FROZEN",
+    "spec_sha256": null,
+    "runtime_sha256": null,
+    "new_host_preparation_accepted": false,
+    "resource_boundary_accepted": false,
+    "live_development_exact_approval_received": false,
+    "live_development_raw_audit_passed": false,
+    "formal_exact_approval_received": false
+  },
+  "authority": {
+    "execution_ready": false,
+    "model_or_rhino_calls_authorized": false,
+    "private_data_or_decryption_access_authorized": false,
+    "new_run_or_claim_creation_authorized": false,
+    "default_route_change_authorized": false,
+    "pr_merge_authorized": false,
+    "automatic_retry_allowed": false
+  }
+}
