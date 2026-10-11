@@ -1,0 +1,86 @@
+#!/usr/bin/env python3
+"""Independent stdlib source/spec/plan/runtime byte and population check.
+
+Run from reviewed checkout, never import staged target code. No grant/state
+creation or environment/model loading. Actual installed assets have a separate
+read-only receipt check; this tool cannot fabricate missing resource facts.
+"""
+import argparse
+import ast
+import hashlib
+import json
+import os
+from pathlib import Path
+import stat
+
+SPEC='eval/c5/reuse-development-spec-20261011-a.json'
+RUNTIME='eval/c5/reuse-development-runtime-freeze-20261011-a.json'
+PLAN='eval/c5/reuse-field-environment-plan-20261011-a.json'
+
+
+def require(ok,code):
+    if not ok:raise ValueError(code)
+
+
+def canonical(v):return json.dumps(v,sort_keys=True,separators=(',',':'),ensure_ascii=True,allow_nan=False).encode()
+def sha(v):return hashlib.sha256(canonical(v)).hexdigest()
+
+
+def read(p):
+    require(p.is_absolute() and p.resolve()==p,'field_freeze_alias')
+    fd=os.open(p,os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK)
+    try:
+        a=os.fstat(fd);require(stat.S_ISREG(a.st_mode) and a.st_nlink==1 and a.st_uid==os.getuid()
+            and not a.st_mode&0o022 and 0<a.st_size<=2*1024*1024,'field_freeze_file')
+        raw=os.pread(fd,a.st_size+1,0);b=os.fstat(fd);c=p.lstat()
+        require(len(raw)==a.st_size and all(getattr(a,k)==getattr(b,k)==getattr(c,k)
+            for k in ('st_dev','st_ino','st_size','st_mtime_ns','st_ctime_ns','st_mode','st_nlink')),'field_freeze_race')
+        return raw
+    finally:os.close(fd)
+
+
+def decode(raw):
+    def pairs(items):
+        v={}
+        for k,x in items:require(k not in v,'field_freeze_duplicate');v[k]=x
+        return v
+    def constant(v):raise ValueError('field_freeze_nonfinite')
+    return json.loads(raw,object_pairs_hook=pairs,parse_constant=constant)
+
+
+def check(root,spec_sha,runtime_sha,*,review=False):
+    root=Path(root);require(root.is_absolute() and root.resolve()==root,'field_freeze_root')
+    sraw,rraw,praw=(read(root/n) for n in (SPEC,RUNTIME,PLAN));s,r,p=map(decode,(sraw,rraw,praw))
+    require(sha(s)==spec_sha==r['spec_sha256'] and sha(r)==runtime_sha,'field_freeze_two_hash_binding')
+    files=r['source_files'];require(type(files) is dict and 0<len(files)<=512,'field_freeze_population')
+    expected=set(files)|{RUNTIME}|({'review-materials.json'} if review else set())
+    observed=set()
+    for directory,dirs,names in os.walk(root,followlinks=False):
+        require(all(not (Path(directory)/d).is_symlink() for d in dirs),'field_freeze_symlink_directory')
+        observed.update((Path(directory)/n).relative_to(root).as_posix() for n in names)
+    require(observed==expected,'field_freeze_extra_or_missing_source')
+    for n,value in files.items():
+        path=Path(n);require(not path.is_absolute() and '..' not in path.parts and str(path)==n,'field_freeze_name')
+        raw=read(root/path);require(hashlib.sha256(raw).hexdigest()==value,'field_freeze_byte_drift')
+        if path.suffix=='.py':ast.parse(raw,filename=n,feature_version=(3,9) if n.startswith('plugin/rhino_listener/')
+                                      or n in ('tools/run_c5_reuse_rhino_entry.py','tools/run_c5_reuse_rhino_wrapper.py') else (3,11))
+    require(hashlib.sha256(sraw).hexdigest()==files[SPEC] and hashlib.sha256(praw).hexdigest()==files[PLAN]
+            and sha(p['environment'])==r['environment_sha256'] and sha(p['model_assets'])==r['model_assets_sha256']
+            and sha(p['host_readable_files'])==r['host_readable_files_sha256']
+            and sha(p['host_acceptance'])==s['host_policy']['acceptance_record_sha256']
+            and s['resources']==r['resources'] and s['host_policy']==r['host_policy'],'field_freeze_complete_closures')
+    require(all(s[k] is False for k in ('automatic_retry_allowed','private_formal_data_allowed','default_route_change_allowed'))
+            and s['host_policy']['full_byte_closure_claimed'] is False,'field_freeze_guarantee_drift')
+    return {'source_files_individually_verified':len(files),'source_population_exact':True,
+            'complete_closure_binding_verified':True,'candidate_execution_ready':s['execution_ready'] is r['execution_ready'] is True,
+            'actual_installed_assets_verified':False,'human_approval_origin_verified':False,'execution_ready':False}
+
+
+def main():
+    p=argparse.ArgumentParser();p.add_argument('--root',type=Path,required=True)
+    p.add_argument('--spec-sha256',required=True);p.add_argument('--runtime-sha256',required=True)
+    p.add_argument('--review',action='store_true');a=p.parse_args()
+    print(json.dumps(check(a.root,a.spec_sha256,a.runtime_sha256,review=a.review),sort_keys=True))
+
+
+if __name__=='__main__':main()

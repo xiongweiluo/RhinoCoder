@@ -32,7 +32,7 @@ def validate_transport(value):
 
 
 def command(mode):
-    require(mode in ('serve','stop','check'),'reuse_fixed_ssh_mode')
+    require(mode in ('serve','stop','export','check'),'reuse_fixed_ssh_mode')
     args=[str(SSH),'-F','/dev/null','-T','-S',POLICY['socket'],
         '-o','BatchMode=yes','-o','ControlMaster=no','-o','ProxyCommand=/usr/bin/false',
         '-o','StrictHostKeyChecking=yes','-o','UpdateHostKeys=no',
@@ -87,6 +87,7 @@ class FieldSSHSession:
                 'reuse_ssh_exact_endpoint_roots')
         self.binding,self.transport,self.guard,self.budget=binding,transport,guard,budget
         self.process=None;self.pipe=None;self.ready=None;self.begin_spent=False;self.close_spent=False;self.stop_spent=False
+        self.export_spent=False
         guard();budget()
         journal=FieldJournal(binding,'controller',registry)  # Before SSH/model startup.
         self.lifecycle=ControlJournal(binding,'controller-lifecycle')
@@ -154,3 +155,19 @@ class FieldSSHSession:
                     'physical_gpu_release_verified':None,'retry_allowed':False})
         require(result.returncode==0,'reuse_ssh_independent_stop_unknown_no_retry')
         return {'ssh_exit_status':0,'physical_gpu_release_verified':None}
+
+    def export(self):
+        require(self.close_spent and self.process.poll()==0 and not self.export_spent,'reuse_export_after_known_exit_once')
+        self.export_spent=True;self.guard(cleanup_only=True);pin=master_pin(self.transport)
+        path=Path(self.binding['paths']['state_root'])/'gpu-public-eight-raw-export.json'
+        fd=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)
+        self.lifecycle.append('gpu_export_intent',{'argv':command('export'),'master_pin':pin})
+        try:
+            result=subprocess.run(command('export'),stdin=subprocess.DEVNULL,stdout=fd,stderr=subprocess.DEVNULL,timeout=60)
+            os.fsync(fd)
+        finally:os.close(fd)
+        require(result.returncode==0,'reuse_export_unknown_no_retry')
+        raw=read_bytes(path,limit=64*1024*1024,private=True)
+        self.lifecycle.append('gpu_export_observed',{'raw_sha256':raw_sha(raw),'bytes':len(raw),
+            'human_or_physical_origin_proven_by_export_hash':False})
+        return raw

@@ -20,6 +20,7 @@ def partial_hub():
     hub=object.__new__(DevelopmentHub)
     hub.guard=lambda:None
     hub.freeze={'synthetic':True}
+    hub.runtime_sha=digest(hub.freeze)
     hub.clock=lambda:100
     hub.secret=b'x'*32
     hub.control_ids=set()

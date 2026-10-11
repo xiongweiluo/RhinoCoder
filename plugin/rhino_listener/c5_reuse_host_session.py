@@ -17,7 +17,8 @@ from plugin.rhino_listener.c5_reuse_field_scope import STUDY, validate_binding, 
 
 
 class ReuseHostSession(HostAssuranceSession):
-    def __init__(self, field_binding, registry, backend, source_guard, source_sha, *, clock=time.monotonic):
+    def __init__(self, field_binding, registry, backend, source_guard, source_sha, *, clock=time.monotonic,
+                 cleanup_source=None):
         validate_binding(field_binding)
         require(field_binding['endpoint']=='mac', 'reuse_host_mac_endpoint_required')
         require(registry.binding == field_binding, 'reuse_host_registry_scope')
@@ -26,6 +27,7 @@ class ReuseHostSession(HostAssuranceSession):
         self.binding = {'study_id': STUDY, 'runtime_freeze_sha256': field_binding['runtime_sha256'],
                         'policy_id': POLICY, 'whole_field_authority_verified': False}
         self.backend, self.source_guard, self.source_sha, self.clock = backend, source_guard, source_sha, clock
+        self.cleanup_source = source_guard if cleanup_source is None else cleanup_source
         self.start_time = clock()
         self.genesis = digest({'study_id': STUDY, 'runtime_freeze_sha256': field_binding['runtime_sha256'],
                                'policy_id': POLICY, 'source_inventory_sha256': source_sha})
@@ -62,7 +64,8 @@ class ReuseHostSession(HostAssuranceSession):
             raise RuntimeError('reuse_host_observation_capacity')
         self.checkpoints += 1
         try:
-            self._source()
+            require((self.cleanup_source if cleanup else self.source_guard)() == self.source_sha,
+                    'frozen source/readable host file drift')
             raw = self._capture()
             error = None
             try:

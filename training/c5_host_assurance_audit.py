@@ -132,13 +132,15 @@ def audit_host_continuity(state, study_id, freeze_sha, source_sha, external_seal
         'execution_authority': False}
 
 
-def audit_request_checkpoint_bindings(state, slot_order, freeze_sha, *, journal_limit=1040):
+def audit_request_checkpoint_bindings(state, slot_order, freeze_sha, *, journal_limit=1040,host_root=None):
     """Bind every raw signed hub/native request to the anchored source check.
 
     Owner-side only for private formal execution evidence. No network/host
     operation. The whole chain must be audited separately against receipt.
     """
     require(type(journal_limit) is int and journal_limit in {1040,4096},'exact raw binding journal bound required')
+    require(host_root is None or host_root==state/'host','exact new host journal location required')
+    host_root=state if host_root is None else host_root
     count=0
     for directory,prefix,check_prefix in [(state,'hub-request-','hub-host-check-')] + [
         (state/slot,'request-','host-check-') for slot in slot_order]:
@@ -152,7 +154,7 @@ def audit_request_checkpoint_bindings(state, slot_order, freeze_sha, *, journal_
                 and check['request_sha256']==digest(sent) and check['runtime_freeze_sha256']==freeze_sha
                 and type(check['host_sequence']) is int and 0<=check['host_sequence']<journal_limit,
                 'raw request/freeze host-check binding differs')
-            row=read_json(state,'host-continuity-%04d.json'%check['host_sequence'])
+            row=read_json(host_root,'host-continuity-%04d.json'%check['host_sequence'])
             require(row['record_sha256']==check['host_record_sha256']
                 and row['runtime_freeze_sha256']==freeze_sha, 'raw host checkpoint anchor differs')
             envelope=sent.get('envelope',sent)

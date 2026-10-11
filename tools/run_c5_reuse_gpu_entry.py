@@ -19,14 +19,19 @@ def main():
     modes=parser.add_mutually_exclusive_group(required=True)
     modes.add_argument('--serve',action='store_true')
     modes.add_argument('--stop',action='store_true')
+    modes.add_argument('--export',action='store_true')
     args=parser.parse_args()
     from plugin.rhino_listener.c5_reuse_runtime_scope import approved_entry
     # Pure fixed-root/complete-record checks happen before state mutation,
     # process inspection, launch, model imports, stdin or signal attempts.
-    spec,runtime,binding,plan,guard=approved_entry(ROOT,'gpu',cleanup_only=args.stop,
+    spec,runtime,binding,plan,guard=approved_entry(ROOT,'gpu',cleanup_only=args.stop or args.export,
                                               private_prefixes=('main','rhino_client','__main__'))
     os.umask(0o077)
     os.chdir(ROOT)
+    if args.export:
+        from training.c5_reuse_gpu_export import export_gpu
+        from training.c5_reuse_evidence import canonical
+        sys.stdout.buffer.write(canonical(export_gpu(binding,plan,guard))+b'\n');return
     from training.c5_reuse_gpu_supervisor import supervise,independent_stop
     if args.serve:
         result=supervise(spec,runtime,binding,plan,guard)
