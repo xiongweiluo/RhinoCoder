@@ -10,7 +10,7 @@ import os
 from pathlib import Path
 from plugin.rhino_listener.c5_research_gate import signature
 from plugin.rhino_listener.c5_research_channel import read_json
-from plugin.rhino_listener.c5_research_native import digest
+from plugin.rhino_listener.c5_research_native import digest,READS
 from plugin.rhino_listener.c5_reuse_runtime_scope import read_bytes
 from training.c5_reuse_evidence import require,exact,sha,ZERO
 from training.c5_reuse_field_scope import validate_binding
@@ -134,5 +134,7 @@ def audit_native_eight(rows,binding,head,handoffs,handoff_head,public,schemas,sl
         and warmup['model_calls']==warmup['tool_dispatches']==0,'reuse_native_audit_warmup')
     return {'complete_eight_native_permission_lifecycle_records':True,'quality_by_slot':quality,
             'all_eight_quality_passed':all(quality.values()),'raw_timed_native_messages':timing,
+            'independently_counted_native_writes':sum(r['payload']['operation'] not in READS for r in observed.values()),
+            'independently_counted_native_reads':sum(r['payload']['operation'] in READS for r in observed.values()),
             'limited_host_continuity':host,'private_audit_keys_retained':True,'memory_erasure_proven':False,
             'human_origin_independently_proven':False,'physical_gpu_release_verified':None,'whole_field_pass':False}

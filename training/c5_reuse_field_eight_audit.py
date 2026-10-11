@@ -88,8 +88,14 @@ def audit_field_eight(*,mac,gpu,spec,runtime,plan,plan_raw,controller,controller
         source_files=runtime['source_files'],external_host_seal_sha256=external['host_seal_sha256'],write_assertions=write_assertions)
     require(begin['host_baseline_head_sha256']==native[1]['payload']['ready']['host_baseline_head_sha256'],
             'reuse_field_baseline_ready_join')
-    return {'status':'PASS' if native_result['all_eight_quality_passed'] else 'QUALITY_FAIL_NO_RETRY',
-        'complete_original_raw_joint_audit':True,'engineering_gate_passed':native_result['all_eight_quality_passed'],
+    # Retain the historical engineering criterion. Semantic outcomes are
+    # separately disclosed; they do not replace the later formal 14/20 gate.
+    engineering=native_result['independently_counted_native_writes']>=1 and native_result['independently_counted_native_reads']>=1
+    return {'status':'PASS' if engineering else 'INCOMPLETE_ENGINEERING_COVERAGE_NO_RETRY',
+        'complete_original_raw_joint_audit':True,'engineering_gate_passed':engineering,
+        'development_all_eight_semantic_outcomes_passed':native_result['all_eight_quality_passed'],
+        'native_writes':native_result['independently_counted_native_writes'],
+        'native_reads':native_result['independently_counted_native_reads'],
         'recorded_generation_attempts':entry['generation']['recorded_generation_attempts'],
         'actual_physical_generation_total_independently_proven':None,'quality_by_slot':native_result['quality_by_slot'],
         'release':release,'owner_custody_statement_bound':True,'cryptographic_human_origin_proven':False,

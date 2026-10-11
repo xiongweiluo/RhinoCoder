@@ -161,6 +161,12 @@ def test_eight_real_sqlite_handoffs_native_events_and_original_raw_audit(tmp_pat
         result=runner.drive(external);assert not result['whole_field_pass'] and hub.stopped and not event.handlers
         assert [r['payload']['slot_id'] for r in runner.journal.rows if r['kind']=='slot_closed']==list(ORDER)
         assert len(calls)==12  # 4 real fake-core requests ×2 +4 abstentions ×1.
+        # Reproduce the timing estimate's complete transport population;
+        # retained fresh permission captures must not disappear for speed.
+        assert {slot:len(list((runner.state/slot).glob('request-*.json'))) for slot in ORDER}=={
+            'write-base':24,'write-lora':24,'read-base':12,'read-lora':12,
+            'clarify-base':4,'clarify-lora':4,'unsupported-base':4,'unsupported-lora':4}
+        assert len(list(runner.state.glob('hub-request-*.json')))==9
         slots={}
         for slot in ORDER:
             d=runner.state/slot;key=read_json(runner.state/'audit-key-custody',slot+'.json')
@@ -180,6 +186,7 @@ def test_eight_real_sqlite_handoffs_native_events_and_original_raw_audit(tmp_pat
             source_files=runtime['source_files'],external_host_seal_sha256=digest(seal),write_assertions=assertions)
         assert outcome['complete_eight_native_permission_lifecycle_records']
         assert not outcome['all_eight_quality_passed'] and not outcome['quality_by_slot']['write-base']
+        assert outcome['independently_counted_native_writes']==2 and outcome['independently_counted_native_reads']==2
         assert outcome['quality_by_slot']['read-base'] and outcome['quality_by_slot']['clarify-base']
         joined=audit_join(runner.session.channel.journal.records,peer.journal.records,runner.binding,peer.binding,
             runner.session.channel.journal.head,peer.journal.head,public['task_plans'],Tokenizer())

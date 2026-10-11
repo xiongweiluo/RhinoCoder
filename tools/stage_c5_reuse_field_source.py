@@ -3,6 +3,8 @@
 
 Standalone stdlib bootstrap: never import deployed code. Initial creation is
 O_EXCL; --update-freeze changes only spec/plan/runtime before any grant exists.
+Explicit --refresh-public-source additionally requires the independently
+pinned previous runtime SHA, exact old bytes/population and no new state.
 No owner grant, keys, observers, model, fixture, old state, install or cleanup.
 """
 import argparse
@@ -43,10 +45,11 @@ def read(p):
     finally:os.close(fd)
 
 
-def stage(raw,expected_sha,*,update=False):
+def stage(raw,expected_sha,*,update=False,refresh=False,previous_runtime_sha=None):
     require(type(raw) is bytes and 0<len(raw)<=32*1024*1024 and sha(raw)==expected_sha,'public_stage_external_package_sha')
     packet=json.loads(raw);require(set(packet)=={'endpoint','payload_base64','file_sha256'},'public_stage_package_shape')
-    endpoint=packet['endpoint'];require(endpoint in PARENTS and type(update) is bool,'public_stage_endpoint')
+    endpoint=packet['endpoint'];require(endpoint in PARENTS and type(update) is type(refresh) is bool
+        and not (update and refresh),'public_stage_endpoint')
     parent=PARENTS[endpoint];root=parent/(INSTANCE+'-source')
     require(parent.is_absolute() and parent.resolve()==parent and parent.is_dir(),'public_stage_parent')
     require(not os.path.lexists(parent/(INSTANCE+'-state'))
@@ -66,20 +69,25 @@ def stage(raw,expected_sha,*,update=False):
         payload[name]=value
     runtime=json.loads(payload[RUNTIME]);require(runtime['source_files']=={n:s for n,s in packet['file_sha256'].items()
                                                                            if n!=RUNTIME},'public_stage_runtime_inventory')
-    if update:
+    if update or refresh:
         require(root.is_dir() and root.resolve()==root,'public_stage_existing_root')
         existing={p.relative_to(root).as_posix() for p in root.rglob('*') if not p.is_dir()}
         require(existing==names and not any(p.is_symlink() for p in root.rglob('*')),'public_stage_existing_population')
         previous=json.loads(read(root/RUNTIME))
+        if refresh:
+            canonical=json.dumps(previous,sort_keys=True,separators=(',',':'),ensure_ascii=True,allow_nan=False).encode()
+            require(sha(canonical)==previous_runtime_sha,'public_stage_previous_runtime_pin')
         for n in names:
             current=read(root/n)
             if n!=RUNTIME:require(sha(current)==previous['source_files'][n],'public_stage_previous_bytes')
-            require(n in MUTABLE or current==payload[n],'public_stage_only_freeze_records_mutable')
+            require(refresh or n in MUTABLE or current==payload[n],'public_stage_only_freeze_records_mutable')
     else:root.mkdir(mode=0o700)
-    for name in sorted(names):
+    for name in sorted(names-{RUNTIME})+[RUNTIME]:
         if update and name not in MUTABLE:continue
+        require(not os.path.lexists(parent/(INSTANCE+'-state'))
+                and not os.path.lexists(parent/'c5-reuse-global-admission-v1'),'public_stage_no_grant_or_admission')
         p=root/name;p.parent.mkdir(mode=0o700,parents=True,exist_ok=True)
-        target=p.with_name('public-freeze-'+p.name) if update else p
+        target=p.with_name('public-freeze-'+p.name) if update or refresh else p
         fd=os.open(target,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)
         try:
             value=payload[name];offset=0
@@ -87,7 +95,7 @@ def stage(raw,expected_sha,*,update=False):
                 count=os.write(fd,value[offset:]);require(count>0,'public_stage_partial_write');offset+=count
             os.fsync(fd)
         finally:os.close(fd)
-        if update:os.replace(target,p)
+        if update or refresh:os.replace(target,p)
         require(read(p)==payload[name],'public_stage_readback')
     fd=os.open(root,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
     try:os.fsync(fd)
@@ -99,8 +107,10 @@ def stage(raw,expected_sha,*,update=False):
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--package-sha256',required=True);p.add_argument('--update-freeze',action='store_true')
+    p.add_argument('--refresh-public-source',action='store_true');p.add_argument('--previous-runtime-sha256')
     a=p.parse_args();raw=sys.stdin.buffer.read(32*1024*1024+1)
-    print(json.dumps(stage(raw,a.package_sha256,update=a.update_freeze),sort_keys=True))
+    print(json.dumps(stage(raw,a.package_sha256,update=a.update_freeze,refresh=a.refresh_public_source,
+                           previous_runtime_sha=a.previous_runtime_sha256),sort_keys=True))
 
 
 if __name__=='__main__':main()

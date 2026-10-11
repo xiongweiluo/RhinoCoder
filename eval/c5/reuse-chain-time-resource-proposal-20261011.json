@@ -1,0 +1,69 @@
+{
+  "status": "resource_discussion_proposal_not_accepted_not_execution_approval",
+  "historical_cumulative_upper_bound_seconds": null,
+  "original_16_hour_compliance_claimed": false,
+  "platform_hour_balance_required": false,
+  "supersedes_fixed_six_hour_proposal": true,
+  "measured_public_reference": {
+    "path": "eval/c5/hostassurance-development-independent-audit-20261007-d.json",
+    "gpu_wall_seconds_including_loading_idle": 1278.215921310999,
+    "slots": 8,
+    "model_requests": 8,
+    "generation_stages": 10,
+    "native_and_hub_messages": 67,
+    "current_entry_field_performance_measured": false
+  },
+  "cpu_complete_chain_population": {
+    "test": "eval/test_c5_reuse_native_entry.py",
+    "write_slot_messages": 24,
+    "read_slot_messages": 12,
+    "abstention_slot_messages": 4,
+    "hub_messages": 9,
+    "eight_total_messages": 97,
+    "generation_stages": 12,
+    "uses_fake_rhino_and_model": true
+  },
+  "projections": {
+    "development_message_workload_formula": "1278.215921310999 * 97 / 67 seconds",
+    "formal_slot_request_formula": "1278.215921310999 * (40 / 8) * (56 / 40) seconds",
+    "formal_public_strata_requests": {"write": 44, "read": 4, "abstention": 8},
+    "formal_pressure_messages_formula": "44*22 + 4*10 + 8*2 + 40*2 + 41 = 1145",
+    "formal_pressure_time_formula": "1278.215921310999 * 1145 / 67 seconds",
+    "development_planning_minutes": [30, 90],
+    "formal_planning_hours": [3, 10],
+    "active_complete_chain_planning_hours": [4.5, 14.5],
+    "confidence_interval_or_completion_guarantee": false,
+    "private_formal_data_read_for_estimate": false
+  },
+  "serial_window_ledger_not_physical_completion_upper_bound": {
+    "development_seconds_including_allocated_backup_allowance": 15840,
+    "formal_public_strata_seconds_including_allocated_backup_allowance": 165600,
+    "database_backup_allowance_per_slot_seconds": 60,
+    "database_backup_has_preemptive_60_second_timeout": false,
+    "clr_or_kernel_forced_preemption_guaranteed": false
+  },
+  "proposed_incremental_finite_reservation": {
+    "development_seconds_max": 18000,
+    "formal_seconds_max": 64800,
+    "new_research_seconds_max": 82800,
+    "historical_use_deducted_or_fabricated": false,
+    "original_cumulative_limit_retroactively_satisfied": false,
+    "unused_development_automatically_transferred_to_formal": false,
+    "includes_loading_idle_generation_stop_release_observation": true,
+    "retry_or_fill_allowed": false
+  },
+  "actual_lease_fact_and_proposed_cutoff": {
+    "owner_reported_actual_expiry": "2026-10-13T20:00:00+02:00",
+    "timezone": "Europe/Zurich",
+    "new_renewed_expiry_known": false,
+    "proposed_generation_cutoff": "2026-10-13T19:45:00+02:00",
+    "export_reserve_seconds": 900,
+    "within_each_phase_stop_reserve_seconds": 60,
+    "continuous_23_hour_latest_start_ignoring_interphase_wait": "2026-10-12T20:45:00+02:00",
+    "truncated_phase_reservation_allowed": false,
+    "renewal_or_payment_authorized": false
+  },
+  "owner_resource_acceptance_received": false,
+  "exact_two_hash_execution_approval_received": false,
+  "execution_ready": false
+}

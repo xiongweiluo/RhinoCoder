@@ -68,3 +68,23 @@ def test_before_approval_only_three_frozen_records_may_change(tmp_path,monkeypat
     value['payload_base64'][module.RUNTIME]=base64.b64encode(rraw).decode();value['file_sha256'][module.RUNTIME]=hashlib.sha256(rraw).hexdigest()
     new=canonical(value)
     with pytest.raises(ValueError,match='only_freeze_records_mutable'):module.stage(new,hashlib.sha256(new).hexdigest(),update=True)
+
+
+@pytest.mark.parametrize('change',['accepted','wrong_previous_pin','old_byte_drift','new_state'])
+def test_explicit_public_source_refresh_requires_old_pin_bytes_and_no_state(tmp_path,monkeypatch,change):
+    raw,pin,value,review=packet(tmp_path,monkeypatch);module.stage(raw,pin)
+    root=tmp_path/(module.INSTANCE+'-source');previous_pin=review['runtime_sha256']
+    name='tools/check_secrets.py';updated=b'# CPU-only source revision\n'
+    value['payload_base64'][name]=base64.b64encode(updated).decode()
+    value['file_sha256'][name]=hashlib.sha256(updated).hexdigest()
+    r=json.loads(base64.b64decode(value['payload_base64'][module.RUNTIME]));r['source_files'][name]=value['file_sha256'][name]
+    rraw=canonical(r)+b'\n';value['payload_base64'][module.RUNTIME]=base64.b64encode(rraw).decode()
+    value['file_sha256'][module.RUNTIME]=hashlib.sha256(rraw).hexdigest();new=canonical(value)
+    if change=='wrong_previous_pin':previous_pin='0'*64
+    elif change=='old_byte_drift':(root/name).write_text('drift\n')
+    elif change=='new_state':(tmp_path/(module.INSTANCE+'-state')).mkdir()
+    if change=='accepted':
+        module.stage(new,hashlib.sha256(new).hexdigest(),refresh=True,previous_runtime_sha=previous_pin)
+        assert (root/name).read_bytes()==updated
+    else:
+        with pytest.raises(ValueError):module.stage(new,hashlib.sha256(new).hexdigest(),refresh=True,previous_runtime_sha=previous_pin)

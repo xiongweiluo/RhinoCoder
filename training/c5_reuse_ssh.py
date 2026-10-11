@@ -105,7 +105,7 @@ class FieldSSHSession:
     def await_ready(self):
         require(self.ready is None and not self.close_spent,'reuse_ssh_ready_no_retry')
         self.close_spent=True  # Unknown startup is permanently retired.
-        value=receive(self.pipe,time.monotonic()+180,self._check)
+        value=receive(self.pipe,time.monotonic()+self.binding['limits']['startup_seconds'],self._check)
         validate_ready(self.binding,value)
         self.lifecycle.append('remote_ready_received',{'ready':value,'human_or_model_origin_verified':False})
         self._check();self.ready=value;self.close_spent=False

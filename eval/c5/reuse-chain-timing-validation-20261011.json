@@ -1,0 +1,41 @@
+{
+  "exact_two_hash_execution_approval_received": false,
+  "execution_ready": false,
+  "full_cpu": {
+    "passed": 1744,
+    "seconds": 320.73,
+    "skipped": 11
+  },
+  "gpu_control_master_readonly_check_passed": true,
+  "historical_cumulative_upper_bound_seconds": null,
+  "model_loading_or_rhino_or_formal_private_reads": 0,
+  "old_published_parent_double_ci_success": [
+    38168352855,
+    38168410598
+  ],
+  "owner_resource_decision_pending": true,
+  "primary_workspace_protected_diff_sha256": "b407093a909b70b9b1c4ea6547517373ad6c7fb230103d97b0502044a0e8aa6c",
+  "prior_disabled_actual_candidate_matches_updated_source": false,
+  "prior_disabled_actual_candidate_runtime_sha256": "3719141109b5a5ef8b932c5f778eaff002f965b8d0856979d87d9cf9618ff7a7",
+  "published_parent_head": "6539792028085ad85d2147ad3e0d2fa72467f2d7",
+  "python_39_inert_imports_passed": true,
+  "release_consistency_passed": true,
+  "resource_proposal": "eval/c5/reuse-chain-time-resource-proposal-20261011.json",
+  "secret_scan_passed": true,
+  "source_files_sha256": {
+    "plugin/rhino_listener/c5_reuse_field_scope.py": "486857d1b67c978c06b73d3fe5eb78a01965dabd50f874eb33f01c16042a5f72",
+    "tools/stage_c5_reuse_field_source.py": "b47071cb909e92fa1554c8817ac1925286cd3d279ae3e30c7ca3c60a108cfec5",
+    "training/c5_reuse_field_eight_audit.py": "7616ccab1e0b267da6868f4c2159082b563e6c5514517959de1c90c9a9853f88",
+    "training/c5_reuse_gpu_supervisor.py": "7fb9cbd6e016e72e4de92d0a60ca6ab19eb66c0ee2d4abe0bd501825aff0f2d2",
+    "training/c5_reuse_native_audit.py": "dc7faa10e56e7e4e321066363eb9b8e89bcbd979ac61f8a62ba89ebd59358ae7",
+    "training/c5_reuse_native_handoff.py": "5ef4c311125614a77187496581bd6f4bec6ee6ad8fe8cb45dc93ca6ea1b5563a",
+    "training/c5_reuse_ssh.py": "707b17ad081a79600a2777685afbdce17cef7c77233b653668755e93e71a46b5",
+    "training/c5_reuse_worker_loop.py": "5fe388dfa1305670b916b246ae7b0569dd0f154e7d567bf811a6dac942bc9189"
+  },
+  "status": "cpu_chain_timing_and_resource_discussion_preparation_not_field_execution",
+  "targeted_cpu": {
+    "passed": 48,
+    "seconds": 28.36
+  },
+  "this_record_new_head_ci_observed": false
+}

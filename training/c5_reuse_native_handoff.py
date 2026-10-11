@@ -24,9 +24,13 @@ from training.c5_formal20_prepermission import rejection
 class CaptureProxy:
     def __init__(self,capture,expected,journal,check):
         self.capture,self.expected,self.journal,self.check=capture,expected,journal,check
+        self.calls=0
 
     def _capture(self):
         self.check()
+        require(self.calls<self.journal.binding['limits']['handoff_signing_captures_max'],
+                'reuse_signing_capture_capacity')
+        self.calls+=1
         value=self.capture()
         self.journal.append('native_signing_capture',{'capture':value})
         require(canonical(value)==canonical(self.expected), 'reuse_actual_scene_changed_before_signing')
@@ -61,12 +65,18 @@ class NativeHandoff:
             inner=sent['request']; key=(inner['slot_id'],inner['step_index'])
             require(key not in self.spent and inner['step_index']==0,'reuse_development_single_step_no_reissue')
             start=last=self.clock()
+            limits=self.binding['limits']
+            cap=limits['handoff_no_permission_seconds'] if observed['status']!='schema_valid_not_authorized' else \
+                limits['handoff_read_seconds'] if observed['name'] in READS else limits['handoff_write_seconds']
             def check():
                 nonlocal last
                 now=self.clock()
-                require(last<=now<start+120,'reuse_complete_native_deadline')
+                require(last<=now<start+cap,'reuse_complete_native_deadline')
                 last=now
                 self.guard(); self.budget()
+                now=self.clock()
+                require(last<=now<start+cap,'reuse_complete_native_deadline')
+                last=now
             check()
             self.spent.add(key)
             self.blocked=True

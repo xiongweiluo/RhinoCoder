@@ -59,8 +59,11 @@ LIMITS = {'model_requests': 56, 'generation_stages': 112, 'slots': 40,
           'hub_requests': 41, 'seeding_steps_per_fixture': 8,
           'normal_observations': 2048, 'cleanup_observations': 256,
           'journal_records': 4096, 'settlement_samples': 8, 'stable_samples': 3,
-          'settlement_seconds': 60, 'startup_seconds': 180, 'model_seconds': 180,
-          'native_seconds': 120}
+          'settlement_seconds': 60, 'startup_seconds': 600, 'model_seconds': 180,
+          'native_seconds': 120, 'first_request_idle_seconds': 600,
+          'between_requests_idle_seconds': 3600, 'handoff_write_seconds': 2700,
+          'handoff_read_seconds': 1260, 'handoff_no_permission_seconds': 60,
+          'handoff_signing_captures_max': 19}
 
 
 def path(value):
