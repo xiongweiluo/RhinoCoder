@@ -55,6 +55,15 @@ class SyntheticTransport:
         self.blocked = bool(summary['retired'] or summary['sealed'] or summary['unresolved_requests'])
 
     def exchange(self, slot, route, step=0):
+        # One outstanding exchange across all wrappers sharing this journal,
+        # including reentrant callbacks and multiple threads in one process.
+        require(self.journal.exchange_lock.acquire(blocking=False), 'exchange_already_active')
+        try:
+            return self._exchange_locked(slot, route, step)
+        finally:
+            self.journal.exchange_lock.release()
+
+    def _exchange_locked(self, slot, route, step):
         require(not self.blocked, 'session_retired_no_retry')
         sent = request(self.journal.identity, slot, route, step)
         raw = wire(sent)

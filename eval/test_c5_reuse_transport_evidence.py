@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import threading
 
 import pytest
 
@@ -374,7 +375,7 @@ def test_route_cannot_be_changed_to_relabel_same_slot(journal):
 
 def test_modules_do_not_import_live_or_parent_implementation():
     root = Path(__file__).resolve().parents[1]
-    allowed = {'fcntl', 'hashlib', 'json', 'os', 'pathlib', 're', 'stat', 'selectors', 'time',
+    allowed = {'fcntl', 'hashlib', 'json', 'os', 'pathlib', 're', 'stat', 'threading', 'selectors', 'time',
                'training.c5_reuse_evidence'}
     for name in ('training/c5_reuse_evidence.py', 'training/c5_reuse_transport.py'):
         for node in ast.walk(ast.parse((root / name).read_text())):
@@ -429,6 +430,61 @@ def test_torn_disk_append_is_not_repaired_or_sent(journal, monkeypatch):
     journal.close()
     with pytest.raises(ValueError, match='journal_incomplete'):
         ev.SyntheticJournal(root, identity)
+
+
+@pytest.mark.parametrize('wrapper', ['same', 'another'])
+def test_reentrant_or_concurrent_wrapper_cannot_send_second_request(journal, wrapper):
+    peer = Peer(chunk=ev.MAX_FRAME)
+    transport = SyntheticTransport(journal, peer)
+    other_peer = Peer()
+    other = transport if wrapper == 'same' else SyntheticTransport(journal, other_peer)
+    original = peer.write
+    def write(data, deadline):
+        with pytest.raises(ValueError, match='exchange_already_active'):
+            other.exchange(1, 'lora')
+        return original(data, deadline)
+    peer.write = write
+    transport.exchange(0, 'base')
+    assert journal.summary['request_intents'] == 1 and other_peer.writes == 0
+
+
+def test_exchange_lock_released_after_failure_but_durable_retirement_remains(journal):
+    transport = SyntheticTransport(journal, Peer(failure='eof'))
+    with pytest.raises(ValueError):
+        transport.exchange(0, 'base')
+    assert not journal.exchange_lock.locked()
+    with pytest.raises(ValueError, match='no_retry'):
+        SyntheticTransport(journal, Peer()).exchange(1, 'lora')
+
+
+def test_actual_cpu_threads_share_one_outstanding_exchange(journal):
+    entered, release = threading.Event(), threading.Event()
+    peer = Peer(chunk=ev.MAX_FRAME)
+    original = peer.write
+    errors = []
+    def write(data, deadline):
+        entered.set()
+        assert release.wait(3)
+        return original(data, deadline)
+    peer.write = write
+    def worker():
+        try:
+            SyntheticTransport(journal, peer, timeout=5).exchange(0, 'base')
+        except BaseException as exc:
+            errors.append(type(exc).__name__)
+    thread = threading.Thread(target=worker)
+    thread.start()
+    try:
+        assert entered.wait(3)
+        second = Peer()
+        with pytest.raises(ValueError, match='exchange_already_active'):
+            SyntheticTransport(journal, second).exchange(1, 'lora')
+        assert second.writes == 0
+    finally:
+        release.set()
+        thread.join(timeout=5)
+    assert not thread.is_alive() and not errors
+    assert journal.summary['request_intents'] == journal.summary['acknowledged_requests'] == 1
 
 
 def test_synthetic_permission_and_write_observation_cannot_dispatch_twice(journal):

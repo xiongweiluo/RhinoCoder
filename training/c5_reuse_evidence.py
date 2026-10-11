@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 import re
 import stat
+import threading
 
 PROTOCOL = 'c5-reuse-cpu-synthetic-v1'
 STUDY = 'c5-rhino-paired-20-reuse-v1-synthetic-engineering'
@@ -273,6 +274,8 @@ class SyntheticJournal:
         require(stat.S_ISDIR(st.st_mode) and st.st_uid == os.getuid()
                 and stat.S_IMODE(st.st_mode) == 0o700, 'journal_directory')
         self.identity, self.root, self.poisoned = identity, root, False
+        self.exchange_lock = threading.Lock()
+        self.append_lock = threading.Lock()
         self.dirfd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
         self.fd = None
         try:
@@ -331,6 +334,10 @@ class SyntheticJournal:
         self.poisoned = False
 
     def append(self, event):
+        with self.append_lock:
+            self._append_locked(event)
+
+    def _append_locked(self, event):
         require(self.fd is not None and not self.poisoned, 'journal_poisoned_or_closed')
         require(self.summary['records'] < MAX_RECORDS, 'journal_capacity')
         record = _record(self.summary['records'], self.summary['head_sha256'], event)
