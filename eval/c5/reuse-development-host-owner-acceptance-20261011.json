@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "study_id": "C5DEV-REUSE-20261011-A",
+  "instance_id": "reuse-dev-20261011-a",
+  "purpose": "new_host_preparation_acceptance_not_execution_approval",
+  "owner_statement": "三项均确认",
+  "owner_confirms_blank_active_document": true,
+  "owner_confirms_exclusive_use_and_no_other_operations_during_research": true,
+  "owner_accepts_readable_files_frozen_opaque_host_trusted_visible_checkpoints_only": true,
+  "owner_opened_rhino_independently": true,
+  "process_observation": {
+    "observed_at_utc": "2026-10-11T16:24:07Z",
+    "pid": 44652,
+    "uid": 501,
+    "start_time_utc_to_whole_second": "2026-10-11T16:14:32Z",
+    "executable": "/Applications/Rhino 8.app/Contents/MacOS/Rhinoceros",
+    "mac_boot_epoch_seconds": 1790688926,
+    "mac_boot_microseconds": 281231,
+    "blank_document_independently_inspected": false
+  },
+  "full_byte_closure_claimed": false,
+  "absence_of_hidden_handlers_or_memory_erasure_proven": false,
+  "old_instance_guarantee_transferred": false,
+  "agent_rhino_script_subscription_warmup_geometry_calls": 0,
+  "new_development_spec_runtime_approval_received": false,
+  "private_formal_data_reads": 0,
+  "execution_ready": false
+}

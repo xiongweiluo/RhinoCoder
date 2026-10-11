@@ -19,6 +19,7 @@ from plugin.rhino_listener.c5_reuse_field_scope import STUDY, validate_binding, 
 class ReuseHostSession(HostAssuranceSession):
     def __init__(self, field_binding, registry, backend, source_guard, source_sha, *, clock=time.monotonic):
         validate_binding(field_binding)
+        require(field_binding['endpoint']=='mac', 'reuse_host_mac_endpoint_required')
         require(registry.binding == field_binding, 'reuse_host_registry_scope')
         self.state = Path(field_binding['paths']['state_root']) / 'host'
         self.field_binding, self.registry = strict(canonical(field_binding)), registry

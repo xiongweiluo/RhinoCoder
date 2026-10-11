@@ -33,9 +33,9 @@ def records(tmp_path, *, plans=None):
             'full_byte_closure_claimed': False, 'baseline_before_generation': True,
             'new_events_after_baseline_allowed': False, 'external_readiness_and_final_capture_required': True}}
     runtime = {'protocol': PROTOCOL, 'study_id': STUDY, 'instance_id': spec['instance_id'], 'spec_sha256': sha(spec),
-        'paths': {'source_root': str(tmp_path/'reuse-dev-cpu-test-source'),
-                  'state_root': str(tmp_path/'reuse-dev-cpu-test-state'),
-                  'admission_root': str(tmp_path/'c5-reuse-global-admission-v1')},
+        'endpoints': {endpoint:{'source_root':str(tmp_path/endpoint/'reuse-dev-cpu-test-source'),
+                  'state_root':str(tmp_path/endpoint/'reuse-dev-cpu-test-state'),
+                  'admission_root':str(tmp_path/endpoint/'c5-reuse-global-admission-v1')} for endpoint in ('mac','gpu')},
         'source_files': {'training/c5_contract.py': 'a'*64}, 'environment_sha256': 'a'*64,
         'model_assets_sha256': 'b'*64, 'host_readable_files_sha256': 'c'*64,
         'host_policy': copy.deepcopy(spec['host_policy']), 'resources': copy.deepcopy(spec['resources']), 'execution_ready': True}
@@ -44,9 +44,12 @@ def records(tmp_path, *, plans=None):
     return spec, runtime, approval, plans
 
 
-def binding(tmp_path, *, plans=None):
+def binding(tmp_path, *, plans=None, endpoint='gpu'):
     spec, runtime, approval, _ = records(tmp_path, plans=plans)
-    return bind(spec, runtime, approval, now=100)
+    b=bind(spec, runtime, approval, now=100, endpoint=endpoint)
+    # Synthetic fixture setup only. The scope checker itself does no I/O.
+    (tmp_path/endpoint).mkdir(exist_ok=True)
+    return b
 
 
 def test_binding_is_partial_not_owner_or_field_origin_proof(tmp_path):
@@ -78,7 +81,7 @@ def test_scope_rejects_old_authority_missing_evidence_or_budget(tmp_path, change
     elif change == 'budget': spec['resources']['remaining_gpu_seconds'] = 100
     elif change == 'export': spec['resources']['export_reserve_seconds'] = 899
     elif change == 'prior': spec['resources']['prior_cumulative_upper_bound_seconds'] = 57600
-    elif change == 'old_path': runtime['paths']['state_root'] = str(tmp_path/'formal20-state-v4')
+    elif change == 'old_path': runtime['endpoints']['gpu']['state_root'] = str(tmp_path/'formal20-state-v4')
     elif change == 'bool': spec['resources']['development_seconds_max'] = True
     else: approval['runtime_sha256'] = '0'*64
     # Rebind all other hashes; negative control is about policy, not only hash drift.
@@ -86,8 +89,8 @@ def test_scope_rejects_old_authority_missing_evidence_or_budget(tmp_path, change
     runtime['resources'] = copy.deepcopy(spec['resources']); runtime['host_policy'] = copy.deepcopy(spec['host_policy'])
     approval['spec_sha256'] = sha(spec)
     if change != 'grant': approval['runtime_sha256'] = sha(runtime)
-    with pytest.raises(ValueError): bind(spec, runtime, approval, now=100)
-    assert not Path(runtime['paths']['state_root']).exists()
+    with pytest.raises(ValueError): bind(spec, runtime, approval, now=100, endpoint='gpu')
+    assert not Path(runtime['endpoints']['gpu']['state_root']).exists()
 
 
 def test_admission_cannot_be_bypassed_with_new_directory_or_runtime(tmp_path):
@@ -97,8 +100,10 @@ def test_admission_cannot_be_bypassed_with_new_directory_or_runtime(tmp_path):
     b2 = copy.deepcopy(b)
     b2['instance_id'] = 'reuse-dev-other'
     b2['runtime_sha256'] = 'f'*64
-    b2['paths']['source_root'] = str(tmp_path/'reuse-dev-other-source')
-    b2['paths']['state_root'] = str(tmp_path/'reuse-dev-other-state')
+    for paths in b2['endpoints'].values():
+        paths['source_root']=str(Path(paths['source_root']).parent/'reuse-dev-other-source')
+        paths['state_root']=str(Path(paths['state_root']).parent/'reuse-dev-other-state')
+    b2['paths']=copy.deepcopy(b2['endpoints']['gpu'])
     with AdmissionRegistry(b2) as registry:
         with pytest.raises(FileExistsError): registry.claim('worker')
         assert len(registry.audit()['rows']) == 1
@@ -122,7 +127,8 @@ def test_admission_crash_never_resets_or_replays(tmp_path, boundary):
 def test_cross_process_registry_lock_and_extra_schema_fail_closed(tmp_path):
     b = binding(tmp_path)
     with AdmissionRegistry(b, create=True) as registry:
-        with pytest.raises(BlockingIOError): AdmissionRegistry(b)
+        with registry._locked():
+            with pytest.raises(BlockingIOError): AdmissionRegistry(b)
         registry.db.execute('CREATE TABLE alternate(x INTEGER)'); registry.db.commit()
         with pytest.raises(ValueError, match='schema'): registry.claim('worker')
 
@@ -230,7 +236,7 @@ def test_new_host_scope_uses_retained_observer_and_independent_audit(tmp_path):
     from plugin.rhino_listener.c5_reuse_host_session import ReuseHostSession
     from training.c5_host_assurance_audit import audit_host_continuity
     from eval.test_c5_host_assurance_session import Backend
-    b = binding(tmp_path)
+    b = binding(tmp_path,endpoint='mac')
     Path(b['paths']['state_root']).mkdir(mode=0o700)
     backend = Backend()
     with AdmissionRegistry(b,create=True) as registry:

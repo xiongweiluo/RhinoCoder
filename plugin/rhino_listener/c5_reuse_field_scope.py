@@ -68,12 +68,24 @@ def path(value):
     return Path(value)
 
 
-def bind(spec, runtime, approval, *, now):
+def endpoint_paths(instance, endpoints):
+    exact(endpoints, ('mac','gpu'))
+    for paths in endpoints.values():
+        exact(paths, ('source_root','state_root','admission_root'))
+        source,state,admission=(path(paths[k]) for k in ('source_root','state_root','admission_root'))
+        require(source.name==instance+'-source' and state.name==instance+'-state'
+                and admission.name=='c5-reuse-global-admission-v1'
+                and len({source,state,admission})==3
+                and all(a not in b.parents for a in (source,state,admission)
+                        for b in (source,state,admission) if a!=b), 'field_path_identity')
+
+
+def bind(spec, runtime, approval, *, now, endpoint):
     """Pure exact binding. No filesystem access or execution authority minting."""
     exact(spec, ('protocol', 'study_id', 'phase', 'instance_id', 'comparison', 'limits',
                  'resources', 'host_policy', 'execution_ready', 'automatic_retry_allowed',
                  'private_formal_data_allowed', 'default_route_change_allowed', 'development_plan_sha256'))
-    exact(runtime, ('protocol', 'study_id', 'instance_id', 'spec_sha256', 'paths',
+    exact(runtime, ('protocol', 'study_id', 'instance_id', 'spec_sha256', 'endpoints',
                     'source_files', 'environment_sha256', 'model_assets_sha256',
                     'host_readable_files_sha256', 'host_policy', 'resources', 'execution_ready'))
     require(spec['protocol'] == runtime['protocol'] == PROTOCOL
@@ -90,7 +102,7 @@ def bind(spec, runtime, approval, *, now):
     for name in ('environment_sha256', 'model_assets_sha256', 'host_readable_files_sha256'):
         require(is_sha(runtime[name]), 'field_asset_evidence_missing')
     require(type(runtime['source_files']) is dict and 0 < len(runtime['source_files']) <= 512
-            and all(type(k) is str and re.fullmatch(r'(training|plugin|tools|eval|agent|mcp)/[a-zA-Z0-9_./-]+', k)
+            and all(type(k) is str and re.fullmatch(r'(training|plugin|tools|eval|agent|mcp|data_pipeline)/[a-zA-Z0-9_./-]+', k)
                     and not Path(k).is_absolute() and '..' not in Path(k).parts
                     and str(Path(k)) == k and is_sha(v) for k, v in runtime['source_files'].items()),
             'field_source_evidence_missing')
@@ -125,21 +137,16 @@ def bind(spec, runtime, approval, *, now):
             and host['new_events_after_baseline_allowed'] is False
             and host['external_readiness_and_final_capture_required'] is True
             and canonical(runtime['host_policy']) == canonical(host), 'field_new_host_policy')
-    paths = runtime['paths']
-    exact(paths, ('source_root', 'state_root', 'admission_root'))
-    source, state, admission = (path(paths[k]) for k in ('source_root', 'state_root', 'admission_root'))
-    require(source.name == spec['instance_id'] + '-source'
-            and state.name == spec['instance_id'] + '-state'
-            and admission.name == 'c5-reuse-global-admission-v1'
-            and len({source, state, admission}) == 3
-            and all(a not in b.parents for a in (source, state, admission)
-                    for b in (source, state, admission) if a != b), 'field_path_identity')
+    require(endpoint in ('mac','gpu'), 'field_endpoint')
+    endpoint_paths(spec['instance_id'], runtime['endpoints'])
+    paths = runtime['endpoints'][endpoint]
     expected = {'study_id': STUDY, 'instance_id': spec['instance_id'], 'actor': 'repository_owner',
                 'approved': True, 'spec_sha256': sha(spec), 'runtime_sha256': sha(runtime),
                 'approval_basis': APPROVAL_BASIS}
     require(canonical(approval) == canonical(expected), 'field_exact_owner_approval')
     value = {'protocol': PROTOCOL, 'study_id': STUDY, 'instance_id': spec['instance_id'],
             'spec_sha256': sha(spec), 'runtime_sha256': sha(runtime), 'paths': paths,
+            'endpoint':endpoint, 'endpoints':runtime['endpoints'],
             'limits': LIMITS, 'development_plan_sha256': spec['development_plan_sha256'],
             'whole_field_authority_verified': False,
             'approval_origin_verified': False, 'record_binding_verified': True}
@@ -149,18 +156,20 @@ def bind(spec, runtime, approval, *, now):
 def validate_binding(value):
     exact(value, ('protocol', 'study_id', 'instance_id', 'spec_sha256', 'runtime_sha256',
                   'paths', 'limits', 'development_plan_sha256', 'whole_field_authority_verified',
-                  'approval_origin_verified', 'record_binding_verified'))
+                  'approval_origin_verified', 'record_binding_verified', 'endpoint','endpoints'))
     require(value['protocol'] == PROTOCOL and value['study_id'] == STUDY
             and type(value['instance_id']) is str and re.fullmatch(r'reuse-dev-[a-z0-9-]{1,48}', value['instance_id'])
             and all(is_sha(value[k]) for k in ('spec_sha256', 'runtime_sha256', 'development_plan_sha256'))
             and value['record_binding_verified'] is True and value['whole_field_authority_verified'] is False
             and value['approval_origin_verified'] is False and canonical(value['limits']) == canonical(LIMITS),
             'field_validated_binding_shape')
-    exact(value['paths'], ('source_root', 'state_root', 'admission_root'))
-    source, state, admission = (path(value['paths'][k]) for k in ('source_root', 'state_root', 'admission_root'))
-    require(source.name == value['instance_id'] + '-source'
-            and state.name == value['instance_id'] + '-state'
-            and admission.name == 'c5-reuse-global-admission-v1'
-            and len({source, state, admission}) == 3
-            and all(a not in b.parents for a in (source, state, admission)
-                    for b in (source, state, admission) if a != b), 'field_path_identity')
+    require(value['endpoint'] in ('mac','gpu'), 'field_endpoint')
+    endpoint_paths(value['instance_id'],value['endpoints'])
+    require(canonical(value['paths'])==canonical(value['endpoints'][value['endpoint']]), 'field_local_endpoint_path')
+
+
+def common_scope(value):
+    """Same message identity at both endpoints, committed by one runtime hash."""
+    validate_binding(value)
+    return {key:value[key] for key in ('protocol','study_id','instance_id','spec_sha256',
+                                       'runtime_sha256','development_plan_sha256','limits')}

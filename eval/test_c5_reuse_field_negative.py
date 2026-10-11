@@ -117,9 +117,10 @@ except BlockingIOError:
     sys.exit(0)
 sys.exit(1)
 '''
-    with AdmissionRegistry(b,create=True):
-        p=subprocess.run([sys.executable,'-B','-c',child_code],input=canonical(b),capture_output=True,timeout=10)
-        assert p.returncode==0,p.stderr.decode()
+    with AdmissionRegistry(b,create=True) as registry:
+        with registry._locked():
+            p=subprocess.run([sys.executable,'-B','-c',child_code],input=canonical(b),capture_output=True,timeout=10)
+            assert p.returncode==0,p.stderr.decode()
     with AdmissionRegistry(b) as registry: assert registry.audit()['rows']==[]
 
 
