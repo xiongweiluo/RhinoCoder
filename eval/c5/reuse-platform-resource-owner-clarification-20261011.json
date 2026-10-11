@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "study_id": "C5DEV-REUSE-20261011-A",
+  "purpose": "platform_resource_fact_not_complete_execution_freeze",
+  "owner_statement": "平台没有小时额度，不需要提供不存在的余额。",
+  "platform_has_hour_quota": false,
+  "platform_hour_quota": null,
+  "remaining_platform_hours_input_required": false,
+  "research_reservation_is_not_platform_balance": true,
+  "historical_cumulative_upper_bound_seconds": null,
+  "historical_cumulative_upper_bound_independently_verified": false,
+  "original_research_cap_automatically_expanded": false,
+  "lease_expiry_owner_reported": "2026-10-13T20:00:00+02:00",
+  "lease_expiry_timezone": "Europe/Zurich",
+  "complete_new_spec_runtime_created": false,
+  "exact_two_hash_execution_approval": false,
+  "execution_ready": false
+}
