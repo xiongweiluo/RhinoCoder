@@ -48,7 +48,9 @@ def read_bytes(path,limit=2*1024*1024,*,private=False):
 
 class ReuseSourceGuard:
     def __init__(self,root,files,*,private_prefixes=()):
-        self.root=Path(root); self.files=dict(files); self.prefixes=('agent','training','tools','plugin','data_pipeline')+tuple(private_prefixes)
+        self.root=Path(root); self.files=dict(files)
+        self.prefixes=('agent','training','tools','plugin','data_pipeline','main','_client',
+                       'schemas_geometry','schemas_transform','schemas_property','schemas_perception')+tuple(private_prefixes)
         require(self.root.is_absolute() and self.root.resolve()==self.root and 0<len(files)<=512,'reuse_source_root')
         self.expected=sha(files)
         for name,value in files.items():
@@ -57,7 +59,7 @@ class ReuseSourceGuard:
                     and ((name.endswith('.py') and p.parts[0] in ('agent','training','plugin','tools','data_pipeline'))
                         or name in (SPEC,PLAN,'eval/c5/rhino-runtime-schema-v1.json',
                         'eval/c5/hostassurance-development-spec-20261007-d.json',
-                        'training/configs/c5_lora_v1.json','requirements-training.txt'))
+                        'eval/c5/c5-engineering-config.json','requirements-training.txt','requirements.txt'))
                     and is_sha(value),'reuse_source_public_population')
 
     def __call__(self):
@@ -78,7 +80,7 @@ class ReuseSourceGuard:
         return self.expected
 
 
-def approved_entry(root,endpoint,*,now=time.time,private_prefixes=()):
+def approved_entry(root,endpoint,*,now=time.time,private_prefixes=(),cleanup_only=False):
     root=Path(root)
     expected=fixed_paths(endpoint)
     require(root==Path(expected['source_root']) and root.resolve()==root,'reuse_fixed_entry_root')
@@ -88,17 +90,17 @@ def approved_entry(root,endpoint,*,now=time.time,private_prefixes=()):
     state=Path(expected['state_root'])
     approval_raw=read_bytes(state/'owner-approval.json',private=True)
     approval=strict(approval_raw)
-    binding=bind(spec,runtime,approval,now=now(),endpoint=endpoint)
+    binding=bind(spec,runtime,approval,now=now(),endpoint=endpoint,cleanup_only=cleanup_only)
     require(spec['instance_id']==INSTANCE and SPEC in runtime['source_files'] and PLAN in runtime['source_files'],
             'reuse_complete_entry_records')
     guard=ReuseSourceGuard(root,runtime['source_files'],private_prefixes=private_prefixes)
     guard()
     plan_raw=read_bytes(root/PLAN); plan=strict(plan_raw)
-    def check():
+    def check(*,cleanup_only=cleanup_only):
         require(read_bytes(root/SPEC)==spec_raw and read_bytes(root/RUNTIME)==runtime_raw
                 and read_bytes(state/'owner-approval.json',private=True)==approval_raw
                 and read_bytes(root/PLAN)==plan_raw,'reuse_approved_records_changed')
-        bind(spec,runtime,approval,now=now(),endpoint=endpoint)
+        bind(spec,runtime,approval,now=now(),endpoint=endpoint,cleanup_only=cleanup_only)
         return guard()
     check()
     return spec,runtime,binding,plan,check

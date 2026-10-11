@@ -1,0 +1,69 @@
+{
+  "actual_gpu_load_generation_rhino_script_subscription_warmup_geometry_calls": 0,
+  "actual_signal_to_gpu_process": 0,
+  "base_head": "c02f82ab29623f93efd67030155aba268a54cf77",
+  "base_pr": 12,
+  "execution_ready": false,
+  "final_focused_controls_covered_by_full_suite": {
+    "passed": 116,
+    "skipped": 2
+  },
+  "final_local_full_suite": {
+    "command": "python -m pytest -q",
+    "linux_owned_child_tests_skipped": 2,
+    "passed": 1663,
+    "platform": "macOS",
+    "seconds": 290.49,
+    "skipped": 11
+  },
+  "formal_runtime_sha256": null,
+  "formal_spec_sha256": null,
+  "main_workspace_protected_diff_sha256": "b407093a909b70b9b1c4ea6547517373ad6c7fb230103d97b0502044a0e8aa6c",
+  "new_actual_run_or_claim_created": false,
+  "precise_publication_ci_verified": false,
+  "prior_source_focused_controls": {
+    "passed": 113,
+    "skip_reason": "Linux-owned-child controls unavailable on Mac; not final-source full validation",
+    "skipped": 2
+  },
+  "private_formal_reads": 0,
+  "public_checks_passed": [
+    "compileall",
+    "secret_scan",
+    "release_consistency",
+    "trace_and_release_data",
+    "P1_demo",
+    "P2_hard_set_and_results",
+    "collection_campaign",
+    "training_audit_no_data",
+    "cluster_template_audit",
+    "reuse_draft_boundaries"
+  ],
+  "publication_ci_status_at_recording": "not_started; inspect PR for later exact-head double CI",
+  "rhino_python39_stdlib_import_passed": true,
+  "schema_version": 1,
+  "scope": "CPU entry source delivery only; no complete runtime freeze or deployment",
+  "source_files_sha256": {
+    "eval/test_c5_reuse_entry_guards.py": "2c25c00ff833d84b195e43e40771a7130126dca5b028c15add8c8dfbc6896e1e",
+    "eval/test_c5_reuse_gpu_entry.py": "ebdabf8f048dbd70625687c5c9bcd7173ca3b01d73006222112a1726e8b1ec4b",
+    "eval/test_c5_reuse_gpu_entry_audit.py": "286cc8c06c53637d028d866cd91fcc552dfafad036a3ad8d27cc9e43936a05c6",
+    "eval/test_c5_reuse_gpu_loader.py": "1a3e9597129ab2bca428431b62f2879ef83f8bd54b09be8230a4cb65d0fdc77b",
+    "plugin/rhino_listener/c5_reuse_field_scope.py": "432fa7321ba2eb187f541b46b087e2b218ef63905bae0a8b92ebbf944dfda320",
+    "plugin/rhino_listener/c5_reuse_runtime_scope.py": "fd4db1900892f87481d03f9ffe73fdb8a264781fc4ee56389dd7cdb37103034a",
+    "tools/run_c5_reuse_gpu_entry.py": "51fddae24c236dd97b2e8ced3b269f215d0d48ba6ea220aa77145d9d80a26e43",
+    "training/c5_reuse_budget.py": "223e4972c5b003eb49a4906ca56385a845071b483243fb2d1a96a1f6a82d103f",
+    "training/c5_reuse_control_journal.py": "50083417ef14b020d6ae70646d6b331c05780e27b3d25a31916188ad0a65fd00",
+    "training/c5_reuse_field_transport.py": "226b9979155466b3dbf857ff56222c0ef635d4bf9f35861de65098cc0775b9a2",
+    "training/c5_reuse_generation.py": "4817e4906b5cef1569a635049c395390b5b793b8817c25921f6850c9a47a458a",
+    "training/c5_reuse_gpu_entry_audit.py": "6604823e45b7ea6ab65f57898cd3118e42dabb16ffe6308070bc99c01acf85d0",
+    "training/c5_reuse_gpu_loader.py": "3311c5d2fedc62aa80fc30dc69912f5f231fe8ef7aa1d25e18800922011b4dfe",
+    "training/c5_reuse_gpu_supervisor.py": "92fae485e0c5c9f3cfccb4ad2c6e8f8d41f371e85fda7bd30d34eab269e458f6",
+    "training/c5_reuse_owned_child.py": "4b882cd31ffd899febe8c2cb52deeed77df9eb79810650f86ed73fb7c5a02e44",
+    "training/c5_reuse_process_identity.py": "45d055730ea7cf01905ac4c2aae3c3aa1a770225766eb618d1ab996769ad0ee5",
+    "training/c5_reuse_ssh.py": "d3902aa104626bb655cd6400f7725322852be40b7613f8ce9e64232ba0492fe8",
+    "training/c5_reuse_worker_loop.py": "891e85ee0abee3d3a1054cfd1caff427be2780f7a21f0f42f187bf3d468985be"
+  },
+  "status": "final_local_cpu_source_validated_not_field_pass",
+  "study_id": "C5DEV-REUSE-20261011-A",
+  "whole_field_pass": false
+}

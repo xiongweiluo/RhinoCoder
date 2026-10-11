@@ -46,12 +46,24 @@ class FieldPipe:
 
 
 class FieldModelChannel:
-    def __init__(self,binding,registry,endpoint,guard,budget,plans,*,clock=time.monotonic):
+    def __init__(self,binding,registry,endpoint,guard,budget,plans,*,clock=time.monotonic,journal=None):
         validate_binding(binding)
         require(binding['endpoint']=='mac', 'field_controller_mac')
         require(sha(plans)==binding['development_plan_sha256'], 'field_transport_plan')
         guard(); budget()
-        self.journal=FieldJournal(binding,'controller',registry)
+        if journal is None:
+            journal=FieldJournal(binding,'controller',registry)
+        else:
+            from training.c5_reuse_field_journal import read_journal
+            require(journal.binding==binding and journal.role=='controller' and len(journal.records)==1
+                    and journal.records[0]['kind']=='open' and not journal.blocked,'field_new_supervised_controller_journal')
+            require(read_journal(journal.root,binding,'controller',journal.head)==journal.records,'field_supervised_controller_disk')
+        require(journal.lock.acquire(blocking=False),'field_controller_ownership_busy')
+        try:
+            require(not getattr(journal,'controller_owner_attached',False),'field_controller_owner_already_attached')
+            journal.controller_owner_attached=True
+        finally:journal.lock.release()
+        self.journal=journal
         self.binding=self.journal.binding
         self.plans=strict(canonical(plans))
         self.endpoint,self.guard,self.budget,self.clock=endpoint,guard,budget,clock

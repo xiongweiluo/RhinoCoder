@@ -31,6 +31,36 @@ class OwnedChildStop:
         except BaseException:
             ops.close(self.fd); self.fd=None; raise
 
+    @classmethod
+    def recheck_qualified(cls,binding,qualification,ops,journal,registry):
+        """Stop-only reconstruction from original durable pre-load evidence.
+
+        This does not claim that a currently loaded child is newly qualified
+        before loading. The fixed stop entry separately verifies original
+        control-chain origin and the frozen one-child policy.
+        """
+        validate_binding(binding)
+        from training.c5_reuse_evidence import exact
+        exact(qualification,('target','parent_pid','policy_sha256','model_loading_started'))
+        target(qualification['target'])
+        require(binding['endpoint']=='gpu' and registry.binding==binding
+                and qualification['policy_sha256']==sha(POLICY) and qualification['model_loading_started'] is False
+                and type(qualification['parent_pid']) is int and qualification['parent_pid']>1,'reuse_original_child_qualification')
+        self=cls.__new__(cls)
+        self.ops,self.journal,self.registry=ops,journal,registry
+        self.parent_pid=qualification['parent_pid'];self.expected=strict(canonical(qualification['target']));self.spent=False
+        self.fd=None
+        try:
+            ops.guard();self.fd=ops.pin(self.expected['pid'])
+            require(ops.identity(self.expected['pid'])==self.expected
+                    and ops.parent(self.expected['pid'])==self.parent_pid,'reuse_qualified_stop_target_drift')
+            journal('owned_stop_qualification_rechecked',{'target_sha256':sha(self.expected),
+                                                       'original_qualification_sha256':sha(qualification)})
+            return self
+        except BaseException:
+            if self.fd is not None:ops.close(self.fd);self.fd=None
+            raise
+
     def stop(self):
         require(self.fd is not None and not self.spent,'reuse_owned_stop_no_retry')
         self.spent=True

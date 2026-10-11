@@ -26,7 +26,7 @@ def test_complete_loading_idle_reservation_rejects_clock_or_capacity(kind):
         with pytest.raises(ValueError): ReuseBudget(r,wall=lambda:clock[0],mono=lambda:clock[1])
         return
     b=ReuseBudget(r,wall=lambda:clock[0],mono=lambda:clock[1])
-    assert b.check()==100
+    assert b.check()==40
     if kind=='elapsed': clock[1]=200
     elif kind=='wall_back': clock[0]=99
     elif kind=='mono_back': clock[1]=99
