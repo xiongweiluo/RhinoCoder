@@ -8,13 +8,25 @@ import re
 import subprocess
 import importlib.util
 from datetime import datetime,timezone
-from .c5_reuse_runtime_scope import approved_entry
-from .c5_reuse_field_scope import require, sha
+from .c5_reuse_runtime_scope import approved_entry,read_bytes,MAC_PARENT
+from .c5_reuse_field_scope import require, sha,COMPARISON
 
 CODE_ROOTS=('/Applications/Rhino 8.app/Contents/','/Users/xiongweiluo/.rhinocode/',
     '/Users/xiongweiluo/Library/Application Support/McNeel/','/Users/xiongweiluo/.codex/worktrees/',
     '/opt/anaconda3/lib/')
 EXACT_CODE=('/Applications/Rhino 8.app/Contents/MacOS/Rhinoceros','/opt/anaconda3/bin/python3.13')
+AUDIT_TOKENIZER_ROOT=MAC_PARENT/'modelbridge-tokenizer'/COMPARISON['base_revision']
+TOKENIZER_NAMES={'config.json','generation_config.json','merges.txt','tokenizer.json','tokenizer_config.json','vocab.json'}
+
+
+def verify_audit_tokenizer(assets):
+    require(assets['audit_tokenizer_dir']==str(AUDIT_TOKENIZER_ROOT)
+            and set(assets['audit_tokenizer_files'])==TOKENIZER_NAMES,'reuse_fixed_audit_tokenizer')
+    root=Path(assets['audit_tokenizer_dir'])
+    require(root.resolve()==root and set(os.listdir(root))==TOKENIZER_NAMES,'reuse_audit_tokenizer_population')
+    for name,expected in assets['audit_tokenizer_files'].items():
+        require(hashlib.sha256(read_bytes(root/name,limit=16*1024*1024)).hexdigest()==expected,
+                'reuse_audit_tokenizer_bytes')
 
 
 def code_sha(path):
@@ -81,6 +93,8 @@ def mac_scope(root,*,embedded=False,private_prefixes=(),cleanup_only=False):
         for files in (plan['host_readable_files'],plan['environment']['mac']['file_sha256']):
             require(type(files) is dict and bool(files) and
                     all(code_sha(p)==expected for p,expected in files.items()),'reuse_mac_readable_bytes')
+        if spec['resources'].get('resource_policy')=='incremental_reuse_unknown_history_v1':
+            verify_audit_tokenizer(plan['model_assets'])
         if not embedded:
             frozen=plan['environment']['mac']['file_sha256']
             for module in tuple(sys.modules.values()):

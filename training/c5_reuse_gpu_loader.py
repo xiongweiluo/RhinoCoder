@@ -32,6 +32,7 @@ LOADER_POLICY={'seed':20260928,'tf32':True,'quantization':'nf4_double_quant_bflo
 
 
 def validate_plan(spec,runtime,plan):
+    revised=spec['resources'].get('resource_policy')=='incremental_reuse_unknown_history_v1'
     exact(plan,('protocol','study_id','instance_id','environment','model_assets','host_readable_files',
                 'gpu_process','loader_policy','transport','host_acceptance','resource_basis'))
     require(plan['protocol']==PROTOCOL and plan['study_id']==STUDY
@@ -40,7 +41,8 @@ def validate_plan(spec,runtime,plan):
     require(sha(plan['environment'])==runtime['environment_sha256']
             and sha(plan['model_assets'])==runtime['model_assets_sha256']
             and sha(plan['host_readable_files'])==runtime['host_readable_files_sha256'], 'reuse_plan_asset_closure')
-    exact(plan['model_assets'],('manifest_raw_sha256','snapshot_dir','base_files','adapter_root','adapter_files'))
+    exact(plan['model_assets'],('manifest_raw_sha256','snapshot_dir','base_files','adapter_root','adapter_files')+
+          (('audit_tokenizer_dir','audit_tokenizer_files') if revised else ()))
     assets=plan['model_assets']
     require(assets['manifest_raw_sha256']==MANIFEST_SHA and assets['snapshot_dir']==str(SNAPSHOT)
             and assets['adapter_root']==str(ADAPTER) and assets['adapter_files']==ADAPTER_FILES
@@ -48,6 +50,12 @@ def validate_plan(spec,runtime,plan):
             and type(assets['base_files']) is dict and len(assets['base_files'])==14
             and all(type(n) is str and Path(n).name==n and is_sha(s) for n,s in assets['base_files'].items()),
             'reuse_plan_original_assets')
+    if revised:
+        names={'config.json','generation_config.json','merges.txt','tokenizer.json','tokenizer_config.json','vocab.json'}
+        require(assets['audit_tokenizer_dir']=='/Users/xiongweiluo/RhinoCoder/data/training/c5/modelbridge-tokenizer/'+COMPARISON['base_revision']
+            and set(assets['audit_tokenizer_files'])==names
+            and assets['audit_tokenizer_files']=={n:assets['base_files'][n] for n in names},
+            'reuse_original_audit_tokenizer_assets')
     process=plan['gpu_process']
     exact(process,('python','entry','boot_id','uid','gpu_uuid','stop_policy'))
     require(process['python']==str(PYTHON) and process['entry']==ENTRY and process['stop_policy']==POLICY
@@ -60,7 +68,6 @@ def validate_plan(spec,runtime,plan):
     basis=plan['resource_basis']
     from training.c5_reuse_ssh import validate_transport
     validate_transport(plan['transport'])
-    revised=spec['resources'].get('resource_policy')=='incremental_reuse_unknown_history_v1'
     exact(basis,('platform_hour_quota','remaining_gpu_seconds_meaning','prior_cumulative_upper_bound_basis')+
           (('resource_revision_acceptance',) if revised else ()))
     if revised:

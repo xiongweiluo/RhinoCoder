@@ -50,6 +50,12 @@ def check_assets(plan,gpu,mac):
     require(mac['host']['file_sha256']==plan['host_readable_files']
         and mac['mac_python']['file_sha256']==plan['environment']['mac']['file_sha256']
         and all(mac[k]['missing']==mac[k]['changed']==[] for k in ('host','mac_python')),'field_assets_current_mac_bytes')
+    if 'audit_tokenizer_files' in assets:
+        require(mac['audit_tokenizer']['directory']==assets['audit_tokenizer_dir']
+            and mac['audit_tokenizer']['population_exact'] is True
+            and mac['audit_tokenizer']['file_sha256']==assets['audit_tokenizer_files']
+            and assets['audit_tokenizer_files']=={n:assets['base_files'][n] for n in assets['audit_tokenizer_files']},
+            'field_assets_current_audit_tokenizer')
     return {'supplied_actual_installed_asset_maps_verified':True,
         'gpu_observation_epochs':[gpu['start_epoch'],gpu['finish_epoch']],'mac_observation_epoch':mac['epoch'],
         'human_or_transport_acquisition_origin_proven':False,'model_calls':0,'rhino_calls':0,'execution_ready':False}

@@ -73,6 +73,11 @@ def check(root,spec_sha,runtime_sha,*,review=False):
             and s['host_policy']['full_byte_closure_claimed'] is False,'field_freeze_guarantee_drift')
     if s['execution_ready'] is True:
         a=p['resource_basis']['resource_revision_acceptance'];q=s['resources']
+        models=p['model_assets'];names={'config.json','generation_config.json','merges.txt','tokenizer.json','tokenizer_config.json','vocab.json'}
+        require(models['audit_tokenizer_dir']=='/Users/xiongweiluo/RhinoCoder/data/training/c5/modelbridge-tokenizer/'+s['comparison']['base_revision']
+            and set(models['audit_tokenizer_files'])==names
+            and models['audit_tokenizer_files']=={n:models['base_files'][n] for n in names},
+            'field_freeze_complete_audit_tokenizer_binding')
         require(q['resource_policy']=='incremental_reuse_unknown_history_v1'
             and q['resource_revision_acceptance_sha256']==sha(a)
             and a['scope']=='resource_revision_only_not_execution' and a['accepted'] is True
