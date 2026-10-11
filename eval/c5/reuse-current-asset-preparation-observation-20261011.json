@@ -1,0 +1,105 @@
+{
+  "adapter_files": 2,
+  "base_files": 14,
+  "complete_current_runtime_freeze": false,
+  "development_field_run_started": false,
+  "execution_ready": false,
+  "first_checker_omission": "Initial libpython glob omitted libpython3.so; corrected checker rehashed both pinned libpython files. Distribution-name spelling normalized before version comparison; no byte policy relaxation.",
+  "formal_reuse_run_started": false,
+  "full_code_byte_closure_proven": false,
+  "gpu_asset_observation_epoch": [
+    1791732156.0876045,
+    1791732227.5928428
+  ],
+  "gpu_boot_id": "0a861fa3-31c9-4899-a022-c4f9cdb8dbfe",
+  "gpu_process_observation": {
+    "boot_epoch": 1791725419,
+    "boot_id": "0a861fa3-31c9-4899-a022-c4f9cdb8dbfe",
+    "clock_ticks_per_second": 100,
+    "compute_processes": {
+      "returncode": 0,
+      "rows": []
+    },
+    "epoch": 1791731953.8077698,
+    "executable": "/usr/bin/python3.10",
+    "executable_sha256": "6ce8f488520d0f0cb8ccc405ba844279492c3926e18b73f0539e5fecd8033467",
+    "expected_environment_exists": true,
+    "gpu": {
+      "returncode": 0,
+      "rows": [
+        "GPU-3a14915f-3804-46b7-b98a-aa09f7bbab4f, NVIDIA GeForce RTX 3090, 11, 24576, 0"
+      ]
+    },
+    "model_or_rhino_calls": 0,
+    "original_worker_43776_present": false,
+    "private_evidence_reads": 0,
+    "python": "3.10.12 (main, Jul 29 2024, 16:56:48) [GCC 11.4.0]",
+    "remote_files_written": 0,
+    "status": "readonly_current_environment_observation_not_execution_authority",
+    "uid": 1000
+  },
+  "gpu_python_executable_sha256": "1b473ff72cfa63de341095fa5192c0d030ac06a56c995d77de3626098f81e055",
+  "gpu_rows": [
+    "GPU-3a14915f-3804-46b7-b98a-aa09f7bbab4f, NVIDIA GeForce RTX 3090, 550.107.02, 11, 24576, 0"
+  ],
+  "inventories": {
+    "distribution": {
+      "additional_cache_bytecode_files": 9465,
+      "historical_loadable_file_count": 21614,
+      "inventory_sha256": "63949937efff447472e2ff07856588cfd965248e5402ff0229c8a0776dfdeb41"
+    },
+    "host": {
+      "changed": 0,
+      "files": 339,
+      "inventory_sha256": "b4a0f55834871647cad9d707ffb7503bcc34888467599db84cb164a309a9b611",
+      "missing": 0
+    },
+    "mac_python": {
+      "changed": 0,
+      "files": 3552,
+      "inventory_sha256": "2553de17d1bc3777bacb40c358f1ccb0731b3df074c0e1c17b967abcccaee6c6",
+      "missing": 0
+    },
+    "stdlib": {
+      "additional_cache_bytecode_files": 880,
+      "historical_loadable_file_count": 960,
+      "inventory_sha256": "7d0ce98b0e3ad0d497c6e32b7132a3ed6b59279722cc5535923ca947ba1d23e5"
+    }
+  },
+  "lease": {
+    "export_reserve_proposal_seconds": 900,
+    "generation_cutoff_proposal": "2026-10-13T19:45:00+02:00",
+    "new_resource_approval_received": false,
+    "owner_reported_expiry": "2026-10-13T20:00:00+02:00",
+    "prior_cumulative_upper_bound_seconds": null,
+    "remaining_gpu_seconds": null,
+    "timezone": "Europe/Zurich"
+  },
+  "mac_asset_observation_epoch": 1791732159.784091,
+  "missing_metadata_files": [
+    "pip:../../../bin/pip3.13"
+  ],
+  "model_or_rhino_calls": 0,
+  "new_gpu_boot_and_uuid_require_new_freeze": true,
+  "new_host_acceptance_proven": false,
+  "observation_origin_independently_authenticated": false,
+  "private_evidence_reads": 0,
+  "public_inspection_source_sha256": {
+    "tools/check_c5_reuse_asset_receipts.py": "12c47994524acda8ee1e0853a477be26163ddaf7d8942f8b5ff4528cd21f812a",
+    "tools/inspect_c5_reuse_gpu_assets.py": "91e222cf28316fc8f85adaec321e7f82a7cccb19bfc0c2fb9c1dce62dc0b0350",
+    "tools/inspect_c5_reuse_gpu_manifest.py": "57fe122a20082e258749d52cec25fe91785fc6b7765ab93ba01f8b198a6097d9",
+    "tools/inspect_c5_reuse_gpu_observation.py": "3e56af14ac60ae65afc9f54692188cc2f66cb6c09a7868b45d515cd72466dcef",
+    "tools/inspect_c5_reuse_mac_assets.py": "69cfbd2dee9d7ca9d89382a59e0c402c35525e09f6f02244b3ca83a994ae9e52"
+  },
+  "raw_receipt_sha256": {
+    "gpu_assets": "7f9d19dcdb991a3dd439229044bdbe8ac878237b8c5136259504a844893b10c2",
+    "gpu_manifest": "7adc7bf2f832b6d1183a4a0d19ab6d3c8f4b6c23820eb2ad68f3cfd53cb6d8ca",
+    "gpu_observation": "8ea671df1f9f324b7700453f1029785e304843b07a8375c4b1d431022bb8de65",
+    "mac_assets": "fdb193cc255ad7368833b00b71b2212e062185c646b253df2f8dc7bbf0ed4c89"
+  },
+  "rhino_bundle_version": {
+    "CFBundleShortVersionString": "8.21",
+    "CFBundleVersion": "8.21.25188.17002"
+  },
+  "status": "supplied_current_readable_asset_maps_match_historical_population"
+}
