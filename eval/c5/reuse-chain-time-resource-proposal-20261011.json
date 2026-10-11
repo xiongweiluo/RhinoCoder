@@ -36,8 +36,10 @@
     "private_formal_data_read_for_estimate": false
   },
   "serial_window_ledger_not_physical_completion_upper_bound": {
-    "development_seconds_including_allocated_backup_allowance": 15840,
-    "formal_public_strata_seconds_including_allocated_backup_allowance": 165600,
+    "development_seconds_including_allocated_backup_allowance": 16350,
+    "formal_public_strata_seconds_including_allocated_backup_allowance": 166110,
+    "begin_ready_plus_send_seconds": 300,
+    "worker_close_send_receive_exit_and_export_seconds": 450,
     "database_backup_allowance_per_slot_seconds": 60,
     "database_backup_has_preemptive_60_second_timeout": false,
     "clr_or_kernel_forced_preemption_guaranteed": false
