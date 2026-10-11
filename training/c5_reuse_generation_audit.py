@@ -1,7 +1,7 @@
 """Independent raw peer audit; does not import the generation producer."""
 import re
 from training.c5_reuse_evidence import canonical, exact, raw_sha, require, sha
-from training.c5_reuse_field_scope import PROTOCOL
+from training.c5_reuse_field_scope import PROTOCOL, common_scope
 from training.c5_reuse_field_journal import replay_records
 from training.c5_reuse_field_wire import envelope, validate_return
 from training.c5_rhino_adapter import invoke_step, step_input
@@ -92,7 +92,7 @@ def audit_generation(values, binding, final_head=None, *, plans=None, tokenizer=
             result = payload['result']
             exact(result, ('protocol','scope_sha256','request_sha256','observation','generation_returns','status'))
             require(request is not None and pending is None and result['request_sha256'] == sha(request)
-                    and result['scope_sha256'] == sha(binding) and result['protocol'] == PROTOCOL
+                    and result['scope_sha256'] == sha(common_scope(binding)) and result['protocol'] == PROTOCOL
                     and result['status'] == 'recorded_model_observation_not_native_permission'
                     and canonical(result['generation_returns']) == canonical([outputs[k] for k in sorted(outputs)]),
                     'generation_receipt_binding')

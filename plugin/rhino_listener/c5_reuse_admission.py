@@ -9,6 +9,8 @@ import os
 from pathlib import Path
 import sqlite3
 import stat
+import threading
+from contextlib import contextmanager
 
 from plugin.rhino_listener.c5_reuse_field_scope import canonical, exact, require, sha, strict, STUDY, validate_binding
 
@@ -16,6 +18,7 @@ TABLE = ('CREATE TABLE admission (study TEXT NOT NULL, role TEXT NOT NULL, '
          'scope_sha256 TEXT NOT NULL, tombstone_sha256 TEXT NOT NULL, '
          'PRIMARY KEY(study,role))')
 ROLES = ('controller', 'worker', 'host', 'stop')
+ENDPOINT_ROLES = {'mac':('controller','host'),'gpu':('worker','stop')}
 
 
 def valid(binding):
@@ -34,22 +37,23 @@ class AdmissionRegistry:
         require(stat.S_ISDIR(st.st_mode) and st.st_uid == os.getuid()
                 and stat.S_IMODE(st.st_mode) == 0o700, 'admission_directory')
         self.root, self.binding = root, strict(canonical(binding))
+        self.mutex=threading.Lock()
         self.dirfd = self.fd = self.dbfd = self.db = None
         try:
             self.dirfd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
             flags = os.O_RDWR | os.O_NOFOLLOW | (os.O_CREAT | os.O_EXCL if create else 0)
             self.fd = os.open('admission.lock', flags, 0o600, dir_fd=self.dirfd)
-            fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            self.dbfd = os.open('admission.sqlite', flags, 0o600, dir_fd=self.dirfd)
-            self._guard()
-            self.db = sqlite3.connect(str(root / 'admission.sqlite'))
-            self.db.execute('PRAGMA journal_mode=DELETE')
-            self.db.execute('PRAGMA synchronous=FULL')
-            if create:
-                self.db.execute(TABLE)
-                self.db.commit()
-                os.fsync(self.dirfd)
-            self.audit()
+            with self._locked():
+                self.dbfd = os.open('admission.sqlite', flags, 0o600, dir_fd=self.dirfd)
+                self._guard()
+                self.db = sqlite3.connect(str(root / 'admission.sqlite'))
+                self.db.execute('PRAGMA journal_mode=DELETE')
+                self.db.execute('PRAGMA synchronous=FULL')
+                if create:
+                    self.db.execute(TABLE)
+                    self.db.commit()
+                    os.fsync(self.dirfd)
+                self._audit_locked()
         except BaseException:
             self.close()
             raise
@@ -65,7 +69,24 @@ class AdmissionRegistry:
                     and st.st_nlink == 1 and st.st_uid == os.getuid()
                     and stat.S_IMODE(st.st_mode) == 0o600, 'admission_file_drift')
 
+    @contextmanager
+    def _locked(self):
+        # Hold only the durable transaction, never model/host lifetime. The
+        # independent stop actor must be able to enter while a worker is live.
+        require(self.mutex.acquire(blocking=False),'admission_operation_active')
+        acquired=False
+        try:
+            fcntl.flock(self.fd,fcntl.LOCK_EX|fcntl.LOCK_NB); acquired=True
+            yield
+        finally:
+            if acquired: fcntl.flock(self.fd,fcntl.LOCK_UN)
+            self.mutex.release()
+
     def audit(self):
+        with self._locked():
+            return self._audit_locked()
+
+    def _audit_locked(self):
         self._guard()
         require(self.db.execute('PRAGMA integrity_check').fetchall() == [('ok',)], 'admission_integrity')
         require(self.db.execute('SELECT type,name,sql FROM sqlite_master ORDER BY name').fetchall() ==
@@ -104,8 +125,12 @@ class AdmissionRegistry:
                 'cross_host_global_coverage_proven': False}
 
     def claim(self, role, *, fault=lambda boundary: None):
-        require(role in ROLES, 'admission_role')
-        self.audit()
+        require(role in ENDPOINT_ROLES[self.binding['endpoint']], 'admission_role')
+        with self._locked():
+            return self._claim_locked(role,fault)
+
+    def _claim_locked(self,role,fault):
+        self._audit_locked()
         value = {'study_id': STUDY, 'role': role, 'scope_sha256': sha(self.binding), 'replay_allowed': False}
         fd = os.open(role + '.consumed.json', os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
                      0o600, dir_fd=self.dirfd)
@@ -122,7 +147,7 @@ class AdmissionRegistry:
         self.db.execute('INSERT INTO admission VALUES (?,?,?,?)', (STUDY, role, sha(self.binding), sha(value)))
         self.db.commit()
         fault('after_commit')
-        self.audit()
+        self._audit_locked()
         return value
 
     def close(self):
