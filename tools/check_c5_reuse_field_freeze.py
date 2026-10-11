@@ -71,6 +71,20 @@ def check(root,spec_sha,runtime_sha,*,review=False):
             and s['resources']==r['resources'] and s['host_policy']==r['host_policy'],'field_freeze_complete_closures')
     require(all(s[k] is False for k in ('automatic_retry_allowed','private_formal_data_allowed','default_route_change_allowed'))
             and s['host_policy']['full_byte_closure_claimed'] is False,'field_freeze_guarantee_drift')
+    if s['execution_ready'] is True:
+        a=p['resource_basis']['resource_revision_acceptance'];q=s['resources']
+        require(q['resource_policy']=='incremental_reuse_unknown_history_v1'
+            and q['resource_revision_acceptance_sha256']==sha(a)
+            and a['scope']=='resource_revision_only_not_execution' and a['accepted'] is True
+            and a['exact_two_hash_execution_approval_received'] is False
+            and q['prior_cumulative_upper_bound_seconds'] is a['historical_cumulative_upper_bound_seconds'] is None
+            and q['original_cumulative_compliance_claimed'] is a['original_16_hour_compliance_claimed'] is False
+            and q['development_seconds_max']==a['development_seconds_max']==18000
+            and q['formal_seconds_max']==a['formal_seconds_max']==64800
+            and q['research_seconds_max']==a['research_seconds_max']==82800
+            and q['remaining_gpu_seconds']==82800
+            and all(q[k]==a[k] for k in ('lease_expiry_epoch','generation_cutoff_epoch','export_reserve_seconds')),
+            'field_freeze_resource_revision_binding')
     return {'source_files_individually_verified':len(files),'source_population_exact':True,
             'complete_closure_binding_verified':True,'candidate_execution_ready':s['execution_ready'] is r['execution_ready'] is True,
             'actual_installed_assets_verified':False,'human_approval_origin_verified':False,'execution_ready':False}

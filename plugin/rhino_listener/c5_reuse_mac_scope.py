@@ -39,6 +39,24 @@ def code_sha(path):
     finally:os.close(fd)
 
 
+def verify_process_identity(process,*,embedded=False):
+    require(type(process['pid']) is int and process['pid']>0 and type(process['uid']) is int,
+            'reuse_accepted_mac_process')
+    if embedded:require(os.getpid()==process['pid'],'reuse_accepted_rhino_pid')
+    expected=process.get('mac_boot_session_uuid')
+    require(type(expected) is str and re.fullmatch(r'[A-F0-9]{8}(?:-[A-F0-9]{4}){3}-[A-F0-9]{12}',expected),
+            'reuse_accepted_mac_boot_session')
+    boot=subprocess.run(['/usr/sbin/sysctl','-n','kern.bootsessionuuid'],capture_output=True,text=True,timeout=15,check=True)
+    require(boot.stdout.strip().upper()==expected,'reuse_accepted_mac_boot_session')
+    uid=subprocess.run(['/bin/ps','-p',str(process['pid']),'-o','uid='],capture_output=True,text=True,timeout=15,check=True)
+    require(uid.stdout.strip()==str(process['uid']),'reuse_accepted_rhino_uid')
+    observed=subprocess.run(['/bin/ps','-p',str(process['pid']),'-o','lstart='],capture_output=True,text=True,
+        timeout=15,check=True,env={**os.environ,'TZ':'UTC'})
+    started=datetime.strptime(' '.join(observed.stdout.split()),'%a %b %d %H:%M:%S %Y').replace(tzinfo=timezone.utc)
+    require(started.strftime('%Y-%m-%dT%H:%M:%SZ')==process['start_time_utc_to_whole_second'],
+            'reuse_accepted_rhino_start_identity')
+
+
 def mac_scope(root,*,embedded=False,private_prefixes=(),cleanup_only=False):
     spec,runtime,binding,plan,source=approved_entry(root,'mac',private_prefixes=private_prefixes,
                                                 cleanup_only=cleanup_only)
@@ -52,23 +70,12 @@ def mac_scope(root,*,embedded=False,private_prefixes=(),cleanup_only=False):
                 'owner_confirms_exclusive_use_and_no_other_operations_during_research',
                 'owner_accepts_readable_files_frozen_opaque_host_trusted_visible_checkpoints_only')),
             'reuse_current_host_acceptance')
-    if embedded:
-        require(os.getpid()==acceptance['process_observation']['pid'],'reuse_accepted_rhino_pid')
-    else:
+    if not embedded:
         require(Path(sys.prefix).resolve()==Path('/opt/anaconda3')
                 and sys.version==plan['environment']['mac']['python']
                 and str(Path(sys.executable).resolve()) in plan['environment']['mac']['file_sha256'],
                 'reuse_controller_interpreter')
-    process=acceptance['process_observation']
-    boot=subprocess.run(['/usr/sbin/sysctl','-n','kern.boottime'],capture_output=True,text=True,timeout=15,check=True)
-    match=re.search(r'sec = ([0-9]+), usec = ([0-9]+)',boot.stdout)
-    require(match is not None and int(match[1])==process['mac_boot_epoch_seconds']
-            and int(match[2])==process['mac_boot_microseconds'],'reuse_accepted_mac_boot')
-    observed=subprocess.run(['/bin/ps','-p',str(process['pid']),'-o','lstart='],capture_output=True,text=True,
-        timeout=15,check=True,env={**os.environ,'TZ':'UTC'})
-    started=datetime.strptime(' '.join(observed.stdout.split()),'%a %b %d %H:%M:%S %Y').replace(tzinfo=timezone.utc)
-    require(started.strftime('%Y-%m-%dT%H:%M:%SZ')==process['start_time_utc_to_whole_second'],
-            'reuse_accepted_rhino_start_identity')
+    verify_process_identity(acceptance['process_observation'],embedded=embedded)
     def guard(*,cleanup_only=cleanup_only):
         value=source(cleanup_only=cleanup_only)
         for files in (plan['host_readable_files'],plan['environment']['mac']['file_sha256']):

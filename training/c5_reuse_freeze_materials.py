@@ -10,7 +10,7 @@ from pathlib import Path
 import subprocess
 from plugin.rhino_listener.c5_reuse_runtime_scope import INSTANCE,SPEC,RUNTIME,PLAN,fixed_paths,read_bytes
 from plugin.rhino_listener.c5_reuse_public_plan import public_plan,SOURCE
-from training.c5_reuse_field_scope import STUDY,PROTOCOL,COMPARISON,LIMITS
+from training.c5_reuse_field_scope import STUDY,PROTOCOL,COMPARISON,LIMITS,RESOURCE_POLICY,RESOURCE_ACCEPTANCE
 from training.c5_reuse_evidence import canonical,require,sha,strict
 from training.c5_reuse_gpu_loader import PYTHON,ENTRY,LOADER_POLICY,ADAPTER,SNAPSHOT,MANIFEST_SHA,ADAPTER_FILES
 from training.c5_reuse_owned_child import POLICY as STOP
@@ -30,21 +30,22 @@ def source_payload(root):
 
 
 def build(root,*,environment,model_assets,host_files,host_acceptance,gpu_process,transport,
-          prior_upper=None,prior_basis=None,current_gpu_independently_rechecked=False):
+          prior_upper=None,prior_basis=None,current_gpu_independently_rechecked=False,resource_acceptance=None):
     require(type(current_gpu_independently_rechecked) is bool,'reuse_freeze_fact_flag')
-    if prior_upper is not None:
-        require(type(prior_upper) is int and 0<=prior_upper<=36000
-                and type(prior_basis) is str and 0<len(prior_basis)<=2048,'reuse_freeze_prior_basis')
+    require(prior_upper is prior_basis is None,'reuse_freeze_history_remains_unknown')
+    if resource_acceptance is not None:
+        require(canonical(resource_acceptance)==canonical(RESOURCE_ACCEPTANCE),'reuse_freeze_resource_acceptance')
     payload=source_payload(root);public=public_plan(Path(root))
     resources={'lease_expiry_epoch':1791914400,'generation_cutoff_epoch':1791913500,'export_reserve_seconds':900,
-        'prior_cumulative_upper_bound_seconds':prior_upper,'remaining_gpu_seconds':21600,
-        'development_seconds_max':3600,'formal_seconds_max':18000,'research_seconds_max':21600,
-        'original_cumulative_seconds_max':57600}
+        'prior_cumulative_upper_bound_seconds':None,'remaining_gpu_seconds':82800,
+        'development_seconds_max':18000,'formal_seconds_max':64800,'research_seconds_max':82800,
+        'original_cumulative_seconds_max':57600,'resource_policy':RESOURCE_POLICY,
+        'resource_revision_acceptance_sha256':sha(RESOURCE_ACCEPTANCE),'original_cumulative_compliance_claimed':False}
     host={'instance_id':INSTANCE,'accepted_by_owner':True,'acceptance_record_sha256':sha(host_acceptance),
         'readable_files_frozen':True,'opaque_host_trusted':True,'full_byte_closure_claimed':False,
         'baseline_before_generation':True,'new_events_after_baseline_allowed':False,
         'external_readiness_and_final_capture_required':True}
-    ready=prior_upper is not None and current_gpu_independently_rechecked
+    ready=resource_acceptance is not None and current_gpu_independently_rechecked
     spec={'protocol':PROTOCOL,'study_id':STUDY,'phase':'development','instance_id':INSTANCE,
         'comparison':COMPARISON,'limits':LIMITS,'resources':resources,'host_policy':host,
         'execution_ready':ready,'automatic_retry_allowed':False,'private_formal_data_allowed':False,
@@ -53,8 +54,9 @@ def build(root,*,environment,model_assets,host_files,host_acceptance,gpu_process
         'model_assets':model_assets,'host_readable_files':host_files,'gpu_process':gpu_process,
         'loader_policy':LOADER_POLICY,'transport':transport,'host_acceptance':host_acceptance,
         'resource_basis':{'platform_hour_quota':None,
-            'remaining_gpu_seconds_meaning':'research_reservation_within_original_cap_not_platform_balance',
-            'prior_cumulative_upper_bound_basis':prior_basis}}
+            'remaining_gpu_seconds_meaning':'incremental_research_reservation_not_platform_balance',
+            'prior_cumulative_upper_bound_basis':'owner_reported_unknown_not_original_16_hour_compliance',
+            'resource_revision_acceptance':resource_acceptance}}
     payload[SPEC]=canonical(spec)+b'\n';payload[PLAN]=canonical(plan)+b'\n'
     source={n:hashlib.sha256(raw).hexdigest() for n,raw in sorted(payload.items())}
     runtime={'protocol':PROTOCOL,'study_id':STUDY,'instance_id':INSTANCE,'spec_sha256':sha(spec),
@@ -66,7 +68,7 @@ def build(root,*,environment,model_assets,host_files,host_acceptance,gpu_process
         'spec_sha256':sha(spec),'runtime_sha256':sha(runtime),'spec_raw_sha256':source[SPEC],
         'runtime_raw_sha256':hashlib.sha256(payload[RUNTIME]).hexdigest(),
         'source_files':source,'payload_bytes':sum(len(v) for v in payload.values()),
-        'pending_facts':(['historical_cumulative_conservative_upper_bound'] if prior_upper is None else [])+
+        'pending_facts':(['explicit_resource_revision_acceptance'] if resource_acceptance is None else [])+
                         ([] if current_gpu_independently_rechecked else ['fresh_actual_gpu_bytes_and_deployment']),
         'actual_mac_and_gpu_deployment_independently_checked':False,'exact_owner_approval_received':False,
         'model_calls':0,'rhino_calls':0,'private_formal_reads':0,'execution_ready':False}

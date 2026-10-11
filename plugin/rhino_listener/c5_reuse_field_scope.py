@@ -64,6 +64,13 @@ LIMITS = {'model_requests': 56, 'generation_stages': 112, 'slots': 40,
           'between_requests_idle_seconds': 3600, 'handoff_write_seconds': 2700,
           'handoff_read_seconds': 1260, 'handoff_no_permission_seconds': 60,
           'handoff_signing_captures_max': 19}
+RESOURCE_POLICY='incremental_reuse_unknown_history_v1'
+RESOURCE_ACCEPTANCE={'actor':'repository_owner','accepted':True,'scope':'resource_revision_only_not_execution',
+    'historical_cumulative_upper_bound_seconds':None,'original_16_hour_compliance_claimed':False,
+    'development_seconds_max':18000,'formal_seconds_max':64800,'research_seconds_max':82800,
+    'lease_expiry_epoch':1791914400,'generation_cutoff_epoch':1791913500,'export_reserve_seconds':900,
+    'renewal_or_payment_authorized':False,'unused_development_transferred_to_formal':False,
+    'exact_two_hash_execution_approval_received':False}
 
 
 def path(value):
@@ -112,16 +119,38 @@ def bind(spec, runtime, approval, *, now, endpoint, cleanup_only=False):
                     and str(Path(k)) == k and is_sha(v) for k, v in runtime['source_files'].items()),
             'field_source_evidence_missing')
     resources = spec['resources']
-    exact(resources, ('lease_expiry_epoch', 'generation_cutoff_epoch', 'export_reserve_seconds',
+    resource_keys=('lease_expiry_epoch', 'generation_cutoff_epoch', 'export_reserve_seconds',
                       'prior_cumulative_upper_bound_seconds', 'remaining_gpu_seconds',
                       'development_seconds_max', 'formal_seconds_max', 'research_seconds_max',
-                      'original_cumulative_seconds_max'))
-    require(all(type(v) is int and v >= 0 for v in resources.values())
+                      'original_cumulative_seconds_max')
+    revised=type(resources) is dict and 'resource_policy' in resources
+    exact(resources,resource_keys+('resource_policy','resource_revision_acceptance_sha256',
+                                 'original_cumulative_compliance_claimed') if revised else resource_keys)
+    require(spec['instance_id']!='reuse-dev-20261011-a' or revised,'field_actual_resource_revision_required')
+    require(all(type(resources[k]) is int and resources[k]>=0 for k in resource_keys
+                if k!='prior_cumulative_upper_bound_seconds')
             and resources['export_reserve_seconds'] >= 900
             and resources['lease_expiry_epoch'] - resources['generation_cutoff_epoch']
                 >= resources['export_reserve_seconds']
             and type(cleanup_only) is bool and type(now) in (int, float) and math.isfinite(now) and 0 < now
             and (cleanup_only or now < resources['generation_cutoff_epoch'])
+            and resources['original_cumulative_seconds_max']==57600
+            and canonical(runtime['resources'])==canonical(resources),'field_resource_boundary')
+    if revised:
+        require(resources['resource_policy']==RESOURCE_POLICY
+            and resources['resource_revision_acceptance_sha256']==sha(RESOURCE_ACCEPTANCE)
+            and resources['original_cumulative_compliance_claimed'] is False
+            and resources['prior_cumulative_upper_bound_seconds'] is None
+            and resources['development_seconds_max']==18000 and resources['formal_seconds_max']==64800
+            and resources['research_seconds_max']==resources['remaining_gpu_seconds']==82800
+            and resources['lease_expiry_epoch']==RESOURCE_ACCEPTANCE['lease_expiry_epoch']
+            and resources['generation_cutoff_epoch']==RESOURCE_ACCEPTANCE['generation_cutoff_epoch']
+            and resources['export_reserve_seconds']==900,'field_incremental_resource_revision')
+    else:
+        # Historical CPU fixtures retain their old schema. The fixed actual
+        # instance above cannot use this branch or an old owner's grant.
+        require(type(resources['prior_cumulative_upper_bound_seconds']) is int
+            and resources['prior_cumulative_upper_bound_seconds']>=0
             and 0 < resources['development_seconds_max'] <= 3600
             and 0 < resources['formal_seconds_max'] <= 18000
             and 0 < resources['research_seconds_max'] <= 21600
@@ -130,7 +159,7 @@ def bind(spec, runtime, approval, *, now, endpoint, cleanup_only=False):
             and resources['original_cumulative_seconds_max'] == 57600
             and resources['prior_cumulative_upper_bound_seconds'] + resources['remaining_gpu_seconds'] <= 57600
             and resources['research_seconds_max'] <= resources['remaining_gpu_seconds']
-            and canonical(runtime['resources']) == canonical(resources), 'field_resource_boundary')
+            , 'field_resource_boundary')
     host = spec['host_policy']
     exact(host, ('instance_id', 'accepted_by_owner', 'acceptance_record_sha256',
                  'readable_files_frozen', 'opaque_host_trusted', 'full_byte_closure_claimed',

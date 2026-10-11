@@ -60,8 +60,18 @@ def validate_plan(spec,runtime,plan):
     basis=plan['resource_basis']
     from training.c5_reuse_ssh import validate_transport
     validate_transport(plan['transport'])
-    exact(basis,('platform_hour_quota','remaining_gpu_seconds_meaning','prior_cumulative_upper_bound_basis'))
-    require(basis['platform_hour_quota'] is None
+    revised=spec['resources'].get('resource_policy')=='incremental_reuse_unknown_history_v1'
+    exact(basis,('platform_hour_quota','remaining_gpu_seconds_meaning','prior_cumulative_upper_bound_basis')+
+          (('resource_revision_acceptance',) if revised else ()))
+    if revised:
+        from training.c5_reuse_field_scope import RESOURCE_ACCEPTANCE
+        require(basis['platform_hour_quota'] is None
+            and basis['remaining_gpu_seconds_meaning']=='incremental_research_reservation_not_platform_balance'
+            and basis['prior_cumulative_upper_bound_basis']=='owner_reported_unknown_not_original_16_hour_compliance'
+            and basis['resource_revision_acceptance']==RESOURCE_ACCEPTANCE
+            and sha(basis['resource_revision_acceptance'])==spec['resources']['resource_revision_acceptance_sha256'],
+            'reuse_incremental_resource_reservation_basis')
+    else:require(spec['instance_id']!='reuse-dev-20261011-a' and basis['platform_hour_quota'] is None
             and basis['remaining_gpu_seconds_meaning']=='research_reservation_within_original_cap_not_platform_balance'
             and type(basis['prior_cumulative_upper_bound_basis']) is str
             and 0<len(basis['prior_cumulative_upper_bound_basis'])<=2048,'reuse_resource_reservation_basis')

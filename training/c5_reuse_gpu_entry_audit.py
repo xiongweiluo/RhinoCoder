@@ -24,6 +24,7 @@ def _one(rows,kind):
 
 
 def _budget(value,resources):
+    revised=resources.get('resource_policy')=='incremental_reuse_unknown_history_v1'
     exact(value,('elapsed_wall_seconds','start_epoch','operational_cap_seconds','reserved_wall_seconds',
                  'stop_reserve_seconds','within_reserved_wall_seconds','prior_cumulative_upper_bound_seconds',
                  'physical_gpu_release_independently_verified'))
@@ -31,9 +32,12 @@ def _budget(value,resources):
                 ('elapsed_wall_seconds','start_epoch','operational_cap_seconds','reserved_wall_seconds','stop_reserve_seconds'))
             and value['start_epoch']>0 and value['stop_reserve_seconds']==60 and value['operational_cap_seconds']>0
             and value['operational_cap_seconds']==value['reserved_wall_seconds']-60
-            and value['reserved_wall_seconds']==min(resources['development_seconds_max'],resources['remaining_gpu_seconds'],
+            and (not revised or (resources['prior_cumulative_upper_bound_seconds'] is None
+                  and resources['original_cumulative_compliance_claimed'] is False
+                  and value['start_epoch']+18000<=resources['generation_cutoff_epoch']))
+            and value['reserved_wall_seconds']==(18000 if revised else min(resources['development_seconds_max'],resources['remaining_gpu_seconds'],
                   resources['original_cumulative_seconds_max']-resources['prior_cumulative_upper_bound_seconds'],
-                  resources['generation_cutoff_epoch']-value['start_epoch'])
+                  resources['generation_cutoff_epoch']-value['start_epoch']))
             and type(value['within_reserved_wall_seconds']) is bool
             and value['within_reserved_wall_seconds']==(value['elapsed_wall_seconds']<=value['reserved_wall_seconds'])
             and value['prior_cumulative_upper_bound_seconds']==resources['prior_cumulative_upper_bound_seconds']
