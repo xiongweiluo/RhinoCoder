@@ -46,7 +46,7 @@ def strict(raw):
     return json.loads(raw, object_pairs_hook=pairs, parse_constant=constant)
 
 
-STUDY = 'C5DEV-REUSE-20261011-A'
+STUDY = 'C5DEV-REUSE-20261012-B'
 PROTOCOL = 'c5-reuse-field-development-v1'
 APPROVAL_BASIS = 'direct repository_owner approval of new reuse development spec and complete runtime freeze'
 COMPARISON = {
@@ -126,7 +126,7 @@ def bind(spec, runtime, approval, *, now, endpoint, cleanup_only=False):
     revised=type(resources) is dict and 'resource_policy' in resources
     exact(resources,resource_keys+('resource_policy','resource_revision_acceptance_sha256',
                                  'original_cumulative_compliance_claimed') if revised else resource_keys)
-    require(spec['instance_id']!='reuse-dev-20261011-a' or revised,'field_actual_resource_revision_required')
+    require(spec['instance_id'] not in ('reuse-dev-20261011-a','reuse-dev-20261012-b') or revised,'field_actual_resource_revision_required')
     require(all(type(resources[k]) is int and resources[k]>=0 for k in resource_keys
                 if k!='prior_cumulative_upper_bound_seconds')
             and resources['export_reserve_seconds'] >= 900

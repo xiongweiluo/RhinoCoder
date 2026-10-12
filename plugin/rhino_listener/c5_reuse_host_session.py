@@ -8,12 +8,12 @@ import math
 import time
 from pathlib import Path
 
-from plugin.rhino_listener.c5_host_assurance_session import HostAssuranceSession
-from plugin.rhino_listener.c5_host_assurance_v2 import POLICY, compare_visible_continuity
-from plugin.rhino_listener.c5_formal20_observation_capacity import LIMITS, ObservationCapacity
-from plugin.rhino_listener.c5_research_channel import publish_json
-from plugin.rhino_listener.c5_research_native import digest, require
-from plugin.rhino_listener.c5_reuse_field_scope import STUDY, validate_binding, strict, canonical
+from .c5_host_assurance_session import HostAssuranceSession
+from .c5_host_assurance_v2 import POLICY, compare_visible_continuity
+from .c5_formal20_observation_capacity import LIMITS, ObservationCapacity
+from .c5_research_channel import publish_json
+from .c5_research_native import digest, require
+from .c5_reuse_field_scope import STUDY, validate_binding, strict, canonical
 
 
 class ReuseHostSession(HostAssuranceSession):

@@ -13,12 +13,12 @@ import time
 
 from .c5_reuse_field_scope import bind, canonical, exact, require, sha, strict, is_sha
 
-INSTANCE='reuse-dev-20261011-a'
+INSTANCE='reuse-dev-20261012-b'
 MAC_PARENT=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5')
 GPU_PARENT=Path('/data')
-SPEC='eval/c5/reuse-development-spec-20261011-a.json'
-RUNTIME='eval/c5/reuse-development-runtime-freeze-20261011-a.json'
-PLAN='eval/c5/reuse-field-environment-plan-20261011-a.json'
+SPEC='eval/c5/reuse-development-spec-20261012-b.json'
+RUNTIME='eval/c5/reuse-development-runtime-freeze-20261012-b.json'
+PLAN='eval/c5/reuse-field-environment-plan-20261012-b.json'
 
 
 def fixed_paths(endpoint):
@@ -59,7 +59,8 @@ class ReuseSourceGuard:
                     and ((name.endswith('.py') and p.parts[0] in ('agent','training','plugin','tools','data_pipeline'))
                         or name in (SPEC,PLAN,'eval/c5/rhino-runtime-schema-v1.json',
                         'eval/c5/hostassurance-development-spec-20261007-d.json',
-                        'eval/c5/c5-engineering-config.json','requirements-training.txt','requirements.txt'))
+                        'eval/c5/c5-engineering-config.json','eval/c5/reuse-development-startup-failure-20261012.json',
+                        'requirements-training.txt','requirements.txt'))
                     and is_sha(value),'reuse_source_public_population')
 
     def __call__(self):
@@ -96,11 +97,14 @@ def approved_entry(root,endpoint,*,now=time.time,private_prefixes=(),cleanup_onl
     guard=ReuseSourceGuard(root,runtime['source_files'],private_prefixes=private_prefixes)
     guard()
     plan_raw=read_bytes(root/PLAN); plan=strict(plan_raw)
+    from .c5_reuse_predecessor import verify_record,verify_retirement
+    verify_record(root,plan,read_bytes);verify_retirement(state.parent,read_bytes)
     def check(*,cleanup_only=cleanup_only):
         require(read_bytes(root/SPEC)==spec_raw and read_bytes(root/RUNTIME)==runtime_raw
                 and read_bytes(state/'owner-approval.json',private=True)==approval_raw
                 and read_bytes(root/PLAN)==plan_raw,'reuse_approved_records_changed')
         bind(spec,runtime,approval,now=now(),endpoint=endpoint,cleanup_only=cleanup_only)
+        verify_retirement(state.parent,read_bytes)
         return guard()
     check()
     return spec,runtime,binding,plan,check

@@ -28,7 +28,8 @@ def main():
         budget=ReuseBudget(spec['resources'])
         runner=MacController(binding,controller_plan,schemas,registry,guard,budget.check)
         result=runner.drive(lambda host,worker:external_readiness(binding,host,worker))
-        print('C5_REUSE_CONTROLLER_EXTERNAL_FINAL_REQUIRED '+str(result),flush=True)
+        from training.c5_reuse_evidence import canonical
+        print('C5_REUSE_CONTROLLER_EXTERNAL_FINAL_REQUIRED '+canonical(result).decode(),flush=True)
 
 
 if __name__=='__main__':main()

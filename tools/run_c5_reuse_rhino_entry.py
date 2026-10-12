@@ -25,10 +25,28 @@ def start():
         module=types.ModuleType(name);module.__path__=[str(path)];sys.modules[name]=module
     package=sys.modules[prefix]
     def load(name):return importlib.import_module(prefix+'.plugin.rhino_listener.'+name)
-    spec,runtime,binding,plan,guard=load('c5_reuse_mac_scope').mac_scope(ROOT,embedded=True,private_prefixes=(prefix,))
+    # Resolve the complete inert dependency graph before any host effects.
+    # Every project import stays inside this namespace; never alias a global
+    # plugin package or alter the embedded interpreter's search path.
+    try:
+        spec,runtime,binding,plan,guard=load('c5_reuse_mac_scope').mac_scope(ROOT,embedded=True,private_prefixes=(prefix,))
+        native,channel=load('c5_research_native'),load('c5_research_channel')
+        registry_type=load('c5_reuse_admission').AdmissionRegistry
+        hub_type=load('c5_reuse_native_hub').ReuseNativeHub
+        session_type=load('c5_reuse_host_session').ReuseHostSession
+        backend_type=load('c5_host_observer_clr').ClrObserverBackend
+        admission_type=load('c5_deferred_baseline').DeferredBaselineAdmission
+        for name in ('sqlite3','hmac','secrets','contextlib','collections','enum','typing'):
+            importlib.import_module(name)
+        guard()
+    except BaseException:
+        # No registry, Rhino import, document, subscription or callback exists
+        # yet. Roll back only this invocation's provisional module namespace.
+        for name in tuple(sys.modules):
+            if name==prefix or name.startswith(prefix+'.'):sys.modules.pop(name)
+        raise
     # Import of Rhino and every host operation are AFTER the complete grant.
     import Rhino
-    native,channel=load('c5_research_native'),load('c5_research_channel')
     require=native.require;state=Path(binding['paths']['state_root']);source_sha=native.digest(runtime['source_files'])
     policy=load('c5_reuse_public_plan').observer_policy(ROOT)
     require(sys.platform=='darwin' and list(sys.version_info[:2])==[3,9]
@@ -39,18 +57,12 @@ def start():
     active=Rhino.RhinoDoc.ActiveDoc
     require(Rhino.RhinoApp.IsOnMainThread and active is not None and not native._all_objects(active),
             'exclusive blank main-thread document required')
-    registry=load('c5_reuse_admission').AdmissionRegistry(binding)
+    registry=registry_type(binding)
     package._REGISTRY=registry
     channel.publish_json(state,'new-hub-started.claim.json',{'study_id':binding['study_id'],
         'runtime_sha256':binding['runtime_sha256'],'replay_allowed':False})
     schemas=load('c5_reuse_runtime_scope').strict(load('c5_reuse_runtime_scope').read_bytes(
         ROOT/'eval/c5/rhino-runtime-schema-v1.json'))['core_parameters']
-    for name in ('sqlite3','hmac','secrets','contextlib','collections','enum','typing'):
-        importlib.import_module(name)
-    hub_type=load('c5_reuse_native_hub').ReuseNativeHub
-    session_type=load('c5_reuse_host_session').ReuseHostSession
-    backend_type=load('c5_host_observer_clr').ClrObserverBackend
-    admission_type=load('c5_deferred_baseline').DeferredBaselineAdmission
     channel.publish_json(state,'warmup.started.json',{'study_id':binding['study_id'],
         'runtime_freeze_sha256':binding['runtime_sha256'],'replay_allowed':False})
     doc=Rhino.RhinoDoc.CreateHeadless(None);require(doc is not None,'warmup opening unknown')

@@ -15,7 +15,9 @@ from training.c5_reuse_evidence import canonical,require,sha,strict
 from training.c5_reuse_gpu_loader import PYTHON,ENTRY,LOADER_POLICY,ADAPTER,SNAPSHOT,MANIFEST_SHA,ADAPTER_FILES
 from training.c5_reuse_owned_child import POLICY as STOP
 
-JSON_FILES=(SOURCE,'eval/c5/rhino-runtime-schema-v1.json','eval/c5/c5-engineering-config.json')
+from plugin.rhino_listener.c5_reuse_predecessor import FAILURE,POLICY as PREDECESSOR
+
+JSON_FILES=(SOURCE,'eval/c5/rhino-runtime-schema-v1.json','eval/c5/c5-engineering-config.json',FAILURE)
 ENTRIES=('tools/run_c5_reuse_gpu_entry.py','tools/run_c5_reuse_mac_entry.py',
          'tools/run_c5_reuse_rhino_entry.py','tools/run_c5_reuse_rhino_wrapper.py')
 
@@ -36,6 +38,8 @@ def build(root,*,environment,model_assets,host_files,host_acceptance,gpu_process
     if resource_acceptance is not None:
         require(canonical(resource_acceptance)==canonical(RESOURCE_ACCEPTANCE),'reuse_freeze_resource_acceptance')
     payload=source_payload(root);public=public_plan(Path(root))
+    require(hashlib.sha256(payload[FAILURE]).hexdigest()==PREDECESSOR['public_failure_record_raw_sha256'],
+            'reuse_freeze_original_failure_bytes')
     resources={'lease_expiry_epoch':1791914400,'generation_cutoff_epoch':1791913500,'export_reserve_seconds':900,
         'prior_cumulative_upper_bound_seconds':None,'remaining_gpu_seconds':82800,
         'development_seconds_max':18000,'formal_seconds_max':64800,'research_seconds_max':82800,
@@ -56,7 +60,7 @@ def build(root,*,environment,model_assets,host_files,host_acceptance,gpu_process
         'resource_basis':{'platform_hour_quota':None,
             'remaining_gpu_seconds_meaning':'incremental_research_reservation_not_platform_balance',
             'prior_cumulative_upper_bound_basis':'owner_reported_unknown_not_original_16_hour_compliance',
-            'resource_revision_acceptance':resource_acceptance}}
+            'resource_revision_acceptance':resource_acceptance},'predecessor':PREDECESSOR}
     payload[SPEC]=canonical(spec)+b'\n';payload[PLAN]=canonical(plan)+b'\n'
     source={n:hashlib.sha256(raw).hexdigest() for n,raw in sorted(payload.items())}
     runtime={'protocol':PROTOCOL,'study_id':STUDY,'instance_id':INSTANCE,'spec_sha256':sha(spec),

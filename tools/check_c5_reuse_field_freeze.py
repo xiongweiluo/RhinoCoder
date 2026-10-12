@@ -13,9 +13,9 @@ import os
 from pathlib import Path
 import stat
 
-SPEC='eval/c5/reuse-development-spec-20261011-a.json'
-RUNTIME='eval/c5/reuse-development-runtime-freeze-20261011-a.json'
-PLAN='eval/c5/reuse-field-environment-plan-20261011-a.json'
+SPEC='eval/c5/reuse-development-spec-20261012-b.json'
+RUNTIME='eval/c5/reuse-development-runtime-freeze-20261012-b.json'
+PLAN='eval/c5/reuse-field-environment-plan-20261012-b.json'
 
 
 def require(ok,code):
@@ -71,6 +71,21 @@ def check(root,spec_sha,runtime_sha,*,review=False):
             and s['resources']==r['resources'] and s['host_policy']==r['host_policy'],'field_freeze_complete_closures')
     require(all(s[k] is False for k in ('automatic_retry_allowed','private_formal_data_allowed','default_route_change_allowed'))
             and s['host_policy']['full_byte_closure_claimed'] is False,'field_freeze_guarantee_drift')
+    if s['instance_id']=='reuse-dev-20261012-b':
+        predecessor=p['predecessor'];f='eval/c5/reuse-development-startup-failure-20261012.json'
+        old=decode(read(root/f))
+        require(hashlib.sha256(read(root/f)).hexdigest()==predecessor['public_failure_record_raw_sha256']
+            and old['study_id']==predecessor['study_id']=='C5DEV-REUSE-20261011-A'
+            and old['status']=='STARTUP_FAILED_RETIRED_NO_RETRY'
+            and old['spec_sha256']==predecessor['spec_sha256']
+            and old['runtime_sha256']==predecessor['runtime_sha256']
+            and old['pipeline_counts']['model_requests_recorded']==predecessor['recorded_model_requests']==0
+            and old['pipeline_counts']['model_native_slots_started']==predecessor['recorded_slots_started']==0
+            and old['pipeline_counts']['model_native_slots_completed']==predecessor['recorded_slots_completed']==0
+            and predecessor['retired_execution_restore_allowed'] is False
+            and predecessor['new_development_requires_new_exact_two_hash_approval'] is True
+            and predecessor['formal_consumption_authorized'] is False,
+            'field_freeze_retired_predecessor_binding')
     if s['execution_ready'] is True:
         a=p['resource_basis']['resource_revision_acceptance'];q=s['resources']
         models=p['model_assets'];names={'config.json','generation_config.json','merges.txt','tokenizer.json','tokenizer_config.json','vocab.json'}

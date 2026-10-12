@@ -4,6 +4,7 @@ Integrity with supplied anchors is not human-origin, physical-GPU, Rhino,
 native permission/geometry, cleanup, or complete field PASS evidence.
 """
 import math
+from plugin.rhino_listener.c5_reuse_runtime_scope import PLAN
 import hashlib
 from training.c5_reuse_evidence import exact,require,sha,is_sha,raw_sha,strict
 from training.c5_reuse_control_journal import replay_control
@@ -51,7 +52,7 @@ def audit_gpu_entry(supervisor,lifecycle,worker,binding,plan,resources,*,spec,ru
     require(sha(spec)==binding['spec_sha256'] and sha(runtime)==binding['runtime_sha256']
             and resources==spec['resources']==runtime['resources']
             and strict(plan_raw,limit=2*1024*1024)==plan
-            and raw_sha(plan_raw)==runtime['source_files']['eval/c5/reuse-field-environment-plan-20261011-a.json']
+            and raw_sha(plan_raw)==runtime['source_files'].get(PLAN)
             and sha(plan['environment'])==runtime['environment_sha256']
             and sha(plan['model_assets'])==runtime['model_assets_sha256']
             and sha(plan['host_readable_files'])==runtime['host_readable_files_sha256']

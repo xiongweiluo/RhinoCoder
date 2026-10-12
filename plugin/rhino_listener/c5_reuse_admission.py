@@ -12,7 +12,7 @@ import stat
 import threading
 from contextlib import contextmanager
 
-from plugin.rhino_listener.c5_reuse_field_scope import canonical, exact, require, sha, strict, STUDY, validate_binding
+from .c5_reuse_field_scope import canonical, exact, require, sha, strict, STUDY, validate_binding
 
 TABLE = ('CREATE TABLE admission (study TEXT NOT NULL, role TEXT NOT NULL, '
          'scope_sha256 TEXT NOT NULL, tombstone_sha256 TEXT NOT NULL, '

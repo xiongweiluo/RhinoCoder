@@ -15,14 +15,18 @@ import os
 from pathlib import Path
 import re
 import stat
+import sqlite3
 import sys
 
-INSTANCE='reuse-dev-20261011-a'
+INSTANCE='reuse-dev-20261012-b'
 PARENTS={'mac':Path('/Users/xiongweiluo/RhinoCoder/data/training/c5'),'gpu':Path('/data')}
-SPEC='eval/c5/reuse-development-spec-20261011-a.json'
-PLAN='eval/c5/reuse-field-environment-plan-20261011-a.json'
-RUNTIME='eval/c5/reuse-development-runtime-freeze-20261011-a.json'
+SPEC='eval/c5/reuse-development-spec-20261012-b.json'
+PLAN='eval/c5/reuse-field-environment-plan-20261012-b.json'
+RUNTIME='eval/c5/reuse-development-runtime-freeze-20261012-b.json'
 MUTABLE={SPEC,PLAN,RUNTIME}
+ACTUAL_PARENTS={Path('/Users/xiongweiluo/RhinoCoder/data/training/c5'),Path('/data')}
+RETIREMENT_SHA='f098afe6e005e3ae09129bb44531ce3947e07d6592632d86a2c75af24f0f2978'
+RETIRED_APPROVAL_SHA='fcfe67c8382d7e2dd28dafd58bec37deea8a75e5686ef9e2b241ac6e0a9416f9'
 
 
 def require(ok,code):
@@ -45,6 +49,51 @@ def read(p):
     finally:os.close(fd)
 
 
+
+def preparation_scope(parent):
+    require(not os.path.lexists(parent/(INSTANCE+'-state')),'public_stage_no_grant_or_admission')
+    registry=parent/'c5-reuse-global-admission-v1'
+    # A's prepare created an empty shared registry. Preserve it; never clear,
+    # rename or create a new registry to bypass a consumed/uncertain role.
+    if parent in ACTUAL_PARENTS or os.path.lexists(registry):
+        old=parent/'reuse-dev-20261011-a-state'
+        i=old.lstat()
+        require(old.resolve()==old and stat.S_ISDIR(i.st_mode) and i.st_uid==os.getuid()
+                and stat.S_IMODE(i.st_mode)==0o700 and not os.path.lexists(old/'owner-approval.json'),
+                'public_stage_predecessor_retired')
+        for name,pin in [('entry-retired-no-retry.json',RETIREMENT_SHA),
+                         ('owner-approval.retired-no-retry.json',RETIRED_APPROVAL_SHA)]:
+            require(not (old/name).stat().st_mode&0o077 and sha(read(old/name))==pin,
+                    'public_stage_predecessor_bytes')
+    if not os.path.lexists(registry):return
+    st=registry.lstat()
+    require(registry.resolve()==registry and stat.S_ISDIR(st.st_mode) and st.st_uid==os.getuid()
+            and stat.S_IMODE(st.st_mode)==0o700 and set(os.listdir(registry))=={'admission.lock','admission.sqlite'},
+            'public_stage_shared_admission_population')
+    identities={}
+    for name in ('admission.lock','admission.sqlite'):
+        p=registry/name;i=p.lstat()
+        require(p.resolve()==p and stat.S_ISREG(i.st_mode) and i.st_nlink==1
+                and i.st_uid==os.getuid() and stat.S_IMODE(i.st_mode)==0o600,'public_stage_shared_admission_file')
+        identities[name]=i
+    db=sqlite3.connect((registry/'admission.sqlite').as_uri()+'?mode=ro',uri=True)
+    try:
+        require(db.execute('PRAGMA integrity_check').fetchall()==[('ok',)],'public_stage_shared_admission_integrity')
+        table=('CREATE TABLE admission (study TEXT NOT NULL, role TEXT NOT NULL, '
+               'scope_sha256 TEXT NOT NULL, tombstone_sha256 TEXT NOT NULL, PRIMARY KEY(study,role))')
+        require(db.execute('SELECT type,name,sql FROM sqlite_master ORDER BY name').fetchall()==
+                [('table','admission',table),('index','sqlite_autoindex_admission_1',None)]
+                and db.execute('SELECT study,role,scope_sha256,tombstone_sha256 FROM admission').fetchall()==[],
+                'public_stage_shared_admission_must_remain_empty')
+    finally:db.close()
+    require(set(os.listdir(registry))==set(identities),'public_stage_shared_admission_changed')
+    for name,before in identities.items():
+        after=(registry/name).lstat()
+        require(all(getattr(before,k)==getattr(after,k) for k in
+            ('st_dev','st_ino','st_size','st_mtime_ns','st_ctime_ns','st_uid','st_mode','st_nlink')),
+            'public_stage_shared_admission_changed')
+
+
 def stage(raw,expected_sha,*,update=False,refresh=False,previous_runtime_sha=None):
     require(type(raw) is bytes and 0<len(raw)<=32*1024*1024 and sha(raw)==expected_sha,'public_stage_external_package_sha')
     packet=json.loads(raw);require(set(packet)=={'endpoint','payload_base64','file_sha256'},'public_stage_package_shape')
@@ -52,8 +101,7 @@ def stage(raw,expected_sha,*,update=False,refresh=False,previous_runtime_sha=Non
         and not (update and refresh),'public_stage_endpoint')
     parent=PARENTS[endpoint];root=parent/(INSTANCE+'-source')
     require(parent.is_absolute() and parent.resolve()==parent and parent.is_dir(),'public_stage_parent')
-    require(not os.path.lexists(parent/(INSTANCE+'-state'))
-            and not os.path.lexists(parent/'c5-reuse-global-admission-v1'),'public_stage_no_grant_or_admission')
+    preparation_scope(parent)
     names=set(packet['payload_base64']);require(names==set(packet['file_sha256']) and MUTABLE<=names
         and 0<len(names)<=513,'public_stage_population')
     payload={}
@@ -62,7 +110,7 @@ def stage(raw,expected_sha,*,update=False,refresh=False,previous_runtime_sha=Non
         require(not p.is_absolute() and '..' not in p.parts and str(p)==name and re.fullmatch(r'[a-zA-Z0-9_./-]+',name)
             and ((name.endswith('.py') and p.parts[0] in ('agent','training','tools','plugin','data_pipeline'))
                 or name in MUTABLE|{'eval/c5/rhino-runtime-schema-v1.json',
-                    'eval/c5/hostassurance-development-spec-20261007-d.json','eval/c5/c5-engineering-config.json',
+                    'eval/c5/hostassurance-development-spec-20261007-d.json','eval/c5/c5-engineering-config.json','eval/c5/reuse-development-startup-failure-20261012.json',
                     'requirements.txt','requirements-training.txt'}),'public_stage_public_source_only')
         value=base64.b64decode(packet['payload_base64'][name],validate=True)
         require(0<len(value)<=2*1024*1024 and sha(value)==packet['file_sha256'][name],'public_stage_raw_bytes')
@@ -84,8 +132,7 @@ def stage(raw,expected_sha,*,update=False,refresh=False,previous_runtime_sha=Non
     else:root.mkdir(mode=0o700)
     for name in sorted(names-{RUNTIME})+[RUNTIME]:
         if update and name not in MUTABLE:continue
-        require(not os.path.lexists(parent/(INSTANCE+'-state'))
-                and not os.path.lexists(parent/'c5-reuse-global-admission-v1'),'public_stage_no_grant_or_admission')
+        preparation_scope(parent)
         p=root/name;p.parent.mkdir(mode=0o700,parents=True,exist_ok=True)
         target=p.with_name('public-freeze-'+p.name) if update or refresh else p
         fd=os.open(target,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)
