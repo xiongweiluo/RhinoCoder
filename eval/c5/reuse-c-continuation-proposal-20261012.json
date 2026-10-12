@@ -1,0 +1,96 @@
+{
+  "authority": {
+    "automatic_retry_allowed": false,
+    "claim_or_migration_authorized": false,
+    "default_route_change_authorized": false,
+    "execution_ready": false,
+    "model_or_rhino_calls_authorized": false,
+    "pr_merge_authorized": false,
+    "private_formal_access_authorized": false,
+    "rental_or_payment_authorized": false
+  },
+  "continuation": {
+    "development_slots": 8,
+    "draft_architecture": "additive_manifest_in_same_global_root_with_nonempty_genesis_bound_to_immutable_v1_files",
+    "formal_requires_development_whole_raw_audit_pass": true,
+    "formal_slots": 40,
+    "fresh_full_spec_runtime_dual_ci_and_exact_approval_required": true,
+    "implementation_status": "NOT_IMPLEMENTED_NO_MIGRATION",
+    "maximum_additional_development_attempts": 1,
+    "maximum_conditional_formal_attempts": 1,
+    "new_blind_holdout_claimed": false,
+    "new_instance_id": null,
+    "new_study_id": null,
+    "original_no_go_or_results_rewrite_allowed": false,
+    "owner_private_ready_final_and_raw_audit_required": true,
+    "protocol_preparation_acceptance_required": true,
+    "same_public_eight_overlap_disclosed": true,
+    "same_sealed_twenty_reuse_disclosed": true,
+    "slot_replacement_or_retry_allowed": false
+  },
+  "decisions": [
+    "end_additional_research",
+    "prepare_one_disclosed_followup"
+  ],
+  "legacy": {
+    "clear_reset_rewrite_or_namespace_bypass_allowed": false,
+    "existing_files_byte_preservation_required": true,
+    "global_roots": {
+      "gpu": "/data/c5-reuse-global-admission-v1",
+      "mac": "/Users/xiongweiluo/RhinoCoder/data/training/c5/c5-reuse-global-admission-v1"
+    },
+    "known_consumed_rows_carried_forward": [
+      [
+        "C5DEV-REUSE-20261012-C",
+        "controller",
+        "eaa08c266a1d785774d14c9d6609d31f7a743aee38f3d1f008b880926a7173e7",
+        "75ece512c33e19f10657c32307d3067889c7d12a512c1e11cf4cf08acfeb6df1"
+      ],
+      [
+        "C5DEV-REUSE-20261012-C",
+        "host",
+        "eaa08c266a1d785774d14c9d6609d31f7a743aee38f3d1f008b880926a7173e7",
+        "721b68b73ca3e1ad7354791ff40d43c5435ef71e805127d5610aad47fa5728e9"
+      ]
+    ],
+    "observed_snapshot_sha256": "90f1abddd8bc4d55fc671bb72559f43989cd35f476d7c83feeea41b3d94585a0",
+    "unknown_or_partial_legacy_blocks_all_new_effects": true
+  },
+  "owner_authorized_scope": "readonly_startup_diagnosis_cpu_controls_and_protocol_proposal_only",
+  "proposal_id": "C5-REUSE-C-STARTUP-CONTINUATION-20261012",
+  "resources": {
+    "additional_development_seconds": null,
+    "export_reserve_seconds_min": 900,
+    "formal_seconds": null,
+    "generation_cutoff_epoch": null,
+    "historical_cumulative_upper_bound_seconds": null,
+    "lease_expiry_epoch": null,
+    "original_16_hour_compliance_claimed": false,
+    "research_seconds": null,
+    "status": "NEW_EXECUTION_BOUNDARY_PENDING_NOT_CURRENT_AUTHORITY",
+    "unused_c_budget_automatically_recredited": false
+  },
+  "retired_c": {
+    "grant_restore_allowed": false,
+    "historical_unique_root_cause_proven": false,
+    "retirement_raw_sha256": "310797d0dfbe9e787424f62140f8dae460fcd443b7b23043ca5e6dc1e8befb80",
+    "runtime_sha256": "160e74bb15497960d51d499f51bac6a8be67b38c0124af385296c1119ecedc24",
+    "serve_stop_or_slot_replay_allowed": false,
+    "study_id": "C5DEV-REUSE-20261012-C"
+  },
+  "selected_decision": null,
+  "startup": {
+    "diagnostic_must_cover_actual_new_entry_preamble_without_fork_or_model": true,
+    "first_gpu_registry_initialization_requires_accepted_bound_nonempty_history": true,
+    "fully_frozen_compatible_runtime_required": true,
+    "native_pidfd_open_and_send_required": true,
+    "numeric_pid_or_name_kill_fallback_allowed": false,
+    "observed_system_python_is_automatically_approved": false,
+    "original_c_stderr_reconstructed": false,
+    "qualified_gpu_stop_error_must_not_skip_first_known_native_cleanup": true,
+    "stderr_cap_bytes": 262144,
+    "stdout_stderr_separate_bounded_raw_capture_before_launch": true,
+    "truncated_or_unobserved_exit_retires_without_retry": true
+  },
+  "status": "DRAFT_NOT_ACCEPTED_NOT_FROZEN"
+}
