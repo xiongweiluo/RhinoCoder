@@ -93,6 +93,9 @@ def endpoint_paths(instance, endpoints):
 
 def _material_binding(spec, runtime, *, now, endpoint, cleanup_only=False):
     """Pure exact binding. No filesystem access or execution authority minting."""
+    if type(spec) is dict and spec.get("study_id")=="C5DEV-REUSE-20261012-D":
+        from .c5_followup_scope import material
+        return material(spec,runtime,now=now,endpoint=endpoint,cleanup_only=cleanup_only)
     exact(spec, ('protocol', 'study_id', 'phase', 'instance_id', 'comparison', 'limits',
                  'resources', 'host_policy', 'execution_ready', 'automatic_retry_allowed',
                  'private_formal_data_allowed', 'default_route_change_allowed', 'development_plan_sha256'))
@@ -187,6 +190,9 @@ def _material_binding(spec, runtime, *, now, endpoint, cleanup_only=False):
 
 def bind(spec, runtime, approval, *, now, endpoint, cleanup_only=False):
     """Pure supplied exact grant binding; never certifies human origin."""
+    if type(spec) is dict and spec.get("study_id")=="C5DEV-REUSE-20261012-D":
+        from .c5_followup_scope import bind as followup_bind
+        return followup_bind(spec,runtime,approval,now=now,endpoint=endpoint,cleanup_only=cleanup_only)
     value=_material_binding(spec,runtime,now=now,endpoint=endpoint,cleanup_only=cleanup_only)
     expected = {'study_id': STUDY, 'instance_id': spec['instance_id'], 'actor': 'repository_owner',
                 'approved': True, 'spec_sha256': sha(spec), 'runtime_sha256': sha(runtime),
@@ -203,6 +209,9 @@ def check_candidate_materials(spec,runtime,*,now,endpoint):
 
 
 def validate_binding(value):
+    if type(value) is dict and value.get("study_id")=="C5DEV-REUSE-20261012-D":
+        from .c5_followup_scope import validate
+        return validate(value)
     exact(value, ('protocol', 'study_id', 'instance_id', 'spec_sha256', 'runtime_sha256',
                   'paths', 'limits', 'development_plan_sha256', 'whole_field_authority_verified',
                   'approval_origin_verified', 'record_binding_verified', 'endpoint','endpoints'))
@@ -220,5 +229,6 @@ def validate_binding(value):
 def common_scope(value):
     """Same message identity at both endpoints, committed by one runtime hash."""
     validate_binding(value)
-    return {key:value[key] for key in ('protocol','study_id','instance_id','spec_sha256',
-                                       'runtime_sha256','development_plan_sha256','limits')}
+    keys=('protocol','study_id','instance_id','spec_sha256','runtime_sha256','development_plan_sha256','limits')
+    if value['study_id']=='C5DEV-REUSE-20261012-D':keys+=('continuation',)
+    return {key:value[key] for key in keys}

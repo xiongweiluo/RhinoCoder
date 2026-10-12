@@ -27,7 +27,7 @@ class ReuseNativeHub(HostAwareDevelopmentHub):
         plan=public_plan(Path(binding['paths']['source_root']))
         require(plan['development_plan_sha256']==binding['development_plan_sha256'],'reuse_native_hub_plan')
         self.binding,self.registry=binding,registry
-        view={'probe_id':STUDY,'slot_order':plan['order'],'task_plans':plan['task_plans'],
+        view={'probe_id':binding['study_id'],'slot_order':plan['order'],'task_plans':plan['task_plans'],
               'slot_policies':plan['slot_policies']}
         native_view={'source_inventory_sha256':sha(runtime['source_files']),
                      'resource_boundary':{'hard_stop_epoch':runtime['resources']['generation_cutoff_epoch']+900}}
