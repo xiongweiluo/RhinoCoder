@@ -10,7 +10,20 @@
 
 ## 当前快照与跨对话续接
 
-### 近期任务索引：2026-10-12 未启动C的GPU boot修订
+### 近期任务索引：2026-10-12 C单次启动失败、首次宿主收尾与永久退休
+
+本人已批准修订C完整两哈希，批准head `5815a043908a3510fdf5cf41bd531100ab00c54a`双CI成功。两端登记与Mac一次prepare成功，本人ready工具就绪后C wrapper一次返回并封存基线；唯一controller在worker-ready前收到EOF，独立stop也退出1。见[失败/收尾报告](docs/c5-reuse-development-startup-failure-20261012-c.md)、[完整公开记录](eval/c5/reuse-development-startup-failure-20261012-c.json)。C记录模型请求/槽启动/完成0，质量与完整物理生成总量不可估计；工程门未通过。
+
+- [x] 本人修订精确批准、双CI、两端最新预检/一次登记与Mac一次prepare完成；原boot漂移与原A/B失败保留。
+- [x] C wrapper/drive各一次；原EOF/stop失败保留，没有serve/stop重放、补槽、名称kill或新候选。无原远端stderr，唯一根因未认证。
+- [x] 对从未open槽/发hub请求的确切既有hub首次stop完成；九派发钥缺席、有限detach和9原host记录复算通过。本人报告私下保管实际失败终止回执；40可用原文件/HMAC/时序/链复核，不是完整8槽联合PASS或资格GPU释放证明。
+- [x] C两端入口批准封存、host/controller消费行保留；A/B退休和308冻结源不变。报告在本准备分支/PR #15，main未合并，发布后元数据CI以PR当前实际结果为准。
+- [ ] 当前必要本人决定：审阅C原失败与有限收尾，是否仅授权无研究作用启动诊断及后续协议方案。共享准入已消费host/controller，当前空表准备规则不支持另一候选；不能清表、复用C角色或换命名空间。后续新候选须本人审议单次/准入规则并另行完整准备、双CI和精确批准，C永久停用。
+- [ ] 条件项：新的获准单次8槽与完整原始联合审计PASS→正式40槽完整冻结/双CI/另一个两哈希批准→本人私下复用/审计→报告及PR收口。原NO-GO、原正式失败、同题披露、阈值和默认混合不改。
+
+以下保留原C boot修订及更早历史时点，旧“未启动/待批准”不是最新状态。
+
+### 历史续接快照：2026-10-12 未启动C的GPU boot修订
 
 本人已精确批准原C两哈希，但恢复SSH后GPU boot漂移在grant前被实际只读预检拦截，见[批准与停止证据](eval/c5/reuse-development-c-postapproval-boot-drift-20261012.json)。C state/grant/prepare/wrapper/drive/模型/槽均0，不是研究重跑。保持同一未启动C，原批准完整副本与A/B退休保留；[boot修订完整冻结](docs/c5-reuse-development-c-boot-revision-review-20261012.md)只更新plan的boot ID及派生runtime，不转移旧批准。
 

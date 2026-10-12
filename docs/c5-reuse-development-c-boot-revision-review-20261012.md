@@ -1,5 +1,7 @@
 # 未启动C的GPU boot修订与完整精确批准门
 
+**最新实际执行状态：** 本人已批准修订两哈希，C已单次在worker-ready前失败并完成首次既有hub收尾/两端退休；见[C失败追加报告](c5-reuse-development-startup-failure-20261012-c.md)。下方材料准备与待批准语句仅为历史时点，不再要求同一批准，也不得恢复C入口。
+
 本人已批准原C spec/runtime两个完整哈希。恢复SSH后、登记任何grant前的无研究作用实际预检发现GPU重启，冻结boot `0a861fa3-31c9-4899-a022-c4f9cdb8dbfe`与实际 `77b495a6-c67c-4721-9038-e87c7fcc3fc6`不符。原GPU预检按守卫拒绝；[追加原批准与停止证据](../eval/c5/reuse-development-c-postapproval-boot-drift-20261012.json)保留原精确批准、发布head与最新观察，不将批准迁移到新runtime。
 
 此时C两端均无state/grant/key/claim/custody，Mac prepare、Rhino wrapper、controller drive、模型加载/请求和槽启动均0。停止发生于只读准备复核，未消耗研究单次入口。保持同一未启动C身份和唯一一次固定公开8槽机会；不是失败后换ID或重跑，不恢复A/B。原批准完整副本保存在 `/private/tmp/rhinocoder-c5-reuse-development-c-freeze-20261012`，Git版本为 `84a0336ab32883c4f16cf7bca775421062387d0a`。
