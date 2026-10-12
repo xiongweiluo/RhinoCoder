@@ -10,7 +10,18 @@
 
 ## 当前快照与跨对话续接
 
-### 近期任务索引：2026-10-12 B准备预检失败、两端退休与审核收口
+### 近期任务索引：2026-10-12 独立C实际权限预检与完整冻结
+
+本人确认另行授权C完整准备，见[准备授权](eval/c5/reuse-development-owner-preparation-authorization-20261012-c.json)。[C完整冻结](docs/c5-reuse-development-c-exact-freeze-review-20261012.md)同时钉住A/B原失败与两端退休；全局准入表保留。两端各308公共文件/307清单及实际固定解释器、权限、宿主/模型/环境与完整5小时窗口的无研究作用预检完成。本地1852 passed／11 skipped；最终发布精确head双CI以本准备PR实际结果为准。C尚无执行批准/state/grant/key/Rhino包装器或模型操作，不恢复A/B或复用旧批准。
+
+- [x] 本人独立C准备授权、无grant实际预检、Mac准备/drive相同readable_scope与双前序退休/共享表拒绝控制完成；原B操作疏漏和原A导入失败保留。
+- [x] C完整spec/runtime/environment plan、两端公共部署及独立字节/人口/闭包、实际权限/惰性依赖/原资产/资源复核完成；C准备分支独立于PR #14，main不自动包含，也没有merge。
+- [ ] 当前唯一执行门：本准备精确发布head双CI成功后，本人批准C spec `10f821cacb0e5681c3b2f8286230eab7dfdd69102ed7ca3adf540f6cd2148446` 与runtime `04caaac2a915b635211751f35d020ec79134d5bdd46d7efff88120be17992df2` 两完整哈希，明确仅C一次固定公开8槽；代理Mac入口须使用已获准主机权限，实际ready/final仍由本人私下保管。
+- [ ] 条件项：C单次8槽及完整原始联合审计PASS→正式40槽独立完整冻结/双CI/另一个两哈希批准→本人单次复用和私有审计→报告及PR审核。失败/未知不重跑、不补槽、不自动再生成候选；原NO-GO、同题披露、阈值与默认混合保持。
+
+以下保留B、A及更早各时点记录，旧“当前/待批准/未运行”不代表最新事实。
+
+### 历史续接快照：2026-10-12 B准备预检失败、两端退休与审核收口
 
 本人已批准[B完整冻结](docs/c5-reuse-development-b-exact-freeze-review-20261012.md)两完整哈希；批准head `03391629b03dcf2b50392479965ef3485a632a61`双CI成功（各1834/10）。两端登记批准后，代理一次Mac prepare在受限沙箱查询启动会话时失败，尚未进入准备函数或Rhino/模型链路。详见[追加B失败报告](docs/c5-reuse-development-preparation-failure-20261012-b.md)及[结构化记录](eval/c5/reuse-development-preparation-failure-20261012-b.json)。实际B模型请求/槽启动/完成0，质量与独立物理生成总量仍null；工程门未通过，不能进入正式冻结/消费。
 

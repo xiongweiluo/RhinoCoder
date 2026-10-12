@@ -62,7 +62,7 @@ def test_full_phase_is_not_silently_truncated_and_raw_auditor_preserves_unknown(
 
 
 def test_actual_namespace_rejects_legacy_cumulative_authority(tmp_path):
-    s,r,a,_=records(tmp_path);s['instance_id']='reuse-dev-20261011-a';r['instance_id']=s['instance_id']
+    s,r,a,_=records(tmp_path);s['instance_id']='reuse-dev-20261012-c';r['instance_id']=s['instance_id']
     rebound(s,r,a)
     with pytest.raises(ValueError,match='actual_resource_revision_required'):bind(s,r,a,now=100,endpoint='gpu')
 

@@ -18,15 +18,18 @@ import stat
 import sqlite3
 import sys
 
-INSTANCE='reuse-dev-20261012-b'
+INSTANCE='reuse-dev-20261012-c'
 PARENTS={'mac':Path('/Users/xiongweiluo/RhinoCoder/data/training/c5'),'gpu':Path('/data')}
-SPEC='eval/c5/reuse-development-spec-20261012-b.json'
-PLAN='eval/c5/reuse-field-environment-plan-20261012-b.json'
-RUNTIME='eval/c5/reuse-development-runtime-freeze-20261012-b.json'
+SPEC='eval/c5/reuse-development-spec-20261012-c.json'
+PLAN='eval/c5/reuse-field-environment-plan-20261012-c.json'
+RUNTIME='eval/c5/reuse-development-runtime-freeze-20261012-c.json'
 MUTABLE={SPEC,PLAN,RUNTIME}
 ACTUAL_PARENTS={Path('/Users/xiongweiluo/RhinoCoder/data/training/c5'),Path('/data')}
 RETIREMENT_SHA='f098afe6e005e3ae09129bb44531ce3947e07d6592632d86a2c75af24f0f2978'
 RETIRED_APPROVAL_SHA='fcfe67c8382d7e2dd28dafd58bec37deea8a75e5686ef9e2b241ac6e0a9416f9'
+RETIRED_ENTRIES=(('reuse-dev-20261011-a',RETIREMENT_SHA,RETIRED_APPROVAL_SHA),
+    ('reuse-dev-20261012-b','3110dd38a8b318150526394ae98e7b36233fa6ac91a64a2adb08a1f1b529afda',
+     '175bb33bf80d2f7559f4ee6d03c6634225c9df4839ef5f84686cd5814dd57574'))
 
 
 def require(ok,code):
@@ -56,15 +59,16 @@ def preparation_scope(parent):
     # A's prepare created an empty shared registry. Preserve it; never clear,
     # rename or create a new registry to bypass a consumed/uncertain role.
     if parent in ACTUAL_PARENTS or os.path.lexists(registry):
-        old=parent/'reuse-dev-20261011-a-state'
-        i=old.lstat()
-        require(old.resolve()==old and stat.S_ISDIR(i.st_mode) and i.st_uid==os.getuid()
-                and stat.S_IMODE(i.st_mode)==0o700 and not os.path.lexists(old/'owner-approval.json'),
-                'public_stage_predecessor_retired')
-        for name,pin in [('entry-retired-no-retry.json',RETIREMENT_SHA),
-                         ('owner-approval.retired-no-retry.json',RETIRED_APPROVAL_SHA)]:
-            require(not (old/name).stat().st_mode&0o077 and sha(read(old/name))==pin,
-                    'public_stage_predecessor_bytes')
+        for instance,retirement,approval in RETIRED_ENTRIES:
+            old=parent/(instance+'-state')
+            i=old.lstat()
+            require(old.resolve()==old and stat.S_ISDIR(i.st_mode) and i.st_uid==os.getuid()
+                    and stat.S_IMODE(i.st_mode)==0o700 and not os.path.lexists(old/'owner-approval.json'),
+                    'public_stage_predecessor_retired')
+            for name,pin in [('entry-retired-no-retry.json',retirement),
+                             ('owner-approval.retired-no-retry.json',approval)]:
+                require(not (old/name).stat().st_mode&0o077 and sha(read(old/name))==pin,
+                        'public_stage_predecessor_bytes')
     if not os.path.lexists(registry):return
     st=registry.lstat()
     require(registry.resolve()==registry and stat.S_ISDIR(st.st_mode) and st.st_uid==os.getuid()
@@ -111,6 +115,7 @@ def stage(raw,expected_sha,*,update=False,refresh=False,previous_runtime_sha=Non
             and ((name.endswith('.py') and p.parts[0] in ('agent','training','tools','plugin','data_pipeline'))
                 or name in MUTABLE|{'eval/c5/rhino-runtime-schema-v1.json',
                     'eval/c5/hostassurance-development-spec-20261007-d.json','eval/c5/c5-engineering-config.json','eval/c5/reuse-development-startup-failure-20261012.json',
+                    'eval/c5/reuse-development-preparation-failure-20261012-b.json',
                     'requirements.txt','requirements-training.txt'}),'public_stage_public_source_only')
         value=base64.b64decode(packet['payload_base64'][name],validate=True)
         require(0<len(value)<=2*1024*1024 and sha(value)==packet['file_sha256'][name],'public_stage_raw_bytes')

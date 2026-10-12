@@ -1,0 +1,16 @@
+{
+  "actor": "repository_owner",
+  "authorization_basis": "direct confirmation of prior request for an independent new candidate complete preparation following retired B preparation failure",
+  "cryptographic_human_origin_proven": false,
+  "direct_owner_message": "<确认",
+  "execution_authorized": false,
+  "instance_id": "reuse-dev-20261012-c",
+  "old_grants_restored": false,
+  "owner_grant_created": false,
+  "preparation_authorized": true,
+  "preparation_base_head": "03302f95580bdc0d10953920cd394424148bc081",
+  "recorded_epoch": 1791813186.2915258,
+  "schema_version": 1,
+  "scope": "public_source_adaptation_cpu_validation_actual_readonly_preflight_and_complete_freeze_preparation_only",
+  "study_id": "C5DEV-REUSE-20261012-C"
+}
