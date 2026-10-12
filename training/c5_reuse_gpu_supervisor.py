@@ -24,9 +24,15 @@ PACKET=struct.Struct('!cd')
 
 
 class Watchdog:
-    def __init__(self,start,cap,*,clock=time.monotonic):
-        require(type(start) in (int,float) and math.isfinite(start) and 0<cap<=3600,'reuse_watchdog_reservation')
-        self.clock=clock;self.last=start;self.hard=start+cap;self.deadline=min(self.hard,start+180)
+    def __init__(self,start,cap,*,clock=time.monotonic,limits=None):
+        require(type(start) in (int,float) and math.isfinite(start) and 0<cap<=(3600 if limits is None else 18000),
+                'reuse_watchdog_reservation')
+        self.limits=limits
+        self.startup=180 if limits is None else limits['startup_seconds']
+        self.first_gap=180 if limits is None else limits['first_request_idle_seconds']
+        self.native_gap=180 if limits is None else limits['between_requests_idle_seconds']
+        self.begun=limits is None
+        self.clock=clock;self.last=start;self.hard=start+cap;self.deadline=min(self.hard,start+self.startup)
         self.ready=False;self.pending=False;self.stages=0;self.buffer=b'';self.last_packet=start
         self.request_active=False;self.requests=0
 
@@ -49,15 +55,19 @@ class Watchdog:
                 require(not self.ready and not self.pending,'reuse_watchdog_duplicate_ready')
                 self.ready=True
                 self.deadline=min(self.hard,issued+180)
+            elif kind==b'B':
+                require(self.limits is not None and self.ready and not self.begun and not self.request_active
+                        and not self.pending and self.requests==0,'reuse_watchdog_once_begin')
+                self.begun=True;self.deadline=min(self.hard,issued+self.first_gap)
             elif kind==b'R':
-                require(self.ready and not self.request_active and not self.pending and self.requests<8,
+                require(self.ready and self.begun and not self.request_active and not self.pending and self.requests<8,
                         'reuse_watchdog_whole_request_start')
                 self.request_active=True;self.requests+=1
                 self.deadline=min(self.hard,issued+180)
             elif kind==b'D':
                 require(self.request_active and not self.pending,'reuse_watchdog_whole_request_end')
                 self.request_active=False
-                self.deadline=min(self.hard,issued+180)
+                self.deadline=min(self.hard,issued+self.native_gap)
             elif kind==b'S':
                 require(self.ready and self.request_active and not self.pending and self.stages<112,'reuse_watchdog_stage_order')
                 self.stages+=1;self.pending=True
@@ -95,7 +105,8 @@ def child_main(binding,plans,journal,registry,gate_fd,progress_fd,qualification,
     from training.c5_reuse_worker_loop import serve
     pipe=FieldPipe(sys.stdout.fileno(),sys.stdin.fileno())
     serve(peer,pipe,qualification,check,budget.check,lifecycle.append,on_ready=lambda:progress(progress_fd,b'L'),
-          on_request_start=lambda:progress(progress_fd,b'R'),on_request_end=lambda:progress(progress_fd,b'D'))
+          on_request_start=lambda:progress(progress_fd,b'R'),on_request_end=lambda:progress(progress_fd,b'D'),
+          on_begin=lambda:progress(progress_fd,b'B'))
     lifecycle.append('worker_budget_observation',budget.observation())
 
 
@@ -111,7 +122,7 @@ def supervise(spec,runtime,binding,plan,guard):
     guard()
     # Time before fork is included in the one parent/child wall reservation.
     budget=ReuseBudget(spec['resources'])
-    watchdog=Watchdog(budget.start_mono,budget.cap)
+    watchdog=Watchdog(budget.start_mono,budget.cap,limits=binding['limits'])
     control=ControlJournal(binding,'supervisor')
     registry=AdmissionRegistry(binding)
     owned=None;pid=None;gate_r=gate_w=progress_r=progress_w=None;wait_status=None

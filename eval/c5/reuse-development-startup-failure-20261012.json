@@ -1,0 +1,150 @@
+{
+  "actual_physical_generation_total_independently_proven": null,
+  "approved_publication_head": "9d1b27a8039861e59163dbbd63692180c872f4b2",
+  "automatic_model_stop_reason": "No new supervisor/qualified child/worker launched; no signal target exists.",
+  "automatic_model_stop_sent": false,
+  "complete_original_raw_joint_audit": false,
+  "engineering_gate_passed": false,
+  "formal_freeze_or_execution_admitted": false,
+  "frozen_source_or_hashes_changed": false,
+  "host_cleanup_or_memory_erasure_proven": false,
+  "instance_id": "reuse-dev-20261011-a",
+  "mac_prepare_exit_status": 0,
+  "no_retry_or_fill": true,
+  "observed_epoch": 1791763251.1788642,
+  "original_c5_no_go_changed": false,
+  "pipeline_counts": {
+    "generation_stages_recorded": 0,
+    "host_baseline_sealed": false,
+    "host_subscription_started": false,
+    "model_native_slots_completed": 0,
+    "model_native_slots_started": 0,
+    "model_or_cuda_loader_invocations": 0,
+    "model_requests_recorded": 0,
+    "native_signed_dispatches_recorded": 0,
+    "private_formal_reads": 0,
+    "warmup_started": false
+  },
+  "preflight_assets": {
+    "approval_raw_sha256": "fcfe67c8382d7e2dd28dafd58bec37deea8a75e5686ef9e2b241ac6e0a9416f9",
+    "direct_owner_exact_two_hash_approval_received": true,
+    "epoch": 1791762974.81058,
+    "execution_ready": false,
+    "gpu_observation_epochs": [
+      1791762888.463725,
+      1791762951.2011704
+    ],
+    "human_or_transport_acquisition_origin_proven": false,
+    "mac_observation_epoch": 1791762927.114945,
+    "model_calls": 0,
+    "model_or_rhino_calls": 0,
+    "private_formal_reads": 0,
+    "rhino_calls": 0,
+    "runtime_sha256": "6c27d31987bed8289b498fd547dd680402b0f526cd773bd58a5c09dfaa9b2ac6",
+    "source_inventory_sha256": "367707fde5a1654ac188d4c7583b6184dc78c1029723d93c64b71f17bc11779a",
+    "spec_sha256": "32f02512402ada907f6ed07381417d7f91c41896acef79ec5fe9b5d037b6d900",
+    "supplied_actual_installed_asset_maps_verified": true
+  },
+  "prepared_keys_retained_private": true,
+  "quality_by_slot": null,
+  "retirement": {
+    "gpu": {
+      "endpoint": "gpu",
+      "grant_preserved_under_retired_name": true,
+      "model_or_rhino_calls": 0,
+      "original_entry_approval_missing": true,
+      "retirement_raw_sha256": "f098afe6e005e3ae09129bb44531ce3947e07d6592632d86a2c75af24f0f2978"
+    },
+    "mac": {
+      "endpoint": "mac",
+      "grant_preserved_under_retired_name": true,
+      "no_key_or_memory_erasure_claim": true,
+      "original_entry_approval_missing": true,
+      "prepared_keys_retained_private": true,
+      "retirement_raw_sha256": "f098afe6e005e3ae09129bb44531ce3947e07d6592632d86a2c75af24f0f2978"
+    },
+    "record": {
+      "approval_retirement_is_recoverable_preservation_not_new_execution_authority": true,
+      "automatic_retry_allowed": false,
+      "error_message": "No module named 'plugin'",
+      "error_type": "ModuleNotFoundError",
+      "failure_phase": "embedded_absolute_admission_import_before_hub_claim_warmup_or_subscription",
+      "formal_execution_authorized": false,
+      "instance_id": "reuse-dev-20261011-a",
+      "record_epoch": 1791763154.555678,
+      "runtime_sha256": "6c27d31987bed8289b498fd547dd680402b0f526cd773bd58a5c09dfaa9b2ac6",
+      "single_wrapper_invocations": 1,
+      "spec_sha256": "32f02512402ada907f6ed07381417d7f91c41896acef79ec5fe9b5d037b6d900",
+      "status": "single_wrapper_start_failed_retired_no_retry",
+      "study_id": "C5DEV-REUSE-20261011-A"
+    }
+  },
+  "root_cause": "Embedded entry loads rhino_c5_<uuid>.plugin namespace without a top-level plugin package; admission module imports top-level plugin. CPU suite imported normal top-level plugin and did not exercise actual embedded bootstrap.",
+  "runtime_sha256": "6c27d31987bed8289b498fd547dd680402b0f526cd773bd58a5c09dfaa9b2ac6",
+  "single_wrapper_invocations": 1,
+  "spec_sha256": "32f02512402ada907f6ed07381417d7f91c41896acef79ec5fe9b5d037b6d900",
+  "state_observations": {
+    "gpu": {
+      "admission_present": false,
+      "approval_raw_sha256": "fcfe67c8382d7e2dd28dafd58bec37deea8a75e5686ef9e2b241ac6e0a9416f9",
+      "endpoint": "gpu",
+      "epoch": 1791763119.0256908,
+      "state_contains_only_owner_approval": true,
+      "worker_supervisor_or_stop_launched": false
+    },
+    "gpu_readonly_environment": {
+      "boot_id": "0a861fa3-31c9-4899-a022-c4f9cdb8dbfe",
+      "compute_processes": {
+        "returncode": 0,
+        "rows": []
+      },
+      "epoch": 1791763082.4934318,
+      "gpu": {
+        "returncode": 0,
+        "rows": [
+          "GPU-3a14915f-3804-46b7-b98a-aa09f7bbab4f, NVIDIA GeForce RTX 3090, 11, 24576, 0"
+        ]
+      },
+      "model_or_rhino_calls": 0,
+      "new_admission_present": false,
+      "new_state_present": true,
+      "original_worker_43776_present": false,
+      "prior_source_runtime_sha256": "6c27d31987bed8289b498fd547dd680402b0f526cd773bd58a5c09dfaa9b2ac6",
+      "private_evidence_reads": 0,
+      "remote_files_written": 0,
+      "status": "readonly_current_environment_observation_not_execution_authority",
+      "uid": 1000
+    },
+    "mac": {
+      "admission_rows": [],
+      "admission_tombstones": [],
+      "approval_raw_sha256": "fcfe67c8382d7e2dd28dafd58bec37deea8a75e5686ef9e2b241ac6e0a9416f9",
+      "complete_host_cleanup_or_memory_erasure_proven": false,
+      "controller_launched": false,
+      "controller_native_or_lifecycle_journals_present": false,
+      "eight_slot_directories_only_handoff_key": true,
+      "endpoint": "mac",
+      "entry_return_release_present": false,
+      "epoch": 1791763115.7826061,
+      "host_continuity_ready_present": false,
+      "hub_started_claim_present": false,
+      "prepared_keys_retained_private": true,
+      "private_formal_reads": 0,
+      "state_population_exact_preparation_only": true,
+      "warmup_started_present": false
+    }
+  },
+  "status": "STARTUP_FAILED_RETIRED_NO_RETRY",
+  "study_id": "C5DEV-REUSE-20261011-A",
+  "wrapper_exception": {
+    "entry_line": 42,
+    "entry_path": "tools/run_c5_reuse_rhino_entry.py",
+    "failed_import": "from plugin.rhino_listener.c5_reuse_field_scope import canonical, exact, require, sha, strict, STUDY, validate_binding",
+    "failed_import_line": 15,
+    "failed_import_path": "plugin/rhino_listener/c5_reuse_admission.py",
+    "message": "No module named 'plugin'",
+    "native_ui_traceback_origin": "Rhino Script Editor accessibility terminal text",
+    "outer_script": "file:///Users/xiongweiluo/.rhinocode/stage/w2rtuz1e.cjd",
+    "type": "ModuleNotFoundError"
+  }
+}

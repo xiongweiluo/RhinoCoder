@@ -1,0 +1,147 @@
+{
+  "actual_independent_byte_checks": {
+    "gpu": {
+      "actual_installed_assets_verified": false,
+      "candidate_execution_ready": true,
+      "complete_closure_binding_verified": true,
+      "execution_ready": false,
+      "human_approval_origin_verified": false,
+      "source_files_individually_verified": 305,
+      "source_population_exact": true
+    },
+    "mac": {
+      "actual_installed_assets_verified": false,
+      "candidate_execution_ready": true,
+      "complete_closure_binding_verified": true,
+      "execution_ready": false,
+      "human_approval_origin_verified": false,
+      "source_files_individually_verified": 305,
+      "source_population_exact": true
+    }
+  },
+  "actual_public_staging": {
+    "gpu": {
+      "endpoint": "gpu",
+      "execution_ready": false,
+      "files_individually_written_and_rechecked": 306,
+      "model_calls": 0,
+      "package_raw_sha256": "1443de85299aebc5a1f422a1882dc5a15661a151a0bfd3a507e0368afa1cf218",
+      "private_formal_reads": 0,
+      "rhino_calls": 0,
+      "state_or_owner_grant_or_admission_created": false
+    },
+    "mac": {
+      "endpoint": "mac",
+      "execution_ready": false,
+      "files_individually_written_and_rechecked": 306,
+      "model_calls": 0,
+      "package_raw_sha256": "d2f24f917cdcda1e15be9b56b04df3d7d2158e7b936b0b738ee8c800a0ec7132",
+      "private_formal_reads": 0,
+      "rhino_calls": 0,
+      "state_or_owner_grant_or_admission_created": false
+    }
+  },
+  "asset_receipt_raw_sha256": {
+    "gpu": "e77f810fa140387810e461f3569220975a556aaccf386a2b082fc750c26b2029",
+    "mac": "3689a41b3b36e2885c7ca23d71579ba5d74f26fb873844101ca0efa2e7bce46b"
+  },
+  "engineering_gate_passed": false,
+  "epoch": 1791769482.668554,
+  "execution_ready": false,
+  "formal_execution_authorized": false,
+  "full_raw_field_audit": false,
+  "independent_asset_maps": {
+    "execution_ready": false,
+    "gpu_observation_epochs": [
+      1791769172.591001,
+      1791769232.2917304
+    ],
+    "human_or_transport_acquisition_origin_proven": false,
+    "mac_observation_epoch": 1791769227.6583831,
+    "model_calls": 0,
+    "rhino_calls": 0,
+    "supplied_actual_installed_asset_maps_verified": true
+  },
+  "instance_id": "reuse-dev-20261012-b",
+  "model_or_rhino_calls": 0,
+  "new_b_exact_two_hash_approval_received": false,
+  "new_b_state_grant_key_or_admission_created": false,
+  "original_a_source_or_failure_modified": false,
+  "owner_readiness_or_final_custody_minted": false,
+  "payload_bytes": 3311921,
+  "poststage_observations": {
+    "gpu": {
+      "a_retirement_verified": true,
+      "b_state_and_external_custody_absent": true,
+      "compute_processes": {
+        "returncode": 0,
+        "stderr": "",
+        "stdout": ""
+      },
+      "epoch": 1791769394.8645365,
+      "model_or_rhino_calls": 0,
+      "private_formal_reads": 0,
+      "remote_files_written": 0,
+      "runtime_sha256": "8b2243663e571113b8912174835fe0adde169ac451706f2829af7299fcbee1b4",
+      "shared_admission_absent": true,
+      "uid": 1000
+    },
+    "mac": {
+      "a_retirement_and_shared_registry_empty_verified": true,
+      "audit_tokenizer_six_verified": true,
+      "b_state_and_external_custody_absent": true,
+      "epoch": 1791769229.210321,
+      "model_or_rhino_calls": 0,
+      "private_formal_reads": 0,
+      "rhino_process_identity_verified": true
+    }
+  },
+  "predecessor": {
+    "formal_consumption_authorized": false,
+    "instance_id": "reuse-dev-20261011-a",
+    "new_development_requires_new_exact_two_hash_approval": true,
+    "physical_generation_total_independently_proven": null,
+    "public_failure_record_raw_sha256": "1dea93d52366135c36ee2a49ecb5605de87475a756da5ae4ef5bc3615798fd38",
+    "recorded_model_requests": 0,
+    "recorded_slots_completed": 0,
+    "recorded_slots_started": 0,
+    "retired_approval_raw_sha256": "fcfe67c8382d7e2dd28dafd58bec37deea8a75e5686ef9e2b241ac6e0a9416f9",
+    "retired_execution_restore_allowed": false,
+    "retirement_raw_sha256": "f098afe6e005e3ae09129bb44531ce3947e07d6592632d86a2c75af24f0f2978",
+    "runtime_sha256": "6c27d31987bed8289b498fd547dd680402b0f526cd773bd58a5c09dfaa9b2ac6",
+    "spec_sha256": "32f02512402ada907f6ed07381417d7f91c41896acef79ec5fe9b5d037b6d900",
+    "study_id": "C5DEV-REUSE-20261011-A"
+  },
+  "private_formal_reads": 0,
+  "public_files_per_endpoint": 306,
+  "publication_head_double_ci_observed": false,
+  "runtime_sha256": "8b2243663e571113b8912174835fe0adde169ac451706f2829af7299fcbee1b4",
+  "source_double_ci": {
+    "epoch": 1791769093.826758,
+    "pr": {
+      "conclusion": "success",
+      "headSha": "31f7cf5649e9a92ffaa50f890e9c304836fc3b97",
+      "passed": 1834,
+      "run_id": 38191594635,
+      "seconds": 507.62,
+      "skipped": 10,
+      "status": "completed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/actions/runs/38191594635"
+    },
+    "push": {
+      "conclusion": "success",
+      "headSha": "31f7cf5649e9a92ffaa50f890e9c304836fc3b97",
+      "passed": 1834,
+      "run_id": 38191591974,
+      "seconds": 829.52,
+      "skipped": 10,
+      "status": "completed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/actions/runs/38191591974"
+    },
+    "source_head": "31f7cf5649e9a92ffaa50f890e9c304836fc3b97"
+  },
+  "source_files_count": 305,
+  "spec_sha256": "cdd2571e63f040fd145b56d6b322fb7914c0d63816b53eca762001f632131488",
+  "status": "complete_actual_candidate_b_freeze_not_execution_approval",
+  "study_id": "C5DEV-REUSE-20261012-B"
+}

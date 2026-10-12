@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "study_id": "C5DEV-REUSE-20261011-A",
+  "instance_id": "reuse-dev-20261011-a",
+  "status": "source_cpu_and_actual_public_deployment_prepared_resource_fact_pending",
+  "source_base_revision": "ef36e208c332fe3c0a19b2e8470515d823696b70",
+  "candidate_spec_sha256": "50de2426aeb12ba8b831b8e8ba100aee8ebe5da75560ac845efb2d75b7fbcbd0",
+  "candidate_runtime_sha256": "3719141109b5a5ef8b932c5f778eaff002f965b8d0856979d87d9cf9618ff7a7",
+  "candidate_is_disabled_not_a_request_for_execution_approval": true,
+  "source_inventory_sha256": "6dcfac419442046b91d4989455ff666fe2eb677dbeb21b4afc4b39290ca525b6",
+  "source_file_count": 302,
+  "public_payload_file_count": 303,
+  "public_payload_bytes": 3271173,
+  "complete_review_material_directory": "/private/tmp/rhinocoder-c5-native-freeze-review",
+  "independent_current_asset_map_check": {
+    "execution_ready": false,
+    "gpu_observation_epochs": [
+      1791745923.045555,
+      1791745986.0178945
+    ],
+    "human_or_transport_acquisition_origin_proven": false,
+    "mac_observation_epoch": 1791744456.6888041,
+    "model_calls": 0,
+    "rhino_calls": 0,
+    "supplied_actual_installed_asset_maps_verified": true
+  },
+  "actual_endpoint_source_checks": {
+    "mac": {
+      "actual_installed_assets_verified": false,
+      "candidate_execution_ready": false,
+      "complete_closure_binding_verified": true,
+      "execution_ready": false,
+      "human_approval_origin_verified": false,
+      "source_files_individually_verified": 302,
+      "source_population_exact": true
+    },
+    "gpu": {
+      "actual_installed_assets_verified": false,
+      "candidate_execution_ready": false,
+      "complete_closure_binding_verified": true,
+      "execution_ready": false,
+      "human_approval_origin_verified": false,
+      "source_files_individually_verified": 302,
+      "source_population_exact": true
+    }
+  },
+  "actual_endpoint_stage_results": {
+    "mac": {
+      "endpoint": "mac",
+      "execution_ready": false,
+      "files_individually_written_and_rechecked": 303,
+      "model_calls": 0,
+      "package_raw_sha256": "94e827ebf71d489763d97f9a9501f369d9b83a3fc3bc41226c0ba50113f48f00",
+      "private_formal_reads": 0,
+      "rhino_calls": 0,
+      "state_or_owner_grant_or_admission_created": false
+    },
+    "gpu": {
+      "endpoint": "gpu",
+      "execution_ready": false,
+      "files_individually_written_and_rechecked": 303,
+      "model_calls": 0,
+      "package_raw_sha256": "0a8a440e6ad78442c9383bcf30a93539050f8b978aa182714886fbcd17bfcdca",
+      "private_formal_reads": 0,
+      "rhino_calls": 0,
+      "state_or_owner_grant_or_admission_created": false
+    }
+  },
+  "current_gpu_readonly_observation": {
+    "epoch": 1791745925.564164,
+    "boot_id": "0a861fa3-31c9-4899-a022-c4f9cdb8dbfe",
+    "uid": 1000,
+    "gpu": {
+      "returncode": 0,
+      "rows": [
+        "GPU-3a14915f-3804-46b7-b98a-aa09f7bbab4f, NVIDIA GeForce RTX 3090, 11, 24576, 0"
+      ]
+    },
+    "compute_processes": {
+      "returncode": 0,
+      "rows": []
+    },
+    "original_worker_43776_present": false
+  },
+  "mac_readable_host_files": 339,
+  "mac_readable_controller_files": 3552,
+  "accepted_rhino_pid_still_present": 44652,
+  "rhino_blank_document_independently_inspected": false,
+  "new_cpu_controls_passed": 70,
+  "local_full_suite": {
+    "passed": 1733,
+    "skipped": 11,
+    "seconds": 316.92
+  },
+  "embedded_python39_inert_import_check_passed": true,
+  "source_dual_ci_success": false,
+  "source_dual_ci_note": "prepublication record; inspect exact PR head check runs for final results",
+  "remaining_input": "historical_gpu_cumulative_residency_conservative_upper_bound_seconds",
+  "historical_cumulative_upper_bound_seconds": null,
+  "platform_hour_quota": null,
+  "platform_balance_input_required": false,
+  "lease_expiry_owner_reported": "2026-10-13T20:00:00+02:00",
+  "generation_cutoff_proposed": "2026-10-13T19:45:00+02:00",
+  "original_cumulative_seconds_max": 57600,
+  "new_research_reservation_proposed_seconds": 21600,
+  "new_state_or_grant_or_keys_or_admission_created": false,
+  "new_agent_actual_model_calls": 0,
+  "new_agent_rhino_scripts_subscriptions_warmup_geometry_calls": 0,
+  "private_formal_data_reads": 0,
+  "whole_actual_eight_slot_engineering_pass": false,
+  "exact_two_hash_execution_approval_received": false,
+  "original_c5_no_go_changed": false,
+  "execution_ready": false,
+  "protected_primary_wip_diff_sha256": "b407093a909b70b9b1c4ea6547517373ad6c7fb230103d97b0502044a0e8aa6c"
+}

@@ -379,7 +379,7 @@ def test_real_cpu_owned_child_is_qualified_before_permit_and_watchdog_never_esca
     monkeypatch.setattr(supervisor,'child_main',child)
     if kind=='timeout':
         original=supervisor.Watchdog
-        monkeypatch.setattr(supervisor,'Watchdog',lambda start,cap:original(start,0.25))
+        monkeypatch.setattr(supervisor,'Watchdog',lambda start,cap,**kwargs:original(start,0.25,**kwargs))
         with pytest.raises(ValueError,match='watchdog_deadline'):
             supervisor.supervise(spec,runtime,b,{},lambda **_:None)
     else:

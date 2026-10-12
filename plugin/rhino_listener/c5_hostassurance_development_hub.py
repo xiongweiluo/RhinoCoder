@@ -58,7 +58,7 @@ class HostAwareDevelopmentHub(DevelopmentHub):
             if self.current_request is not None and not self.request_attested:
                 publish_json(self.state,'hub-host-check-%04d.json'%self.seq,{
                     'request_sha256':digest(self.current_request),'host_record_sha256':self.assurance.head,
-                    'host_sequence':self.assurance.sequence-1,'runtime_freeze_sha256':digest(self.freeze)})
+                    'host_sequence':self.assurance.sequence-1,'runtime_freeze_sha256':self.runtime_sha})
                 self.request_attested=True
             return result
         finally: self.source = source
