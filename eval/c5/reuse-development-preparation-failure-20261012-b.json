@@ -1,0 +1,216 @@
+{
+  "actual_physical_generation_total_independently_proven": null,
+  "approved_head_ci": {
+    "pr": {
+      "conclusion": "success",
+      "headSha": "03391629b03dcf2b50392479965ef3485a632a61",
+      "passed": 1834,
+      "run_id": 38193194920,
+      "seconds": 764.78,
+      "skipped": 10,
+      "status": "completed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/actions/runs/38193194920"
+    },
+    "push": {
+      "conclusion": "success",
+      "headSha": "03391629b03dcf2b50392479965ef3485a632a61",
+      "passed": 1834,
+      "run_id": 38193191668,
+      "seconds": 619.96,
+      "skipped": 10,
+      "status": "completed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/actions/runs/38193191668"
+    }
+  },
+  "approved_publication_head": "03391629b03dcf2b50392479965ef3485a632a61",
+  "automatic_model_stop_reason": "No new supervisor/qualified child/worker launched; no signal target exists.",
+  "automatic_model_stop_sent": false,
+  "complete_original_raw_joint_audit": false,
+  "controller_drive_invocations": 0,
+  "engineering_gate_passed": false,
+  "evidence_origin_limits": "Filesystem populations, local tool outputs and received remote observations plus reviewed entry control flow support recorded zero downstream activity for this invocation. These are not cryptographic human/transport origin proof or an independently measured physical generation total.",
+  "external_readiness_or_final_custody_created": false,
+  "failure": {
+    "auto_review_rejection": false,
+    "command": [
+      "/usr/sbin/sysctl",
+      "-n",
+      "kern.bootsessionuuid"
+    ],
+    "entry_rerun_after_diagnosis": false,
+    "process_exit_status": 1,
+    "root_cause": "Agent launched the fixed Mac preparation command under the restricted filesystem/system sandbox; sysctl process-identity query was denied before prepare was entered. The same read-only query with already-authorized host access succeeded. No frozen source defect is established by this failure.",
+    "sandboxed_readonly_diagnostic_stderr": "sysctl: sysctl fmt -1 1024 1: Operation not permitted",
+    "site": "plugin/rhino_listener/c5_reuse_mac_scope.py:61",
+    "type": "CalledProcessError",
+    "unsandboxed_readonly_diagnostic_exit_status": 0,
+    "unsandboxed_readonly_diagnostic_stdout": "F873EC8A-960B-4B86-B35E-65A973D84E99"
+  },
+  "formal_freeze_or_execution_admitted": false,
+  "frozen_source_or_hashes_changed": false,
+  "host_cleanup_or_memory_erasure_proven": false,
+  "instance_id": "reuse-dev-20261012-b",
+  "mac_prepare_command_invocations": 1,
+  "mac_prepare_exit_status": 1,
+  "no_retry_or_fill": true,
+  "observed_epoch": 1791773168.673225,
+  "original_c5_no_go_changed": false,
+  "pipeline_counts": {
+    "generation_stages_recorded": 0,
+    "host_baseline_sealed": false,
+    "host_subscription_started": false,
+    "model_native_slots_completed": 0,
+    "model_native_slots_started": 0,
+    "model_or_cuda_loader_invocations": 0,
+    "model_requests_recorded": 0,
+    "native_signed_dispatches_recorded": 0,
+    "private_formal_reads": 0,
+    "warmup_started": false
+  },
+  "postretirement_independent_verification": {
+    "gpu_source": {
+      "actual_installed_assets_verified": false,
+      "candidate_execution_ready": true,
+      "complete_closure_binding_verified": true,
+      "execution_ready": false,
+      "human_approval_origin_verified": false,
+      "source_files_individually_verified": 305,
+      "source_population_exact": true
+    },
+    "gpu_state": {
+      "a_retirement_unchanged": true,
+      "b_admission_and_custody_absent": true,
+      "endpoint_mutations": 0,
+      "epoch": 1791773272.3876076,
+      "gpu_b_retired_state_population_and_bytes_independently_verified": true,
+      "model_or_rhino_calls": 0,
+      "original_entry_grant_absent": true
+    },
+    "mac": {
+      "a_retirement_unchanged": true,
+      "epoch": 1791773245.6309419,
+      "mac_b_retirement_and_grant_verified": true,
+      "mac_source_check": {
+        "actual_installed_assets_verified": false,
+        "candidate_execution_ready": true,
+        "complete_closure_binding_verified": true,
+        "execution_ready": false,
+        "human_approval_origin_verified": false,
+        "source_files_individually_verified": 305,
+        "source_population_exact": true
+      },
+      "model_or_rhino_calls": 0,
+      "public_result_and_exact_approval_join_verified": true,
+      "source_or_entry_mutations": 0
+    }
+  },
+  "preflight": {
+    "a_retired_and_shared_registry_empty": true,
+    "b_state_and_custody_absent": true,
+    "budget_check_only": {
+      "elapsed_wall_seconds": 6.209011189639568e-06,
+      "operational_cap_seconds": 17940,
+      "physical_gpu_release_independently_verified": null,
+      "prior_cumulative_upper_bound_seconds": null,
+      "reserved_wall_seconds": 18000,
+      "start_epoch": 1791772641.7624419,
+      "stop_reserve_seconds": 60,
+      "within_reserved_wall_seconds": true
+    },
+    "epoch": 1791772641.762439,
+    "model_or_rhino_calls": 0,
+    "private_formal_reads": 0,
+    "process_and_tokenizer_verified": true,
+    "source_check": {
+      "actual_installed_assets_verified": false,
+      "candidate_execution_ready": true,
+      "complete_closure_binding_verified": true,
+      "execution_ready": false,
+      "human_approval_origin_verified": false,
+      "source_files_individually_verified": 305,
+      "source_population_exact": true
+    }
+  },
+  "prepare_function_entered": false,
+  "quality_by_slot": null,
+  "retirement": {
+    "gpu": {
+      "approval_raw_sha256": "175bb33bf80d2f7559f4ee6d03c6634225c9df4839ef5f84686cd5814dd57574",
+      "b_gpu_admission_absent": true,
+      "boot_id": "0a861fa3-31c9-4899-a022-c4f9cdb8dbfe",
+      "compute_stdout": "",
+      "endpoint": "gpu",
+      "epoch": 1791773028.5469177,
+      "full_host_cleanup_or_memory_erasure_claimed": false,
+      "gpu_stdout": "GPU-3a14915f-3804-46b7-b98a-aa09f7bbab4f, 11\n",
+      "grant_preserved_under_retired_name": true,
+      "model_or_rhino_calls": 0,
+      "no_b_preparation_claim_or_keys_or_custody": true,
+      "no_signal_sent": true,
+      "original_entry_approval_missing": true,
+      "retirement_raw_sha256": "3110dd38a8b318150526394ae98e7b36233fa6ac91a64a2adb08a1f1b529afda",
+      "retirement_record": {
+        "approval_retirement_is_recoverable_preservation_not_new_execution_authority": true,
+        "automatic_retry_allowed": false,
+        "controller_drive_invocations": 0,
+        "error_message": "sysctl kern.bootsessionuuid returned exit status 1: Operation not permitted under local sandbox",
+        "error_type": "CalledProcessError",
+        "failure_phase": "mac_scope_process_identity_before_prepare_function",
+        "formal_execution_authorized": false,
+        "instance_id": "reuse-dev-20261012-b",
+        "prepare_function_entered": false,
+        "record_epoch": 1791772926.736382,
+        "rhino_wrapper_invocations": 0,
+        "runtime_sha256": "8b2243663e571113b8912174835fe0adde169ac451706f2829af7299fcbee1b4",
+        "single_mac_prepare_command_invocations": 1,
+        "spec_sha256": "cdd2571e63f040fd145b56d6b322fb7914c0d63816b53eca762001f632131488",
+        "status": "single_mac_preflight_failed_retired_no_retry",
+        "study_id": "C5DEV-REUSE-20261012-B"
+      },
+      "state_contains_only_owner_approval_before_retirement": true
+    },
+    "mac": {
+      "approval_raw_sha256": "175bb33bf80d2f7559f4ee6d03c6634225c9df4839ef5f84686cd5814dd57574",
+      "endpoint": "mac",
+      "epoch": 1791773046.1745028,
+      "full_host_cleanup_or_memory_erasure_claimed": false,
+      "grant_preserved_under_retired_name": true,
+      "model_or_rhino_calls": 0,
+      "no_b_preparation_claim_or_keys_or_custody": true,
+      "no_signal_sent": true,
+      "original_entry_approval_missing": true,
+      "retirement_raw_sha256": "3110dd38a8b318150526394ae98e7b36233fa6ac91a64a2adb08a1f1b529afda",
+      "retirement_record": {
+        "approval_retirement_is_recoverable_preservation_not_new_execution_authority": true,
+        "automatic_retry_allowed": false,
+        "controller_drive_invocations": 0,
+        "error_message": "sysctl kern.bootsessionuuid returned exit status 1: Operation not permitted under local sandbox",
+        "error_type": "CalledProcessError",
+        "failure_phase": "mac_scope_process_identity_before_prepare_function",
+        "formal_execution_authorized": false,
+        "instance_id": "reuse-dev-20261012-b",
+        "prepare_function_entered": false,
+        "record_epoch": 1791772926.736382,
+        "rhino_wrapper_invocations": 0,
+        "runtime_sha256": "8b2243663e571113b8912174835fe0adde169ac451706f2829af7299fcbee1b4",
+        "single_mac_prepare_command_invocations": 1,
+        "spec_sha256": "cdd2571e63f040fd145b56d6b322fb7914c0d63816b53eca762001f632131488",
+        "status": "single_mac_preflight_failed_retired_no_retry",
+        "study_id": "C5DEV-REUSE-20261012-B"
+      },
+      "shared_admission_integrity": "ok",
+      "shared_admission_population": [
+        "admission.lock",
+        "admission.sqlite"
+      ],
+      "shared_admission_rows": [],
+      "state_contains_only_owner_approval_before_retirement": true
+    }
+  },
+  "rhino_wrapper_invocations": 0,
+  "runtime_sha256": "8b2243663e571113b8912174835fe0adde169ac451706f2829af7299fcbee1b4",
+  "spec_sha256": "cdd2571e63f040fd145b56d6b322fb7914c0d63816b53eca762001f632131488",
+  "status": "PREPARATION_PREFLIGHT_FAILED_RETIRED_NO_RETRY",
+  "study_id": "C5DEV-REUSE-20261012-B",
+  "timing_note": "Retained retirement_record.record_epoch equals the earlier Mac approval-registration epoch; it is not a measured failure or retirement instant. Endpoint epoch fields are the actual subsequent read-only state observation times."
+}
