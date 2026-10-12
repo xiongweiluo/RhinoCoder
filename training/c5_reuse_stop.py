@@ -27,7 +27,7 @@ def stop_once(binding, expected, approval, registry, journal, ops):
     require(binding['endpoint']=='gpu', 'stop_gpu_endpoint_required')
     binding, expected, approval = (strict(canonical(v)) for v in (binding, expected, approval))
     target(expected)
-    grant = {'study_id': STUDY, 'actor': 'repository_owner', 'approved': True,
+    grant = {'study_id': binding['study_id'], 'actor': 'repository_owner', 'approved': True,
              'spec_sha256': binding['spec_sha256'], 'runtime_sha256': binding['runtime_sha256'],
              'target_identity_sha256': sha(expected), 'signal': 'SIGTERM', 'signals_max': 1,
              'approval_basis': 'direct repository_owner exact reuse stop scope approval'}
@@ -37,7 +37,7 @@ def stop_once(binding, expected, approval, registry, journal, ops):
     admission = registry.claim('stop')
     journal('stop_admitted', {'admission': admission, 'target': expected})
     fd = None
-    result = {'study_id': STUDY, 'signal_attempts': 0, 'exit_observed': False,
+    result = {'study_id': binding['study_id'], 'signal_attempts': 0, 'exit_observed': False,
               'gpu_absence_independently_verified': None, 'replay_allowed': False,
               'status': 'stop_unknown_no_retry'}
     try:

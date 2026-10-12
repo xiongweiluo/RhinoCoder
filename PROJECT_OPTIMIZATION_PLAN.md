@@ -10,7 +10,19 @@
 
 ## 当前快照与跨对话续接
 
-### 近期任务索引：2026-10-12 只读启动诊断与禁用后续协议草案
+### 近期任务索引：2026-10-12 接受披露式后续准备，D完整冻结
+
+本人接受草案且仅批准后续准备，并接受本次新5＋18小时有限资源边界，未授予执行/迁移/私题/付款或merge权限。[D完整审议材料](docs/c5-reuse-followup-d-exact-freeze-review-20261012.md)与[独立预执行证据](eval/c5/reuse-followup-preexecution-validation-20261012-d.json)优先于下面待接受草案的历史时点。
+
+- [x] 独立官方CPython3.11.17及原包CPU兼容性/实际原生pidfd首门禁、完整字节清单完成；原conda/model/adapter不改。固定无字节缓存参数纳入实际资格及冻结。
+- [x] 同一全局根的非空历史genesis、旧v1字节保留、D单次角色永久消费及异常双流留存/首次已知收尾接线完成；42新增CPU控制通过，最终完整CPU/双CI见准备PR。
+- [x] 两端各337清单/338公共文件部署、真实无grant完整CLI/实际资产与5小时窗口、外部独立字节/人口/三次退休/旧消费核查通过；没有D state/grant/key/custody/准入初始化、模型/Rhino调用或私题读取。原三次失败、C消费与NO-GO保留。
+- [ ] 唯一执行门：该完整准备精确head双CI成功后，本人审议并明确批准spec `62e6a66c77604858a0b0109003af1cff74f3ffbdb2ae33b8756c76951746e1d6` 与runtime `af589bebd37a6786a01843275ec3add7b868edcc9e6a495fa989d67b93842f67` 两完整哈希的一次固定公开8槽。此前仅准备/资源批准和C旧两哈希不能代用；本人ready/final保管与完整原始联合审计仍必需。
+- [ ] 条件项：唯一D开发完整原始联合审计PASS→正式40槽独立完整冻结/最新实际租期与完整18小时窗口/双CI/另一精确批准→本人私下披露式复用及审计→报告与PR/main本人审核。原NO-GO/正式失败/同题披露/评分门槛/默认混合不改；失败不重试或补槽。
+
+以下为只读草案及更早历史；旧“待接受/未完成诊断”不代表最新状态。
+
+### 历史续接快照：2026-10-12 只读启动诊断与禁用后续协议草案
 
 本人回复“可以”授权上一轮提出的只读诊断/协议方案，本轮已完成[诊断与草案](docs/c5-reuse-startup-readonly-diagnosis-and-continuation-proposal-20261012.md)、[两端只读证据](eval/c5/reuse-c-startup-readonly-diagnosis-20261012.json)和[禁用协议 JSON](eval/c5/reuse-c-continuation-proposal-20261012.json)。冻结 GPU Python 缺 `os.pidfd_open`，归档入口第一原语门禁当前必拒绝；原 C stderr 缺失，不能追认证明唯一历史异常。
 
