@@ -69,15 +69,14 @@ def verify_process_identity(process,*,embedded=False):
             'reuse_accepted_rhino_start_identity')
 
 
-def mac_scope(root,*,embedded=False,private_prefixes=(),cleanup_only=False):
-    spec,runtime,binding,plan,source=approved_entry(root,'mac',private_prefixes=private_prefixes,
-                                                cleanup_only=cleanup_only)
+def readable_scope(root,spec,runtime,plan,source,*,embedded=False,cleanup_only=False):
+    """Identical actual interpreter/process/readable checks, no state or grant."""
     require(sha(plan['environment'])==runtime['environment_sha256']
             and sha(plan['host_readable_files'])==runtime['host_readable_files_sha256']
             and sha(plan['host_acceptance'])==spec['host_policy']['acceptance_record_sha256'],
             'reuse_mac_asset_binding')
     acceptance=plan['host_acceptance']
-    require(acceptance['instance_id']==binding['instance_id']
+    require(acceptance['instance_id']==spec['instance_id']
             and all(acceptance[k] is True for k in ('owner_confirms_blank_active_document',
                 'owner_confirms_exclusive_use_and_no_other_operations_during_research',
                 'owner_accepts_readable_files_frozen_opaque_host_trusted_visible_checkpoints_only')),
@@ -108,4 +107,11 @@ def mac_scope(root,*,embedded=False,private_prefixes=(),cleanup_only=False):
                 require(str(p) in frozen and code_sha(p)==frozen[str(p)],'reuse_controller_foreign_loaded_environment')
         return value
     guard()
+    return guard
+
+
+def mac_scope(root,*,embedded=False,private_prefixes=(),cleanup_only=False):
+    spec,runtime,binding,plan,source=approved_entry(root,'mac',private_prefixes=private_prefixes,
+                                                cleanup_only=cleanup_only)
+    guard=readable_scope(root,spec,runtime,plan,source,embedded=embedded,cleanup_only=cleanup_only)
     return spec,runtime,binding,plan,guard

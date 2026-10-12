@@ -15,9 +15,9 @@ from training.c5_reuse_evidence import canonical,require,sha,strict
 from training.c5_reuse_gpu_loader import PYTHON,ENTRY,LOADER_POLICY,ADAPTER,SNAPSHOT,MANIFEST_SHA,ADAPTER_FILES
 from training.c5_reuse_owned_child import POLICY as STOP
 
-from plugin.rhino_listener.c5_reuse_predecessor import FAILURE,POLICY as PREDECESSOR
+from plugin.rhino_listener.c5_reuse_predecessor import FAILURES,POLICIES as PREDECESSOR
 
-JSON_FILES=(SOURCE,'eval/c5/rhino-runtime-schema-v1.json','eval/c5/c5-engineering-config.json',FAILURE)
+JSON_FILES=(SOURCE,'eval/c5/rhino-runtime-schema-v1.json','eval/c5/c5-engineering-config.json')+FAILURES
 ENTRIES=('tools/run_c5_reuse_gpu_entry.py','tools/run_c5_reuse_mac_entry.py',
          'tools/run_c5_reuse_rhino_entry.py','tools/run_c5_reuse_rhino_wrapper.py')
 
@@ -38,8 +38,9 @@ def build(root,*,environment,model_assets,host_files,host_acceptance,gpu_process
     if resource_acceptance is not None:
         require(canonical(resource_acceptance)==canonical(RESOURCE_ACCEPTANCE),'reuse_freeze_resource_acceptance')
     payload=source_payload(root);public=public_plan(Path(root))
-    require(hashlib.sha256(payload[FAILURE]).hexdigest()==PREDECESSOR['public_failure_record_raw_sha256'],
-            'reuse_freeze_original_failure_bytes')
+    for failure,policy in zip(FAILURES,PREDECESSOR):
+        require(hashlib.sha256(payload[failure]).hexdigest()==policy['public_failure_record_raw_sha256'],
+                'reuse_freeze_original_failure_bytes')
     resources={'lease_expiry_epoch':1791914400,'generation_cutoff_epoch':1791913500,'export_reserve_seconds':900,
         'prior_cumulative_upper_bound_seconds':None,'remaining_gpu_seconds':82800,
         'development_seconds_max':18000,'formal_seconds_max':64800,'research_seconds_max':82800,

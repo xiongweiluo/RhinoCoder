@@ -7,7 +7,7 @@ import sqlite3
 
 import pytest
 
-from plugin.rhino_listener.c5_reuse_predecessor import POLICY,verify_retirement
+from plugin.rhino_listener.c5_reuse_predecessor import POLICY,B_POLICY,verify_retirement
 from plugin.rhino_listener.c5_reuse_runtime_scope import read_bytes
 from plugin.rhino_listener.c5_reuse_field_scope import bind,canonical
 from eval.test_c5_reuse_field_preparation import binding
@@ -26,6 +26,13 @@ def legacy(tmp_path):
         ('owner-approval.retired-no-retry.json',approval,POLICY['retired_approval_raw_sha256'])]:
         p=state/name;p.write_bytes(canonical(value)+b'\n');p.chmod(0o600)
         assert hashlib.sha256(p.read_bytes()).hexdigest()==pin
+    other=parent/'reuse-dev-20261012-b-state';other.mkdir(mode=0o700)
+    bf=json.loads((ROOT/'eval/c5/reuse-development-preparation-failure-20261012-b.json').read_bytes())
+    ba=json.loads((ROOT/'eval/c5/reuse-development-owner-exact-approval-20261012-b.json').read_bytes())['approval']
+    for name,value,pin in [('entry-retired-no-retry.json',bf['retirement']['mac']['retirement_record'],B_POLICY['retirement_raw_sha256']),
+        ('owner-approval.retired-no-retry.json',ba,B_POLICY['retired_approval_raw_sha256'])]:
+        p=other/name;p.write_bytes(canonical(value)+b'\n');p.chmod(0o600)
+        assert hashlib.sha256(p.read_bytes()).hexdigest()==pin
     return b,parent,state
 
 
@@ -36,16 +43,18 @@ def test_retirement_binding_and_existing_empty_registry_are_readonly(tmp_path):
     before={p.name:p.read_bytes() for p in registry.iterdir()}
     verify_retirement(parent,read_bytes);preparation_scope(parent)
     assert before=={p.name:p.read_bytes() for p in registry.iterdir()}
-    assert not (parent/'reuse-dev-20261012-b-state').exists()
+    assert not (parent/'reuse-dev-20261012-c-state').exists()
     assert set(registry.iterdir())=={registry/'admission.lock',registry/'admission.sqlite'}
 
 
 @pytest.mark.parametrize('change',['restored_grant','missing_retirement','drift_retirement','missing_saved_approval',
     'drift_saved_approval','alias_retirement','hardlink_retirement','public_directory','public_record','nonempty_registry',
     'tombstone','schema','extra','alias_database','hardlink_database'])
-def test_no_restore_unknown_registry_or_new_namespace_bypass(tmp_path,change):
+@pytest.mark.parametrize('predecessor',['a','b'])
+def test_no_restore_unknown_registry_or_new_namespace_bypass(tmp_path,change,predecessor):
     b,parent,state=legacy(tmp_path)
     with AdmissionRegistry(b,create=True):pass
+    if predecessor=='b':state=parent/'reuse-dev-20261012-b-state'
     reg=Path(b['paths']['admission_root']);ret=state/'entry-retired-no-retry.json'
     if change=='restored_grant':(state/'owner-approval.json').write_text('{}')
     elif change=='missing_retirement':ret.unlink()
@@ -70,7 +79,7 @@ def test_no_restore_unknown_registry_or_new_namespace_bypass(tmp_path,change):
             db.commit()
         finally:db.close()
     with pytest.raises((ValueError,OSError)):preparation_scope(parent)
-    assert not (parent/'reuse-dev-20261012-b-source').exists() and not (parent/'reuse-dev-20261012-b-state').exists()
+    assert not (parent/'reuse-dev-20261012-c-source').exists() and not (parent/'reuse-dev-20261012-c-state').exists()
 
 
 def test_old_exact_approval_and_retired_study_are_not_candidate_b_authority():
