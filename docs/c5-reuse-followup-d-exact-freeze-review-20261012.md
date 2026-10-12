@@ -1,5 +1,7 @@
 # D 披露式后续开发：完整冻结与执行审议
 
+**最新实际状态：**本人随后明确批准以下两完整哈希，唯一 D 开发已启动并在本人 ready 门失败，现已两端永久退休；见[原始失败与收尾记录](c5-reuse-followup-d-readiness-failure-20261012.md)。下文保留完整准备时点，不能再据此启动或复用批准。
+
 2026-10-12。本人与代理的当前授权是后续准备；本人已接受禁用草案和本次独立资源预约，见[准备接受记录](../eval/c5/reuse-followup-owner-preparation-acceptance-20261012-d.json)、[资源接受记录](../eval/c5/reuse-followup-resource-acceptance-20261012-d.json)。没有生成两端 owner grant、研究 state、key、本人保管目录或 v2 准入 manifest。此次完整公共源码已两端部署和无 grant 预检；这不等于已执行、8槽工程 PASS、正式授权或 PR 合并。
 
 ## 两个可审议的完整哈希
