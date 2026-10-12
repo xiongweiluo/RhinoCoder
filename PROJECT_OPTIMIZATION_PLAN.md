@@ -10,7 +10,19 @@
 
 ## 当前快照与跨对话续接
 
-### 近期任务索引：2026-10-12 独立C实际权限预检与完整冻结
+### 近期任务索引：2026-10-12 未启动C的GPU boot修订
+
+本人已精确批准原C两哈希，但恢复SSH后GPU boot漂移在grant前被实际只读预检拦截，见[批准与停止证据](eval/c5/reuse-development-c-postapproval-boot-drift-20261012.json)。C state/grant/prepare/wrapper/drive/模型/槽均0，不是研究重跑。保持同一未启动C，原批准完整副本与A/B退休保留；[boot修订完整冻结](docs/c5-reuse-development-c-boot-revision-review-20261012.md)只更新plan的boot ID及派生runtime，不转移旧批准。
+
+- [x] 原模型/环境/Mac资产重哈希与65项相关CPU控制通过；全部代码和spec字节不变，资源/停止边界、共享准入和唯一8槽规则不变。
+- [x] 最新完整修订两端308公共文件部署、实际无grant预检、独立字节和原资产验证完成，见[完整修订验证](eval/c5/reuse-development-boot-revision-preexecution-validation-20261012-c.json)。
+- [ ] 修订精确发布head双CI成功；以PR #15实际结果为准，main没有自动包含或merge。
+- [ ] 当前执行门：本人批准spec `10f821cacb0e5681c3b2f8286230eab7dfdd69102ed7ca3adf540f6cd2148446` 与修订runtime `160e74bb15497960d51d499f51bac6a8be67b38c0124af385296c1119ecedc24` 两完整哈希，仅一次固定公开8槽；原04caa批准不能代用，本人实际ready/final保管仍必需。
+- [ ] 条件项：唯一8槽完整原始联合审计PASS→正式40槽完整冻结/双CI/新两哈希批准→本人私下复用及审计→报告和PR审核；原NO-GO与默认混合不改，不补槽或重试。
+
+以下为原C及更早历史时点，旧“待批准/同boot/未运行”不代表最新事实。
+
+### 历史续接快照：2026-10-12 独立C实际权限预检与完整冻结
 
 本人确认另行授权C完整准备，见[准备授权](eval/c5/reuse-development-owner-preparation-authorization-20261012-c.json)。[C完整冻结](docs/c5-reuse-development-c-exact-freeze-review-20261012.md)同时钉住A/B原失败与两端退休；全局准入表保留。两端各308公共文件/307清单及实际固定解释器、权限、宿主/模型/环境与完整5小时窗口的无研究作用预检完成。本地1852 passed／11 skipped；最终发布精确head双CI以本准备PR实际结果为准。C尚无执行批准/state/grant/key/Rhino包装器或模型操作，不恢复A/B或复用旧批准。
 

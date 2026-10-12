@@ -1,13 +1,15 @@
-# 独立开发C完整冻结与精确批准门
+# 独立开发C原完整冻结与精确批准门
+
+**本页为原批准时点说明。** 本人随后精确批准，但GPU重启在任何grant/入口前被只读预检拦截；最新完整材料和执行门见[C boot修订](c5-reuse-development-c-boot-revision-review-20261012.md)。下方“尚无批准”和“同boot”仅为原时点记录，原04caa批准不适用于修订runtime。
 
 本人在B单次准备预检失败并退休后明确确认[独立新候选准备](../eval/c5/reuse-development-owner-preparation-authorization-20261012-c.json)。C身份为`C5DEV-REUSE-20261012-C`／`reuse-dev-20261012-c`。此次只完成源码适配、CPU验证、两端公共部署、实际无研究作用预检及完整冻结；尚无C执行批准、state/grant/key、Rhino包装器、模型加载或生成。A/B原失败、完整源根和两端退休批准保留，旧批准不能用于C。
 
 | 完整材料 | canonical SHA-256 |
 | --- | --- |
 | [C development spec](../eval/c5/reuse-development-spec-20261012-c.json) | `10f821cacb0e5681c3b2f8286230eab7dfdd69102ed7ca3adf540f6cd2148446` |
-| [C complete runtime freeze](../eval/c5/reuse-development-runtime-freeze-20261012-c.json) | `04caaac2a915b635211751f35d020ec79134d5bdd46d7efff88120be17992df2` |
+| [C complete runtime freeze](https://github.com/xiongweiluo/RhinoCoder/blob/84a0336ab32883c4f16cf7bca775421062387d0a/eval/c5/reuse-development-runtime-freeze-20261012-c.json) | `04caaac2a915b635211751f35d020ec79134d5bdd46d7efff88120be17992df2` |
 
-上述哈希覆盖整个JSON，按sort_keys、紧凑separators、ensure_ascii=true、allow_nan=false规范化；不是原始文件SHA或缩写。[完整environment plan](../eval/c5/reuse-field-environment-plan-20261012-c.json)绑定模型、环境、宿主接受、资源、停止和两条退休关系。material-ready不等于执行批准或工程PASS。实际逐文件与预检证据见[独立完成记录](../eval/c5/reuse-development-complete-preexecution-validation-20261012-c.json)；精确发布head双CI以该准备PR当前实际检查结果为准，归档的发布前记录不冒充后来CI结果。
+上述哈希覆盖整个JSON，按sort_keys、紧凑separators、ensure_ascii=true、allow_nan=false规范化；不是原始文件SHA或缩写。[完整environment plan](https://github.com/xiongweiluo/RhinoCoder/blob/84a0336ab32883c4f16cf7bca775421062387d0a/eval/c5/reuse-field-environment-plan-20261012-c.json)绑定模型、环境、宿主接受、资源、停止和两条退休关系。material-ready不等于执行批准或工程PASS。实际逐文件与预检证据见[独立完成记录](../eval/c5/reuse-development-complete-preexecution-validation-20261012-c.json)；精确发布head双CI以该准备PR当前实际检查结果为准，归档的发布前记录不冒充后来CI结果。
 
 ## 操作权限预检与防止恢复旧执行
 
