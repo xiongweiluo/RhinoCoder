@@ -1,0 +1,303 @@
+{
+  "diagnostic_setup_correction": {
+    "corrected_readonly_diagnostic_flags": [
+      "-I",
+      "-B"
+    ],
+    "initial_failed_attempts_not_research_entry_or_c_root_cause": true,
+    "initial_site_disabled_diagnostic_failed": "ModuleNotFoundError: jsonschema",
+    "original_entry_used_no_site_flag": false,
+    "preliminary_local_receipts_retained": true
+  },
+  "diagnostic_tool_raw_sha256": "b117ce182bc88b552ee0b07de18366c2e039cc3108290733e1060d7094fc9041",
+  "effects": {
+    "c_serve_stop_or_slot_retry": 0,
+    "fork_pidfd_pin_or_signals": 0,
+    "formal_private_data_access": 0,
+    "model_or_rhino_calls": 0,
+    "new_state_grant_keys_or_candidates": 0,
+    "registry_writes": 0,
+    "source_deployment_or_migration": 0
+  },
+  "effects_count_scope": "Research-owned worker forks/pidfd pins/signals and study mutations; read-only SSH, sysctl and nvidia-smi subprocesses are allowed inspection, not counted as research launches.",
+  "finding": {
+    "current_primitive_guard_reproduced_readonly": true,
+    "first_guard_before_journal_registry_fork_or_worker": true,
+    "first_guard_rejection": "reuse_linux_owned_child_primitives",
+    "gpu_stop_exception_can_skip_known_native_cleanup_in_legacy_controller": true,
+    "historical_unique_root_cause_proven": false,
+    "legacy_ssh_discards_remote_stderr": true,
+    "missing_api": "os.pidfd_open",
+    "original_c_stderr_unavailable": true,
+    "registry_default_create_false_downstream_gap": true,
+    "same_frozen_gpu_interpreter_first_guard_would_pass": false,
+    "system_python_not_an_approved_runtime": true
+  },
+  "independent_interpreter_capability_observations": [
+    {
+      "HAVE_PIDFD_OPEN": null,
+      "HAVE_PIDFD_SEND_SIGNAL": null,
+      "epoch": 1791822634.0398993,
+      "exe": "/data/conda-envs/rhinocoder/bin/python3.11",
+      "fork": true,
+      "no_fork_pin_signal_or_model_call": true,
+      "pidfd_open": false,
+      "pidfd_send_signal": true,
+      "platform": "linux",
+      "python": "3.11.16 (main, Aug 27 2026, 14:44:21) [GCC 14.3.0]"
+    },
+    {
+      "exe": "/usr/bin/python3",
+      "fork": true,
+      "inspection_only_not_an_approved_runtime": true,
+      "pidfd_open": true,
+      "pidfd_send_signal": true,
+      "platform": "linux",
+      "python": "3.10.12 (main, Jul 29 2024, 16:56:48) [GCC 11.4.0]"
+    }
+  ],
+  "legacy_snapshot": {
+    "gpu": {
+      "exists": false,
+      "file_sha256": {},
+      "root_name": "c5-reuse-global-admission-v1",
+      "rows": [],
+      "writes": 0
+    },
+    "mac": {
+      "exists": true,
+      "file_sha256": {
+        "admission.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "admission.sqlite": "1d616f891b2f43015629d70e7c1ed6eed19ab288abc61d5403d1a0be1a0cd213",
+        "controller.consumed.json": "0ce2bd4f879e331ef6c8100cdc91e5f7a8ddfa079acc33a7a784eddac8aaa323",
+        "host.consumed.json": "a1f829c678a1f248c2e36d566707d47f7fb32e7d3d7404d81ea6085573a8a8f6"
+      },
+      "root_name": "c5-reuse-global-admission-v1",
+      "rows": [
+        [
+          "C5DEV-REUSE-20261012-C",
+          "controller",
+          "eaa08c266a1d785774d14c9d6609d31f7a743aee38f3d1f008b880926a7173e7",
+          "75ece512c33e19f10657c32307d3067889c7d12a512c1e11cf4cf08acfeb6df1"
+        ],
+        [
+          "C5DEV-REUSE-20261012-C",
+          "host",
+          "eaa08c266a1d785774d14c9d6609d31f7a743aee38f3d1f008b880926a7173e7",
+          "721b68b73ca3e1ad7354791ff40d43c5435ef71e805127d5610aad47fa5728e9"
+        ]
+      ],
+      "writes": 0
+    }
+  },
+  "limitations": {
+    "complete_eight_slot_joint_audit_pass": false,
+    "complete_model_and_installed_environment_rehashed": false,
+    "execution_ready": false,
+    "new_execution_resource_authority": false,
+    "original_runtime_main_context_replayed": false,
+    "original_serve_argv_or_private_stderr_reconstructed": false,
+    "pr_merge_authorized": false,
+    "qualified_gpu_release_or_memory_erasure_proven": false
+  },
+  "main_head_observed": "9d20bd70fb0367da9346f11e83bd78d347f443b8",
+  "observation_raw_sha256": {
+    "gpu": "3722bb334bde49a60dff77f6231b5249469dc0ec3f6f767f780d7feb1cfa09da",
+    "mac": "a8cc5490934f28abb1af37ddd4f42bec6ee26f7eab88ee4ecc93ed99b3035353"
+  },
+  "observations": {
+    "gpu": {
+      "diagnostic_main_in_archived_source_closure": false,
+      "endpoint": "gpu",
+      "epoch": 1791823131.070373,
+      "execution_authority": false,
+      "execution_ready": false,
+      "fork_pidfd_pin_signal_or_registry_mutations": 0,
+      "installed_model_and_complete_environment_bytes_rehashed": false,
+      "model_or_rhino_calls": 0,
+      "new_study_or_candidate_created": false,
+      "original_serve_argv_or_stderr_reconstructed": false,
+      "owner_grant_used": false,
+      "process": {
+        "boot_matches": true,
+        "compute": [],
+        "diagnostic_argv_is_serve": false,
+        "diagnostic_cwd_matches_source": true,
+        "expected_archived_serve_argv": [
+          "/data/conda-envs/rhinocoder/bin/python3.11",
+          "-I",
+          "-B",
+          "/data/reuse-dev-20261012-c-source/tools/run_c5_reuse_gpu_entry.py",
+          "--serve"
+        ],
+        "first_guard_rejection_if_missing_apis": "reuse_linux_owned_child_primitives",
+        "fork_available": true,
+        "frozen_first_primitive_guard_would_pass": false,
+        "gpu": [
+          "GPU-3a14915f-3804-46b7-b98a-aa09f7bbab4f, 11"
+        ],
+        "identity_of_diagnostic_process_only": {
+          "argv_sha256": "76e871e7df4b435635e1e29acd05f9b179024ee59603dd82c04ce1293eceebd5",
+          "boot_id": "77b495a6-c67c-4721-9038-e87c7fcc3fc6",
+          "cwd": "/data/reuse-dev-20261012-c-source",
+          "executable_sha256": "1b473ff72cfa63de341095fa5192c0d030ac06a56c995d77de3626098f81e055",
+          "pid": 66513,
+          "start_ticks": 718803,
+          "uid": 1000
+        },
+        "model_packages_imported": false,
+        "pidfd_open_available": false,
+        "pidfd_send_signal_available": true,
+        "thread_count": 1,
+        "uid_matches": true
+      },
+      "registry_after": {
+        "exists": false,
+        "file_sha256": {},
+        "root_name": "c5-reuse-global-admission-v1",
+        "rows": [],
+        "writes": 0
+      },
+      "registry_before": {
+        "exists": false,
+        "file_sha256": {},
+        "root_name": "c5-reuse-global-admission-v1",
+        "rows": [],
+        "writes": 0
+      },
+      "retirements": {
+        "reuse-dev-20261011-a": {
+          "active_grant_absent": true,
+          "retired_grant_raw_sha256": "fcfe67c8382d7e2dd28dafd58bec37deea8a75e5686ef9e2b241ac6e0a9416f9",
+          "retirement_raw_sha256": "f098afe6e005e3ae09129bb44531ce3947e07d6592632d86a2c75af24f0f2978"
+        },
+        "reuse-dev-20261012-b": {
+          "active_grant_absent": true,
+          "retired_grant_raw_sha256": "175bb33bf80d2f7559f4ee6d03c6634225c9df4839ef5f84686cd5814dd57574",
+          "retirement_raw_sha256": "3110dd38a8b318150526394ae98e7b36233fa6ac91a64a2adb08a1f1b529afda"
+        },
+        "reuse-dev-20261012-c": {
+          "active_grant_absent": true,
+          "retired_grant_raw_sha256": "359892d9adc45bc33a966bc013b5bc4f2a04b979100e760ee506f2edf2304225",
+          "retirement_raw_sha256": "310797d0dfbe9e787424f62140f8dae460fcd443b7b23043ca5e6dc1e8befb80"
+        }
+      },
+      "runtime_sha256": "160e74bb15497960d51d499f51bac6a8be67b38c0124af385296c1119ecedc24",
+      "source_files_verified": 307,
+      "spec_sha256": "10f821cacb0e5681c3b2f8286230eab7dfdd69102ed7ca3adf540f6cd2148446",
+      "static_boundaries": {
+        "original_remote_failure_proven_by_static_check": false,
+        "supervisor_registry_uses_default_create_false": true
+      },
+      "status": "readonly_archived_startup_diagnosis_not_execution_authority"
+    },
+    "mac": {
+      "diagnostic_main_in_archived_source_closure": false,
+      "endpoint": "mac",
+      "epoch": 1791823128.567198,
+      "execution_authority": false,
+      "execution_ready": false,
+      "fork_pidfd_pin_signal_or_registry_mutations": 0,
+      "installed_model_and_complete_environment_bytes_rehashed": false,
+      "model_or_rhino_calls": 0,
+      "new_study_or_candidate_created": false,
+      "original_serve_argv_or_stderr_reconstructed": false,
+      "owner_grant_used": false,
+      "process": {
+        "accepted_rhino_identity_readonly_checked": true,
+        "diagnostic_cwd": "/Users/xiongweiluo/RhinoCoder",
+        "rhino_calls": 0
+      },
+      "registry_after": {
+        "exists": true,
+        "file_sha256": {
+          "admission.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "admission.sqlite": "1d616f891b2f43015629d70e7c1ed6eed19ab288abc61d5403d1a0be1a0cd213",
+          "controller.consumed.json": "0ce2bd4f879e331ef6c8100cdc91e5f7a8ddfa079acc33a7a784eddac8aaa323",
+          "host.consumed.json": "a1f829c678a1f248c2e36d566707d47f7fb32e7d3d7404d81ea6085573a8a8f6"
+        },
+        "root_name": "c5-reuse-global-admission-v1",
+        "rows": [
+          [
+            "C5DEV-REUSE-20261012-C",
+            "controller",
+            "eaa08c266a1d785774d14c9d6609d31f7a743aee38f3d1f008b880926a7173e7",
+            "75ece512c33e19f10657c32307d3067889c7d12a512c1e11cf4cf08acfeb6df1"
+          ],
+          [
+            "C5DEV-REUSE-20261012-C",
+            "host",
+            "eaa08c266a1d785774d14c9d6609d31f7a743aee38f3d1f008b880926a7173e7",
+            "721b68b73ca3e1ad7354791ff40d43c5435ef71e805127d5610aad47fa5728e9"
+          ]
+        ],
+        "writes": 0
+      },
+      "registry_before": {
+        "exists": true,
+        "file_sha256": {
+          "admission.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "admission.sqlite": "1d616f891b2f43015629d70e7c1ed6eed19ab288abc61d5403d1a0be1a0cd213",
+          "controller.consumed.json": "0ce2bd4f879e331ef6c8100cdc91e5f7a8ddfa079acc33a7a784eddac8aaa323",
+          "host.consumed.json": "a1f829c678a1f248c2e36d566707d47f7fb32e7d3d7404d81ea6085573a8a8f6"
+        },
+        "root_name": "c5-reuse-global-admission-v1",
+        "rows": [
+          [
+            "C5DEV-REUSE-20261012-C",
+            "controller",
+            "eaa08c266a1d785774d14c9d6609d31f7a743aee38f3d1f008b880926a7173e7",
+            "75ece512c33e19f10657c32307d3067889c7d12a512c1e11cf4cf08acfeb6df1"
+          ],
+          [
+            "C5DEV-REUSE-20261012-C",
+            "host",
+            "eaa08c266a1d785774d14c9d6609d31f7a743aee38f3d1f008b880926a7173e7",
+            "721b68b73ca3e1ad7354791ff40d43c5435ef71e805127d5610aad47fa5728e9"
+          ]
+        ],
+        "writes": 0
+      },
+      "retirements": {
+        "reuse-dev-20261011-a": {
+          "active_grant_absent": true,
+          "retired_grant_raw_sha256": "fcfe67c8382d7e2dd28dafd58bec37deea8a75e5686ef9e2b241ac6e0a9416f9",
+          "retirement_raw_sha256": "f098afe6e005e3ae09129bb44531ce3947e07d6592632d86a2c75af24f0f2978"
+        },
+        "reuse-dev-20261012-b": {
+          "active_grant_absent": true,
+          "retired_grant_raw_sha256": "175bb33bf80d2f7559f4ee6d03c6634225c9df4839ef5f84686cd5814dd57574",
+          "retirement_raw_sha256": "3110dd38a8b318150526394ae98e7b36233fa6ac91a64a2adb08a1f1b529afda"
+        },
+        "reuse-dev-20261012-c": {
+          "active_grant_absent": true,
+          "retired_grant_raw_sha256": "359892d9adc45bc33a966bc013b5bc4f2a04b979100e760ee506f2edf2304225",
+          "retirement_raw_sha256": "310797d0dfbe9e787424f62140f8dae460fcd443b7b23043ca5e6dc1e8befb80"
+        }
+      },
+      "runtime_sha256": "160e74bb15497960d51d499f51bac6a8be67b38c0124af385296c1119ecedc24",
+      "source_files_verified": 307,
+      "spec_sha256": "10f821cacb0e5681c3b2f8286230eab7dfdd69102ed7ca3adf540f6cd2148446",
+      "static_boundaries": {
+        "original_remote_failure_proven_by_static_check": false,
+        "supervisor_registry_uses_default_create_false": true
+      },
+      "status": "readonly_archived_startup_diagnosis_not_execution_authority"
+    }
+  },
+  "original_c_public_failure_path": "eval/c5/reuse-development-startup-failure-20261012-c.json",
+  "original_c_public_failure_raw_sha256": "f92a0bbf412500c094ceeaaabe166e7c3719f0490f9c4b32b3f32712457a41e0",
+  "owner_authorization": "owner_reply_can_proceed_to_readonly_startup_diagnosis_and_protocol_proposal",
+  "prior_c_report_ci_observed": {
+    "both_conclusions": "SUCCESS",
+    "draft": true,
+    "head": "abe63120b07bb5614b669b1bae512e6418856c9c",
+    "pr": 15,
+    "pull_request_run": 38273757891,
+    "push_run": 38273750373,
+    "state": "OPEN"
+  },
+  "record_id": "C5-REUSE-C-READONLY-STARTUP-DIAGNOSIS-20261012",
+  "source_base_head": "abe63120b07bb5614b669b1bae512e6418856c9c",
+  "status": "completed_readonly_diagnosis_not_field_pass"
+}
