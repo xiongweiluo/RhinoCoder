@@ -12,6 +12,8 @@
 
 ### 近期任务索引：2026-10-11 原20题同题复用协议准备，不运行
 
+**2026-10-12最新执行结论：** 本人已批准完整开发两哈希；两端登记及Mac单次prepare成功，但Rhino唯一包装器在临时包/绝对`plugin`导入处启动失败，尚未warmup/订阅/基线、模型加载或槽运行。见[单次失败与退休报告](docs/c5-reuse-development-startup-failure-20261012.md)。两端grant已可恢复改名保留、当前入口永久停用，不重试/补槽/换ID。工程门未通过，正式冻结/消费条件不满足；下方“待本批准”是执行前快照，不再要求同一批准。当前先收口这一追加失败及PR审核，不能把先前CPU/CI或准备完成当作现场PASS。
+
 实际main核实为`9d20bd70fb0367da9346f11e83bd78d347f443b8`；#2～#6已按本人精确批准普通合并、五步main CI全SUCCESS，见[公开收口记录](https://github.com/xiongweiluo/RhinoCoder/pull/6#issuecomment-6097448759)。#7仍独立Draft，主工作区九份修改未覆盖/打包。下方PR/main待收口仅为10月9日历史，不是当前待办。
 
 原C5-7 NO-GO及正式失败不改。本人已明确确认原20题可复用，并授权**只准备**[公开协议修订草案](docs/c5-formal20-reuse-protocol-amendment-20261011.md)和[冻结准备方案](docs/c5-formal20-reuse-freeze-preparation-20261011.md)；默认表述为同一封存集的披露式复用评测，不自动认证全新盲测、零生成或完整审计。新的候选study仅规划，旧claim/入口/state不解锁，尚无新run、私题读取、模型/Rhino调用或资源批准。本节是本准备分支更新，不表示main已包含该草案。
