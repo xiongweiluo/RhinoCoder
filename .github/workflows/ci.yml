@@ -20,6 +20,8 @@ jobs:
         run: npm ci --prefix agent/ui
       - name: Compile
         run: python -m compileall -q agent data_pipeline eval plugin tools training
+      - name: Recovery Linux fork and pidfd CPU gate
+        run: python -m pytest -q --tb=short eval/test_c5_recovery_field.py::test_actual_gpu_supervisor_cpu_child_is_qualified_before_loader_and_stops_once
       - name: Unit tests
         run: python -m pytest -q
       - name: Build UI
