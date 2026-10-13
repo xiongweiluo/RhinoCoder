@@ -94,19 +94,19 @@ def main():
         if state['receipt'] is None:campaign.confirm(snap,receipt)
         else:require(state['receipt']=={'snapshot':snap,'receipt':receipt},'recovery_retained_owner_permission_changed')
         guard();attempt=campaign.start()
-        from training.c5_recovery_field_budget import FieldBudget
-        budget=FieldBudget(campaign)
-        from training.c5_recovery_field_permit import permit
-        load_permit=permit(campaign,b)
-        from training.c5_recovery_field_ssh import FieldSSHSession
-        from training.c5_recovery_field_mac import MacController
-        from training.c5_reuse_admission import AdmissionRegistry
-        from training.c5_recovery_field_audit import audit_ready,audit_failure
-        from training.c5_reuse_field_scope import common_scope,PROTOCOL
-        from plugin.rhino_listener.c5_recovery_scope import paths
-        schemas=strict((ROOT/'eval/c5/rhino-runtime-schema-v1.json').read_bytes())['core_parameters']
         runner=None;session_holder={}
         try:
+            from training.c5_recovery_field_budget import FieldBudget
+            budget=FieldBudget(campaign)
+            from training.c5_recovery_field_permit import permit
+            load_permit=permit(campaign,b)
+            from training.c5_recovery_field_ssh import FieldSSHSession
+            from training.c5_recovery_field_mac import MacController
+            from training.c5_reuse_admission import AdmissionRegistry
+            from training.c5_recovery_field_audit import audit_ready,audit_failure
+            from training.c5_reuse_field_scope import common_scope,PROTOCOL
+            from plugin.rhino_listener.c5_recovery_scope import paths
+            schemas=strict((ROOT/'eval/c5/rhino-runtime-schema-v1.json').read_bytes())['core_parameters']
             with AdmissionRegistry(b) as registry:
                 def factory(*a):
                     session=FieldSSHSession.__new__(FieldSSHSession);session_holder['session']=session

@@ -480,16 +480,38 @@ log.close()
         snap,receipt=preload(b)
         begin={'kind':'reuse_begin_after_preload_confirmation','protocol':PROTOCOL,'scope_sha256':sha(common_scope(b)),
             'preload_snapshot':snap,'preload_receipt':receipt,'host_baseline_head_sha256':'e'*64,'worker_readiness_sha256':sha(ready)}
-        chunks=[frame(begin)]
+        child.stdin.write(frame(begin));child.stdin.flush()
+        # The frozen stream protocol forbids pipelined frames. Wait for the
+        # actual durable begin receipt before sending the first RPC.
+        received=state/'worker-lifecycle/raw-0004.json'
+        deadline=time.monotonic()+10
+        while not received.exists():
+            assert child.poll() is None,'CPU supervisor exited before begin receipt'
+            assert time.monotonic()<deadline,'CPU begin receipt timed out'
+            time.sleep(0.01)
+        assert json.loads(received.read_bytes())['kind']=='worker_begin_record_received'
+        messages=[]
         for slot in ORDER:
             inner=request(b['study_id'],slot,plans[slot]['route'],0,plans[slot]['steps'][0],
                 {'unit':'Millimeters','objects':[],'groups':{}},{'document_key':'a'*64,'revision':0,'scene_sha256':'b'*64},
                 b['runtime_sha256'],'cpu-'+slot)
-            chunks.append(frame(envelope(b,inner)))
-        chunks.append(frame({'kind':'reuse_worker_close','protocol':PROTOCOL,'scope_sha256':sha(common_scope(b))}))
-        stdout,stderr=child.communicate(b''.join(chunks),timeout=30)
+            child.stdin.write(frame(envelope(b,inner)));child.stdin.flush()
+            with selectors.DefaultSelector() as select:
+                select.register(child.stdout,selectors.EVENT_READ)
+                assert select.select(30),'CPU request response timed out'
+            line=child.stdout.readline()
+            assert line,'CPU worker exited before response'
+            messages.append(json.loads(line))
+        child.stdin.write(frame({'kind':'reuse_worker_close','protocol':PROTOCOL,'scope_sha256':sha(common_scope(b))}));child.stdin.flush()
+        with selectors.DefaultSelector() as select:
+            select.register(child.stdout,selectors.EVENT_READ)
+            assert select.select(30),'CPU worker close timed out'
+        line=child.stdout.readline();assert line,'CPU worker exited before close receipt'
+        messages.append(json.loads(line))
+        stdout,stderr=child.communicate(timeout=30)
         assert child.returncode==0,stderr.decode()
-        messages=[json.loads(line) for line in stdout.splitlines()];assert len(messages)==9
+        assert not stdout,stdout.decode()
+        assert len(messages)==9
         assert messages[-1]['kind']=='reuse_worker_closed' and messages[-1]['requests']==8
         final=json.loads(stderr.decode().split('CPU_SUPERVISOR_RESULT ')[-1])
         assert final['child_exit_success'] and final['child_exit_reaped']
