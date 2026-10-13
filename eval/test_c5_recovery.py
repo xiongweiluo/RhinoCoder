@@ -459,3 +459,22 @@ def test_resource_revision_cannot_change_contract_history_or_finite_cap(tmp_path
     old=c.log.rows()
     with pytest.raises(ValueError):c.accept_resource_revision(revised,g)
     assert c.log.rows()==old
+
+
+
+def test_resource_revision_keeps_interprocess_lock_through_durable_append(tmp_path,monkeypatch):
+    import subprocess,sys
+    c,_=campaign(tmp_path);confirmed(c);c.start();c.failed('transport',proof())
+    revised=dict(c.scope,development_seconds_max=43200,runtime_sha256='7'*64,generation_cutoff_epoch=100000)
+    g=grant(revised);g['previous_campaign_head_sha256']=c.log.rows()[-1]['record_sha256']
+    original=c.log.append_locked;checked=[]
+    def append(kind,payload):
+        if kind=='resource_runtime_revision_accepted':
+            probe=subprocess.run([sys.executable,'-I','-B','-c',
+                "import os,fcntl,sys;fd=os.open(sys.argv[1],os.O_RDONLY)\ntry: fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB)\nexcept BlockingIOError: sys.exit(23)\nsys.exit(0)",
+                str(c.log.root/'manifest.json')],timeout=5)
+            assert probe.returncode==23,'resource revision dropped its exclusive lock before append'
+            checked.append(True)
+        return original(kind,payload)
+    monkeypatch.setattr(c.log,'append_locked',append)
+    c.accept_resource_revision(revised,g);assert checked==[True] and c.observation()['attempts']==1

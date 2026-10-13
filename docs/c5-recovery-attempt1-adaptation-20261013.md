@@ -27,4 +27,6 @@ PR #20 的 f6c2041 完整冻结获本人精确批准，两端 grant 已登记、
 
 新的精确批准后才可保留原grant副本并登记新批准、按原账本精确head追加资源/runtime修订、生成第二次独立准备目录及在加载前取得本人的新scope实际宿主保管确认。现阶段没有执行这些步骤；旧一次尝试不重启。
 
-最终审核候选：spec `098118947aba3d6a218725748bb28ade18dbf4fb21f207ba7f894e1d4dfd2404`；runtime `721b2fd039a4fefecd81d1643ec70437acfcff1fe587c41fcdf0570744b7999f`。见[最终增量两端/CPU/独立复核](../eval/c5/recovery-attempt1-candidate-review-20261013.json)。两端当前375及原批准375归档完整，旧grant/消费和首次计时不变。最终本地269 passed / 5 skipped（76.13秒）；真实兼容Linux受影响26 passed / 117 deselected（14.59秒），包含旧与新边界两次真实资格fork、首槽真实SQLite/原始签名及损坏证据拒绝。扩展Linux测试的权限失败与240秒未完成均保留，不当作通过；完整回归以当前精确head push与PR双CI为准。独立stdlib复核374源、1272静态项目导入和8份Rhino3.9语法、原loader/解码/公开任务字节以及原8条campaign记录。
+资源修订持久追加现采用同一文件锁内的原始状态重放，跨进程探针确认追加前仍无法抢到该锁。原77ff45d两次CI作为已替代候选取消保留，不当作完整通过，最终以最新修复head为准。
+
+最终审核候选：spec `098118947aba3d6a218725748bb28ade18dbf4fb21f207ba7f894e1d4dfd2404`；runtime `ef1181b64f93505d568f84f477e73371a705b996fea72174ff66f8a7250322b7`。见[最终增量两端/CPU/独立复核](../eval/c5/recovery-attempt1-candidate-review-20261013.json)。两端当前375及原批准375归档完整，旧grant/消费和首次计时不变。最终本地270 passed / 5 skipped（76.97秒）；真实兼容Linux受影响27 passed / 117 deselected（13.89秒），包含旧与新边界两次真实资格fork、首槽真实SQLite/原始签名及损坏证据拒绝。扩展Linux测试的权限失败与240秒未完成均保留，不当作通过；完整回归以当前精确head push与PR双CI为准。独立stdlib复核374源、1272静态项目导入和8份Rhino3.9语法、原loader/解码/公开任务字节以及原8条campaign记录。

@@ -142,7 +142,7 @@ class Campaign:
             return self.log.append_locked('runtime_revision_accepted',payload)
     def accept_resource_revision(self,scope,grant):
         with self.log.locked():
-            rows=self.log.rows();state=self.observation();head=rows[-1]['record_sha256'] if rows else '0'*64
+            rows=self.log.rows();state=replay(self.initial_scope,rows);head=rows[-1]['record_sha256'] if rows else '0'*64
             payload={'scope':scope,'grant':grant,'previous_head_sha256':head,
                 'resource_amendment':{'old_seconds_max':state['scope']['development_seconds_max'],
                     'new_seconds_max':scope['development_seconds_max'],'first_load_epoch':state['first_load_epoch'],
