@@ -35,6 +35,6 @@ def validate(spec,runtime,plan,history):
             'owner_accepts_readable_files_frozen_opaque_host_trusted_visible_checkpoints_only')), 'recovery_current_host_acceptance')
     require(plan['resource_basis']['platform_hour_quota'] is None
         and plan['resource_basis']['historical_cumulative_upper_bound_seconds'] is None
-        and plan['resource_basis']['accepted_development_seconds_max']==18000
+        and plan['resource_basis']['accepted_development_seconds_max']==spec['resources']['development_seconds_max']
         and plan['resource_basis']['accepted_conditional_formal_seconds_max']==64800,
         'recovery_resource_fact_not_platform_balance')

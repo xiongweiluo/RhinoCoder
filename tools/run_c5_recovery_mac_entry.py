@@ -12,7 +12,7 @@ def failure_category(error):
     """Only known engineering failures are retryable after independent cleanup."""
     if isinstance(error,(KeyboardInterrupt,SystemExit)):return 'cancelled'
     message=str(error)
-    if message in ('followup_capture_read_deadline','field_pipe_deadline'):
+    if message in ('followup_capture_read_deadline','field_pipe_deadline','field_whole_exchange_deadline'):
         return 'transport'
     if message in ('reuse_worker_eof_or_chunk','reuse_ssh_remote_supervisor_failed',
                    'recovery_ready_proof_transport'):return 'transport'
@@ -56,7 +56,8 @@ def main():
                     require((folder/'host-continuity-terminal-receipt.json').exists()
                         and not (folder/'hub.key').exists(),'recovery_revision_host_cleanup_unknown')
             current=Campaign(old['scope'],revision_log)
-            current.accept_revision(b['recovery']['scope'],dict(g,previous_campaign_head_sha256=previous))
+            action=(current.accept_resource_revision if b['recovery']['scope']['development_seconds_max']!=old['scope']['development_seconds_max'] else current.accept_revision)
+            action(b['recovery']['scope'],dict(g,previous_campaign_head_sha256=previous))
             print('C5_RECOVERY_REVISION_ACCEPTED_BUDGET_AND_ATTEMPTS_PRESERVED');return
         finally:revision_log.close()
     create=args.prepare and not parent.exists()
@@ -67,11 +68,11 @@ def main():
             and state['status'] in ('WAITING_OWNER','PREPARED','RETRYABLE_ENGINEERING',
                                   'RETRYABLE_ENGINEERING_DIAGNOSTICS_INCOMPLETE'),
             'recovery_attempt_requires_known_campaign_state')
-        remaining=(min(state['first_load_epoch']+18000-60,s['resources']['generation_cutoff_epoch']-60)-time.time()
+        remaining=(min(state['first_load_epoch']+b['recovery']['scope']['development_seconds_max']-60,s['resources']['generation_cutoff_epoch']-60)-time.time()
                    if state['first_load_epoch'] is not None else s['resources']['generation_cutoff_epoch']-time.time()-60)
         require(remaining>=plan['minimum_attempt_window_seconds'],'recovery_complete_remaining_attempt_window_unavailable')
         if state['first_load_epoch'] is None:
-            require(time.time()+18000<=s['resources']['generation_cutoff_epoch'],'recovery_complete_window_unavailable')
+            require(time.time()+b['recovery']['scope']['development_seconds_max']<=s['resources']['generation_cutoff_epoch'],'recovery_complete_window_unavailable')
         local=Path(b['paths']['state_root']);owner=local.parent/'owner-custody'
         if args.prepare:
             require(not local.exists(),'recovery_attempt_setup_already_exists_no_overwrite')

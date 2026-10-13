@@ -78,7 +78,7 @@ class FieldModelChannel:
             key=(sent['request']['slot_id'],sent['request']['step_index'])
             require(key not in self.spent and len(self.spent)<56, 'field_request_consumed')
             start=last=self.clock()
-            deadline=start+180
+            deadline=start+self.binding['limits']['model_seconds']
             def check():
                 nonlocal last
                 now=self.clock()

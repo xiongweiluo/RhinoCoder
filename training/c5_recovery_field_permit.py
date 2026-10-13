@@ -18,7 +18,7 @@ def validate(value,binding,grant):
     exact(value,('kind','initial_scope','scope','attempt','rows','head_sha256','preload_confirmation'))
     require(value['kind']=='recovery_mac_load_permit' and value['scope']==binding['recovery']['scope']
         and value['attempt']==binding['recovery']['attempt']
-        and type(value['rows']) is list and 1<=len(value['rows'])<=512,'recovery_exact_load_permit')
+        and type(value['rows']) is list and 1<=len(value['rows'])<=2048,'recovery_exact_load_permit')
     require_grant(value['scope'],grant);head=ZERO
     for index,row in enumerate(value['rows']):
         exact(row,('seq','previous_sha256','binding_sha256','kind','payload','record_sha256'))
