@@ -38,6 +38,9 @@ def readiness(binding,qualification,worker_head):
 
 
 def validate_begin(value,binding):
+    if binding.get('study_id')=='C5DEV-RECOVERY-20261013':
+        from plugin.rhino_listener.c5_recovery_scope import validate_preload_begin
+        return validate_preload_begin(binding,value)
     exact(value,('kind','protocol','scope_sha256','owner_readiness'))
     require(value['kind']=='reuse_begin_after_external_readiness' and value['protocol']==PROTOCOL
             and value['scope_sha256']==sha(common_scope(binding)),'reuse_worker_begin_scope')
@@ -64,7 +67,8 @@ def serve(peer,pipe,qualification,guard,budget,journal,*,clock=time.monotonic,on
     on_ready()
     begin=receive(pipe,clock()+180,check)
     owner=validate_begin(begin,peer.binding)
-    require(owner['worker_readiness_sha256']==sha(ready),'reuse_external_worker_ready_binding')
+    require((begin['worker_readiness_sha256'] if peer.binding.get('study_id')=='C5DEV-RECOVERY-20261013'
+             else owner['worker_readiness_sha256'])==sha(ready),'reuse_external_worker_ready_binding')
     journal('worker_begin_record_received',{'begin':begin,'human_provenance_independently_verified':False})
     on_begin()
     for index,slot in enumerate(ORDER):

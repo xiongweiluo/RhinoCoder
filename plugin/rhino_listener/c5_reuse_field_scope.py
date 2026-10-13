@@ -209,6 +209,9 @@ def check_candidate_materials(spec,runtime,*,now,endpoint):
 
 
 def validate_binding(value):
+    if type(value) is dict and value.get('study_id')=='C5DEV-RECOVERY-20261013':
+        from .c5_recovery_scope import validate
+        return validate(value)
     if type(value) is dict and value.get("study_id")=="C5DEV-REUSE-20261012-D":
         from .c5_followup_scope import validate
         return validate(value)
@@ -231,4 +234,5 @@ def common_scope(value):
     validate_binding(value)
     keys=('protocol','study_id','instance_id','spec_sha256','runtime_sha256','development_plan_sha256','limits')
     if value['study_id']=='C5DEV-REUSE-20261012-D':keys+=('continuation',)
+    if value['study_id']=='C5DEV-RECOVERY-20261013':keys+=('recovery',)
     return {key:value[key] for key in keys}

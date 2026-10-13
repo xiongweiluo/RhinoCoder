@@ -1,0 +1,23 @@
+{
+  "candidate_runtime_sha256": "eca3675e43e8e5cddf081fc881ccc8813a11734ff1f8c10989c26d4c35ce3879",
+  "candidate_spec_sha256": "741efe0c46bb70efd1ec1836bd7eba4c28159a15fee9d88474287f1838db505a",
+  "epoch": 1791909033.501899,
+  "execution_ready": false,
+  "gpu_current_facts_or_lease_not_claimed": true,
+  "model_or_rhino_calls": 0,
+  "new_rhino_safe_sources_python39_parsed": 8,
+  "new_state_or_grants_created": false,
+  "original_source_files_incrementally_adapted": [
+    "plugin/rhino_listener/c5_reuse_field_scope.py",
+    "training/c5_reuse_admission.py",
+    "training/c5_reuse_worker_loop.py"
+  ],
+  "original_unaffected_source_files_reused": 334,
+  "preload_and_qualification_effect_order_rechecked": true,
+  "private_formal_reads": 0,
+  "registered_actors": 16,
+  "source_files_verified": 374,
+  "source_inventory_sha256": "255a3207190db8812ba776a9e7a6c2a9b10f0ff89c7aecd3de47acb8ebe66fb8",
+  "static_project_imports_in_closure": 1269,
+  "status": "INDEPENDENT_STDLIB_SOURCE_AND_ACTOR_CLOSURE_PASS_LIMITED_NOT_FIELD_EXECUTION_READY"
+}
