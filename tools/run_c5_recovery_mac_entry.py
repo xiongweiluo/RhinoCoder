@@ -8,6 +8,20 @@ import sys
 import time
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 
+def failure_category(error):
+    """Only known engineering failures are retryable after independent cleanup."""
+    if isinstance(error,(KeyboardInterrupt,SystemExit)):return 'cancelled'
+    message=str(error)
+    if message in ('followup_capture_read_deadline','field_pipe_deadline'):
+        return 'transport'
+    if message in ('reuse_worker_eof_or_chunk','reuse_ssh_remote_supervisor_failed',
+                   'recovery_ready_proof_transport'):return 'transport'
+    if message=='reuse_model_operational_retirement':return 'native_operational'
+    if message in ('followup_remote_diagnostic_incomplete_no_retry',
+                   'followup_capture_limit_or_error_no_retry','followup_protocol_delivery_unknown'):
+        return 'capture'
+    return 'integrity'
+
 def main():
     p=argparse.ArgumentParser(description=__doc__);m=p.add_mutually_exclusive_group(required=True)
     m.add_argument('--prepare',action='store_true');m.add_argument('--drive',action='store_true');m.add_argument('--accept-revision',action='store_true')
@@ -148,12 +162,7 @@ def main():
                     gpu={**b,'endpoint':'gpu','paths':paths('gpu',attempt,b['runtime_sha256'])}
                     proof=audit_failure(raw,gpu,serve_capture=diagnostic,native_known=native_known,expected_gpu_uuid=plan['gpu_process']['gpu_uuid'])
                 except BaseException as error:secondary.append(type(error).__name__)
-            category='cancelled' if isinstance(original,(KeyboardInterrupt,SystemExit)) else 'integrity'
-            if str(original) in ('reuse_worker_eof_or_chunk','reuse_ssh_remote_supervisor_failed',
-                                 'recovery_ready_proof_transport'):
-                category='transport'
-            if str(original)=='reuse_model_operational_retirement':category='native_operational'
-            if str(original)=='followup_remote_diagnostic_incomplete_no_retry':category='capture'
+            category=failure_category(original)
             try:decision=campaign.failed(category,proof)
             except BaseException as error:
                 secondary.append(type(error).__name__);decision='PAUSED_RECONCILIATION'

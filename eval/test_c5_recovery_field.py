@@ -522,3 +522,36 @@ log.close()
         assert result=={'status':'already_exited','signal_attempts':0,'exit_observed':True,'error_type':None}
     finally:
         if child.poll() is None:child.terminate();child.wait(timeout=5)
+
+
+@pytest.mark.parametrize('mode',('ready-proof','failure-proof','stop','export'))
+def test_actual_proof_command_retains_both_cpu_streams(monkeypatch,tmp_path,mode):
+    from training import c5_recovery_field_ssh as transport
+    from training.c5_reuse_control_journal import ControlJournal
+    from types import SimpleNamespace
+    s,r,p,b,g,plans,raw=fixture(monkeypatch,tmp_path)
+    b=field.material(s,r,endpoint='mac',attempt=1,now=100)
+    state=Path(b['paths']['state_root']);state.mkdir(mode=0o700,parents=True)
+    session=transport.FieldSSHSession.__new__(transport.FieldSSHSession)
+    session.binding=b;session.attempt=1;session.lifecycle=ControlJournal(b,'controller-lifecycle')
+    monkeypatch.setattr(transport,'command',lambda name,attempt:[sys.executable,'-I','-B','-c',
+        "import sys;print('CPU_PUBLIC_PROOF');print('CPU_DIAGNOSTIC',file=sys.stderr)"])
+    result=session._captured_command(mode)
+    assert result.returncode==0
+    assert (state/(mode+'-stdout.raw')).read_bytes()==b'CPU_PUBLIC_PROOF\n'
+    assert (state/(mode+'-stderr.raw')).read_bytes()==b'CPU_DIAGNOSTIC\n'
+    proof=session.lifecycle.rows[-1]['payload']
+    assert proof['complete_raw_capture'] and proof['stdout']['name']==mode+'-stdout.raw'
+    assert proof['stderr']['name']==mode+'-stderr.raw'
+
+@pytest.mark.parametrize('error,category',(
+    (TimeoutError('followup_capture_read_deadline'),'transport'),
+    (ValueError('field_pipe_deadline'),'transport'),
+    (ValueError('followup_capture_limit_or_error_no_retry'),'capture'),
+    (TimeoutError('recovery_shared_budget_exhausted'),'integrity'),
+    (ValueError('followup_capture_persisted_bytes_drift'),'integrity'),
+    (ValueError('unknown_failure'),'integrity'),
+    (KeyboardInterrupt(),'cancelled')))
+def test_actual_entry_failure_classification_keeps_unknowns_closed(error,category):
+    from tools.run_c5_recovery_mac_entry import failure_category
+    assert failure_category(error)==category

@@ -29,6 +29,25 @@ POLICY={'host':'175.155.64.171','port':24151,'user':'linux',
         'diagnostic_stderr_retained':True,'stdout_capture_cap_bytes':67108864,'stderr_capture_cap_bytes':262144,'automatic_signal_escalation':False}
 
 
+class RecoveryCapturedStreams(CapturedStreams):
+    """Add only fixed proof names; retain the original bounded pump/seal."""
+    def __init__(self,root,prefix,*,stdout_cap=67108864,stderr_cap=262144):
+        if prefix in ('serve','stop','export'):
+            super().__init__(root,prefix,stdout_cap=stdout_cap,stderr_cap=stderr_cap);return
+        require(prefix in ('ready-proof','failure-proof'),'recovery_fixed_proof_capture_name')
+        import queue,threading
+        from training.c5_followup_diagnostics import RawFile
+        root=Path(root)
+        require(root.is_absolute() and root.resolve()==root and root.is_dir()
+            and stat.S_IMODE(root.stat().st_mode)==0o700 and root.stat().st_uid==os.getuid(),
+            'followup_capture_root')
+        self.stdout=RawFile(root/(prefix+'-stdout.raw'),stdout_cap)
+        try:self.stderr=RawFile(root/(prefix+'-stderr.raw'),stderr_cap)
+        except BaseException:self.stdout.finish(None);raise
+        self.queue=queue.Queue(maxsize=16);self.delivery_overflow=False;self.stop=threading.Event()
+        self.threads=[];self.process=None;self.finished=False
+
+
 def validate_transport(value):
     exact(value,('policy','ssh_executable_sha256'))
     require(value['policy']==POLICY and is_sha(value['ssh_executable_sha256']),'reuse_fixed_transport_policy')
@@ -214,7 +233,7 @@ class FieldSSHSession:
 
     def _captured_command(self,mode):
         from types import SimpleNamespace
-        capture=CapturedStreams(Path(self.binding['paths']['state_root']),mode,
+        capture=RecoveryCapturedStreams(Path(self.binding['paths']['state_root']),mode,
             stdout_cap=67108864 if mode=='export' else 262144)
         process=None
         try:

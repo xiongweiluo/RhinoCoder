@@ -24,9 +24,9 @@
 
 ## 验证与完整候选
 
-最终本地受影响回归 **330 passed / 4 skipped（58.28秒）**。包括真正隔离的 Python3.9包装器/首次Idle、前置确认、八槽worker协议的8次请求/16阶段独立复算、重哈希篡改负例、跨进程共有停止、预算/修订/原历史不变。真实Linux fork/pidfd的CPU子进程用例在Linux CI运行；Mac不会伪造它通过。首轮完整 CI 各 2069 passed / 12 skipped、一个新增联测失败，原因是测试把多条协议帧合并发送；修正为逐请求等待实际 begin 记录及响应，保留退出/停止断言。首轮失败不计为通过，修订 head 重新跑完整双 CI。原GitHub完整Python/UI/契约检查保持原要求，当前精确head双CI以PR实际结果为准。
+最终本地受影响回归 **341 passed / 4 skipped（61.50秒）**，包含证明双流/错误分类新增11控。包括真正隔离的 Python3.9包装器/首次Idle、前置确认、八槽worker协议的8次请求/16阶段独立复算、重哈希篡改负例、跨进程共有停止、预算/修订/原历史不变。真实Linux fork/pidfd的CPU子进程用例在Linux CI运行；Mac不会伪造它通过。首轮完整 CI 各 2069 passed / 12 skipped、一个新增联测失败，原因是测试把多条协议帧合并发送；修正为逐请求等待实际 begin 记录及响应，保留退出/停止断言。首轮失败不计为通过，修订 head 重新跑完整双 CI。原GitHub完整Python/UI/契约检查保持原要求，当前精确head双CI以PR实际结果为准。
 
-独立stdlib审核不导入生产者，复核374份实际候选源码、1269处静态项目导入闭合、16个固定actors及8份新Rhino安全源码的3.9语法，重新检查确认→加载意图及资格→加载屏障的顺序。见 [源码复核](../eval/c5/recovery-field-independent-source-review-20261013.json)。[候选审核](../eval/c5/recovery-field-incremental-review-20261013.json)、[spec](../eval/c5/recovery-development-spec-20261013.json)、[runtime](../eval/c5/recovery-runtime-freeze-20261013.json)、[实际Mac复核](../eval/c5/recovery-field-actual-mac-review-20261013.json)已成文。
+独立stdlib审核不导入生产者，复核374份实际候选源码、1270处静态项目导入闭合、16个固定actors及8份新Rhino安全源码的3.9语法，重新检查确认→加载意图及资格→加载屏障的顺序。见 [源码复核](../eval/c5/recovery-field-independent-source-review-20261013.json)。[候选审核](../eval/c5/recovery-field-incremental-review-20261013.json)、[spec](../eval/c5/recovery-development-spec-20261013.json)、[runtime](../eval/c5/recovery-runtime-freeze-20261013.json)、[实际Mac复核](../eval/c5/recovery-field-actual-mac-review-20261013.json)已成文。
 
 候选 source inventory 包含全部372初始公共源码与两个事实/只读预检文件，合计374份；runtime另作为独立公共文件逐字节部署/核对。候选 spec/runtime 均 `execution_ready=true`，表示当前完整资源与 GPU 资产事实可组成批准候选；仍须两端最终字节、精确 head 双 CI 和本人另行明确批准。此字段不授予执行权限。没有新campaign/role state、grant、密钥或模型/Rhino研究调用；没有私题读取。历史#19准备复核现在从其原Git对象重放原字节，与当前源码/实际新鲜性复核清楚区分。
 
@@ -41,12 +41,12 @@ GPU 恢复后实际完整 CLI 通过：兼容 Python 原生 pidfd 可用、21614
 完整新批准候选：
 
 - spec：`3d6010c1dd371276ab18b28a1e0f5cba64edac9d0d9ef3ea5a0edf495075f99a`
-- runtime：`d8462b50a19741ed43d2e8a6068493767034735b66d7e938b0ced89905084408`
-- source inventory：`3c4783814675b4b0f9c71a428986456b1e06cc3f3ff30a010df9e14b63a27b24`（374源，runtime另1公共文件）
+- runtime：`96728a7654502683cf9966f71644258355bbfb7167e792be4fadf9f7bbe148f1`
+- source inventory：`8083fc8bd04cbbd50a54c554c30f741edd601667c19481bf23a649f11e49bab8`（374源，runtime另1公共文件）
 
 准许执行范围仍仅一个新恢复campaign的固定公开八槽开发；依冻结规则最多三个工程加载意图，共享同一5小时计时、原生清理和完整原始审计。没有授权正式40槽、读原20题、模型训练、产品路线切换或自动merge。前置本人交互保管在加载前完成，普通输入纠正/取消不消费加载意图；未知清理暂停，质量失败不自动重试。
 
-最终 Mac 真实无 grant CLI 已逐字节通过当前完整两哈希；GPU 最终公共更新时 SSH 返回 Broken pipe，认证需恢复后复核传输状态并完成当前完整候选 CLI。已经完成的原资产/旧历史证据保留，当前更新未完成不得假记通过。修订 head 的两次完整 CI 和最新最终两端证据写入 PR 当前审核记录；它们是本完整两哈希的前置门，不再为纯 CI 状态改动已冻结源码。
+Mac 前一完整候选真实无 grant CLI 已通过；后续独立边界审核补全 ready/failure 证明文件名前缀适配及等待超时分类，原诊断器不改，真实CPU双流/类别回归通过，当前新 runtime 必须另做两端实际检查。GPU 最终公共更新时 SSH 返回 Broken pipe，认证需恢复后复核传输状态并完成当前完整候选 CLI。已经完成的原资产/旧历史证据保留，当前更新未完成不得假记通过。修订 head 的两次完整 CI 和最新最终两端证据写入 PR 当前审核记录；它们是本完整两哈希的前置门，不再为纯 CI 状态改动已冻结源码。
 
 ## 审核/主线
 
