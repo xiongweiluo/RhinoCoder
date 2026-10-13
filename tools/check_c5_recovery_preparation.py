@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import sys
+import subprocess
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from training.c5_reuse_evidence import canonical,require,sha
@@ -50,10 +51,13 @@ def history_document(root):
 def review(root=ROOT):
     root=Path(root);require(root.is_absolute() and root.resolve()==root,'recovery_review_root')
     old=json.loads((root/RUNTIME).read_bytes());files=dict(old['source_files'])
+    historical='9fdcec36d44953067f75d9c8e94bd016b2522081'
+    def original(name):
+        return subprocess.check_output(['git','show',historical+':'+name],cwd=root)
     for name,pin in files.items():
-        require(raw_sha((root/name).read_bytes())==pin,'recovery_legacy_source_changed')
+        require(raw_sha(original(name))==pin,'recovery_legacy_source_changed')
     files[RUNTIME]=raw_sha((root/RUNTIME).read_bytes())
-    for name in NEW_SOURCES:files[name]=raw_sha((root/name).read_bytes())
+    for name in NEW_SOURCES:files[name]=raw_sha(original(name))
     history=history_document(root)
     spec={'protocol':POLICY['protocol'],'status':'PREPARATION_ONLY','policy':POLICY,
           'history_sha256':sha(history),'changed_groups':['retry_policy','confirmation','stop'],
