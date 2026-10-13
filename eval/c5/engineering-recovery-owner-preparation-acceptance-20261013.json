@@ -1,0 +1,15 @@
+{
+  "a_to_d_historical_results_or_grants_changed": false,
+  "actual_new_models_rhino_signals_registry_writes": 0,
+  "date": "2026-10-13",
+  "direct_owner_request": "可以，请按这个方向直接修订重试、确认和停止规则，保留 A～D 的历史与有效材料，只重验受影响部分。持续完成实现、CPU 验证和审核材料，不要在子项或 PR 处停工；新的现场执行再单独交我批准。",
+  "formal_private_reads": 0,
+  "local_validation": "See final exact-head PR validation and CPU output; no historical CI transfer",
+  "new_field_execution_approved": false,
+  "old_337_source_file_pins_reverified": true,
+  "preparation_review_runtime_sha256": "d0aa00ae65b43ec6cb8f718ac433e0ff4b94f3f32712a298f0f78d0366fa4902",
+  "preparation_review_spec_sha256": "faf4e294dd66001fa5cf6b9923381b3d870681dc521cd0852526b7900ef623d6",
+  "sole_required_reviewer": "repository_owner",
+  "status": "PREPARATION_AUTHORIZED_NOT_FIELD_EXECUTION",
+  "these_are_preparation_review_hashes_not_executable_field_freezes": true
+}
