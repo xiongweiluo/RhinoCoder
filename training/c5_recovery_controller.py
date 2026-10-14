@@ -17,15 +17,26 @@ def replay(scope,rows):
            'scope':dict(scope)}
     for row in rows:
         scope=state['scope'];kind,p=row['kind'],row['payload']
-        if kind=='runtime_revision_accepted':
-            exact(p,('scope','grant','previous_head_sha256'))
+        if kind in ('runtime_revision_accepted','resource_runtime_revision_accepted'):
+            exact(p,('scope','grant','previous_head_sha256')+
+                  (('resource_amendment',) if kind=='resource_runtime_revision_accepted' else ()))
             revised=validate_scope(p['scope'])
             require(not state['active'] and not state['formal_consumed']
                     and state['status'] not in ('PAUSED_RECONCILIATION','AWAITING_INDEPENDENT_AUDIT')
                     and state['attempts']<POLICY['public_attempts_max'],'recovery_revision_requires_known_pause')
             require(all(revised[k]==scope[k] for k in ('campaign_id','phase','policy_sha256',
-                    'history_sha256','public_plan_sha256','contract_sha256','development_seconds_max')),
+                    'history_sha256','public_plan_sha256','contract_sha256')),
                     'recovery_revision_cannot_change_contract_or_reset_budget')
+            if kind=='resource_runtime_revision_accepted':
+                amendment={'old_seconds_max':scope['development_seconds_max'],
+                    'new_seconds_max':revised['development_seconds_max'],
+                    'first_load_epoch':state['first_load_epoch'],'attempts':state['attempts'],
+                    'budget_reset':False,'old_budget_recredited':False}
+                require(p['resource_amendment']==amendment and scope['phase']=='public_engineering'
+                    and revised['development_seconds_max']>scope['development_seconds_max'],
+                    'recovery_explicit_resource_amendment_required')
+            else:require(revised['development_seconds_max']==scope['development_seconds_max'],
+                         'recovery_revision_cannot_change_contract_or_reset_budget')
             require(revised['generation_cutoff_epoch']>=scope['generation_cutoff_epoch']
                     and revised!=scope,'recovery_revision_not_new_material')
             grant=dict(p['grant'])
@@ -129,6 +140,15 @@ class Campaign:
             replay(self.initial_scope,rows+[{'kind':'runtime_revision_accepted','payload':payload,
                                            'previous_sha256':head}])
             return self.log.append_locked('runtime_revision_accepted',payload)
+    def accept_resource_revision(self,scope,grant):
+        with self.log.locked():
+            rows=self.log.rows();state=replay(self.initial_scope,rows);head=rows[-1]['record_sha256'] if rows else '0'*64
+            payload={'scope':scope,'grant':grant,'previous_head_sha256':head,
+                'resource_amendment':{'old_seconds_max':state['scope']['development_seconds_max'],
+                    'new_seconds_max':scope['development_seconds_max'],'first_load_epoch':state['first_load_epoch'],
+                    'attempts':state['attempts'],'budget_reset':False,'old_budget_recredited':False}}
+            replay(self.initial_scope,rows+[{'kind':'resource_runtime_revision_accepted','payload':payload,'previous_sha256':head}])
+            return self.log.append_locked('resource_runtime_revision_accepted',payload)
     def confirm(self,snap,receipt):
         return self._event('owner_preload_confirmed',{'snapshot':snap,'receipt':receipt})
     def resume_after_owner_pause(self):

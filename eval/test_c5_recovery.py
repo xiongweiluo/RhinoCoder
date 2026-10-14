@@ -435,3 +435,61 @@ def test_stop_factory_derives_one_path_for_both_actors_and_campaign_reopens(tmp_
         finally:a.log.close();b.log.close()
     with open_campaign(root,'mac',s,document,expected_roots=roots) as reopened:
         assert reopened.rows()==[]
+
+
+def test_explicit_resource_revision_requires_new_exact_grant_and_preserves_all_consumption(tmp_path):
+    c,clock=campaign(tmp_path);confirmed(c);c.start();clock[0]=500;c.failed('transport',proof())
+    old={p.name:p.read_bytes() for p in c.log.root.iterdir()}
+    revised=dict(c.scope,development_seconds_max=43200,spec_sha256='8'*64,runtime_sha256='7'*64,generation_cutoff_epoch=100000)
+    g=grant(revised);g['previous_campaign_head_sha256']=c.log.rows()[-1]['record_sha256']
+    with pytest.raises(ValueError):c.accept_revision(revised,g)
+    with pytest.raises(ValueError):c.accept_resource_revision(revised,grant(c.scope))
+    c.accept_resource_revision(revised,g)
+    assert all((c.log.root/n).read_bytes()==raw for n,raw in old.items())
+    state=c.observation();assert state['attempts']==1 and state['first_load_epoch']==100 and state['receipt'] is None
+    assert c.log.rows()[-1]['payload']['resource_amendment']=={'old_seconds_max':1000,'new_seconds_max':43200,
+        'first_load_epoch':100.,'attempts':1,'budget_reset':False,'old_budget_recredited':False}
+    confirmed(c);assert c.start()==2 and c.budget()==42740
+
+@pytest.mark.parametrize('field,value',[('development_seconds_max',86401),('contract_sha256','9'*64),('history_sha256','9'*64),('public_plan_sha256','9'*64)])
+def test_resource_revision_cannot_change_contract_history_or_finite_cap(tmp_path,field,value):
+    c,_=campaign(tmp_path);confirmed(c);c.start();c.failed('transport',proof())
+    revised=dict(c.scope,development_seconds_max=43200,runtime_sha256='7'*64,generation_cutoff_epoch=100000)
+    revised[field]=value;g=grant(revised);g['previous_campaign_head_sha256']=c.log.rows()[-1]['record_sha256']
+    old=c.log.rows()
+    with pytest.raises(ValueError):c.accept_resource_revision(revised,g)
+    assert c.log.rows()==old
+
+
+
+def test_resource_revision_keeps_interprocess_lock_through_durable_append(tmp_path,monkeypatch):
+    import subprocess,sys
+    c,_=campaign(tmp_path);confirmed(c);c.start();c.failed('transport',proof())
+    revised=dict(c.scope,development_seconds_max=43200,runtime_sha256='7'*64,generation_cutoff_epoch=100000)
+    g=grant(revised);g['previous_campaign_head_sha256']=c.log.rows()[-1]['record_sha256']
+    original=c.log.append_locked;checked=[]
+    def append(kind,payload):
+        if kind=='resource_runtime_revision_accepted':
+            probe=subprocess.run([sys.executable,'-I','-B','-c',
+                "import os,fcntl,sys;fd=os.open(sys.argv[1],os.O_RDONLY)\ntry: fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB)\nexcept BlockingIOError: sys.exit(23)\nsys.exit(0)",
+                str(c.log.root/'manifest.json')],timeout=5)
+            assert probe.returncode==23,'resource revision dropped its exclusive lock before append'
+            checked.append(True)
+        return original(kind,payload)
+    monkeypatch.setattr(c.log,'append_locked',append)
+    c.accept_resource_revision(revised,g);assert checked==[True] and c.observation()['attempts']==1
+
+
+def test_expired_previous_cap_explicit_extension_keeps_first_clock_and_attempt_count(tmp_path):
+    c,clock=campaign(tmp_path);confirmed(c);c.start();clock[0]=500;c.failed('transport',proof())
+    old={p.name:p.read_bytes() for p in c.log.root.iterdir()}
+    clock[0]=50000.
+    revised=dict(c.scope,development_seconds_max=86400,spec_sha256='8'*64,runtime_sha256='7'*64,generation_cutoff_epoch=100000)
+    g=grant(revised);g['previous_campaign_head_sha256']=c.log.rows()[-1]['record_sha256']
+    c.accept_resource_revision(revised,g)
+    assert all((c.log.root/n).read_bytes()==raw for n,raw in old.items())
+    state=c.observation();assert state['attempts']==1 and state['first_load_epoch']==100.
+    assert c.budget()==36440.
+    confirmed(c);assert c.start()==2 and c.observation()['first_load_epoch']==100.
+    clock[0]=86500.
+    with pytest.raises(ValueError,match='shared_budget_exhausted'):c.budget()

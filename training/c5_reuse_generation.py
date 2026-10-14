@@ -69,7 +69,7 @@ class GenerationPeer:
             def guard():
                 nonlocal last
                 now = self.clock()
-                require(last <= now < start + 180, 'peer_complete_generation_deadline')
+                require(last <= now < start + self.binding['limits']['model_seconds'], 'peer_complete_generation_deadline')
                 last = now
                 self.guard(); self.check_budget()
             receipts = []

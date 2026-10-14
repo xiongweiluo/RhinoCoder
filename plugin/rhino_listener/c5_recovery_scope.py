@@ -29,7 +29,7 @@ def material(spec,runtime,*,endpoint,attempt,now,cleanup_only=False):
         'model_assets_sha256','host_readable_files_sha256','resources','recovery','execution_ready'))
     require(spec['protocol']==runtime['protocol']==PROTOCOL and spec['study_id']==runtime['study_id']==STUDY
         and spec['instance_id']==runtime['instance_id']==INSTANCE and spec['phase']=='development'
-        and spec['comparison']==COMPARISON and spec['limits']==LIMITS,'recovery_field_identity_contract')
+        and spec['comparison']==COMPARISON and spec['limits'] in (LIMITS,dict(LIMITS,model_seconds=360)),'recovery_field_identity_contract')
     r=spec['recovery']
     exact(r,('policy','history_sha256','public_attempts_max','minimum_attempt_window_seconds',
         'all_attempts_disclosed','owner_confirmation_before_loading','new_blind_holdout_claimed','previous_campaign_head_sha256'))
@@ -54,8 +54,8 @@ def material(spec,runtime,*,endpoint,attempt,now,cleanup_only=False):
         'development_seconds_max','formal_seconds_max','research_seconds_max',
         'historical_cumulative_upper_bound_seconds','original_16_hour_compliance_claimed',
         'old_budget_recredited','unused_development_transferred_to_formal','actual_lease_basis'))
-    require(resources['development_seconds_max']==18000 and resources['formal_seconds_max']==64800
-        and resources['research_seconds_max']==82800 and resources['export_reserve_seconds']==900
+    require(type(resources['development_seconds_max']) is int and resources['development_seconds_max'] in (18000,43200,86400) and resources['formal_seconds_max']==64800
+        and resources['research_seconds_max']==resources['development_seconds_max']+64800 and resources['export_reserve_seconds']==900
         and resources['historical_cumulative_upper_bound_seconds'] is None
         and all(resources[k] is False for k in ('original_16_hour_compliance_claimed',
                         'old_budget_recredited','unused_development_transferred_to_formal'))
@@ -78,7 +78,7 @@ def material(spec,runtime,*,endpoint,attempt,now,cleanup_only=False):
         'recovery_host_guarantee')
     binding={'protocol':PROTOCOL,'study_id':STUDY,'instance_id':INSTANCE,'spec_sha256':sha(spec),
         'runtime_sha256':sha(runtime),'development_plan_sha256':spec['development_plan_sha256'],
-        'limits':LIMITS,'endpoint':endpoint,'paths':paths(endpoint,attempt,sha(runtime)),
+        'limits':spec['limits'],'endpoint':endpoint,'paths':paths(endpoint,attempt,sha(runtime)),
         'endpoints':{e:paths(e,attempt,sha(runtime)) for e in PARENTS},'recovery':{'scope':campaign_scope(spec,runtime),'attempt':attempt},
         'whole_field_authority_verified':False,'approval_origin_verified':False,'record_binding_verified':True}
     validate(binding)
@@ -96,9 +96,9 @@ def validate(value):
         and s['spec_sha256']==value['spec_sha256'] and s['runtime_sha256']==value['runtime_sha256']
         and s['public_plan_sha256']==value['development_plan_sha256'] and s['contract_sha256']==sha(COMPARISON) and s['policy_sha256']==sha(RECOVERY_POLICY)
         and all(is_sha(s[k]) for k in ('spec_sha256','runtime_sha256','policy_sha256','history_sha256',
-                'public_plan_sha256','contract_sha256')) and s['development_seconds_max']==18000
+                'public_plan_sha256','contract_sha256')) and type(s['development_seconds_max']) is int and s['development_seconds_max'] in (18000,43200,86400)
         and type(s['generation_cutoff_epoch']) in (int,float) and math.isfinite(s['generation_cutoff_epoch'])
-        and s['generation_cutoff_epoch']>0 and value['limits']==LIMITS
+        and s['generation_cutoff_epoch']>0 and value['limits'] in (LIMITS,dict(LIMITS,model_seconds=360))
         and value['whole_field_authority_verified'] is value['approval_origin_verified'] is False
         and value['record_binding_verified'] is True and value['endpoint'] in PARENTS
         and value['endpoints']=={e:paths(e,r['attempt'],value['runtime_sha256']) for e in PARENTS}

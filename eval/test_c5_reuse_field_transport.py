@@ -160,3 +160,14 @@ with AdmissionRegistry(x['binding'],create=True) as registry:
     finally:
         if process.poll() is None: process.kill(); process.wait(timeout=10)
         for stream in (process.stdin,process.stdout,process.stderr): stream.close()
+
+
+@pytest.mark.parametrize('kind,code',(('eof','field_transport_eof'),('oversize','field_oversize_chunk')))
+def test_eof_and_oversize_have_distinct_raw_evidence_codes(tmp_path,kind,code):
+    channel,p,sent,endpoint,mac_registry,gpu_registry=setup(tmp_path,kind)
+    try:
+        with pytest.raises(ValueError,match=code):channel.exchange(sent)
+        received=[r['payload'] for r in channel.journal.records if r['kind']=='wire_received']
+        assert len(received)==1 and received[0]['observed_bytes']==(0 if kind=='eof' else 32769)
+        assert len(endpoint.writes)==1
+    finally:mac_registry.close();gpu_registry.close()

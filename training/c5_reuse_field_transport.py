@@ -78,7 +78,7 @@ class FieldModelChannel:
             key=(sent['request']['slot_id'],sent['request']['step_index'])
             require(key not in self.spent and len(self.spent)<56, 'field_request_consumed')
             start=last=self.clock()
-            deadline=start+180
+            deadline=start+self.binding['limits']['model_seconds']
             def check():
                 nonlocal last
                 now=self.clock()
@@ -105,7 +105,8 @@ class FieldModelChannel:
                 require(type(chunk) is bytes, 'field_receive_type')
                 self.journal.append('wire_received',{'request_sha256':sha(sent),'raw_hex':chunk[:READ_LIMIT].hex(),
                     'observed_bytes':len(chunk),'truncated':len(chunk)>READ_LIMIT})
-                require(0<len(chunk)<=READ_LIMIT, 'field_eof_or_oversize_chunk')
+                require(len(chunk)>0, 'field_transport_eof')
+                require(len(chunk)<=READ_LIMIT, 'field_oversize_chunk')
                 buffer+=chunk
                 require(len(buffer)<=FRAME_LIMIT, 'field_response_size')
             require(buffer.endswith(b'\n') and buffer.count(b'\n')==1, 'field_extra_or_partial_frame')

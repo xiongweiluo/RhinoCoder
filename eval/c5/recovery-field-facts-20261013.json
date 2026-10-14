@@ -1,1 +1,35 @@
-{"actual_lease_report":{"actor":"repository_owner","expiry_epoch":1792000800.0,"not_execution_approval":true,"owner_statement":"本人直接回复：10月14日20:00瑞士时间（2026-10-14 20:00 Europe/Zurich）","timezone":"Europe/Zurich"},"gpu_authentication_master_present":true,"gpu_current_review":{"actual_lease_report_is_separate_input":true,"actual_pidfd_available":true,"candidate_phase":"development","candidate_runtime_sha256":"eca3675e43e8e5cddf081fc881ccc8813a11734ff1f8c10989c26d4c35ce3879","candidate_spec_sha256":"741efe0c46bb70efd1ec1836bd7eba4c28159a15fee9d88474287f1838db505a","compatible_environment_full_bytes_verified":true,"distribution_files_reverified":21614,"endpoint":"gpu","environment_sha256":"9cce641f84edb66d48a44ad7d88061962d07d556ab03ce5e439cd5d3ae135021","epoch":1791911870.3006544,"gpu_boot_id":"77b495a6-c67c-4721-9038-e87c7fcc3fc6","gpu_uuid":"GPU-3a14915f-3804-46b7-b98a-aa09f7bbab4f","history_sha256":"55aa648fdd35575faac13be9b53ed3345042b3afffacd28e55575629aa2057d2","model_assets_sha256":"d4678bfccdf22620bdc453cebcf9d6a3202f48980f8aa15aa3b0192b41ef02ce","model_or_cuda_calls":0,"new_grants_or_campaign_state_created":false,"original_model_assets_full_bytes_verified":true,"private_formal_reads":0,"same_global_history_verified":true,"source_bytes_verified":true,"source_inventory_sha256":"255a3207190db8812ba776a9e7a6c2a9b10f0ff89c7aecd3de47acb8ebe66fb8","uid":1000},"previous_campaign_head_sha256":null}
+{
+  "actual_lease_report": {
+    "actor": "repository_owner",
+    "expiry_epoch": 1792000800.0,
+    "not_execution_approval": true,
+    "owner_statement": "\u672c\u4eba\u76f4\u63a5\u56de\u590d\uff1a10\u670814\u65e520:00\u745e\u58eb\u65f6\u95f4\uff082026-10-14 20:00 Europe/Zurich\uff09",
+    "timezone": "Europe/Zurich"
+  },
+  "gpu_authentication_master_present": true,
+  "gpu_current_review": {
+    "actual_lease_report_is_separate_input": true,
+    "actual_pidfd_available": true,
+    "candidate_phase": "development",
+    "candidate_runtime_sha256": "3b26c51538ec7369bee7d6ef1724b0e0c89e094ae0e9e717bb7b90e366aef514",
+    "candidate_spec_sha256": "2c44020276b545458212f95bf09d12d269a18d91a6a1c946e1ea39939ecb3c23",
+    "compatible_environment_full_bytes_verified": true,
+    "distribution_files_reverified": 21614,
+    "endpoint": "gpu",
+    "environment_sha256": "9cce641f84edb66d48a44ad7d88061962d07d556ab03ce5e439cd5d3ae135021",
+    "epoch": 1791978768.732415,
+    "gpu_boot_id": "77b495a6-c67c-4721-9038-e87c7fcc3fc6",
+    "gpu_uuid": "GPU-3a14915f-3804-46b7-b98a-aa09f7bbab4f",
+    "history_sha256": "55aa648fdd35575faac13be9b53ed3345042b3afffacd28e55575629aa2057d2",
+    "model_assets_sha256": "d4678bfccdf22620bdc453cebcf9d6a3202f48980f8aa15aa3b0192b41ef02ce",
+    "model_or_cuda_calls": 0,
+    "new_grants_or_campaign_state_created": false,
+    "original_model_assets_full_bytes_verified": true,
+    "private_formal_reads": 0,
+    "same_global_history_verified": true,
+    "source_bytes_verified": true,
+    "source_inventory_sha256": "7dc77736f3633a34e25a9e4272b3262a10946a36861fd8e3334fda227b87fe7b",
+    "uid": 1000
+  },
+  "previous_campaign_head_sha256": "a9f7e01b618c7de0e96619df6fb17a67d3e1dddea05d22e283899b69a533aaac"
+}

@@ -35,7 +35,7 @@ def validate_scope(scope):
             and all(is_sha(scope[k]) for k in ('spec_sha256','runtime_sha256','policy_sha256',
                                               'history_sha256','public_plan_sha256','contract_sha256'))
             and scope['policy_sha256']==sha(POLICY),'recovery_scope_policy')
-    require(type(scope['development_seconds_max']) is int and 60<scope['development_seconds_max']<=18000
+    require(type(scope['development_seconds_max']) is int and 60<scope['development_seconds_max']<=86400
             and type(scope['generation_cutoff_epoch']) in (int,float)
             and math.isfinite(scope['generation_cutoff_epoch']) and scope['generation_cutoff_epoch']>0,
             'recovery_finite_shared_budget')

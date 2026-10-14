@@ -29,12 +29,12 @@ def _budget(value,resources):
     require(all(type(value[k]) in (int,float) and math.isfinite(value[k]) and value[k]>=0 for k in
                 ('elapsed_wall_seconds','start_epoch','operational_cap_seconds','reserved_wall_seconds','stop_reserve_seconds'))
         and value['start_epoch']>0 and value['stop_reserve_seconds']==60
-        and value['reserved_wall_seconds']==resources['development_seconds_max']==18000
-        and value['operational_cap_seconds']==17940
-        and value['start_epoch']+18000<=resources['generation_cutoff_epoch']
+        and value['reserved_wall_seconds']==resources['development_seconds_max']
+        and value['operational_cap_seconds']==resources['development_seconds_max']-60
+        and value['start_epoch']+resources['development_seconds_max']<=resources['generation_cutoff_epoch']
         and value['prior_cumulative_upper_bound_seconds'] is None
         and type(value['within_reserved_wall_seconds']) is bool
-        and value['within_reserved_wall_seconds']==(value['elapsed_wall_seconds']<=18000)
+        and value['within_reserved_wall_seconds']==(value['elapsed_wall_seconds']<=resources['development_seconds_max'])
         and value['physical_gpu_release_independently_verified'] is None,'recovery_audit_shared_wall_budget')
 
 
