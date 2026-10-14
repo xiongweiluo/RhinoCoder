@@ -552,6 +552,8 @@ def test_actual_proof_command_retains_both_cpu_streams(monkeypatch,tmp_path,mode
 
 @pytest.mark.parametrize('error,category',(
     (TimeoutError('followup_capture_read_deadline'),'transport'),
+    (ValueError('field_transport_eof'),'transport'),
+    (ValueError('field_oversize_chunk'),'integrity'),
     (ValueError('field_pipe_deadline'),'transport'),
     (ValueError('field_whole_exchange_deadline'),'transport'),
     (ValueError('followup_capture_limit_or_error_no_retry'),'capture'),

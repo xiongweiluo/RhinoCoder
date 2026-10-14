@@ -1,0 +1,141 @@
+{
+  "all_dispatch_keys_absent": true,
+  "approved_runtime_sha256": "3b26c51538ec7369bee7d6ef1724b0e0c89e094ae0e9e717bb7b90e366aef514",
+  "approved_spec_sha256": "2c44020276b545458212f95bf09d12d269a18d91a6a1c946e1ea39939ecb3c23",
+  "attempts_consumed": 2,
+  "cleanup_reconciliation_proof": {
+    "capture_complete": true,
+    "known_native_cleanup_complete": true,
+    "private_exposure_absent": true,
+    "qualified_target_absent": true,
+    "raw_anchor_sha256": "0bfa1340b3b37c3f7653c4a57c272b0f7db87c7a2938462bce5f20ce4e4f27e0"
+  },
+  "compatible_check_profile": {
+    "actual_cuda_initialized": false,
+    "baseline_native": {
+      "bytes_hashed": 387071079,
+      "hash_calls": 2871,
+      "hash_seconds": 1.1655009554233402,
+      "seconds": 2.0160022109921556
+    },
+    "cpu_package_class_import_seconds": 9.860373846982839,
+    "cuda_visible_devices": "",
+    "endpoint": "compatible_linux_cpu",
+    "epoch": 1791978079.6513042,
+    "loaded_environment": {
+      "bytes_hashed": 10880698932,
+      "hash_calls": 2300,
+      "hash_seconds": 26.000063004466938,
+      "seconds": 26.184452613000758
+    },
+    "method": "separate CPU process with original hashing results and per-call counters; no model instantiated",
+    "native_after_package_import": {
+      "bytes_hashed": 387071079,
+      "hash_calls": 2871,
+      "hash_seconds": 1.1439809472067282,
+      "seconds": 1.982027788006235
+    },
+    "new_model_load_or_generation_calls": 0,
+    "preflight_seconds": 22.236335235997103,
+    "private_formal_reads": 0,
+    "total_modules": 2649
+  },
+  "completed_slots": 1,
+  "connection_root_cause_uniquely_proven": false,
+  "controller_head_sha256": "81d6949517bbb935e624004f97b28374abe0a23b262421a3c9011625acfd889d",
+  "controller_rows": 12,
+  "dedup_probe": {
+    "actual_cuda_initialized": false,
+    "before_after_and_final_metadata_stability_checked": true,
+    "cross_guard_cache": false,
+    "endpoint": "compatible_linux_cpu_prototype_only",
+    "epoch": 1791978305.3570392,
+    "full_byte_check_every_distinct_origin_this_guard": true,
+    "new_model_load_or_generation_calls": 0,
+    "preflight_seconds": 22.41261355599272,
+    "private_formal_reads": 0,
+    "single_guard_seconds": 2.0074164379911963,
+    "unique_bytes_hashed": 490931700,
+    "unique_hash_calls": 2269
+  },
+  "epoch": 1791977445.2024388,
+  "first_load_epoch_preserved": 1791916117.781239,
+  "first_slot_model_status": "selector_contract_failure_no_dispatch",
+  "fixture_control_signatures_verified": 7,
+  "full_host_closure_or_memory_erasure_proven": false,
+  "host": {
+    "causal_origin_or_emitted_bytes_proven": false,
+    "complete_handler_absence_proven": false,
+    "execution_authority": false,
+    "legacy_byte_closure_verified": false,
+    "limited_visible_continuity_verified": true,
+    "normal_checkpoint_count": 10,
+    "policy_id": "c5-frozen-source-trusted-host-visible-continuity-v2",
+    "raw_external_seal_sha256": "3f36d841e0a033624cd0623f12ddb6e3b25fcfd78880f1844c052d64468f2a29",
+    "record_count": 22,
+    "status": "limited_host_continuity_audit_verified",
+    "study_id": "C5DEV-RECOVERY-20261013"
+  },
+  "host_terminal": {
+    "blocked": false,
+    "execution_authority": false,
+    "journal_head_sha256": "935e01707bd3592b3cf0ea95d928cf984b7a6f02d815a3e3bd50356b00610850",
+    "record_count": 22,
+    "seal_sha256": "3f36d841e0a033624cd0623f12ddb6e3b25fcfd78880f1844c052d64468f2a29",
+    "study_id": "C5DEV-RECOVERY-20261013"
+  },
+  "hub_control_signatures_verified": 3,
+  "independent_raw_refinement": "transport_zero_byte_eof",
+  "known_native_cleanup_complete": true,
+  "mac_check_profile": {
+    "counter_wrapper_separate_cpu_process_original_hash_values_unchanged": true,
+    "endpoint": "mac",
+    "guard_bytes_hashed": 557042548,
+    "guard_file_hash_calls": 3967,
+    "guard_hash_seconds": 0.3519405579427257,
+    "new_model_or_rhino_calls": 0,
+    "private_formal_reads": 0,
+    "scope_construction_seconds": 1.6932637090794742,
+    "single_guard_seconds": 0.3819796669995412,
+    "total_calls": 11901
+  },
+  "mac_lifecycle_head_sha256": "332e066dd3db90a58df6103355f4c5ffd6750b4195b0b17f3baa7542f8e665e3",
+  "maximum_attempts": 3,
+  "native_head_sha256": "f16652a9a29aa24395f100a9ab5db8cec113c0ef9269348db358bfb18f9f5c85",
+  "native_reads": 0,
+  "native_rows": 16,
+  "native_writes": 0,
+  "new_model_or_rhino_calls": 0,
+  "old_180_and_360_second_failures_retained": true,
+  "opened_slots": 2,
+  "original_c5_no_go_changed": false,
+  "original_failure_classification": "integrity",
+  "original_fixture_keys_retained_before_capture": true,
+  "owner_custody_agent_signed": false,
+  "owner_custody_statement": "\u5df2\u4fdd\u7ba1\u672c\u6b21\u5931\u8d25\u56de\u6267",
+  "owner_failure_receipt_custody_reported": true,
+  "private_formal_reads": 0,
+  "qualified_target_absent": true,
+  "quality_for_unfinished_slots": null,
+  "reconciled_campaign_head_sha256": "a9f7e01b618c7de0e96619df6fb17a67d3e1dddea05d22e283899b69a533aaac",
+  "reconciliation_decision": "RETRYABLE_ENGINEERING",
+  "remaining_attempts": 1,
+  "single_shared_signal_and_reaped": true,
+  "source_inventory_sha256": "7dc77736f3633a34e25a9e4272b3262a10946a36861fd8e3334fda227b87fe7b",
+  "status": "COMPLETE_RETAINED_PARTIAL_RAW_AND_KNOWN_CLEANUP_AUDIT_PASS_NOT_EIGHT_SLOT_GATE",
+  "streams": {
+    "stderr": {
+      "bytes": 96156,
+      "complete_transport_capture": true,
+      "exit_status": 255,
+      "raw_sha256": "494419e3808ab78643e2d35d7bb94438caaed76e29a4d45cddf4163d98d8e8f2"
+    },
+    "stdout": {
+      "bytes": 1575,
+      "complete_transport_capture": true,
+      "exit_status": 255,
+      "raw_sha256": "2104ba8445f10aa34e534388b26a9fdf0d509a61dfaeddd1cfb55b71261273f6"
+    }
+  },
+  "whole_eight_gate_passed": false
+}

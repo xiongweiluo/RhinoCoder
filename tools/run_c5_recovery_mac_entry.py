@@ -12,7 +12,7 @@ def failure_category(error):
     """Only known engineering failures are retryable after independent cleanup."""
     if isinstance(error,(KeyboardInterrupt,SystemExit)):return 'cancelled'
     message=str(error)
-    if message in ('followup_capture_read_deadline','field_pipe_deadline','field_whole_exchange_deadline'):
+    if message in ('followup_capture_read_deadline','field_pipe_deadline','field_whole_exchange_deadline','field_transport_eof'):
         return 'transport'
     if message in ('reuse_worker_eof_or_chunk','reuse_ssh_remote_supervisor_failed',
                    'recovery_ready_proof_transport'):return 'transport'

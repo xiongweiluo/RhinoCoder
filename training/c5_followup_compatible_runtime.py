@@ -80,16 +80,27 @@ def installed_environment(prefix):
     return report,inventory
 
 
-def verify_loaded_environment(prefix,inventory):
-    """Reject loaded foreign/unregistered Python and native extension origins.
+def _file_identity(path):
+    value = Path(path).lstat()
+    require(stat.S_ISREG(value.st_mode), 'loaded dependency is not a regular file')
+    return tuple(getattr(value,key) for key in ('st_dev','st_ino','st_mode','st_nlink',
+                 'st_uid','st_gid','st_size','st_mtime_ns','st_ctime_ns'))
 
-    Project modules are independently covered by the project SourceGuard;
-    standard-library files are separately fingerprinted by runtime preflight.
+
+def verify_loaded_environment(prefix,inventory,*,modules=None):
+    """Check each distinct loaded origin's bytes once in THIS invocation.
+
+    Native extensions can publish many module aliases for one large file.
+    Every origin is still validated, and every invocation hashes the full
+    distinct file set. Metadata checks before/after hashing, at each alias,
+    and at the end reject concurrent drift. No cross-checkpoint digest cache.
+    modules is a CPU verification hook; the actual loader uses sys.modules.
     """
     prefix = Path(prefix)
-    for module in tuple(sys.modules.values()):
+    verified = {}
+    for module in (tuple(sys.modules.values()) if modules is None else tuple(modules)):
         origin = getattr(module,'__file__',None)
-        if not origin: continue  # built-ins have no file.
+        if not origin: continue
         path = Path(origin)
         if path.suffix=='.pyc':
             import importlib.util
@@ -98,7 +109,17 @@ def verify_loaded_environment(prefix,inventory):
         require(path.is_absolute() and path.resolve()==path and path.is_relative_to(prefix),
                 'foreign installed module origin')
         key = path.relative_to(prefix).as_posix()
-        require(key in inventory and file_sha(path)==inventory[key],'unregistered/drifted loaded dependency')
+        require(key in inventory, 'unregistered/drifted loaded dependency')
+        identity = _file_identity(path)
+        if path in verified:
+            require(identity==verified[path], 'loaded dependency changed during verification')
+            continue
+        actual = file_sha(path)
+        require(identity==_file_identity(path), 'loaded dependency changed during verification')
+        require(actual==inventory[key], 'unregistered/drifted loaded dependency')
+        verified[path] = identity
+    require(all(_file_identity(path)==identity for path,identity in verified.items()),
+            'loaded dependency changed during verification')
 
 
 def runtime_preflight(prefix):

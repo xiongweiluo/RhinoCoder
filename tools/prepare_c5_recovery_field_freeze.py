@@ -83,9 +83,9 @@ def assemble():
             'owner_statement':'确认预算是足够的，你不需要太纠结预算问题，我会及时续租',
             'reservation_interpretation':'agent_sized_finite_24_hours_preparation_within_owner_resource_authorization_exact_execution_grant_pending',
             'timing_estimate':{'prior_minimum_attempt_window_seconds':16344,'extra_eight_rpc_wait_seconds':1440,
-                'revised_minimum_attempt_window_seconds':17784,'two_remaining_windows_seconds':35568,
-                'shared_cap_seconds':86400,'elapsed_preparation_wait_stop_allowance_seconds':50832,
-                'first_load_epoch_preserved':1791916117.781239,'attempts_already_consumed':1},
+                'revised_minimum_attempt_window_seconds':17784,'one_remaining_window_seconds':17784,
+                'shared_cap_seconds':86400,'elapsed_preparation_wait_stop_allowance_seconds':68616,
+                'first_load_epoch_preserved':1791916117.781239,'attempts_already_consumed':2},
             'actual_renewed_lease_expiry_verified':lease is not None,'gpu_current_assets_verified':current})
     if current:
         plan['gpu_process'].update(boot_id=gpu['gpu_boot_id'],uid=gpu['uid'],gpu_uuid=gpu['gpu_uuid'])
@@ -93,7 +93,8 @@ def assemble():
     documents={SPEC:spec,PLAN:plan,HISTORY:history}
     allowed_legacy_changes={'plugin/rhino_listener/c5_reuse_field_scope.py',
         'training/c5_reuse_admission.py','training/c5_reuse_worker_loop.py',
-        'training/c5_reuse_field_transport.py','training/c5_reuse_generation.py','training/c5_reuse_gpu_supervisor.py'}
+        'training/c5_reuse_field_transport.py','training/c5_reuse_generation.py','training/c5_reuse_gpu_supervisor.py',
+        'training/c5_followup_compatible_runtime.py'}
     require(all(n in allowed_legacy_changes or raw_sha((ROOT/n).read_bytes())==h
         for n,h in old_runtime['source_files'].items()),'recovery_unaffected_original_contract_bytes_changed')
     files=set(old_runtime['source_files'])
@@ -116,8 +117,8 @@ def assemble():
         'field_actor_sources_registered':True,'candidate_spec_sha256':sha(spec),'candidate_runtime_sha256':sha(runtime),
         'source_files':len(source),'source_inventory_sha256':sha(source),'history_sha256':sha(history),
         'candidate_two_hashes_are_not_execution_approval_objects':not ready,
-        'changed_groups':['retry_policy','confirmation','stop','native_tools'],
-        'affected_checks':affected_checks(['retry_policy','confirmation','stop','native_tools']),
+        'changed_groups':['retry_policy','confirmation','stop','native_tools','runtime_environment'],
+        'affected_checks':affected_checks(['retry_policy','confirmation','stop','native_tools','runtime_environment']),
         'reused_model_contract_sha256':sha(COMPARISON),'reused_original_d_runtime_sha256':sha(old_runtime),
         'current_mac_review':mac,'gpu_environment_and_model_assets_currently_verified':current,
         'renewed_actual_lease_expiry_currently_verified':lease is not None,
