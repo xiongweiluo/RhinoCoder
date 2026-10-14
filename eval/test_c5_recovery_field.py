@@ -407,7 +407,7 @@ def test_full_five_hour_ledger_capacity_includes_transition_reserve(monkeypatch,
 
 
 @pytest.mark.skipif(sys.platform!='linux' or not hasattr(os,'pidfd_open'),reason='real Linux CPU fork/pidfd barrier')
-@pytest.mark.parametrize('revised_boundary',(False,True))
+@pytest.mark.parametrize('revised_boundary',(0,43200,86400))
 def test_actual_gpu_supervisor_cpu_child_is_qualified_before_loader_and_stops_once(monkeypatch,tmp_path,revised_boundary):
     import shutil
     import time
@@ -419,9 +419,9 @@ def test_actual_gpu_supervisor_cpu_child_is_qualified_before_loader_and_stops_on
     h=history_fixture(tmp_path,field.PARENTS)
     s['recovery']['history_sha256']=sha(h)
     if revised_boundary:
-        s['resources'].update(development_seconds_max=43200,research_seconds_max=108000)
+        s['resources'].update(development_seconds_max=revised_boundary,research_seconds_max=revised_boundary+64800)
         s['limits']['model_seconds']=360
-    s['resources'].update(generation_cutoff_epoch=time.time()+50000,lease_expiry_epoch=time.time()+50900)
+    s['resources'].update(generation_cutoff_epoch=time.time()+100000,lease_expiry_epoch=time.time()+100900)
     # Keep exact 900-second export boundary in this CPU-only timestamp fixture.
     s['resources']['lease_expiry_epoch']=s['resources']['generation_cutoff_epoch']+900
     r.update(spec_sha256=sha(s),resources=copy.deepcopy(s['resources']),recovery=copy.deepcopy(s['recovery']))
@@ -480,7 +480,9 @@ log.close()
         with selectors.DefaultSelector() as select:
             select.register(child.stdout,selectors.EVENT_READ)
             assert select.select(30),'CPU worker failed to publish ready'
-        line=child.stdout.readline();ready=json.loads(line)
+        line=child.stdout.readline()
+        assert line,child.stderr.read().decode()
+        ready=json.loads(line)
         snap,receipt=preload(b)
         begin={'kind':'reuse_begin_after_preload_confirmation','protocol':PROTOCOL,'scope_sha256':sha(common_scope(b)),
             'preload_snapshot':snap,'preload_receipt':receipt,'host_baseline_head_sha256':'e'*64,'worker_readiness_sha256':sha(ready)}
@@ -562,20 +564,23 @@ def test_actual_entry_failure_classification_keeps_unknowns_closed(error,categor
     assert failure_category(error)==category
 
 
-def test_revision_material_12_hours_360_seconds_keeps_legacy_bindings(monkeypatch,tmp_path):
+@pytest.mark.parametrize('cap',(43200,86400))
+def test_revision_material_extended_hours_360_seconds_keeps_legacy_bindings(monkeypatch,tmp_path,cap):
     s,r,p,old,g,plans,raw=fixture(monkeypatch,tmp_path)
-    s['resources'].update(development_seconds_max=43200,research_seconds_max=108000)
+    s['resources'].update(development_seconds_max=cap,research_seconds_max=cap+64800)
     s['limits']['model_seconds']=360
     r.update(spec_sha256=sha(s),resources=s['resources'])
     new=field.material(s,r,endpoint='gpu',attempt=2,now=100)
-    assert new['limits']['model_seconds']==360 and new['recovery']['scope']['development_seconds_max']==43200
+    assert new['limits']['model_seconds']==360 and new['recovery']['scope']['development_seconds_max']==cap
     validate_binding(old);validate_binding(new)
 
 
-def test_qualified_watchdog_uses_bound_request_deadline_and_larger_shared_reservation():
+@pytest.mark.parametrize('cap',(43200,86400))
+def test_qualified_watchdog_uses_bound_request_deadline_and_larger_shared_reservation(cap):
     from training.c5_reuse_gpu_supervisor import Watchdog,PACKET
     clock=[100.];limits=dict(LIMITS,model_seconds=360)
-    w=Watchdog(100.,43140,clock=lambda:clock[0],limits=limits)
+    with pytest.raises(ValueError,match='watchdog_reservation'):Watchdog(100.,86401,clock=lambda:clock[0],limits=limits)
+    w=Watchdog(100.,cap-60,clock=lambda:clock[0],limits=limits)
     for code in (b'L',b'B',b'R'):w.feed(PACKET.pack(code,100.))
     clock[0]=280.;assert w.check()==180
     clock[0]=460.

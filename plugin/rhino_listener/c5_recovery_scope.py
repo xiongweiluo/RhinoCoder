@@ -54,7 +54,7 @@ def material(spec,runtime,*,endpoint,attempt,now,cleanup_only=False):
         'development_seconds_max','formal_seconds_max','research_seconds_max',
         'historical_cumulative_upper_bound_seconds','original_16_hour_compliance_claimed',
         'old_budget_recredited','unused_development_transferred_to_formal','actual_lease_basis'))
-    require(type(resources['development_seconds_max']) is int and resources['development_seconds_max'] in (18000,43200) and resources['formal_seconds_max']==64800
+    require(type(resources['development_seconds_max']) is int and resources['development_seconds_max'] in (18000,43200,86400) and resources['formal_seconds_max']==64800
         and resources['research_seconds_max']==resources['development_seconds_max']+64800 and resources['export_reserve_seconds']==900
         and resources['historical_cumulative_upper_bound_seconds'] is None
         and all(resources[k] is False for k in ('original_16_hour_compliance_claimed',
@@ -96,7 +96,7 @@ def validate(value):
         and s['spec_sha256']==value['spec_sha256'] and s['runtime_sha256']==value['runtime_sha256']
         and s['public_plan_sha256']==value['development_plan_sha256'] and s['contract_sha256']==sha(COMPARISON) and s['policy_sha256']==sha(RECOVERY_POLICY)
         and all(is_sha(s[k]) for k in ('spec_sha256','runtime_sha256','policy_sha256','history_sha256',
-                'public_plan_sha256','contract_sha256')) and type(s['development_seconds_max']) is int and s['development_seconds_max'] in (18000,43200)
+                'public_plan_sha256','contract_sha256')) and type(s['development_seconds_max']) is int and s['development_seconds_max'] in (18000,43200,86400)
         and type(s['generation_cutoff_epoch']) in (int,float) and math.isfinite(s['generation_cutoff_epoch'])
         and s['generation_cutoff_epoch']>0 and value['limits'] in (LIMITS,dict(LIMITS,model_seconds=360))
         and value['whole_field_authority_verified'] is value['approval_origin_verified'] is False

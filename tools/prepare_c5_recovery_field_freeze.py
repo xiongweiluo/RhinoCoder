@@ -59,7 +59,7 @@ def assemble():
         'owner_confirmation_before_loading':True,'new_blind_holdout_claimed':False,
         'previous_campaign_head_sha256':facts['previous_campaign_head_sha256']}
     resources={'lease_expiry_epoch':1791914400,'generation_cutoff_epoch':1791913500,'export_reserve_seconds':900,
-        'development_seconds_max':43200,'formal_seconds_max':64800,'research_seconds_max':108000,
+        'development_seconds_max':86400,'formal_seconds_max':64800,'research_seconds_max':151200,
         'historical_cumulative_upper_bound_seconds':None,'original_16_hour_compliance_claimed':False,
         'old_budget_recredited':False,'unused_development_transferred_to_formal':False,
         'actual_lease_basis':'last_reported_2026_10_13_20_00_Europe_Zurich_no_renewed_expiry_attested'}
@@ -79,12 +79,12 @@ def assemble():
         transport=dict(old_plan['transport'],policy=TRANSPORT),host_acceptance=acceptance,recovery=recovery,
         minimum_attempt_window_seconds=17784,
         resource_basis={'platform_hour_quota':None,'historical_cumulative_upper_bound_seconds':None,
-            'accepted_development_seconds_max':43200,'accepted_conditional_formal_seconds_max':64800,
+            'accepted_development_seconds_max':86400,'accepted_conditional_formal_seconds_max':64800,
             'owner_statement':'确认预算是足够的，你不需要太纠结预算问题，我会及时续租',
-            'reservation_interpretation':'agent_sized_finite_12_hours_preparation_within_owner_resource_authorization_exact_execution_grant_pending',
+            'reservation_interpretation':'agent_sized_finite_24_hours_preparation_within_owner_resource_authorization_exact_execution_grant_pending',
             'timing_estimate':{'prior_minimum_attempt_window_seconds':16344,'extra_eight_rpc_wait_seconds':1440,
                 'revised_minimum_attempt_window_seconds':17784,'two_remaining_windows_seconds':35568,
-                'shared_cap_seconds':43200,'elapsed_preparation_wait_stop_allowance_seconds':7632,
+                'shared_cap_seconds':86400,'elapsed_preparation_wait_stop_allowance_seconds':50832,
                 'first_load_epoch_preserved':1791916117.781239,'attempts_already_consumed':1},
             'actual_renewed_lease_expiry_verified':lease is not None,'gpu_current_assets_verified':current})
     if current:

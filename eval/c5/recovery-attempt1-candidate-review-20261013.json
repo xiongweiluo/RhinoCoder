@@ -1,29 +1,30 @@
 {
   "actual_compatible_linux_affected_cpu": {
     "deselected": 117,
+    "includes_5_12_24h_actual_qualified_fork": true,
     "includes_fixture_signature_tamper_and_unknown_dispatch_rejection": true,
     "includes_original_and_revised_actual_qualified_fork": true,
-    "passed": 27,
-    "raw_output_sha256": "f907d2ba0cbbe64bcf7726688d29ef7e489247c1defa25565c07a6baae135e09",
-    "seconds": 13.89,
+    "passed": 31,
+    "raw_output_sha256": "7c4298cd79415d7e9040833fef319c8ac3e15e0bfec215a4af6b0ab42c8a6d11",
+    "seconds": 18.83,
     "skipped": 0,
     "synthetic_provider_only": true
   },
   "actual_lease_expiry_epoch": 1792000800,
   "auto_merge_authorized": false,
-  "candidate_runtime_sha256": "ef1181b64f93505d568f84f477e73371a705b996fea72174ff66f8a7250322b7",
-  "candidate_spec_sha256": "098118947aba3d6a218725748bb28ade18dbf4fb21f207ba7f894e1d4dfd2404",
+  "candidate_runtime_sha256": "3b26c51538ec7369bee7d6ef1724b0e0c89e094ae0e9e717bb7b90e366aef514",
+  "candidate_spec_sha256": "2c44020276b545458212f95bf09d12d269a18d91a6a1c946e1ea39939ecb3c23",
   "current_gpu_candidate_readonly": {
     "actual_lease_report_is_separate_input": true,
     "actual_pidfd_available": true,
     "candidate_phase": "development",
-    "candidate_runtime_sha256": "ef1181b64f93505d568f84f477e73371a705b996fea72174ff66f8a7250322b7",
-    "candidate_spec_sha256": "098118947aba3d6a218725748bb28ade18dbf4fb21f207ba7f894e1d4dfd2404",
+    "candidate_runtime_sha256": "3b26c51538ec7369bee7d6ef1724b0e0c89e094ae0e9e717bb7b90e366aef514",
+    "candidate_spec_sha256": "2c44020276b545458212f95bf09d12d269a18d91a6a1c946e1ea39939ecb3c23",
     "compatible_environment_full_bytes_verified": true,
     "distribution_files_reverified": 21614,
     "endpoint": "gpu",
     "environment_sha256": "9cce641f84edb66d48a44ad7d88061962d07d556ab03ce5e439cd5d3ae135021",
-    "epoch": 1791921727.4038224,
+    "epoch": 1791965525.78025,
     "gpu_boot_id": "77b495a6-c67c-4721-9038-e87c7fcc3fc6",
     "gpu_uuid": "GPU-3a14915f-3804-46b7-b98a-aa09f7bbab4f",
     "history_sha256": "55aa648fdd35575faac13be9b53ed3345042b3afffacd28e55575629aa2057d2",
@@ -34,17 +35,17 @@
     "private_formal_reads": 0,
     "same_global_history_verified": true,
     "source_bytes_verified": true,
-    "source_inventory_sha256": "c6cc6141f0aa2de454ed6e062781d8c3bb6311ee577cc93e86d194e29a50639b",
+    "source_inventory_sha256": "7dc77736f3633a34e25a9e4272b3262a10946a36861fd8e3334fda227b87fe7b",
     "uid": 1000
   },
   "current_mac_candidate_readonly": {
     "actual_lease_report_is_separate_input": true,
     "audit_tokenizer_files_reverified": 6,
     "candidate_phase": "development",
-    "candidate_runtime_sha256": "ef1181b64f93505d568f84f477e73371a705b996fea72174ff66f8a7250322b7",
-    "candidate_spec_sha256": "098118947aba3d6a218725748bb28ade18dbf4fb21f207ba7f894e1d4dfd2404",
+    "candidate_runtime_sha256": "3b26c51538ec7369bee7d6ef1724b0e0c89e094ae0e9e717bb7b90e366aef514",
+    "candidate_spec_sha256": "2c44020276b545458212f95bf09d12d269a18d91a6a1c946e1ea39939ecb3c23",
     "endpoint": "mac",
-    "epoch": 1791921645.170293,
+    "epoch": 1791965523.509492,
     "history_sha256": "55aa648fdd35575faac13be9b53ed3345042b3afffacd28e55575629aa2057d2",
     "mac_environment_files_reverified": 3552,
     "mac_environment_full_bytes_verified": true,
@@ -55,16 +56,16 @@
     "readable_host_files_reverified": 339,
     "same_global_history_verified": true,
     "source_bytes_verified": true,
-    "source_inventory_sha256": "c6cc6141f0aa2de454ed6e062781d8c3bb6311ee577cc93e86d194e29a50639b"
+    "source_inventory_sha256": "7dc77736f3633a34e25a9e4272b3262a10946a36861fd8e3334fda227b87fe7b"
   },
-  "epoch": 1791922139.958706,
+  "epoch": 1791965794.984595,
   "exact_owner_execution_approval_required": true,
   "first_load_epoch": 1791916117.781239,
   "generation_cutoff_epoch": 1791999900,
   "independent_gpu_original_archive_and_current_source": {
     "compute_pids": [],
     "current_candidate_375_files_verified": true,
-    "epoch": 1791922103.080984,
+    "epoch": 1791965564.5685475,
     "gpu_memory": "GPU-3a14915f-3804-46b7-b98a-aa09f7bbab4f, 11",
     "new_attempt2_absent": true,
     "new_model_or_cuda_calls": 0,
@@ -73,10 +74,10 @@
     "private_formal_reads": 0
   },
   "independent_source_and_history_review": {
-    "candidate_runtime_sha256": "ef1181b64f93505d568f84f477e73371a705b996fea72174ff66f8a7250322b7",
-    "candidate_spec_sha256": "098118947aba3d6a218725748bb28ade18dbf4fb21f207ba7f894e1d4dfd2404",
+    "candidate_runtime_sha256": "3b26c51538ec7369bee7d6ef1724b0e0c89e094ae0e9e717bb7b90e366aef514",
+    "candidate_spec_sha256": "2c44020276b545458212f95bf09d12d269a18d91a6a1c946e1ea39939ecb3c23",
     "current_mac_ledger_rows": 8,
-    "epoch": 1791921549.842165,
+    "epoch": 1791965585.6681201,
     "first_load_and_one_attempt_consumption_unchanged": true,
     "key_custody_before_first_control_and_model": true,
     "new_exact_grant_or_attempt2_present": false,
@@ -95,7 +96,7 @@
     "private_formal_reads": 0,
     "rhino_python39_sources_parsed": 8,
     "source_files": 374,
-    "source_inventory_sha256": "c6cc6141f0aa2de454ed6e062781d8c3bb6311ee577cc93e86d194e29a50639b",
+    "source_inventory_sha256": "7dc77736f3633a34e25a9e4272b3262a10946a36861fd8e3334fda227b87fe7b",
     "static_project_imports_in_closure": 1272,
     "status": "INDEPENDENT_STDLIB_INCREMENTAL_SOURCE_AND_HISTORY_REVIEW_PASS_NO_EXECUTION"
   },
@@ -109,10 +110,23 @@
     "retained_raw_outputs": true
   },
   "local_affected_cpu": {
-    "passed": 270,
-    "raw_output_sha256": "0f3665edd8102216f5a3a5461eb8811ed10673e0db341223beeef7e5c924fdcc",
-    "seconds": 76.97,
-    "skipped": 5
+    "final_fixture_correction_followup": {
+      "deselected": 134,
+      "passed": 11,
+      "raw_output_sha256": "034c43a85bc4f36c810f78df8d00c1dc305c749d87b9b42210af2667ec680b03",
+      "seconds": 0.27,
+      "skipped": 3
+    },
+    "passed": 273,
+    "raw_output_sha256": "fbbebf16d3e5a6752180b1612cc4c501c63181aaa1efd335c9aa6d83a49dee01",
+    "seconds": 77.5,
+    "skipped": 6
+  },
+  "new_24h_diagnostics": {
+    "cpu_first_load_lease_too_short_for_24h_detected_then_fixture_fixed": true,
+    "earlier_failed_outputs_retained_not_passed": true,
+    "missing_scope_whitelist_detected_by_cpu_then_fixed": true,
+    "production_initial_full_reservation_rule_retained": true
   },
   "new_attempt2_prepared": false,
   "new_exact_grant_registered": false,
@@ -121,14 +135,62 @@
   "old_approved_375_public_files_archived_both_endpoints": true,
   "old_grant_and_consumption_bytes_preserved": true,
   "old_quality_no_go_preserved": true,
+  "previous_12h_candidate": {
+    "dual_ci_success_runs": [
+      38460523174,
+      38460528622
+    ],
+    "each_passed": 2101,
+    "each_skipped": 12,
+    "execution_started": false,
+    "head": "d47b781d56c48437d118ae243bca2e1d944baadd",
+    "runtime_sha256": "ef1181b64f93505d568f84f477e73371a705b996fea72174ff66f8a7250322b7",
+    "spec_sha256": "098118947aba3d6a218725748bb28ade18dbf4fb21f207ba7f894e1d4dfd2404",
+    "superseded_reason": "elapsed shared cap expired while awaiting restored authentication"
+  },
   "prior_attempts_consumed": 1,
   "prior_campaign_head_sha256": "6dcb6aee30180bd35ef9c17f7e924df6d3bd5d0534b5e71ac52fe5989b663fe7",
   "private_formal_reads": 0,
-  "proposed_finite_development_seconds_max": 43200,
+  "proposed_finite_development_seconds_max": 86400,
   "public_files_per_endpoint": 375,
+  "resource_boundary_interpretation": "finite 24h preparation sized under owner adequate-resource authorization; same first load, one consumed attempt; new exact grant required; lease remains owner-reported 2026-10-14 20:00 Europe/Zurich; latest generation operations 19:44, stop observation through19:45, export reserve900",
   "resource_revision_exclusive_lock_cross_process_test_passed": true,
   "source_files": 374,
-  "source_inventory_sha256": "c6cc6141f0aa2de454ed6e062781d8c3bb6311ee577cc93e86d194e29a50639b",
+  "source_inventory_sha256": "7dc77736f3633a34e25a9e4272b3262a10946a36861fd8e3334fda227b87fe7b",
   "status": "FINAL_INCREMENTAL_TWO_ENDPOINT_CPU_AND_SOURCE_REVIEW_PASS_AWAITING_EXACT_HEAD_DUAL_CI_AND_OWNER_GRANT",
-  "superseded_77ff45d_dual_ci_cancelled_not_passed": true
+  "superseded_77ff45d_dual_ci_cancelled_not_passed": true,
+  "two_endpoint_incremental_archive_and_stage": {
+    "gpu": {
+      "endpoint": "gpu",
+      "epoch": 1791965500.567952,
+      "model_or_rhino_calls": 0,
+      "new_candidate_runtime_sha256": "3b26c51538ec7369bee7d6ef1724b0e0c89e094ae0e9e717bb7b90e366aef514",
+      "new_candidate_spec_sha256": "2c44020276b545458212f95bf09d12d269a18d91a6a1c946e1ea39939ecb3c23",
+      "new_public_files_verified": 375,
+      "no_budget_revision_or_attempt_preparation": true,
+      "old_approved_public_archive_files": 375,
+      "old_grant_unchanged": true,
+      "old_ledger_files_unchanged": 3,
+      "old_runtime_sha256": "b358f843d0e29561ed5a3fbb96f3a72671af6defa50d4d9264a8db3e08a720c8",
+      "private_formal_reads": 0,
+      "same_population": true,
+      "source_inventory_sha256": "7dc77736f3633a34e25a9e4272b3262a10946a36861fd8e3334fda227b87fe7b"
+    },
+    "mac": {
+      "endpoint": "mac",
+      "epoch": 1791965489.517206,
+      "model_or_rhino_calls": 0,
+      "new_candidate_runtime_sha256": "3b26c51538ec7369bee7d6ef1724b0e0c89e094ae0e9e717bb7b90e366aef514",
+      "new_candidate_spec_sha256": "2c44020276b545458212f95bf09d12d269a18d91a6a1c946e1ea39939ecb3c23",
+      "new_public_files_verified": 375,
+      "no_budget_revision_or_attempt_preparation": true,
+      "old_approved_public_archive_files": 375,
+      "old_grant_unchanged": true,
+      "old_ledger_files_unchanged": 9,
+      "old_runtime_sha256": "b358f843d0e29561ed5a3fbb96f3a72671af6defa50d4d9264a8db3e08a720c8",
+      "private_formal_reads": 0,
+      "same_population": true,
+      "source_inventory_sha256": "7dc77736f3633a34e25a9e4272b3262a10946a36861fd8e3334fda227b87fe7b"
+    }
+  }
 }

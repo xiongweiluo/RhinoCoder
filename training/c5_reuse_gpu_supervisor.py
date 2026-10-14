@@ -25,7 +25,7 @@ PACKET=struct.Struct('!cd')
 
 class Watchdog:
     def __init__(self,start,cap,*,clock=time.monotonic,limits=None):
-        require(type(start) in (int,float) and math.isfinite(start) and 0<cap<=(3600 if limits is None else (43200 if limits['model_seconds']==360 else 18000)),
+        require(type(start) in (int,float) and math.isfinite(start) and 0<cap<=(3600 if limits is None else (86400 if limits['model_seconds']==360 else 18000)),
                 'reuse_watchdog_reservation')
         self.limits=limits
         self.startup=180 if limits is None else limits['startup_seconds']
