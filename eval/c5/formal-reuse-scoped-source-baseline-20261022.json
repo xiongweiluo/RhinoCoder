@@ -1,0 +1,18 @@
+{
+  "mechanical_scope_copy_not_runtime_validation": true,
+  "original_files_modified": false,
+  "source_files": {
+    "plugin/rhino_listener/c5_formal20_host_session_v2.py": "03e8060a665a4854375da1f650686a45fd47aa010bcc5497153e93a4bad1f203",
+    "plugin/rhino_listener/c5_formal20_hub.py": "d400fe36d961386185c62d20b73672bc36573a8bcb675e5ace6460674b6a4136",
+    "plugin/rhino_listener/c5_formal20_hub_v2.py": "daddeb715d051fbded801e8aa8186733c83276597426b507668aae0b6986703f",
+    "tools/c5_formal20_owner_run_v2.py": "be3a9bd8b42543ee648e748fbeaa62b91e2bb285a57c6cd356c0a9a0c2d50f19",
+    "tools/c5_rhino_formal20_arm_v2.py": "8fde8715a9fa05a9b1b6ba5a4eb085ee993b1c08fb838531eb829c82802889ae",
+    "tools/run_c5_formal20_worker_v2.py": "c141defdc00cc86ed32b9dc85ea7f5c6e9fe674b7fc014f527498d3d16c2ab59",
+    "training/c5_formal20_adapters.py": "fb3a4c42ec7da26e71cca821748e1e996f46548d85b18cdecdeab3e8788900d6",
+    "training/c5_formal20_adapters_v2.py": "762465887d633e8218196ebcc20d3fa2b5aac4eb913bdcf7acca72e2dd51a4de",
+    "training/c5_formal20_joint_audit.py": "f4c84a485565c24a67cca72b795da9272e53d2bc9fdebcdf32ebabd8426376bd",
+    "training/c5_formal20_joint_audit_v2.py": "1e01dcf9f01274c99e0ae113ed09d6fc248bd533ee9636f17f96d9d9b47d4854",
+    "training/c5_formal20_runner.py": "745cb79fbba1094853b91f15c1b76be5b153f15dd8cd2cd86e69a3df5a0f37ca",
+    "training/c5_formal20_runtime.py": "6747b99c6a36a894a371614dde53e7e0c67fdbdc0ec2eb6b80dece2100c13598"
+  }
+}
