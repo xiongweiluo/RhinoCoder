@@ -122,12 +122,27 @@ def step_evidence(state, key):
     return {name: read_json(state, name) for name in names}
 
 
+def capture_parent_grant(state,spec,freeze,guard):
+    """Snapshot the already validated parent grant for this attempt's export.
+
+    This does not create authority: approved_scope() and the pre-load permit
+    gate precede the child, and exact parent bytes are checked before/after.
+    """
+    from plugin.rhino_listener.c5_formal_reuse_scope import expected_grant
+    guard();value=read_json(REMOTE_STATE,'owner-approval.json')
+    require(value==expected_grant(spec,freeze),'formal_reuse_original_parent_grant_required')
+    publish_json(state,'owner-approval.json',value)
+    guard();require(read_json(REMOTE_STATE,'owner-approval.json')==value,
+        'formal_reuse_parent_grant_changed_during_capture')
+
+
 def serve_child(progress_fd,attempt):
     from training.c5_formal_reuse_admission import attempt_state
     from training.c5_formal_reuse_supervisor import progress
     state=attempt_state('gpu',attempt)
     os.environ['HF_HUB_OFFLINE'] = '1'; os.environ['TRANSFORMERS_OFFLINE'] = '1'; os.umask(0o077)
     spec, freeze, freeze_sha, source, assets, inventory, snapshot = approved_scope()
+    capture_parent_grant(state,spec,freeze,source)
     publish_json(state, 'formal20.worker-started.claim.json', {'study_id': STUDY_ID,
         'runtime_freeze_sha256': freeze_sha, 'replay_allowed': False})
     permit=read_json(state,'load-permit.json')
