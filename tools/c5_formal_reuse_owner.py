@@ -47,17 +47,17 @@ def run_interactive(attempt):
             if budget is not None:budget.check()
         native=NativeAdapterV2(state,spec,freeze,guard=guard,cleanup_guard=source)
         if not (state/'formal20.zero-prepared.json').exists():
-            publish_json(state,'formal20.zero-started.claim.json',{'study_id':STUDY_ID,
-                'runtime_freeze_sha256':digest(freeze),'replay_allowed':False})
+            claim={'study_id':STUDY_ID,'runtime_freeze_sha256':digest(freeze),'replay_allowed':False}
+            if (state/'formal20.zero-started.claim.json').exists():
+                require(read_json(state,'formal20.zero-started.claim.json')==claim,'formal_reuse_partial_preparation_scope')
+            else:publish_json(state,'formal20.zero-started.claim.json',claim)
             native.arm()
         else:
             require(read_json(state,'formal20.zero-prepared.json')=={'study_id':STUDY_ID,
                 'runtime_freeze_sha256':digest(freeze),'private_rows_read':0,'model_calls':0}
                 and not (state/'remote-launch-intent.json').exists()
                 and not (state/'formal20.started.json').exists(),'formal_reuse_resume_only_unloaded_preparation')
-            native.armed=True
-            native.keys=[(state,'hub.key')]+[(state/('F%02d-%s'%(n,r)),'handoff.key')
-                for n in range(1,21) for r in ('base','lora')]
+            native.verify_prepared_keys()
         print('C5_FORMAL_REUSE_WAIT_APPROVED_RHINO_ARM_ZERO_PRIVATE_ROWS',flush=True)
         native.wait_zero_ready();source()
         basis=read_json(state,'host-continuity-ready.json')

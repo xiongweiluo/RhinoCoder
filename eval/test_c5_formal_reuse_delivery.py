@@ -194,3 +194,29 @@ def test_actual_bounded_public_upload_bootstrap_on_cpu(tmp_path,monkeypatch,trun
         assert value['complete_public_population_bytes_verified'] is True
         assert value['files']==len(files) and value['execution_authority'] is False
         assert not (tmp_path/'state').exists()
+
+
+def test_unloaded_partial_key_preparation_reuses_original_keys_and_repairs_only_missing_custody(tmp_path):
+    from training.c5_formal_reuse_adapters import NativeAdapterV2
+    freeze={'synthetic':True};state=tmp_path/'preload-1';state.mkdir(mode=0o700)
+    publish_json(state,'formal20.zero-started.claim.json',{'study_id':STUDY_ID,
+        'runtime_freeze_sha256':digest(freeze),'replay_allowed':False})
+    secret='1'*64;publish_json(state,'hub.key',{'key_hex':secret})
+    adapter=NativeAdapterV2(state,{},freeze,guard=lambda:None)
+    adapter.arm();assert json.loads((state/'hub.key').read_bytes())['key_hex']==secret
+    assert len(adapter.keys)==41 and (state/'formal20.zero-prepared.json').exists()
+    before={p.relative_to(state).as_posix():p.read_bytes() for p in state.rglob('*.key')}
+    (state/'audit-key-custody/F01-base.json').unlink()
+    second=NativeAdapterV2(state,{},freeze,guard=lambda:None);second.arm()
+    assert before=={p.relative_to(state).as_posix():p.read_bytes() for p in state.rglob('*.key')}
+    publish_json(state,'remote-launch-intent.json',{'synthetic':True})
+    with pytest.raises(NativeError):NativeAdapterV2(state,{},freeze,guard=lambda:None).arm()
+
+def test_prepared_key_absence_cannot_be_recreated_from_retained_custody(tmp_path):
+    from training.c5_formal_reuse_adapters import NativeAdapterV2
+    freeze={'synthetic':True};state=tmp_path/'preload-1';state.mkdir(mode=0o700)
+    publish_json(state,'formal20.zero-started.claim.json',{'study_id':STUDY_ID,
+        'runtime_freeze_sha256':digest(freeze),'replay_allowed':False})
+    adapter=NativeAdapterV2(state,{},freeze,guard=lambda:None);adapter.arm()
+    (state/'F01-base/handoff.key').unlink()
+    with pytest.raises(NativeError):NativeAdapterV2(state,{},freeze,guard=lambda:None).arm()

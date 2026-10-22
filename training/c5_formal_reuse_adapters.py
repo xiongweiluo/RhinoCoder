@@ -26,28 +26,51 @@ class NativeAdapterV2(NativeAdapter):
         super().__init__(*args,channel_factory=partial(channel_factory,cleanup_guard=self.cleanup_guard),**kwargs)
         self.armed=False
 
+    def verify_prepared_keys(self):
+        labels={'hub'}|{'F%02d-%s'%(n,r) for n in range(1,21) for r in ('base','lora')}
+        custody=self.state/'audit-key-custody'
+        require(custody.is_dir() and {p.name for p in custody.iterdir()}=={n+'.json' for n in labels},
+            'formal_reuse_complete_prepared_key_custody')
+        self.keys=[]
+        for label in sorted(labels):
+            directory,name=(self.state,'hub.key') if label=='hub' else (self.state/label,'handoff.key')
+            value=read_json(directory,name)
+            require(set(value)=={'key_hex'} and type(value['key_hex']) is str
+                and len(value['key_hex'])==64 and all(c in '0123456789abcdef' for c in value['key_hex'])
+                and read_json(custody,label+'.json')=={**value,'runtime_sha256':digest(self.freeze)},
+                'formal_reuse_prepared_original_key_binding')
+            self.keys.append((directory,name))
+        self.armed=True
+
     def arm(self):
         self.guard()
-        require(not self.armed and not (self.state/'formal20.started.json').exists(),
-            'formal zero-stage arm once before private consumption')
+        require(not self.armed and all(not (self.state/n).exists() for n in
+            ('formal20.started.json','remote-launch-intent.json','formal20.hub-started.claim.json')),
+            'formal_reuse_repair_only_unloaded_unattached_preparation')
         require(read_json(self.state,'formal20.zero-started.claim.json')=={
             'study_id':STUDY_ID,'runtime_freeze_sha256':digest(self.freeze),'replay_allowed':False},
             'new exact zero-stage claim required')
-        publish_json(self.state,'hub.key',{'key_hex':secrets.token_bytes(32).hex()})
-        self.keys.append((self.state,'hub.key'))
-        for n in range(1,21):
-            for route in ('base','lora'):
-                directory=self.state/('F%02d-%s'%(n,route));directory.mkdir(mode=0o700)
-                publish_json(directory,'handoff.key',{'key_hex':secrets.token_bytes(32).hex()})
-                self.keys.append((directory,'handoff.key'))
-        publish_json(self.state,'formal20.zero-prepared.json',{'study_id':STUDY_ID,
-            'runtime_freeze_sha256':digest(self.freeze),'private_rows_read':0,'model_calls':0})
-        custody=self.state/'audit-key-custody';custody.mkdir(mode=0o700)
-        for directory,name in self.keys:
-            label='hub' if directory==self.state else directory.name
-            publish_json(custody,label+'.json',{'key_hex':read_json(directory,name)['key_hex'],
-                'runtime_sha256':digest(self.freeze)})
-        self.armed=True
+        labels=['hub']+['F%02d-%s'%(n,r) for n in range(1,21) for r in ('base','lora')]
+        custody=self.state/'audit-key-custody'
+        if not custody.exists():custody.mkdir(mode=0o700)
+        require({p.name for p in custody.iterdir()}<={n+'.json' for n in labels},
+            'formal_reuse_unknown_partial_key_custody')
+        for label in labels:
+            directory,name=(self.state,'hub.key') if label=='hub' else (self.state/label,'handoff.key')
+            if not directory.exists():directory.mkdir(mode=0o700)
+            if not (directory/name).exists():
+                require(not (custody/(label+'.json')).exists(),'formal_reuse_dispatch_key_cannot_be_recreated')
+                publish_json(directory,name,{'key_hex':secrets.token_bytes(32).hex()})
+            value=read_json(directory,name)
+            expected={**value,'runtime_sha256':digest(self.freeze)}
+            if (custody/(label+'.json')).exists():
+                require(read_json(custody,label+'.json')==expected,'formal_reuse_partial_key_scope_drift')
+            else:publish_json(custody,label+'.json',expected)
+        self.verify_prepared_keys()
+        prepared={'study_id':STUDY_ID,'runtime_freeze_sha256':digest(self.freeze),'private_rows_read':0,'model_calls':0}
+        if (self.state/'formal20.zero-prepared.json').exists():
+            require(read_json(self.state,'formal20.zero-prepared.json')==prepared,'formal_reuse_prepared_scope_drift')
+        else:publish_json(self.state,'formal20.zero-prepared.json',prepared)
 
     def wait_zero_ready(self):
         self.guard()
