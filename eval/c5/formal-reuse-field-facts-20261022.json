@@ -3250,12 +3250,12 @@
     "loader_preflight": {
       "cuda_initialized": false,
       "environment_sha256": "9cce641f84edb66d48a44ad7d88061962d07d556ab03ce5e439cd5d3ae135021",
-      "epoch": 1792685164.0647895,
+      "epoch": 1792685843.1773686,
       "generation_calls": 0,
       "holdout_rows_read": 0,
       "model_loaded": false,
-      "source_code_inventory_sha256": "fda67a2b49cdc6982fc41b23cb3b3c348cefa7c6478fde323e3e8b98eac3ce97",
-      "source_inventory_sha256": "740eb1dd3fe1ec018d07e0c8521378eb2b648030ed7ff061184ee0a30ede98dc",
+      "source_code_inventory_sha256": "fca177b582f5c6f767fe447a9b2a52148a85192fa37159869f87f30bc6de1cde",
+      "source_inventory_sha256": "777cadba57cc65130539b2cd4ccd1a96752777bdc33128b5a9b09452e66e9877",
       "status": "formal_readonly_loader_closure_verified_not_execution_authority",
       "torch_version": "2.10.0+cu126"
     },
@@ -3313,7 +3313,7 @@
     },
     "cpu_import_preflight": {
       "cuda_initialized": false,
-      "epoch": 1792685139.4245062,
+      "epoch": 1792685808.420125,
       "external_loaded_modules_verified": 3357,
       "grant_or_state_created": false,
       "model_generation_calls": 0,
@@ -3321,7 +3321,7 @@
       "private_formal_reads": 0,
       "public_tokenizer_class": "Qwen2Tokenizer",
       "rhino_calls": 0,
-      "source_code_inventory_sha256": "fda67a2b49cdc6982fc41b23cb3b3c348cefa7c6478fde323e3e8b98eac3ce97",
+      "source_code_inventory_sha256": "fca177b582f5c6f767fe447a9b2a52148a85192fa37159869f87f30bc6de1cde",
       "status": "ACTUAL_MAC_CPU_TOKENIZER_CLOSURE_VERIFIED_NOT_EXECUTION_AUTHORITY"
     },
     "decryption_executable": "/opt/homebrew/Cellar/age/1.3.2/bin/age",
@@ -7242,8 +7242,8 @@
       "files": 429,
       "model_or_rhino_calls": 0,
       "private_formal_reads": 0,
-      "runtime_sha256": "b2c41879c7c82cb2eb27925ee541bf8c2a9843e24a51061ee5b55a14bb2178be",
-      "spec_sha256": "e73c240e412992f9882f4635b3b906cfdd21b4205daec9f7d75d4af21d07d8ac"
+      "runtime_sha256": "49fc04b5a5266fd8fabde71d799f9313e5bc0693c11b367f44d1b4c368da79af",
+      "spec_sha256": "45be0e31840259b5b368786be51e2caa853da0cc634b1af5f6cfce094303d1fa"
     },
     "mac": {
       "complete_public_population_bytes_verified": true,
@@ -7251,8 +7251,8 @@
       "files": 429,
       "model_or_rhino_calls": 0,
       "private_formal_reads": 0,
-      "runtime_sha256": "b2c41879c7c82cb2eb27925ee541bf8c2a9843e24a51061ee5b55a14bb2178be",
-      "spec_sha256": "e73c240e412992f9882f4635b3b906cfdd21b4205daec9f7d75d4af21d07d8ac"
+      "runtime_sha256": "49fc04b5a5266fd8fabde71d799f9313e5bc0693c11b367f44d1b4c368da79af",
+      "spec_sha256": "45be0e31840259b5b368786be51e2caa853da0cc634b1af5f6cfce094303d1fa"
     }
   },
   "private_formal_reads": 0,
@@ -7260,6 +7260,6 @@
   "research_model_or_rhino_calls": 0,
   "research_rhino_calls": 0,
   "schema_version": 1,
-  "source_code_revision": "8a5a8b0c7eb3195eead7a40ea8b60fdfd950d25a",
-  "status": "COMPLETE_CURRENT_FACTS_EXPORT_SNAPSHOT_CORRECTION_VERIFIED_FINAL_BYTE_CHECK_REQUIRED"
+  "source_code_revision": "851a3433a35cbc935d1a08fa66f0397d66586962",
+  "status": "COMPLETE_CURRENT_FACTS_FINAL_PRODUCTION_IMPORTS_VERIFIED"
 }

@@ -9,7 +9,7 @@
   },
   "actual_linux_pidfd_and_raw_capture_covered_by_separate_cpu_tests": true,
   "auto_merge": false,
-  "epoch": 1792685386.9928708,
+  "epoch": 1792686126.675829,
   "final_ci_receipts_location": "PR22 metadata/body and local data/training/c5/formal-reuse-final-freeze-and-dual-ci-20261022.json",
   "final_preparation_correction": "snapshot exact already-approved parent grant before model loading so per-attempt raw stop export contains original approval",
   "formal_execution_approved": false,
@@ -17,12 +17,12 @@
   "gpu_cpu_import_receipt": {
     "cuda_initialized": false,
     "environment_sha256": "9cce641f84edb66d48a44ad7d88061962d07d556ab03ce5e439cd5d3ae135021",
-    "epoch": 1792685164.0647895,
+    "epoch": 1792685843.1773686,
     "generation_calls": 0,
     "holdout_rows_read": 0,
     "model_loaded": false,
-    "source_code_inventory_sha256": "fda67a2b49cdc6982fc41b23cb3b3c348cefa7c6478fde323e3e8b98eac3ce97",
-    "source_inventory_sha256": "740eb1dd3fe1ec018d07e0c8521378eb2b648030ed7ff061184ee0a30ede98dc",
+    "source_code_inventory_sha256": "fca177b582f5c6f767fe447a9b2a52148a85192fa37159869f87f30bc6de1cde",
+    "source_inventory_sha256": "777cadba57cc65130539b2cd4ccd1a96752777bdc33128b5a9b09452e66e9877",
     "status": "formal_readonly_loader_closure_verified_not_execution_authority",
     "torch_version": "2.10.0+cu126"
   },
@@ -32,7 +32,7 @@
       "complete_public_population_and_bytes_verified": true,
       "compute_stdout": "",
       "endpoint": "gpu",
-      "epoch": 1792685342.185017,
+      "epoch": 1792686100.7670796,
       "full_18h_window_verified": true,
       "gpu_stdout": "GPU-0e00f0ad-fa5a-eed9-6eee-5877984e02f9, NVIDIA GeForce RTX 3090, 24576, 11\n",
       "model_calls": 0,
@@ -45,14 +45,14 @@
       "public_files": 429,
       "research_rhino_calls": 0,
       "retired_files": 8,
-      "runtime_sha256": "1138761f3702f1f3597d5e8bb7856f5bd273e5b5e92f865e1ec1ec16f4a885bf",
-      "spec_sha256": "8eda102abe61b1b37b1571c4487da37bcb4f1bd460ec59c1fbf8e12e4539abdc",
+      "runtime_sha256": "1eee8af1dc25092708297f0c8f5e29b6322ebe7527d670475195d2f364a2f262",
+      "spec_sha256": "4b4b22d221a70700770c802654dbc503ff5a31c9f5dc7b834abbf1276a8cb3c8",
       "uid": 1000
     },
     "mac": {
       "complete_public_population_and_bytes_verified": true,
       "endpoint": "mac",
-      "epoch": 1792685341.035361,
+      "epoch": 1792686098.8596108,
       "full_18h_window_verified": true,
       "model_calls": 0,
       "new_namespace_absent": true,
@@ -64,8 +64,8 @@
       "public_files": 429,
       "research_rhino_calls": 0,
       "retired_files": 8,
-      "runtime_sha256": "1138761f3702f1f3597d5e8bb7856f5bd273e5b5e92f865e1ec1ec16f4a885bf",
-      "spec_sha256": "8eda102abe61b1b37b1571c4487da37bcb4f1bd460ec59c1fbf8e12e4539abdc"
+      "runtime_sha256": "1eee8af1dc25092708297f0c8f5e29b6322ebe7527d670475195d2f364a2f262",
+      "spec_sha256": "4b4b22d221a70700770c802654dbc503ff5a31c9f5dc7b834abbf1276a8cb3c8"
     }
   },
   "latest_local_full_cpu": {
@@ -76,7 +76,7 @@
   },
   "mac_cpu_import_receipt": {
     "cuda_initialized": false,
-    "epoch": 1792685139.4245062,
+    "epoch": 1792685808.420125,
     "external_loaded_modules_verified": 3357,
     "grant_or_state_created": false,
     "model_generation_calls": 0,
@@ -84,7 +84,7 @@
     "private_formal_reads": 0,
     "public_tokenizer_class": "Qwen2Tokenizer",
     "rhino_calls": 0,
-    "source_code_inventory_sha256": "fda67a2b49cdc6982fc41b23cb3b3c348cefa7c6478fde323e3e8b98eac3ce97",
+    "source_code_inventory_sha256": "fca177b582f5c6f767fe447a9b2a52148a85192fa37159869f87f30bc6de1cde",
     "status": "ACTUAL_MAC_CPU_TOKENIZER_CLOSURE_VERIFIED_NOT_EXECUTION_AUTHORITY"
   },
   "mac_python_files": 3552,
@@ -95,6 +95,7 @@
   "original_model_files": 14,
   "original_no_go_changed": false,
   "owner_final_custody_created": false,
+  "post_ready_original_budget_regression_passed": true,
   "pr": "https://github.com/xiongweiluo/RhinoCoder/pull/22",
   "primary_wip_diff_sha256": "b407093a909b70b9b1c4ea6547517373ad6c7fb230103d97b0502044a0e8aa6c",
   "private_formal_reads": 0,
@@ -103,12 +104,12 @@
   "readonly_rhino_environment_queries": 1,
   "research_rhino_calls": 0,
   "retired_original_actor_files_verified_unchanged": 12,
-  "runtime_sha256": "1138761f3702f1f3597d5e8bb7856f5bd273e5b5e92f865e1ec1ec16f4a885bf",
+  "runtime_sha256": "1eee8af1dc25092708297f0c8f5e29b6322ebe7527d670475195d2f364a2f262",
   "same_head_push_and_pull_request_ci_required": true,
   "scoped_synthetic_full40_joint_audit_and_tamper_cases_passed": 6,
-  "source_code_revision": "8a5a8b0c7eb3195eead7a40ea8b60fdfd950d25a",
-  "source_inventory_sha256": "24b904982081740625c4918d8a6c203b09b4dcc612dc0579fd8de2fd58192616",
-  "spec_sha256": "8eda102abe61b1b37b1571c4487da37bcb4f1bd460ec59c1fbf8e12e4539abdc",
+  "source_code_revision": "851a3433a35cbc935d1a08fa66f0397d66586962",
+  "source_inventory_sha256": "70ef6a3174d79b582b380ae6c722989bd853cba629b50d9c95fd28f8a6d94345",
+  "spec_sha256": "4b4b22d221a70700770c802654dbc503ff5a31c9f5dc7b834abbf1276a8cb3c8",
   "status": "COMPLETE_PUBLIC_PREPARATION_SAME_HEAD_DUAL_CI_REQUIRED_BEFORE_OWNER_APPROVAL",
   "superseded_unapproved_formal_candidates": [
     {
@@ -117,8 +118,16 @@
       "research_state_created": false,
       "runtime_sha256": "d48ff5cfd061231c9c1c3def07c5ea93849801d23c6ef2d0b1de899f08b22334",
       "spec_sha256": "d94c74a8091c27ed3823220a7a6d87a7f4004518680af1bf3d4618230333bf37"
+    },
+    {
+      "executed": false,
+      "reason": "retain original post-ready budget without imposing another complete 18h window",
+      "research_state_created": false,
+      "runtime_sha256": "1138761f3702f1f3597d5e8bb7856f5bd273e5b5e92f865e1ec1ec16f4a885bf",
+      "spec_sha256": "8eda102abe61b1b37b1571c4487da37bcb4f1bd460ec59c1fbf8e12e4539abdc"
     }
   ],
   "synthetic_physical_transport_and_actual_authority_not_claimed": true,
+  "worker_lifecycle_cpu_cases_passed": 5,
   "worker_parent_approval_snapshot_and_actual_cpu_control_loop_cases_passed": 4
 }
