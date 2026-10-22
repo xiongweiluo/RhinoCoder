@@ -72,3 +72,27 @@ def test_worker_bootstrap_stop_exports_original_parent_grant_from_its_own_attemp
     finally:
         signal.setitimer(signal.ITIMER_REAL,0);signal.signal(signal.SIGALRM,old_handler)
         os.umask(old_umask);os.close(rfd);os.close(wfd)
+
+
+def test_post_ready_authority_uses_original_budget_instead_of_requiring_a_second_full_window():
+    import time,copy
+    from plugin.rhino_listener.c5_formal_reuse_scope import SPEC_FILE,FREEZE_FILE,expected_grant,validate_materials
+    from tools.prepare_c5_formal_reuse_freeze import assemble
+    from training.c5_formal_reuse_runner import validate_authority
+    from training.c5_formal_reuse_budget import FormalBudgetV2
+    docs={n:json.loads((worker.ROOT/n).read_bytes()) for n in (SPEC_FILE,FREEZE_FILE)}
+    spec=copy.deepcopy(docs[SPEC_FILE]);freeze=copy.deepcopy(docs[FREEZE_FILE])
+    # This is a pure public-material fixture. It neither writes a grant nor
+    # accesses private families, and it never enters the field runner.
+    now=time.time();first=now-64700;cutoff=first+64800
+    spec.update(model_generation_cutoff_epoch=cutoff,lease_expiry_epoch=cutoff+900,latest_owner_start_epoch=first)
+    freeze['resource_boundary'].update(generation_cutoff_epoch=cutoff,provider_expiry_epoch=cutoff+900)
+    freeze['spec_sha256']=digest(spec);grant=expected_grant(spec,freeze)
+    clock=[now,100000.]
+    budget=FormalBudgetV2(freeze['resource_boundary'],wall=lambda:clock[0],mono=lambda:clock[1],
+        start={'wall':first,'mono':clock[1]-(now-first)})
+    assert 0<budget.check()<=40.01
+    with pytest.raises(NativeError):validate_materials(spec,freeze,check_time=True)
+    assert validate_authority(spec,freeze,grant)==digest(freeze)
+    clock[0]+=41;clock[1]+=41
+    with pytest.raises(NativeError):budget.check()

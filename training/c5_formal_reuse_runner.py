@@ -55,7 +55,9 @@ class FormalRunError(RuntimeError):
 def validate_authority(spec: Mapping[str, Any], freeze: Mapping[str, Any], approval: Mapping[str, Any]) -> str:
     """Only this new frozen reuse authority; the retired runner is untouched."""
     from plugin.rhino_listener.c5_formal_reuse_scope import authority
-    return authority(spec,freeze,approval)
+    # The owner checks the complete window before load intent. After ready,
+    # the original first-load budget (including startup/idle) governs.
+    return authority(spec,freeze,approval,check_time=False)
 
 
 
