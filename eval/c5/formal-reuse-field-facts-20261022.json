@@ -16,7 +16,7 @@
     "reported_utc": "2026-10-25T19:00:00+00:00",
     "timezone": "Europe/Zurich"
   },
-  "actual_public_deployment_both_endpoints_verified": false,
+  "actual_public_deployment_both_endpoints_verified": true,
   "gpu_check_error": null,
   "gpu_current_review": {
     "adapter_files": {
@@ -3247,6 +3247,18 @@
     "epoch": 1792682976.5431824,
     "full_bytes_verified": true,
     "gpu_boot_id": "5e83729b-b29b-43f6-8635-c98f662d3d56",
+    "loader_preflight": {
+      "cuda_initialized": false,
+      "environment_sha256": "9cce641f84edb66d48a44ad7d88061962d07d556ab03ce5e439cd5d3ae135021",
+      "epoch": 1792684050.9401681,
+      "generation_calls": 0,
+      "holdout_rows_read": 0,
+      "model_loaded": false,
+      "source_code_inventory_sha256": "fbd36887db7f8151ad34330ecc2bbdc5f433680774fb6bc69dd3ba429a51daaa",
+      "source_inventory_sha256": "6fa3c7079da04de434c550076939973d0c6bfeb9cf33b815a101cae338035cca",
+      "status": "formal_readonly_loader_closure_verified_not_execution_authority",
+      "torch_version": "2.10.0+cu126"
+    },
     "model_or_cuda_calls": 0,
     "new_admission_created": false,
     "observation": {
@@ -3298,6 +3310,19 @@
         "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
       },
       "population_exact": true
+    },
+    "cpu_import_preflight": {
+      "cuda_initialized": false,
+      "epoch": 1792684014.093319,
+      "external_loaded_modules_verified": 3357,
+      "grant_or_state_created": false,
+      "model_generation_calls": 0,
+      "model_loaded": false,
+      "private_formal_reads": 0,
+      "public_tokenizer_class": "Qwen2Tokenizer",
+      "rhino_calls": 0,
+      "source_code_inventory_sha256": "fbd36887db7f8151ad34330ecc2bbdc5f433680774fb6bc69dd3ba429a51daaa",
+      "status": "ACTUAL_MAC_CPU_TOKENIZER_CLOSURE_VERIFIED_NOT_EXECUTION_AUTHORITY"
     },
     "decryption_executable": "/opt/homebrew/Cellar/age/1.3.2/bin/age",
     "decryption_executable_sha256": "5e5d756f6659ca8fe0a2f2e05f126529e5d36c5d65c961e6912966482f0f8de1",
@@ -7208,13 +7233,33 @@
     "source_review_raw_sha256": "645b10e0dcfaada227b2a195ac3aeab8e65080c3a76d5c723c3476f2743def07",
     "ssh_executable_sha256": "33456ee1ab92822af12d5c399cafa5b33fe1d4e46c950b04cc96e019c994053b"
   },
-  "model_or_rhino_calls": 0,
   "old_lease_used_as_current": false,
   "owner_is_preparing_renewal": false,
+  "prior_public_deployment_byte_receipts": {
+    "gpu": {
+      "complete_public_population_bytes_verified": true,
+      "execution_authority": false,
+      "files": 429,
+      "model_or_rhino_calls": 0,
+      "private_formal_reads": 0,
+      "runtime_sha256": "ef17ad9fd86962480e5cb8005b8f6df2a55b312b0d0f469e04d78e527143f4e9",
+      "spec_sha256": "3a236fc3dc3b790de47ab6b3f60955c5116303268744e88214e813807270db1e"
+    },
+    "mac": {
+      "complete_public_population_bytes_verified": true,
+      "execution_authority": false,
+      "files": 429,
+      "model_or_rhino_calls": 0,
+      "private_formal_reads": 0,
+      "runtime_sha256": "ef17ad9fd86962480e5cb8005b8f6df2a55b312b0d0f469e04d78e527143f4e9",
+      "spec_sha256": "3a236fc3dc3b790de47ab6b3f60955c5116303268744e88214e813807270db1e"
+    }
+  },
   "private_formal_reads": 0,
   "readonly_rhino_environment_queries": 1,
+  "research_model_or_rhino_calls": 0,
   "research_rhino_calls": 0,
   "schema_version": 1,
-  "source_code_revision": "5ece50f17079f7a908bc2db9af9b9c734107e124",
-  "status": "ACTUAL_TWO_ENDPOINT_PUBLIC_FREEZE_PREPARATION_NOT_EXECUTION_APPROVED"
+  "source_code_revision": "a913232ca3fb9bb4f4f7588faee6de4cd6f836e7",
+  "status": "COMPLETE_CURRENT_FACTS_FINAL_PUBLIC_BYTE_CHECK_REQUIRED_BEFORE_PRESENTING_HASHES"
 }

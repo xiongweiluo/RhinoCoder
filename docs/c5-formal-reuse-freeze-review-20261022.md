@@ -47,3 +47,11 @@ CPU 验证包括真实隔离进程 wire、半帧/EOF/重复帧与溢出、实际
 完整公共字节核查和 push / pull_request 两套完整 CI 的最终精确 head、原始测试计数、实际两端部署与导入收据、完整 spec/runtime SHA，统一记录于最终验证材料。任何待核实字段会使候选禁用；在两端最终字节一致且双 CI 通过之前，不把中间诊断哈希交作执行批准对象。PR 保持 Draft，main 不变；合并与新现场执行均由所有者分别决定。
 
 本人批准新完整哈希后才可登记新 grant，并按本人私下入口消费封存 20 题、完成一次 40 槽、终止/导出及完整原始联合审计。此次准备不代替这一步。
+
+## 最终公共候选
+
+生产源码提交 `a913232ca3fb9bb4f4f7588faee6de4cd6f836e7` 的完整值见验证材料；spec SHA-256 为 `d94c74a8091c27ed3823220a7a6d87a7f4004518680af1bf3d4618230333bf37`，runtime SHA-256 为 `d48ff5cfd061231c9c1c3def07c5ea93849801d23c6ef2d0b1de899f08b22334`。两端独立标准库进程已分别验证429个公共文件、原Mac49/GPU35份历史及各8份退休文件；新状态/grant/正式命名空间均缺席，GPU当前同一boot/UUID空闲11MiB，完整18小时窗口通过。
+
+实际Mac CPU核查3357个已加载外部模块来源，Qwen2Tokenizer可用；实际GPU兼容环境导入torch 2.10.0+cu126、PEFT/Transformers且来源完整，CUDA均未初始化。新身份的40槽真实签名、SQLite许可/夹具、严格wire解析、宿主/阶段时序和联合审核及5类篡改负例共6项通过；其中物理Rhino/模型传输和实际现场授权是公开合成夹具，真实Linux pidfd、原始双流和准入链另有独立实际CPU/合成负例验证，不冒充一次现场研究。
+
+[最终准备验证材料](../eval/c5/formal-reuse-complete-preparation-validation-20261022.json)保存独立原始收据、各完整哈希、代码/历史/环境及真实租期。最终提交的push/PR两套完整CI结果以[Draft PR #22](https://github.com/xiongweiluo/RhinoCoder/pull/22)最新精确head元数据和本地封存为准；只有二者成功才提交本人执行批准，不能用之前head的绿灯替代。本次未创建正式grant、未读取私题、未加载模型或消费40槽。
