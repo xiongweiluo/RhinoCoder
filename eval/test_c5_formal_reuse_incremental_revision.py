@@ -106,3 +106,29 @@ def test_revision_cannot_create_a_replacement_campaign(tmp_path,monkeypatch):
     with pytest.raises((ValueError,NativeError),match='formal_reuse_revision_cannot_create_new_campaign'):
         admission.open_formal_campaign(s,f,expected_grant(s,f),f['history'],create=True,root=root)
     assert not (root/admission.NAMESPACE).exists()
+
+
+@pytest.mark.parametrize('mutation',['source','proof','prefix'])
+def test_readonly_lineage_guard_rejects_changed_original_public_bytes(tmp_path,monkeypatch,mutation):
+    s,f,root,log=frozen_log(tmp_path);log.close();lineage=f['incremental_revision']
+    # Filesystem component fixture: real frozen prefix, synthetic public source.
+    old_source=tmp_path/'original-source';old_source.mkdir()
+    pins={}
+    for n in range(429):
+        p=old_source/('public-%04d.json'%n);p.write_text('{}\n')
+        pins[p.name]=hashlib.sha256(p.read_bytes()).hexdigest()
+    lineage['prior_mac_source_root']=str(old_source);lineage['prior_public_source_files']=pins
+    old_state=tmp_path/'original-state';leaf=old_state/'preload-1';leaf.mkdir(parents=True)
+    proof=leaf/'independent-preexposure-failure-proof.json'
+    proof.write_bytes(canonical(lineage['prior_failure_proof'])+b'\n');proof.chmod(0o600)
+    assert hashlib.sha256(proof.read_bytes()).hexdigest()==lineage['prior_failure_proof_sha256']
+    lineage['prior_mac_state_root']=str(old_state)
+    monkeypatch.setitem(admission.ROOTS,'mac',root)
+    monkeypatch.setattr(admission,'history_guard',lambda *args,**kw:lambda:None)
+    guard=revision.verify_endpoint('mac',f);guard()
+    if mutation=='source':(old_source/'public-0000.json').write_text('{"changed":true}\n')
+    elif mutation=='proof':proof.write_text('{}\n')
+    else:(root/admission.NAMESPACE/'ledger/event-0000.json').write_text('{}\n')
+    with pytest.raises((ValueError,NativeError)):
+        if mutation=='prefix':guard()
+        else:revision.verify_endpoint('mac',f)
