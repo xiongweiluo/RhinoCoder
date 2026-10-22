@@ -9,19 +9,20 @@
   },
   "actual_linux_pidfd_and_raw_capture_covered_by_separate_cpu_tests": true,
   "auto_merge": false,
-  "epoch": 1792684513.980329,
+  "epoch": 1792685386.9928708,
   "final_ci_receipts_location": "PR22 metadata/body and local data/training/c5/formal-reuse-final-freeze-and-dual-ci-20261022.json",
+  "final_preparation_correction": "snapshot exact already-approved parent grant before model loading so per-attempt raw stop export contains original approval",
   "formal_execution_approved": false,
   "formal_slots_consumed": 0,
   "gpu_cpu_import_receipt": {
     "cuda_initialized": false,
     "environment_sha256": "9cce641f84edb66d48a44ad7d88061962d07d556ab03ce5e439cd5d3ae135021",
-    "epoch": 1792684050.9401681,
+    "epoch": 1792685164.0647895,
     "generation_calls": 0,
     "holdout_rows_read": 0,
     "model_loaded": false,
-    "source_code_inventory_sha256": "fbd36887db7f8151ad34330ecc2bbdc5f433680774fb6bc69dd3ba429a51daaa",
-    "source_inventory_sha256": "6fa3c7079da04de434c550076939973d0c6bfeb9cf33b815a101cae338035cca",
+    "source_code_inventory_sha256": "fda67a2b49cdc6982fc41b23cb3b3c348cefa7c6478fde323e3e8b98eac3ce97",
+    "source_inventory_sha256": "740eb1dd3fe1ec018d07e0c8521378eb2b648030ed7ff061184ee0a30ede98dc",
     "status": "formal_readonly_loader_closure_verified_not_execution_authority",
     "torch_version": "2.10.0+cu126"
   },
@@ -31,7 +32,7 @@
       "complete_public_population_and_bytes_verified": true,
       "compute_stdout": "",
       "endpoint": "gpu",
-      "epoch": 1792684294.490807,
+      "epoch": 1792685342.185017,
       "full_18h_window_verified": true,
       "gpu_stdout": "GPU-0e00f0ad-fa5a-eed9-6eee-5877984e02f9, NVIDIA GeForce RTX 3090, 24576, 11\n",
       "model_calls": 0,
@@ -44,14 +45,14 @@
       "public_files": 429,
       "research_rhino_calls": 0,
       "retired_files": 8,
-      "runtime_sha256": "d48ff5cfd061231c9c1c3def07c5ea93849801d23c6ef2d0b1de899f08b22334",
-      "spec_sha256": "d94c74a8091c27ed3823220a7a6d87a7f4004518680af1bf3d4618230333bf37",
+      "runtime_sha256": "1138761f3702f1f3597d5e8bb7856f5bd273e5b5e92f865e1ec1ec16f4a885bf",
+      "spec_sha256": "8eda102abe61b1b37b1571c4487da37bcb4f1bd460ec59c1fbf8e12e4539abdc",
       "uid": 1000
     },
     "mac": {
       "complete_public_population_and_bytes_verified": true,
       "endpoint": "mac",
-      "epoch": 1792684290.769071,
+      "epoch": 1792685341.035361,
       "full_18h_window_verified": true,
       "model_calls": 0,
       "new_namespace_absent": true,
@@ -63,8 +64,8 @@
       "public_files": 429,
       "research_rhino_calls": 0,
       "retired_files": 8,
-      "runtime_sha256": "d48ff5cfd061231c9c1c3def07c5ea93849801d23c6ef2d0b1de899f08b22334",
-      "spec_sha256": "d94c74a8091c27ed3823220a7a6d87a7f4004518680af1bf3d4618230333bf37"
+      "runtime_sha256": "1138761f3702f1f3597d5e8bb7856f5bd273e5b5e92f865e1ec1ec16f4a885bf",
+      "spec_sha256": "8eda102abe61b1b37b1571c4487da37bcb4f1bd460ec59c1fbf8e12e4539abdc"
     }
   },
   "latest_local_full_cpu": {
@@ -75,7 +76,7 @@
   },
   "mac_cpu_import_receipt": {
     "cuda_initialized": false,
-    "epoch": 1792684014.093319,
+    "epoch": 1792685139.4245062,
     "external_loaded_modules_verified": 3357,
     "grant_or_state_created": false,
     "model_generation_calls": 0,
@@ -83,7 +84,7 @@
     "private_formal_reads": 0,
     "public_tokenizer_class": "Qwen2Tokenizer",
     "rhino_calls": 0,
-    "source_code_inventory_sha256": "fbd36887db7f8151ad34330ecc2bbdc5f433680774fb6bc69dd3ba429a51daaa",
+    "source_code_inventory_sha256": "fda67a2b49cdc6982fc41b23cb3b3c348cefa7c6478fde323e3e8b98eac3ce97",
     "status": "ACTUAL_MAC_CPU_TOKENIZER_CLOSURE_VERIFIED_NOT_EXECUTION_AUTHORITY"
   },
   "mac_python_files": 3552,
@@ -102,12 +103,22 @@
   "readonly_rhino_environment_queries": 1,
   "research_rhino_calls": 0,
   "retired_original_actor_files_verified_unchanged": 12,
-  "runtime_sha256": "d48ff5cfd061231c9c1c3def07c5ea93849801d23c6ef2d0b1de899f08b22334",
+  "runtime_sha256": "1138761f3702f1f3597d5e8bb7856f5bd273e5b5e92f865e1ec1ec16f4a885bf",
   "same_head_push_and_pull_request_ci_required": true,
   "scoped_synthetic_full40_joint_audit_and_tamper_cases_passed": 6,
-  "source_code_revision": "a913232ca3fb9bb4f4f7588faee6de4cd6f836e7",
-  "source_inventory_sha256": "28453e7ed9e186eb7f249c1867ea626deb4fd6a42b8352e5ef5ab8d8e9942569",
-  "spec_sha256": "d94c74a8091c27ed3823220a7a6d87a7f4004518680af1bf3d4618230333bf37",
+  "source_code_revision": "8a5a8b0c7eb3195eead7a40ea8b60fdfd950d25a",
+  "source_inventory_sha256": "24b904982081740625c4918d8a6c203b09b4dcc612dc0579fd8de2fd58192616",
+  "spec_sha256": "8eda102abe61b1b37b1571c4487da37bcb4f1bd460ec59c1fbf8e12e4539abdc",
   "status": "COMPLETE_PUBLIC_PREPARATION_SAME_HEAD_DUAL_CI_REQUIRED_BEFORE_OWNER_APPROVAL",
-  "synthetic_physical_transport_and_actual_authority_not_claimed": true
+  "superseded_unapproved_formal_candidates": [
+    {
+      "executed": false,
+      "reason": "worker parent-to-attempt export snapshot omission corrected before execution",
+      "research_state_created": false,
+      "runtime_sha256": "d48ff5cfd061231c9c1c3def07c5ea93849801d23c6ef2d0b1de899f08b22334",
+      "spec_sha256": "d94c74a8091c27ed3823220a7a6d87a7f4004518680af1bf3d4618230333bf37"
+    }
+  ],
+  "synthetic_physical_transport_and_actual_authority_not_claimed": true,
+  "worker_parent_approval_snapshot_and_actual_cpu_control_loop_cases_passed": 4
 }
