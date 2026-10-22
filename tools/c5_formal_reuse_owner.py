@@ -192,7 +192,7 @@ def reconcile_owner(attempt):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('mode',choices=('run','audit','reconcile'))
-    p.add_argument('--attempt',type=int,choices=(1,2,3),default=1);a=p.parse_args()
+    p.add_argument('--attempt',type=int,choices=(1,2,3),default=2);a=p.parse_args()
     try:
         result={'run':run_interactive,'audit':audit_owner,'reconcile':reconcile_owner}[a.mode](a.attempt)
         print(json.dumps(result,sort_keys=True));return 0

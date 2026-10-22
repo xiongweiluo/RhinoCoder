@@ -78,15 +78,18 @@ def open_formal_campaign(spec,freeze,grant,history,*,create=False,root=None,wall
     require(sha(history)==freeze['history_sha256'],'formal_reuse_history_binding')
     root=ROOTS['mac'] if root is None else Path(root);guard=history_guard('mac',history,root=root)
     parent=root/NAMESPACE
+    require(not create or freeze.get('incremental_revision') is None,'formal_reuse_revision_cannot_create_new_campaign')
     if create:
         require(not parent.exists(),'formal_reuse_campaign_already_exists');parent.mkdir(mode=0o700)
         write_once(parent,'campaign.json',{'campaign_id':STUDY_ID,'history_sha256':sha(history),
             'initial_scope_sha256':sha(campaign_scope(spec,freeze))})
     directory(parent);manifest=strict(read_private(parent/'campaign.json'))
     scope=campaign_scope(spec,freeze)
-    require(manifest=={'campaign_id':STUDY_ID,'history_sha256':sha(history),'initial_scope_sha256':sha(scope)},
+    from training.c5_formal_reuse_revision import initial_scope
+    initial=initial_scope(spec,freeze)
+    require(manifest=={'campaign_id':STUDY_ID,'history_sha256':sha(history),'initial_scope_sha256':sha(initial)},
         'formal_reuse_no_replacement_campaign')
-    log=EvidenceLog(parent/'ledger',scope,guard,create=create)
+    log=EvidenceLog(parent/'ledger',initial,guard,create=create)
     return FormalCampaign(scope,log,**({'wall':wall} if wall is not None else {}))
 
 def require_startable(campaign,attempt):

@@ -39,9 +39,9 @@ boundary={'owner_confirmed':True,'provider_expiry_epoch':now+100900,'generation_
  'development_campaign_head_sha256':'ebb572fbbe53ea2ec5c5a191f56ea1ee7767eef7525eca69d4a8a56a90f1975a',
  'development_seconds_max':86400,'research_cumulative_max_seconds':151200,
  'development_elapsed_to_release_seconds':66773.24127721786}
-spec={'model_generation_cutoff_epoch':boundary['generation_cutoff_epoch'],'comparison':{'synthetic_cpu':True},
- 'public_commitment_sha256':'4'*64,'runtime_limits':{'model_seconds':360,'startup_seconds':600,
- 'first_request_idle_seconds':600,'between_requests_idle_seconds':3600}}
+spec=json.loads((Path(REPO)/'eval/c5/formal-reuse-spec-20261022-r1.json').read_bytes())
+spec['model_generation_cutoff_epoch']=boundary['generation_cutoff_epoch']
+
 freeze={'history_sha256':'3'*64,'resource_boundary':boundary,
  'field_plan':{'gpu_process':{'uid':os.getuid(),'boot_id':parent['boot_id']}}}
 scope=campaign_scope(spec,freeze);log=EvidenceLog(Path.cwd()/'cpu-ledger',scope,lambda:None,create=True)
@@ -62,6 +62,7 @@ def child(fd):
  if MODE=='hang':time.sleep(30)
  progress(fd,b'E');progress(fd,b'D')
 def finite_watchdog(start,cap,*,limits):
+ if MODE=='constructor_failure':raise ValueError('cpu_fixture_constructor_failure_before_gate')
  if MODE=='hang':return FormalWatchdog(start,5,limits={**limits,'model_seconds':1},clock=time.monotonic)
  return FormalWatchdog(start,cap,limits=limits)
 error=None
@@ -72,7 +73,7 @@ before=sorted(p.name for p in (state/'qualified-stop').glob('event-*.json'))
 again=independent_stop(state,lambda:None)
 after=sorted(p.name for p in (state/'qualified-stop').glob('event-*.json'))
 assert before==after and len(after)==2 and 'torch' not in sys.modules
-print(json.dumps({'error':error,'final':final,'again':again,'model_imported':False,'child_after_qualified':True}))
+print(json.dumps({'error':error,'final':final,'again':again,'model_imported':False,'child_after_qualified':(state/'cpu-child-after-qualified.json').is_file()}))
 '''
     script=script.replace('REPO',repr(str(ROOT))).replace('MODE',repr(mode))
     entry.write_text(script)
@@ -94,3 +95,10 @@ def test_actual_hung_cpu_child_gets_one_pidfd_signal_and_second_actor_cannot_res
     assert result['error']=='ValueError' and result['final']['child_exit_reaped'] is True
     assert result['final']['stop_result']['signal_attempts']==1
     assert result['again']['signal_attempts']==1 and result['again']['retry_signal_allowed'] is False
+
+def test_watchdog_constructor_failure_never_releases_child_and_still_records_one_shared_stop(tmp_path):
+    result=run_fixture(tmp_path,'constructor_failure')
+    assert result['error']=='ValueError' and result['child_after_qualified'] is False
+    assert result['final']['child_exit_reaped'] is True and result['final']['cleanup_errors']==[]
+    assert result['final']['stop_result']['signal_attempts']==result['again']['signal_attempts']==1
+    assert result['again']['retry_signal_allowed'] is False

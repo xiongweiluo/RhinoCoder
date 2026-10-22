@@ -86,6 +86,11 @@ def approved_scope():
         require(public(ROOT/FREEZE_FILE)==freeze and public(ROOT/SPEC_FILE)==spec
             and read_json(REMOTE_STATE,'owner-approval.json')==approval,'formal_reuse_gpu_material_drift')
         return freeze['source_inventory_sha256']
+    from training.c5_formal_reuse_revision import verify_endpoint
+    lineage=verify_endpoint('gpu',freeze)
+    original=source
+    def guarded():lineage();return original()
+    source=guarded
     source();actual,inventory,snapshot=preflight()
     return spec,freeze,freeze_sha,source,actual,inventory,snapshot
 

@@ -47,4 +47,8 @@ def scope(*,check_time=True):
                     and file_sha(path)==freeze['mac_environment']['file_sha256'][str(path)],'formal_reuse_foreign_loaded_origin')
         require(all(file_sha(ROOT/n)==h for n,h in freeze['fixed_public_files'].items()),'formal_reuse_public_configuration_drift')
         return freeze['source_inventory_sha256']
-    guard();return spec,freeze,approval,guard
+    from training.c5_formal_reuse_revision import verify_endpoint
+    lineage=verify_endpoint('mac',freeze)
+    original=guard
+    def guarded():lineage();return original()
+    guarded();return spec,freeze,approval,guarded

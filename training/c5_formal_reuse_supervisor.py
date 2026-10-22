@@ -17,6 +17,8 @@ from training.c5_recovery_stop import CoordinatedStop
 from training.c5_reuse_process_identity import LinuxIdentity,OwnedPidfdOperations
 from training.c5_reuse_gpu_supervisor import PACKET,progress
 
+from plugin.rhino_listener.c5_formal_reuse_limits import watchdog_limits
+
 def validate_load_permit(permit,spec,freeze,attempt):
     from training.c5_formal_reuse_admission import campaign_scope
     from training.c5_formal_reuse_admission import formal_replay as replay
@@ -24,14 +26,21 @@ def validate_load_permit(permit,spec,freeze,attempt):
     require(type(permit) is dict and set(permit)=={'scope','rows','attempt','first_load_epoch'}
         and permit['scope']==campaign_scope(spec,freeze) and type(permit['attempt']) is int and permit['attempt']==attempt
         and type(permit['rows']) is list and 1<=len(permit['rows'])<=2048,'formal_reuse_load_permit_shape')
+    from training.c5_formal_reuse_revision import initial_scope
+    initial=initial_scope(spec,freeze)
+    lineage=freeze.get('incremental_revision')
+    if lineage is not None:
+        require(permit['rows'][:lineage['prior_campaign_rows']]==lineage['prior_campaign_events'],
+            'formal_reuse_exact_original_permit_prefix_required')
     head=ZERO
     for i,row in enumerate(permit['rows']):
         require(set(row)=={'seq','previous_sha256','binding_sha256','kind','payload','record_sha256'}
-            and type(row['seq']) is int and row['seq']==i and row['previous_sha256']==head and row['binding_sha256']==sha(permit['scope'])
+            and type(row['seq']) is int and row['seq']==i and row['previous_sha256']==head and row['binding_sha256']==sha(initial)
             and row['record_sha256']==sha({k:v for k,v in row.items() if k!='record_sha256'}),
             'formal_reuse_load_permit_original_chain')
         head=row['record_sha256']
-    state=replay(permit['scope'],permit['rows'])
+    state=replay(initial,permit['rows'])
+    require(state['scope']==permit['scope'],'formal_reuse_current_revision_permit_required')
     require(state['active'] and state['attempts']==attempt and not state['formal_consumed']
         and state['status']=='LOADING' and state['first_load_epoch']==permit['first_load_epoch'],
         'formal_reuse_load_permit_preprivate_order')
@@ -41,7 +50,8 @@ def claim_gpu_role(permit,freeze,attempt):
     from training.c5_formal_reuse_admission import ROOTS,NAMESPACE,history_guard
     root=ROOTS['gpu'];history_guard('gpu',freeze['history'])()
     parent=root/NAMESPACE
-    manifest={'scope_sha256':sha(permit['scope']),'first_load_epoch':permit['first_load_epoch'],
+    from training.c5_formal_reuse_revision import initial_scope
+    manifest={'scope_sha256':sha(initial_scope({},freeze)) if freeze.get('incremental_revision') is not None else sha(permit['scope']),'first_load_epoch':permit['first_load_epoch'],
         'history_sha256':sha(freeze['history']),'replay_allowed':False}
     if not parent.exists():
         require(attempt==1,'formal_reuse_gpu_missing_previous_roles')
@@ -66,6 +76,7 @@ def independent_stop(state,guard):
 
 def supervise(state,spec,freeze,attempt,guard,child,*,watchdog_type=None):
     import threading
+    limits=watchdog_limits(spec)
     require(sys.platform=='linux' and hasattr(os,'fork') and hasattr(os,'pidfd_open')
         and hasattr(signal,'pidfd_send_signal') and threading.active_count()==1 and 'torch' not in sys.modules,
         'formal_reuse_qualification_before_threads_or_model')
@@ -117,10 +128,10 @@ def supervise(state,spec,freeze,attempt,guard,child,*,watchdog_type=None):
         write_once(state,'qualification.json',qualification)
         log=EvidenceLog(state/'qualified-stop',{'qualification_sha256':sha(qualification)},guard,create=True)
         coordinator=CoordinatedStop(log,qualification)
+        if watchdog_type is None:watchdog_type=FormalWatchdog
+        watchdog=watchdog_type(time.monotonic(),budget.check(),limits=limits)
         guard();budget.check();require(os.write(gate_w,b'G')==1,'formal_reuse_load_release')
         os.close(gate_w);gate_w=None;os.set_blocking(progress_r,False)
-        if watchdog_type is None:watchdog_type=FormalWatchdog
-        limits=dict(spec['runtime_limits']);watchdog=watchdog_type(time.monotonic(),budget.check(),limits=limits)
         with selectors.DefaultSelector() as selector:
             selector.register(fd,selectors.EVENT_READ,'exit');selector.register(progress_r,selectors.EVENT_READ,'progress')
             while True:
@@ -134,8 +145,6 @@ def supervise(state,spec,freeze,attempt,guard,child,*,watchdog_type=None):
         primary=error
         raise
     finally:
-        for item in (gate_r,gate_w,progress_r,progress_w):
-            if item is not None:os.close(item)
         try:
             if log is not None:
                 ops=OwnedPidfdOperations(guard)
@@ -153,6 +162,10 @@ def supervise(state,spec,freeze,attempt,guard,child,*,watchdog_type=None):
                 'stop_result':stop_result,'epoch':time.time(),'retry_allowed':False,
                 'primary_error_type':None if primary is None else type(primary).__name__,'cleanup_errors':cleanup_errors})
         finally:
+            # Keep an unreleased child blocked until the qualified shared stop
+            # is recorded. Closing its gate first creates an EOF/identity race.
+            for item in (gate_r,gate_w,progress_r,progress_w):
+                if item is not None:os.close(item)
             if log is not None:log.close()
             if fd is not None:os.close(fd)
             for s,h in old_handlers.items():signal.signal(s,h)

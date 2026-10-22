@@ -13,20 +13,20 @@ from .c5_research_native import digest, require
 from .c5_formal20_scope_v2 import native_plans
 
 STUDY_ID='c5-rhino-paired-20-reuse-v1'
-INSTANCE='reuse-formal-20261022'
+INSTANCE='reuse-formal-20261022-r1'
 MAC_SOURCE=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5')/(INSTANCE+'-source')
 MAC_STATE=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5')/(INSTANCE+'-state')
 REMOTE_SOURCE=Path('/data')/(INSTANCE+'-source')
 REMOTE_STATE=Path('/data')/(INSTANCE+'-state')
 REMOTE_ENV=Path('/data/c5-reuse-compatible-python-20261012-d/runtime')
-SPEC_FILE='eval/c5/formal-reuse-spec-20261022.json'
-FREEZE_FILE='eval/c5/formal-reuse-runtime-freeze-20261022.json'
+SPEC_FILE='eval/c5/formal-reuse-spec-20261022-r1.json'
+FREEZE_FILE='eval/c5/formal-reuse-runtime-freeze-20261022-r1.json'
 RESOURCE_FILE='eval/c5/formal-reuse-resource-boundary-20261022.json'
-FACTS_FILE='eval/c5/formal-reuse-field-facts-20261022.json'
+FACTS_FILE='eval/c5/formal-reuse-field-facts-20261022-r1.json'
 ACCEPTANCE_FILE='eval/c5/formal-reuse-audit-revision-acceptance-20261022.json'
 APPROVAL_BASIS='direct repository_owner approval of complete disclosed-reuse formal40 spec and runtime freeze'
-SSH_SOCKET=Path('/private/tmp/c5-reuse-24151.control')
-SSH_PORT=24151
+SSH_SOCKET=Path('/private/tmp/c5-formal-22158.control')
+SSH_PORT=22158
 SSH_KNOWN_HOSTS=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/known-hosts-22159')
 SSH_KNOWN_HOSTS_SHA='ae41a99e39f76b1be352f0098439b126fe5b8465c358b8dabbb7a71e53d2d1a9'
 SLOT=re.compile(r'F(?:0[1-9]|1[0-9]|20)-(?:base|lora)\Z')
@@ -75,6 +75,10 @@ def validate_materials(spec,freeze,*,clock=time.time,check_time=True):
         and spec.get('per_request_timeout_seconds')==360 and spec.get('startup_timeout_seconds')==600
         and spec.get('formal_gpu_seconds_max')==64800 and spec.get('raw_stdout_cap_bytes')==67108864
         and spec.get('raw_stderr_cap_bytes')==2097152,'formal_reuse_fixed_capacity')
+    from .c5_formal_reuse_limits import watchdog_limits
+    watchdog_limits(spec)
+    from .c5_formal_reuse_lineage import validate_lineage
+    validate_lineage(freeze.get('incremental_revision'))
     evidence=freeze.get('development_gate_audit',{})
     require(evidence.get('original_frozen_verifier_passed') is False
         and evidence.get('supplemental_full_joint_review',{}).get('supplemental_result',{}).get('engineering_gate_passed') is True

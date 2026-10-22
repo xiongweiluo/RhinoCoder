@@ -47,12 +47,12 @@ def gpu_facts_match(gpu,code,now):
         and gpu.get('private_formal_reads')==0 and gpu.get('new_admission_created') is False,
         'formal_reuse_actual_readonly_gpu_observation')
     require(receipt.get('status')=='formal_readonly_loader_closure_verified_not_execution_authority'
-        and receipt.get('source_code_inventory_sha256')==digest(code)
         and receipt.get('environment_sha256')==digest(environment)
         and receipt.get('cuda_initialized') is receipt.get('model_loaded') is False
         and type(receipt.get('generation_calls')) is int and receipt['generation_calls']==0
         and type(receipt.get('holdout_rows_read')) is int and receipt['holdout_rows_read']==0,
         'formal_reuse_current_gpu_loader_code_environment_binding')
+    if receipt.get('source_code_inventory_sha256')!=digest(code):return False
     require(all(type(value) in (int,float) and 0<=now-value<=86400
         for value in (gpu.get('epoch'),receipt.get('epoch'))),'formal_reuse_current_gpu_observation_age')
     fields=[p.strip() for p in gpu['observation']['gpu_stdout'].strip().split(',')]
@@ -114,10 +114,16 @@ def assemble(*,now=None):
             spec['ssh_'+k]=endpoint[k]
         spec['ssh_host_key_alias']=endpoint['host_key_alias']
     spec['entry_return_wrapper_template']='#! python 3\nimport runpy\nscope = runpy.run_path("'+str(MAC_SOURCE)+'/tools/c5_rhino_formal_reuse_arm.py", init_globals={"FORMAL_ATTEMPT": {attempt}}, run_name="__main__")\nscope["ENTRY_RETURN_BARRIER"].release_after_entry_return()\n'
-    spec['entry_return_wrapper']=spec['entry_return_wrapper_template'].replace('{attempt}','1')
+    spec['entry_return_wrapper']=spec['entry_return_wrapper_template'].replace('{attempt}','2')
     spec['observer_backend']=dict(old_spec['observer_backend'])
     spec['observer_backend']['code_read_roots']=[str(MAC_SOURCE) if p.startswith('/Users/xiongweiluo/RhinoCoder/data/training/c5/') else p
         for p in old_spec['observer_backend']['code_read_roots']]
+    from plugin.rhino_listener.c5_formal_reuse_limits import LIMITS
+    from plugin.rhino_listener.c5_formal_reuse_lineage import LINEAGE_FILE,validate_lineage
+    lineage=read(LINEAGE_FILE);validate_lineage(lineage)
+    spec['runtime_limits']=dict(LIMITS)
+    spec['next_preexposure_attempt']=2
+    spec['original_first_load_epoch']=lineage['formal_first_load_epoch']
     spec['preexposure_operational_attempts_max']=3
     spec['private_exposure_or_generation_intent_attempts_max']=1
     spec['owner_preload_confirmation_without_artificial_timeout']=True
@@ -127,7 +133,7 @@ def assemble(*,now=None):
     mac_environment=baseline['environment']['mac'] if mac is None else mac['environment']
     public_names=set(old['fixed_public_files'])-{'eval/c5/rhino-resource-boundary-v8-formal20-20261008.json',
         'eval/c5/hostassurance-development-independent-audit-20261007-d.json'}
-    public_names|={SPEC_FILE,RESOURCE_FILE,HISTORY,ACCEPTANCE_FILE,FACTS_FILE,
+    public_names|={SPEC_FILE,RESOURCE_FILE,HISTORY,ACCEPTANCE_FILE,FACTS_FILE,LINEAGE_FILE,
         'eval/c5/recovery-attempt3-execution-review-20261014.json',
         'eval/c5/recovery-completed-audit-source-review-20261014.json'}
     documents={SPEC_FILE:spec,RESOURCE_FILE:resources}
@@ -145,7 +151,7 @@ def assemble(*,now=None):
         if ready else 'disabled_offline_formal_preparation')
     payload[SPEC_FILE]=encoded(spec);pins[SPEC_FILE]=raw_sha(payload[SPEC_FILE])
     freeze=dict(old)
-    freeze.update(study_id=STUDY_ID,instance_id=INSTANCE,execution_ready=ready,spec_sha256=digest(spec),
+    freeze.update(study_id=STUDY_ID,instance_id=INSTANCE,incremental_revision=lineage,execution_ready=ready,spec_sha256=digest(spec),
         spec_file_sha256=pins[SPEC_FILE],source_files=pins,source_inventory_sha256=digest(pins),
         fixed_public_files={n:pins[n] for n in sorted(public_names)},source_revision=spec['deployment_revision'],
         mac_source_root=str(MAC_SOURCE),remote_source_root=str(REMOTE_SOURCE),

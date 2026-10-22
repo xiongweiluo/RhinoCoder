@@ -28,7 +28,19 @@ def register(endpoint,spec_sha,runtime_sha):
         require({p.name for p in state.iterdir()}=={'owner-approval.json'}
             and read_json(state,'owner-approval.json')==record,'formal_reuse_existing_consumption_or_other_grant')
     else:state.mkdir(mode=0o700);publish_json(state,'owner-approval.json',record)
-    return {'registered_exact_spec_sha256':spec_sha,'registered_exact_runtime_sha256':runtime_sha,
+    revision=None
+    if endpoint=='mac' and r.get('incremental_revision') is not None:
+        import shlex,subprocess
+        from training.c5_formal_reuse_ssh import argv,verify as verify_ssh
+        from plugin.rhino_listener.c5_followup_profile import GPU_FLAGS
+        from plugin.rhino_listener.c5_formal_reuse_scope import REMOTE_ENV
+        verify_ssh(s,r)
+        command='import json;from pathlib import Path;print((Path('+repr(str(REMOTE_STATE))+')/"owner-approval.json").read_text())'
+        result=subprocess.run(argv(s,'export-supervisor',2)[:-1]+[shlex.join([str(REMOTE_ENV/'bin/python3.11'),*GPU_FLAGS,'-c',command])],capture_output=True,timeout=30)
+        require(result.returncode==0 and json.loads(result.stdout)==record,'formal_reuse_both_exact_revision_grants_required')
+        from training.c5_formal_reuse_revision import activate_mac
+        revision=activate_mac(s,r,record)
+    return {'incremental_revision':revision,'registered_exact_spec_sha256':spec_sha,'registered_exact_runtime_sha256':runtime_sha,
         'endpoint':endpoint,'human_origin_cryptographically_proven':False,'model_or_rhino_calls':0,
         'private_formal_reads':0,'campaign_or_role_created':False}
 if __name__=='__main__':
