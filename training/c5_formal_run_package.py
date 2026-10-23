@@ -18,14 +18,14 @@ from training.c5_reuse_evidence import sha, exact
 
 def replay_package_revision(state, row):
     p = row['payload']
-    exact(p, ('scope', 'grant', 'previous_head_sha256', 'package', 'accounting_cutover'))
+    exact(p, ('scope', 'grant', 'previous_head_sha256', 'package', 'accounting_cutover','prior_reconciliation'))
     from training.c5_recovery_policy import validate_scope, require_grant
     old, new = state['scope'], validate_scope(p['scope'])
     package = p['package']
     policy = validate_policy(package['policy'])
     validate_layout(package['layout']); migration = validate_migration(p['accounting_cutover'])
     require(not state['active'] and not state['formal_consumed'] and state['status'] in
-            ('RETRYABLE_ENGINEERING', 'WAITING_OWNER', 'PREPARED', 'ATTEMPT_LIMIT_REACHED')
+            ('RETRYABLE_ENGINEERING', 'WAITING_OWNER', 'PREPARED', 'ATTEMPT_LIMIT_REACHED','PAUSED_RECONCILIATION')
             and new!=old, 'run_package_revision_known_pause')
     require(all(new[k] == old[k] for k in ('campaign_id', 'phase', 'policy_sha256', 'history_sha256',
                 'public_plan_sha256', 'contract_sha256'))
@@ -36,6 +36,16 @@ def replay_package_revision(state, row):
     require(grant.pop('previous_campaign_head_sha256') == p['previous_head_sha256']
             == row['previous_sha256'], 'run_package_revision_original_head')
     require_grant(new, grant)
+    prior=p['prior_reconciliation']
+    if state['status']=='PAUSED_RECONCILIATION':
+        require(type(prior) is dict and set(prior)=={'proof','basis','manual_external_attestation'}
+            and prior['basis']=='new_package_authorized_automatic_raw_audit'
+            and prior['manual_external_attestation'] is False,'run_package_prior_reconciliation_provenance')
+        from training.c5_recovery_policy import retry_decision
+        decision=retry_decision(old,min(state['attempts'],3),False,'startup',prior['proof'])
+        require(decision in ('RETRYABLE_ENGINEERING','ATTEMPT_LIMIT_REACHED'),
+            'run_package_prior_raw_evidence_incomplete')
+    else:require(prior is None,'run_package_unneeded_prior_reconciliation')
     require(migration['legacy_first_load_epoch'] == state['first_load_epoch']
             and migration['prior_attempts_consumed'] == state['attempts']
             and migration['prior_campaign_head_sha256'] == p['previous_head_sha256']
@@ -114,11 +124,13 @@ def activate_package(spec, freeze, grant):
             return {'status': 'run_package_already_registered', 'research_restarted': False}
         require(rows == package['prior_campaign_events'], 'run_package_unreviewed_history_append')
         campaign = FormalCampaign(current['scope'], log)
+        prior_reconciliation=None
         if current['status'] == 'PAUSED_RECONCILIATION':
             # Read-only audit of the immutable old actor. Never manufacture an
             # owner manual receipt or run an old model entry.
             proof = audit_previous_attempt(package)
-            campaign.reconcile('startup', proof)
+            prior_reconciliation={'proof':proof,'basis':'new_package_authorized_automatic_raw_audit',
+                'manual_external_attestation':False}
         current = campaign.observation()
         require(not current['active'] and not current['formal_consumed'], 'run_package_prior_cleanup_unknown')
         revised = campaign_scope(spec, freeze); head = log.rows()[-1]['record_sha256']
@@ -130,7 +142,8 @@ def activate_package(spec, freeze, grant):
                     'runtime_sha256': revised['runtime_sha256'], 'policy_sha256': sha(POLICY),
                     'previous_campaign_head_sha256': head}
         campaign._event('run_package_revision_accepted', {'scope': revised, 'grant': evidence,
-            'previous_head_sha256': head, 'package': package, 'accounting_cutover': migration})
+            'previous_head_sha256': head, 'package': package, 'accounting_cutover': migration,
+            'prior_reconciliation':prior_reconciliation})
         return {'status': 'run_package_registered_waiting_private_entry',
                 'attempts_consumed': current['attempts'], 'first_load_epoch': current['first_load_epoch'],
                 'research_restarted': False}

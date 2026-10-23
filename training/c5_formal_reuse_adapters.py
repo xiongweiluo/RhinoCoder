@@ -77,7 +77,13 @@ class NativeAdapterV2(NativeAdapter):
         while not (self.state/'host-continuity-ready.json').exists():
             require(not (self.state/'deferred-baseline.failed.json').exists(),'formal_reuse_host_preparation_failed')
             self.guard()
-            require(time.time()<=self.spec['latest_owner_start_epoch'],'formal_reuse_full_window_no_longer_available')
+            if 'run_package' in self.spec:
+                policy=self.spec['run_package']['policy']
+                require(time.time()+policy['remaining_chain_upper_seconds']+policy['startup_seconds']
+                    +policy['export_reserve_seconds']<=self.spec['run_package']['lease_expiry_epoch'],
+                    'run_package_remaining_work_window_unavailable')
+            else:
+                require(time.time()<=self.spec['latest_owner_start_epoch'],'formal_reuse_full_window_no_longer_available')
             time.sleep(0.05)
         require(read_json(self.state,'host-continuity-ready.json')=={'study_id':STUDY_ID,
             'runtime_freeze_sha256':digest(self.freeze),'legacy_byte_closure_verified':False,

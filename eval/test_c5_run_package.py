@@ -33,12 +33,12 @@ def confirm(c):
         'public_attempts_authorized':0,'human_origin_cryptographically_proven':False})
 
 
-def package_campaign(tmp_path,*,owner_confirmed=True):
+def package_campaign(tmp_path,*,owner_confirmed=True,pending_previous=False):
     spec,freeze,_,log=frozen_log(tmp_path)
     now=[FIRST+1000]
     c=FormalCampaign(freeze['incremental_revision']['initial_campaign_scope'],log,wall=lambda:now[0])
     r1=campaign_scope(spec,freeze);c.accept_revision(r1,revision_grant(r1,log.rows()[-1]['record_sha256']))
-    confirm(c);c.start();c.failed('startup',proof());now[0]=FIRST+12000
+    confirm(c);c.start();c.failed('startup',{**proof(),'capture_complete':False} if pending_previous else proof());now[0]=FIRST+12000
     migration={'schema_version':1,'legacy_first_load_epoch':FIRST,'cutover_epoch':now[0],
         'legacy_generation_stop_epoch':FIRST+64740,'legacy_accounting_end_epoch':now[0],
         'legacy_elapsed_debit_seconds':12000.,'gpu_residency_upper_seconds':11000.,
@@ -50,7 +50,9 @@ def package_campaign(tmp_path,*,owner_confirmed=True):
     spec['run_package']=freeze['run_package']=package
     revised=campaign_scope(spec,freeze);head=log.rows()[-1]['record_sha256']
     c._event('run_package_revision_accepted',{'scope':revised,'grant':revision_grant(revised,head),
-        'previous_head_sha256':head,'package':package,'accounting_cutover':migration})
+        'previous_head_sha256':head,'package':package,'accounting_cutover':migration,
+        'prior_reconciliation':({'proof':proof(),'basis':'new_package_authorized_automatic_raw_audit',
+            'manual_external_attestation':False} if pending_previous else None)})
     if owner_confirmed:
         confirm(c)
         c._event('package_owner_custody_consent',{'scope_sha256':sha(c.scope),'automatic_receipt_capture':True,
@@ -255,4 +257,37 @@ def test_private_input_errors_happen_before_native_preparation_and_do_not_consum
         with pytest.raises((ValueError,NativeError)):c.start()
         assert c.observation()['attempts']==2
         assert observed_start(c)==3
+    finally:c.log.close()
+
+
+def test_native_wait_uses_remaining_work_window_instead_of_legacy_full_phase(tmp_path,monkeypatch):
+    from training.c5_formal_reuse_adapters import NativeAdapterV2
+    from plugin.rhino_listener.c5_research_channel import publish_json
+    import training.c5_formal_reuse_adapters as module
+    package={'policy':POLICY,'lease_expiry_epoch':2000000000+53701}
+    spec={'run_package':package,'latest_owner_start_epoch':1,'study_id':POLICY['study_id']}
+    freeze={'fixture':True};calls=[]
+    monkeypatch.setattr(module.time,'time',lambda:2000000000)
+    def ready(_):
+        calls.append('ready')
+        publish_json(tmp_path,'host-continuity-ready.json',{'study_id':POLICY['study_id'],
+            'runtime_freeze_sha256':digest(freeze),'legacy_byte_closure_verified':False,
+            'sealed_before_model_generation':True})
+    monkeypatch.setattr(module.time,'sleep',ready)
+    NativeAdapterV2(tmp_path,spec,freeze,guard=lambda:None).wait_zero_ready()
+    assert calls==['ready']
+
+
+def test_new_rule_reconciliation_does_not_rewrite_old_failure_or_claim_old_manual_pass(tmp_path):
+    from training.c5_formal_reuse_admission import formal_replay
+    _,f,c,_=package_campaign(tmp_path,owner_confirmed=False,pending_previous=True)
+    try:
+        prefix=f['run_package']['prior_campaign_events']
+        old=formal_replay(c.initial_scope,prefix)
+        assert old['status']=='PAUSED_RECONCILIATION' and old['attempts']==2
+        assert c.log.rows()[:len(prefix)]==prefix
+        assert not any(row['kind']=='cleanup_reconciled' for row in c.log.rows()[len(prefix):])
+        event=c.log.rows()[len(prefix)]
+        assert event['payload']['prior_reconciliation']['manual_external_attestation'] is False
+        assert c.observation()['status']=='WAITING_OWNER' and c.observation()['first_load_epoch']==FIRST
     finally:c.log.close()

@@ -87,6 +87,10 @@ def _run_package(*, output=print):
     from tools.c5_formal_reuse_owner import run_interactive
     spec,freeze,grant,guard=scope(check_time=False)
     require('run_package' in spec,'run_package_required')
+    previous=Path(spec['run_package']['previous_mac_attempt_root'])
+    if (previous/'host-continuity-terminal-receipt.json').is_file():
+        output('原失败实际回执（新规则自动保管，不追认旧逐次人工见证）：'+
+            json.dumps(read_json(previous,'host-continuity-terminal-receipt.json'),sort_keys=True))
     session={}
     output(json.dumps({'package_id':spec['run_package']['layout']['package_id'],
         'spec_sha256':digest(spec),'runtime_sha256':digest(freeze),'rules':spec['run_package']['policy'],
