@@ -1124,3 +1124,33 @@ def test_missing_capture_pauses_without_falsely_claiming_scene_pollution(
         result["global_fault"]["scope"] == "unknown"
         and len(result["attempted_indices"]) == 1
     )
+
+
+@pytest.mark.parametrize(
+    "fault,status,scope,code",
+    [
+        ("proof_global", "SLOT_STOPPED_GLOBAL", "global", "source_drift"),
+        (
+            "proof_cancel",
+            "SLOT_PAUSED_RECONCILIATION",
+            "owner_pause",
+            "owner_cancelled",
+        ),
+    ],
+)
+def test_stop_or_cancel_during_raw_slot_proof_is_preserved_and_consumed(
+    tmp_path, monkeypatch, fault, status, scope, code
+):
+    from eval.test_c5_formal_reuse_full_field import complete_scoped_field
+    from plugin.rhino_listener.c5_research_channel import read_json
+
+    state, cases, spec, freeze, receipt, result, campaign = complete_scoped_field(
+        tmp_path, monkeypatch, slot_plan=plan(), slot_fault=fault
+    )
+    assert result["status"] == status
+    assert result["global_fault"] == {"scope": scope, "code": code}
+    assert result["attempted_indices"] == [7] and campaign.indices == [7]
+    outcome = read_json(state, "slot-outcome-07.json")
+    assert outcome["fault"] == result["global_fault"]
+    assert outcome["decision"] != "CONTINUE_FIXED_ORDER"
+    assert result["cleanup_errors"] == []

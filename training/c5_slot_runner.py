@@ -301,11 +301,19 @@ class SlotRunner(FormalRunner):
                             self.source_guard,
                             self.native,
                         )
-                    except BaseException:
-                        fault = {
-                            "scope": "unknown",
-                            "code": "raw_audit_or_shared_health_unconfirmed",
-                        }
+                    except BaseException as error:
+                        # Preserve known stop/cancel semantics even when they
+                        # arrive during export or the fresh shared-health proof.
+                        # The slot remains consumed; never replay it on recovery.
+                        if isinstance(error, KeyboardInterrupt):
+                            fault = {"scope": "owner_pause", "code": "owner_cancelled"}
+                        elif getattr(error, "slot_scope", None) == "global":
+                            fault = {"scope": "global", "code": error.code}
+                        else:
+                            fault = {
+                                "scope": "unknown",
+                                "code": "raw_audit_or_shared_health_unconfirmed",
+                            }
                 decision = decide(fault, proof)
                 payload = {
                     "index": index,
