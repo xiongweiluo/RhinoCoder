@@ -19,12 +19,12 @@ def audit_preexposure_failure(state,spec,freeze,campaign,terminal,*,package_reco
     if package_recovery:
         require('run_package' in freeze and current.get('package')==freeze['run_package'],
             'run_package_recovery_requires_current_approved_scope')
-        eligible=current['status'] in ('LOADING','READY','PAUSED_RECONCILIATION','RETRYABLE_ENGINEERING')
+        eligible=current['status'] in ('LOADING','READY','PAUSED_RECONCILIATION','RETRYABLE_ENGINEERING') or slot_prework and current['status']=='RUNNING'
     require(eligible and (current['formal_consumed'] is False or slot_prework)
         and current['attempts']==int(state.name.split('-')[-1]),
         'formal_reuse_failure_requires_unconsumed_paused_campaign')
     rows=campaign.log.rows()
-    require((slot_prework and not current.get('begun') and not current.get('slot_current_indices')) or not any(r['kind'] in ('private_exposure_intent','generation_begin_intent') for r in rows),
+    require((slot_prework and not current.get('slot_current_indices')) or not any(r['kind'] in ('private_exposure_intent','generation_begin_intent') for r in rows),
         'formal_reuse_failure_private_exposure_sticky')
     forbidden=('formal20.started.json','private-cases.json','native-plans.json','native-prepared.json',
         'formal20.hub-initialization.claim.json','worker-bootstrap-request.json')

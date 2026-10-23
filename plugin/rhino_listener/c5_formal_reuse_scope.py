@@ -94,7 +94,7 @@ def validate_materials(spec,freeze,*,clock=time.time,check_time=True):
     package=spec.get('run_package')
     if package is not None:
         from .c5_run_package_policy import validate_policy,validate_migration
-        validate_policy(package['policy']);validate_migration(package['timing_migration'])
+        validate_policy(package['policy']);validate_migration(package['timing_migration'],attempts_max=package['policy'].get('global_loads_max',5))
         if package['policy'].get('version')==2:
             from .c5_slot_protocol import validate_protocol
             validate_protocol(package.get('slot_protocol'))

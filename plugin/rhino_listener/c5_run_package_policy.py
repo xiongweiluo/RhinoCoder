@@ -61,7 +61,7 @@ def validate_layout(value):
     return value
 
 
-def validate_migration(value):
+def validate_migration(value,*,attempts_max=5):
     keys = {'schema_version', 'legacy_first_load_epoch', 'cutover_epoch', 'legacy_generation_stop_epoch',
             'legacy_elapsed_debit_seconds', 'gpu_residency_upper_seconds', 'prior_campaign_head_sha256',
             'prior_attempts_consumed', 'legacy_accounting_end_epoch', 'legacy_policy_rejudged', 'historical_first_load_rewritten'}
@@ -74,7 +74,7 @@ def validate_migration(value):
             and value['cutover_epoch'] >= value['legacy_accounting_end_epoch'] >= value['legacy_first_load_epoch']
             and value['legacy_elapsed_debit_seconds'] >= value['legacy_accounting_end_epoch'] - value['legacy_first_load_epoch']
             and value['legacy_elapsed_debit_seconds'] >= value['gpu_residency_upper_seconds']
-            and type(value['prior_attempts_consumed']) is int and 1 <= value['prior_attempts_consumed'] < 5
+            and type(value['prior_attempts_consumed']) is int and 1 <= value['prior_attempts_consumed'] < attempts_max
             and type(value['prior_campaign_head_sha256']) is str and len(value['prior_campaign_head_sha256']) == 64
             and all(c in '0123456789abcdef' for c in value['prior_campaign_head_sha256'])
             and value['legacy_policy_rejudged'] is value['historical_first_load_rewritten'] is False,

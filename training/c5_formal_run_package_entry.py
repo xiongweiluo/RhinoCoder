@@ -206,7 +206,7 @@ def run_package(*,output=print):
             try:
                 state=attempt_state('mac',max(1,campaign.observation()['attempts']))
                 detached=None
-                if (state/'host-continuity-terminal-receipt.json').exists():
+                if 'slot_protocol' in spec.get('run_package',{}) or (state/'host-continuity-terminal-receipt.json').exists():
                     request=request_rhino_attempt(spec,freeze,0)
                     name='package-dispatcher-detached-'+request['nonce']+'.json'
                     deadline=time.monotonic()+10

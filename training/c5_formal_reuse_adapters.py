@@ -230,6 +230,24 @@ class ModelAdapterV2(ModelAdapter):
         observed=rebind_observation(wire,sent,self.freeze['model_identities'][route],binding)
         return {**wire,'observation':observed,'wire_request':sent,'wire_response':wire}
 
+    def export_completed_slot(self,slot_id):
+        """Read-only export of each original step BEFORE allowing the next slot."""
+        require('slot_protocol' in self.spec.get('run_package',{}) and self.bootstrapped,
+            'slot_export_current_approved_protocol')
+        exported=[]
+        for key in self.attempts:
+            request=read_json(self.state,key+'-model-request.json')
+            if request['slot_id']!=slot_id:continue
+            name=key+'-remote-evidence.json'
+            require(not (self.state/name).exists(),'slot_original_step_export_once')
+            sent={'kind':'formal_export_step','study_id':STUDY_ID,
+                'runtime_freeze_sha256':digest(self.freeze),'key':key}
+            value=self.pipe.exchange(sent)
+            require(value.get('status')=='formal_raw_step_evidence' and value.get('key')==key
+                and value.get('request_sha256')==digest(sent),'slot_original_step_export_binding')
+            publish_json(self.state,name,value);exported.append(key)
+        return exported
+
     def _stop_zero_protocol(self):
         require(not self.bootstrapped,'zero-stage abort cannot follow private bootstrap')
         if self.process is None: return
