@@ -147,6 +147,10 @@ def test_private_owner_entry_copies_audits_and_publishes_only_after_original_unc
     summary=output/'owner-public-partial-audit-summary.json'
     assert summary.exists() is (not concurrent_change)
     assert not list(output.glob('readonly-evidence-*'))
+    if concurrent_change:
+        paths=list(output.glob('owner-public-partial-audit-refusal-*.json'))
+        assert len(paths)==1
+        assert json.loads(paths[0].read_bytes())['error_code']=='partial_audit_original_changed_after_audit'
     if not concurrent_change:
         value=json.loads(summary.read_bytes())
         assert value['evidence_copy_bytes_verified'] and not value['original_source_or_evidence_modified']
@@ -168,3 +172,11 @@ def test_owner_environment_uses_exact_typed_frozen_virtual_origin(tmp_path,monke
     assert result['readable_loaded_external_files'][str(path)]==owner.file_sha(path)
     spoof=types.ModuleType('torch.'+kind);spoof.__file__='_'+kind+'.py';modules['torch.'+kind]=spoof;setattr(torch,kind,spoof)
     with pytest.raises(ValueError,match='virtual_namespace_identity'):owner.environment()
+
+
+def test_public_contract_probe_seals_schema_loader_path_before_private_audit():
+    import sys
+    owner=owner_module();a=owner.prepare_public_contract(Tokenizer());paths=list(sys.path)
+    b=owner.prepare_public_contract(Tokenizer())
+    assert a==b and a['public_tools']==23 and a['private_evidence_reads']==0 and a['model_or_rhino_calls']==0
+    assert list(sys.path)==paths

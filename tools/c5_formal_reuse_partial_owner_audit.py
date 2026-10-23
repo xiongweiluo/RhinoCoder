@@ -5,7 +5,7 @@ from pathlib import Path
 SOURCE=Path(__file__).resolve().parent
 ORIGINAL=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/reuse-formal-20261023-r2-source')
 EVIDENCE=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/reuse-formal-20261023-r2-state/preload-3')
-OUTPUT=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/reuse-formal-20261023-r2-partial-audit-state')
+OUTPUT=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/reuse-formal-20261023-r2-partial-audit-v2-state')
 SPEC='dff43f351b64159341c363c5156578c9da0ad3820a20d8a9baa46c7cde18d9c1'
 RUNTIME='8f946c2efd02397e04e1fbc143410785371d82748a84c1939f334ba866e495ed'
 FILES={'owner.py','core.py'}
@@ -46,8 +46,19 @@ def load_core(freeze):
         'training.c5_lifecycle_joint_audit','training.c5_formal_reuse_evidence_audit',
         'training.c5_formal_reuse_runtime','training.c5_formal_reuse_admission','training.c5_rhino_adapter'):
         importlib.import_module(name)
-    tokenizer.apply_chat_template([{'role':'user','content':'Public CPU-only audit closure probe'}],tokenize=False,add_generation_prompt=True)
+    prepare_public_contract(tokenizer)
     return core['audit_partial'],tokenizer
+def prepare_public_contract(tokenizer):
+    # The fixed public loader adds its registered MCP schema directory once.
+    # Run it BEFORE environment sealing; never relax the sys.path comparison.
+    from training.c5_inventory import load_public_mcp_tools
+    from training.c5_contract import render_selection,render_invocation
+    tools=load_public_mcp_tools();text='Public CPU-only audit closure probe'
+    selection=render_selection(tokenizer,text,tools)
+    invocation=render_invocation(tokenizer,text,tools,'create_box')
+    return {'public_tools':len(tools),'selection_prompt_sha256':hashlib.sha256(selection.prompt.encode()).hexdigest(),
+        'invocation_prompt_sha256':hashlib.sha256(invocation.prompt.encode()).hexdigest(),
+        'model_or_rhino_calls':0,'private_evidence_reads':0}
 def environment():
     files={}
     from plugin.rhino_listener.c5_formal_reuse_origins import origin_path
@@ -94,7 +105,7 @@ def copy_evidence(original,destination):
     require(evidence_inventory(original)==before,'partial_audit_original_changed_during_copy')
     return before
 def publish(name,value):
-    require(name=='owner-public-partial-audit-summary.json','partial_audit_public_output_name')
+    require(name=='owner-public-partial-audit-summary.json' or (name.startswith('owner-public-partial-audit-refusal-') and name.endswith('.json') and len(name.removeprefix('owner-public-partial-audit-refusal-').removesuffix('.json'))==64 and all(c in '0123456789abcdef' for c in name.removeprefix('owner-public-partial-audit-refusal-').removesuffix('.json'))),'partial_audit_public_output_name')
     raw=(json.dumps(value,sort_keys=True,ensure_ascii=False,indent=2,allow_nan=False)+'\n').encode()
     require(len(raw)<=131072,'partial_audit_bounded_summary')
     if OUTPUT.exists():
@@ -107,7 +118,7 @@ def publish(name,value):
     with os.fdopen(fd,'wb') as f:f.write(raw);f.flush();os.fsync(f.fileno())
 def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('mode',choices=('inspect-runtime','audit'))
-    parser.add_argument('--review-sha256');args=parser.parse_args();stage='public_scope'
+    parser.add_argument('--review-sha256');args=parser.parse_args();stage='public_scope';review_verified=False
     try:
         if args.mode=='audit':require(sys.stdin.isatty() and sys.stderr.isatty(),'partial_audit_owner_private_terminal_required')
         spec,freeze,original_guard=public_original()
@@ -118,6 +129,7 @@ def main():
                 and review['original_spec_sha256']==SPEC and review['original_runtime_sha256']==RUNTIME,
                 'partial_audit_review_binding')
             require(all(file_sha(SOURCE/name)==sha for name,sha in review['source_files'].items()),'partial_audit_review_code')
+            review_verified=True
         audit,tokenizer=load_core(freeze)
         if args.mode=='inspect-runtime':
             value=environment();allowed=dict(freeze['mac_environment']['file_sha256'])
@@ -159,6 +171,10 @@ def main():
     except BaseException as error:
         code=str(error)
         if not(code.startswith('partial_') and code.replace('_','').isascii() and code.replace('_','').isalnum()):code=type(error).__name__
-        print(json.dumps({'status':'readonly_partial_audit_refused','stage':stage,'error_code':code,
-            'private_content_included':False,'research_restarted':False}),file=sys.stderr);return 1
+        refusal={'status':'readonly_partial_audit_refused','stage':stage,'error_code':code,
+            'private_content_included':False,'research_restarted':False}
+        if args.mode=='audit' and review_verified:
+            try:publish('owner-public-partial-audit-refusal-'+digest(refusal)+'.json',refusal)
+            except BaseException:pass  # Public stderr remains available; never alter original evidence.
+        print(json.dumps(refusal),file=sys.stderr);return 1
 if __name__=='__main__':raise SystemExit(main())
