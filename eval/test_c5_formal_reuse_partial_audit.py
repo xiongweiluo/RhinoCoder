@@ -152,3 +152,19 @@ def test_private_owner_entry_copies_audits_and_publishes_only_after_original_unc
         assert value['evidence_copy_bytes_verified'] and not value['original_source_or_evidence_modified']
         assert value['sqlite_reader_sidecars_confined_to_disposable_private_copy']
         assert not value['original_complete_40_gate_passed'] and value['full40_quality_result'] is None
+
+@pytest.mark.parametrize('kind',['ops','classes'])
+def test_owner_environment_uses_exact_typed_frozen_virtual_origin(tmp_path,monkeypatch,kind):
+    import types,sys
+    owner=owner_module();path=tmp_path/'defining.py';path.write_text('public CPU defining source')
+    cls_name='_Ops' if kind=='ops' else '_Classes'
+    cls=type(cls_name,(types.ModuleType,),{})
+    virtual=cls('torch.'+kind);virtual.__file__='_'+kind+'.py'
+    defining=types.ModuleType('torch._'+kind);defining.__file__=str(path);setattr(defining,cls_name,cls)
+    torch=types.ModuleType('torch');setattr(torch,kind,virtual)
+    modules={'torch':torch,'torch._'+kind:defining,'torch.'+kind:virtual}
+    monkeypatch.setattr(owner,'sys',types.SimpleNamespace(modules=modules,executable=sys.executable,version=sys.version,path=sys.path))
+    result=owner.environment()
+    assert result['readable_loaded_external_files'][str(path)]==owner.file_sha(path)
+    spoof=types.ModuleType('torch.'+kind);spoof.__file__='_'+kind+'.py';modules['torch.'+kind]=spoof;setattr(torch,kind,spoof)
+    with pytest.raises(ValueError,match='virtual_namespace_identity'):owner.environment()

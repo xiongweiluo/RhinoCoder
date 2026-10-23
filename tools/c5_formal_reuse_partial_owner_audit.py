@@ -50,11 +50,10 @@ def load_core(freeze):
     return core['audit_partial'],tokenizer
 def environment():
     files={}
+    from plugin.rhino_listener.c5_formal_reuse_origins import origin_path
     for module in tuple(sys.modules.values()):
-        origin=getattr(module,'__file__',None)
-        if not origin or str(origin).startswith('<'):continue
-        path=Path(origin)
-        if path.suffix=='.pyc':path=Path(importlib.util.source_from_cache(str(path)))
+        path=origin_path(module,sys.modules,require)
+        if path is None:continue
         path=path.resolve(strict=True)
         if path.is_relative_to(ORIGINAL) or path.is_relative_to(SOURCE):continue
         files[str(path)]=file_sha(path)
