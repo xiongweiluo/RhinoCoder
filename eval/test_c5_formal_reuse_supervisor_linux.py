@@ -59,6 +59,9 @@ def child(fd):
  assert q['model_loading_started'] is False and q['target']==LinuxIdentity()(os.getpid())
  (state/'cpu-child-after-qualified.json').write_text(json.dumps({'pid':os.getpid(),'no_model':True}))
  progress(fd,b'L');progress(fd,b'B');progress(fd,b'R');progress(fd,b'S')
+ if MODE=='broken_stderr':
+  read_fd,write_fd=os.pipe();os.close(read_fd);os.dup2(write_fd,2);os.close(write_fd)
+  raise ValueError('cpu_fixture_child_failure_with_broken_stderr')
  if MODE=='hang':time.sleep(30)
  progress(fd,b'E');progress(fd,b'D')
 def finite_watchdog(start,cap,*,limits):
@@ -102,3 +105,13 @@ def test_watchdog_constructor_failure_never_releases_child_and_still_records_one
     assert result['final']['child_exit_reaped'] is True and result['final']['cleanup_errors']==[]
     assert result['final']['stop_result']['signal_attempts']==result['again']['signal_attempts']==1
     assert result['again']['retry_signal_allowed'] is False
+
+
+def test_broken_child_stderr_cannot_publish_parent_final_or_skip_reap(tmp_path):
+    result=run_fixture(tmp_path,'broken_stderr')
+    assert result['error']=='ValueError' and result['child_after_qualified'] is True
+    final=result['final']
+    assert final['child_exit_reaped'] is True and final['child_wait_status']==256
+    assert final['primary_error_type'] is None and final['cleanup_errors']==[]
+    assert final['stop_result']['status']=='already_exited'
+    assert final['stop_result']['signal_attempts']==result['again']['signal_attempts']==0

@@ -114,17 +114,22 @@ def supervise(state,spec,freeze,attempt,guard,child,*,watchdog_type=None):
         old_handlers={s:signal.signal(s,interrupted) for s in (signal.SIGTERM,signal.SIGINT,signal.SIGHUP)}
         sys.stdout.flush();sys.stderr.flush();pid=os.fork()
         if pid==0:
-            for s in old_handlers:signal.signal(s,signal.SIG_DFL)
-            os.close(gate_w);os.close(progress_r)
+            # A child must never unwind into the parent's finally, even when
+            # its diagnostic stream is already broken or descriptor setup fails.
+            child_status=1
             try:
+                for s in old_handlers:signal.signal(s,signal.SIG_DFL)
+                os.close(gate_w);os.close(progress_r)
                 require(os.read(gate_r,2)==b'G','formal_reuse_preload_gate');os.close(gate_r)
                 q=strict(read_private(state/'qualification.json'))
                 require(q['target']==LinuxIdentity()(os.getpid()) and q['parent_pid']==os.getppid(),
                     'formal_reuse_qualified_child_only')
-                child(progress_w);os._exit(0)
+                child(progress_w);child_status=0
             except BaseException:
-                # Never print private request/answer frames or their exceptions.
-                sys.stderr.write('C5_FORMAL_REUSE_CHILD_FAILED\n');sys.stderr.flush();os._exit(1)
+                # Diagnostics never contain private request/answer material.
+                try:sys.stderr.write('C5_FORMAL_REUSE_CHILD_FAILED\n');sys.stderr.flush()
+                except BaseException:pass
+            finally:os._exit(child_status)
         os.close(gate_r);gate_r=None;os.close(progress_w);progress_w=None
         fd=os.pidfd_open(pid,0);target=LinuxIdentity()(pid)
         require(LinuxIdentity().parent(pid)==os.getpid() and all(target[k]==parent[k]
