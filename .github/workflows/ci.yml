@@ -71,12 +71,11 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
           python-version: "3.11"
+      - run: python -m pip install -r requirements-lock.txt
       - run: npm ci --prefix agent/ui
-      - run: npm run build --prefix agent/ui
       - run: npm run test:e2e --prefix agent/ui
-      - run: npm run build:public --prefix agent/ui
-      - run: python tools/check_ui_performance.py
       - run: npm run test:e2e:public --prefix agent/ui
+      - run: python tools/check_ui_performance.py
   release:
     needs: impact
     if: needs.impact.outputs.release == 'true'
