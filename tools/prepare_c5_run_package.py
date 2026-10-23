@@ -106,8 +106,30 @@ def assemble():
     return docs
 
 
+def verify_historical_package():
+    """r2 was executed and frozen: check its bytes, never regenerate with new code."""
+    spec,freeze=read(SPEC),read(RUNTIME)
+    require(digest(spec)=='dff43f351b64159341c363c5156578c9da0ad3820a20d8a9baa46c7cde18d9c1'
+        and digest(freeze)=='8f946c2efd02397e04e1fbc143410785371d82748a84c1939f334ba866e495ed',
+        'run_package_historical_approved_pair_changed')
+    for name,sha in freeze['source_files'].items():
+        if name.endswith('.py'):
+            result=subprocess.run(['git','show',freeze['source_revision']+':'+name],cwd=ROOT,capture_output=True)
+            require(result.returncode==0,'run_package_historical_commit_missing')
+            raw=result.stdout
+        else:
+            path=ROOT/('eval/c5/formal-run-package-layout-20261023.json' if name==LAYOUT_FILE else name)
+            raw=path.read_bytes()
+        require(hashlib.sha256(raw).hexdigest()==sha,'run_package_historical_source_bytes:'+name)
+    return {'status':'original_executed_r2_artifacts_verified_without_regeneration',
+        'spec_sha256':digest(spec),'runtime_sha256':digest(freeze),
+        'historical_source_revision':freeze['source_revision'],'field_execution_authority':False}
+
+
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--check',action='store_true');a=p.parse_args()
+    if a.check:
+        print(json.dumps(verify_historical_package(),sort_keys=True));return
     docs=assemble()
     for name,value in docs.items():
         path=ROOT/('eval/c5/formal-run-package-layout-20261023.json' if name==LAYOUT_FILE else name);raw=encoded(value)
