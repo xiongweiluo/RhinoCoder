@@ -15,7 +15,6 @@ import pytest
 ROOT=Path(__file__).resolve().parents[1]
 
 
-@pytest.mark.skipif(sys.platform!='linux' or not hasattr(os,'pidfd_open'),reason='actual Linux fork/pidfd startup')
 @pytest.mark.parametrize('package_mode',['r1','r2','r3'])
 def test_full_approved_spec_to_real_owner_and_worker_startup(tmp_path,package_mode):
     script=r'''
@@ -133,7 +132,7 @@ revision_grant={'actor':'repository_owner','approved':True,'protocol':POLICY['pr
  'policy_sha256':sha(POLICY),'previous_campaign_head_sha256':head}
 if PACKAGE_MODE=='r3':
  p=s['run_package']['slot_protocol']
- initial._event('slot_protocol_revision_accepted',{'scope':revised,'grant':revision_grant,'previous_head_sha256':head,'package':s['run_package'],'original_audit_sha256':p['prior_audit_sha256'],'original_settlement_sha256':p['prior_settlement_sha256]})
+ initial._event('slot_protocol_revision_accepted',{'scope':revised,'grant':revision_grant,'previous_head_sha256':head,'package':s['run_package'],'original_audit_sha256':p['prior_audit_sha256'],'original_settlement_sha256':p['prior_settlement_sha256']})
  initial._event('slot_owner_session_confirmed',{'scope_sha256':sha(revised),'automatic_receipt_capture':True,'manual_host_ready_attestation':False,'before_model_loading':True})
 elif PACKAGE_MODE=='r2':
  prior={'raw_anchor_sha256':'d'*64,'capture_complete':True,'qualified_target_absent':True,
@@ -189,13 +188,18 @@ assert original['final']['stop_result']['signal_attempts']==0
 c=campaign();value=c.observation();c.log.close()
 assert value['attempts']==attempt and value['formal_consumed'] is (PACKAGE_MODE=='r3') and value['first_load_epoch']==1792692329.837715
 if PACKAGE_MODE=='r3':
- assert sum(r['kind']=='private_exposure_intent' for r in campaign().log.rows())==1
+ original_campaign=campaign()
+ try:assert sum(r['kind']=='private_exposure_intent' for r in original_campaign.log.rows())==1
+ finally:original_campaign.log.close()
  assert value['charged_gpu_seconds']==s['run_package']['timing_migration']['legacy_elapsed_debit_seconds']
 print(json.dumps({'full_public_authority_checked':True,'actual_owner_worker_cli_startup':True,
  'actual_fork_qualified_before_loader':True,'actual_ready_frame':True,'natural_abort_exit':True,
  'private_exposures':0,'first_load_epoch_preserved':True}))
 '''
     script=script.replace('REPO',repr(str(ROOT))).replace('PACKAGE_MODE',repr(package_mode))
+    compile(script,'generated-approved-worker-startup-'+package_mode,'exec')
+    if sys.platform!='linux' or not hasattr(os,'pidfd_open'):
+        pytest.skip('generated startup syntax verified; actual fork/pidfd requires Linux')
     (tmp_path/'tools').mkdir()
     entry=tmp_path/'tools/run_c5_formal_reuse_worker.py'
     launcher=tmp_path/'fixture.py';launcher.write_text(script)
