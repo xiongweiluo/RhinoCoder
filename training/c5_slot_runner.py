@@ -348,8 +348,16 @@ class SlotRunner(FormalRunner):
                     break
         except BaseException as error:
             fault = {
-                "scope": getattr(error, "slot_scope", "unknown"),
-                "code": getattr(error, "code", "unclassified_phase_exception"),
+                "scope": (
+                    "owner_pause"
+                    if isinstance(error, KeyboardInterrupt)
+                    else getattr(error, "slot_scope", "unknown")
+                ),
+                "code": (
+                    "owner_cancelled"
+                    if isinstance(error, KeyboardInterrupt)
+                    else getattr(error, "code", "unclassified_phase_exception")
+                ),
             }
             decision = decide(fault, None)
         finally:

@@ -7,7 +7,11 @@ import json, time
 from pathlib import Path
 from plugin.rhino_listener.c5_research_native import require, digest
 from plugin.rhino_listener.c5_research_channel import read_json, publish_json
-from plugin.rhino_listener.c5_slot_protocol import POLICY, validate_protocol
+from plugin.rhino_listener.c5_slot_protocol import (
+    POLICY,
+    validate_protocol,
+    prework_decision,
+)
 
 
 def require_slot_startable(campaign, attempt):
@@ -135,8 +139,19 @@ def activate(spec, freeze, grant):
 def _summary(spec, freeze, campaign, state, proof, status, *, error=None):
     value = campaign.observation()
     plan = spec["run_package"]["slot_protocol"]
-    if proof is None and (state / "slot-independent-audit.json").exists():
-        proof = read_json(state, "slot-independent-audit.json")
+    if proof is None and state.is_dir():
+        from training.c5_slot_report import read_review
+
+        snapshot = read_review(state, None, prefix="slot-audit")
+        if snapshot is not None:
+            from training.c5_reuse_evidence import sha
+
+            require(
+                snapshot["scope_sha256"] == sha(campaign.scope)
+                and snapshot["attempt"] == value["attempts"],
+                "slot_audit_snapshot_current_phase",
+            )
+            proof = snapshot["proof"]
     code = str(error) if error is not None else None
     if code is not None and not (
         code.startswith(("slot_", "formal_", "partial_", "run_package_"))
@@ -224,6 +239,8 @@ def _summary(spec, freeze, campaign, state, proof, status, *, error=None):
         ]
         + ([] if proof else ["current_phase_raw_audit_incomplete"]),
     )
+    if status == "SLOT_PAUSED_RECONCILIATION":
+        result["unknowns"].append("failure_scope_or_resume_conditions_unconfirmed")
     result["campaign_head_sha256"] = campaign.log.rows()[-1]["record_sha256"]
     summary_root = (
         state
@@ -236,17 +253,93 @@ def _summary(spec, freeze, campaign, state, proof, status, *, error=None):
     return result
 
 
+def _reconcile_slot_attempt(
+    campaign, state, spec, freeze, guard, *, owner_resume_invocation, output
+):
+    from training.c5_formal_run_package import capture_owner_receipt, settle_known_load
+    from training.c5_slot_audit import audit_phase, audit_prework
+    from training.c5_slot_report import publish_review
+    from training.c5_reuse_evidence import sha
+
+    observed = campaign.observation()
+    terminal = capture_owner_receipt(state, spec, freeze, output=output)
+    if not (state / "formal20.started.json").exists():
+        proof = audit_prework(state, spec, freeze, campaign, terminal, guard)
+        failure = read_json(state, "formal-preexposure-failure.json")
+        status = prework_decision(failure, proof, owner_resume=owner_resume_invocation)
+        global_code = failure.get("global_fault", {}).get(
+            "code", "permission_or_safety"
+        )
+    else:
+        proof = audit_phase(state, spec, freeze, guard, terminal, campaign=campaign)
+        result = read_json(state, "slot-phase-result.json")
+        status = result["status"]
+        global_code = (result.get("global_fault") or {}).get("code")
+    publish_review(
+        state,
+        {
+            "study_id": spec["study_id"],
+            "campaign_head_sha256": campaign.log.rows()[-1]["record_sha256"],
+            "scope_sha256": sha(campaign.scope),
+            "attempt": observed["attempts"],
+            "proof": proof,
+            "owner_resume_invocation": owner_resume_invocation,
+            "private_content_included": False,
+        },
+        prefix="slot-audit",
+    )
+    if observed["active"]:
+        campaign._event(
+            "slot_phase_finished",
+            {
+                "attempt": observed["attempts"],
+                "status": status,
+                "raw_anchor_sha256": digest(proof),
+                "cleanup_proof_sha256": digest(proof),
+            },
+        )
+    settle_known_load(campaign, state, digest(proof))
+    observed = campaign.observation()
+    if observed["status"] == "SLOT_PAUSED_RECONCILIATION":
+        if status == "SLOT_STOPPED_GLOBAL":
+            campaign._event(
+                "slot_global_failure_reconciled",
+                {
+                    "raw_anchor_sha256": digest(proof),
+                    "global_fault_code": global_code,
+                },
+            )
+        elif (
+            status == "SLOT_RETRYABLE_PREWORK"
+            or proof.get("resume_unattempted_safe") is True
+            or owner_resume_invocation
+            and proof.get("owner_pause_resume_safe") is True
+        ):
+            campaign._event(
+                "slot_cleanup_reconciled",
+                {
+                    "raw_anchor_sha256": digest(proof),
+                    "cleanup_verified": True,
+                    "evidence_chain_verified": True,
+                    "shared_health_verified": True,
+                    "permission_safe": True,
+                    "source_unchanged": True,
+                },
+            )
+    return proof
+
+
 def run_slot_package(spec, freeze, grant, guard, *, output=print, input_fn=input):
     from plugin.rhino_listener.c5_formal_reuse_scope import attempt_state
     from training.c5_formal_reuse_admission import open_formal_campaign
-    from training.c5_formal_run_package import capture_owner_receipt, settle_known_load
     from tools.c5_formal_reuse_owner import run_interactive
-    from training.c5_slot_audit import audit_phase, audit_prework
     from training.c5_recovery_confirmation import input_status
+    from training.c5_reuse_evidence import sha
 
     campaign = open_formal_campaign(spec, freeze, grant, freeze["history"])
     try:
         observed = campaign.observation()
+        owner_resume_invocation = observed["status"] == "SLOT_PAUSED_RECONCILIATION"
         require(
             observed.get("slot_protocol") == spec["run_package"]["slot_protocol"],
             "slot_package_not_activated",
@@ -282,8 +375,6 @@ def run_slot_package(spec, freeze, grant, guard, *, output=print, input_fn=input
             if not confirmed:
                 return {"status": "SLOT_WAITING_OWNER", "attempt_consumed": False}
             guard()
-            from training.c5_reuse_evidence import sha
-
             campaign._event(
                 "slot_owner_session_confirmed",
                 {
@@ -299,57 +390,15 @@ def run_slot_package(spec, freeze, grant, guard, *, output=print, input_fn=input
                 state = attempt_state("mac", observed["attempts"])
                 proof = None
                 try:
-                    terminal = capture_owner_receipt(state, spec, freeze, output=output)
-                    if not (state / "formal20.started.json").exists():
-                        proof = audit_prework(
-                            state, spec, freeze, campaign, terminal, guard
-                        )
-                        failure = read_json(state, "formal-preexposure-failure.json")
-                        status = (
-                            "SLOT_STOPPED_GLOBAL"
-                            if failure.get("global_fault", {}).get("scope") == "global"
-                            else "SLOT_RETRYABLE_PREWORK"
-                        )
-                    else:
-                        proof = audit_phase(
-                            state, spec, freeze, guard, terminal, campaign=campaign
-                        )
-                        result = read_json(state, "slot-phase-result.json")
-                        status = result["status"]
-                    if (state / "slot-independent-audit.json").exists():
-                        require(
-                            read_json(state, "slot-independent-audit.json") == proof,
-                            "slot_existing_raw_audit_changed",
-                        )
-                    else:
-                        publish_json(state, "slot-independent-audit.json", proof)
-                    if observed["active"]:
-                        campaign._event(
-                            "slot_phase_finished",
-                            {
-                                "attempt": observed["attempts"],
-                                "status": status,
-                                "raw_anchor_sha256": digest(proof),
-                                "cleanup_proof_sha256": digest(proof),
-                            },
-                        )
-                    settle_known_load(campaign, state, digest(proof))
-                    observed = campaign.observation()
-                    if (
-                        observed["status"] == "SLOT_PAUSED_RECONCILIATION"
-                        and proof.get("resume_unattempted_safe") is True
-                    ):
-                        campaign._event(
-                            "slot_cleanup_reconciled",
-                            {
-                                "raw_anchor_sha256": digest(proof),
-                                "cleanup_verified": True,
-                                "evidence_chain_verified": True,
-                                "shared_health_verified": True,
-                                "permission_safe": True,
-                                "source_unchanged": True,
-                            },
-                        )
+                    proof = _reconcile_slot_attempt(
+                        campaign,
+                        state,
+                        spec,
+                        freeze,
+                        guard,
+                        owner_resume_invocation=owner_resume_invocation,
+                        output=output,
+                    )
                 except BaseException as error:
                     if campaign.observation()["active"]:
                         campaign._event(
@@ -408,8 +457,6 @@ def run_slot_package(spec, freeze, grant, guard, *, output=print, input_fn=input
                     "SLOT_STOPPED_PRELOAD_CHECK",
                     error=error,
                 )
-            # The existing real entry owns qualification, load intent, zero readiness,
-            # fixed worker, bounded cleanup and immutable resource settlement.
             campaign.log.close()
             try:
                 run_interactive(attempt, package_session={"confirmed": True})
@@ -422,6 +469,9 @@ def run_slot_package(spec, freeze, grant, guard, *, output=print, input_fn=input
                     "attempt_consumed": False,
                     "private_content_included": False,
                 }
+            # A fresh invocation permits an earlier owner pause to resume, but
+            # it must never auto-resume a new Ctrl+C during this invocation.
+            owner_resume_invocation = False
     finally:
         campaign.log.close()
 

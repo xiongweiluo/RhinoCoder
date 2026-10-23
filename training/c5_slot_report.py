@@ -9,9 +9,10 @@ from plugin.rhino_listener.c5_research_channel import (
 from plugin.rhino_listener.c5_research_native import digest, canonical, require
 
 
-def publish_review(root, value):
+def publish_review(root, value, *, prefix="slot-review"):
+    require(prefix in ("slot-review", "slot-audit"), "slot_review_pointer_kind")
     sha = digest(value)
-    name = "slot-review-" + sha + ".json"
+    name = prefix + "-" + sha + ".json"
     if (root / name).exists():
         require(read_json(root, name) == value, "slot_review_snapshot_changed")
     else:
@@ -37,9 +38,9 @@ def publish_review(root, value):
             stream.write((canonical(pointer) + "\n").encode())
             stream.flush()
             os.fsync(stream.fileno())
-        if (root / "slot-review-current.json").exists():
-            read_json(root, "slot-review-current.json")
-        os.replace(temporary, "slot-review-current.json", src_dir_fd=fd, dst_dir_fd=fd)
+        if (root / (prefix + "-current.json")).exists():
+            read_json(root, (prefix + "-current.json"))
+        os.replace(temporary, (prefix + "-current.json"), src_dir_fd=fd, dst_dir_fd=fd)
         os.fsync(fd)
     finally:
         try:
@@ -50,10 +51,11 @@ def publish_review(root, value):
     return pointer
 
 
-def read_review(root, head):
-    if not (root / "slot-review-current.json").exists():
+def read_review(root, head, *, prefix="slot-review"):
+    require(prefix in ("slot-review", "slot-audit"), "slot_review_pointer_kind")
+    if not (root / (prefix + "-current.json")).exists():
         return None
-    p = read_json(root, "slot-review-current.json")
+    p = read_json(root, (prefix + "-current.json"))
     require(
         set(p)
         == {
@@ -69,15 +71,15 @@ def read_review(root, head):
         and type(p["summary_sha256"]) is str
         and len(p["summary_sha256"]) == 64
         and all(c in "0123456789abcdef" for c in p["summary_sha256"])
-        and p["summary_name"] == "slot-review-" + p["summary_sha256"] + ".json",
+        and p["summary_name"] == prefix + "-" + p["summary_sha256"] + ".json",
         "slot_review_pointer_scope",
     )
-    if p["campaign_head_sha256"] != head:
+    if head is not None and p["campaign_head_sha256"] != head:
         return None
     value = read_json(root, p["summary_name"])
     require(
         digest(value) == p["summary_sha256"]
-        and value["campaign_head_sha256"] == head
+        and value["campaign_head_sha256"] == p["campaign_head_sha256"]
         and value["study_id"] == p["study_id"]
         and value["private_content_included"] is False,
         "slot_review_pointer_bytes",

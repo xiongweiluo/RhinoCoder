@@ -913,3 +913,214 @@ def test_recovery_window_uses_actual_remaining_work_not_a_fresh_full_phase(tmp_p
         )
     finally:
         c.log.close()
+
+
+def prework_proof():
+    return {
+        "raw_anchor_sha256": "a" * 64,
+        "capture_complete": True,
+        "qualified_target_absent": True,
+        "known_native_cleanup_complete": True,
+        "new_work_absent": True,
+        "historical_private_exposure_preserved": True,
+    }
+
+
+@pytest.mark.parametrize(
+    "failure,expected",
+    [
+        ({"error_type": "TimeoutError"}, "SLOT_RETRYABLE_PREWORK"),
+        (
+            {"error_type": "NativeError", "error_code": "field_pipe_deadline"},
+            "SLOT_RETRYABLE_PREWORK",
+        ),
+        (
+            {
+                "error_type": "NativeError",
+                "error_code": "formal_reuse_frame_eof_no_replay",
+            },
+            "SLOT_PAUSED_RECONCILIATION",
+        ),
+        ({"error_type": "PermissionError"}, "SLOT_STOPPED_GLOBAL"),
+        (
+            {"global_fault": {"scope": "global", "code": "source_drift"}},
+            "SLOT_STOPPED_GLOBAL",
+        ),
+    ],
+)
+def test_prework_cleanup_does_not_turn_unknown_scope_into_retry(failure, expected):
+    from plugin.rhino_listener.c5_slot_protocol import prework_decision
+
+    assert prework_decision(failure, prework_proof()) == expected
+    bad = prework_proof()
+    bad["known_native_cleanup_complete"] = False
+    assert prework_decision(failure, bad) == "SLOT_PAUSED_RECONCILIATION"
+
+
+def prework_reconciliation_fixture(tmp_path, monkeypatch, error_type):
+    from plugin.rhino_listener.c5_research_channel import publish_json
+    from training import c5_slot_audit, c5_formal_run_package
+
+    s, f, c, prior = real_campaign_fixture(tmp_path)
+    c._event(
+        "slot_load_intent",
+        {"attempt": 4, "epoch": 1792779000.0, "remaining_indices": list(range(7, 40))},
+    )
+    state = tmp_path / "preload-4"
+    state.mkdir(mode=0o700)
+    publish_json(state, "formal-preexposure-failure.json", {"error_type": error_type})
+    publish_json(
+        state,
+        "export-supervisor-original.json",
+        {
+            "final": {
+                "child_exit_reaped": True,
+                "child_wait_status": 0,
+                "epoch": 1792779001.0,
+            },
+            "worker_resource": None,
+        },
+    )
+    # Physical native/remote observations are explicit fixtures here; actual
+    # HMAC/lifecycle and real Linux qualification are covered separately.
+    monkeypatch.setattr(c5_slot_audit, "audit_prework", lambda *a, **k: prework_proof())
+    monkeypatch.setattr(
+        c5_formal_run_package,
+        "capture_owner_receipt",
+        lambda *a, **k: {"synthetic_terminal": True},
+    )
+    return s, f, c, prior, state
+
+
+def test_unknown_prework_can_be_reaudited_without_overwrite_or_double_charge(
+    tmp_path, monkeypatch
+):
+    from training.c5_slot_entry import _reconcile_slot_attempt, _summary
+
+    s, f, c, prior, state = prework_reconciliation_fixture(
+        tmp_path, monkeypatch, "NativeError"
+    )
+    try:
+        for _ in range(2):
+            _reconcile_slot_attempt(
+                c,
+                state,
+                s,
+                f,
+                lambda: None,
+                owner_resume_invocation=False,
+                output=lambda _: None,
+            )
+        value = c.observation()
+        assert (
+            value["status"] == "SLOT_PAUSED_RECONCILIATION"
+            and value["charged_gpu_seconds"] == prior["gpu_charged_seconds"] + 1
+        )
+        assert (
+            len(
+                list(
+                    state.glob(
+                        "slot-audit-????????????????????????????????????????????????????????????????.json"
+                    )
+                )
+            )
+            == 2
+        )
+        summary = _summary(s, f, c, state, None, value["status"])
+        assert summary["raw_audit_sha256"] == digest(prework_proof())
+        assert "failure_scope_or_resume_conditions_unconfirmed" in summary["unknowns"]
+    finally:
+        c.log.close()
+
+
+@pytest.mark.parametrize(
+    "failure,expected",
+    [("TimeoutError", "SLOT_RESUMABLE"), ("PermissionError", "SLOT_STOPPED_GLOBAL")],
+)
+def test_complete_late_cleanup_proof_resolves_pause_without_new_human_gate(
+    tmp_path, monkeypatch, failure, expected
+):
+    from training.c5_slot_entry import _reconcile_slot_attempt
+
+    s, f, c, prior, state = prework_reconciliation_fixture(
+        tmp_path, monkeypatch, failure
+    )
+    try:
+        c._event(
+            "slot_phase_finished",
+            {
+                "attempt": 4,
+                "status": "SLOT_PAUSED_RECONCILIATION",
+                "raw_anchor_sha256": "b" * 64,
+                "cleanup_proof_sha256": None,
+            },
+        )
+        _reconcile_slot_attempt(
+            c,
+            state,
+            s,
+            f,
+            lambda: None,
+            owner_resume_invocation=False,
+            output=lambda _: None,
+        )
+        assert (
+            c.observation()["status"] == expected and c.observation()["attempts"] == 4
+        )
+        assert c.observation()["first_load_epoch"] == prior["first_load_epoch"]
+    finally:
+        c.log.close()
+
+
+def test_owner_cancel_does_not_autoresume_until_fresh_private_invocation(
+    tmp_path, monkeypatch
+):
+    from training.c5_slot_entry import _reconcile_slot_attempt
+
+    s, f, c, prior, state = prework_reconciliation_fixture(
+        tmp_path, monkeypatch, "KeyboardInterrupt"
+    )
+    try:
+        _reconcile_slot_attempt(
+            c,
+            state,
+            s,
+            f,
+            lambda: None,
+            owner_resume_invocation=False,
+            output=lambda _: None,
+        )
+        assert c.observation()["status"] == "SLOT_PAUSED_RECONCILIATION"
+        _reconcile_slot_attempt(
+            c,
+            state,
+            s,
+            f,
+            lambda: None,
+            owner_resume_invocation=True,
+            output=lambda _: None,
+        )
+        assert (
+            c.observation()["status"] == "SLOT_RESUMABLE"
+            and c.observation()["slot_resumes"] == 1
+        )
+        assert (
+            c.observation()["charged_gpu_seconds"] == prior["gpu_charged_seconds"] + 1
+        )
+    finally:
+        c.log.close()
+
+
+def test_missing_capture_pauses_without_falsely_claiming_scene_pollution(
+    tmp_path, monkeypatch
+):
+    from eval.test_c5_formal_reuse_full_field import complete_scoped_field
+
+    state, cases, spec, freeze, receipt, result, campaign = complete_scoped_field(
+        tmp_path, monkeypatch, slot_plan=plan(), slot_fault="post_model_capture_failure"
+    )
+    assert result["status"] == "SLOT_PAUSED_RECONCILIATION"
+    assert (
+        result["global_fault"]["scope"] == "unknown"
+        and len(result["attempted_indices"]) == 1
+    )

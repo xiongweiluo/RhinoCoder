@@ -170,7 +170,9 @@ def run_interactive(attempt, *, package_session=None):
             if native is not None and not exposed:
                 try:native.finish()
                 except BaseException as error:cleanup.append({'action':'known_native_cleanup','error_type':type(error).__name__})
-            publish_json(state,'formal-preexposure-failure.json',{'error_type':type(primary).__name__,
+            safe_code=str(primary)
+            if not(safe_code.startswith(('formal_reuse_','slot_','run_package_','field_pipe_')) and safe_code.replace('_','').isascii() and safe_code.replace('_','').isalnum()):safe_code=None
+            publish_json(state,'formal-preexposure-failure.json',{'error_type':type(primary).__name__,**({'error_code':safe_code} if slot_mode else {}),
                 'cleanup_errors':cleanup,**({'global_fault':{'scope':'global','code':'permission_or_safety'}} if slot_mode and isinstance(primary,PermissionError) else {'global_fault':{'scope':primary.slot_scope,'code':primary.code}} if slot_mode and getattr(primary,'slot_scope',None)=='global' else {}),'private_exposure_recorded':campaign.observation()['formal_consumed'] if slot_mode else exposed,**({'new_work_started':exposed} if slot_mode else {}),'retry_authorized_by_summary':False})
             observation=campaign.observation()
             if observation['active'] and not slot_mode:

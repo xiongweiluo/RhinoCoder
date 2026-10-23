@@ -239,6 +239,13 @@ def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None,slot_
         campaign=Campaign()
         runner=SlotRunner(state=state,spec=spec,freeze=freeze,approval=grant,model=model,native=native,
             source_guard=lambda:None,budget_guard=lambda:None,campaign=campaign,tokenizer=Tokenizer())
+        if slot_fault=='post_model_capture_failure':
+            original_capture=native.capture;capture_calls=[0]
+            def missing_capture(slot_id):
+                capture_calls[0]+=1
+                if capture_calls[0]==3:return {'status':'failed_no_retry','error_type':'NativeError'}
+                return original_capture(slot_id)
+            native.capture=missing_capture
         if slot_fault is not None:
             original_slot=runner._slot
             def changed_slot(slot,case,freeze_sha,prompts):

@@ -18,6 +18,7 @@ EVENTS = {
     "slot_attempt_recorded",
     "slot_phase_finished",
     "slot_cleanup_reconciled",
+    "slot_global_failure_reconciled",
 }
 
 
@@ -301,6 +302,19 @@ def replay(state, row):
                 "slot_prework_retry_known_cleanup",
             )
         state.update(active=False, status=p["status"])
+    elif kind == "slot_global_failure_reconciled":
+        from plugin.rhino_listener.c5_slot_protocol import GLOBAL_CODES
+
+        exact(p, ("raw_anchor_sha256", "global_fault_code"))
+        require(
+            not state["active"]
+            and state["status"] == "SLOT_PAUSED_RECONCILIATION"
+            and state["attempts"] in state["settled_attempts"]
+            and is_sha(p["raw_anchor_sha256"])
+            and p["global_fault_code"] in GLOBAL_CODES,
+            "slot_global_reconciliation_requires_raw_exit_and_known_scope",
+        )
+        state["status"] = "SLOT_STOPPED_GLOBAL"
     elif kind == "slot_cleanup_reconciled":
         exact(
             p,

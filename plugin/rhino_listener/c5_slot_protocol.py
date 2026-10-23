@@ -210,3 +210,54 @@ def impact_indices(indices, scope):
         if scope in ("shared_logic", "model", "prompt", "scoring")
         else sorted(set(indices) | {i ^ 1 for i in indices})
     )
+
+
+PREWORK_ENGINEERING_CODES = {
+    "formal_reuse_complete_frame_timeout",
+    "formal_reuse_decoded_frame_timeout",
+    "formal_reuse_ready_validation_timeout",
+    "field_pipe_deadline",
+}
+
+
+def prework_decision(failure, proof, *, owner_resume=False):
+    """Complete cleanup alone does not identify an unknown startup fault."""
+    required = {
+        "raw_anchor_sha256",
+        "capture_complete",
+        "qualified_target_absent",
+        "known_native_cleanup_complete",
+        "new_work_absent",
+        "historical_private_exposure_preserved",
+    }
+    if (
+        not isinstance(proof, dict)
+        or set(proof) != required
+        or not all(proof[k] is True for k in required - {"raw_anchor_sha256"})
+    ):
+        return "SLOT_PAUSED_RECONCILIATION"
+    anchor = proof.get("raw_anchor_sha256")
+    if (
+        not isinstance(anchor, str)
+        or len(anchor) != 64
+        or any(c not in "0123456789abcdef" for c in anchor)
+    ):
+        return "SLOT_PAUSED_RECONCILIATION"
+    fault = failure.get("global_fault", {})
+    if (
+        failure.get("error_type") == "PermissionError"
+        or fault.get("scope") == "global"
+        and fault.get("code") in GLOBAL_CODES
+    ):
+        return "SLOT_STOPPED_GLOBAL"
+    if failure.get("error_type") == "KeyboardInterrupt":
+        return (
+            "SLOT_RETRYABLE_PREWORK" if owner_resume else "SLOT_PAUSED_RECONCILIATION"
+        )
+    if (
+        failure.get("error_type")
+        in ("TimeoutError", "BrokenPipeError", "ConnectionError", "EOFError")
+        or failure.get("error_code") in PREWORK_ENGINEERING_CODES
+    ):
+        return "SLOT_RETRYABLE_PREWORK"
+    return "SLOT_PAUSED_RECONCILIATION"

@@ -342,9 +342,23 @@ def _audit_phase(state, spec, freeze, guard, terminal):
         "qualified_gpu": supervisor,
         "residency": residency,
         "raw_native_timing": timings,
+        "owner_pause": bool(
+            result.get("global_fault")
+            and result["global_fault"].get("scope") == "owner_pause"
+        ),
+        "owner_pause_resume_safe": result["status"] == "SLOT_PAUSED_RECONCILIATION"
+        and not result["cleanup_errors"]
+        and bool(
+            result.get("global_fault")
+            and result["global_fault"].get("scope") == "owner_pause"
+        )
+        and all(o["proof"] is not None for o in outcomes),
         "resume_unattempted_safe": result["status"] == "SLOT_PAUSED_RECONCILIATION"
         and not result["cleanup_errors"]
-        and bool(outcomes)
+        and not (
+            result.get("global_fault")
+            and result["global_fault"].get("scope") == "owner_pause"
+        )
         and all(o["proof"] is not None for o in outcomes),
         "paired_summary": None,
         "new_blind_holdout_claimed": False,
