@@ -1,0 +1,58 @@
+import sys,json,hashlib,os,time,subprocess
+from pathlib import Path
+mode='gpu' if sys.platform!='darwin' else 'mac'
+base=Path('/data') if mode=='gpu' else Path('/Users/xiongweiluo/RhinoCoder/data/training/c5')
+root=base/'reuse-formal-20261023-r3-source'
+def read(p):
+ assert p.is_file() and not p.is_symlink()
+ return json.loads(p.read_bytes())
+def digest(v):return hashlib.sha256(json.dumps(v,sort_keys=True,ensure_ascii=False,separators=(',',':'),allow_nan=False).encode()).hexdigest()
+def sha(p):
+ assert p.is_file() and not p.is_symlink()
+ return hashlib.sha256(p.read_bytes()).hexdigest()
+def files(r,pins,exact=True):
+ assert r.resolve()==r and r.is_dir()
+ if exact:
+  assert all(not p.is_symlink() for p in r.rglob('*'))
+  assert {p.relative_to(r).as_posix() for p in r.rglob('*') if p.is_file()}==set(pins)
+ for n,h in pins.items():
+  assert not Path(n).is_absolute() and '..' not in Path(n).parts
+  p=r/n
+  assert p.resolve()==p and all(not q.is_symlink() for q in p.parents if q!=r.parent)
+  assert sha(p)==h,(str(r),n)
+ return len(pins)
+s=read(root/'eval/c5/reuse-formal-20261023-r3-spec.json');f=read(root/'eval/c5/reuse-formal-20261023-r3-runtime.json')
+assert digest(s)==f['spec_sha256'] and digest(f['source_files'])==f['source_inventory_sha256']
+pins=dict(f['source_files']);pins['eval/c5/reuse-formal-20261023-r3-runtime.json']=sha(root/'eval/c5/reuse-formal-20261023-r3-runtime.json')
+count=files(root,pins);assert not os.path.lexists(base/'reuse-formal-20261023-r3-state')
+h=read(root/'eval/c5/slot-protocol-original-public-history-20261023.json')
+old=base/'reuse-formal-20261023-r2-source';oldf=read(old/'eval/c5/reuse-formal-20261023-r2-runtime.json');olds=read(old/'eval/c5/reuse-formal-20261023-r2-spec.json')
+assert digest(oldf)==h['original_runtime_sha256'] and digest(olds)==h['original_spec_sha256']
+old_counts={old.name:files(old,h['original_source_files'])}
+old_counts['reuse-formal-20261022-r1-source']=files(base/'reuse-formal-20261022-r1-source',oldf['run_package']['previous_public_source_files'])
+old_counts['reuse-formal-20261022-source']=files(base/'reuse-formal-20261022-source',f['incremental_revision']['prior_public_source_files'])
+hist=f['history']['endpoints'][mode];global_root=base/'c5-reuse-global-admission-v1'
+history_files=files(global_root,hist['global_files'],False)+files(base,hist['retired_files'],False)
+for retired in f['history']['retired_instances']:assert not os.path.lexists(base/(retired+'-state')/'owner-approval.json')
+formal=global_root/'formal-reuse-v1';prefix=f['incremental_revision'][mode+'_campaign_prefix_files'];files(formal,prefix,False)
+if mode=='mac':
+ events=sorted((formal/'ledger').glob('event-*.json'));assert len(events)==18
+ rows=[read(p) for p in events];assert rows==h['prior_campaign_events']
+ previous='0'*64
+ for i,row in enumerate(rows):
+  assert row['seq']==i and row['previous_sha256']==previous
+  content={k:v for k,v in row.items() if k!='record_sha256'};assert digest(content)==row['record_sha256'];previous=row['record_sha256']
+ assert previous==h['prior_campaign_head_sha256']
+ summary=read(base/'reuse-formal-20261023-r2-partial-audit-v2-state'/'owner-public-partial-audit-summary.json');assert digest(summary)=='97770d00de3bb4dd10aad25ec878ecaeb82cc0b5ebe57f7d3fd73fe9c3abd1f2'
+else:
+ assert {p.name for p in formal.glob('worker-role-*.json')}=={'worker-role-1.json','worker-role-2.json','worker-role-3.json'}
+v={'schema_version':1,'endpoint':mode,'epoch':time.time(),'package_id':s['instance_id'],'spec_sha256':digest(s),'runtime_sha256':digest(f),'source_inventory_sha256':f['source_inventory_sha256'],'source_code_inventory_sha256':digest({n:h for n,h in f['source_files'].items() if n.endswith('.py')}),'public_files_verified':count,'original_frozen_roots_verified':old_counts,'historical_pinned_files_verified':history_files,'original_ledger_rows':18,'original_ledger_head_sha256':h['prior_campaign_head_sha256'],'original_loads':h['prior_attempts_consumed'],'original_first_load_epoch':h['first_load_epoch'],'original_charged_gpu_seconds':h['gpu_charged_seconds'],'new_state_grant_or_activation_absent':True,'execution_authority_created':False,'private_formal_reads':0,'model_or_rhino_calls':0,'ready_material':s['execution_ready'] and f['execution_ready']}
+if mode=='gpu':
+ assert Path('/proc/sys/kernel/random/boot_id').read_text().strip()=='5e83729b-b29b-43f6-8635-c98f662d3d56'
+ assert not Path('/proc/763995').exists() and not Path('/proc/764022').exists()
+ def cmd(args):
+  p=subprocess.run(args,capture_output=True,text=True,timeout=15);assert p.returncode==0;return p.stdout.strip()
+ gpu=cmd(['/usr/bin/nvidia-smi','--query-gpu=uuid,memory.used','--format=csv,noheader,nounits']);compute=cmd(['/usr/bin/nvidia-smi','--query-compute-apps=pid,gpu_uuid,used_memory','--format=csv,noheader,nounits'])
+ assert gpu.startswith('GPU-0e00f0ad-fa5a-eed9-6eee-5877984e02f9,') and not compute
+ v.update(original_qualified_parent_target_absent=True,gpu_identity_memory=gpu,compute_processes_empty=True,boot_id='5e83729b-b29b-43f6-8635-c98f662d3d56')
+print(json.dumps(v,sort_keys=True))

@@ -1,13 +1,13 @@
 {
   "actual_execution_authorized": false,
-  "both_public_deployments": false,
+  "both_public_deployments": true,
   "environment": null,
-  "independent_public_readback": false,
-  "latest_gpu_identity_idle": false,
+  "independent_public_readback": true,
+  "latest_gpu_identity_idle": true,
   "lease_basis": "owner_reported_2026-10-25_20:00_Europe/Zurich",
   "lease_expiry_epoch": 1792954800,
-  "linux_cpu_closure": false,
-  "mac_cpu_closure": false,
+  "linux_cpu_closure": true,
+  "mac_cpu_closure": true,
   "mac_environment": {
     "file_sha256": {
       "/opt/anaconda3/bin/python3.13": "533c281efcb8511cf34ea48bd8fd4659f41b171fc4f0f771db1c94f4ba629347",
@@ -3568,8 +3568,34 @@
   },
   "model_or_rhino_calls": 0,
   "original_exit_audit_settlement_closed": true,
-  "prior_frozen_sources_unchanged": false,
+  "prior_frozen_sources_unchanged": true,
   "private_formal_reads": 0,
   "schema_version": 1,
-  "source_code_revision": "353d6b02fdd803a14c8b2b80241aac9f7ec5bfbf"
+  "source_code_inventory_sha256": "843585adcf72f6fa92223d191d7c47799480d389476b2f94f03ded83b622a3a3",
+  "source_code_revision": "88a9a34c8df63c3315b2476788df90f90d2e6de1",
+  "verification_evidence": {
+    "actual_compatible_linux_cpu": {
+      "log_sha256": "96622d5c4d8a4f16114f782032f56959b99c504cab326b0a6def648ab08fc2be",
+      "model_loaded": false,
+      "passed": 64,
+      "startup_paths": 3,
+      "warning": "pytest_version_ignores_asyncio_default_fixture_loop_scope"
+    },
+    "cpu_code_inventory_sha256": "843585adcf72f6fa92223d191d7c47799480d389476b2f94f03ded83b622a3a3",
+    "earlier_cumulative_gpu_hours": "unknown_no_original_16h_compliance_claim",
+    "final_metadata_requires_separate_readback": true,
+    "gpu_public_probe_sha256": "1dd8285360662a12e6e372f35d4e58a520607c5bdc841ff5d96d17d26b6604fe",
+    "mac_affected_cpu": {
+      "log_sha256": "5b59753bf59a21cff6b5b5fd2bcfeb4b543938d331fa3808ce286611c26a295b",
+      "passed": 108,
+      "skipped_linux_only": 3
+    },
+    "mac_public_probe_sha256": "4d94ef27b81af939206420d1cbdd1180fc118a8f8c1eb7d028a485cad3992361",
+    "model_asset_scope": "unchanged_frozen_pins_and_original_full_asset_proof_reused; affected_loader_import_closure_verified; full_actual_load_preflight_still_required",
+    "private_evidence_scope": "owner_v2_1009_file_inventory_proof_reused; agent_did_not_open_private_cases",
+    "provisional_gpu_readback_sha256": "bb7a3014fdd6b2e7e6d1b80bbe0ba2f6c3f1745de46e9d6723ab20a59261c728",
+    "provisional_mac_readback_sha256": "3b9f30fd4cd73708b08fb1ef93ad4c745bcc50336a2f1910d7e32c693f05d3f2",
+    "rhino_scope": "existing_pid_44652_confirmed; original_signed_empty_cleanup_reused; current_document_blank_rechecked_at_future_real_arm",
+    "source_code_revision": "88a9a34c8df63c3315b2476788df90f90d2e6de1"
+  }
 }
