@@ -1,6 +1,6 @@
 # RhinoCoder 项目优化计划
 
-> 2026-10-23 当前增量：正式第3次尝试的退出、失败原因只读核查与原驻留结算已收尾，首次仍7/40、完整门未通过。后续[局部失败／明确中断续跑／有限工程回归规则及完整冻结](docs/c5-slot-recovery-protocol-review-20261023.md)已准备，Mac 108项、原实例Linux 64项通过，双端464公共文件一致；[Draft PR #24](https://github.com/xiongweiluo/RhinoCoder/pull/24)最终CI与材料审批待收口。全部历史、消费、FIRST和原C5 NO-GO保留，实际新执行未授权。
+> 2026-10-23 当前增量：正式第3次尝试的退出、失败原因只读核查与原驻留结算已收尾，首次仍7/40、完整门未通过。后续[局部失败／明确中断续跑／有限工程回归规则及完整冻结](docs/c5-slot-recovery-protocol-review-20261023.md)已准备，最终受影响Mac 51项、原实例Linux 54项通过（未变证据复用），双端464公共文件一致；[Draft PR #24](https://github.com/xiongweiluo/RhinoCoder/pull/24)最终CI与材料审批待收口。全部历史、消费、FIRST和原C5 NO-GO保留，实际新执行未授权。
 
 > 2026-10-22 历史增量：本人已接受第三次追加只读审核修订，正在完成[正式40槽完整冻结准备](docs/c5-formal-reuse-freeze-review-20261022.md)。新端口22158、实际租期至10月25日20:00 Europe/Zurich；新现场执行仍须另批完整哈希。
 
