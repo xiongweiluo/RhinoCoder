@@ -58,7 +58,11 @@ def prepare_owner_session(session,campaign,spec,freeze,public,source,*,input_fn=
 def prepare_private_session(session,campaign,spec,freeze,public,source):
     from training.c5_formal_run_budget import require_recovery_window
     require(session.get('confirmed') is True,'run_package_private_session_not_prepared')
-    source();require_recovery_window(spec['run_package'],campaign.observation())
+    source()
+    if 'slot_protocol' in spec['run_package']:
+        from training.c5_slot_entry import require_remaining_window
+        require_remaining_window(spec['run_package'],campaign.observation())
+    else:require_recovery_window(spec['run_package'],campaign.observation())
 
 
 def finalize_private_audit(state, spec, freeze, guard, terminal):
@@ -87,6 +91,9 @@ def _run_package(*, output=print):
     from tools.c5_formal_reuse_owner import run_interactive
     spec,freeze,grant,guard=scope(check_time=False)
     require('run_package' in spec,'run_package_required')
+    if 'slot_protocol' in spec['run_package']:
+        from training.c5_slot_entry import run_slot_package
+        return run_slot_package(spec,freeze,grant,guard,output=output)
     previous=Path(spec['run_package']['previous_mac_attempt_root'])
     if (previous/'host-continuity-terminal-receipt.json').is_file():
         output('原失败实际回执（新规则自动保管，不追认旧逐次人工见证）：'+
@@ -172,7 +179,12 @@ def run_package(*,output=print):
     control_scope(Path(__file__).resolve().parents[1])
     # One owner process per exact package. No second terminal can launch a
     # competing load while the first waits for private input or is cleaning up.
-    fd=os.open(MAC_STATE/'owner-session.lock',os.O_RDWR|os.O_CREAT|os.O_NOFOLLOW,0o600)
+    lock_root=MAC_STATE
+    spec,_,_=control_scope(Path(__file__).resolve().parents[1])
+    if 'slot_protocol' in spec.get('run_package',{}):
+        from training.c5_formal_reuse_admission import ROOTS,NAMESPACE
+        lock_root=ROOTS['mac']/NAMESPACE
+    fd=os.open(lock_root/'owner-session.lock',os.O_RDWR|os.O_CREAT|os.O_NOFOLLOW,0o600)
     info=os.fstat(fd)
     require(stat.S_ISREG(info.st_mode) and info.st_uid==os.getuid() and info.st_nlink==1
         and stat.S_IMODE(info.st_mode)==0o600,'run_package_owner_lock_identity')

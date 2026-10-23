@@ -23,8 +23,22 @@ class NativeAdapterV2(NativeAdapter):
     def __init__(self,*args,channel_factory=NativeChannelV2,cleanup_guard=None,**kwargs):
         self.cleanup_guard=kwargs['guard'] if cleanup_guard is None else cleanup_guard
         from functools import partial
-        super().__init__(*args,channel_factory=partial(channel_factory,cleanup_guard=self.cleanup_guard),**kwargs)
+        spec=args[1] if len(args)>1 else kwargs['spec']
+        hub_limit=81 if 'slot_protocol' in spec.get('run_package',{}) else 41
+        super().__init__(*args,channel_factory=partial(channel_factory,cleanup_guard=self.cleanup_guard,hub_limit=hub_limit),**kwargs)
         self.armed=False
+
+    def shared_health(self,slot_id):
+        self.cleanup_guard()
+        require(self.current is None and not self.unresolved(slot_id),'slot_cleanup_must_be_known')
+        response=self.hub.control('health',slot_id)
+        request=read_json(self.state,'hub-request-%04d.json'%(self.hub.seq-1))
+        require(response=={'status':'slot_shared_health_verified','slot_id':slot_id,
+            'request_sha256':digest(request),'active_serial':read_json(self.state,'hub-bootstrap.json')['active_serial'],
+            'active_sha256':read_json(self.state,'hub-bootstrap.json')['active_sha256'],
+            'source_sha256':self.freeze['source_inventory_sha256'],
+            'previous_fixture_closed':True,'previous_bridge_stopped':True},'slot_fresh_shared_health_binding')
+        self.cleanup_guard();return response
 
     def verify_prepared_keys(self):
         labels={'hub'}|{'F%02d-%s'%(n,r) for n in range(1,21) for r in ('base','lora')}
@@ -79,7 +93,7 @@ class NativeAdapterV2(NativeAdapter):
             self.guard()
             if 'run_package' in self.spec:
                 policy=self.spec['run_package']['policy']
-                require(time.time()+policy['remaining_chain_upper_seconds']+policy['startup_seconds']
+                require(time.time()+(len(self.spec['run_package']['slot_protocol']['selected_indices'])*policy['slot_work_upper_seconds'] if 'slot_protocol' in self.spec['run_package'] else policy['remaining_chain_upper_seconds'])+policy['startup_seconds']
                     +policy['export_reserve_seconds']<=self.spec['run_package']['lease_expiry_epoch'],
                     'run_package_remaining_work_window_unavailable')
             else:
@@ -196,6 +210,8 @@ class ModelAdapterV2(ModelAdapter):
             'formal zero readiness and one new hash bootstrap required')
         sent={'kind':'formal_bootstrap','study_id':STUDY_ID,'runtime_freeze_sha256':digest(self.freeze),
             'started':read_json(self.state,'formal20.started.json'),'plans':self.plans}
+        if 'slot_protocol' in self.spec.get('run_package',{}):
+            sent['slot_order']=read_json(self.state,'native-plans.json')['slot_order']
         publish_json(self.state,'worker-bootstrap-request.json',sent)
         value=self.pipe.exchange(sent)
         publish_json(self.state,'worker-bootstrap-response.json',value)

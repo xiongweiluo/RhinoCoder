@@ -42,7 +42,7 @@ def install():
             and value['study_id']==spec['study_id'] and value['runtime_sha256']==digest(freeze)
             and type(value['nonce']) is str and len(value['nonce'])==64
             and all(c in '0123456789abcdef' for c in value['nonce'])
-            and type(value['attempt']) is int and 0<=value['attempt']<=5,'run_package_rhino_request_scope')
+            and type(value['attempt']) is int and 0<=value['attempt']<=spec['run_package']['policy'].get('global_loads_max',5),'run_package_rhino_request_scope')
         if value['attempt']==0:
             Rhino.RhinoApp.Idle-=tick;waiting[0]=False
             publish_json(MAC_STATE,'package-dispatcher-detached-'+value['nonce']+'.json',value)

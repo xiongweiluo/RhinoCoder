@@ -1,0 +1,18 @@
+{
+  "actual_execution_authorized": false,
+  "both_public_deployments": false,
+  "environment": null,
+  "independent_public_readback": false,
+  "latest_gpu_identity_idle": false,
+  "lease_basis": "owner_reported_2026-10-25_20:00_Europe/Zurich",
+  "lease_expiry_epoch": 1792954800,
+  "linux_cpu_closure": false,
+  "mac_cpu_closure": false,
+  "mac_environment": null,
+  "model_or_rhino_calls": 0,
+  "original_exit_audit_settlement_closed": true,
+  "prior_frozen_sources_unchanged": false,
+  "private_formal_reads": 0,
+  "schema_version": 1,
+  "source_code_revision": null
+}

@@ -13,18 +13,18 @@ from plugin.rhino_listener.c5_formal_reuse_scope import STUDY_ID
 from training.c5_host_assurance_audit import audit_host_continuity
 from training.c5_formal_reuse_evidence_audit import audit_supervisor
 
-def audit_preexposure_failure(state,spec,freeze,campaign,terminal,*,package_recovery=False,prior_release_observation=None):
+def audit_preexposure_failure(state,spec,freeze,campaign,terminal,*,package_recovery=False,prior_release_observation=None,slot_prework=False):
     current=campaign.observation()
     eligible=current['status']=='PAUSED_RECONCILIATION' and not current['active']
     if package_recovery:
         require('run_package' in freeze and current.get('package')==freeze['run_package'],
             'run_package_recovery_requires_current_approved_scope')
         eligible=current['status'] in ('LOADING','READY','PAUSED_RECONCILIATION','RETRYABLE_ENGINEERING')
-    require(eligible and current['formal_consumed'] is False
+    require(eligible and (current['formal_consumed'] is False or slot_prework)
         and current['attempts']==int(state.name.split('-')[-1]),
         'formal_reuse_failure_requires_unconsumed_paused_campaign')
     rows=campaign.log.rows()
-    require(not any(r['kind'] in ('private_exposure_intent','generation_begin_intent') for r in rows),
+    require((slot_prework and not current.get('begun') and not current.get('slot_current_indices')) or not any(r['kind'] in ('private_exposure_intent','generation_begin_intent') for r in rows),
         'formal_reuse_failure_private_exposure_sticky')
     forbidden=('formal20.started.json','private-cases.json','native-plans.json','native-prepared.json',
         'formal20.hub-initialization.claim.json','worker-bootstrap-request.json')
@@ -63,5 +63,8 @@ def audit_preexposure_failure(state,spec,freeze,campaign,terminal,*,package_reco
     anchor={'campaign_head_sha256':rows[-1]['record_sha256'],'host':host,'native_abort':response,
         'qualified_gpu':supervisor,'raw_capture':read_json(state,'raw-streams-final.json')}
     if prior_release_observation is not None:anchor['prior_release_observation']=prior_release_observation
+    if slot_prework:
+        require('slot_protocol' in freeze.get('run_package',{}) and current.get('slot_protocol')==freeze['run_package']['slot_protocol'],'slot_prework_exact_current_scope')
+        return {'raw_anchor_sha256':digest(anchor),'capture_complete':True,'qualified_target_absent':True,'known_native_cleanup_complete':True,'new_work_absent':True,'historical_private_exposure_preserved':True}
     return {'raw_anchor_sha256':digest(anchor),'capture_complete':True,'qualified_target_absent':True,
         'known_native_cleanup_complete':True,'private_exposure_absent':True}

@@ -37,7 +37,9 @@ def finite(value):
 
 
 def validate_policy(value):
-    require(value == POLICY, 'run_package_unapproved_rule_change')
+    if value != POLICY:
+        from .c5_slot_protocol import POLICY as SLOT_POLICY
+        require(value == SLOT_POLICY, 'run_package_unapproved_rule_change')
     return value
 
 
@@ -46,7 +48,7 @@ def validate_layout(value):
             'mac_state_root', 'gpu_state_root', 'spec_file', 'runtime_file', 'policy_sha256'}
     require(type(value) is dict and set(value) == keys and value['schema_version'] == 1
             and value['study_id'] == POLICY['study_id']
-            and value['policy_sha256'] == digest(POLICY), 'run_package_layout_binding')
+            and (value['policy_sha256']==digest(POLICY) or value['policy_sha256']==digest(__import__(__package__+'.c5_slot_protocol',fromlist=['POLICY']).POLICY)), 'run_package_layout_binding')
     name = value['package_id']
     require(type(name) is str and name.startswith('reuse-formal-') and len(name) <= 80
             and all(c.isascii() and (c.isalnum() or c == '-') for c in name), 'run_package_name')

@@ -108,7 +108,7 @@ class TimedSyntheticWire(SyntheticWire):
             publish_json(self.local,prefix+'time.json',self.last_phase)
         return value
 
-def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None):
+def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None,slot_plan=None,slot_fault=None,fixture_mismatch_index=None):
     state,cases,spec,freeze,_,rhino,_=setup_field(tmp_path,monkeypatch)
     # Real signature/SQLite/timing code below; ONLY geometry/model are fake.
     new_spec,new_freeze,_=records()
@@ -118,6 +118,15 @@ def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None):
     freeze.update(study_id=STUDY_ID,environment={'synthetic':True})
     from eval.test_c5_formal_reuse_preparation import boundary
     freeze['resource_boundary']=boundary()
+    if slot_plan is not None:
+        if fixture_mismatch_index is not None:
+            from training.c5_formal20_plan import slot_order,family_merkle_root
+            target=slot_order(cases,seed=spec['slot_seed'])[fixture_mismatch_index]['family_id']
+            case=next(c for c in cases if c['family_id']==target)
+            case['initial_assertions']=copy.deepcopy(case['initial_assertions'])
+            case['initial_assertions']['object_count']+=1
+            spec['family_merkle_root_sha256']=family_merkle_root(cases)
+        spec['run_package']={'slot_protocol':slot_plan}
     freeze['spec_sha256']=digest(spec)
     grant={'study_id':spec['study_id'],'actor':'repository_owner','approved':True,'spec_sha256':digest(spec),
         'runtime_freeze_sha256':digest(freeze),'approval_basis':'direct repository_owner approval of complete disclosed-reuse formal40 spec and runtime freeze'}
@@ -189,7 +198,7 @@ def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None):
     monkeypatch.setattr(runner_module,'validate_authority',lambda *a:digest(freeze))
     monkeypatch.setattr(evidence,'audit_supervisor',lambda *a,**k:{'permit_first_load_epoch':wire.start})
     monkeypatch.setattr(evidence,'audit_completed_admission',lambda *a,**k:{'first_load_epoch':wire.start})
-    publish_json(state,'load-permit.json',{'first_load_epoch':wire.start})
+    publish_json(state,'load-permit.json',{'first_load_epoch':wire.start,**({'rows':[{'payload':{'remaining_indices':slot_plan['selected_indices']}}]} if slot_plan is not None else {})})
     model=ModelAdapterV2(state,spec,freeze,guard=lambda:None)
     model.pipe=wire;model.zero_ready=True;model.process=SimpleNamespace(stdin=__import__('io').BytesIO(),
         stdout=__import__('io').BytesIO(),wait=lambda **_:0)
@@ -198,6 +207,30 @@ def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None):
     native.prepare=prepare
     runner=FormalRunner(state=state,spec=spec,freeze=freeze,approval=grant,model=model,native=native,
         source_guard=lambda:None,budget_guard=lambda:None)
+    if slot_plan is not None:
+        from training import c5_slot_runner as slot_module
+        from training.c5_slot_runner import SlotRunner
+        monkeypatch.setattr(slot_module,'validate_authority',lambda *a:digest(freeze))
+        class Campaign:
+            def __init__(self):self.indices=[];self.rows=[]
+            def observation(self):return {'slot_attempted_indices':list(self.indices)}
+            def _event(self,kind,payload):
+                assert kind=='slot_attempt_recorded'
+                assert payload['index']==slot_plan['selected_indices'][len(self.indices)]
+                self.indices.append(payload['index']);self.rows.append(payload)
+        campaign=Campaign()
+        runner=SlotRunner(state=state,spec=spec,freeze=freeze,approval=grant,model=model,native=native,
+            source_guard=lambda:None,budget_guard=lambda:None,campaign=campaign,tokenizer=Tokenizer())
+        if slot_fault is not None:
+            original_slot=runner._slot
+            def changed_slot(slot,case,freeze_sha,prompts):
+                if slot_fault=='global':raise slot_module.GlobalFault('permission_or_safety')
+                value=original_slot(slot,case,freeze_sha,prompts)
+                if slot_fault=='cleanup':
+                    # CPU failure injection: known close/stop acknowledgement lost.
+                    value['stop']=None
+                return value
+            runner._slot=changed_slot
     if fail_before_model_at is not None:
         validate=runner_module.validate_fixture_readback
         calls=[0]
@@ -209,6 +242,8 @@ def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None):
             return validate(case,actual)
         monkeypatch.setattr(runner_module,'validate_fixture_readback',fail_public_fixture)
     result=runner.run(lambda:cases)
+    if slot_plan is not None:
+        return state,cases,spec,freeze,read_json(state,'host-continuity-terminal-receipt.json'),result,campaign
     if fail_before_model_at is None:
         assert result['status']=='formal_execution_complete_awaiting_independent_audit',result
     else:
