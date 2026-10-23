@@ -64,6 +64,8 @@ if sys.argv[1]=='worker':
  worker.approved_scope=scope
  control.control_scope=lambda actual:(s,f,guard)
  def cpu_load(*args,**kwargs):
+  q=json.loads((gpu/'preload-2/qualification.json').read_bytes())
+  assert q['model_loading_started'] is False and q['target']==LinuxIdentity()(os.getpid())
   sys.modules['torch']=types.SimpleNamespace(version=types.SimpleNamespace(cuda='CPU-fixture'),
    cuda=types.SimpleNamespace(get_device_name=lambda _: 'NVIDIA GeForce RTX 3090'))
   return None,None,None,guard
@@ -103,8 +105,8 @@ owner.open_formal_campaign=campaign
 owner.scope=lambda **kw:(s,f,grant,guard)
 owner.commitment=lambda _:{}
 owner.attempt_state=lambda endpoint,attempt:root/('preload-'+str(attempt))
-owner.sys.stdin=types.SimpleNamespace(isatty=lambda:True)
-owner.sys.stderr=types.SimpleNamespace(isatty=lambda:True,write=lambda value:None,flush=lambda:None)
+owner.sys=types.SimpleNamespace(stdin=types.SimpleNamespace(isatty=lambda:True),
+ stderr=types.SimpleNamespace(isatty=lambda:True))
 def confirm(scope,snap,guard):
  return {'actor':'repository_owner',**snap,'before_model_loading':True,
   'public_attempts_authorized':0,'human_origin_cryptographically_proven':False}

@@ -64,3 +64,11 @@
 本地实现和禁用候选处于准备分支 `codex/c5-run-package-simplification`，不是 main 或已批准部署。新冻结生成器在实际 GPU 退出/资产、两端新代码 CPU 闭包、部署和独立回读缺失时强制给出 `hashes_are_execution_approval_objects: false`。此时不请求规则/运行包/精确哈希批准，更不把诊断哈希当作执行哈希。
 
 唯一外部阻塞是原 GPU 共享认证连接缺席。恢复后应先核实原资格退出与原始导出、只读自动失败审核，再完成新包两端公共部署与增量 CPU/独立回读，形成可批准的完整 spec/runtime。所有可独立完成的实现、受影响验证和 PR 审核材料继续推进；不在子项、提交或 PR 处停工。
+
+## 最新本地审核增量
+
+固定代码提交 `50904f937b3a726aa5d41cc4958dc85767d0336a` 的最终受影响 CPU 验证为 **113 passed / 1 skipped，73.04秒**；跳过项为实际 Linux 启动路径，等待精确 PR head CI。实际 Mac 完整入口/保管/计时/控制/队列模块导入、公开 tokenizer、3360个外部模块及冻结可读文件通过，11.33秒，无 CUDA 初始化、模型加载或 Rhino 调用。
+
+独立纯标准库回读通过新447份公共文件、原 r1 433份、原最初429份、49份旧历史和8份退休文件；原正式9条事件与已用2次一致，新 r2 state/grant 不存在。主工作区原9份修改的差异 SHA-256 仍为 `b407093a909b70b9b1c4ea6547517373ad6c7fb230103d97b0502044a0e8aa6c`。
+
+机器可读摘要见 [CPU及独立回读](../eval/c5/formal-run-package-cpu-validation-20261023.json) 和 [当前禁用候选审核](../eval/c5/formal-run-package-review-20261023.json)。完整代码与真实 Linux 回归的最新 CI 以 PR 精确 head 记录为准；此页不以本地 Mac 跳过替代 Linux 成功。当前6项未完成冻结事实均依赖恢复 GPU 后的原始退出复核或最终两端复核，不提前提交审批。
