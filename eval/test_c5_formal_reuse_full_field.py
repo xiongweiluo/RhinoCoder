@@ -239,9 +239,10 @@ def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None,slot_
         campaign=Campaign()
         runner=SlotRunner(state=state,spec=spec,freeze=freeze,approval=grant,model=model,native=native,
             source_guard=lambda:None,budget_guard=lambda:None,campaign=campaign,tokenizer=Tokenizer())
-        if slot_fault in ('proof_global','proof_cancel'):
+        if slot_fault in ('proof_global','proof_cancel','proof_permission'):
             def failed_slot_proof(*args):
                 if slot_fault=='proof_cancel':raise KeyboardInterrupt()
+                if slot_fault=='proof_permission':raise PermissionError('CPU injection')
                 raise slot_module.GlobalFault('source_drift')
             runner.proof_fn=failed_slot_proof
         if slot_fault=='post_model_capture_failure':

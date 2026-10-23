@@ -307,6 +307,8 @@ class SlotRunner(FormalRunner):
                         # The slot remains consumed; never replay it on recovery.
                         if isinstance(error, KeyboardInterrupt):
                             fault = {"scope": "owner_pause", "code": "owner_cancelled"}
+                        elif isinstance(error, PermissionError):
+                            fault = {"scope": "global", "code": "permission_or_safety"}
                         elif getattr(error, "slot_scope", None) == "global":
                             fault = {"scope": "global", "code": error.code}
                         else:

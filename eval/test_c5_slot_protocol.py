@@ -1130,6 +1130,7 @@ def test_missing_capture_pauses_without_falsely_claiming_scene_pollution(
     "fault,status,scope,code",
     [
         ("proof_global", "SLOT_STOPPED_GLOBAL", "global", "source_drift"),
+        ("proof_permission", "SLOT_STOPPED_GLOBAL", "global", "permission_or_safety"),
         (
             "proof_cancel",
             "SLOT_PAUSED_RECONCILIATION",
