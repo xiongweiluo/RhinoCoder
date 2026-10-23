@@ -13,7 +13,7 @@ from plugin.rhino_listener.c5_formal_reuse_scope import STUDY_ID
 from training.c5_host_assurance_audit import audit_host_continuity
 from training.c5_formal_reuse_evidence_audit import audit_supervisor
 
-def audit_preexposure_failure(state,spec,freeze,campaign,terminal,*,package_recovery=False):
+def audit_preexposure_failure(state,spec,freeze,campaign,terminal,*,package_recovery=False,prior_release_observation=None):
     current=campaign.observation()
     eligible=current['status']=='PAUSED_RECONCILIATION' and not current['active']
     if package_recovery:
@@ -59,8 +59,9 @@ def audit_preexposure_failure(state,spec,freeze,campaign,terminal,*,package_reco
     host=audit_host_continuity(state,STUDY_ID,digest(freeze),freeze['source_inventory_sha256'],
         terminal['seal_sha256'],normal_limit=2048,cleanup_limit=256,journal_limit=4096)
     require(host['limited_visible_continuity_verified'] is True,'formal_reuse_failure_host_continuity_unknown')
-    supervisor=audit_supervisor(state,spec,freeze,completed=False)
+    supervisor=audit_supervisor(state,spec,freeze,completed=False,**({'prior_release_observation':prior_release_observation} if prior_release_observation is not None else {}))
     anchor={'campaign_head_sha256':rows[-1]['record_sha256'],'host':host,'native_abort':response,
         'qualified_gpu':supervisor,'raw_capture':read_json(state,'raw-streams-final.json')}
+    if prior_release_observation is not None:anchor['prior_release_observation']=prior_release_observation
     return {'raw_anchor_sha256':digest(anchor),'capture_complete':True,'qualified_target_absent':True,
         'known_native_cleanup_complete':True,'private_exposure_absent':True}

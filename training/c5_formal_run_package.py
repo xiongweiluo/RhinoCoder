@@ -156,6 +156,10 @@ def audit_previous_attempt(package):
     state = Path(package['previous_mac_attempt_root'])
     require(source.is_absolute() and state.is_absolute() and source.resolve() == source and state.resolve() == state,
             'run_package_prior_fixed_paths')
+    observation_path=state/'prior-independent-release-observation.json'
+    if observation_path.exists():
+        require(hashlib.sha256(observation_path.read_bytes()).hexdigest()==package.get('previous_release_observation_file_sha256'),
+                'run_package_prior_observation_exact_frozen_bytes')
     # The source population is independently frozen by the package assembler.
     pins = package['previous_public_source_files']
     require({p.relative_to(source).as_posix() for p in source.rglob('*') if p.is_file()} == set(pins)
@@ -166,17 +170,24 @@ from pathlib import Path
 sys.path.insert(0,sys.argv[1])
 from training.c5_formal_reuse_field_scope import scope
 from training.c5_formal_reuse_admission import open_formal_campaign
-from training.c5_formal_reuse_failure_audit import audit_preexposure_failure
 from plugin.rhino_listener.c5_research_channel import read_json
 s,f,g,guard=scope(check_time=False)
 c=open_formal_campaign(s,f,g,f['history'])
 try:
- guard();p=Path(sys.argv[2]);proof=audit_preexposure_failure(p,s,f,c,read_json(p,'host-continuity-terminal-receipt.json'));guard()
+ guard();p=Path(sys.argv[2])
+ import training
+ training.__path__.insert(0,str(Path(sys.argv[3])/'training'))
+ for name in ('training.c5_formal_reuse_evidence_audit','training.c5_formal_reuse_failure_audit'):sys.modules.pop(name,None)
+ from training.c5_formal_reuse_failure_audit import audit_preexposure_failure
+ observation=read_json(p,'prior-independent-release-observation.json') if (p/'prior-independent-release-observation.json').exists() else None
+ proof=audit_preexposure_failure(p,s,f,c,read_json(p,'host-continuity-terminal-receipt.json'),prior_release_observation=observation)
+ import hashlib
+ assert all(hashlib.sha256((Path(sys.argv[1])/n).read_bytes()).hexdigest()==h for n,h in f['source_files'].items())
  print(json.dumps(proof,sort_keys=True))
 finally:c.log.close()
 """
     from plugin.rhino_listener.c5_followup_profile import MAC_FLAGS
-    result = subprocess.run(['/opt/anaconda3/bin/python3.13', *MAC_FLAGS, '-c', script, str(source), str(state)],
+    result = subprocess.run(['/opt/anaconda3/bin/python3.13', *MAC_FLAGS, '-c', script, str(source), str(state), str(Path(__file__).resolve().parents[1])],
                             capture_output=True, timeout=180)
     require(result.returncode == 0, 'run_package_original_failure_evidence_incomplete')
     proof = json.loads(result.stdout)

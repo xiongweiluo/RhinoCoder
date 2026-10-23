@@ -121,9 +121,9 @@ def test_budget_separates_timeline_residency_and_provider_clock(tmp_path):
         # prospective residency contract, never a rewrite of that old result.
         basis={'charged_before_seconds':12000.,'load_intent_epoch':clock[0],'legacy_first_load_epoch':FIRST}
         b=ResidencyBudget(package,basis,wall=lambda:clock[0],mono=lambda:clock[1])
-        assert b.check()==86400-12000-900
+        assert b.check()==POLICY['gpu_residency_seconds_max']-12000-900
         clock[0]+=500;clock[1]+=500
-        assert b.check()==86400-12500-900
+        assert b.check()==POLICY['gpu_residency_seconds_max']-12500-900
         assert basis['legacy_first_load_epoch']==FIRST
         require_recovery_window(package,c.observation(),now=clock[0],remaining_work_seconds=1000)
         package['lease_expiry_epoch']=clock[0]+2499
@@ -381,3 +381,27 @@ def test_residency_audit_cross_joins_original_gpu_exit_and_both_receipts(tmp_pat
         else:
             with pytest.raises((ValueError,NativeError)):audit_residency_join(tmp_path,spec,freeze)
     finally:c.log.close()
+
+
+def test_prior_missing_waitpid_is_disclosed_and_requires_both_process_absences():
+    from training.c5_formal_reuse_evidence_audit import verify_prior_absence
+    final={'child_exit_reaped':False,'child_wait_status':None,'stop_result':None,
+           'primary_error_type':'BrokenPipeError','cleanup_errors':[],'epoch':FIRST+200}
+    value={'qualification':{'pid':'fixture'},'parent':{'pid':321},'final':final,
+           'boot_id':'fixture-boot','epoch':FIRST+600,
+           'stop_rows':[{}, {'payload':{'status':'already_exited','signal_attempts':0,
+                                      'exit_observed':True,'error_type':None}}]}
+    observation={'schema_version':1,'qualification_sha256':digest(value['qualification']),
+        'parent_sha256':digest(value['parent']),'boot_id':'fixture-boot','epoch':FIRST+500,
+        'target_proc_absent':True,'parent_proc_absent':True,'original_final_sha256':digest(final),
+        'producer_waitpid_proof_missing':True}
+    before=copy.deepcopy(value)
+    assert verify_prior_absence(value,observation,completed=False)
+    assert value==before and value['final']['child_exit_reaped'] is False
+    for key,replacement in [('parent_proc_absent',False),('target_proc_absent',False),
+            ('original_final_sha256','0'*64),('boot_id','other'),('epoch',FIRST+100)]:
+        with pytest.raises(NativeError):
+            verify_prior_absence(value,{**observation,key:replacement},completed=False)
+    with pytest.raises(NativeError):verify_prior_absence(value,observation,completed=True)
+    bad=copy.deepcopy(value);bad['stop_rows'][1]['payload']['status']='unknown'
+    with pytest.raises(NativeError):verify_prior_absence(bad,observation,completed=False)

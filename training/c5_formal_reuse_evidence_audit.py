@@ -66,7 +66,7 @@ def audit_signatures(state,freeze,order,cases):
     return {'signed_requests_recomputed':count,'private_audit_keys_retained':41,
         'dispatch_keys_absent':True,'memory_erasure_proven':False}
 
-def audit_supervisor(state,spec,freeze,*,completed=True):
+def audit_supervisor(state,spec,freeze,*,completed=True,prior_release_observation=None):
     value=read_json(state,'export-supervisor-original.json');q=value['qualification'];parent=value['parent']
     require(q['model_loading_started'] is False and q['parent_pid']==parent['pid']
         and q['target']['pid']!=parent['pid'] and all(q['target'][k]==parent[k] for k in
@@ -105,11 +105,15 @@ def audit_supervisor(state,spec,freeze,*,completed=True):
         and type(result['signal_attempts']) is int
         and (result['status'],result['signal_attempts']) in (('already_exited',0),('exit_observed',1)),
         'formal_reuse_shared_stop_known_exit_required')
-    final=value['final'];require(type(final['child_wait_status']) is int and final['child_exit_reaped'] is True
+    final=value['final']
+    recovered=False
+    if prior_release_observation is not None:
+        recovered=verify_prior_absence(value,prior_release_observation,completed=completed)
+    require(recovered or (type(final['child_wait_status']) is int and final['child_exit_reaped'] is True
         and final['stop_result']=={**result,'retry_signal_allowed':False} and final['cleanup_errors']==[]
         and type(final['epoch']) in (int,float) and math.isfinite(final['epoch'])
         and type(value['epoch']) in (int,float) and math.isfinite(value['epoch'])
-        and 0<final['epoch']<=value['epoch'],'formal_reuse_original_child_reap_join')
+        and 0<final['epoch']<=value['epoch']), 'formal_reuse_original_child_reap_join')
     if completed:
         require(final['child_wait_status']==0 and final['primary_error_type'] is None
             and result['status']=='already_exited' and result['signal_attempts']==0,
@@ -134,7 +138,7 @@ def audit_supervisor(state,spec,freeze,*,completed=True):
             and record['error_type'] is None and p.stat().st_size==record['observed_bytes']==record['retained_bytes']
             and hashlib.sha256(p.read_bytes()).hexdigest()==record['observed_bytes_sha256']==record['retained_bytes_sha256'],
             'formal_reuse_original_stream_raw_hash')
-    return {'qualified_child_exited_reaped':True,'same_gpu_idle_observed':True,
+    return {'qualified_child_exited_reaped':not recovered,'same_gpu_idle_observed':True,
         'shared_stop_signals':result['signal_attempts'],'complete_original_stream_capture':True,
         'physical_origin_cryptographically_proven':False,'permit_first_load_epoch':permit['first_load_epoch']}
 
@@ -179,3 +183,24 @@ def audit_residency_join(state,spec,freeze):
         'legacy_first_load_epoch':permit['first_load_epoch'],
         'after_gpu_exit_wait_seconds_not_charged':local['observation_epoch']-end,
         'actual_qualified_gpu_exit_epoch':end,'producer_summary_accepted_as_proof':False}
+
+
+def verify_prior_absence(value,observation,*,completed):
+    """Prospective prior-failure audit; never manufactures waitpid or exit time."""
+    require(not completed and type(observation) is dict and set(observation)=={
+        'schema_version','qualification_sha256','parent_sha256','boot_id','epoch',
+        'target_proc_absent','parent_proc_absent','original_final_sha256','producer_waitpid_proof_missing'},
+        'run_package_prior_absence_schema')
+    final=value['final'];result=value['stop_rows'][1]['payload']
+    require(observation['schema_version']==1 and observation['qualification_sha256']==digest(value['qualification'])
+        and observation['parent_sha256']==digest(value['parent']) and observation['boot_id']==value['boot_id']
+        and observation['original_final_sha256']==digest(final)
+        and observation['target_proc_absent'] is observation['parent_proc_absent'] is True
+        and observation['producer_waitpid_proof_missing'] is True
+        and type(observation['epoch']) in (int,float) and math.isfinite(observation['epoch'])
+        and final['epoch']<=observation['epoch']<=value['epoch']
+        and final['child_exit_reaped'] is False and final['child_wait_status'] is None
+        and final['stop_result'] is None and final['primary_error_type']=='BrokenPipeError'
+        and final['cleanup_errors']==[] and result=={'status':'already_exited','signal_attempts':0,
+            'exit_observed':True,'error_type':None}, 'run_package_prior_absence_original_evidence')
+    return True

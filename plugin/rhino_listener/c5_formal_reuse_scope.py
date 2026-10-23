@@ -98,7 +98,7 @@ def validate_materials(spec,freeze,*,clock=time.time,check_time=True):
     require(spec.get('automatic_retry_allowed') is (package is not None),'run_package_explicit_retry_authority')
     require(spec.get('max_model_requests')==56 and spec.get('max_generation_stages')==112
         and spec.get('per_request_timeout_seconds')==360 and spec.get('startup_timeout_seconds')==600
-        and spec.get('formal_gpu_seconds_max')==(86400 if package is not None else 64800) and spec.get('raw_stdout_cap_bytes')==67108864
+        and spec.get('formal_gpu_seconds_max')==(package['policy']['gpu_residency_seconds_max'] if package is not None else 64800) and spec.get('raw_stdout_cap_bytes')==67108864
         and spec.get('raw_stderr_cap_bytes')==2097152,'formal_reuse_fixed_capacity')
     from .c5_formal_reuse_limits import watchdog_limits
     watchdog_limits(spec)

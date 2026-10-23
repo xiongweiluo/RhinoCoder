@@ -47,6 +47,7 @@ def assemble():
         'previous_gpu_source_root':previous['gpu_source_root'],
         'previous_mac_attempt_root':previous['mac_attempt_root'],
         'previous_public_source_files':previous['public_source_files'],
+        'previous_release_observation_file_sha256':previous.get('release_observation_file_sha256'),
         'lease_expiry_epoch':spec['lease_expiry_epoch']}
     blockers=[key for key in ('previous_qualified_exit_and_raw_audit','current_idle_gpu_full_assets',
         'new_loader_cpu_closure','new_mac_cpu_closure','both_public_deployments','independent_public_readback')
