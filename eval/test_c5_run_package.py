@@ -291,3 +291,93 @@ def test_new_rule_reconciliation_does_not_rewrite_old_failure_or_claim_old_manua
         assert event['payload']['prior_reconciliation']['manual_external_attestation'] is False
         assert c.observation()['status']=='WAITING_OWNER' and c.observation()['first_load_epoch']==FIRST
     finally:c.log.close()
+
+
+@pytest.mark.parametrize('complete',[True,False])
+def test_abandoned_controller_reconciles_only_complete_original_evidence(tmp_path,monkeypatch,complete):
+    from training.c5_formal_run_package import automatic_reconcile
+    import training.c5_formal_reuse_failure_audit as audit
+    from plugin.rhino_listener.c5_research_channel import publish_json
+    spec,freeze,c,now=package_campaign(tmp_path)
+    try:
+        observed_start(c);c.ready('a'*64)
+        state=tmp_path/'preload-3';state.mkdir(mode=0o700)
+        publish_json(state,'host-continuity-terminal-receipt.json',{'cpu_fixture':True})
+        publish_json(state,'export-supervisor-original.json',{'final':{'child_exit_reaped':True,
+            'child_wait_status':0,'epoch':now[0]+10},'epoch':now[0]+11})
+        before=c.log.rows()
+        def independent_raw_boundary(*args,**kw):
+            assert kw=={'package_recovery':True}
+            if not complete:raise NativeError('fixture missing original EOF proof')
+            return proof()
+        monkeypatch.setattr(audit,'audit_preexposure_failure',independent_raw_boundary)
+        if complete:
+            assert automatic_reconcile(c,state,spec,freeze)=='RETRYABLE_ENGINEERING'
+            v=c.observation();assert not v['active'] and v['attempts']==3 and v['first_load_epoch']==FIRST
+            assert v['charged_gpu_seconds']==12010 and v['settled_attempts']==[3]
+            assert not (state/'resource-settlement.json').exists()
+            assert (state/'reconciled-residency-observation.json').exists()
+            require_startable(c,4)
+        else:
+            with pytest.raises(NativeError):automatic_reconcile(c,state,spec,freeze)
+            assert c.log.rows()==before and c.observation()['active'] and c.observation()['attempts']==3
+    finally:c.log.close()
+
+
+def test_delayed_control_readback_does_not_charge_gpu_after_original_exit(tmp_path):
+    from training.c5_formal_run_package import settle_known_load
+    from plugin.rhino_listener.c5_research_channel import publish_json,read_json
+    _,f,c,now=package_campaign(tmp_path)
+    try:
+        observed_start(c);c.failed('startup',proof())
+        state=tmp_path/'preload-3';state.mkdir(mode=0o700)
+        publish_json(state,'export-supervisor-original.json',{'final':{'child_exit_reaped':True,
+            'child_wait_status':0,'epoch':now[0]+100},'epoch':now[0]+10000})
+        settle_known_load(c,state,'a'*64)
+        assert c.observation()['charged_gpu_seconds']==12100
+        assert read_json(state,'reconciled-residency-observation.json')['stop_epoch']==now[0]+100
+    finally:c.log.close()
+
+
+def test_mac_late_observation_is_separate_from_gpu_residency_settlement(tmp_path):
+    from plugin.rhino_listener.c5_research_channel import publish_json
+    _,f,c,now=package_campaign(tmp_path)
+    try:
+        clock=[now[0],1000.]
+        b=ResidencyBudget(f['run_package'],{'charged_before_seconds':12000.,
+            'load_intent_epoch':clock[0],'legacy_first_load_epoch':FIRST},wall=lambda:clock[0],mono=lambda:clock[1])
+        publish_json(tmp_path,'export-supervisor-original.json',{'final':{'child_exit_reaped':True,
+            'child_wait_status':0,'epoch':clock[0]+100},'epoch':clock[0]+10000})
+        clock[0]+=10000;clock[1]+=10000
+        value=b.settle(tmp_path,'formal_mac_driver_finished')
+        assert value['elapsed_seconds_including_load_and_idle']==100
+        assert value['observation_epoch']-value['stop_epoch']==9900
+        assert value['legacy_first_load_epoch']==FIRST
+    finally:c.log.close()
+
+
+@pytest.mark.parametrize('mutation',['none','local_underreport','remote_mismatch','exit_mismatch'])
+def test_residency_audit_cross_joins_original_gpu_exit_and_both_receipts(tmp_path,mutation):
+    from training.c5_formal_reuse_evidence_audit import audit_residency_join
+    from plugin.rhino_listener.c5_research_channel import publish_json
+    spec,freeze,c,now=package_campaign(tmp_path)
+    try:
+        start=now[0];end=start+100
+        remote={'settlement_basis':'worker_before_exit','stop_epoch':end-1,
+            'elapsed_seconds_including_load_and_idle':99.,'charged_before_seconds':12000.}
+        local={'settlement_basis':'original_qualified_gpu_exit','stop_epoch':end,'observation_epoch':end+5000,
+            'elapsed_seconds_including_load_and_idle':100.,'charged_before_seconds':12000.}
+        exported={'final':{'child_exit_reaped':True,'child_wait_status':0,'epoch':end},'worker_resource':copy.deepcopy(remote)}
+        if mutation=='local_underreport':local['elapsed_seconds_including_load_and_idle']=1.
+        if mutation=='remote_mismatch':exported['worker_resource']['charged_before_seconds']=0.
+        if mutation=='exit_mismatch':local['stop_epoch']+=1
+        for name,value in [('load-permit.json',{'first_load_epoch':FIRST,'budget_basis':{'load_intent_epoch':start,'charged_before_seconds':12000.}}),
+            ('export-supervisor-original.json',exported),('resource-settlement.json',local),
+            ('worker-stop-response.json',{'raw_records':{'resource-settlement.json':remote}})]:publish_json(tmp_path,name,value)
+        if mutation=='none':
+            result=audit_residency_join(tmp_path,spec,freeze)
+            assert result['gpu_residency_seconds_upper']==100 and result['after_gpu_exit_wait_seconds_not_charged']==5000
+            assert result['legacy_first_load_epoch']==FIRST
+        else:
+            with pytest.raises((ValueError,NativeError)):audit_residency_join(tmp_path,spec,freeze)
+    finally:c.log.close()

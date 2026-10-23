@@ -13,7 +13,7 @@ from pathlib import Path
 from plugin.rhino_listener.c5_research_native import digest, require
 from plugin.rhino_listener.c5_research_channel import read_json, publish_json
 from plugin.rhino_listener.c5_run_package_policy import validate_policy, validate_layout, validate_migration
-from training.c5_reuse_evidence import sha, exact
+from training.c5_reuse_evidence import sha, exact, is_sha
 
 
 def replay_package_revision(state, row):
@@ -90,7 +90,7 @@ def replay_package_event(state, kind, payload):
                 and all(type(payload[k]) in (int, float) and __import__('math').isfinite(payload[k])
                         for k in ('start_epoch', 'stop_epoch', 'charged_seconds'))
                 and 0 <= payload['stop_epoch']-payload['start_epoch'] <= payload['charged_seconds']
-                and type(payload['proof_sha256']) is str and len(payload['proof_sha256']) == 64,
+                and is_sha(payload['proof_sha256']),
                 'run_package_raw_residency_settlement')
         state['charged_gpu_seconds'] += payload['charged_seconds']
         state['settled_attempts'].append(payload['attempt'])
@@ -194,21 +194,37 @@ def automatic_reconcile(campaign, state, spec, freeze, *, error='startup'):
     if value['formal_consumed']:
         return 'FORMAL_CONSUMED_NO_RETRY'
     terminal = read_json(state, 'host-continuity-terminal-receipt.json')
-    proof = audit_preexposure_failure(state, spec, freeze, campaign, terminal)
+    proof = audit_preexposure_failure(state, spec, freeze, campaign, terminal,package_recovery=True)
+    if value['active']:
+        decision=campaign.failed(error,proof)
+    elif value['status']=='PAUSED_RECONCILIATION':
+        decision=campaign.reconcile(error,proof)
+    else:
+        require(value['status']=='RETRYABLE_ENGINEERING','run_package_known_reconciliation_status')
+        decision=value['status']
     settle_known_load(campaign,state,digest(proof))
-    return campaign.reconcile(error, proof)
+    return decision
 
 
 def settle_known_load(campaign,state,proof_sha):
     value=campaign.observation()
-    settlement=read_json(state,'resource-settlement.json')
-    final=read_json(state,'export-supervisor-original.json')['final']
+    exported=read_json(state,'export-supervisor-original.json');final=exported['final']
+    settlement=read_json(state,'resource-settlement.json') if (state/'resource-settlement.json').exists() else None
     require(final['child_exit_reaped'] is True and type(final['child_wait_status']) is int,
             'run_package_settlement_requires_original_exit')
-    start=value['load_intent_epoch'];stop=max(final['epoch'],settlement['stop_epoch'])
+    start=value['load_intent_epoch'];stop=final['epoch']
+    elapsed=stop-start
+    worker=exported.get('worker_resource')
+    if worker is not None:elapsed=max(elapsed,worker['elapsed_seconds_including_load_and_idle'])
+    if settlement is not None and settlement.get('settlement_basis')=='original_qualified_gpu_exit':
+        elapsed=max(elapsed,settlement['elapsed_seconds_including_load_and_idle'])
+    if settlement is None and not (state/'reconciled-residency-observation.json').exists():
+        publish_json(state,'reconciled-residency-observation.json',{'start_epoch':start,'stop_epoch':stop,
+            'charged_seconds_upper':elapsed,'source':'original_qualified_exit_and_export',
+            'producer_settlement_fabricated':False,'proof_sha256':proof_sha})
     if value['attempts'] not in value['settled_attempts']:
         campaign._event('gpu_residency_settled',{'attempt':value['attempts'],'start_epoch':start,
-            'stop_epoch':stop,'charged_seconds':max(stop-start,settlement['elapsed_seconds_including_load_and_idle']),
+            'stop_epoch':stop,'charged_seconds':elapsed,
             'proof_sha256':proof_sha})
 
 

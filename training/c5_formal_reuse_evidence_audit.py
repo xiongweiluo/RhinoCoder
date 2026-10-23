@@ -117,7 +117,9 @@ def audit_supervisor(state,spec,freeze,*,completed=True):
     permit=read_json(state,'load-permit.json');require(value['permit']==permit,'formal_reuse_cross_endpoint_load_permit')
     from training.c5_formal_reuse_supervisor import validate_load_permit
     validate_load_permit(permit,spec,freeze,int(state.name.removeprefix('preload-')))
-    require(permit['first_load_epoch']<=final['epoch']<=value['epoch']<=freeze['resource_boundary']['provider_expiry_epoch'],
+    require(permit['first_load_epoch']<=final['epoch']<=value['epoch']
+        and final['epoch']<=freeze['resource_boundary']['provider_expiry_epoch']
+        and ('run_package' in freeze or value['epoch']<=freeze['resource_boundary']['provider_expiry_epoch']),
         'formal_reuse_original_release_within_actual_lease')
     raw=read_json(state,'raw-streams-final.json')
     require(raw['complete_raw_capture'] is True and raw['protocol_delivery_overflow'] is False
@@ -152,3 +154,28 @@ def audit_completed_admission(state,spec,freeze):
             'original_development_first_load_epoch':freeze['history']['development_first_load_epoch'],
             'original_development_attempts':3,'no_history_or_budget_reset':True}
     finally:campaign.log.close()
+
+
+def audit_residency_join(state,spec,freeze):
+    """Cross-endpoint raw join; do not accept a producer's usage summary."""
+    package=freeze['run_package'];policy=package['policy']
+    permit=read_json(state,'load-permit.json');exported=read_json(state,'export-supervisor-original.json')
+    local=read_json(state,'resource-settlement.json')
+    remote=read_json(state,'worker-stop-response.json')['raw_records']['resource-settlement.json']
+    final=exported['final'];start=permit['budget_basis']['load_intent_epoch'];end=final['epoch']
+    require(exported['worker_resource']==remote and final['child_exit_reaped'] is True
+        and type(final['child_wait_status']) is int and start<=end<=package['lease_expiry_epoch']
+        and local.get('settlement_basis')=='original_qualified_gpu_exit'
+        and remote.get('settlement_basis')=='worker_before_exit'
+        and local['stop_epoch']==end and remote['stop_epoch']<=end
+        and type(local['observation_epoch']) in (int,float) and math.isfinite(local['observation_epoch'])
+        and local['observation_epoch']>=end,'run_package_independent_residency_exit_join')
+    upper=max(end-start,remote['elapsed_seconds_including_load_and_idle'])
+    require(local['elapsed_seconds_including_load_and_idle']==upper
+        and local['charged_before_seconds']==remote['charged_before_seconds']==permit['budget_basis']['charged_before_seconds']
+        and local['charged_before_seconds']+upper<=policy['gpu_residency_seconds_max'],
+        'run_package_independent_residency_amount_join')
+    return {'gpu_residency_seconds_upper':upper,'charged_before_seconds':local['charged_before_seconds'],
+        'legacy_first_load_epoch':permit['first_load_epoch'],
+        'after_gpu_exit_wait_seconds_not_charged':local['observation_epoch']-end,
+        'actual_qualified_gpu_exit_epoch':end,'producer_summary_accepted_as_proof':False}

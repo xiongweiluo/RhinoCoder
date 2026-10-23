@@ -257,4 +257,6 @@ def export_supervisor(state,freeze,guard):
             '--format=csv,noheader,nounits'],text=True,timeout=15),
         'compute_stdout':subprocess.check_output(['nvidia-smi','--query-compute-apps=pid,process_name,used_memory',
             '--format=csv,noheader,nounits'],text=True,timeout=15),'model_or_cuda_calls':0,'private_formal_reads':0}
+    if 'run_package' in freeze:
+        value['worker_resource']=strict(read_private(state/'resource-settlement.json')) if (state/'resource-settlement.json').exists() else None
     guard();return value

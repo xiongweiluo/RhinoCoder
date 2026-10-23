@@ -108,7 +108,10 @@ def _run_package(*, output=print):
                 from training.c5_formal_run_package import settle_known_load
                 settle_known_load(campaign,previous,summary['private_audit_sha256'])
                 return summary
-            if observation['status']=='PAUSED_RECONCILIATION' and not observation['formal_consumed']:
+            needs_reconciliation=(observation['active'] or observation['status']=='PAUSED_RECONCILIATION'
+                or (observation['status']=='RETRYABLE_ENGINEERING' and observation['attempts']>observation['package_start_attempt']
+                    and observation['attempts'] not in observation['settled_attempts']))
+            if needs_reconciliation and not observation['formal_consumed']:
                 previous=attempt_state('mac',observation['attempts'])
                 try:
                     capture_owner_receipt(previous,spec,freeze,output=output)
@@ -117,6 +120,8 @@ def _run_package(*, output=print):
                     return public_status(campaign,previous)
                 if decision!='RETRYABLE_ENGINEERING':return public_status(campaign,previous)
             observation=campaign.observation()
+            if observation['status']=='PAUSED_OWNER':
+                campaign.resume_after_owner_pause();observation=campaign.observation()
             if observation['formal_consumed'] or attempt>observation['attempts_max']:
                 return public_status(campaign,attempt_state('mac',max(1,observation['attempts'])))
             require(not observation['active'],'run_package_existing_active_attempt_requires_reconciliation')

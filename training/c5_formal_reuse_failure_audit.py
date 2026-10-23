@@ -13,10 +13,15 @@ from plugin.rhino_listener.c5_formal_reuse_scope import STUDY_ID
 from training.c5_host_assurance_audit import audit_host_continuity
 from training.c5_formal_reuse_evidence_audit import audit_supervisor
 
-def audit_preexposure_failure(state,spec,freeze,campaign,terminal):
+def audit_preexposure_failure(state,spec,freeze,campaign,terminal,*,package_recovery=False):
     current=campaign.observation()
-    require(current['status']=='PAUSED_RECONCILIATION' and current['formal_consumed'] is False
-        and not current['active'] and current['attempts']==int(state.name.split('-')[-1]),
+    eligible=current['status']=='PAUSED_RECONCILIATION' and not current['active']
+    if package_recovery:
+        require('run_package' in freeze and current.get('package')==freeze['run_package'],
+            'run_package_recovery_requires_current_approved_scope')
+        eligible=current['status'] in ('LOADING','READY','PAUSED_RECONCILIATION','RETRYABLE_ENGINEERING')
+    require(eligible and current['formal_consumed'] is False
+        and current['attempts']==int(state.name.split('-')[-1]),
         'formal_reuse_failure_requires_unconsumed_paused_campaign')
     rows=campaign.log.rows()
     require(not any(r['kind'] in ('private_exposure_intent','generation_begin_intent') for r in rows),

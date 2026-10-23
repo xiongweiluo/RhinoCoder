@@ -37,9 +37,20 @@ class ResidencyBudget:
     def settle(self, state, status):
         now, monotonic = self.wall(), self.mono()
         require(now >= self.last_wall and monotonic >= self.last_mono, 'run_package_settlement_clock')
+        stop=now;elapsed=max(now-self.start_wall,monotonic-self.start_mono);basis='worker_before_exit'
+        if (state/'export-supervisor-original.json').exists():
+            from plugin.rhino_listener.c5_research_channel import read_json
+            exported=read_json(state,'export-supervisor-original.json');final=exported['final']
+            require(final['child_exit_reaped'] is True and type(final['child_wait_status']) is int
+                and type(final['epoch']) in (int,float) and math.isfinite(final['epoch'])
+                and self.start_wall<=final['epoch']<=now,'run_package_actual_residency_exit_required')
+            stop=final['epoch'];elapsed=stop-self.start_wall;basis='original_qualified_gpu_exit'
+            worker=exported.get('worker_resource')
+            if worker is not None:elapsed=max(elapsed,worker['elapsed_seconds_including_load_and_idle'])
         value = {'study_id': self.policy['study_id'], 'status': status, 'accounting': 'gpu_residency_v1',
-                 'start_epoch': self.start_wall, 'stop_epoch': now,
-                 'elapsed_seconds_including_load_and_idle': max(now-self.start_wall, monotonic-self.start_mono),
+                 'start_epoch': self.start_wall, 'stop_epoch': stop,'observation_epoch':now,
+                 'settlement_basis':basis,
+                 'elapsed_seconds_including_load_and_idle': elapsed,
                  'charged_before_seconds': self.basis['charged_before_seconds'],
                  'legacy_first_load_epoch': self.basis['legacy_first_load_epoch'],
                  'cap_seconds': self.policy['gpu_residency_seconds_max'],
