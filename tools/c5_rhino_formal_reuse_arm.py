@@ -113,7 +113,10 @@ def start():
                 'source_inventory_sha256':freeze['source_inventory_sha256'],'baseline_sealed':False,'replay_allowed':False}))
     def callback(sender,event):
         barrier.tick(in_command=bool(getattr(Rhino.RhinoApp,'InCommand',False)),sender=sender,event=event)
-        if arm.stopped:package._SESSION=None
+        if arm.stopped:
+            package._SESSION=None
+            next_package=globals().get('PACKAGE_NEXT')
+            if next_package is not None:next_package()
     arm._callback=callback
     source();Rhino.RhinoApp.Idle+=callback
     channel.publish_json(state,'deferred-baseline.prepared.json',{'study_id':protocol.STUDY_ID,

@@ -13,7 +13,7 @@ import time
 from training.c5_recovery_policy import validate_scope,require_grant,retry_decision
 from training.c5_recovery_confirmation import validate_receipt
 from training.c5_recovery_policy import POLICY
-from plugin.rhino_listener.c5_formal_reuse_scope import STUDY_ID,authority,MAC_STATE,REMOTE_STATE
+from plugin.rhino_listener.c5_formal_reuse_scope import STUDY_ID,authority,MAC_STATE,REMOTE_STATE,PACKAGE_LAYOUT
 
 NAMESPACE='formal-reuse-v1'
 HISTORY_FILE='eval/c5/formal-reuse-history-20261022.json'
@@ -25,7 +25,7 @@ def campaign_scope(spec,freeze):
     return {'campaign_id':STUDY_ID,'phase':'formal','spec_sha256':digest(spec),'runtime_sha256':digest(freeze),
         'policy_sha256':sha(POLICY),'history_sha256':freeze['history_sha256'],
         'public_plan_sha256':spec['public_commitment_sha256'],'contract_sha256':sha(spec['comparison']),
-        'development_seconds_max':64800,'generation_cutoff_epoch':spec['model_generation_cutoff_epoch']}
+        'development_seconds_max':spec.get('run_package',{}).get('policy',{}).get('gpu_residency_seconds_max',64800),'generation_cutoff_epoch':spec['model_generation_cutoff_epoch']}
 
 def history_guard(endpoint,history,*,root=None):
     require(endpoint in ROOTS and type(history) is dict,'formal_reuse_history_endpoint')
@@ -69,7 +69,7 @@ def history_guard(endpoint,history,*,root=None):
     guard();return guard
 
 def attempt_state(endpoint,attempt):
-    require(endpoint in ('mac','gpu') and type(attempt) is int and 1<=attempt<=3,
+    require(endpoint in ('mac','gpu') and type(attempt) is int and 1<=attempt<=(5 if PACKAGE_LAYOUT is not None else 3),
         'formal_reuse_bounded_preexposure_attempt')
     return (MAC_STATE if endpoint=='mac' else REMOTE_STATE)/('preload-'+str(attempt))
 
@@ -94,7 +94,10 @@ def open_formal_campaign(spec,freeze,grant,history,*,create=False,root=None,wall
 
 def require_startable(campaign,attempt):
     value=campaign.observation()
-    require(value['attempts']+1==attempt and value['attempts']<3 and value['formal_consumed'] is False
+    if value.get('package') is not None:
+        require(value['attempts']==value['package_start_attempt'] or value['attempts'] in value['settled_attempts'],
+            'run_package_previous_gpu_usage_unsettled')
+    require(value['attempts']+1==attempt and value['attempts']<value.get('attempts_max',3) and value['formal_consumed'] is False
         and value['active'] is False and value['status'] in ('WAITING_OWNER','PREPARED',
             'RETRYABLE_ENGINEERING','RETRYABLE_ENGINEERING_DIAGNOSTICS_INCOMPLETE'),
         'formal_reuse_attempt_requires_known_pause_and_no_private_consumption')
@@ -112,14 +115,20 @@ def consume_before_private(campaign,attempt,state):
 
 def formal_replay(scope, rows):
     validate_scope(scope)
-    state = {'attempts': 0, 'active': False, 'formal_consumed': False, 'first_load_epoch': None, 'last_epoch': None, 'status': 'WAITING_OWNER', 'receipt': None, 'ready': False, 'begun': False, 'scope': dict(scope)}
+    state = {'attempts': 0, 'active': False, 'formal_consumed': False, 'first_load_epoch': None, 'last_epoch': None, 'status': 'WAITING_OWNER', 'receipt': None, 'ready': False, 'begun': False, 'scope': dict(scope), 'attempts_max':3, 'package':None, 'load_intent_epoch':None}
     for row in rows:
         scope = state['scope']
         kind, p = (row['kind'], row['payload'])
+        if kind in ('package_owner_session_confirmed','package_owner_custody_consent','package_preload_observed','gpu_residency_settled'):
+            from training.c5_formal_run_package import replay_package_event
+            replay_package_event(state,kind,p);continue
+        if kind=='run_package_revision_accepted':
+            from training.c5_formal_run_package import replay_package_revision
+            replay_package_revision(state,row);continue
         if kind in ('runtime_revision_accepted', 'resource_runtime_revision_accepted'):
             exact(p, ('scope', 'grant', 'previous_head_sha256') + (('resource_amendment',) if kind == 'resource_runtime_revision_accepted' else ()))
             revised = validate_scope(p['scope'])
-            require(not state['active'] and (not state['formal_consumed']) and (state['status'] not in ('PAUSED_RECONCILIATION', 'AWAITING_INDEPENDENT_AUDIT')) and (state['attempts'] < POLICY['public_attempts_max']), 'recovery_revision_requires_known_pause')
+            require(not state['active'] and (not state['formal_consumed']) and (state['status'] not in ('PAUSED_RECONCILIATION', 'AWAITING_INDEPENDENT_AUDIT')) and (state['attempts'] < state['attempts_max']), 'recovery_revision_requires_known_pause')
             require(all((revised[k] == scope[k] for k in ('campaign_id', 'phase', 'policy_sha256', 'history_sha256', 'public_plan_sha256', 'contract_sha256'))), 'recovery_revision_cannot_change_contract_or_reset_budget')
             if kind == 'resource_runtime_revision_accepted':
                 amendment = {'old_seconds_max': scope['development_seconds_max'], 'new_seconds_max': revised['development_seconds_max'], 'first_load_epoch': state['first_load_epoch'], 'attempts': state['attempts'], 'budget_reset': False, 'old_budget_recredited': False}
@@ -138,20 +147,20 @@ def formal_replay(scope, rows):
             state['status'] = 'PREPARED'
         elif kind == 'owner_resume_requested':
             exact(p, ('attempts',))
-            require(state['status'] == 'PAUSED_OWNER' and (not state['active']) and (not state['formal_consumed']) and (p['attempts'] == state['attempts']) and (state['attempts'] < POLICY['public_attempts_max']), 'recovery_owner_resume_order')
+            require(state['status'] == 'PAUSED_OWNER' and (not state['active']) and (not state['formal_consumed']) and (p['attempts'] == state['attempts']) and (state['attempts'] < state['attempts_max']), 'recovery_owner_resume_order')
             state['status'] = 'RETRYABLE_ENGINEERING'
         elif kind == 'attempt_load_intent':
             exact(p, ('attempt', 'epoch'))
-            require(state['receipt'] is not None and (not state['active']) and (not state['formal_consumed']) and (state['status'] in ('PREPARED', 'RETRYABLE_ENGINEERING', 'RETRYABLE_ENGINEERING_DIAGNOSTICS_INCOMPLETE')) and (type(p['attempt']) is int) and (p['attempt'] == state['attempts'] + 1) and (p['attempt'] <= POLICY['public_attempts_max']), 'recovery_attempt_order')
+            require((state['package'] is None or (state['package_owner_consent'] and state['package_preload_attempt']==p['attempt'] and state['attempts']-state['package_start_attempt'] < state['package']['policy']['package_preexposure_loads_max'])) and state['receipt'] is not None and (not state['active']) and (not state['formal_consumed']) and (state['status'] in ('PREPARED', 'RETRYABLE_ENGINEERING', 'RETRYABLE_ENGINEERING_DIAGNOSTICS_INCOMPLETE')) and (type(p['attempt']) is int) and (p['attempt'] == state['attempts'] + 1) and (p['attempt'] <= state['attempts_max']), 'recovery_attempt_order')
             require(type(p['epoch']) in (int, float) and math.isfinite(p['epoch']) and (p['epoch'] > 0) and (state['last_epoch'] is None or p['epoch'] >= state['last_epoch']), 'recovery_clock_regression')
             if state['first_load_epoch'] is None:
                 require(p['epoch'] + scope['development_seconds_max'] <= scope['generation_cutoff_epoch'], 'recovery_complete_window_unavailable')
                 state['first_load_epoch'] = p['epoch']
-            require(p['epoch'] < min(state['first_load_epoch'] + scope['development_seconds_max'] - 60, scope['generation_cutoff_epoch'] - 60), 'recovery_shared_budget_exhausted')
-            state.update(attempts=p['attempt'], active=True, ready=False, begun=False, status='LOADING', last_epoch=p['epoch'])
+            require(state['package'] is not None or p['epoch'] < min(state['first_load_epoch'] + scope['development_seconds_max'] - 60, scope['generation_cutoff_epoch'] - 60), 'recovery_shared_budget_exhausted')
+            state.update(attempts=p['attempt'], active=True, ready=False, begun=False, status='LOADING', last_epoch=p['epoch'],load_intent_epoch=p['epoch'])
         elif kind == 'budget_observation':
             exact(p, ('epoch',))
-            require(state['first_load_epoch'] is not None and type(p['epoch']) in (int, float) and math.isfinite(p['epoch']) and (p['epoch'] >= state['last_epoch']) and (p['epoch'] < min(state['first_load_epoch'] + scope['development_seconds_max'] - 60, scope['generation_cutoff_epoch'] - 60)), 'recovery_shared_budget_exhausted')
+            require(state['first_load_epoch'] is not None and type(p['epoch']) in (int, float) and math.isfinite(p['epoch']) and (p['epoch'] >= state['last_epoch']) and (state['package'] is not None or p['epoch'] < min(state['first_load_epoch'] + scope['development_seconds_max'] - 60, scope['generation_cutoff_epoch'] - 60)), 'recovery_shared_budget_exhausted')
             state['last_epoch'] = p['epoch']
         elif kind == 'worker_ready':
             exact(p, ('attempt', 'raw_anchor_sha256'))
@@ -171,13 +180,13 @@ def formal_replay(scope, rows):
         elif kind == 'attempt_failed':
             exact(p, ('attempt', 'error', 'proof', 'decision'))
             require(state['active'] and p['attempt'] == state['attempts'], 'recovery_failure_order')
-            decision = retry_decision(scope, state['attempts'], state['formal_consumed'], p['error'], p['proof'])
+            decision = formal_retry_decision(state, p['error'], p['proof'])
             require(decision == p['decision'], 'recovery_failure_decision_changed')
             state.update(active=False, status=decision)
         elif kind == 'cleanup_reconciled':
             exact(p, ('error', 'proof', 'decision'))
             require(not state['active'] and state['status'] == 'PAUSED_RECONCILIATION', 'recovery_reconciliation_order')
-            decision = retry_decision(scope, state['attempts'], state['formal_consumed'], p['error'], p['proof'])
+            decision = formal_retry_decision(state, p['error'], p['proof'])
             require(p['decision'] == decision and decision != 'PAUSED_RECONCILIATION', 'recovery_reconciliation_incomplete')
             state['status'] = decision
         elif kind == 'attempt_completed':
@@ -187,6 +196,22 @@ def formal_replay(scope, rows):
         else:
             raise ValueError('recovery_unknown_event')
     return state
+
+def formal_retry_decision(state,error,proof):
+    if state.get('package') is None:
+        return retry_decision(state['scope'],state['attempts'],state['formal_consumed'],error,proof)
+    # Validate the same closed original evidence shape; only the finite limit is
+    # changed prospectively by the exact package grant in this same ledger.
+    decision=retry_decision(state['scope'],min(state['attempts'],3),state['formal_consumed'],error,proof)
+    if decision=='ATTEMPT_LIMIT_REACHED':
+        from plugin.rhino_listener.c5_run_package_policy import retry_authorized
+        p=state['package']
+        if retry_authorized(p['policy'],package_start_attempt=p['timing_migration']['prior_attempts_consumed'],
+                attempts=state['attempts'],exposed=state['formal_consumed'],same_pair=True,
+                complete_proof=all(proof[k] for k in proof if k!='raw_anchor_sha256')):
+            return 'RETRYABLE_ENGINEERING'
+    return decision
+
 
 class FormalCampaign:
 
@@ -244,6 +269,11 @@ class FormalCampaign:
         if state['first_load_epoch'] is None:
             return self.scope['development_seconds_max'] - 60
         require(now >= state['last_epoch'], 'recovery_clock_regression')
+        if state.get('package') is not None:
+            from training.c5_formal_run_budget import require_recovery_window
+            value=require_recovery_window(state['package'],state,now=now)
+            self._event('budget_observation',{'epoch':now})
+            return min(value['remaining_budget_seconds'],value['remaining_lease_seconds'])
         remaining = min(state['first_load_epoch'] + self.scope['development_seconds_max'] - 60, self.scope['generation_cutoff_epoch'] - 60) - now
         require(remaining > 0, 'recovery_shared_budget_exhausted')
         self._event('budget_observation', {'epoch': now})
@@ -260,13 +290,13 @@ class FormalCampaign:
 
     def failed(self, error, proof):
         state = self.observation()
-        decision = retry_decision(self.scope, state['attempts'], state['formal_consumed'], error, proof)
+        decision = formal_retry_decision(state, error, proof)
         self._event('attempt_failed', {'attempt': state['attempts'], 'error': error, 'proof': proof, 'decision': decision})
         return decision
 
     def reconcile(self, error, proof):
         state = self.observation()
-        decision = retry_decision(self.scope, state['attempts'], state['formal_consumed'], error, proof)
+        decision = formal_retry_decision(state, error, proof)
         self._event('cleanup_reconciled', {'error': error, 'proof': proof, 'decision': decision})
         return decision
 

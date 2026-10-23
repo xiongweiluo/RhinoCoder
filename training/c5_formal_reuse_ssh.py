@@ -9,7 +9,7 @@ from plugin.rhino_listener.c5_formal_reuse_scope import REMOTE_SOURCE,REMOTE_ENV
 from plugin.rhino_listener.c5_followup_profile import GPU_FLAGS
 
 def argv(spec,mode,attempt):
-    require(mode in ('serve','stop','export-supervisor') and type(attempt) is int and 1<=attempt<=3,
+    require(mode in ('serve','stop','export-supervisor') and type(attempt) is int and 1<=attempt<=(spec.get('run_package',{}).get('policy',{}).get('global_preexposure_loads_max',3)),
         'formal_reuse_fixed_remote_action')
     host,user,port=spec['ssh_host'],spec['ssh_user'],spec['ssh_port']
     require(type(host) is str and re.fullmatch(r'[A-Za-z0-9.-]{1,253}',host)
@@ -20,7 +20,7 @@ def argv(spec,mode,attempt):
     alias=spec['ssh_host_key_alias']
     require(type(alias) is str and re.fullmatch(r'[A-Za-z0-9.\[\]:_-]{1,280}',alias),'formal_reuse_host_key_alias')
     command=shlex.join([str(REMOTE_ENV/'bin/python3.11'),*GPU_FLAGS,
-        str(REMOTE_SOURCE/'tools/run_c5_formal_reuse_worker.py'),mode,'--attempt',str(attempt)])
+        str(REMOTE_SOURCE/('tools/c5_formal_reuse_control.py' if 'run_package' in spec and mode!='serve' else 'tools/run_c5_formal_reuse_worker.py')),mode,'--attempt',str(attempt)])
     return ['/usr/bin/ssh','-F','/dev/null','-T','-S',spec['ssh_socket'],'-o','BatchMode=yes',
         '-o','ControlMaster=no','-o','ProxyCommand=/usr/bin/false','-o','StrictHostKeyChecking=yes',
         '-o','UpdateHostKeys=no','-o','UserKnownHostsFile='+spec['ssh_known_hosts_file'],

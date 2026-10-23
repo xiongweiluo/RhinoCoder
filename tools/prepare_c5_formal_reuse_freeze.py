@@ -139,7 +139,7 @@ def assemble(*,now=None):
     documents={SPEC_FILE:spec,RESOURCE_FILE:resources}
     source=set(read('eval/c5/recovery-runtime-freeze-20261013.json')['source_files'])
     source|={p.relative_to(ROOT).as_posix() for folder in ('training','plugin/rhino_listener','tools')
-        for p in (ROOT/folder).glob('*formal_reuse*.py')}
+        for p in (ROOT/folder).glob('*.py') if any(x in p.name for x in ('formal_reuse','formal_run','run_package'))}
     source|=public_names|{'eval/c5/recovery-runtime-freeze-20261013.json'}
     require(set(ACTORS.values())<=source and len(source)<=512,'formal_reuse_complete_actor_source_population')
     payload={n:encoded(documents[n]) if n in documents else (ROOT/n).read_bytes() for n in sorted(source)}

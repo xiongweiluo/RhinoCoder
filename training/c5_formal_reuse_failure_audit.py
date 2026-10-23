@@ -13,10 +13,15 @@ from plugin.rhino_listener.c5_formal_reuse_scope import STUDY_ID
 from training.c5_host_assurance_audit import audit_host_continuity
 from training.c5_formal_reuse_evidence_audit import audit_supervisor
 
-def audit_preexposure_failure(state,spec,freeze,campaign,terminal):
+def audit_preexposure_failure(state,spec,freeze,campaign,terminal,*,package_recovery=False,prior_release_observation=None):
     current=campaign.observation()
-    require(current['status']=='PAUSED_RECONCILIATION' and current['formal_consumed'] is False
-        and not current['active'] and current['attempts']==int(state.name.split('-')[-1]),
+    eligible=current['status']=='PAUSED_RECONCILIATION' and not current['active']
+    if package_recovery:
+        require('run_package' in freeze and current.get('package')==freeze['run_package'],
+            'run_package_recovery_requires_current_approved_scope')
+        eligible=current['status'] in ('LOADING','READY','PAUSED_RECONCILIATION','RETRYABLE_ENGINEERING')
+    require(eligible and current['formal_consumed'] is False
+        and current['attempts']==int(state.name.split('-')[-1]),
         'formal_reuse_failure_requires_unconsumed_paused_campaign')
     rows=campaign.log.rows()
     require(not any(r['kind'] in ('private_exposure_intent','generation_begin_intent') for r in rows),
@@ -54,8 +59,9 @@ def audit_preexposure_failure(state,spec,freeze,campaign,terminal):
     host=audit_host_continuity(state,STUDY_ID,digest(freeze),freeze['source_inventory_sha256'],
         terminal['seal_sha256'],normal_limit=2048,cleanup_limit=256,journal_limit=4096)
     require(host['limited_visible_continuity_verified'] is True,'formal_reuse_failure_host_continuity_unknown')
-    supervisor=audit_supervisor(state,spec,freeze,completed=False)
+    supervisor=audit_supervisor(state,spec,freeze,completed=False,**({'prior_release_observation':prior_release_observation} if prior_release_observation is not None else {}))
     anchor={'campaign_head_sha256':rows[-1]['record_sha256'],'host':host,'native_abort':response,
         'qualified_gpu':supervisor,'raw_capture':read_json(state,'raw-streams-final.json')}
+    if prior_release_observation is not None:anchor['prior_release_observation']=prior_release_observation
     return {'raw_anchor_sha256':digest(anchor),'capture_complete':True,'qualified_target_absent':True,
         'known_native_cleanup_complete':True,'private_exposure_absent':True}

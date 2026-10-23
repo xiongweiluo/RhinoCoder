@@ -77,7 +77,13 @@ class NativeAdapterV2(NativeAdapter):
         while not (self.state/'host-continuity-ready.json').exists():
             require(not (self.state/'deferred-baseline.failed.json').exists(),'formal_reuse_host_preparation_failed')
             self.guard()
-            require(time.time()<=self.spec['latest_owner_start_epoch'],'formal_reuse_full_window_no_longer_available')
+            if 'run_package' in self.spec:
+                policy=self.spec['run_package']['policy']
+                require(time.time()+policy['remaining_chain_upper_seconds']+policy['startup_seconds']
+                    +policy['export_reserve_seconds']<=self.spec['run_package']['lease_expiry_epoch'],
+                    'run_package_remaining_work_window_unavailable')
+            else:
+                require(time.time()<=self.spec['latest_owner_start_epoch'],'formal_reuse_full_window_no_longer_available')
             time.sleep(0.05)
         require(read_json(self.state,'host-continuity-ready.json')=={'study_id':STUDY_ID,
             'runtime_freeze_sha256':digest(self.freeze),'legacy_byte_closure_verified':False,
@@ -125,12 +131,20 @@ class NativeAdapterV2(NativeAdapter):
         if (self.state/'formal20.hub-initialization.claim.json').exists() or self.hub is not None:
             return super().finish()
         self.guard()
+        if (self.state/'preload-abort.response.json').exists():
+            result=read_json(self.state,'preload-abort.response.json')
+            require(result['status']=='preload_aborted' and result['runtime_freeze_sha256']==digest(self.freeze),
+                'formal_reuse_preload_abort_binding')
+            return result
         if not (self.state/'host-continuity-ready.json').exists():
             return super().finish()
         from plugin.rhino_listener.c5_research_gate import signature
         secret=bytes.fromhex(read_json(self.state,'hub.key')['key_hex'])
         payload={'action':'abort_uninitialized_native','runtime_freeze_sha256':digest(self.freeze)}
-        publish_json(self.state,'preload-abort.request.json',{'payload':payload,'signature':signature(secret,payload)})
+        request={'payload':payload,'signature':signature(secret,payload)}
+        if (self.state/'preload-abort.request.json').exists():
+            require(read_json(self.state,'preload-abort.request.json')==request,'run_package_original_abort_request_changed')
+        else:publish_json(self.state,'preload-abort.request.json',request)
         deadline=time.monotonic()+120
         while not (self.state/'preload-abort.response.json').exists():
             self.guard();require(time.monotonic()<deadline,'formal_reuse_preload_abort_unknown');time.sleep(0.05)
@@ -218,11 +232,16 @@ class ModelAdapterV2(ModelAdapter):
         require(code==0,'formal zero-stage worker exit unknown')
 
     def _supervisor_snapshot(self,mode):
+        original_name=mode+'-original.json'
+        if (self.state/original_name).is_file():return read_json(self.state,original_name)
         from training.c5_formal_reuse_ssh import argv,verify
         from training.c5_reuse_evidence import strict
         verify(self.spec,self.freeze)
         result=subprocess.run(argv(self.spec,mode,self.attempt),capture_output=True,timeout=90)
-        publish_json(self.state,mode+'-transport-observation.json',{'exit_code':result.returncode,
+        observation=mode+'-transport-observation.json'
+        if (self.state/observation).exists():
+            observation=mode+'-transport-observation-%04d.json'%len(list(self.state.glob(mode+'-transport-observation*.json')))
+        publish_json(self.state,observation,{'exit_code':result.returncode,
             'stdout_raw_sha256':__import__('hashlib').sha256(result.stdout).hexdigest(),
             'stderr_raw_sha256':__import__('hashlib').sha256(result.stderr).hexdigest(),
             'bytes':len(result.stdout),'model_restart':False})

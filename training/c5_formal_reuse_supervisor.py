@@ -23,7 +23,7 @@ def validate_load_permit(permit,spec,freeze,attempt):
     from training.c5_formal_reuse_admission import campaign_scope
     from training.c5_formal_reuse_admission import formal_replay as replay
     from training.c5_reuse_evidence import ZERO
-    require(type(permit) is dict and set(permit)=={'scope','rows','attempt','first_load_epoch'}
+    require(type(permit) is dict and set(permit)==({'scope','rows','attempt','first_load_epoch','budget_basis'} if 'run_package' in freeze else {'scope','rows','attempt','first_load_epoch'})
         and permit['scope']==campaign_scope(spec,freeze) and type(permit['attempt']) is int and permit['attempt']==attempt
         and type(permit['rows']) is list and 1<=len(permit['rows'])<=2048,'formal_reuse_load_permit_shape')
     from training.c5_formal_reuse_revision import initial_scope
@@ -44,6 +44,13 @@ def validate_load_permit(permit,spec,freeze,attempt):
     require(state['active'] and state['attempts']==attempt and not state['formal_consumed']
         and state['status']=='LOADING' and state['first_load_epoch']==permit['first_load_epoch'],
         'formal_reuse_load_permit_preprivate_order')
+    if 'run_package' in freeze:
+        from training.c5_formal_run_package import verify_package_prefix
+        verify_package_prefix(freeze['run_package'],permit['rows'])
+        require(state['package']==freeze['run_package'] and permit['budget_basis']=={
+            'charged_before_seconds':state['charged_gpu_seconds'],
+            'load_intent_epoch':state['load_intent_epoch'],'legacy_first_load_epoch':state['first_load_epoch']},
+            'run_package_actual_budget_permit')
     return state
 
 def claim_gpu_role(permit,freeze,attempt):
@@ -85,10 +92,8 @@ def supervise(state,spec,freeze,attempt,guard,child,*,watchdog_type=None):
     claim_gpu_role(permit,freeze,attempt)
     write_once(state,'load-permit.json',permit)
     write_once(state,'worker-role-consumed.json',{'attempt':attempt,'permit_sha256':sha(permit),'replay_allowed':False})
-    from training.c5_formal_reuse_budget import FormalBudgetV2
-    now,mono=time.time(),time.monotonic();elapsed=now-validated['first_load_epoch']
-    require(0<=elapsed<=64800,'formal_reuse_original_load_clock')
-    budget=FormalBudgetV2(freeze['resource_boundary'],start={'wall':validated['first_load_epoch'],'mono':mono-elapsed})
+    from training.c5_formal_run_budget import budget_for
+    budget=budget_for(freeze,permit)
     parent=LinuxIdentity()(os.getpid())
     require(parent['uid']==freeze['field_plan']['gpu_process']['uid']
         and parent['boot_id']==freeze['field_plan']['gpu_process']['boot_id'],
@@ -109,17 +114,22 @@ def supervise(state,spec,freeze,attempt,guard,child,*,watchdog_type=None):
         old_handlers={s:signal.signal(s,interrupted) for s in (signal.SIGTERM,signal.SIGINT,signal.SIGHUP)}
         sys.stdout.flush();sys.stderr.flush();pid=os.fork()
         if pid==0:
-            for s in old_handlers:signal.signal(s,signal.SIG_DFL)
-            os.close(gate_w);os.close(progress_r)
+            # A child must never unwind into the parent's finally, even when
+            # its diagnostic stream is already broken or descriptor setup fails.
+            child_status=1
             try:
+                for s in old_handlers:signal.signal(s,signal.SIG_DFL)
+                os.close(gate_w);os.close(progress_r)
                 require(os.read(gate_r,2)==b'G','formal_reuse_preload_gate');os.close(gate_r)
                 q=strict(read_private(state/'qualification.json'))
                 require(q['target']==LinuxIdentity()(os.getpid()) and q['parent_pid']==os.getppid(),
                     'formal_reuse_qualified_child_only')
-                child(progress_w);os._exit(0)
+                child(progress_w);child_status=0
             except BaseException:
-                # Never print private request/answer frames or their exceptions.
-                sys.stderr.write('C5_FORMAL_REUSE_CHILD_FAILED\n');sys.stderr.flush();os._exit(1)
+                # Diagnostics never contain private request/answer material.
+                try:sys.stderr.write('C5_FORMAL_REUSE_CHILD_FAILED\n');sys.stderr.flush()
+                except BaseException:pass
+            finally:os._exit(child_status)
         os.close(gate_r);gate_r=None;os.close(progress_w);progress_w=None
         fd=os.pidfd_open(pid,0);target=LinuxIdentity()(pid)
         require(LinuxIdentity().parent(pid)==os.getpid() and all(target[k]==parent[k]
@@ -175,7 +185,7 @@ def supervise(state,spec,freeze,attempt,guard,child,*,watchdog_type=None):
 class FormalWatchdog:
 
     def __init__(self, start, cap, *, clock=time.monotonic, limits=None):
-        require(type(start) in (int, float) and math.isfinite(start) and (0 < cap <= (3600 if limits is None else 86400 if limits['model_seconds'] == 360 else 18000)), 'reuse_watchdog_reservation')
+        require(type(start) in (int, float) and math.isfinite(start) and (0 < cap <= (3600 if limits is None else 129600 if limits['model_seconds'] == 360 else 18000)), 'reuse_watchdog_reservation')
         self.limits = limits
         self.startup = 180 if limits is None else limits['startup_seconds']
         self.first_gap = 180 if limits is None else limits['first_request_idle_seconds']
@@ -252,4 +262,6 @@ def export_supervisor(state,freeze,guard):
             '--format=csv,noheader,nounits'],text=True,timeout=15),
         'compute_stdout':subprocess.check_output(['nvidia-smi','--query-compute-apps=pid,process_name,used_memory',
             '--format=csv,noheader,nounits'],text=True,timeout=15),'model_or_cuda_calls':0,'private_formal_reads':0}
+    if 'run_package' in freeze:
+        value['worker_resource']=strict(read_private(state/'resource-settlement.json')) if (state/'resource-settlement.json').exists() else None
     guard();return value

@@ -16,14 +16,15 @@ from plugin.rhino_listener.c5_research_native import digest,require
 from plugin.rhino_listener.c5_research_channel import publish_json,read_json
 from training.c5_formal_reuse_deployment import verify
 
-def register(endpoint,spec_sha,runtime_sha):
+def register(endpoint,spec_sha,runtime_sha,*,execution_approved=False):
     require(endpoint in ('mac','gpu') and ROOT==(MAC_SOURCE if endpoint=='mac' else REMOTE_SOURCE),
         'formal_reuse_approved_fixed_deployment')
     s=json.loads((ROOT/SPEC_FILE).read_bytes());r=json.loads((ROOT/FREEZE_FILE).read_bytes())
     require(spec_sha==digest(s) and runtime_sha==digest(r),'formal_reuse_actual_approved_full_hashes')
+    require('run_package' not in s or execution_approved is True,'run_package_actual_execution_separately_required')
     validate_materials(s,r);verify(ROOT,s,r)
     state=MAC_STATE if endpoint=='mac' else REMOTE_STATE
-    record=expected_grant(s,r)
+    record=expected_grant(s,r,execution_approved=execution_approved)
     if state.exists():
         require({p.name for p in state.iterdir()}=={'owner-approval.json'}
             and read_json(state,'owner-approval.json')==record,'formal_reuse_existing_consumption_or_other_grant')
@@ -38,12 +39,17 @@ def register(endpoint,spec_sha,runtime_sha):
         command='import json;from pathlib import Path;print((Path('+repr(str(REMOTE_STATE))+')/"owner-approval.json").read_text())'
         result=subprocess.run(argv(s,'export-supervisor',2)[:-1]+[shlex.join([str(REMOTE_ENV/'bin/python3.11'),*GPU_FLAGS,'-c',command])],capture_output=True,timeout=30)
         require(result.returncode==0 and json.loads(result.stdout)==record,'formal_reuse_both_exact_revision_grants_required')
-        from training.c5_formal_reuse_revision import activate_mac
-        revision=activate_mac(s,r,record)
+        if 'run_package' in s:
+            from training.c5_formal_run_package import activate_package
+            revision=activate_package(s,r,record)
+        else:
+            from training.c5_formal_reuse_revision import activate_mac
+            revision=activate_mac(s,r,record)
     return {'incremental_revision':revision,'registered_exact_spec_sha256':spec_sha,'registered_exact_runtime_sha256':runtime_sha,
         'endpoint':endpoint,'human_origin_cryptographically_proven':False,'model_or_rhino_calls':0,
         'private_formal_reads':0,'campaign_or_role_created':False}
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('endpoint',choices=('mac','gpu'))
     p.add_argument('--approved-spec-sha256',required=True);p.add_argument('--approved-runtime-sha256',required=True)
-    a=p.parse_args();print(json.dumps(register(a.endpoint,a.approved_spec_sha256,a.approved_runtime_sha256),sort_keys=True))
+    p.add_argument('--execution-approved',action='store_true',help='Only after direct separate actual-execution authorization, never material review alone')
+    a=p.parse_args();print(json.dumps(register(a.endpoint,a.approved_spec_sha256,a.approved_runtime_sha256,execution_approved=a.execution_approved),sort_keys=True))

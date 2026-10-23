@@ -49,9 +49,10 @@ def audit_remote(state, spec, freeze):
         expected_ready['startup_receipt']=read_json(state,'worker-startup-ready.json')
         audit_startup_ready(expected_ready['startup_receipt'],raw['worker-startup-ready.json'],freeze,STUDY_ID)
         require(raw['worker-bootstrap-response.json']==expected_ready
-            and raw['owner-approval.json']=={'study_id':STUDY_ID,'actor':'repository_owner','approved':True,
-                'spec_sha256':digest(spec),'runtime_freeze_sha256':digest(freeze),
-                'approval_basis':'direct repository_owner approval of complete disclosed-reuse formal40 spec and runtime freeze'},
+            and raw['owner-approval.json']==__import__('plugin.rhino_listener.c5_formal_reuse_scope',
+                fromlist=['expected_grant']).expected_grant(spec,freeze,
+                    execution_approved=raw['owner-approval.json'].get('actual_execution_approved') is True)
+            and ('run_package' not in spec or raw['owner-approval.json'].get('actual_execution_approved') is True),
             'formal raw ready/grant inventory differs')
     require(ready==expected_ready,'formal model ready binding differs')
     assets, loaded = stop['asset_environment_preflight'], raw['loaded-runtime.json']
@@ -73,7 +74,8 @@ def audit_remote(state, spec, freeze):
         require(type(resource[k]) in (int, float) and math.isfinite(resource[k]), 'formal finite settlement required')
     elapsed = resource['elapsed_seconds_including_load_and_idle']
     audit_resource(resource,boundary,status='formal_worker_stopped_no_replay',
-        first_epoch=read_json(state,'load-permit.json')['first_load_epoch'])
+        first_epoch=read_json(state,'load-permit.json')['first_load_epoch'],
+        package=freeze.get('run_package'),permit=read_json(state,'load-permit.json'))
     summary = raw['worker-summary.json']
     keys = summary['attempted_keys']
     require(isinstance(keys, list) and len(keys) == len(set(keys)) == summary['requests']
@@ -265,7 +267,8 @@ def audit_run(state, cases, spec, freeze, tokenizer, *, source_guard):
         'formal finite Mac resource amounts required')
     elapsed = local['elapsed_seconds_including_load_and_idle']
     audit_resource(local,boundary,status='formal_mac_driver_finished',
-        first_epoch=read_json(state,'load-permit.json')['first_load_epoch'])
+        first_epoch=read_json(state,'load-permit.json')['first_load_epoch'],
+        package=freeze.get('run_package'),permit=read_json(state,'load-permit.json'))
     remote = audit_remote(state, spec, freeze)
     by_id = {c['family_id']: c for c in cases}; scored, keys, first_prompts = [], [], {}
     for slot in order:

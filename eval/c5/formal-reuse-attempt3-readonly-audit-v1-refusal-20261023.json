@@ -1,0 +1,12 @@
+{
+  "basis": "owner_reported_public_error_json",
+  "error_code": "partial_audit_environment_identity",
+  "original_complete_40_gate_passed": false,
+  "private_content_included": false,
+  "raw_private_audit_success_claimed": false,
+  "research_restarted": false,
+  "review_runtime_sha256": "4ab6040d8f8a69e049eb08e6d2c97e23d52c390f5e979dc240151f6af8a30264",
+  "stage": "resource_join",
+  "status": "readonly_partial_audit_refused",
+  "study_id": "c5-rhino-paired-20-reuse-v1"
+}

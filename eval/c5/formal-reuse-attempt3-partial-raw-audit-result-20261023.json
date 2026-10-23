@@ -1,0 +1,125 @@
+{
+  "actor": "repository_owner",
+  "admission_audit": {
+    "attempts_consumed": 3,
+    "first_load_epoch": 1792692329.837715,
+    "formal_exposures": 1,
+    "ledger_usage_unsettled": true,
+    "original_history_preserved": true
+  },
+  "audit_kind": "additional_retrospective_partial_not_original_full40",
+  "c5_6_gate_claim": false,
+  "completed_slot_raw_chains_verified": 6,
+  "default_product_route_changed": false,
+  "evidence_copy_bytes_verified": true,
+  "external_host_seal_sha256": "504008dc3f615b49e8053464d4456a134d18abaedefaeb265c008b59e79f62f6",
+  "failed_pre_model_slot": {
+    "diagnosis": "initial_fixture_readback_rejected",
+    "initial_fixture_validation_rejection_reproduced": true,
+    "known_lifecycle_verified": true,
+    "model_requests": 0,
+    "native_model_dispatches": 0,
+    "pre_model_failure_verified": true
+  },
+  "full40_quality_result": null,
+  "generation_stages_verified": 13,
+  "host_continuity_audit": {
+    "causal_origin_or_emitted_bytes_proven": false,
+    "complete_handler_absence_proven": false,
+    "execution_authority": false,
+    "legacy_byte_closure_verified": false,
+    "limited_visible_continuity_verified": true,
+    "normal_checkpoint_count": 146,
+    "policy_id": "c5-frozen-source-trusted-host-visible-continuity-v2",
+    "raw_external_seal_sha256": "504008dc3f615b49e8053464d4456a134d18abaedefaeb265c008b59e79f62f6",
+    "record_count": 168,
+    "status": "limited_host_continuity_audit_verified",
+    "study_id": "c5-rhino-paired-20-reuse-v1"
+  },
+  "host_request_bindings": {
+    "execution_authority": false,
+    "raw_requests_bound_to_anchored_checkpoints": 103
+  },
+  "manual_per_receipt_attestation": false,
+  "model_or_rhino_calls": 0,
+  "native_model_executions_verified": 4,
+  "native_timing_audits": [
+    {
+      "execution_authority": false,
+      "native_requests_with_complete_timing": 8
+    },
+    {
+      "execution_authority": false,
+      "native_requests_with_complete_timing": 6
+    },
+    {
+      "execution_authority": false,
+      "native_requests_with_complete_timing": 13
+    },
+    {
+      "execution_authority": false,
+      "native_requests_with_complete_timing": 6
+    },
+    {
+      "execution_authority": false,
+      "native_requests_with_complete_timing": 13
+    },
+    {
+      "execution_authority": false,
+      "native_requests_with_complete_timing": 6
+    },
+    {
+      "execution_authority": false,
+      "native_requests_with_complete_timing": 48
+    },
+    {
+      "execution_authority": false,
+      "native_requests_with_complete_timing": 3
+    }
+  ],
+  "new_independent_holdout_claimed": false,
+  "original_c5_no_go_changed": false,
+  "original_complete_40_gate_passed": false,
+  "original_complete_gate_rejection": "formal incomplete run cannot pass audit",
+  "original_evidence_file_count": 1009,
+  "original_evidence_inventory_sha256": "f94e4af40cd4c699f305e662a82e6fbc046b7ca09fb049ce23f2b77db6af31d5",
+  "original_source_or_evidence_modified": false,
+  "paired_summary": null,
+  "partial_quality_scores_reported": false,
+  "private_content_included": false,
+  "qualified_gpu_audit": {
+    "complete_original_stream_capture": true,
+    "permit_first_load_epoch": 1792692329.837715,
+    "physical_origin_cryptographically_proven": false,
+    "qualified_child_exited_reaped": true,
+    "same_gpu_idle_observed": true,
+    "shared_stop_signals": 0
+  },
+  "raw_model_requests_verified": 8,
+  "read_only_retrospective_extension": true,
+  "recorded_slots_attempted": 7,
+  "replay_allowed": false,
+  "research_restarted": false,
+  "residency_audit": {
+    "actual_qualified_gpu_exit_epoch": 1792772286.0806684,
+    "after_gpu_exit_wait_seconds_not_charged": 33.588621616363525,
+    "charged_before_seconds": 66686.97700071335,
+    "gpu_residency_seconds_upper": 1290.1737365722656,
+    "legacy_first_load_epoch": 1792692329.837715,
+    "producer_summary_accepted_as_proof": false
+  },
+  "review_runtime_sha256": "7979bd18e3e5381a2628c90dc6e3451c1b51f4aecaf53137a5e19602f802e43c",
+  "runtime_freeze_sha256": "8f946c2efd02397e04e1fbc143410785371d82748a84c1939f334ba866e495ed",
+  "schema_version": 1,
+  "signature_audit": {
+    "audit_keys_retained": 41,
+    "dispatch_keys_absent": true,
+    "memory_erasure_proven": false,
+    "signed_requests_recomputed": 103
+  },
+  "spec_sha256": "dff43f351b64159341c363c5156578c9da0ad3820a20d8a9baa46c7cde18d9c1",
+  "sqlite_reader_sidecars_confined_to_disposable_private_copy": true,
+  "status": "additional_partial_raw_joint_components_verified_not_full40",
+  "study_id": "c5-rhino-paired-20-reuse-v1",
+  "unattempted_slots": 33
+}
