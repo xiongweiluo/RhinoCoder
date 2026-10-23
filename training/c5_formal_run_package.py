@@ -45,12 +45,20 @@ def replay_package_revision(state, row):
     state.update(scope=new, receipt=None, status='WAITING_OWNER', package=package,
                  accounting_cutover=migration, attempts_max=policy['global_preexposure_loads_max'],
                  charged_gpu_seconds=migration['legacy_elapsed_debit_seconds'], settled_attempts=state.get('settled_attempts',[]),
-                 package_start_attempt=state['attempts'], package_owner_consent=False)
+                 package_start_attempt=state['attempts'], package_owner_consent=False,package_preload_attempt=None)
 
 
 def replay_package_event(state, kind, payload):
     require(state['package'] is not None, 'run_package_event_without_approved_package')
-    if kind == 'package_owner_custody_consent':
+    if kind=='package_owner_session_confirmed':
+        exact(payload,('scope_sha256','automatic_receipt_capture','manual_host_ready_attestation','before_model_loading'))
+        require(not state['active'] and not state['formal_consumed'] and not state['package_owner_consent']
+            and payload=={'scope_sha256':sha(state['scope']),'automatic_receipt_capture':True,
+                'manual_host_ready_attestation':False,'before_model_loading':True},'run_package_actual_session_consent')
+        state['package_owner_consent']=True
+        state['receipt']={'package_session':payload}
+        state['status']='PREPARED'
+    elif kind == 'package_owner_custody_consent':
         exact(payload, ('scope_sha256', 'automatic_receipt_capture', 'manual_per_receipt_attestation'))
         require(not state['active'] and state['receipt'] is not None
                 and payload == {'scope_sha256': sha(state['scope']), 'automatic_receipt_capture': True,
@@ -63,6 +71,7 @@ def replay_package_event(state, kind, payload):
             and payload['manual_owner_attestation'] is False
             and all(type(payload[k]) is str and len(payload[k])==64 and all(c in '0123456789abcdef' for c in payload[k])
                     for k in ('host_ready_sha256','snapshot_sha256')), 'run_package_automatic_preload_is_not_manual_attestation')
+        state['package_preload_attempt']=payload['attempt']
     elif kind == 'gpu_residency_settled':
         exact(payload, ('attempt', 'start_epoch', 'stop_epoch', 'charged_seconds', 'proof_sha256'))
         require(not state['active'] and payload['attempt'] == state['attempts']

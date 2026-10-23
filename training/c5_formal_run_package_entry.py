@@ -29,21 +29,36 @@ def request_rhino_attempt(spec, freeze, attempt):
     return value
 
 
-def prepare_private_session(session, campaign, spec, freeze, public, source):
+def prepare_owner_session(session,campaign,spec,freeze,public,source,*,input_fn=input,output=print):
+    """All human input precedes native preparation and durable load intent."""
     from tools.c5_formal20_owner_run_v2 import verify_private_metadata
-    from training.c5_formal_run_budget import require_recovery_window
-    if not session.get('confirmed'):
-        # Confirmation of the real ready + package rules has just happened in
-        # the same terminal. Collect paths before spending a model load.
-        session['sealed'] = Path(getpass.getpass('原封存 age 文件绝对路径（不回显）：').strip())
-        session['identity'] = Path(getpass.getpass('age identity 绝对路径（不回显）：').strip())
-        verify_private_metadata(session['sealed'], session['identity'], public, freeze)
+    from training.c5_recovery_confirmation import input_status
+    if session.get('confirmed'):return True
+    session['sealed']=Path(getpass.getpass('原封存 age 文件绝对路径（不回显）：').strip())
+    session['identity']=Path(getpass.getpass('age identity 绝对路径（不回显）：').strip())
+    verify_private_metadata(session['sealed'],session['identity'],public,freeze);source()
+    if not campaign.observation()['package_owner_consent']:
+        output('确认本精确运行包、有限预曝光自动恢复，以及真实回执在本终端自动展示并私下保存；不声称逐次人工核对宿主回执。')
+        confirmed=False
+        for _ in range(3):
+            try:status,_=input_status(input_fn('输入“确认并保管”（取消则暂停，未准备Rhino、未加载模型）：'))
+            except (EOFError,KeyboardInterrupt):return False
+            if status=='confirmed':confirmed=True;break
+            if status=='cancelled':return False
+            output('输入未匹配；未准备Rhino、未消费尝试。')
+        if not confirmed:return False
         source()
-        campaign._event('package_owner_custody_consent', {'scope_sha256': __import__(
-            'training.c5_reuse_evidence',fromlist=['sha']).sha(campaign.scope),
-            'automatic_receipt_capture': True, 'manual_per_receipt_attestation': False})
-        session['confirmed'] = True
-    require_recovery_window(spec['run_package'], campaign.observation())
+        from training.c5_reuse_evidence import sha
+        campaign._event('package_owner_session_confirmed',{'scope_sha256':sha(campaign.scope),
+            'automatic_receipt_capture':True,'manual_host_ready_attestation':False,'before_model_loading':True})
+    session['confirmed']=True
+    return True
+
+
+def prepare_private_session(session,campaign,spec,freeze,public,source):
+    from training.c5_formal_run_budget import require_recovery_window
+    require(session.get('confirmed') is True,'run_package_private_session_not_prepared')
+    source();require_recovery_window(spec['run_package'],campaign.observation())
 
 
 def finalize_private_audit(state, spec, freeze, guard, terminal):
@@ -101,6 +116,9 @@ def _run_package(*, output=print):
             if observation['formal_consumed'] or attempt>observation['attempts_max']:
                 return public_status(campaign,attempt_state('mac',max(1,observation['attempts'])))
             require(not observation['active'],'run_package_existing_active_attempt_requires_reconciliation')
+            from tools.c5_formal_reuse_owner import commitment
+            if not prepare_owner_session(session,campaign,spec,freeze,commitment(spec),guard,output=output):
+                return {'status':'WAITING_OWNER','attempt_consumed':False,'native_preparation_started':False}
             state=attempt_state('mac',attempt)
         finally:campaign.log.close()
         error=None;result=None

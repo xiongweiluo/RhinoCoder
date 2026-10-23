@@ -49,9 +49,10 @@ def audit_remote(state, spec, freeze):
         expected_ready['startup_receipt']=read_json(state,'worker-startup-ready.json')
         audit_startup_ready(expected_ready['startup_receipt'],raw['worker-startup-ready.json'],freeze,STUDY_ID)
         require(raw['worker-bootstrap-response.json']==expected_ready
-            and raw['owner-approval.json']=={'study_id':STUDY_ID,'actor':'repository_owner','approved':True,
-                'spec_sha256':digest(spec),'runtime_freeze_sha256':digest(freeze),
-                'approval_basis':'direct repository_owner approval of complete disclosed-reuse formal40 spec and runtime freeze'},
+            and raw['owner-approval.json']==__import__('plugin.rhino_listener.c5_formal_reuse_scope',
+                fromlist=['expected_grant']).expected_grant(spec,freeze,
+                    execution_approved=raw['owner-approval.json'].get('actual_execution_approved') is True)
+            and ('run_package' not in spec or raw['owner-approval.json'].get('actual_execution_approved') is True),
             'formal raw ready/grant inventory differs')
     require(ready==expected_ready,'formal model ready binding differs')
     assets, loaded = stop['asset_environment_preflight'], raw['loaded-runtime.json']

@@ -139,7 +139,7 @@ def capture_parent_grant(state,spec,freeze,guard):
     """
     from plugin.rhino_listener.c5_formal_reuse_scope import expected_grant
     guard();value=read_json(REMOTE_STATE,'owner-approval.json')
-    require(value==expected_grant(spec,freeze),'formal_reuse_original_parent_grant_required')
+    require(value==expected_grant(spec,freeze,execution_approved=value.get('actual_execution_approved') is True),'formal_reuse_original_parent_grant_required')
     publish_json(state,'owner-approval.json',value)
     guard();require(read_json(REMOTE_STATE,'owner-approval.json')==value,
         'formal_reuse_parent_grant_changed_during_capture')

@@ -33,7 +33,7 @@ def confirm(c):
         'public_attempts_authorized':0,'human_origin_cryptographically_proven':False})
 
 
-def package_campaign(tmp_path):
+def package_campaign(tmp_path,*,owner_confirmed=True):
     spec,freeze,_,log=frozen_log(tmp_path)
     now=[FIRST+1000]
     c=FormalCampaign(freeze['incremental_revision']['initial_campaign_scope'],log,wall=lambda:now[0])
@@ -51,9 +51,10 @@ def package_campaign(tmp_path):
     revised=campaign_scope(spec,freeze);head=log.rows()[-1]['record_sha256']
     c._event('run_package_revision_accepted',{'scope':revised,'grant':revision_grant(revised,head),
         'previous_head_sha256':head,'package':package,'accounting_cutover':migration})
-    confirm(c)
-    c._event('package_owner_custody_consent',{'scope_sha256':sha(c.scope),'automatic_receipt_capture':True,
-        'manual_per_receipt_attestation':False})
+    if owner_confirmed:
+        confirm(c)
+        c._event('package_owner_custody_consent',{'scope_sha256':sha(c.scope),'automatic_receipt_capture':True,
+            'manual_per_receipt_attestation':False})
     return spec,freeze,c,now
 
 
@@ -64,7 +65,7 @@ def test_package_revision_preserves_history_attempts_and_first_clock(tmp_path):
         assert v['first_load_epoch']==FIRST and v['attempts']==2 and v['charged_gpu_seconds']==12000
         assert v['attempts_max']==5 and not v['formal_consumed']
         assert c.log.rows()[:len(s['run_package']['prior_campaign_events'])]==s['run_package']['prior_campaign_events']
-        require_startable(c,3);assert c.start()==3
+        require_startable(c,3);assert observed_start(c)==3
         value=c.observation()
         permit={'scope':c.scope,'rows':c.log.rows(),'attempt':3,'first_load_epoch':FIRST,
             'budget_basis':{'charged_before_seconds':12000.,'load_intent_epoch':now[0],
@@ -80,7 +81,7 @@ def test_same_package_has_finite_global_and_package_limits(tmp_path):
     _,_,c,now=package_campaign(tmp_path)
     try:
         for attempt in (3,4,5):
-            require_startable(c,attempt);c.start()
+            require_startable(c,attempt);observed_start(c)
             decision=c.failed('startup',proof())
             now[0]+=10
             c._event('gpu_residency_settled',{'attempt':attempt,'start_epoch':now[0]-10,
@@ -94,7 +95,7 @@ def test_same_package_has_finite_global_and_package_limits(tmp_path):
 def test_unsettled_previous_load_cannot_undercount_and_retry(tmp_path):
     _,_,c,_=package_campaign(tmp_path)
     try:
-        c.start();assert c.failed('startup',proof())=='RETRYABLE_ENGINEERING'
+        observed_start(c);assert c.failed('startup',proof())=='RETRYABLE_ENGINEERING'
         with pytest.raises((ValueError,NativeError),match='usage_unsettled'):require_startable(c,4)
     finally:c.log.close()
 
@@ -172,7 +173,7 @@ def test_automatic_preload_observation_is_not_a_fabricated_manual_confirmation(t
     _,_,c,now=package_campaign(tmp_path)
     try:
         manual_count=sum(row['kind']=='owner_preload_confirmed' for row in c.log.rows())
-        c.start();c.failed('startup',proof());now[0]+=10
+        observed_start(c);c.failed('startup',proof());now[0]+=10
         c._event('gpu_residency_settled',{'attempt':3,'start_epoch':now[0]-10,
             'stop_epoch':now[0],'charged_seconds':10.,'proof_sha256':'a'*64})
         p={'scope_sha256':sha(c.scope),'attempt':4,'host_ready_sha256':'a'*64,
@@ -214,3 +215,44 @@ def test_private_request_pointer_is_atomic_bounded_and_contains_no_paths(tmp_pat
     assert actual==value and actual['attempt']==3 and len(actual['nonce'])==64
     assert set(actual)=={'attempt','nonce','runtime_sha256','study_id'}
     assert not list(tmp_path.glob('*.tmp'))
+
+
+def observed_start(c):
+    c._event('package_preload_observed',{'scope_sha256':sha(c.scope),'attempt':c.observation()['attempts']+1,
+        'host_ready_sha256':'a'*64,'snapshot_sha256':'b'*64,'manual_owner_attestation':False})
+    return c.start()
+
+
+def test_material_review_does_not_create_an_execution_grant_by_default():
+    from plugin.rhino_listener.c5_formal_reuse_scope import expected_grant
+    spec={'run_package':{'fixture':True}};freeze={'fixture':True}
+    template=expected_grant(spec,freeze)
+    assert template['approved'] is template['actual_execution_approved'] is False
+    actual=expected_grant(spec,freeze,execution_approved=True)
+    assert actual['actual_execution_approved'] is actual['within_package_retries_approved'] is True
+
+
+def test_private_input_errors_happen_before_native_preparation_and_do_not_consume(tmp_path,monkeypatch):
+    import training.c5_formal_run_package_entry as entry
+    import tools.c5_formal20_owner_run_v2 as metadata
+    s,f,c,_=package_campaign(tmp_path,owner_confirmed=False)
+    try:
+        before=c.log.rows();answers=iter(['/private/tmp/cpu-fixture.age','/private/tmp/cpu-fixture.identity'])
+        monkeypatch.setattr(entry.getpass,'getpass',lambda _:next(answers))
+        def invalid(*args):raise ValueError('fixture incorrect private path')
+        monkeypatch.setattr(metadata,'verify_private_metadata',invalid)
+        with pytest.raises(ValueError):entry.prepare_owner_session({},c,s,f,{},lambda:None,
+            input_fn=lambda _:pytest.fail('confirmation must follow metadata validity'))
+        assert c.log.rows()==before and c.observation()['attempts']==2
+        assert not c.observation()['package_owner_consent'] and not (tmp_path/'preload-3').exists()
+        answers=iter(['/private/tmp/cpu-fixture.age','/private/tmp/cpu-fixture.identity'])
+        monkeypatch.setattr(metadata,'verify_private_metadata',lambda *args:None)
+        session={}
+        assert entry.prepare_owner_session(session,c,s,f,{},lambda:None,input_fn=lambda _:'确认并保管 ',output=lambda _:None)
+        assert session['confirmed'] and c.observation()['package_owner_consent']
+        assert c.observation()['receipt'].keys()=={'package_session'}
+        # Package consent never substitutes for actual machine ready.
+        with pytest.raises((ValueError,NativeError)):c.start()
+        assert c.observation()['attempts']==2
+        assert observed_start(c)==3
+    finally:c.log.close()

@@ -72,25 +72,22 @@ def run_interactive(attempt, *, package_session=None):
         if not (state/snap_name).exists():
             publish_json(state,snap_name,snapshot(campaign.scope,digest(basis),hashlib.sha256(secrets.token_bytes(32)).hexdigest()))
         snap=read_json(state,snap_name)
-        previous=campaign.observation()['receipt']
-        automatic_preload=False
-        if previous is not None and previous['snapshot']==snap and campaign.observation()['status']=='PREPARED':
-            from training.c5_recovery_confirmation import validate_receipt
-            receipt=validate_receipt(campaign.scope,snap,previous['receipt'])
+        if package_session is not None:
+            require(package_session.get('confirmed') is True and campaign.observation()['package_owner_consent'],
+                'run_package_actual_session_consent_required')
+            campaign._event('package_preload_observed',{'scope_sha256':__import__(
+                'training.c5_reuse_evidence',fromlist=['sha']).sha(campaign.scope),
+                'attempt':attempt,'host_ready_sha256':digest(basis),'snapshot_sha256':digest(snap),
+                'manual_owner_attestation':False})
         else:
-            if package_session is not None and package_session.get('confirmed'):
-                require(campaign.observation()['package_owner_consent'], 'run_package_actual_owner_consent_required')
-                campaign._event('package_preload_observed',{'scope_sha256':__import__(
-                    'training.c5_reuse_evidence',fromlist=['sha']).sha(campaign.scope),
-                    'attempt':attempt,'host_ready_sha256':digest(basis),'snapshot_sha256':digest(snap),
-                    'manual_owner_attestation':False})
-                receipt=previous['receipt'];automatic_preload=True
+            previous=campaign.observation()['receipt']
+            if previous is not None and previous['snapshot']==snap and campaign.observation()['status']=='PREPARED':
+                from training.c5_recovery_confirmation import validate_receipt
+                receipt=validate_receipt(campaign.scope,snap,previous['receipt'])
             else:
-                if package_session is not None:
-                    print('本次确认涵盖同一精确运行包的有限预曝光自动恢复，以及真实回执在本终端自动展示和私下保存；不声称逐次人工见证。',flush=True)
                 receipt=confirm_preload(campaign.scope,snap,source)
-            if receipt is None:return {'status':'WAITING_OWNER_MODEL_NOT_LOADED','attempt_consumed':False}
-            if not automatic_preload:campaign.confirm(snap,receipt)
+                if receipt is None:return {'status':'WAITING_OWNER_MODEL_NOT_LOADED','attempt_consumed':False}
+                campaign.confirm(snap,receipt)
         if package_session is not None:
             from training.c5_formal_run_package_entry import prepare_private_session
             prepare_private_session(package_session,campaign,spec,freeze,public,source)

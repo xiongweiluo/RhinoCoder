@@ -16,14 +16,15 @@ from plugin.rhino_listener.c5_research_native import digest,require
 from plugin.rhino_listener.c5_research_channel import publish_json,read_json
 from training.c5_formal_reuse_deployment import verify
 
-def register(endpoint,spec_sha,runtime_sha):
+def register(endpoint,spec_sha,runtime_sha,*,execution_approved=False):
     require(endpoint in ('mac','gpu') and ROOT==(MAC_SOURCE if endpoint=='mac' else REMOTE_SOURCE),
         'formal_reuse_approved_fixed_deployment')
     s=json.loads((ROOT/SPEC_FILE).read_bytes());r=json.loads((ROOT/FREEZE_FILE).read_bytes())
     require(spec_sha==digest(s) and runtime_sha==digest(r),'formal_reuse_actual_approved_full_hashes')
+    require('run_package' not in s or execution_approved is True,'run_package_actual_execution_separately_required')
     validate_materials(s,r);verify(ROOT,s,r)
     state=MAC_STATE if endpoint=='mac' else REMOTE_STATE
-    record=expected_grant(s,r)
+    record=expected_grant(s,r,execution_approved=execution_approved)
     if state.exists():
         require({p.name for p in state.iterdir()}=={'owner-approval.json'}
             and read_json(state,'owner-approval.json')==record,'formal_reuse_existing_consumption_or_other_grant')
@@ -50,4 +51,5 @@ def register(endpoint,spec_sha,runtime_sha):
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('endpoint',choices=('mac','gpu'))
     p.add_argument('--approved-spec-sha256',required=True);p.add_argument('--approved-runtime-sha256',required=True)
-    a=p.parse_args();print(json.dumps(register(a.endpoint,a.approved_spec_sha256,a.approved_runtime_sha256),sort_keys=True))
+    p.add_argument('--execution-approved',action='store_true',help='Only after direct separate actual-execution authorization, never material review alone')
+    a=p.parse_args();print(json.dumps(register(a.endpoint,a.approved_spec_sha256,a.approved_runtime_sha256,execution_approved=a.execution_approved),sort_keys=True))

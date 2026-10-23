@@ -119,7 +119,7 @@ def formal_replay(scope, rows):
     for row in rows:
         scope = state['scope']
         kind, p = (row['kind'], row['payload'])
-        if kind in ('package_owner_custody_consent','package_preload_observed','gpu_residency_settled'):
+        if kind in ('package_owner_session_confirmed','package_owner_custody_consent','package_preload_observed','gpu_residency_settled'):
             from training.c5_formal_run_package import replay_package_event
             replay_package_event(state,kind,p);continue
         if kind=='run_package_revision_accepted':
@@ -151,7 +151,7 @@ def formal_replay(scope, rows):
             state['status'] = 'RETRYABLE_ENGINEERING'
         elif kind == 'attempt_load_intent':
             exact(p, ('attempt', 'epoch'))
-            require((state['package'] is None or (state['package_owner_consent'] and state['attempts']-state['package_start_attempt'] < state['package']['policy']['package_preexposure_loads_max'])) and state['receipt'] is not None and (not state['active']) and (not state['formal_consumed']) and (state['status'] in ('PREPARED', 'RETRYABLE_ENGINEERING', 'RETRYABLE_ENGINEERING_DIAGNOSTICS_INCOMPLETE')) and (type(p['attempt']) is int) and (p['attempt'] == state['attempts'] + 1) and (p['attempt'] <= state['attempts_max']), 'recovery_attempt_order')
+            require((state['package'] is None or (state['package_owner_consent'] and state['package_preload_attempt']==p['attempt'] and state['attempts']-state['package_start_attempt'] < state['package']['policy']['package_preexposure_loads_max'])) and state['receipt'] is not None and (not state['active']) and (not state['formal_consumed']) and (state['status'] in ('PREPARED', 'RETRYABLE_ENGINEERING', 'RETRYABLE_ENGINEERING_DIAGNOSTICS_INCOMPLETE')) and (type(p['attempt']) is int) and (p['attempt'] == state['attempts'] + 1) and (p['attempt'] <= state['attempts_max']), 'recovery_attempt_order')
             require(type(p['epoch']) in (int, float) and math.isfinite(p['epoch']) and (p['epoch'] > 0) and (state['last_epoch'] is None or p['epoch'] >= state['last_epoch']), 'recovery_clock_regression')
             if state['first_load_epoch'] is None:
                 require(p['epoch'] + scope['development_seconds_max'] <= scope['generation_cutoff_epoch'], 'recovery_complete_window_unavailable')

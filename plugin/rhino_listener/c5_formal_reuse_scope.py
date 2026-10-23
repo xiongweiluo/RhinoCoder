@@ -59,10 +59,15 @@ def file_sha(path):
         for chunk in iter(lambda:stream.read(1048576),b''):h.update(chunk)
     return h.hexdigest()
 
-def expected_grant(spec,freeze):
+def expected_grant(spec,freeze,*,execution_approved=False):
     """Comparison value only; no disk write or human provenance assertion."""
-    return {'study_id':STUDY_ID,'actor':'repository_owner','approved':True,
+    record={'study_id':STUDY_ID,'actor':'repository_owner','approved':True,
         'spec_sha256':digest(spec),'runtime_freeze_sha256':digest(freeze),'approval_basis':APPROVAL_BASIS}
+    if 'run_package' in spec:
+        approved=execution_approved is True
+        record.update(approved=approved,run_package_rules_approved=approved,
+            actual_execution_approved=approved,within_package_retries_approved=approved)
+    return record
 
 def validate_materials(spec,freeze,*,clock=time.time,check_time=True):
     require(type(spec) is dict and type(freeze) is dict
@@ -141,7 +146,10 @@ def validate_materials(spec,freeze,*,clock=time.time,check_time=True):
 
 def authority(spec,freeze,approval,*,clock=time.time,check_time=True):
     value=validate_materials(spec,freeze,clock=clock,check_time=check_time)
-    require(approval==expected_grant(spec,freeze),'formal_reuse_new_exact_owner_approval_required')
+    require('run_package' not in spec or approval.get('actual_execution_approved') is True,
+        'run_package_actual_execution_separately_required')
+    require(approval==expected_grant(spec,freeze,execution_approved=approval.get('actual_execution_approved') is True),
+        'formal_reuse_new_exact_owner_approval_required')
     return value
 
 def validate_formal_binding(spec,freeze,approval):
