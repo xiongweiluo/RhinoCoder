@@ -73,7 +73,8 @@ def audit_remote(state, spec, freeze):
         require(type(resource[k]) in (int, float) and math.isfinite(resource[k]), 'formal finite settlement required')
     elapsed = resource['elapsed_seconds_including_load_and_idle']
     audit_resource(resource,boundary,status='formal_worker_stopped_no_replay',
-        first_epoch=read_json(state,'load-permit.json')['first_load_epoch'])
+        first_epoch=read_json(state,'load-permit.json')['first_load_epoch'],
+        package=freeze.get('run_package'),permit=read_json(state,'load-permit.json'))
     summary = raw['worker-summary.json']
     keys = summary['attempted_keys']
     require(isinstance(keys, list) and len(keys) == len(set(keys)) == summary['requests']
@@ -265,7 +266,8 @@ def audit_run(state, cases, spec, freeze, tokenizer, *, source_guard):
         'formal finite Mac resource amounts required')
     elapsed = local['elapsed_seconds_including_load_and_idle']
     audit_resource(local,boundary,status='formal_mac_driver_finished',
-        first_epoch=read_json(state,'load-permit.json')['first_load_epoch'])
+        first_epoch=read_json(state,'load-permit.json')['first_load_epoch'],
+        package=freeze.get('run_package'),permit=read_json(state,'load-permit.json'))
     remote = audit_remote(state, spec, freeze)
     by_id = {c['family_id']: c for c in cases}; scored, keys, first_prompts = [], [], {}
     for slot in order:

@@ -38,8 +38,12 @@ def register(endpoint,spec_sha,runtime_sha):
         command='import json;from pathlib import Path;print((Path('+repr(str(REMOTE_STATE))+')/"owner-approval.json").read_text())'
         result=subprocess.run(argv(s,'export-supervisor',2)[:-1]+[shlex.join([str(REMOTE_ENV/'bin/python3.11'),*GPU_FLAGS,'-c',command])],capture_output=True,timeout=30)
         require(result.returncode==0 and json.loads(result.stdout)==record,'formal_reuse_both_exact_revision_grants_required')
-        from training.c5_formal_reuse_revision import activate_mac
-        revision=activate_mac(s,r,record)
+        if 'run_package' in s:
+            from training.c5_formal_run_package import activate_package
+            revision=activate_package(s,r,record)
+        else:
+            from training.c5_formal_reuse_revision import activate_mac
+            revision=activate_mac(s,r,record)
     return {'incremental_revision':revision,'registered_exact_spec_sha256':spec_sha,'registered_exact_runtime_sha256':runtime_sha,
         'endpoint':endpoint,'human_origin_cryptographically_proven':False,'model_or_rhino_calls':0,
         'private_formal_reads':0,'campaign_or_role_created':False}

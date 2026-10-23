@@ -23,7 +23,7 @@ def validate_load_permit(permit,spec,freeze,attempt):
     from training.c5_formal_reuse_admission import campaign_scope
     from training.c5_formal_reuse_admission import formal_replay as replay
     from training.c5_reuse_evidence import ZERO
-    require(type(permit) is dict and set(permit)=={'scope','rows','attempt','first_load_epoch'}
+    require(type(permit) is dict and set(permit)==({'scope','rows','attempt','first_load_epoch','budget_basis'} if 'run_package' in freeze else {'scope','rows','attempt','first_load_epoch'})
         and permit['scope']==campaign_scope(spec,freeze) and type(permit['attempt']) is int and permit['attempt']==attempt
         and type(permit['rows']) is list and 1<=len(permit['rows'])<=2048,'formal_reuse_load_permit_shape')
     from training.c5_formal_reuse_revision import initial_scope
@@ -44,6 +44,13 @@ def validate_load_permit(permit,spec,freeze,attempt):
     require(state['active'] and state['attempts']==attempt and not state['formal_consumed']
         and state['status']=='LOADING' and state['first_load_epoch']==permit['first_load_epoch'],
         'formal_reuse_load_permit_preprivate_order')
+    if 'run_package' in freeze:
+        from training.c5_formal_run_package import verify_package_prefix
+        verify_package_prefix(freeze['run_package'],permit['rows'])
+        require(state['package']==freeze['run_package'] and permit['budget_basis']=={
+            'charged_before_seconds':state['charged_gpu_seconds'],
+            'load_intent_epoch':state['load_intent_epoch'],'legacy_first_load_epoch':state['first_load_epoch']},
+            'run_package_actual_budget_permit')
     return state
 
 def claim_gpu_role(permit,freeze,attempt):
@@ -85,10 +92,8 @@ def supervise(state,spec,freeze,attempt,guard,child,*,watchdog_type=None):
     claim_gpu_role(permit,freeze,attempt)
     write_once(state,'load-permit.json',permit)
     write_once(state,'worker-role-consumed.json',{'attempt':attempt,'permit_sha256':sha(permit),'replay_allowed':False})
-    from training.c5_formal_reuse_budget import FormalBudgetV2
-    now,mono=time.time(),time.monotonic();elapsed=now-validated['first_load_epoch']
-    require(0<=elapsed<=64800,'formal_reuse_original_load_clock')
-    budget=FormalBudgetV2(freeze['resource_boundary'],start={'wall':validated['first_load_epoch'],'mono':mono-elapsed})
+    from training.c5_formal_run_budget import budget_for
+    budget=budget_for(freeze,permit)
     parent=LinuxIdentity()(os.getpid())
     require(parent['uid']==freeze['field_plan']['gpu_process']['uid']
         and parent['boot_id']==freeze['field_plan']['gpu_process']['boot_id'],

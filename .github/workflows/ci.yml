@@ -1,59 +1,118 @@
 name: CI
 
 on:
-  push:
   pull_request:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  validate:
+  impact:
     runs-on: ubuntu-latest
+    outputs:
+      python_scope: ${{ steps.select.outputs.python_scope }}
+      ui: ${{ steps.select.outputs.ui }}
+      release: ${{ steps.select.outputs.release }}
+      package: ${{ steps.select.outputs.package }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - id: select
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = pull_request ]; then
+            python tools/select_affected_checks.py --base "$BASE_SHA" --head "$HEAD_SHA"
+          else
+            python tools/select_affected_checks.py --full
+          fi
+  python:
+    needs: impact
+    if: needs.impact.outputs.python_scope != 'none'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
           python-version: "3.11"
-      - name: Install dependencies
-        run: python -m pip install -r requirements-lock.txt
-      - name: Install UI dependencies
-        run: npm ci --prefix agent/ui
+      - run: python -m pip install -r requirements-lock.txt
       - name: Compile
         run: python -m compileall -q agent data_pipeline eval plugin tools training
-      - name: Recovery Linux fork and pidfd CPU gate
-        run: python -m pytest -q --tb=short eval/test_c5_recovery_field.py::test_actual_gpu_supervisor_cpu_child_is_qualified_before_loader_and_stops_once
-      - name: Formal reuse complete public material gate
-        run: python tools/check_c5_formal_reuse_candidate.py
-      - name: Formal reuse Linux qualification and shared stop CPU gate
-        run: python -m pytest -q --tb=short eval/test_c5_formal_reuse_supervisor_linux.py
-      - name: Unit tests
-        run: python -m pytest -q
-      - name: Build UI
-        run: npm run build --prefix agent/ui
-      - name: Browser end-to-end demo
-        run: npm run test:e2e --prefix agent/ui
-      - name: Build public recruiter demo
-        run: npm run build:public --prefix agent/ui
-      - name: Check UI performance budget
-        run: python tools/check_ui_performance.py
-      - name: Browser end-to-end public deployment
-        run: npm run test:e2e:public --prefix agent/ui
-      - name: Validate benchmark tasks
+      - name: Unit and actual Linux startup/stop regressions, once
+        env:
+          TEST_SCOPE: ${{ needs.impact.outputs.python_scope }}
+        run: |
+          if [ "$TEST_SCOPE" = c5 ]; then
+            python -m pytest -q --tb=short eval/test_c5*.py
+          else
+            python -m pytest -q --tb=short
+          fi
+      - name: Current public run package (never grants or executes)
+        run: python tools/prepare_c5_run_package.py --check
+      - run: python tools/check_secrets.py
+  ui:
+    needs: impact
+    if: needs.impact.outputs.ui == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      - run: npm ci --prefix agent/ui
+      - run: npm run build --prefix agent/ui
+      - run: npm run test:e2e --prefix agent/ui
+      - run: npm run build:public --prefix agent/ui
+      - run: python tools/check_ui_performance.py
+      - run: npm run test:e2e:public --prefix agent/ui
+  release:
+    needs: impact
+    if: needs.impact.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -r requirements-lock.txt
+      - name: Benchmark, trace, release and training templates
         run: |
           python eval/run_eval.py --dry-run
           python tools/check_collection_campaign.py
-      - name: Scan secrets
-        run: python tools/check_secrets.py
-      - name: Audit trace admission and release data
-        run: |
           python tools/audit_trace_data.py
           python tools/audit_release_data.py
           python tools/audit_p1_demo.py
           python tools/audit_p2_hard_set.py
           python tools/audit_p2_results.py
-      - name: Check release versions and documentation
-        run: python tools/check_release_consistency.py
-      - name: Validate locked training and school GPU templates
-        run: |
+          python tools/check_release_consistency.py
           python tools/run_training.py audit --no-data
           python tools/run_training.py cluster-template-audit
+  validate:
+    if: always()
+    needs: [impact, python, ui, release]
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python - <<'PY'
+          import json, os
+          results=json.loads(os.environ['RESULTS'])
+          assert results['impact']['result']=='success',results
+          assert all(v['result'] in ('success','skipped') for v in results.values()),results
+          print('All selected checks passed; unselected checks are explicitly skipped.')
+          PY

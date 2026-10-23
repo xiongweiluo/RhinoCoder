@@ -62,7 +62,10 @@ def preflight():
         project_prefixes=('agent','training','tools','plugin','data_pipeline'))
     inventory=verify(freeze,freeze['field_plan'],source)
     snapshot=Path(freeze['model_assets']['snapshot_dir'])
-    verified=verify_snapshot(snapshot,Path('/data/RhinoCoder-c5/base-snapshot-manifest.json'))
+    # Loader preflight above already verified all fourteen snapshot bytes.
+    # Bind its result without reading the same multi-GB weights a second time.
+    verified={'revision':snapshot.name,'manifest_sha256':file_sha(Path('/data/RhinoCoder-c5/base-snapshot-manifest.json')),'files':14}
+    require(digest(verified)==freeze['model_identities']['base'],'run_package_original_snapshot_identity')
     assets={'environment':freeze['environment'],'environment_sha256':freeze['environment_sha256'],
         'snapshot':verified,'adapter_sha256':freeze['model_identities']['lora'],
         'adapter_files':freeze['model_assets']['adapter_files'],'source_files':freeze['source_files'],
@@ -71,7 +74,7 @@ def preflight():
     require(assets['fixed_public_files']==freeze['fixed_public_files'],'formal_reuse_public_deployment_drift')
     return assets,inventory,snapshot
 
-def approved_scope():
+def approved_scope(*,with_assets=True):
     spec,freeze=public(ROOT/SPEC_FILE),public(ROOT/FREEZE_FILE)
     approval=read_json(REMOTE_STATE,'owner-approval.json')
     freeze_sha=authority(spec,freeze,approval,check_time=False)
@@ -91,7 +94,8 @@ def approved_scope():
     original=source
     def guarded():lineage();return original()
     source=guarded
-    source();actual,inventory,snapshot=preflight()
+    source()
+    actual,inventory,snapshot=preflight() if with_assets else (None,None,None)
     return spec,freeze,freeze_sha,source,actual,inventory,snapshot
 
 
@@ -151,9 +155,8 @@ def serve_child(progress_fd,attempt):
     publish_json(state, 'formal20.worker-started.claim.json', {'study_id': STUDY_ID,
         'runtime_freeze_sha256': freeze_sha, 'replay_allowed': False})
     permit=read_json(state,'load-permit.json')
-    now,mono=__import__('time').time(),__import__('time').monotonic()
-    budget=FormalBudget(freeze['resource_boundary'],start={'wall':permit['first_load_epoch'],
-        'mono':mono-(now-permit['first_load_epoch'])})
+    from training.c5_formal_run_budget import budget_for
+    budget=budget_for(freeze,permit)
     output, settled, status = sys.stdout.buffer, False, 'formal_worker_failed_no_replay'
     def alarm(*_): raise TimeoutError('formal worker resource stop')
     signal.signal(signal.SIGALRM, alarm)
@@ -263,7 +266,7 @@ def serve_child(progress_fd,attempt):
 def serve(attempt):
     from training.c5_formal_reuse_admission import attempt_state
     from training.c5_formal_reuse_supervisor import supervise
-    spec,freeze,_,guard,_,_,_=approved_scope()
+    spec,freeze,_,guard,_,_,_=approved_scope(with_assets=False)
     supervise(attempt_state('gpu',attempt),spec,freeze,attempt,guard,
         lambda fd:serve_child(fd,attempt))
 
@@ -271,7 +274,7 @@ def serve(attempt):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode', choices=('preflight', 'import-preflight', 'serve', 'stop', 'export-supervisor'))
-    parser.add_argument('--attempt',type=int,choices=(1,2,3),default=1)
+    parser.add_argument('--attempt',type=int,choices=range(1,6),default=1)
     args = parser.parse_args()
     if args.mode == 'preflight': print(frame(preflight()[0]).decode(), end='')
     elif args.mode=='import-preflight':print(frame(import_preflight()).decode(),end='')
@@ -279,7 +282,8 @@ def main():
     else:
         from training.c5_formal_reuse_supervisor import independent_stop,export_supervisor
         from training.c5_formal_reuse_admission import attempt_state
-        _,freeze,_,guard,_,_,_=approved_scope()
+        from training.c5_formal_reuse_control import control_scope
+        _,freeze,guard=control_scope(ROOT)
         state=attempt_state('gpu',args.attempt)
         result=independent_stop(state,guard) if args.mode=='stop' else export_supervisor(state,freeze,guard)
         print(frame(result).decode(),end='')

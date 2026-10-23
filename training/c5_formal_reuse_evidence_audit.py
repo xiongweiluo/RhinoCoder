@@ -13,13 +13,25 @@ from plugin.rhino_listener.c5_research_channel import read_json
 from plugin.rhino_listener.c5_research_gate import signature
 from training.c5_reuse_evidence import sha,ZERO
 
-def audit_resource(value,boundary,*,status,first_epoch):
+def audit_resource(value,boundary,*,status,first_epoch,package=None,permit=None):
     from plugin.rhino_listener.c5_formal_reuse_resource_policy import validate_boundary
     validate_boundary(boundary)
     require(value['status']==status and value['resource_boundary_sha256']==digest(boundary)
         and value['replay_allowed'] is False,'formal_reuse_resource_receipt_binding')
     for key in ('elapsed_seconds_including_load_and_idle','cap_seconds','start_epoch','stop_epoch'):
         require(type(value[key]) in (int,float) and math.isfinite(value[key]),'formal_reuse_finite_resource_observation')
+    if package is not None:
+        from plugin.rhino_listener.c5_run_package_policy import validate_policy
+        policy=validate_policy(package['policy']);basis=permit['budget_basis']
+        require(value.get('accounting')=='gpu_residency_v1' and value['run_package_sha256']==digest(package)
+            and value['cap_seconds']==policy['gpu_residency_seconds_max']
+            and value['legacy_first_load_epoch']==first_epoch==basis['legacy_first_load_epoch']
+            and value['start_epoch']==basis['load_intent_epoch']
+            and value['charged_before_seconds']==basis['charged_before_seconds']
+            and 0<=value['stop_epoch']-value['start_epoch']<=value['elapsed_seconds_including_load_and_idle']
+            and value['charged_before_seconds']+value['elapsed_seconds_including_load_and_idle']<=value['cap_seconds']
+            and value['stop_epoch']<=package['lease_expiry_epoch'], 'run_package_raw_resource_overrun')
+        return value['elapsed_seconds_including_load_and_idle']
     require(value['cap_seconds']==64800 and value['start_epoch']==first_epoch
         and 0<=value['elapsed_seconds_including_load_and_idle']<=64800
         and boundary['development_elapsed_to_release_seconds']+value['elapsed_seconds_including_load_and_idle']

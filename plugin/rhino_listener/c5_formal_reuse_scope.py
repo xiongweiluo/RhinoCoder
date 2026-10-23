@@ -24,6 +24,19 @@ FREEZE_FILE='eval/c5/formal-reuse-runtime-freeze-20261022-r1.json'
 RESOURCE_FILE='eval/c5/formal-reuse-resource-boundary-20261022.json'
 FACTS_FILE='eval/c5/formal-reuse-field-facts-20261022-r1.json'
 ACCEPTANCE_FILE='eval/c5/formal-reuse-audit-revision-acceptance-20261022.json'
+# Only a deployed package carries this public, hash-pinned layout marker.
+# Historical r1 sources have no marker and keep their original fixed constants.
+import json as _json
+from .c5_run_package_policy import LAYOUT_FILE, validate_layout
+_layout_path=Path(__file__).resolve().parents[2]/LAYOUT_FILE
+PACKAGE_LAYOUT=None
+if _layout_path.is_file():
+    PACKAGE_LAYOUT=validate_layout(_json.loads(_layout_path.read_bytes()))
+    INSTANCE=PACKAGE_LAYOUT['package_id']
+    MAC_SOURCE=Path(PACKAGE_LAYOUT['mac_source_root']);MAC_STATE=Path(PACKAGE_LAYOUT['mac_state_root'])
+    REMOTE_SOURCE=Path(PACKAGE_LAYOUT['gpu_source_root']);REMOTE_STATE=Path(PACKAGE_LAYOUT['gpu_state_root'])
+    SPEC_FILE=PACKAGE_LAYOUT['spec_file'];FREEZE_FILE=PACKAGE_LAYOUT['runtime_file']
+
 APPROVAL_BASIS='direct repository_owner approval of complete disclosed-reuse formal40 spec and runtime freeze'
 SSH_SOCKET=Path('/private/tmp/c5-formal-22158.control')
 SSH_PORT=22158
@@ -68,12 +81,19 @@ def validate_materials(spec,freeze,*,clock=time.time,check_time=True):
     require(spec.get('comparison')==COMPARISON and spec.get('base_revision')==COMPARISON['base_revision']
         and spec.get('adapter_sha256')==COMPARISON['adapter_sha256']
         and spec.get('contract_id')==COMPARISON['contract_id'],'formal_reuse_model_contract_drift')
+    package=spec.get('run_package')
+    if package is not None:
+        from .c5_run_package_policy import validate_policy,validate_migration
+        validate_policy(package['policy']);validate_migration(package['timing_migration'])
+        require(freeze.get('run_package')==package and PACKAGE_LAYOUT==package['layout']
+            and LAYOUT_FILE in freeze['source_files'], 'run_package_complete_material_binding')
     require(all(spec.get(k) is False for k in ('original_final_entry_allowed','original_80_reuse_allowed',
-        'automatic_retry_allowed','task_replacement_after_claim_allowed','default_route_change_allowed',
+        'task_replacement_after_claim_allowed','default_route_change_allowed',
         'new_independent_holdout_claimed','original_c5_no_go_changed')),'formal_reuse_history_or_route_drift')
+    require(spec.get('automatic_retry_allowed') is (package is not None),'run_package_explicit_retry_authority')
     require(spec.get('max_model_requests')==56 and spec.get('max_generation_stages')==112
         and spec.get('per_request_timeout_seconds')==360 and spec.get('startup_timeout_seconds')==600
-        and spec.get('formal_gpu_seconds_max')==64800 and spec.get('raw_stdout_cap_bytes')==67108864
+        and spec.get('formal_gpu_seconds_max')==(86400 if package is not None else 64800) and spec.get('raw_stdout_cap_bytes')==67108864
         and spec.get('raw_stderr_cap_bytes')==2097152,'formal_reuse_fixed_capacity')
     from .c5_formal_reuse_limits import watchdog_limits
     watchdog_limits(spec)
@@ -116,7 +136,7 @@ def validate_materials(spec,freeze,*,clock=time.time,check_time=True):
         and boundary['export_reserve_seconds']==spec.get('export_reserve_seconds')
         and spec.get('latest_owner_start_epoch')==boundary['generation_cutoff_epoch']-64800,
         'formal_reuse_actual_resource_binding')
-    if check_time:require(clock()<=spec['latest_owner_start_epoch'],'formal_reuse_full_window_unavailable')
+    if check_time:require(clock()<=spec['model_generation_cutoff_epoch'] if package is not None else clock()<=spec['latest_owner_start_epoch'],'formal_reuse_full_window_unavailable')
     return digest(freeze)
 
 def authority(spec,freeze,approval,*,clock=time.time,check_time=True):
@@ -138,6 +158,6 @@ def validate_formal_binding(spec,freeze,approval):
         'formal_capacity_verified':True,'policy_binding_verified':True,'whole_field_authority_verified':False}
 
 def attempt_state(endpoint,attempt):
-    require(endpoint in ('mac','gpu') and type(attempt) is int and 1<=attempt<=3,
+    require(endpoint in ('mac','gpu') and type(attempt) is int and 1<=attempt<=(5 if PACKAGE_LAYOUT is not None else 3),
         'formal_reuse_bounded_preexposure_attempt')
     return (MAC_STATE if endpoint=='mac' else REMOTE_STATE)/('preload-'+str(attempt))
