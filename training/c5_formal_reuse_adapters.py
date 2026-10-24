@@ -27,6 +27,24 @@ class NativeAdapterV2(NativeAdapter):
         hub_limit=81 if 'slot_protocol' in spec.get('run_package',{}) else 41
         super().__init__(*args,channel_factory=partial(channel_factory,cleanup_guard=self.cleanup_guard,hub_limit=hub_limit),**kwargs)
         self.armed=False
+        self._tail_closed, self._tail_stopped = {}, {}
+
+    def close_slot(self, slot_id):
+        from training.c5_slot_tail_repair import enabled
+        if not enabled(self.spec): return super().close_slot(slot_id)
+        value = super().close_slot(slot_id)
+        require(value.get('status') == 'closed'
+            and value.get('close_capture',{}).get('fixture_registry_absent') is True
+            and value.get('key_absence') == {'key_removed':True,'actual_absence_checked':True},
+            'slot_tail_close_receipt_incomplete')
+        self._tail_closed[slot_id] = value
+        return value
+
+    def stop_slot(self, slot_id):
+        from training.c5_slot_tail_repair import enabled, stop_known_child
+        if not enabled(self.spec): return super().stop_slot(slot_id)
+        from training.c5_formal_reuse_adapters_base import database_backup
+        return stop_known_child(self, slot_id, database_backup, publish_json)
 
     def shared_health(self,slot_id):
         self.cleanup_guard()

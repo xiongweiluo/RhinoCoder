@@ -33,7 +33,7 @@ class SceneView:
 
 
 class ResearchSigner:
-    def __init__(self, store, scene, secret, owner_freeze_sha256, task, *, max_writes, max_reads, clock=time.time):
+    def __init__(self, store, scene, secret, owner_freeze_sha256, task, *, max_writes, max_reads, clock=time.time, late_ttl=False):
         require(isinstance(owner_freeze_sha256, str) and SHA.fullmatch(owner_freeze_sha256), "owner source/spec binding required")
         require(isinstance(task, str) and 0 < len(task) <= 4096, "bounded task required")
         require(type(max_writes) is int and 0 <= max_writes <= 12 and type(max_reads) is int and 0 <= max_reads <= 12, "bounded task policy required")
@@ -42,6 +42,8 @@ class ResearchSigner:
         self.owner_freeze, self.clock = owner_freeze_sha256, clock
         self.max_writes, self.max_reads, self.reads = max_writes, max_reads, 0
         self.blocked = False
+        self.late_ttl = late_ttl
+        self.last_issue_timing = None
         with store._tx() as db:
             db.execute("CREATE TABLE IF NOT EXISTS c5_model_handoff (observation_sha256 TEXT PRIMARY KEY, state TEXT NOT NULL, request_id TEXT UNIQUE, payload_sha256 TEXT)")
 
@@ -89,9 +91,20 @@ class ResearchSigner:
                     "model observation already reserved; never reissue")
             db.execute("INSERT INTO c5_model_handoff VALUES(?,'reserved',NULL,NULL)",(observation_sha,))
         if op in READS:
+            if self.late_ttl:
+                require(self.scene.snapshot() == current, "scene changed before late TTL")
             row_sha = None
             request_id = secrets.token_urlsafe(24)
             expiry = int(self.clock()) + 120
+        elif self.late_ttl:
+            link, state = self.store._prepare_consumed_delegated_c5(
+                self.task, op, args, scene=self.scene, ttl_seconds=120,
+                delegated_scope=DELEGATED_HEADLESS_SCOPE,
+            )
+            row, _ = self.store.inspect(link)
+            require(row["status"] == "consumed" and state == current,
+                    "late TTL consumed scene differs")
+            row_sha, request_id, expiry = digest(row), link.request_id, row["expires_at"]
         else:
             link = self.store.prepare(self.task,op,args,scene=self.scene,
                                       ttl_seconds=120,delegated_scope=DELEGATED_HEADLESS_SCOPE)
@@ -101,7 +114,16 @@ class ResearchSigner:
             require(row["status"] == "consumed", "permission not consumed")
             require(self.scene.snapshot() == state, "scene changed after consumption")
             row_sha, request_id, expiry = digest(row), link.request_id, row["expires_at"]
-        expected = self.scene.atomic.snapshot()
+        # The late-TTL branch has already made its final actual scene readback;
+        # further captures here would spend the newly issued one-shot permission.
+        expected = before if self.late_ttl else self.scene.atomic.snapshot()
+        if self.late_ttl:
+            issued_epoch = self.clock()
+            require(30 <= expiry - issued_epoch <= 120,
+                    "late handoff TTL exhausted before signature")
+            self.last_issue_timing = {"issued_epoch": issued_epoch,
+                "expires_at": expiry, "remaining_seconds": expiry-issued_epoch,
+                "live_captures_completed_before_ttl": True, "ttl_seconds": 120}
         if link is not None:
             require(expected["revision"] == row["scene_revision"] and expected["scene_sha256"] == row["scene_sha256"], "scene changed before signature")
         payload = {"version":1,"request_id":request_id,"task_sha256":task_sha256(self.task),

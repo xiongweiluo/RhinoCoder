@@ -6,6 +6,7 @@ and creates started before preparation. Tests inject synthetic channels/pipes.
 from __future__ import annotations
 
 import hashlib
+from contextlib import closing
 import os
 import secrets
 import sqlite3
@@ -25,6 +26,7 @@ from training.c5_formal_reuse_model_wire import request, FramedPipe, rebind_obse
 from training.c5_modelbridge_joint_audit import semantic
 from training.c5_modelbridge_runtime import file_sha
 from training.c5_research_permission import ResearchSigner, SceneView
+from plugin.rhino_listener.c5_slot_tail_policy import enabled as tail_repair_enabled
 from training.consent_candidate import ConsentStore
 from training.c5_inventory import load_public_mcp_tools
 
@@ -64,9 +66,15 @@ class NativeChannel:
 
 
 class ActualScene:
-    def __init__(self, channel, expected, record): self.channel, self.expected, self.record = channel, expected, record
+    def __init__(self, channel, expected, record, *, tail_repair=False):
+        self.channel, self.expected, self.record = channel, expected, record
+        self.tail_repair = tail_repair
     def _capture(self):
         actual = self.channel.control('capture')
+        if (self.tail_repair and actual.get('status')=='captured'
+            and (actual.get('state')!=self.expected['state'] or actual.get('native')!=self.expected['native'])):
+            from training.c5_slot_tail_repair import SigningSceneDrift
+            raise SigningSceneDrift('slot_tail_actual_signing_scene_drift')
         require(actual['status'] == 'captured' and actual['state'] == self.expected['state']
             and actual['native'] == self.expected['native'], 'formal actual scene drift while signing')
         self.record['signing_captures'].append(actual)
@@ -80,9 +88,9 @@ def database_backup(directory, name):
     source, target = directory / (name + '.sqlite3'), directory / (name + '-audit.sqlite3')
     fd = os.open(target, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
     os.close(fd)
-    with sqlite3.connect(source.resolve().as_uri() + '?mode=ro', uri=True) as src:
+    with closing(sqlite3.connect(source.resolve().as_uri() + '?mode=ro', uri=True)) as src:
         src.execute('PRAGMA query_only=ON')
-        with sqlite3.connect(target) as dst:
+        with closing(sqlite3.connect(target)) as dst:
             src.backup(dst)
             require(dst.execute('PRAGMA quick_check').fetchone()[0] == 'ok', 'formal backup invalid')
     return file_sha(target)
@@ -162,17 +170,19 @@ class NativeAdapter:
         if denied is not None: return denied
         record = {'capture': before, 'post_model_capture': None, 'signing_captures': [],
             'request': sent, 'response': wire, 'handoff_request_id': None}
-        proxy = ActualScene(child, before, record)
+        proxy = ActualScene(child, before, record, tail_repair=tail_repair_enabled(self.spec))
         store, signer = self.signers[slot_id]
         if signer is None:
             p = self.plans['plans'][slot_id]
             signer = ResearchSigner(store, SceneView(proxy, proxy.semantic_scene), child.secret, digest(self.freeze), task_text,
-                max_writes=p['max_writes'], max_reads=p['max_reads'])
+                max_writes=p['max_writes'], max_reads=p['max_reads'],
+                late_ttl=tail_repair_enabled(self.spec))
             self.signers[slot_id] = (store, signer)
         else:
             signer.scene = SceneView(proxy, proxy.semantic_scene)
         envelope = signer.issue(observed, schemas=_schemas())
         record['handoff_request_id'] = envelope['payload']['request_id']
+        if signer.late_ttl: record['ttl_issue'] = signer.last_issue_timing
         # Save the consumed/signed handoff before dispatch; crashes retain it.
         step = sent['step_index']
         publish_json(self.state / slot_id, 'signing-%d.json' % step, record)

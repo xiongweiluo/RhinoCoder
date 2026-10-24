@@ -71,22 +71,31 @@ def activate(spec, freeze, grant):
 
     authority(spec, freeze, grant)
     p = validate_protocol(spec["run_package"]["slot_protocol"])
-    prior_audit = read_json(
-        Path(spec["run_package"]["original_audit_root"]),
-        "owner-public-partial-audit-summary.json",
-    )
+    from plugin.rhino_listener.c5_slot_tail_policy import enabled as tail_enabled
+    reference=spec['run_package'].get('tail_repair',{}).get('prior_review')
+    prior_audit = (read_json(Path(reference['review_root']),reference['summary_name'])
+        if tail_enabled(spec) else read_json(
+            Path(spec["run_package"]["original_audit_root"]),
+            "owner-public-partial-audit-summary.json"))
     prior_settlement = read_json(
         Path(spec["run_package"]["original_settlement_root"]),
         spec["run_package"]["original_settlement_name"],
     )
-    require(
-        digest(prior_audit) == p["prior_audit_sha256"]
-        and digest(prior_settlement) == p["prior_settlement_sha256"]
-        and prior_audit["original_source_or_evidence_modified"] is False
-        and prior_audit["qualified_gpu_audit"]["qualified_child_exited_reaped"]
-        and prior_settlement["public_status"]["current_load_unsettled"] is False,
-        "slot_original_audit_and_settlement_required",
-    )
+    if tail_enabled(spec):
+        from training.c5_slot_tail_prior import check_review
+        check_review(prior_audit,prior_settlement,reference)
+        require(digest(prior_audit)==p['prior_audit_sha256']
+            and digest(prior_settlement)==p['prior_settlement_sha256'],
+            'slot_tail_plan_prior_review_binding')
+    else:
+        require(
+            digest(prior_audit) == p["prior_audit_sha256"]
+            and digest(prior_settlement) == p["prior_settlement_sha256"]
+            and prior_audit["original_source_or_evidence_modified"] is False
+            and prior_audit["qualified_gpu_audit"]["qualified_child_exited_reaped"]
+            and prior_settlement["public_status"]["current_load_unsettled"] is False,
+            "slot_original_audit_and_settlement_required",
+        )
     log = EvidenceLog(
         ROOTS["mac"] / NAMESPACE / "ledger",
         initial_scope(spec, freeze),
@@ -176,7 +185,7 @@ def _summary(spec, freeze, campaign, state, proof, status, *, error=None):
             "unattempted": 33,
             "complete": False,
             "original_result_unchanged": True,
-            "original_audit_sha256": plan["prior_audit_sha256"],
+            "original_audit_sha256": spec["run_package"].get("tail_repair",{}).get("prior_review",{}).get("first_audit_sha256",plan["prior_audit_sha256"]),
         },
         "continuation": {
             "attempted": (
@@ -207,6 +216,14 @@ def _summary(spec, freeze, campaign, state, proof, status, *, error=None):
         "private_content_included": False,
         "execution_authority": False,
     }
+    if spec['run_package'].get('tail_repair'):
+        result['evidence_reuse_prior_tail']={
+            'original_full_phase_gate_passed':False,
+            'original_refusal_retained':'slot_final_exact_claim_population',
+            'verified_raw_components_reused':32,
+            'owner_review_sha256':spec['run_package']['tail_repair']['prior_review']['summary_sha256'],
+            'historical_last_failed_slot_rewritten':False,
+        }
     result["prior_phase_records"] = [
         {
             "kind": p["plan"]["kind"],
@@ -484,16 +501,22 @@ def verify_prior_private_evidence(spec, freeze):
         Path(spec["run_package"]["original_audit_root"]),
         "owner-public-partial-audit-summary.json",
     )
-    require(
-        digest(summary) == spec["run_package"]["slot_protocol"]["prior_audit_sha256"],
-        "slot_original_review_changed",
-    )
+    from plugin.rhino_listener.c5_slot_tail_policy import enabled as tail_enabled
+    reference=spec['run_package'].get('tail_repair',{}).get('prior_review')
+    expected=(reference['first_audit_sha256'] if tail_enabled(spec)
+        else spec['run_package']['slot_protocol']['prior_audit_sha256'])
+    require(digest(summary)==expected,'slot_original_review_changed')
     prior = Path(spec["run_package"]["original_private_attempt_root"])
     require(
         digest(evidence_inventory(prior))
         == summary["original_evidence_inventory_sha256"],
         "slot_original_private_evidence_changed",
     )
+    if tail_enabled(spec):
+        from training.c5_slot_tail_prior import verify_prior_private
+        latest=read_json(Path(reference['review_root']),reference['summary_name'])
+        require(digest(latest)==reference['summary_sha256'],'slot_tail_prior_public_anchor')
+        verify_prior_private(reference,latest)
     return True
 
 

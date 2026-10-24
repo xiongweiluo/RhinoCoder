@@ -299,20 +299,25 @@ def assemble():
     return docs
 
 
+def verify_historical_package():
+    spec,freeze=read(SPEC),read(RUNTIME)
+    require(digest(spec)=='6911d112b1b11bb6bed636eac3f3d456b6400a92ac98dd95dc0105057d46fa22'
+        and digest(freeze)=='ba39557e57027ee4533b4d4d2468540d7af4765d22a5257b123acc8c14fda4ea',
+        'slot_historical_approved_pair_changed')
+    for name,sha in freeze['source_files'].items():
+        if name.endswith('.py'):
+            value=subprocess.run(['git','show',freeze['source_revision']+':'+name],cwd=ROOT,capture_output=True,check=True).stdout
+        else:value=(ROOT/(LAYOUT if name==LAYOUT_FILE else name)).read_bytes()
+        require(hashlib.sha256(value).hexdigest()==sha,'slot_historical_source_bytes:'+name)
+    return {'status':'original_executed_r3_verified_without_regeneration','spec_sha256':digest(spec),
+        'runtime_sha256':digest(freeze),'field_execution_authority':False}
+
+
 def main():
-    p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--check", action="store_true")
-    a = p.parse_args()
-    docs = assemble()
-    for name, v in docs.items():
-        path = ROOT / (LAYOUT if name == LAYOUT_FILE else name)
-        raw = encoded(v)
-        if a.check:
-            require(path.read_bytes() == raw, "slot_saved_candidate_drift:" + name)
-        else:
-            path.write_bytes(raw)
-    print(json.dumps(docs[REVIEW], sort_keys=True))
+    p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--check',action='store_true');a=p.parse_args()
+    require(a.check,'slot_executed_r3_regeneration_forbidden_use_new_tail_package')
+    print(json.dumps(verify_historical_package(),sort_keys=True))
 
 
-if __name__ == "__main__":
-    main()
+if __name__=='__main__':main()

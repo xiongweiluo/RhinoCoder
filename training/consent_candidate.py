@@ -215,13 +215,10 @@ class ConsentStore:
             and state.scene_sha256 == row["scene_sha256"]
         )
 
-    def prepare(
-        self, task: str, tool_name: str, arguments: Mapping[str, Any], *,
-        scene: SceneProvider, ttl_seconds: int = 120,
-        selection: StepOutcome | None = None,
-        review_note: str = "",
-        delegated_scope: str = "",
-    ) -> ConsentLink:
+    def _preparation_fields(
+        self, task, tool_name, arguments, *, scene, ttl_seconds,
+        selection=None, review_note="", delegated_scope="",
+    ):
         if not isinstance(task, str) or not task.strip() or len(task) > 4096:
             raise ConsentError("invalid_task")
         if tool_name in READ_ONLY_TOOLS or tool_name not in self.inventory:
@@ -265,6 +262,20 @@ class ConsentStore:
         if len(arguments_json) > 4096:
             raise ConsentError("arguments_too_large")
 
+        return checked, state, scene_summary_json, arguments_json
+
+    def prepare(
+        self, task: str, tool_name: str, arguments: Mapping[str, Any], *,
+        scene: SceneProvider, ttl_seconds: int = 120,
+        selection: StepOutcome | None = None,
+        review_note: str = "",
+        delegated_scope: str = "",
+    ) -> ConsentLink:
+        checked, state, scene_summary_json, arguments_json = self._preparation_fields(
+            task, tool_name, arguments, scene=scene, ttl_seconds=ttl_seconds,
+            selection=selection, review_note=review_note, delegated_scope=delegated_scope,
+        )
+
         request_id = secrets.token_urlsafe(24)
         capability = secrets.token_urlsafe(32)
         now = int(self.clock())
@@ -282,6 +293,52 @@ class ConsentStore:
             task, arguments_json, scene_summary_json, scene, review_note, delegated_scope,
         )
         return ConsentLink(request_id, capability)
+
+    def _prepare_consumed_delegated_c5(
+        self, task, tool_name, arguments, *, scene, ttl_seconds=120,
+        delegated_scope,
+    ):
+        """C5 trusted caller only: all live readbacks precede TTL creation.
+
+        Same validation, private capability, session/scene binding and append-only
+        requested/approved/consumed events as the existing delegated path. No UI
+        route invokes this method. The signed native gate independently checks
+        the exact document/revision/hash again before reserving or dispatching.
+        No expiry is extended and no consumed row is renewed.
+        """
+        if delegated_scope != DELEGATED_HEADLESS_SCOPE:
+            raise ConsentError("delegated_scope_missing")
+        with self._lock:
+            try:
+                _, state, summary_json, arguments_json = self._preparation_fields(
+                    task, tool_name, arguments, scene=scene, ttl_seconds=ttl_seconds,
+                    delegated_scope=delegated_scope,
+                )
+            except ConsentError as error:
+                cause=error.__cause__
+                if isinstance(cause, PermissionError) or getattr(cause,'slot_scope',None)=='global':
+                    raise cause
+                raise
+            if scene.snapshot() != state:
+                error=ConsentError("scene_changed")
+                error.slot_scope='global';error.code='shared_environment_pollution'
+                raise error
+            request_id, capability = secrets.token_urlsafe(24), secrets.token_urlsafe(32)
+            # No scene provider, callback or native I/O occurs after this point.
+            with self._tx() as db:
+                now = int(self.clock())
+                db.execute("INSERT INTO consent_requests VALUES(?,?,?,?,?,?,?,?,?,?,?)", (
+                    request_id, self.session_id, _sha256(capability), task_sha256(task),
+                    tool_name, _sha256(arguments_json), state.revision,
+                    state.scene_sha256, "pending", now, now + ttl_seconds,
+                ))
+                self._event(db, request_id, "requested")
+                self._set_status(db, request_id, "approved", "codex_delegated_headless")
+                self._set_status(db, request_id, "consumed")
+            self._display[request_id] = _Display(
+                task, arguments_json, summary_json, scene, "", delegated_scope,
+            )
+            return ConsentLink(request_id, capability), state
 
     def prepare_from_invocation(
         self, task: str, selection: StepOutcome, invocation_text: str, *,
