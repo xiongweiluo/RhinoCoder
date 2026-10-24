@@ -6,7 +6,7 @@ tasks are not admitted. The actual frozen worker/host/stop wiring is separate.
 import time
 
 from training.c5_reuse_evidence import canonical, exact, raw_sha, require, sha, strict
-from training.c5_reuse_field_scope import PROTOCOL, STUDY, validate_binding
+from training.c5_reuse_field_scope import PROTOCOL, STUDY, validate_binding, common_scope
 from training.c5_reuse_field_journal import FieldJournal, MAX_RECORD
 from training.c5_rhino_adapter import invoke_step, step_input
 from training.c5_formal20_privacy import allowed
@@ -18,6 +18,7 @@ class GenerationPeer:
     def __init__(self, binding, registry, plans, tokenizer, generate, route_context,
                  guard, check_budget, *, clock=time.monotonic):
         validate_binding(binding)
+        require(binding['endpoint']=='gpu', 'peer_gpu_endpoint_required')
         require(sha(plans) == binding['development_plan_sha256'] and type(plans) is dict
                 and 0 < len(plans) <= 40, 'development_plan_binding')
         for slot, p in plans.items():
@@ -92,7 +93,7 @@ class GenerationPeer:
                 observed = invoke_step(self.tokenizer, generate, user_step,
                     privacy_guard=lambda rendered: rendered == user_step and allowed(request['task'], request['scene']))
             guard()
-            result = {'protocol': PROTOCOL, 'scope_sha256': sha(self.binding), 'request_sha256': sha(sent),
+            result = {'protocol': PROTOCOL, 'scope_sha256': sha(common_scope(self.binding)), 'request_sha256': sha(sent),
                       'observation': observed, 'generation_returns': receipts,
                       'status': 'recorded_model_observation_not_native_permission'}
             self.journal.append('model_receipt', {'result': result})

@@ -24,6 +24,7 @@ def target(value):
 
 def stop_once(binding, expected, approval, registry, journal, ops):
     validate_binding(binding)
+    require(binding['endpoint']=='gpu', 'stop_gpu_endpoint_required')
     binding, expected, approval = (strict(canonical(v)) for v in (binding, expected, approval))
     target(expected)
     grant = {'study_id': STUDY, 'actor': 'repository_owner', 'approved': True,
