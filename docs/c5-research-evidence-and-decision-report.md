@@ -1,5 +1,7 @@
 # C5研究证据与C5-7最终裁决
 
+**2026-10-11追加准备说明：**#2～#6的普通合并及实际main CI已完成，见[公开收口](https://github.com/xiongweiluo/RhinoCoder/pull/6#issuecomment-6097448759)；原本文待PR/main是历史时点。本人后来明确确认原20题可复用，并仅授权[公开修订草案](c5-formal20-reuse-protocol-amendment-20261011.md)/[冻结方案](c5-formal20-reuse-freeze-preparation-20261011.md)准备。它是潜在的新追加研究，不改下面NO-GO、原消费/未知计数或不可重放的旧入口；不称全新独立盲测，尚无新的正式冻结、资源/模型/Rhino/私有消费批准，也不重启旧Goal或宣告其成功。准备分支不是main已实施的新研究。
+
 2026-10-09，Europe/Zurich。**C5-7最终裁决：NO-GO（正式现场证据不完整，当前LoRA路线不进入产品接入）。**[机器裁决](../eval/c5/c5-final-decision-20261009.json)与[本人部分失败核查摘要](../eval/c5/formal20-v4-owner-incomplete-audit-summary-20261009.json)分开登记；不改原摘要的`not_decided_here`。正式20题已消费且单次失败，不恢复、补题、补槽、换ID复跑或重新解密。此裁决不是完成40槽、完整联合审计或总体Goal完成证明；研究宿主清理仍未核实、PR/main尚未收口。
 
 ## 裁决与本人证据登记
