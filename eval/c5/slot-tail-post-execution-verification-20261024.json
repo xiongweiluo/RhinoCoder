@@ -1,0 +1,133 @@
+{
+  "gpu": {
+    "endpoint": "gpu",
+    "epoch": 1792868903.5111723,
+    "ledger_writes": 0,
+    "model_or_rhino_calls": 0,
+    "private_content_included": false,
+    "roots": {
+      "current": {
+        "files": 481,
+        "inventory_sha256": "272bb12751dcaff6e4c7148da7434898e79216c2b750ff6e1a1fbeb4c4c04b84"
+      },
+      "historical_initial": {
+        "files": 429,
+        "inventory_sha256": "826134d6927ca197268193a6042e45bc9b485ae0c51b6f7656e4b3f0bf02adc2"
+      },
+      "historical_r1": {
+        "files": 433,
+        "inventory_sha256": "f36a34d4e54b8fd581eae49c2dcc29e731e6adb3eb1e8f35909bd1dabd7e63e8"
+      },
+      "historical_r2": {
+        "files": 447,
+        "inventory_sha256": "88a91c55a2a06dbee7ca35349fed26090b5a4253e4a879fb9d036befdc4b3805"
+      },
+      "historical_r3": {
+        "files": 464,
+        "inventory_sha256": "d9faf9595518623c2092a9a78a02623c4acd45c035ec3fcefb6b7236f33f7abe"
+      }
+    },
+    "runtime_sha256": "73dcad00f96c3830e46a520122f383b751cd04e6be675f84e65a5966e65c583c",
+    "spec_sha256": "d80a20ea0e4f6460640f84d7e64cf548b93ce84c8215ea8ca13a076b3bf0d086",
+    "status": "post_execution_public_frozen_bytes_verified"
+  },
+  "independent_gpu_exit_observation": {
+    "attempts": [
+      {
+        "attempt": 5,
+        "milestones": {
+          "bootstrap.json": true,
+          "loaded-runtime.json": true,
+          "qualification.json": true,
+          "supervisor-final.json": true,
+          "worker-role-consumed.json": true,
+          "worker-startup-ready.json": true,
+          "worker-summary.json": true
+        },
+        "qualification_before_model_loading": true,
+        "qualified_child_pid": 1728986,
+        "qualified_child_present": false,
+        "qualified_parent_pid": 1728770,
+        "qualified_parent_present": false,
+        "state_exists": true,
+        "supervisor_final": {
+          "child_exit_reaped": true,
+          "child_wait_status": 0,
+          "cleanup_errors": [],
+          "epoch": 1792868774.1042826,
+          "primary_error_type": null,
+          "stop_result": {
+            "error_type": null,
+            "exit_observed": true,
+            "retry_signal_allowed": false,
+            "signal_attempts": 0,
+            "status": "already_exited"
+          }
+        }
+      },
+      {
+        "attempt": 6,
+        "milestones": {
+          "bootstrap.json": false,
+          "loaded-runtime.json": false,
+          "qualification.json": false,
+          "supervisor-final.json": false,
+          "worker-role-consumed.json": false,
+          "worker-startup-ready.json": false,
+          "worker-summary.json": false
+        },
+        "state_exists": false
+      }
+    ],
+    "boot_id": "5e83729b-b29b-43f6-8635-c98f662d3d56",
+    "compute": "",
+    "epoch": 1792868830.195593,
+    "gpu": "GPU-0e00f0ad-fa5a-eed9-6eee-5877984e02f9, 11, 0",
+    "private_content_included": false,
+    "signals_sent": 0
+  },
+  "ledger_writes": 0,
+  "limitations": [
+    "Public file closure and qualified process absence do not prove opaque host internals or physical origin."
+  ],
+  "mac": {
+    "endpoint": "mac",
+    "epoch": 1792868901.940759,
+    "ledger_writes": 0,
+    "model_or_rhino_calls": 0,
+    "private_content_included": false,
+    "roots": {
+      "current": {
+        "files": 481,
+        "inventory_sha256": "272bb12751dcaff6e4c7148da7434898e79216c2b750ff6e1a1fbeb4c4c04b84"
+      },
+      "historical_initial": {
+        "files": 429,
+        "inventory_sha256": "826134d6927ca197268193a6042e45bc9b485ae0c51b6f7656e4b3f0bf02adc2"
+      },
+      "historical_r1": {
+        "files": 433,
+        "inventory_sha256": "f36a34d4e54b8fd581eae49c2dcc29e731e6adb3eb1e8f35909bd1dabd7e63e8"
+      },
+      "historical_r2": {
+        "files": 447,
+        "inventory_sha256": "88a91c55a2a06dbee7ca35349fed26090b5a4253e4a879fb9d036befdc4b3805"
+      },
+      "historical_r3": {
+        "files": 464,
+        "inventory_sha256": "d9faf9595518623c2092a9a78a02623c4acd45c035ec3fcefb6b7236f33f7abe"
+      }
+    },
+    "runtime_sha256": "73dcad00f96c3830e46a520122f383b751cd04e6be675f84e65a5966e65c583c",
+    "spec_sha256": "d80a20ea0e4f6460640f84d7e64cf548b93ce84c8215ea8ca13a076b3bf0d086",
+    "status": "post_execution_public_frozen_bytes_verified"
+  },
+  "model_or_rhino_calls": 0,
+  "private_content_included": false,
+  "status": "post_execution_public_freeze_and_exit_verified",
+  "verification_helper_refusal_retained": {
+    "cause": "Initial readback helper assumed historical runtime files existed inside the current source root; corrected to traverse each existing frozen predecessor root.",
+    "error": "FileNotFoundError",
+    "field_bytes_or_ledger_modified": false
+  }
+}

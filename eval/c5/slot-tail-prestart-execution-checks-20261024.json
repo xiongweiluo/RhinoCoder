@@ -1,0 +1,251 @@
+{
+  "all_5_ci_jobs_success": true,
+  "ci_run": 40110051110,
+  "evidence": [
+    {
+      "file_sha256": "d3767d5e538deaee14b4e7fe4cf6faeed4eb768750e0065d290b15d120628b16",
+      "name": "c5-r4-approved-prestart-gpu-readback.json",
+      "public_result": {
+        "actual_execution_authority": false,
+        "charged_seconds_preserved": 70340.89651274681,
+        "code_inventory_sha256": "edf2b9acdd02716568980cd068433e2624aebc398e22e4ccfe6dfed15e1cebd1",
+        "current_lease_remaining_seconds": 91443.61468744278,
+        "endpoint": "gpu",
+        "epoch": 1792863356.385322,
+        "first_load_epoch_preserved": 1792692329.837715,
+        "full_window_currently_available": true,
+        "historical_full_gate_passed": false,
+        "model_or_rhino_calls": 0,
+        "new_loads_or_slots": 0,
+        "new_state_or_grant_present": false,
+        "old_refusals_retained": true,
+        "prior_attempts_preserved": 4,
+        "prior_rows_preserved": 36,
+        "private_formal_reads": 0,
+        "remaining_work_plus_startup_export_seconds": 34500,
+        "roots": {
+          "current": {
+            "files": 481,
+            "inventory_sha256": "272bb12751dcaff6e4c7148da7434898e79216c2b750ff6e1a1fbeb4c4c04b84"
+          },
+          "historical_initial": {
+            "files": 429,
+            "inventory_sha256": "826134d6927ca197268193a6042e45bc9b485ae0c51b6f7656e4b3f0bf02adc2"
+          },
+          "historical_r1": {
+            "files": 433,
+            "inventory_sha256": "f36a34d4e54b8fd581eae49c2dcc29e731e6adb3eb1e8f35909bd1dabd7e63e8"
+          },
+          "historical_r2": {
+            "files": 447,
+            "inventory_sha256": "88a91c55a2a06dbee7ca35349fed26090b5a4253e4a879fb9d036befdc4b3805"
+          },
+          "historical_r3": {
+            "files": 464,
+            "inventory_sha256": "d9faf9595518623c2092a9a78a02623c4acd45c035ec3fcefb6b7236f33f7abe"
+          }
+        },
+        "runtime_sha256": "73dcad00f96c3830e46a520122f383b751cd04e6be675f84e65a5966e65c583c",
+        "source_inventory_sha256": "96409cfaa93bb9bebca4d535fd3af8c4ed2f661dc6a73c87425c4953b4d56fb4",
+        "spec_sha256": "d80a20ea0e4f6460640f84d7e64cf548b93ce84c8215ea8ca13a076b3bf0d086",
+        "status": "INDEPENDENT_PUBLIC_FREEZE_READBACK_VERIFIED_NO_AUTHORITY"
+      }
+    },
+    {
+      "file_sha256": "236070047a6b3a4ffe076e75f96a4083c6312b8db28c672f5bba6dcb3a243fde",
+      "name": "c5-r4-approved-prestart-gpu-assets.json",
+      "public_result": {
+        "adapter_files_verified": 2,
+        "base_files_verified": 14,
+        "boot_id": "5e83729b-b29b-43f6-8635-c98f662d3d56",
+        "compatible_runtime_files_verified": 2684,
+        "compute_pids": [],
+        "cuda_initialized": false,
+        "finish_epoch": 1792863385.12457,
+        "gpu_row": "GPU-0e00f0ad-fa5a-eed9-6eee-5877984e02f9, NVIDIA GeForce RTX 3090, 11, 0",
+        "model_loaded": false,
+        "native_libraries_verified": 27,
+        "native_symlinks_verified": 8,
+        "original_distribution_proof_reused_not_all_21614_files_rehashed": true,
+        "original_source_files_verified": 464,
+        "private_formal_reads": 0,
+        "remote_files_written": 0,
+        "research_restarted": false,
+        "start_epoch": 1792863373.0411022
+      }
+    },
+    {
+      "file_sha256": "a70ea22a363fe4f5f0b3f519705453c19c08bfb0566dc289869dc817676f84e5",
+      "name": "c5-r4-approved-gpu-grant.json",
+      "public_result": {
+        "campaign_or_role_created": false,
+        "endpoint": "gpu",
+        "human_origin_cryptographically_proven": false,
+        "incremental_revision": null,
+        "model_or_rhino_calls": 0,
+        "private_formal_reads": 0,
+        "registered_exact_runtime_sha256": "73dcad00f96c3830e46a520122f383b751cd04e6be675f84e65a5966e65c583c",
+        "registered_exact_spec_sha256": "d80a20ea0e4f6460640f84d7e64cf548b93ce84c8215ea8ca13a076b3bf0d086"
+      }
+    },
+    {
+      "file_sha256": "25d58ae0a58dd9be8bcc8a36fb8344e763db950b722114efe3182c971476cbb6",
+      "name": "c5-r4-preload-waiter-diagnostic.json",
+      "public_result": {
+        "epoch": 1792864316.482128,
+        "hooks_changed": 0,
+        "in_command_bool": true,
+        "in_command_callable": false,
+        "in_command_type": "int",
+        "matched_tick_functions": 2,
+        "model_calls": 0,
+        "private_reads": 0,
+        "waiters": [
+          {
+            "expected_state_root": true,
+            "waiting": true
+          },
+          {
+            "expected_state_root": true,
+            "waiting": true
+          }
+        ]
+      }
+    },
+    {
+      "file_sha256": "47214973d9f005844ccc992bec8bbaf133c63ff589bc3df311d76cc8dd6c66c6",
+      "name": "c5-r4-preload-waiter-diagnostic-v2.json",
+      "public_result": {
+        "epoch": 1792864389.8290439,
+        "hooks_changed": 0,
+        "in_command_bool": true,
+        "in_command_callable": false,
+        "in_command_type": "int",
+        "matched_tick_functions": 2,
+        "model_calls": 0,
+        "private_reads": 0,
+        "waiters": [
+          {
+            "expected_state_root": true,
+            "waiting": false
+          },
+          {
+            "expected_state_root": true,
+            "waiting": false
+          }
+        ]
+      }
+    },
+    {
+      "file_sha256": "697e191bc4f529eb99cbd636759281b2c2184c665a5417fbd91f52f94bd2de13",
+      "name": "c5-r4-preload-waiter-diagnostic-v3.json",
+      "public_result": {
+        "epoch": 1792864448.738662,
+        "hooks_changed": 0,
+        "in_command_bool": true,
+        "in_command_callable": false,
+        "in_command_type": "int",
+        "matched_tick_functions": 3,
+        "model_calls": 0,
+        "private_reads": 0,
+        "waiters": [
+          {
+            "expected_state_root": true,
+            "waiting": false
+          },
+          {
+            "expected_state_root": true,
+            "waiting": false
+          },
+          {
+            "expected_state_root": true,
+            "waiting": true
+          }
+        ]
+      }
+    }
+  ],
+  "first_load_epoch": 1792692329.837715,
+  "git_head_checked": "55a11a6c11781de04f2c20ae0f84fdfd7030d73d",
+  "mac_runtime_files_verified": 3552,
+  "preload_ui_incident": {
+    "detach_record": {
+      "attempt": 0,
+      "nonce": "bd65c24d10cd1b5c92872b36469d528dd85ff9202a380e7e5e4e68d3a275d989",
+      "runtime_sha256": "73dcad00f96c3830e46a520122f383b751cd04e6be675f84e65a5966e65c583c",
+      "study_id": "c5-rhino-paired-20-reuse-v1"
+    },
+    "duplicate_waiting_installations": 2,
+    "extra_cleanup_assertion_refused_before_claim_or_hook_mutation": true,
+    "historical_results_or_consumption_modified": false,
+    "immutable_frozen_source_unchanged": true,
+    "latest_readonly_function_closure": [
+      false,
+      false,
+      true
+    ],
+    "original_frozen_attempt_zero_detach_observed": true,
+    "readonly_function_closure_after_detach": [
+      false,
+      false
+    ],
+    "reinstalled_once_after_verified_detach": true,
+    "research_or_model_started": false,
+    "whole_host_handler_absence_claimed": false
+  },
+  "prior_attempts": 4,
+  "prior_gpu_charged_seconds": 70340.89651274681,
+  "prior_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+  ],
+  "private_content_included": false,
+  "recorded_epoch": 1792864494.9255161,
+  "rhino_readable_files_verified": 339,
+  "runtime_sha256": "73dcad00f96c3830e46a520122f383b751cd04e6be675f84e65a5966e65c583c",
+  "schema_version": 1,
+  "selected_indices": [
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39
+  ],
+  "separate_actual_execution_approval_received": true,
+  "spec_sha256": "d80a20ea0e4f6460640f84d7e64cf548b93ce84c8215ea8ca13a076b3bf0d086",
+  "status": "exact_package_approved_prestart_checks_complete_waiting_private_owner_entry",
+  "tokenizer_files_verified": 6
+}

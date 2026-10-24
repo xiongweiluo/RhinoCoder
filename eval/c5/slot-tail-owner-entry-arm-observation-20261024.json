@@ -1,0 +1,36 @@
+{
+  "approved_frozen_source_unchanged": true,
+  "entry_reinstalled_this_turn": false,
+  "epoch": 1792865351.5977678,
+  "milestones": {
+    "deferred-baseline.failed.json": false,
+    "deferred-baseline.prepared.json": true,
+    "entry-return-release.json": true,
+    "formal20.hub-admission.claim.json": true,
+    "formal20.started.json": false,
+    "formal20.zero-prepared.json": true,
+    "host-continuity-ready.json": false,
+    "package-rhino-arm.claim.json": true,
+    "remote-launch-intent.json": false,
+    "warmup.result.json": true
+  },
+  "model_or_slots_restarted": false,
+  "private_content_included": false,
+  "readonly_host_diagnosis": {
+    "current_r4_sessions": [
+      {
+        "arm_blocked": false,
+        "arm_stopped": false,
+        "barrier_state": "await_first_idle",
+        "callback_present": true
+      }
+    ],
+    "epoch": 1792865221.411121,
+    "hooks_changed": 0,
+    "in_command": 2,
+    "model_calls": 0,
+    "private_reads": 0
+  },
+  "runtime_sha256": "73dcad00f96c3830e46a520122f383b751cd04e6be675f84e65a5966e65c583c",
+  "status": "same_attempt_5_arm_waiting_first_idle_no_model"
+}

@@ -1,0 +1,32 @@
+{
+  "attempts": 4,
+  "charged_gpu_seconds": 70340.89651274681,
+  "epoch": 1792864635.638623,
+  "first_load_epoch": 1792692329.837715,
+  "global_attempted_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+  ],
+  "ledger_head": "bd9454363df9d69e5347c74a283d18fd8e4f70f1031bbb24ca61f538441dd203",
+  "ledger_rows": 37,
+  "model_or_private_calls": 0,
+  "original_36_rows_unchanged": true,
+  "private_content_included": false,
+  "status": "APPROVED_ORIGINAL_PREFIX_PRESERVED_WAITING_OWNER"
+}

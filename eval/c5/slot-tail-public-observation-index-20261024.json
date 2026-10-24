@@ -1,0 +1,58 @@
+{
+  "all_original_prefix_checks_passed": true,
+  "first_epoch": 1792866625.077815,
+  "last_epoch": 1792868977.2946339,
+  "last_observation": {
+    "epoch": 1792868977.2946339,
+    "latest_public_slot_progress": {
+      "attempted_count": 22,
+      "confirmed_generation_stages": 34,
+      "decision": "CONTINUE_FIXED_ORDER",
+      "fixed_denominator": 40,
+      "phase": "interrupted_continuation",
+      "private_content_included": false,
+      "study_id": "c5-rhino-paired-20-reuse-v1"
+    },
+    "milestones": {
+      "formal20.started.json": true,
+      "host-continuity-ready.json": true,
+      "host-continuity-terminal-receipt.json": true,
+      "slot-audit-current.json": true,
+      "slot-review-current.json": true,
+      "worker-process-exit.json": true,
+      "worker-startup-ready.json": true
+    },
+    "original_36_rows_unchanged": true,
+    "private_content_included": false,
+    "status": {
+      "attempts_consumed": 5,
+      "attempts_max": 6,
+      "current_load_unsettled": false,
+      "execution_authority": false,
+      "first_evaluation_attempted": 7,
+      "first_load_epoch": 1792692329.837715,
+      "fixed_denominator": 40,
+      "global_ever_attempted_slot_count": 40,
+      "gpu_charged_seconds": 72581.37416148186,
+      "kind": "interrupted_continuation",
+      "lease_expiry_epoch": 1792954800,
+      "legacy_wall_policy_rejudged": false,
+      "new_blind_holdout_claimed": false,
+      "newly_attempted_slots": 22,
+      "original_first_result_unchanged": true,
+      "package_id": "reuse-formal-20261024-r4",
+      "prior_phase_count": 1,
+      "private_content_included": false,
+      "private_exposure_recorded": true,
+      "schema_version": 2,
+      "selected_slots": 22,
+      "status": "SLOT_PHASE_COMPLETE",
+      "study_id": "c5-rhino-paired-20-reuse-v1",
+      "timeline_elapsed_seconds": 176647.4843890667,
+      "unattempted_selected_slots": 0
+    }
+  },
+  "observation_count": 37,
+  "observation_file_sha256": "50de3009c5c2d7b9a4786868ce107afa48abf5ce703c5221092fa50137b3b043",
+  "private_content_included": false
+}
