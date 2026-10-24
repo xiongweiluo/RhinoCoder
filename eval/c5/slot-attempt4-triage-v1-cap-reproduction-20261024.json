@@ -1,0 +1,24 @@
+{
+  "actual_total_bytes": 143374572,
+  "epoch": 1792841175.033537,
+  "file_count": 1581,
+  "first_limit_crossing": {
+    "cumulative_bytes": 134255367,
+    "files_seen": 1413
+  },
+  "maximum_file_bytes": 560227,
+  "old_limit_bytes": 134217728,
+  "old_refusal_file_sha256": "e6b9c2dd2d480cf4cd4a485c86f1da903728a77f25420ad59fc41a98d1c4f470",
+  "old_rejection_modified": false,
+  "old_review_sha256": "f0fa023a1b45ee969a4c26d4b7c657431f7ae4935bb7530bc2f12620c5051e29",
+  "original_evidence_modified": false,
+  "private_content_included": false,
+  "private_evidence_bytes_read": 0,
+  "reproduced_check": "triage_evidence_cap",
+  "reproduction_basis": "exact_old_inventory_predicates_replayed_on_directory_metadata_only",
+  "research_restarted": false,
+  "root_resolved_equal": true,
+  "schema_version": 1,
+  "symlink_count": 0,
+  "unsafe_file_identity_count": 0
+}

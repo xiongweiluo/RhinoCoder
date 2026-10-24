@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+"""Owner entry: only original hub stop, then raw read-only review. Never generation."""
+import argparse,fcntl,hashlib,importlib.util,json,os,re,sys,time
+from pathlib import Path
+SOURCE=Path(__file__).resolve().parent
+BASE=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5')
+FIELD=BASE/'reuse-formal-20261023-r3-source'
+STATE=BASE/'reuse-formal-20261023-r3-state/preload-4'
+OUTPUT=BASE/'reuse-formal-20261023-r3-close-audit-state'
+V2=BASE/'reuse-formal-20261023-r3-readonly-triage-v2-source'
+SPEC='6911d112b1b11bb6bed636eac3f3d456b6400a92ac98dd95dc0105057d46fa22'
+RUNTIME='ba39557e57027ee4533b4d4d2468540d7af4765d22a5257b123acc8c14fda4ea'
+V2_REVIEW='f70be79f3fc4eb4a880b90e7f7377593284842386a723fc2c0df288d8e56ee3e'
+def load(name,path):
+    spec=importlib.util.spec_from_file_location(name,path);module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module);return module
+def digest(v):return hashlib.sha256(json.dumps(v,sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode()).hexdigest()
+def require(v,code):
+    if not v:raise ValueError(code)
+def public_file(p):
+    require(p.resolve()==p and p.is_file() and not p.is_symlink(),'close_owner_public_file_scope');return p.read_bytes()
+def publish(p,v):
+    raw=(json.dumps(v,sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False)+'\n').encode()
+    if p.exists():require(public_file(p)==raw,'close_owner_immutable_record');return
+    fd=os.open(p,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)
+    with os.fdopen(fd,'wb') as f:f.write(raw);f.flush();os.fsync(f.fileno())
+def main():
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('mode',choices=['close-and-audit']);parser.add_argument('--review-sha256',required=True);args=parser.parse_args()
+    stage=['public_guard'];fd=None;core=common=None;campaign=None;literals={}
+    def checkpoint(value):require(isinstance(value,str) and re.fullmatch('[A-Za-z0-9_.-]{1,80}',value) is not None,'close_owner_stage');stage[0]=value
+    def safe_error(error):
+        if core is not None and isinstance(error,core.Refusal):return {'error_type':'Refusal','error_code':error.code}
+        if common is not None and isinstance(error,common.Refusal):return {'error_type':'Refusal','error_code':error.code,'error_context':error.context}
+        typ=type(error).__name__;typ=typ if typ in {'ValueError','NativeError','RuntimeError','FileNotFoundError','TimeoutError','PermissionError','KeyError','TypeError','KeyboardInterrupt','BlockingIOError'} else 'unknown_error_type_redacted'
+        text=str(error);literal=text if text in literals else None
+        # Only fixed owner guard labels or exact frozen public literals are output.
+        code=text if text in {'close_owner_public_file_scope','close_owner_immutable_record','close_owner_private_terminal','close_owner_review','close_owner_sources','close_owner_v2_sources','close_owner_python','close_owner_exact_pair','close_owner_original_source','close_owner_output','close_owner_original_state','close_owner_ledger_changed','close_owner_stage'} else 'original_checker_refused'
+        return {'error_type':typ,'error_code':code,'public_error_literal':literal,'unknown_error_text_redacted':literal is None}
+    try:
+        require(sys.stdin.isatty() and sys.stderr.isatty(),'close_owner_private_terminal')
+        review=json.loads(public_file(SOURCE/'review.json'));require(digest(review)==args.review_sha256,'close_owner_review')
+        require(set(review['files'])=={'owner.py','core.py','tests.py'} and all(hashlib.sha256(public_file(SOURCE/n)).hexdigest()==h for n,h in review['files'].items()),'close_owner_sources')
+        prior=json.loads(public_file(V2/'review.json'));require(digest(prior)==V2_REVIEW and all(hashlib.sha256(public_file(V2/n)).hexdigest()==h for n,h in prior['files'].items()),'close_owner_v2_sources')
+        common=load('original_v2_inventory_core',V2/'core.py');core=load('original_close_audit_core',SOURCE/'core.py')
+        require(sys.flags.isolated and sys.dont_write_bytecode and Path(sys.executable).resolve()==Path('/opt/anaconda3/bin/python3.13') and sys.pycache_prefix==str(BASE/'reuse-dev-20261012-d-bytecode-cache-must-remain-absent') and not os.path.lexists(sys.pycache_prefix),'close_owner_python')
+        spec=json.loads(public_file(FIELD/'eval/c5/reuse-formal-20261023-r3-spec.json'));freeze=json.loads(public_file(FIELD/'eval/c5/reuse-formal-20261023-r3-runtime.json'))
+        require(digest(spec)==SPEC and digest(freeze)==RUNTIME and sys.version==freeze['mac_environment']['python'],'close_owner_exact_pair')
+        def guard():require(all(hashlib.sha256(public_file(FIELD/n)).hexdigest()==h for n,h in freeze['source_files'].items()),'close_owner_original_source')
+        guard();literals=common.public_literals(FIELD,freeze['source_files'])
+        for name,sha in freeze['mac_environment']['file_sha256'].items():require(hashlib.sha256(public_file(Path(name))).hexdigest()==sha,'close_owner_original_source')
+        sys.path.insert(0,str(FIELD))
+        from training.c5_formal_reuse_control import control_scope
+        from training.c5_formal_reuse_admission import open_formal_campaign,ROOTS,NAMESPACE
+        from plugin.rhino_listener.c5_formal_reuse_scope import MAC_STATE
+        from plugin.rhino_listener.c5_research_channel import read_json
+        from training.c5_formal_reuse_transport import NativeChannelV2
+        from training.c5_formal_reuse_model_native_audit import audit_lifecycle
+        from training.c5_lifecycle_joint_audit import audit_native_timing
+        from training.c5_host_assurance_audit import audit_host_continuity
+        from training.c5_slot_entry import verify_prior_private_evidence
+        control_spec,control_freeze,control_guard=control_scope(FIELD);require(control_spec==spec and control_freeze==freeze,'close_owner_exact_pair')
+        fd=os.open(ROOTS['mac']/NAMESPACE/'owner-session.lock',os.O_RDWR|os.O_NOFOLLOW);fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB)
+        campaign=open_formal_campaign(spec,freeze,read_json(MAC_STATE,'owner-approval.json'),freeze['history']);rows_before=campaign.log.rows();observed=campaign.observation()
+        require(observed['attempts']==4 and observed['status']=='SLOT_PAUSED_RECONCILIATION' and not observed['active'] and 4 in observed['settled_attempts'] and observed['first_load_epoch']==1792692329.837715,'close_owner_original_state')
+        checkpoint('prior_private_history_inventory');verify_prior_private_evidence(spec,freeze)
+        OUTPUT.mkdir(mode=0o700,exist_ok=True);require(OUTPUT.resolve()==OUTPUT and not OUTPUT.is_symlink() and OUTPUT.stat().st_mode&0o777==0o700 and OUTPUT.stat().st_uid==os.getuid(),'close_owner_output')
+        ops={'read':common.read,'publish':publish,'inventory':common.inventory,'closure':OUTPUT,'channel_type':NativeChannelV2,'audit_lifecycle':audit_lifecycle,'audit_timing':audit_native_timing,'audit_host':audit_host_continuity,'field':FIELD,'safe_error':safe_error,'campaign':campaign}
+        cleanup=core.close_original_hub(STATE,spec,freeze,control_guard,ops,checkpoint=checkpoint)
+        checkpoint('owner_automatic_late_receipt_custody');receipt=common.read(STATE/'host-continuity-terminal-receipt.json')
+        publish(OUTPUT/'owner-automatic-late-receipt-custody.json',{'receipt':receipt,'custody':'existing_owner_once_confirmation_automatic_capture','late_cleanup':True,'manual_per_receipt_attestation':False})
+        print('C5_FORMAL_REUSE_HOST_EXTERNAL_RECEIPT '+json.dumps(receipt,sort_keys=True),flush=True)
+        result,proofs=core.audit_components(STATE,spec,freeze,guard,ops,cleanup,checkpoint=checkpoint)
+        require(campaign.log.rows()==rows_before,'close_owner_ledger_changed')
+        result.update(audit_completed_observation_epoch=time.time(),study_id=spec['study_id'],package_id=spec['instance_id'],spec_sha256=SPEC,runtime_sha256=RUNTIME,review_sha256=args.review_sha256,attempts_consumed=observed['attempts'],first_load_epoch=observed['first_load_epoch'],gpu_charged_seconds=observed['charged_gpu_seconds'],campaign_head_sha256=rows_before[-1]['record_sha256'],campaign_unchanged_during_close_audit=True)
+        publish(OUTPUT/('owner-private-component-proofs-'+digest(proofs)+'.json'),{'private_content_included':True,'proofs':proofs})
+        publish(OUTPUT/('owner-public-close-audit-'+digest(result)+'.json'),result)
+        print('C5_ORIGINAL_LATE_CLEANUP_AND_RAW_REVIEW_FINISHED_NO_RESTART',flush=True)
+        print(json.dumps({'status':result['status'],'native_cleanup_verified':cleanup['native_cleanup_verified'],'full_original_raw_joint_gate_passed':False,'resume_authority':False,'private_content_included':False},sort_keys=True))
+    except BaseException as error:
+        v={'schema_version':1,'status':'original_close_audit_paused','stage':stage[0],**safe_error(error),'research_restarted':False,'resume_authority':False,'private_content_included':False}
+        try:
+            if OUTPUT.is_dir():publish(OUTPUT/('owner-public-close-audit-refusal-'+digest(v)+'.json'),v)
+        except BaseException:pass
+        print(json.dumps(v,sort_keys=True));return 1
+    finally:
+        if campaign is not None:campaign.log.close()
+        if fd is not None:fcntl.flock(fd,fcntl.LOCK_UN);os.close(fd)
+    return 0
+if __name__=='__main__':raise SystemExit(main())

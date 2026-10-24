@@ -1,0 +1,77 @@
+{
+  "attempt": 4,
+  "attempted_indices": [
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+  ],
+  "counts": {
+    "closed": 11,
+    "result_records": 11,
+    "slot_local_faults": 1,
+    "stopped": 10,
+    "unknown_faults": 1
+  },
+  "diagnostic_limits": {
+    "file_bytes_max": 33554432,
+    "files_max": 20000,
+    "total_bytes_max": 268435456
+  },
+  "failed_response_metadata": [
+    {
+      "error_type": "NativeError",
+      "evidence_name": "F09-lora/response-0043.json",
+      "public_error_literal": "expired/oversized handoff TTL",
+      "public_failure_sites": [
+        "plugin/rhino_listener/c5_research_gate.py:60"
+      ],
+      "status": "failed_no_retry",
+      "unknown_error_text_redacted": false
+    }
+  ],
+  "failed_slot_metadata": [
+    {
+      "close_verified_by_producer": true,
+      "error_type": "FormalPlanError",
+      "fault_code": "fixture_readback_rejected",
+      "fault_scope": "local",
+      "recorded_steps": 0,
+      "slot_id": "F04-lora",
+      "stop_verified_by_producer": true
+    },
+    {
+      "close_verified_by_producer": true,
+      "error_type": "NativeError",
+      "fault_code": "unclassified_exception",
+      "fault_scope": "unknown",
+      "recorded_steps": 1,
+      "slot_id": "F09-lora",
+      "stop_verified_by_producer": false
+    }
+  ],
+  "generation_stages": 17,
+  "host_terminal_receipt_present": false,
+  "hub_stop_present": false,
+  "model_or_rhino_calls": 0,
+  "native_cleanup_verified": false,
+  "original_evidence_files": 1581,
+  "original_evidence_inventory_sha256": "6b3cb059893852dc963284f6deade3577803e9b6cc59c617dea7f763b46889f9",
+  "original_evidence_unchanged_during_review": true,
+  "previous_review_sha256": "f0fa023a1b45ee969a4c26d4b7c657431f7ae4935bb7530bc2f12620c5051e29",
+  "private_content_included": false,
+  "research_restarted": false,
+  "resume_authority": false,
+  "review_sha256": "f70be79f3fc4eb4a880b90e7f7377593284842386a723fc2c0df288d8e56ee3e",
+  "runtime_sha256": "ba39557e57027ee4533b4d4d2468540d7af4765d22a5257b123acc8c14fda4ea",
+  "schema_version": 2,
+  "spec_sha256": "6911d112b1b11bb6bed636eac3f3d456b6400a92ac98dd95dc0105057d46fa22",
+  "status": "readonly_diagnostics_only_not_raw_joint_audit_pass"
+}

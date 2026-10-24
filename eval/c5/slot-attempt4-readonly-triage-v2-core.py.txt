@@ -1,0 +1,116 @@
+"""Owner-only bounded diagnosis; export only explicit public failure codes."""
+import ast, hashlib, json, os, re, stat
+from pathlib import Path
+
+TOTAL_BYTES_MAX=268435456
+FILE_BYTES_MAX=33554432
+FILES_MAX=20000
+ERROR_CODES=frozenset({'triage_file_scope','triage_file_size','triage_duplicate_key','triage_nonfinite','triage_invalid_json','triage_root_scope','triage_evidence_symlink','triage_evidence_identity','triage_evidence_file_bytes_limit','triage_evidence_total_bytes_limit','triage_evidence_file_count_limit','triage_evidence_changed_during_hash','triage_actual_fixed_prefix','triage_actual_result_population','triage_slot_identity','triage_original_changed_during_review'})
+CONTEXT_KEYS=frozenset({'observed_bytes','limit_bytes','observed_files','limit_files','json_line','json_column'})
+class Refusal(ValueError):
+    def __init__(self,code,context=None):
+        assert code in ERROR_CODES
+        self.code=code;self.context=context or {}
+        assert all(k in CONTEXT_KEYS and type(v) is int and v>=0 for k,v in self.context.items())
+        super().__init__(code)
+def require(v,code,context=None):
+    if not v:raise Refusal(code,context)
+def digest(v):return hashlib.sha256(json.dumps(v,sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode()).hexdigest()
+def read(path):
+    require(path.resolve()==path and path.is_file() and not path.is_symlink(),'triage_file_scope')
+    require(path.stat().st_size<=FILE_BYTES_MAX,'triage_file_size',{'observed_bytes':path.stat().st_size,'limit_bytes':FILE_BYTES_MAX})
+    def pairs(items):
+        d={}
+        for k,v in items:require(k not in d,'triage_duplicate_key');d[k]=v
+        return d
+    try:return json.loads(path.read_bytes(),object_pairs_hook=pairs,parse_constant=lambda _:(_ for _ in ()).throw(Refusal('triage_nonfinite')))
+    except json.JSONDecodeError as e:raise Refusal('triage_invalid_json',{'json_line':e.lineno,'json_column':e.colno}) from None
+    except UnicodeError:raise Refusal('triage_invalid_json') from None
+
+def evidence_metadata(root,*,total_bytes_max=TOTAL_BYTES_MAX,file_bytes_max=FILE_BYTES_MAX,files_max=FILES_MAX):
+    require(root.resolve()==root and root.is_dir() and not root.is_symlink(),'triage_root_scope')
+    values={};total=0
+    for path in sorted(root.rglob('*')):
+        require(not path.is_symlink(),'triage_evidence_symlink')
+        if path.is_dir():continue
+        s=path.stat()
+        require(stat.S_ISREG(s.st_mode) and s.st_uid==os.getuid() and s.st_nlink==1 and not(s.st_mode&0o022),'triage_evidence_identity')
+        require(s.st_size<=file_bytes_max,'triage_evidence_file_bytes_limit',{'observed_bytes':s.st_size,'limit_bytes':file_bytes_max})
+        total+=s.st_size
+        require(total<=total_bytes_max,'triage_evidence_total_bytes_limit',{'observed_bytes':total,'limit_bytes':total_bytes_max})
+        require(len(values)<files_max,'triage_evidence_file_count_limit',{'observed_files':len(values)+1,'limit_files':files_max})
+        values[path.relative_to(root).as_posix()]={'bytes':s.st_size,'inode':s.st_ino,'mtime_ns':s.st_mtime_ns,'mode':stat.S_IMODE(s.st_mode)}
+    return values
+
+def inventory(root):
+    # Validate all finite metadata limits before reading any private bytes.
+    metadata=evidence_metadata(root);values={}
+    for name,before in metadata.items():
+        fd=os.open(root/name,os.O_RDONLY|os.O_NOFOLLOW)
+        with os.fdopen(fd,'rb') as stream:
+            s=os.fstat(stream.fileno())
+            require(stat.S_ISREG(s.st_mode) and s.st_uid==os.getuid() and s.st_nlink==1 and {'bytes':s.st_size,'inode':s.st_ino,'mtime_ns':s.st_mtime_ns,'mode':stat.S_IMODE(s.st_mode)}==before,'triage_evidence_changed_during_hash')
+            h=hashlib.sha256();seen=0
+            for chunk in iter(lambda:stream.read(1048576),b''):
+                seen+=len(chunk);require(seen<=before['bytes'],'triage_evidence_changed_during_hash');h.update(chunk)
+            after=os.fstat(stream.fileno())
+            require(seen==before['bytes'] and (after.st_size,after.st_ino,after.st_mtime_ns,stat.S_IMODE(after.st_mode))==(s.st_size,s.st_ino,s.st_mtime_ns,stat.S_IMODE(s.st_mode)),'triage_evidence_changed_during_hash')
+        values[name]={**before,'sha256':h.hexdigest()}
+    require(evidence_metadata(root)==metadata,'triage_evidence_changed_during_hash')
+    return values
+
+ERROR_TYPES={'NativeError','FormalRunError','FormalPlanError','ValueError','RuntimeError','TimeoutError','KeyError','TypeError','FileNotFoundError','PermissionError','KeyboardInterrupt','AssertionError','OSError','EOFError'}
+STATES={'done','captured','closed','stopped','slot_opened','hub_stopped','failed_no_retry','hub_failed_no_retry','slot_shared_health_verified','pending','reserved','executed'}
+FAULTS={'fixture_readback_rejected','owner_cancelled','permission_or_safety','evidence_chain_damage','shared_environment_pollution','unclassified_exception','raw_audit_or_shared_health_unconfirmed','resource_window_insufficient','source_drift'}
+
+def public_literals(source,files):
+    allowed={}
+    for name in files:
+        if not name.endswith('.py'):continue
+        for node in ast.walk(ast.parse((source/name).read_text())):
+            if isinstance(node,ast.Call):
+                message=None
+                if isinstance(node.func,ast.Name) and node.func.id=='require' and len(node.args)>1:message=node.args[1]
+                elif isinstance(node.func,ast.Name) and node.func.id.endswith(('Error','Fault')) and node.args:message=node.args[0]
+                if isinstance(message,ast.Constant) and isinstance(message.value,str) and 0<len(message.value)<=256:
+                    allowed.setdefault(message.value,[]).append(name+':'+str(node.lineno))
+    return allowed
+
+def safe_error(value,allowed):
+    typ=value.get('error_type');text=value.get('error')
+    out={'error_type':typ if isinstance(typ,str) and typ in ERROR_TYPES else ('unknown_error_type_redacted' if typ is not None else None)}
+    if isinstance(text,str):
+        out['public_error_literal']=text if text in allowed else None
+        out['public_failure_sites']=allowed.get(text,[])[:12]
+        out['unknown_error_text_redacted']=text not in allowed
+    return out
+
+def triage(state,source,freeze,*,stage=lambda value:None):
+    stage('scan_evidence_metadata');evidence_metadata(state)
+    stage('hash_evidence_before');before=inventory(state)
+    stage('parse_phase_result');result=read(state/'slot-phase-result.json')
+    require(result['attempted_indices']==list(range(7,18)) and result['kind']=='interrupted_continuation','triage_actual_fixed_prefix')
+    stage('build_public_error_allowlist');allowed=public_literals(source,freeze['source_files'])
+    records=sorted(state.glob('F*.result.json'))
+    require(len(records)==11,'triage_actual_result_population')
+    failed=[];counts={'result_records':len(records),'closed':0,'stopped':0,'slot_local_faults':0,'unknown_faults':0}
+    stage('parse_slot_results')
+    for p in records:
+        row=read(p);slot=p.name[:-len('.result.json')]
+        require(re.fullmatch(r'F(?:0[1-9]|1[0-9]|20)-(?:base|lora)',slot) is not None and row.get('slot_id')==slot,'triage_slot_identity')
+        counts['closed']+=row.get('close')=='closed';counts['stopped']+=row.get('stop')=='stopped'
+        fault=row.get('fault') or {};scope=fault.get('scope');code=fault.get('code')
+        counts['slot_local_faults']+=scope=='local';counts['unknown_faults']+=scope=='unknown'
+        if row.get('error_type') is not None or row.get('close')!='closed' or row.get('stop')!='stopped':
+            failed.append({'slot_id':slot,'close_verified_by_producer':row.get('close')=='closed','stop_verified_by_producer':row.get('stop')=='stopped','recorded_steps':len(row.get('steps',[])),'fault_scope':scope if isinstance(scope,str) and scope in {'local','unknown','global','owner_pause'} else None,'fault_code':code if isinstance(code,str) and code in FAULTS else None,**safe_error(row,allowed)})
+    errors=[]
+    responses=list(state.glob('hub-response-*.json'))
+    for directory in state.iterdir():
+        if directory.is_dir() and re.fullmatch(r'F(?:0[1-9]|1[0-9]|20)-(?:base|lora)',directory.name):responses+=list(directory.glob('response-*.json'))
+    stage('parse_native_responses')
+    for p in sorted(responses):
+        row=read(p)
+        if row.get('status') not in {'failed_no_retry','hub_failed_no_retry'}:continue
+        errors.append({'evidence_name':p.relative_to(state).as_posix(),'status':row['status'],**safe_error(row,allowed)})
+    stage('hash_evidence_after');require(inventory(state)==before,'triage_original_changed_during_review')
+    return {'schema_version':2,'diagnostic_limits':{'total_bytes_max':TOTAL_BYTES_MAX,'file_bytes_max':FILE_BYTES_MAX,'files_max':FILES_MAX},'status':'readonly_diagnostics_only_not_raw_joint_audit_pass','attempt':4,'attempted_indices':result['attempted_indices'],'generation_stages':result['generation_stages'],'counts':counts,'failed_slot_metadata':failed,'failed_response_metadata':errors,'original_evidence_inventory_sha256':digest(before),'original_evidence_files':len(before),'original_evidence_unchanged_during_review':True,'hub_stop_present':(state/'hub-stop.json').is_file(),'host_terminal_receipt_present':(state/'host-continuity-terminal-receipt.json').is_file(),'native_cleanup_verified':False,'resume_authority':False,'research_restarted':False,'model_or_rhino_calls':0,'private_content_included':False}
