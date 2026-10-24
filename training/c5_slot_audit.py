@@ -25,6 +25,7 @@ from training.c5_formal20_plan import (
 )
 from plugin.rhino_listener.c5_slot_protocol import validate_protocol, decide
 from training.c5_slot_runner import raw_slot_proof
+from plugin.rhino_listener.c5_slot_tail_policy import enabled as tail_repair_enabled
 
 
 def audit_prework(state, spec, freeze, campaign, terminal, guard):
@@ -151,6 +152,7 @@ def _audit_phase(state, spec, freeze, guard, terminal):
     by_id = {c["family_id"]: c for c in cases}
     keys = []
     outcomes = []
+    failed_tail_proofs = {}
     claim_names = set()
     step_names = set()
     timings = [audit_native_timing(state, digest(freeze), hub=True)]
@@ -212,6 +214,9 @@ def _audit_phase(state, spec, freeze, guard, terminal):
                 proof == outcome["proof"] and score == outcome["score"],
                 "slot_final_independent_slot_recomputation",
             )
+        if outcome["proof"] is None and tail_repair_enabled(spec):
+            from training.c5_slot_tail_audit import audit_failed_native_ttl
+            failed_tail_proofs[str(i)] = audit_failed_native_ttl(state, slot, by_id[slot["family_id"]], raw, freeze, tokenizer)
         require(
             decide(outcome["fault"], proof) == outcome["decision"],
             "slot_final_classification_recomputed",
@@ -342,6 +347,7 @@ def _audit_phase(state, spec, freeze, guard, terminal):
         "qualified_gpu": supervisor,
         "residency": residency,
         "raw_native_timing": timings,
+        "prospective_failed_tail_proofs": failed_tail_proofs,
         "owner_pause": bool(
             result.get("global_fault")
             and result["global_fault"].get("scope") == "owner_pause"
@@ -359,7 +365,9 @@ def _audit_phase(state, spec, freeze, guard, terminal):
             result.get("global_fault")
             and result["global_fault"].get("scope") == "owner_pause"
         )
-        and all(o["proof"] is not None for o in outcomes),
+        and all(o["proof"] is not None or str(o["index"]) in failed_tail_proofs
+            and o["fault"]=={"scope":"unknown","code":"unclassified_exception"}
+            for o in outcomes),
         "paired_summary": None,
         "new_blind_holdout_claimed": False,
         "original_c5_no_go_changed": False,
@@ -375,6 +383,9 @@ def audit_phase(state, spec, freeze, guard, terminal, *, campaign):
         evidence_inventory,
     )
 
+    from plugin.rhino_listener.c5_slot_tail_policy import enabled
+    if enabled(spec):
+        from training.c5_slot_tail_storage import copy_evidence, evidence_inventory
     with tempfile.TemporaryDirectory(prefix="phase-audit-") as name:
         copied = Path(name).resolve() / state.name
         before = copy_evidence(state, copied)

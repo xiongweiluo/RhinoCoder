@@ -109,7 +109,7 @@ class TimedSyntheticWire(SyntheticWire):
             publish_json(self.local,prefix+'time.json',self.last_phase)
         return value
 
-def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None,slot_plan=None,slot_fault=None,fixture_mismatch_index=None,invalid_model_index=None):
+def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None,slot_plan=None,slot_fault=None,fixture_mismatch_index=None,invalid_model_index=None,tail_repair=False,native_ttl_failure=False,model_infer_failure=False,backup_failure=False):
     state,cases,spec,freeze,_,rhino,_=setup_field(tmp_path,monkeypatch)
     # Real signature/SQLite/timing code below; ONLY geometry/model are fake.
     new_spec,new_freeze,_=records()
@@ -128,6 +128,9 @@ def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None,slot_
             case['initial_assertions']['object_count']+=1
             spec['family_merkle_root_sha256']=family_merkle_root(cases)
         spec['run_package']={'slot_protocol':slot_plan}
+        if tail_repair:
+            from plugin.rhino_listener.c5_slot_tail_policy import POLICY as TAIL_POLICY
+            spec['run_package']['tail_repair']={'version':1,'policy':TAIL_POLICY}
         freeze['tokenizer_dir']=str(tmp_path/'synthetic-tokenizer-not-read')
     freeze['spec_sha256']=digest(spec)
     grant={'study_id':spec['study_id'],'actor':'repository_owner','approved':True,'spec_sha256':digest(spec),
@@ -275,6 +278,23 @@ def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None,slot_
     def load_cases():
         if slot_plan is not None:publish_json(state,'private-cases.json',cases)
         return cases
+    if native_ttl_failure:
+        from plugin.rhino_listener.c5_research_gate import ResearchGate
+        original_execute = ResearchGate.execute
+        fired = [False]
+        def refuse_once(self, envelope):
+            if not fired[0]:
+                fired[0] = True
+                self.clock = lambda: envelope['payload']['expires_at']
+            return original_execute(self, envelope)
+        monkeypatch.setattr(ResearchGate, 'execute', refuse_once)
+    if model_infer_failure:
+        def failed_infer(**kwargs): raise TimeoutError('CPU private synthetic timeout')
+        model.infer = failed_infer
+    if backup_failure:
+        from training import c5_formal_reuse_adapters_base as native_base
+        def failed_backup(*a): raise OSError('CPU synthetic disk failure')
+        monkeypatch.setattr(native_base, 'database_backup', failed_backup)
     result=runner.run(load_cases)
     if slot_plan is not None:
         return state,cases,spec,freeze,read_json(state,'host-continuity-terminal-receipt.json'),result,campaign

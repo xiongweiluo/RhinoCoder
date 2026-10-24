@@ -1,0 +1,3 @@
+........................................................................ [ 57%]
+...........
+{"actual_formal_grant_created": false, "actual_formal_ledger_writes": 0, "code_inventory_sha256": "5a8d6a067466b04dffa9e0f32816f0b05178a43af08500e6371a66027ff941b3", "cpu_log_sha256": "30cb154296e423343006569236dd845f97e6e286a1d36a38f9354ffa6b720e70", "model_loaded": false, "private_formal_reads": 0, "public_test_archive_sha256": "94a1bea66af59ae2b8121460000e0e4d60405a2a29249e606347a09d3ecc5c84", "returncode": -15}

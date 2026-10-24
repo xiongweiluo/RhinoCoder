@@ -1,0 +1,60 @@
+"""Independent stdlib-only readback of public roots. No actor imports or writes."""
+import hashlib,json,os,stat,sys,time
+from pathlib import Path
+
+def digest(v):return hashlib.sha256(json.dumps(v,sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode()).hexdigest()
+def sha(path):
+ h=hashlib.sha256()
+ with path.open('rb') as stream:
+  for b in iter(lambda:stream.read(1048576),b''):h.update(b)
+ return h.hexdigest()
+def check_root(root,pins):
+ assert root.is_absolute() and root.resolve()==root and root.is_dir()
+ actual={p.relative_to(root).as_posix() for p in root.rglob('*') if not p.is_dir()}
+ directories={str(p) for n in pins for p in Path(n).parents if str(p)!='.'}
+ assert actual==set(pins) and {p.relative_to(root).as_posix() for p in root.rglob('*') if p.is_dir()}==directories
+ for name,h in pins.items():
+  p=root/name;info=p.lstat()
+  assert p.resolve()==p and stat.S_ISREG(info.st_mode) and info.st_uid==os.getuid() and info.st_nlink==1
+  assert sha(p)==h,name
+ return {'files':len(pins),'inventory_sha256':digest(pins)}
+import base64,gzip
+manifest=json.loads(gzip.decompress(base64.b64decode('H4sIAPjW3GoC/91V22rkRhD9lWWe40x3VV/zmj9Y2OehurrKVhiPTI/Gu8vif09pDFmPwXYgDpgFIalR69Q5dTn9YyPfhE/LNB92Q6h/3/zxaRkn+e3T5m5M87Dljw3T7R1N14fdje3YHW8IYrIPG42+VqwagwSIoYRYawffQoxBGQgQOJYeMAORiz0GQNuMDSjnCm5jUXQax2VHpz4tT5Brztl157pga6F374g6ROGSizBJK8DsWpQmMWvuqD2jSmWk1r3CijzkfpKvT0CdBu3S1CcXHCRWrVAKsubkxGfj3bIEzkxUvCTbKD15tFuNoKltHlbU02GZbmWn015WULmn/ZbjdsjpKFc6j1vaX4HBewfhatj1+MPvfx3nw+YJwE9eGTuTidWaGAs6CYkiOA+gtmw5eu4uGCFJOWqxt0ixpmRPSy/yinq8E/73nNbd/xA6//qTTS+OwAkZDU0huRScxexZUmArXmkVWUrgAj4KFSaP5HJq2NQqVtIKeUt8bpzDmv+FFtmNeV5W9O2Xo4zj9pv12/VXmfanefv5ZjrMf85dxrbTQttl0HSYDtevK1hRz+k04ONjl57GkMNyfn/3cPNp8DnedLi3IPP4/iRlkKE1D1YoK6RqWpvIh9IpBwylFrFm94nBSunWz568NmmBA7vQSnicg72sOkLxa5vdTEcLMjHtd8ZumWj/3rrgDVHFdmGw3gcbCF8zpOIrks0OSIiNawslkjiOviUboWiyG6qzNgDqDBeioD4TNfz76xn+DUmKiUxSkGhZ1x5tyklCZejMUCWjTT31htK8FMVYXTU36WYp1v0o5UIS4nNJ8N6S8Gq8WaVC1XOMBORSbyJWLIwYqkqH5Kp5JJk3owQquWqr3aEZiXa2YhUXLySF/FwS/g+S8A1JvSppjTVGXxIgg6tAlXIhg7B1IO4hskM7DlBZtKWWAZMiaqYmF5JSeHju2hfOm6OkrjaFzbG3Lha040mrjyU2C6l2cCFVQ4fqA/uidnKxsAeb4VDPJ8L13eklszun5D972BsoH82aXqT7sRznFZofzEheZPrh/OE1pr/U2D/8DW8F1Eg4CwAA')));endpoint='gpu';scope=manifest[endpoint]
+root=Path(scope['roots']['current']['root']);runtime=root/manifest['runtime_file']
+assert sha(runtime)==scope['runtime_file_sha256']
+f=json.loads(runtime.read_bytes());assert digest(f)==manifest['runtime_sha256']
+f3=json.loads((root/'eval/c5/reuse-formal-20261023-r3-runtime.json').read_bytes())
+old_runtime=Path(scope['roots']['historical_r2']['root'])/'eval/c5/reuse-formal-20261023-r2-runtime.json'
+assert sha(old_runtime)==f3['run_package']['previous_public_source_files']['eval/c5/reuse-formal-20261023-r2-runtime.json']
+f2=json.loads(old_runtime.read_bytes())
+# Current exact runtime pins f3/f2 raw bytes; verify before using their maps.
+for n in ('eval/c5/reuse-formal-20261023-r3-runtime.json',):
+ assert sha(root/n)==f['source_files'][n]
+pins=dict(f['source_files']);pins[manifest['runtime_file']]=scope['runtime_file_sha256']
+map_by_tag={'current':pins,'historical_initial':f['incremental_revision']['prior_public_source_files'],'historical_r1':f2['run_package']['previous_public_source_files'],'historical_r2':f3['run_package']['previous_public_source_files'],'historical_r3':f['run_package']['previous_public_source_files']}
+for tag,value in scope['roots'].items():
+ value['pins']=map_by_tag[tag];assert digest(value['pins'])==value['inventory_sha256'] and len(value['pins'])==value['files']
+results={name:check_root(Path(v['root']),v['pins']) for name,v in scope['roots'].items()}
+root=Path(scope['roots']['current']['root']);s=json.loads((root/manifest['spec_file']).read_bytes());f=json.loads((root/manifest['runtime_file']).read_bytes())
+assert digest(s)==manifest['spec_sha256'] and digest(f)==manifest['runtime_sha256']
+assert f['spec_sha256']==digest(s) and digest(f['source_files'])==f['source_inventory_sha256']
+assert s['execution_ready'] is f['execution_ready'] is manifest['execution_ready']
+p=s['run_package'];plan=p['slot_protocol'];prior=manifest['prior']
+assert plan['selected_indices']==list(range(18,40)) and plan['prior_attempted_indices']==list(range(18))
+assert len(p['prior_campaign_events'])==36 and p['prior_campaign_events'][-1]['record_sha256']==prior['campaign_head_sha256']
+assert p['timing_migration']['prior_attempts_consumed']==4 and p['timing_migration']['legacy_first_load_epoch']==1792692329.837715
+assert p['timing_migration']['gpu_residency_upper_seconds']==70340.89651274681
+assert p['tail_repair']['prior_review']['summary_sha256']==prior['review_sha256']
+assert p['tail_repair']['prior_review']['first_audit_sha256']==prior['first_audit_sha256']
+assert s['study_id']=='c5-rhino-paired-20-reuse-v1' and f['new_exact_owner_approval_received'] is False
+assert not os.path.lexists(scope['new_state_root'])
+window=22*1500+600+900;remaining=p['lease_expiry_epoch']-time.time()
+print(json.dumps({'status':'INDEPENDENT_PUBLIC_FREEZE_READBACK_VERIFIED_NO_AUTHORITY','endpoint':endpoint,'epoch':time.time(),
+ 'roots':results,'spec_sha256':digest(s),'runtime_sha256':digest(f),'source_inventory_sha256':f['source_inventory_sha256'],
+ 'code_inventory_sha256':digest({n:h for n,h in f['source_files'].items() if n.endswith('.py')}),
+ 'new_state_or_grant_present':False,'new_loads_or_slots':0,'private_formal_reads':0,'model_or_rhino_calls':0,
+ 'prior_attempts_preserved':4,'prior_rows_preserved':36,'first_load_epoch_preserved':1792692329.837715,
+ 'charged_seconds_preserved':70340.89651274681,'historical_full_gate_passed':False,'old_refusals_retained':True,
+ 'remaining_work_plus_startup_export_seconds':window,'current_lease_remaining_seconds':remaining,
+ 'full_window_currently_available':window<=min(remaining,129600-70340.89651274681),
+ 'actual_execution_authority':False},sort_keys=True))
