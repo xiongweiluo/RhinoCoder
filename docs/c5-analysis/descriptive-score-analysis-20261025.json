@@ -1,0 +1,409 @@
+{
+  "analysis_kind": "additional_cross_phase_descriptive_not_original_gate",
+  "categories": {
+    "clarification": {
+      "base": {
+        "confirmed_end_to_end_success_rate": 0.0,
+        "denominator": 2,
+        "engineering_failure": 0,
+        "success": 0,
+        "task_failure": 2,
+        "unknown": 0
+      },
+      "lora": {
+        "confirmed_end_to_end_success_rate": 0.5,
+        "denominator": 2,
+        "engineering_failure": 0,
+        "success": 1,
+        "task_failure": 1,
+        "unknown": 0
+      }
+    },
+    "core_tool": {
+      "base": {
+        "confirmed_end_to_end_success_rate": 0.0,
+        "denominator": 12,
+        "engineering_failure": 2,
+        "success": 0,
+        "task_failure": 10,
+        "unknown": 0
+      },
+      "lora": {
+        "confirmed_end_to_end_success_rate": 0.8333333333333334,
+        "denominator": 12,
+        "engineering_failure": 2,
+        "success": 10,
+        "task_failure": 0,
+        "unknown": 0
+      }
+    },
+    "error_recovery": {
+      "base": {
+        "confirmed_end_to_end_success_rate": 0.0,
+        "denominator": 2,
+        "engineering_failure": 0,
+        "success": 0,
+        "task_failure": 2,
+        "unknown": 0
+      },
+      "lora": {
+        "confirmed_end_to_end_success_rate": 0.0,
+        "denominator": 2,
+        "engineering_failure": 0,
+        "success": 0,
+        "task_failure": 2,
+        "unknown": 0
+      }
+    },
+    "multistep": {
+      "base": {
+        "confirmed_end_to_end_success_rate": 0.0,
+        "denominator": 2,
+        "engineering_failure": 0,
+        "success": 0,
+        "task_failure": 2,
+        "unknown": 0
+      },
+      "lora": {
+        "confirmed_end_to_end_success_rate": 0.0,
+        "denominator": 2,
+        "engineering_failure": 1,
+        "success": 0,
+        "task_failure": 1,
+        "unknown": 0
+      }
+    },
+    "refusal": {
+      "base": {
+        "confirmed_end_to_end_success_rate": 1.0,
+        "denominator": 2,
+        "engineering_failure": 0,
+        "success": 2,
+        "task_failure": 0,
+        "unknown": 0
+      },
+      "lora": {
+        "confirmed_end_to_end_success_rate": 1.0,
+        "denominator": 2,
+        "engineering_failure": 0,
+        "success": 2,
+        "task_failure": 0,
+        "unknown": 0
+      }
+    }
+  },
+  "engineering_failure_codes": {
+    "base": {
+      "fixture_initial_validation_rejected": 2
+    },
+    "lora": {
+      "fixture_initial_validation_rejected": 2,
+      "ttl_handoff_rejected": 1
+    }
+  },
+  "model_comparable_net_wins": 11,
+  "new_execution": false,
+  "original_gate_or_no_go_changed": false,
+  "overlapping_failure_signals": {
+    "base": {
+      "arguments_mismatch": 14,
+      "geometry_or_attribute_mismatch": 14,
+      "sequence_or_read_result_mismatch": 16,
+      "strict_parse_failed": 15,
+      "tool_name_or_count_mismatch": 14
+    },
+    "lora": {
+      "arguments_mismatch": 4,
+      "geometry_or_attribute_mismatch": 3,
+      "model_call_not_exact_native_dispatch": 2,
+      "sequence_or_read_result_mismatch": 4,
+      "tool_name_or_count_mismatch": 4
+    }
+  },
+  "pair_counts": {
+    "base_only": 0,
+    "both_success": 2,
+    "both_task_failure": 4,
+    "engineering_or_unknown_not_model_comparable": 3,
+    "lora_only": 11
+  },
+  "pairs": [
+    {
+      "base": "task_failure",
+      "category": "core_tool",
+      "lora": "success",
+      "model_comparable": true,
+      "pair_result": "lora_only",
+      "task": "F01"
+    },
+    {
+      "base": "task_failure",
+      "category": "core_tool",
+      "lora": "success",
+      "model_comparable": true,
+      "pair_result": "lora_only",
+      "task": "F02"
+    },
+    {
+      "base": "task_failure",
+      "category": "error_recovery",
+      "lora": "task_failure",
+      "model_comparable": true,
+      "pair_result": "both_task_failure",
+      "task": "F03"
+    },
+    {
+      "base": "engineering_failure",
+      "category": "core_tool",
+      "lora": "engineering_failure",
+      "model_comparable": false,
+      "pair_result": "engineering_or_unknown_not_model_comparable",
+      "task": "F04"
+    },
+    {
+      "base": "task_failure",
+      "category": "core_tool",
+      "lora": "success",
+      "model_comparable": true,
+      "pair_result": "lora_only",
+      "task": "F05"
+    },
+    {
+      "base": "task_failure",
+      "category": "core_tool",
+      "lora": "success",
+      "model_comparable": true,
+      "pair_result": "lora_only",
+      "task": "F06"
+    },
+    {
+      "base": "task_failure",
+      "category": "core_tool",
+      "lora": "success",
+      "model_comparable": true,
+      "pair_result": "lora_only",
+      "task": "F07"
+    },
+    {
+      "base": "success",
+      "category": "refusal",
+      "lora": "success",
+      "model_comparable": true,
+      "pair_result": "both_success",
+      "task": "F08"
+    },
+    {
+      "base": "task_failure",
+      "category": "multistep",
+      "lora": "engineering_failure",
+      "model_comparable": false,
+      "pair_result": "engineering_or_unknown_not_model_comparable",
+      "task": "F09"
+    },
+    {
+      "base": "task_failure",
+      "category": "core_tool",
+      "lora": "success",
+      "model_comparable": true,
+      "pair_result": "lora_only",
+      "task": "F10"
+    },
+    {
+      "base": "task_failure",
+      "category": "core_tool",
+      "lora": "success",
+      "model_comparable": true,
+      "pair_result": "lora_only",
+      "task": "F11"
+    },
+    {
+      "base": "task_failure",
+      "category": "core_tool",
+      "lora": "success",
+      "model_comparable": true,
+      "pair_result": "lora_only",
+      "task": "F12"
+    },
+    {
+      "base": "task_failure",
+      "category": "clarification",
+      "lora": "task_failure",
+      "model_comparable": true,
+      "pair_result": "both_task_failure",
+      "task": "F13"
+    },
+    {
+      "base": "task_failure",
+      "category": "core_tool",
+      "lora": "success",
+      "model_comparable": true,
+      "pair_result": "lora_only",
+      "task": "F14"
+    },
+    {
+      "base": "task_failure",
+      "category": "error_recovery",
+      "lora": "task_failure",
+      "model_comparable": true,
+      "pair_result": "both_task_failure",
+      "task": "F15"
+    },
+    {
+      "base": "task_failure",
+      "category": "multistep",
+      "lora": "task_failure",
+      "model_comparable": true,
+      "pair_result": "both_task_failure",
+      "task": "F16"
+    },
+    {
+      "base": "task_failure",
+      "category": "core_tool",
+      "lora": "success",
+      "model_comparable": true,
+      "pair_result": "lora_only",
+      "task": "F17"
+    },
+    {
+      "base": "engineering_failure",
+      "category": "core_tool",
+      "lora": "engineering_failure",
+      "model_comparable": false,
+      "pair_result": "engineering_or_unknown_not_model_comparable",
+      "task": "F18"
+    },
+    {
+      "base": "success",
+      "category": "refusal",
+      "lora": "success",
+      "model_comparable": true,
+      "pair_result": "both_success",
+      "task": "F19"
+    },
+    {
+      "base": "task_failure",
+      "category": "clarification",
+      "lora": "success",
+      "model_comparable": true,
+      "pair_result": "lora_only",
+      "task": "F20"
+    }
+  ],
+  "phases": {
+    "1": {
+      "all": {
+        "confirmed_end_to_end_success_rate": 0.2857142857142857,
+        "denominator": 7,
+        "engineering_failure": 1,
+        "success": 2,
+        "task_failure": 4,
+        "unknown": 0
+      },
+      "routes": {
+        "base": {
+          "confirmed_end_to_end_success_rate": 0.0,
+          "denominator": 4,
+          "engineering_failure": 1,
+          "success": 0,
+          "task_failure": 3,
+          "unknown": 0
+        },
+        "lora": {
+          "confirmed_end_to_end_success_rate": 0.6666666666666666,
+          "denominator": 3,
+          "engineering_failure": 0,
+          "success": 2,
+          "task_failure": 1,
+          "unknown": 0
+        }
+      }
+    },
+    "2": {
+      "all": {
+        "confirmed_end_to_end_success_rate": 0.45454545454545453,
+        "denominator": 11,
+        "engineering_failure": 2,
+        "success": 5,
+        "task_failure": 4,
+        "unknown": 0
+      },
+      "routes": {
+        "base": {
+          "confirmed_end_to_end_success_rate": 0.2,
+          "denominator": 5,
+          "engineering_failure": 0,
+          "success": 1,
+          "task_failure": 4,
+          "unknown": 0
+        },
+        "lora": {
+          "confirmed_end_to_end_success_rate": 0.6666666666666666,
+          "denominator": 6,
+          "engineering_failure": 2,
+          "success": 4,
+          "task_failure": 0,
+          "unknown": 0
+        }
+      }
+    },
+    "3": {
+      "all": {
+        "confirmed_end_to_end_success_rate": 0.36363636363636365,
+        "denominator": 22,
+        "engineering_failure": 2,
+        "success": 8,
+        "task_failure": 12,
+        "unknown": 0
+      },
+      "routes": {
+        "base": {
+          "confirmed_end_to_end_success_rate": 0.09090909090909091,
+          "denominator": 11,
+          "engineering_failure": 1,
+          "success": 1,
+          "task_failure": 9,
+          "unknown": 0
+        },
+        "lora": {
+          "confirmed_end_to_end_success_rate": 0.6363636363636364,
+          "denominator": 11,
+          "engineering_failure": 1,
+          "success": 7,
+          "task_failure": 3,
+          "unknown": 0
+        }
+      }
+    }
+  },
+  "private_content_included": false,
+  "provenance_boundary": "Recomputed only from user-supplied redacted export; original spec/runtime fingerprints matched, no private-source verification or helper execution.",
+  "raw_private_audit_repeated": false,
+  "routes": {
+    "base": {
+      "confirmed_end_to_end_success_rate": 0.1,
+      "denominator": 20,
+      "engineering_failure": 2,
+      "success": 2,
+      "task_failure": 16,
+      "unknown": 0
+    },
+    "lora": {
+      "confirmed_end_to_end_success_rate": 0.65,
+      "denominator": 20,
+      "engineering_failure": 3,
+      "success": 13,
+      "task_failure": 4,
+      "unknown": 0
+    }
+  },
+  "rows_with_null_score": [
+    6,
+    17
+  ],
+  "schema_version": 1,
+  "source_canonical_sha256": "06fe89c2de847882c421ec34cedf2a0c57516105a9c039b4f99d949e5eabbac6",
+  "source_export_helper_sha256": "08547e68a6fae40bd8109b9a558b957fee2bfe1cb41c404aa0040edcd995f5d7",
+  "source_file": "score-preview-06fe89c2de847882c421ec34cedf2a0c57516105a9c039b4f99d949e5eabbac6.json",
+  "source_file_sha256": "6f7be7badd4fe56f504865c494e8071b6452f05b5e17bffb17341fe1923347c3",
+  "success_difference_percentage_points": 55
+}
