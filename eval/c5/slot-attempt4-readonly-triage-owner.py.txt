@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+"""Owner-only read-only diagnosis. No new research, model, Rhino or network."""
+import argparse,hashlib,importlib.util,json,os,sys
+from pathlib import Path
+SOURCE=Path(__file__).resolve().parent
+FIELD=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/reuse-formal-20261023-r3-source')
+STATE=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/reuse-formal-20261023-r3-state/preload-4')
+OUTPUT=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/reuse-formal-20261023-r3-readonly-triage-state')
+SPEC='6911d112b1b11bb6bed636eac3f3d456b6400a92ac98dd95dc0105057d46fa22'
+RUNTIME='ba39557e57027ee4533b4d4d2468540d7af4765d22a5257b123acc8c14fda4ea'
+def digest(v):return hashlib.sha256(json.dumps(v,sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode()).hexdigest()
+def require(v,code):
+    if not v:raise ValueError(code)
+def file_sha(p):
+    require(p.resolve()==p and p.is_file() and not p.is_symlink(),'triage_public_file_identity')
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+def read(p):return json.loads(p.read_bytes())
+def publish(value):
+    if not OUTPUT.exists():OUTPUT.mkdir(mode=0o700)
+    require(OUTPUT.resolve()==OUTPUT and OUTPUT.is_dir() and not OUTPUT.is_symlink() and OUTPUT.stat().st_uid==os.getuid() and OUTPUT.stat().st_mode&0o777==0o700,'triage_output_scope')
+    p=OUTPUT/('owner-public-triage-'+digest(value)+'.json')
+    raw=(json.dumps(value,ensure_ascii=False,sort_keys=True,indent=2,allow_nan=False)+'\n').encode();require(len(raw)<=131072,'triage_output_cap')
+    if p.exists():require(p.read_bytes()==raw,'triage_snapshot_changed');return
+    fd=os.open(p,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)
+    with os.fdopen(fd,'wb') as f:f.write(raw);f.flush();os.fsync(f.fileno())
+def main():
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('mode',choices=['audit']);parser.add_argument('--review-sha256',required=True);args=parser.parse_args()
+    stage='public_package_guard'
+    try:
+        require(sys.stdin.isatty() and sys.stderr.isatty(),'triage_owner_private_terminal_required')
+        review=read(SOURCE/'review.json');require(digest(review)==args.review_sha256,'triage_review_digest')
+        require(set(review['files'])=={'owner.py','core.py','tests.py'} and all(file_sha(SOURCE/n)==sha for n,sha in review['files'].items()),'triage_review_files')
+        require(sys.flags.isolated and sys.dont_write_bytecode and Path(sys.executable).resolve()==Path('/opt/anaconda3/bin/python3.13') and sys.pycache_prefix=='/Users/xiongweiluo/RhinoCoder/data/training/c5/reuse-dev-20261012-d-bytecode-cache-must-remain-absent' and not os.path.lexists(sys.pycache_prefix),'triage_interpreter')
+        spec=read(FIELD/'eval/c5/reuse-formal-20261023-r3-spec.json');freeze=read(FIELD/'eval/c5/reuse-formal-20261023-r3-runtime.json')
+        def guard():
+            require(digest(read(FIELD/'eval/c5/reuse-formal-20261023-r3-spec.json'))==SPEC and digest(read(FIELD/'eval/c5/reuse-formal-20261023-r3-runtime.json'))==RUNTIME,'triage_frozen_pair')
+            require(all(file_sha(FIELD/n)==sha for n,sha in freeze['source_files'].items()),'triage_frozen_source')
+        guard();require(sys.version==freeze['mac_environment']['python'],'triage_python_version')
+        stage='owner_readonly_evidence_diagnosis'
+        module_spec=importlib.util.spec_from_file_location('readonly_slot_diagnostic_core',SOURCE/'core.py');core=importlib.util.module_from_spec(module_spec);module_spec.loader.exec_module(core)
+        value=core.triage(STATE,FIELD,freeze);guard()
+        value.update(review_sha256=args.review_sha256,spec_sha256=SPEC,runtime_sha256=RUNTIME)
+        publish(value)
+        print('C5_SLOT_READONLY_DIAGNOSTICS_COMPLETE_NO_RESEARCH_RESTART')
+        print(json.dumps({'status':value['status'],'private_content_included':False,'research_restarted':False},sort_keys=True))
+    except BaseException as e:
+        typ=type(e).__name__;typ=typ if typ in {'ValueError','FileNotFoundError','PermissionError','TypeError','AssertionError','OSError','KeyboardInterrupt'} else 'unknown_error_type_redacted'
+        v={'status':'readonly_diagnostics_refused','stage':stage,'error_type':typ,'private_content_included':False,'research_restarted':False}
+        try:publish(v)
+        except BaseException:pass
+        print(json.dumps(v,sort_keys=True));return 1
+    return 0
+if __name__=='__main__':raise SystemExit(main())

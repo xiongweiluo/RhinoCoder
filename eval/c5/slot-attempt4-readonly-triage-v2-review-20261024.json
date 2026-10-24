@@ -1,0 +1,38 @@
+{
+  "actual_evidence_metadata": {
+    "files": 1581,
+    "maximum_file_bytes": 560227,
+    "symlinks": 0,
+    "total_bytes": 143374572,
+    "unsafe_identity_count": 0
+  },
+  "actual_metadata_preflight_passed": true,
+  "capacity_basis": "actual_existing_11_slot_evidence_exceeds_old_128_MiB_limit;256_MiB_is_finite_headroom_for_this_readonly_diagnosis",
+  "cpu_synthetic_tests_passed": 25,
+  "field_or_campaign_writes": false,
+  "field_source_modified": false,
+  "files": {
+    "core.py": "8185319d67d784f5673bfd2399f41a15d5c2f206bb2944a6417905ede92f604a",
+    "owner.py": "57294ef3875ebf5bd425c55de8d377ebc6d157cd6c03d3142eb3180bc9b7707e",
+    "tests.py": "68ec3ced18a93305c9e5f201d3960860feb6021bfdb4893c9ca62991410d0695"
+  },
+  "limits": {
+    "file_bytes_max": 33554432,
+    "files_max": 20000,
+    "public_output_bytes_max": 131072,
+    "total_bytes_max": 268435456
+  },
+  "model_or_rhino_or_network_calls": 0,
+  "not_full_joint_audit": true,
+  "old_total_bytes_max": 134217728,
+  "previous_refusal_retained": true,
+  "previous_review_sha256": "f0fa023a1b45ee969a4c26d4b7c657431f7ae4935bb7530bc2f12620c5051e29",
+  "private_content_included": false,
+  "private_evidence_bytes_read_by_agent": 0,
+  "purpose": "owner_only_readonly_error_diagnosis_with_explicit_closed_refusal_codes",
+  "reproduced_old_failure": "triage_evidence_cap",
+  "resume_or_retry_authority": false,
+  "runtime_sha256": "ba39557e57027ee4533b4d4d2468540d7af4765d22a5257b123acc8c14fda4ea",
+  "schema_version": 2,
+  "spec_sha256": "6911d112b1b11bb6bed636eac3f3d456b6400a92ac98dd95dc0105057d46fa22"
+}

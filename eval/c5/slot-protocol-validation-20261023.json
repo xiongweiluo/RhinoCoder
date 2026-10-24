@@ -1,0 +1,337 @@
+{
+  "actual_execution_authorized": false,
+  "agent_private_formal_reads": 0,
+  "baseline_validation": {
+    "code_revision": "88a9a34c8df63c3315b2476788df90f90d2e6de1",
+    "cpu_tests": {
+      "actual_compatible_linux": {
+        "log_sha256": "96622d5c4d8a4f16114f782032f56959b99c504cab326b0a6def648ab08fc2be",
+        "model_loading": "explicit_cpu_stub_not_actual_weights",
+        "passed": 64,
+        "real_worker_startup_paths": 3,
+        "warning": "pytest_config_option_unused"
+      },
+      "mac": {
+        "log_sha256": "5b59753bf59a21cff6b5b5fd2bcfeb4b543938d331fa3808ce286611c26a295b",
+        "passed": 108,
+        "skipped_linux_only": 3
+      }
+    },
+    "final_readback": {
+      "gpu": {
+        "boot_id": "5e83729b-b29b-43f6-8635-c98f662d3d56",
+        "compute_processes_empty": true,
+        "endpoint": "gpu",
+        "epoch": 1792784006.4079702,
+        "execution_authority_created": false,
+        "gpu_identity_memory": "GPU-0e00f0ad-fa5a-eed9-6eee-5877984e02f9, 11",
+        "historical_pinned_files_verified": 43,
+        "model_or_rhino_calls": 0,
+        "new_state_grant_or_activation_absent": true,
+        "original_charged_gpu_seconds": 67977.15073728561,
+        "original_first_load_epoch": 1792692329.837715,
+        "original_frozen_roots_verified": {
+          "reuse-formal-20261022-r1-source": 433,
+          "reuse-formal-20261022-source": 429,
+          "reuse-formal-20261023-r2-source": 447
+        },
+        "original_ledger_head_sha256": "f643a9b3633486400bc4a9c82a22efbe724e3f477e8c1f27e63af6eaa4c8e2ab",
+        "original_ledger_rows": 18,
+        "original_loads": 3,
+        "original_qualified_parent_target_absent": true,
+        "package_id": "reuse-formal-20261023-r3",
+        "private_formal_reads": 0,
+        "public_files_verified": 464,
+        "ready_material": true,
+        "runtime_sha256": "08cc7944f152b63a060f422de2f6ed29c29fa55be90d0eb9a8bc0edb5c1aa61d",
+        "schema_version": 1,
+        "source_code_inventory_sha256": "843585adcf72f6fa92223d191d7c47799480d389476b2f94f03ded83b622a3a3",
+        "source_inventory_sha256": "bdd55831048a44bc3506ce636f98b08420eff2be56c344a3aa87f2348e371173",
+        "spec_sha256": "bc546292d34b26fa48e4c26bf9222d3d4766b891895f9b4bcd80073d00fb870e"
+      },
+      "mac": {
+        "endpoint": "mac",
+        "epoch": 1792784005.19242,
+        "execution_authority_created": false,
+        "historical_pinned_files_verified": 57,
+        "model_or_rhino_calls": 0,
+        "new_state_grant_or_activation_absent": true,
+        "original_charged_gpu_seconds": 67977.15073728561,
+        "original_first_load_epoch": 1792692329.837715,
+        "original_frozen_roots_verified": {
+          "reuse-formal-20261022-r1-source": 433,
+          "reuse-formal-20261022-source": 429,
+          "reuse-formal-20261023-r2-source": 447
+        },
+        "original_ledger_head_sha256": "f643a9b3633486400bc4a9c82a22efbe724e3f477e8c1f27e63af6eaa4c8e2ab",
+        "original_ledger_rows": 18,
+        "original_loads": 3,
+        "package_id": "reuse-formal-20261023-r3",
+        "private_formal_reads": 0,
+        "public_files_verified": 464,
+        "ready_material": true,
+        "runtime_sha256": "08cc7944f152b63a060f422de2f6ed29c29fa55be90d0eb9a8bc0edb5c1aa61d",
+        "schema_version": 1,
+        "source_code_inventory_sha256": "843585adcf72f6fa92223d191d7c47799480d389476b2f94f03ded83b622a3a3",
+        "source_inventory_sha256": "bdd55831048a44bc3506ce636f98b08420eff2be56c344a3aa87f2348e371173",
+        "spec_sha256": "bc546292d34b26fa48e4c26bf9222d3d4766b891895f9b4bcd80073d00fb870e"
+      }
+    },
+    "later_signal_fix_required_new_freeze": true
+  },
+  "ci": {
+    "baseline_exact_head": "35c633077cad4a87f6a79b992febf380dcc4fa5d",
+    "baseline_success_run": 39998576780,
+    "cancelled_intermediate_run": 40012547798,
+    "cancelled_reason": "final_review_detected_global_fault_and_owner_cancel_during_slot_proof_lost_semantics; fixed_and_covered",
+    "final_exact_head_receipt": "GitHub_PR_checks_and_final_PR_description_updated_after_success_no_self_referential_commit",
+    "policy": "one_final_exact_pr_head_workflow_deduplicated; full_impact_scope; three_real_startup_paths_once",
+    "pull_request": "https://github.com/xiongweiluo/RhinoCoder/pull/24"
+  },
+  "cpu_closure": {
+    "gpu": {
+      "additional_modules": [
+        "training.c5_slot_campaign",
+        "training.c5_slot_entry",
+        "training.c5_slot_runner",
+        "training.c5_slot_worker",
+        "training.c5_slot_audit",
+        "training.c5_formal_reuse_admission",
+        "training.c5_formal_reuse_supervisor",
+        "training.c5_formal_reuse_control",
+        "tools.run_c5_formal_reuse_worker",
+        "tools.register_c5_formal_reuse_approval"
+      ],
+      "cuda_initialized": false,
+      "environment_sha256": "9cce641f84edb66d48a44ad7d88061962d07d556ab03ce5e439cd5d3ae135021",
+      "epoch": 1792785206.4276166,
+      "full_asset_preflight_still_required_at_actual_load": true,
+      "grant_or_state_created": false,
+      "model_asset_pins_unchanged_from_original_full_verified_freeze": true,
+      "model_loaded": false,
+      "model_or_rhino_calls": 0,
+      "preparation_only": true,
+      "private_formal_reads": 0,
+      "source_code_inventory_sha256": "d929aa35b7cbe959ee24c1bdb230cd2e7d98f8f6a0b03e736a1a6f40bf73c8c9",
+      "source_inventory_sha256": "7a6d454db033b373c4d6baaaf81d2f3a9f24fb2e857dc05bb8b1f1c016dba896",
+      "status": "actual_linux_changed_source_and_loader_import_closure_verified",
+      "unaffected_weight_bytes_rehashed": false
+    },
+    "mac": {
+      "additional_modules": [
+        "training.c5_slot_campaign",
+        "training.c5_slot_entry",
+        "training.c5_slot_runner",
+        "training.c5_slot_worker",
+        "training.c5_slot_audit",
+        "training.c5_formal_reuse_admission",
+        "training.c5_formal_reuse_supervisor",
+        "training.c5_formal_reuse_control",
+        "tools.run_c5_formal_reuse_worker",
+        "tools.register_c5_formal_reuse_approval",
+        "tools.c5_formal_run_package",
+        "training.c5_formal_run_package_entry",
+        "tools.c5_rhino_run_package",
+        "tools.c5_formal_reuse_partial_owner_audit"
+      ],
+      "after_contract_closure": {
+        "cuda_initialized": false,
+        "epoch": 1792785185.542135,
+        "external_loaded_modules_verified": 3566,
+        "grant_or_state_created": false,
+        "model_generation_calls": 0,
+        "model_loaded": false,
+        "private_formal_reads": 0,
+        "public_tokenizer_class": "Qwen2Tokenizer",
+        "rhino_calls": 0,
+        "source_code_inventory_sha256": "d929aa35b7cbe959ee24c1bdb230cd2e7d98f8f6a0b03e736a1a6f40bf73c8c9",
+        "status": "ACTUAL_MAC_CPU_TOKENIZER_CLOSURE_VERIFIED_NOT_EXECUTION_AUTHORITY"
+      },
+      "cuda_initialized": false,
+      "epoch": 1792785183.6344829,
+      "external_loaded_modules_verified": 3360,
+      "grant_or_state_created": false,
+      "model_generation_calls": 0,
+      "model_loaded": false,
+      "preparation_only": true,
+      "private_formal_reads": 0,
+      "public_contract_probe": {
+        "invocation_prompt_sha256": "9e6974776d699aed251c7736d4df2f1ac5fba51d286cffd03f9a42d3159c7dd2",
+        "model_or_rhino_calls": 0,
+        "private_evidence_reads": 0,
+        "public_tools": 23,
+        "selection_prompt_sha256": "4911647bebbc8f73c9d8117222bfd2f2dea4555727dc910d28868b35f40f3ed5"
+      },
+      "public_tokenizer_class": "Qwen2Tokenizer",
+      "rhino_calls": 0,
+      "source_code_inventory_sha256": "d929aa35b7cbe959ee24c1bdb230cd2e7d98f8f6a0b03e736a1a6f40bf73c8c9",
+      "source_inventory_sha256": "7a6d454db033b373c4d6baaaf81d2f3a9f24fb2e857dc05bb8b1f1c016dba896",
+      "status": "ACTUAL_MAC_CPU_TOKENIZER_CLOSURE_VERIFIED_NOT_EXECUTION_AUTHORITY"
+    }
+  },
+  "cpu_tests": {
+    "actual_linux_current_affected": {
+      "log_sha256": "0d7adbf2dedeb14940d033ed85f4e3ef5b07ed6838b26350cc92b3882c45ac31",
+      "model_loading": "explicit_cpu_stub_not_actual_weights",
+      "passed": 54,
+      "real_worker_startup_paths": 3
+    },
+    "mac_current_affected": {
+      "log_sha256": "4a3d713e246d3a4a24a9f2899ae08075c5a85a9a81fc6ff9b00f5019ad486a36",
+      "passed": 51
+    },
+    "unchanged_tests_reused": {
+      "linux_supervisor_watchdog": 13,
+      "mac_partial_audit_package_and_original_fullfield": 60,
+      "new_global_cancel_signals_only_change": "slot_runner_proof_exception_classification",
+      "previous_code_revision": "88a9a34c8df63c3315b2476788df90f90d2e6de1"
+    }
+  },
+  "independent_checker_source_sha256": "7a3cd8d78581de4da04ec7f2e10fc3444ce8e3d597e41a68abf5fd52f8dffc0f",
+  "model_or_rhino_calls": 0,
+  "new_grant_state_or_ledger_event_created": false,
+  "original_closure": {
+    "full_raw_slot_chains": 6,
+    "generation_stages": 13,
+    "model_requests": 8,
+    "original_attempted": 7,
+    "original_evidence_inventory_files": 1009,
+    "original_full40_gate": "not_passed",
+    "original_no_go_preserved": true,
+    "owner_inventory_proof_reused_not_agent_private_read": true,
+    "readonly_v1_refusal_preserved": true,
+    "readonly_v2_summary_sha256": "97770d00de3bb4dd10aad25ec878ecaeb82cc0b5ebe57f7d3fd73fe9c3abd1f2",
+    "seventh_model_requests": 0,
+    "unattempted": 33
+  },
+  "package_id": "reuse-formal-20261023-r3",
+  "preparation_failures_preserved": {
+    "earlier_generated_startup_syntax_failure_fixed": true,
+    "earlier_synthetic_unknown_capture_failure_followed_by_explicit_unknown_pause_regression": true,
+    "independent_readback_initial_parent_directory_symlink_scan_narrowed_to_exact_public_pins": true,
+    "invalid_test_filename_no_tests_ran": true,
+    "signal_classification_bug_fixed_and_intermediate_CI_cancelled": true
+  },
+  "public_readback": {
+    "gpu": {
+      "boot_id": "5e83729b-b29b-43f6-8635-c98f662d3d56",
+      "compute_processes_empty": true,
+      "endpoint": "gpu",
+      "epoch": 1792785392.6102908,
+      "execution_authority_created": false,
+      "gpu_identity_memory": "GPU-0e00f0ad-fa5a-eed9-6eee-5877984e02f9, 11",
+      "historical_pinned_files_verified": 43,
+      "model_or_rhino_calls": 0,
+      "new_state_grant_or_activation_absent": true,
+      "original_charged_gpu_seconds": 67977.15073728561,
+      "original_first_load_epoch": 1792692329.837715,
+      "original_frozen_roots_verified": {
+        "reuse-formal-20261022-r1-source": 433,
+        "reuse-formal-20261022-source": 429,
+        "reuse-formal-20261023-r2-source": 447
+      },
+      "original_ledger_head_sha256": "f643a9b3633486400bc4a9c82a22efbe724e3f477e8c1f27e63af6eaa4c8e2ab",
+      "original_ledger_rows": 18,
+      "original_loads": 3,
+      "original_qualified_parent_target_absent": true,
+      "package_id": "reuse-formal-20261023-r3",
+      "private_formal_reads": 0,
+      "public_files_verified": 464,
+      "ready_material": true,
+      "runtime_sha256": "ba39557e57027ee4533b4d4d2468540d7af4765d22a5257b123acc8c14fda4ea",
+      "schema_version": 1,
+      "source_code_inventory_sha256": "d929aa35b7cbe959ee24c1bdb230cd2e7d98f8f6a0b03e736a1a6f40bf73c8c9",
+      "source_inventory_sha256": "f2c9c108e208380991584c3c40d3e4fd61cae6aa11b3eca5a7de31079f2c9db2",
+      "spec_sha256": "6911d112b1b11bb6bed636eac3f3d456b6400a92ac98dd95dc0105057d46fa22"
+    },
+    "mac": {
+      "endpoint": "mac",
+      "epoch": 1792785391.378369,
+      "execution_authority_created": false,
+      "historical_pinned_files_verified": 57,
+      "model_or_rhino_calls": 0,
+      "new_state_grant_or_activation_absent": true,
+      "original_charged_gpu_seconds": 67977.15073728561,
+      "original_first_load_epoch": 1792692329.837715,
+      "original_frozen_roots_verified": {
+        "reuse-formal-20261022-r1-source": 433,
+        "reuse-formal-20261022-source": 429,
+        "reuse-formal-20261023-r2-source": 447
+      },
+      "original_ledger_head_sha256": "f643a9b3633486400bc4a9c82a22efbe724e3f477e8c1f27e63af6eaa4c8e2ab",
+      "original_ledger_rows": 18,
+      "original_loads": 3,
+      "package_id": "reuse-formal-20261023-r3",
+      "private_formal_reads": 0,
+      "public_files_verified": 464,
+      "ready_material": true,
+      "runtime_sha256": "ba39557e57027ee4533b4d4d2468540d7af4765d22a5257b123acc8c14fda4ea",
+      "schema_version": 1,
+      "source_code_inventory_sha256": "d929aa35b7cbe959ee24c1bdb230cd2e7d98f8f6a0b03e736a1a6f40bf73c8c9",
+      "source_inventory_sha256": "f2c9c108e208380991584c3c40d3e4fd61cae6aa11b3eca5a7de31079f2c9db2",
+      "spec_sha256": "6911d112b1b11bb6bed636eac3f3d456b6400a92ac98dd95dc0105057d46fa22"
+    }
+  },
+  "reuse_scope": {
+    "actual_future_model_load_full_preflight_required": true,
+    "current_rhino_document_content_reverified_by_future_arm": true,
+    "historical_16h_total_unknown": true,
+    "last_signed_original_cleanup_blank_preserved": true,
+    "lease_expiry_epoch": 1792954800,
+    "lease_owner_reported": "2026-10-25 20:00 Europe/Zurich",
+    "mac_rhino_pid_44652_process_observed": true,
+    "prior_frozen_public_roots_files": [
+      429,
+      433,
+      447
+    ],
+    "retired_A_D_and_development_metadata_byte_checked": true,
+    "unchanged_model_assets_original_full_proof_reused": true
+  },
+  "runtime_sha256": "ba39557e57027ee4533b4d4d2468540d7af4765d22a5257b123acc8c14fda4ea",
+  "schema_version": 1,
+  "source_code_revision": "2700ce353c0529375edb53122cbca9fdcd1900a4",
+  "spec_sha256": "6911d112b1b11bb6bed636eac3f3d456b6400a92ac98dd95dc0105057d46fa22",
+  "status": "PUBLIC_MATERIAL_COMPLETE_PENDING_OWNER_REVIEW_AND_SEPARATE_EXECUTION_APPROVAL",
+  "study_id": "c5-rhino-paired-20-reuse-v1",
+  "work_plan": {
+    "fixed_indices": [
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39
+    ],
+    "kind": "interrupted_continuation",
+    "new_execution_not_approved": true,
+    "regression_targets": []
+  }
+}

@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+"""Owner-only read-only diagnosis with closed refusal codes; never field execution."""
+import argparse,hashlib,importlib.util,json,os,re,sys
+from pathlib import Path
+SOURCE=Path(__file__).resolve().parent
+FIELD=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/reuse-formal-20261023-r3-source')
+STATE=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/reuse-formal-20261023-r3-state/preload-4')
+OUTPUT=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/reuse-formal-20261023-r3-readonly-triage-v2-state')
+SPEC='6911d112b1b11bb6bed636eac3f3d456b6400a92ac98dd95dc0105057d46fa22'
+RUNTIME='ba39557e57027ee4533b4d4d2468540d7af4765d22a5257b123acc8c14fda4ea'
+PREVIOUS_REVIEW='f0fa023a1b45ee969a4c26d4b7c657431f7ae4935bb7530bc2f12620c5051e29'
+GUARD_CODES=frozenset({'triage_public_file_identity','triage_public_file_size','triage_public_json_invalid','triage_public_duplicate_key','triage_output_scope','triage_output_cap','triage_snapshot_changed','triage_owner_private_terminal_required','triage_review_digest','triage_review_files','triage_interpreter','triage_frozen_pair','triage_frozen_source','triage_python_version','triage_invalid_stage'})
+STAGES=frozenset({'public_package_guard','scan_evidence_metadata','hash_evidence_before','parse_phase_result','build_public_error_allowlist','parse_slot_results','parse_native_responses','hash_evidence_after','frozen_source_recheck','publish_redacted_output'})
+SAFE_TYPES=frozenset({'ValueError','FileNotFoundError','PermissionError','TypeError','AssertionError','OSError','KeyboardInterrupt','JSONDecodeError','Refusal','GuardRefusal'})
+class GuardRefusal(ValueError):
+    def __init__(self,code):
+        assert code in GUARD_CODES;self.code=code;super().__init__(code)
+def require(v,code):
+    if not v:raise GuardRefusal(code)
+def digest(v):return hashlib.sha256(json.dumps(v,sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode()).hexdigest()
+def file_sha(p):
+    require(p.resolve()==p and p.is_file() and not p.is_symlink(),'triage_public_file_identity')
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+def read(p):
+    require(p.resolve()==p and p.is_file() and not p.is_symlink(),'triage_public_file_identity')
+    require(p.stat().st_size<=2097152,'triage_public_file_size')
+    def pairs(items):
+        v={}
+        for k,x in items:require(k not in v,'triage_public_duplicate_key');v[k]=x
+        return v
+    try:return json.loads(p.read_bytes(),object_pairs_hook=pairs,parse_constant=lambda _:(_ for _ in ()).throw(GuardRefusal('triage_public_json_invalid')))
+    except (json.JSONDecodeError,UnicodeError):raise GuardRefusal('triage_public_json_invalid') from None
+
+def refusal_fields(error,core=None):
+    typ=type(error).__name__;code='triage_unclassified_error';context={}
+    if isinstance(error,GuardRefusal):code=error.code
+    elif core is not None and isinstance(error,core.Refusal):code=error.code;context=error.context
+    elif isinstance(error,FileNotFoundError):code='triage_required_file_missing'
+    elif isinstance(error,PermissionError):code='triage_filesystem_permission_denied'
+    elif isinstance(error,KeyboardInterrupt):code='triage_owner_cancelled'
+    return {'error_type':typ if typ in SAFE_TYPES else 'unknown_error_type_redacted','error_code':code,'error_context':context}
+
+def publish(value):
+    if not OUTPUT.exists():OUTPUT.mkdir(mode=0o700)
+    require(OUTPUT.resolve()==OUTPUT and OUTPUT.is_dir() and not OUTPUT.is_symlink() and OUTPUT.stat().st_uid==os.getuid() and OUTPUT.stat().st_mode&0o777==0o700,'triage_output_scope')
+    raw=(json.dumps(value,ensure_ascii=False,sort_keys=True,indent=2,allow_nan=False)+'\n').encode();require(len(raw)<=131072,'triage_output_cap')
+    p=OUTPUT/('owner-public-triage-'+digest(value)+'.json')
+    if p.exists():require(p.read_bytes()==raw,'triage_snapshot_changed');return
+    fd=os.open(p,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)
+    with os.fdopen(fd,'wb') as f:f.write(raw);f.flush();os.fsync(f.fileno())
+
+def main():
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('mode',choices=['audit']);parser.add_argument('--review-sha256',required=True);args=parser.parse_args()
+    progress=['public_package_guard'];core=None
+    def stage(value):require(value in STAGES,'triage_invalid_stage');progress[0]=value
+    try:
+        require(sys.stdin.isatty() and sys.stderr.isatty(),'triage_owner_private_terminal_required')
+        review=read(SOURCE/'review.json');require(digest(review)==args.review_sha256,'triage_review_digest')
+        require(set(review['files'])=={'owner.py','core.py','tests.py'} and all(file_sha(SOURCE/n)==sha for n,sha in review['files'].items()),'triage_review_files')
+        require(sys.flags.isolated and sys.dont_write_bytecode and Path(sys.executable).resolve()==Path('/opt/anaconda3/bin/python3.13') and sys.pycache_prefix=='/Users/xiongweiluo/RhinoCoder/data/training/c5/reuse-dev-20261012-d-bytecode-cache-must-remain-absent' and not os.path.lexists(sys.pycache_prefix),'triage_interpreter')
+        freeze=read(FIELD/'eval/c5/reuse-formal-20261023-r3-runtime.json')
+        def guard():
+            require(digest(read(FIELD/'eval/c5/reuse-formal-20261023-r3-spec.json'))==SPEC and digest(read(FIELD/'eval/c5/reuse-formal-20261023-r3-runtime.json'))==RUNTIME,'triage_frozen_pair')
+            require(all(file_sha(FIELD/n)==sha for n,sha in freeze['source_files'].items()),'triage_frozen_source')
+        guard();require(sys.version==freeze['mac_environment']['python'],'triage_python_version')
+        module_spec=importlib.util.spec_from_file_location('readonly_slot_diagnostic_v2_core',SOURCE/'core.py');core=importlib.util.module_from_spec(module_spec);module_spec.loader.exec_module(core)
+        value=core.triage(STATE,FIELD,freeze,stage=stage);stage('frozen_source_recheck');guard()
+        value.update(review_sha256=args.review_sha256,previous_review_sha256=PREVIOUS_REVIEW,spec_sha256=SPEC,runtime_sha256=RUNTIME)
+        stage('publish_redacted_output');publish(value)
+        print('C5_SLOT_READONLY_DIAGNOSTICS_COMPLETE_NO_RESEARCH_RESTART')
+        print(json.dumps({'status':value['status'],'private_content_included':False,'research_restarted':False},sort_keys=True))
+    except BaseException as e:
+        v={'schema_version':2,'status':'readonly_diagnostics_refused','stage':progress[0],**refusal_fields(e,core),'review_sha256':args.review_sha256 if re.fullmatch('[0-9a-f]{64}',args.review_sha256) else None,'previous_review_sha256':PREVIOUS_REVIEW,'refusal_record_saved':True,'private_content_included':False,'research_restarted':False}
+        try:publish(v)
+        except BaseException:v['refusal_record_saved']=False
+        print(json.dumps(v,sort_keys=True));return 1
+    return 0
+if __name__=='__main__':raise SystemExit(main())

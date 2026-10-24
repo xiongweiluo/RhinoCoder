@@ -15,14 +15,16 @@ from training.c5_lifecycle_timing_audit import audit_phase
 
 class NativeChannelV2:
     def __init__(self,directory,secret,freeze_sha,task=None,*,hub=False,guard=lambda:None,
-                 pump=lambda:None,clock=time.monotonic,sleep=time.sleep,cleanup_guard=None):
+                 pump=lambda:None,clock=time.monotonic,sleep=time.sleep,cleanup_guard=None,hub_limit=41):
         self.directory,self.secret,self.freeze,self.task,self.hub=directory,secret,freeze_sha,task,hub
         self.guard,self.pump,self.clock,self.sleep=guard,pump,clock,sleep
         self.cleanup_guard=guard if cleanup_guard is None else cleanup_guard
+        require(hub_limit in (41,81),'slot_bounded_hub_controls')
+        self.hub_limit=hub_limit
         self.seq,self.unresolved=1,False
 
     def exchange(self,message):
-        require(not self.unresolved and self.seq <= (41 if self.hub else 128),'formal channel uncertain/exhausted')
+        require(not self.unresolved and self.seq <= (self.hub_limit if self.hub else 128),'formal channel uncertain/exhausted')
         self.unresolved=True
         phase=PhaseClock(120,clock=self.clock)
         prefix='hub-' if self.hub else ''

@@ -50,6 +50,7 @@ class SyntheticWire:
                 choice=choices[self.current['step_index']] if choices else None
                 raw=json.dumps({'tool':choice[0] if choice else None},separators=(',',':')) if stage=='selector' else json.dumps(
                     {'name':choice[0],'arguments':choice[1]},separators=(',',':'))
+                if stage=='selector' and getattr(self,'invalid_task',None)==self.current['task']:raw='not-json'
                 return {'raw':raw,'tokens':10,'seconds':0.01,'prompt_sha256':hashlib.sha256(prompt.encode()).hexdigest(),
                     'output_sha256':hashlib.sha256(raw.encode()).hexdigest()}
             self.session=FormalModelSession(digest(self.freeze),sent['plans'],self.state,Tokenizer(),generate,
@@ -108,7 +109,7 @@ class TimedSyntheticWire(SyntheticWire):
             publish_json(self.local,prefix+'time.json',self.last_phase)
         return value
 
-def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None):
+def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None,slot_plan=None,slot_fault=None,fixture_mismatch_index=None,invalid_model_index=None):
     state,cases,spec,freeze,_,rhino,_=setup_field(tmp_path,monkeypatch)
     # Real signature/SQLite/timing code below; ONLY geometry/model are fake.
     new_spec,new_freeze,_=records()
@@ -118,9 +119,22 @@ def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None):
     freeze.update(study_id=STUDY_ID,environment={'synthetic':True})
     from eval.test_c5_formal_reuse_preparation import boundary
     freeze['resource_boundary']=boundary()
+    if slot_plan is not None:
+        if fixture_mismatch_index is not None:
+            from training.c5_formal20_plan import slot_order,family_merkle_root
+            target=slot_order(cases,seed=spec['slot_seed'])[fixture_mismatch_index]['family_id']
+            case=next(c for c in cases if c['family_id']==target)
+            case['initial_assertions']=copy.deepcopy(case['initial_assertions'])
+            case['initial_assertions']['object_count']+=1
+            spec['family_merkle_root_sha256']=family_merkle_root(cases)
+        spec['run_package']={'slot_protocol':slot_plan}
+        freeze['tokenizer_dir']=str(tmp_path/'synthetic-tokenizer-not-read')
     freeze['spec_sha256']=digest(spec)
     grant={'study_id':spec['study_id'],'actor':'repository_owner','approved':True,'spec_sha256':digest(spec),
         'runtime_freeze_sha256':digest(freeze),'approval_basis':'direct repository_owner approval of complete disclosed-reuse formal40 spec and runtime freeze'}
+    if slot_plan is not None:
+        from plugin.rhino_listener.c5_formal_reuse_scope import expected_grant
+        grant=expected_grant(spec,freeze,execution_approved=True)
     # Reuse the same synthetic model policy, not a new task-text family.
     # setup_field's policy is reconstructed from its existing generated plans.
     policy={}
@@ -131,6 +145,19 @@ def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None):
         if c['stratum']=='multistep':policy[c['task_text']]=[(r['name'],r['arguments']) for r in c['expected_operations']]
     remote=tmp_path/'remote-v2';remote.mkdir(mode=0o700)
     wire=TimedSyntheticWire(remote,spec,freeze,policy,local=state)
+    if invalid_model_index is not None:
+        from training.c5_formal20_plan import slot_order
+        target=slot_order(cases,seed=spec['slot_seed'])[invalid_model_index]['family_id']
+        wire.invalid_task=next(c for c in cases if c['family_id']==target)['task_text']
+    if slot_fault=='remote_export':
+        exchange=wire.exchange
+        def altered_export(sent):
+            value=exchange(sent)
+            if sent.get('kind')=='formal_export_step':
+                receipt=next(v for n,v in value['records'].items() if n.endswith('-raw.json'))
+                receipt['output_sha256']='0'*64
+            return value
+        wire.exchange=altered_export
     publish_json(remote,'owner-approval.json',grant)
     publish_json(remote,'worker-startup-ready.json',wire.ready)
     publish_json(state,'formal20.zero-started.claim.json',{'study_id':spec['study_id'],
@@ -189,7 +216,7 @@ def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None):
     monkeypatch.setattr(runner_module,'validate_authority',lambda *a:digest(freeze))
     monkeypatch.setattr(evidence,'audit_supervisor',lambda *a,**k:{'permit_first_load_epoch':wire.start})
     monkeypatch.setattr(evidence,'audit_completed_admission',lambda *a,**k:{'first_load_epoch':wire.start})
-    publish_json(state,'load-permit.json',{'first_load_epoch':wire.start})
+    publish_json(state,'load-permit.json',{'first_load_epoch':wire.start,**({'rows':[{'payload':{'remaining_indices':slot_plan['selected_indices']}}]} if slot_plan is not None else {})})
     model=ModelAdapterV2(state,spec,freeze,guard=lambda:None)
     model.pipe=wire;model.zero_ready=True;model.process=SimpleNamespace(stdin=__import__('io').BytesIO(),
         stdout=__import__('io').BytesIO(),wait=lambda **_:0)
@@ -198,6 +225,43 @@ def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None):
     native.prepare=prepare
     runner=FormalRunner(state=state,spec=spec,freeze=freeze,approval=grant,model=model,native=native,
         source_guard=lambda:None,budget_guard=lambda:None)
+    if slot_plan is not None:
+        from training import c5_slot_runner as slot_module
+        from training.c5_slot_runner import SlotRunner
+        monkeypatch.setattr(slot_module,'validate_authority',lambda *a:digest(freeze))
+        class Campaign:
+            def __init__(self):self.indices=[];self.rows=[]
+            def observation(self):return {'slot_attempted_indices':list(self.indices)}
+            def _event(self,kind,payload):
+                assert kind=='slot_attempt_recorded'
+                assert payload['index']==slot_plan['selected_indices'][len(self.indices)]
+                self.indices.append(payload['index']);self.rows.append(payload)
+        campaign=Campaign()
+        runner=SlotRunner(state=state,spec=spec,freeze=freeze,approval=grant,model=model,native=native,
+            source_guard=lambda:None,budget_guard=lambda:None,campaign=campaign,tokenizer=Tokenizer())
+        if slot_fault in ('proof_global','proof_cancel','proof_permission'):
+            def failed_slot_proof(*args):
+                if slot_fault=='proof_cancel':raise KeyboardInterrupt()
+                if slot_fault=='proof_permission':raise PermissionError('CPU injection')
+                raise slot_module.GlobalFault('source_drift')
+            runner.proof_fn=failed_slot_proof
+        if slot_fault=='post_model_capture_failure':
+            original_capture=native.capture;capture_calls=[0]
+            def missing_capture(slot_id):
+                capture_calls[0]+=1
+                if capture_calls[0]==3:return {'status':'failed_no_retry','error_type':'NativeError'}
+                return original_capture(slot_id)
+            native.capture=missing_capture
+        if slot_fault is not None:
+            original_slot=runner._slot
+            def changed_slot(slot,case,freeze_sha,prompts):
+                if slot_fault=='global':raise slot_module.GlobalFault('permission_or_safety')
+                value=original_slot(slot,case,freeze_sha,prompts)
+                if slot_fault=='cleanup':
+                    # CPU failure injection: known close/stop acknowledgement lost.
+                    value['stop']=None
+                return value
+            runner._slot=changed_slot
     if fail_before_model_at is not None:
         validate=runner_module.validate_fixture_readback
         calls=[0]
@@ -208,7 +272,12 @@ def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None):
                 raise FormalPlanError('synthetic_pre_model_failure_not_actual_fixture_rejection')
             return validate(case,actual)
         monkeypatch.setattr(runner_module,'validate_fixture_readback',fail_public_fixture)
-    result=runner.run(lambda:cases)
+    def load_cases():
+        if slot_plan is not None:publish_json(state,'private-cases.json',cases)
+        return cases
+    result=runner.run(load_cases)
+    if slot_plan is not None:
+        return state,cases,spec,freeze,read_json(state,'host-continuity-terminal-receipt.json'),result,campaign
     if fail_before_model_at is None:
         assert result['status']=='formal_execution_complete_awaiting_independent_audit',result
     else:

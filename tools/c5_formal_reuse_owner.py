@@ -40,11 +40,24 @@ def run_interactive(attempt, *, package_session=None):
     campaign=open_formal_campaign(spec,freeze,approval,freeze['history'],create=not(root/'formal-reuse-v1').exists())
     state=attempt_state('mac',attempt);budget=None;native=model=None;started=False;exposed=False;primary_error=None
     try:
-        require_startable(campaign,attempt)
+        slot_mode='slot_protocol' in spec.get('run_package',{})
+        if slot_mode:
+            from training.c5_slot_entry import require_slot_startable
+            require_slot_startable(campaign,attempt)
+        else:require_startable(campaign,attempt)
         if not state.exists():state.mkdir(mode=0o700)
         def guard():
-            source()
-            if budget is not None:budget.check()
+            if slot_mode:
+                from training.c5_slot_runner import GlobalFault
+                try:source()
+                except (KeyboardInterrupt,EOFError):raise
+                except BaseException as error:raise GlobalFault('source_drift') from error
+                if budget is not None:
+                    try:budget.check()
+                    except BaseException as error:raise GlobalFault('resource_window_insufficient') from error
+            else:
+                source()
+                if budget is not None:budget.check()
         cleanup_source=source
         if package_session is not None:
             from training.c5_formal_reuse_control import control_scope
@@ -73,9 +86,9 @@ def run_interactive(attempt, *, package_session=None):
             publish_json(state,snap_name,snapshot(campaign.scope,digest(basis),hashlib.sha256(secrets.token_bytes(32)).hexdigest()))
         snap=read_json(state,snap_name)
         if package_session is not None:
-            require(package_session.get('confirmed') is True and campaign.observation()['package_owner_consent'],
+            require(package_session.get('confirmed') is True and (campaign.observation().get('slot_owner_consent') if slot_mode else campaign.observation()['package_owner_consent']),
                 'run_package_actual_session_consent_required')
-            campaign._event('package_preload_observed',{'scope_sha256':__import__(
+            if not slot_mode:campaign._event('package_preload_observed',{'scope_sha256':__import__(
                 'training.c5_reuse_evidence',fromlist=['sha']).sha(campaign.scope),
                 'attempt':attempt,'host_ready_sha256':digest(basis),'snapshot_sha256':digest(snap),
                 'manual_owner_attestation':False})
@@ -96,7 +109,11 @@ def run_interactive(attempt, *, package_session=None):
         if package_session is not None:
             from training.c5_formal_reuse_ssh import verify as verify_preload_transport
             verify_preload_transport(spec,freeze);source()
-        campaign.start();started=True
+        if slot_mode:
+            observed=campaign.observation();plan=spec['run_package']['slot_protocol']
+            campaign._event('slot_load_intent',{'attempt':attempt,'epoch':time.time(),'remaining_indices':plan['selected_indices'][len(observed['slot_attempted_indices']):]})
+        else:campaign.start()
+        started=True
         first=campaign.observation()['first_load_epoch']
         model=ModelAdapterV2(state,spec,freeze,guard=guard);model.attempt=attempt
         model.load_permit={'scope':campaign.scope,'rows':campaign.log.rows(),'attempt':attempt,'first_load_epoch':first}
@@ -107,15 +124,31 @@ def run_interactive(attempt, *, package_session=None):
         from training.c5_formal_run_budget import budget_for
         budget=budget_for(freeze,model.load_permit)
         model.start_zero();guard()
-        ready=read_json(state,'worker-startup-ready.json');campaign.ready(digest(ready))
+        ready=read_json(state,'worker-startup-ready.json')
+        if slot_mode:campaign._event('slot_worker_ready',{'attempt':attempt,'raw_anchor_sha256':digest(ready)})
+        else:campaign.ready(digest(ready))
         publish_json(state,'formal20.zero-readiness.json',{'study_id':STUDY_ID,
             'runtime_freeze_sha256':digest(freeze),'host_ready_sha256':digest(basis),
             'model_ready_sha256':digest(ready),'private_rows_read':0,'formal_started_present':False})
-        if package_session is None:
+        if slot_mode:
+            sealed=identity=None
+        elif package_session is None:
             sealed=Path(getpass.getpass('原封存 age 文件绝对路径（仅本人终端，不回显）：').strip())
             identity=Path(getpass.getpass('age identity 文件绝对路径（不回显）：').strip())
         else:
             sealed,identity=package_session['sealed'],package_session['identity']
+        if slot_mode:
+            guard();campaign._event('slot_work_begin',{'attempt':attempt,'raw_anchor_sha256':digest(ready)});exposed=True
+            from training.c5_slot_runner import SlotRunner
+            from training.c5_execution import load_pinned_tokenizer,load_config
+            tokenizer=load_pinned_tokenizer(Path(freeze['tokenizer_dir']),config=load_config(ROOT/'eval/c5/c5-engineering-config.json'))
+            runner=SlotRunner(state=state,spec=spec,freeze=freeze,approval=approval,model=model,native=native,
+                source_guard=source,budget_guard=budget.check,campaign=campaign,tokenizer=tokenizer)
+            def original_cases():
+                prior=Path(spec['run_package']['original_private_attempt_root'])
+                value=read_json(prior,'private-cases.json')
+                publish_json(state,'private-cases.json',value);return value
+            return runner.run(original_cases)
         verify_private_metadata(sealed,identity,public,freeze);guard()
         consume_before_private(campaign,attempt,state);exposed=True;campaign.begin(digest(ready))
         runner=FormalRunner(state=state,spec=spec,freeze=freeze,approval=approval,model=model,native=native,
@@ -137,10 +170,12 @@ def run_interactive(attempt, *, package_session=None):
             if native is not None and not exposed:
                 try:native.finish()
                 except BaseException as error:cleanup.append({'action':'known_native_cleanup','error_type':type(error).__name__})
-            publish_json(state,'formal-preexposure-failure.json',{'error_type':type(primary).__name__,
-                'cleanup_errors':cleanup,'private_exposure_recorded':exposed,'retry_authorized_by_summary':False})
+            safe_code=str(primary)
+            if not(safe_code.startswith(('formal_reuse_','slot_','run_package_','field_pipe_')) and safe_code.replace('_','').isascii() and safe_code.replace('_','').isalnum()):safe_code=None
+            publish_json(state,'formal-preexposure-failure.json',{'error_type':type(primary).__name__,**({'error_code':safe_code} if slot_mode else {}),
+                'cleanup_errors':cleanup,**({'global_fault':{'scope':'global','code':'permission_or_safety'}} if slot_mode and isinstance(primary,PermissionError) else {'global_fault':{'scope':primary.slot_scope,'code':primary.code}} if slot_mode and getattr(primary,'slot_scope',None)=='global' else {}),'private_exposure_recorded':campaign.observation()['formal_consumed'] if slot_mode else exposed,**({'new_work_started':exposed} if slot_mode else {}),'retry_authorized_by_summary':False})
             observation=campaign.observation()
-            if observation['active']:
+            if observation['active'] and not slot_mode:
                 # This is an incomplete proof and therefore PAUSED_RECONCILIATION.
                 # The read-only independent failure auditor must supply actual
                 # raw evidence before bounded pre-exposure recovery is possible.

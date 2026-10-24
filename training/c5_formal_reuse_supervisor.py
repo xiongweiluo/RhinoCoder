@@ -41,7 +41,7 @@ def validate_load_permit(permit,spec,freeze,attempt):
         head=row['record_sha256']
     state=replay(initial,permit['rows'])
     require(state['scope']==permit['scope'],'formal_reuse_current_revision_permit_required')
-    require(state['active'] and state['attempts']==attempt and not state['formal_consumed']
+    require(state['active'] and state['attempts']==attempt and (not state['formal_consumed'] or 'slot_protocol' in freeze.get('run_package',{}))
         and state['status']=='LOADING' and state['first_load_epoch']==permit['first_load_epoch'],
         'formal_reuse_load_permit_preprivate_order')
     if 'run_package' in freeze:

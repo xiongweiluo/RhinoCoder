@@ -1,0 +1,18 @@
+{
+  "cpu_synthetic_tests_passed": 10,
+  "field_or_campaign_writes": false,
+  "field_source_modified": false,
+  "files": {
+    "core.py": "98bee94c115db3e3c4de3a1d3ab1995bf7bd49cbc7e14c5743346b80c0eee3a8",
+    "owner.py": "98bc2416be29ea001092ddd8c328c11cf16df1270313600a0fce1bcd46d85a65",
+    "tests.py": "c8cf266a75b7f9136bbe8a166130a92ef30a6a4216b5f45894afa89de6b2962d"
+  },
+  "model_or_rhino_or_network_calls": 0,
+  "not_full_joint_audit": true,
+  "private_content_included": false,
+  "purpose": "owner_only_readonly_error_diagnosis_not_new_execution",
+  "resume_or_retry_authority": false,
+  "runtime_sha256": "ba39557e57027ee4533b4d4d2468540d7af4765d22a5257b123acc8c14fda4ea",
+  "schema_version": 1,
+  "spec_sha256": "6911d112b1b11bb6bed636eac3f3d456b6400a92ac98dd95dc0105057d46fa22"
+}
