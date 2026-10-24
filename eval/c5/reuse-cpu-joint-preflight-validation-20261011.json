@@ -1,0 +1,114 @@
+{
+  "actual_model_generation_total": null,
+  "actual_rhino_dispatch_total": null,
+  "date": "2026-10-11",
+  "deployment_manifest": {
+    "destination": "/private/tmp/rhinocoder-c5-cpu-review-l3vjmskk/cpu-joint-review-20261011-source",
+    "entrypoints": [
+      "training/c5_reuse_joint.py",
+      "training/c5_reuse_joint_audit.py",
+      "training/c5_reuse_deployment.py",
+      "tools/check_c5_formal20_reuse_draft.py",
+      "tools/audit_c5_final_decision.py",
+      "tools/check_c5_reuse_deployment.py"
+    ],
+    "execution_ready": false,
+    "files": {
+      "docs/c5-contract-aligned-qlora-plan.md": "6ed67ab35c6648958289caff49149ec07e572336155cb6a40d10a65158cc5e47",
+      "eval/c5/c5-final-decision-20261009.json": "2084a7cb7c91fceb8037c55255570913828a0266cda703cf02e18e7caa264b07",
+      "eval/c5/formal20-reuse-preparation-draft-20261011.json": "5e86c9c65dc61527128fb69ea966f34a094ed4c05b67cc425aaa1afda3d52f2c",
+      "eval/c5/formal20-v4-owner-incomplete-audit-summary-20261009.json": "a81a40a70bfc9b22f92e507609a65363c670ef95919c647e99ff447710fee6d7",
+      "eval/c5/formal20-v4-public-stop-observation-20261009.json": "bac822d688db8979d6e53a30ceab9bda2459993ffb88c953fc28a0ab83d728e1",
+      "eval/c5/formal20-v4-worker-stop-result-20261009-a.json": "a8a67c85729b9133aeeef03cdfd458eb3446bc0d17f12434bdb755abab5d1bec",
+      "eval/c5/rhino-formal20-public-commitment-v1.json": "726ad282775568bd63472ea8fa164ab489996c8fd0cd47126585e1cf7eb40745",
+      "eval/c5/rhino-formal20-spec-v4.json": "39eb6dbfaf9a2f42896aac9b18204ab3cddb832cdbab9f748564fb86a4a421c7",
+      "requirements-training.txt": "f39591eb1523871bdbb8f1d453e2d8f9e51dd817a72e5d583897e05ea547ed55",
+      "tools/audit_c5_final_decision.py": "bf2bf30adfcaddf8fc3a01acf11b79314e0c75c80f8f37e4b8c1671e9472cf35",
+      "tools/check_c5_formal20_reuse_draft.py": "6588803c4e8949020a301ce64390c8de43981125ba22933a430efe62a3684f0b",
+      "tools/check_c5_reuse_deployment.py": "9c59be59898335821f402c1e262d7c09ed575da737aa87e0eca1af2e510ea6da",
+      "training/__init__.py": "12d22720f81b6f35a044421ed915ca8234cdf2dcbfe50539d179c4626506fe3d",
+      "training/c5_reuse_deployment.py": "52253346d5e1027e5ed2799f1feaa23d6ba39f2820779f92a8aa9c316bca4280",
+      "training/c5_reuse_evidence.py": "a6cc4374c1f300d65c951ecc955e15968c259bc663a1c6908bb4a679f72750a5",
+      "training/c5_reuse_joint.py": "ed8eed9152999e25df7a635b9cef50750c5893fa2a93ab5704218ad4b5295538",
+      "training/c5_reuse_joint_audit.py": "26d90cce2e046f451606d6f9e46b6d5ab0cfe09c92704250748617c30651e476",
+      "training/c5_reuse_transport.py": "2a281ee5b68fd9229cef878ef26c09dc8f90827af5e21ce7733f4e471edbac1b",
+      "training/config.py": "8231adae4d2284c72b20f39e77cc8dc46b16df3efdb15f8f017c47e055cd9bda",
+      "training/configs/rhinocoder-qwen25-coder-7b-itc-lora-v1.json": "c4872a3c821d962c5031bac17aaa567ad6f14d442ffd8d769b8009957640a6b0"
+    },
+    "kind": "cpu_public_deployment_manifest_not_execution_freeze",
+    "scope": {
+      "execution_kind": "cpu_synthetic_not_execution_authority",
+      "instance_id": "cpu-joint-review-20261011",
+      "protocol": "c5-reuse-cpu-synthetic-v1",
+      "study_id": "c5-rhino-paired-20-reuse-v1-synthetic-engineering"
+    },
+    "trust_boundary": "interpreter_stdlib_os_opaque_not_byte_frozen"
+  },
+  "deployment_manifest_canonical_sha256": "29cba925840ddd39dc0acee598c9e6d15f33480738b68da82f6e74a390bb6825",
+  "deployment_preflight_trusted_source_fresh_process": {
+    "execution_ready": false,
+    "files_verified": 20,
+    "manifest_sha256": "29cba925840ddd39dc0acee598c9e6d15f33480738b68da82f6e74a390bb6825",
+    "state_absent": true,
+    "status": "cpu_actual_deployment_root_bytes_verified_not_live_freeze",
+    "target_code_executed": false
+  },
+  "execution_ready": false,
+  "final_witness": {
+    "kind": "external_cpu_joint_final",
+    "ledger_rows_sha256": "49df18ce65d75a90462ba81708cb13d313891e0f366dfefe774c2a0e1a4d2726",
+    "native_head_sha256": "6afa61cf0d0de41449ccae7d61a4ac2aa4a47327a8c3e3fc7e9219c09566ea72",
+    "native_records": 282,
+    "scope_sha256": "09e24127fb247db33ea7f7ebf00fea021abd66b17209c692de615a0e8a172513",
+    "transport_head_sha256": "b0104398c52a19e20fa54322d0940b1792ab0b9de2fb1e69a8eeb1e6de73550b",
+    "transport_records": 163
+  },
+  "formal_runtime_sha256": null,
+  "formal_spec_sha256": null,
+  "joint_audit": {
+    "actual_model_generation_total": null,
+    "actual_rhino_dispatch_total": null,
+    "admission_consumed": true,
+    "execution_ready": false,
+    "external_witness_origin_verified": false,
+    "ledger_rows_sha256": "49df18ce65d75a90462ba81708cb13d313891e0f366dfefe774c2a0e1a4d2726",
+    "native_genesis_sha256": "73b59b178e6188a761e4a062086839bb1911f00bce043ea45b567319ee56efe2",
+    "native_head_sha256": "6afa61cf0d0de41449ccae7d61a4ac2aa4a47327a8c3e3fc7e9219c09566ea72",
+    "native_records": 282,
+    "replay_allowed": false,
+    "retired": false,
+    "retirement_recorded": false,
+    "status": "cpu_joint_raw_recomputed_not_live_authority",
+    "synthetic_joint_complete": true,
+    "synthetic_permits_consumed": 120,
+    "synthetic_scores": {
+      "base": 20,
+      "lora": 20,
+      "paired_net_wins": 0
+    },
+    "synthetic_slots_cleaned": 40,
+    "synthetic_write_effects": 40,
+    "unknown_effects": 0
+  },
+  "joint_audit_fresh_process_did_not_import_producer": true,
+  "live_field_deployment_performed": false,
+  "live_field_engineering_pass": false,
+  "main_worktree_binary_diff_sha256": "b407093a909b70b9b1c4ea6547517373ad6c7fb230103d97b0502044a0e8aa6c",
+  "parent_NO_GO_unchanged": true,
+  "parent_source_commit": "c91b9a607bf24899572b18fc096e0a8788e9d273",
+  "readiness_witness": {
+    "kind": "external_cpu_joint_readiness",
+    "native_genesis_sha256": "73b59b178e6188a761e4a062086839bb1911f00bce043ea45b567319ee56efe2",
+    "scope_sha256": "09e24127fb247db33ea7f7ebf00fea021abd66b17209c692de615a0e8a172513",
+    "transport_genesis_sha256": "9e36031bca2decd8bc0073e228355426acbc1c531c4ee724c9a8774eb8e7f613"
+  },
+  "schema_version": 1,
+  "status": "CPU_SYNTHETIC_JOINT_AND_LOCAL_STAGE_ONLY",
+  "tests": {
+    "combined_transport_draft_decision_controls": 309,
+    "full_repository_result": "recorded_on_final_source_in_PR",
+    "new_joint_and_deployment_controls": 143
+  },
+  "timezone": "Europe/Zurich",
+  "witness_origin_verified": false
+}
