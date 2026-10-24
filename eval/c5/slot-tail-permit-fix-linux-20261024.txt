@@ -1,0 +1,11 @@
+............                                                             [100%]
+=============================== warnings summary ===============================
+../../conda-envs/rhinocoder/lib/python3.11/site-packages/_pytest/config/__init__.py:1464
+  /data/conda-envs/rhinocoder/lib/python3.11/site-packages/_pytest/config/__init__.py:1464: PytestConfigWarning: Unknown config option: asyncio_default_fixture_loop_scope
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+12 passed, 36 deselected, 1 warning in 17.58s
+
+{"actual_research_events": 0, "code_inventory_sha256": "edf2b9acdd02716568980cd068433e2624aebc398e22e4ccfe6dfed15e1cebd1", "epoch": 1792857771.1636653, "log_sha256": "f333bb76a82f5ce8447e1d319255572ff556c93b6c3b7a5915132dbb87b6fa04", "model_loaded": false, "prior_cpu_eof_refusal_retained": true, "private_reads": 0, "returncode": 0, "source_code_revision": "d7dc1671d1eaa6f65ad72092ddd19ba60c16c7b9"}

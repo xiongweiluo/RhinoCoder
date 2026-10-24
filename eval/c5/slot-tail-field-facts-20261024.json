@@ -1,12 +1,12 @@
 {
   "actual_execution_authorized": false,
-  "both_public_deployments": false,
+  "both_public_deployments": true,
   "environment": null,
-  "independent_public_readback": false,
+  "independent_public_readback": true,
   "latest_gpu_identity_idle": true,
   "lease_basis": "owner_reported_2026-10-25_20:00_Europe/Zurich",
   "lease_expiry_epoch": 1792954800,
-  "linux_cpu_closure": false,
+  "linux_cpu_closure": true,
   "mac_cpu_closure": true,
   "mac_environment": {
     "file_sha256": {
@@ -3571,9 +3571,23 @@
   "prior_frozen_sources_unchanged": true,
   "private_formal_reads": 0,
   "schema_version": 1,
-  "source_code_inventory_sha256": null,
-  "source_code_revision": null,
+  "source_code_inventory_sha256": "edf2b9acdd02716568980cd068433e2624aebc398e22e4ccfe6dfed15e1cebd1",
+  "source_code_revision": "d7dc1671d1eaa6f65ad72092ddd19ba60c16c7b9",
   "verification_evidence": {
+    "final_idle_observation": {
+      "boot_id": "5e83729b-b29b-43f6-8635-c98f662d3d56",
+      "compute_pids": [],
+      "epoch": 1792857145.7706704,
+      "gpu_row": "GPU-0e00f0ad-fa5a-eed9-6eee-5877984e02f9, NVIDIA GeForce RTX 3090, 11, 0",
+      "model_loaded": false,
+      "new_r4_state_present": false,
+      "original_stopped_pids_present": {
+        "1392827": false,
+        "1392873": false
+      },
+      "private_reads": 0,
+      "signals_sent": 0
+    },
     "first_load_epoch_preserved": 1792692329.837715,
     "gpu_public_assets": {
       "adapter_files_verified": 2,
@@ -3598,12 +3612,113 @@
     "historical_full_gate_passed": false,
     "historical_private_scope": "owner_previous_actual_review_reused; agent_reads_only_public_summary_and_known_path_metadata",
     "lease_scope": "owner_reported_2026-10-25_20:00_Europe/Zurich_no_new_execution",
+    "linux_cpu": {
+      "additional_boundary_nodes": 8,
+      "affected_permit_and_r1_to_r4_startup_recheck_passed": 12,
+      "baseline_nodes": 126,
+      "code_inventory_sha256": "edf2b9acdd02716568980cd068433e2624aebc398e22e4ccfe6dfed15e1cebd1",
+      "completed_before_240_second_tool_timeout": 83,
+      "completed_before_600_second_tool_timeout": 38,
+      "distinct_final_node_coverage": 134,
+      "exact_head_full_ci_required": true,
+      "final_log_sha256": "f333bb76a82f5ce8447e1d319255572ff556c93b6c3b7a5915132dbb87b6fa04",
+      "last_baseline_batch_passed": 4,
+      "last_baseline_r4_eof_refusal_retained": true,
+      "model_loaded": false,
+      "private_reads": 0
+    },
+    "mac_cpu": {
+      "additional_boundary_passed": 8,
+      "baseline_passed_reused": 122,
+      "boundary_log_sha256": "7ebc52cf8ca16c249702a26b9ae16e0870f7c5f39f390644a3815482ddfc2ce7",
+      "distinct_final_passed_coverage": 130,
+      "linux_only_skipped": 4,
+      "tail_overlap_recheck_passed": 43
+    },
+    "mac_deployed_closure": {
+      "cuda_initialized": false,
+      "epoch": 1792857734.7742028,
+      "external_loaded_modules_verified": 3357,
+      "grant_or_state_created": false,
+      "model_generation_calls": 0,
+      "model_loaded": false,
+      "private_formal_reads": 0,
+      "public_tokenizer_class": "Qwen2Tokenizer",
+      "rhino_calls": 0,
+      "source_code_inventory_sha256": "edf2b9acdd02716568980cd068433e2624aebc398e22e4ccfe6dfed15e1cebd1",
+      "status": "ACTUAL_MAC_CPU_TOKENIZER_CLOSURE_VERIFIED_NOT_EXECUTION_AUTHORITY"
+    },
     "mac_probe_only_entry_excluded_from_runtime_closure": true,
     "mac_public_preflight_sha256": "63512435a0c97f5a6b95cc8004c84b9fc02dcfca0a12a83d8dc8e53cb499b8b3",
     "mac_runtime_external_files_verified": 3552,
     "new_model_or_slot_execution_authorized": false,
     "old_refusals_preserved": true,
     "original_attempt4_audit_status": "original_joint_review_procedure_finished_with_rejections",
-    "reused_r1_r2_r3_sources_and_evidence": true
+    "permit_fix_mac_boundary": {
+      "common_evidence_parser_max_bytes_unchanged": 262144,
+      "old_cpu_eof_rejection_retained": true,
+      "passed": 8,
+      "public_load_permit_max_bytes": 786432
+    },
+    "provisional_public_readback": {
+      "gpu": {
+        "actual_authority": false,
+        "epoch": 1792857754.941887,
+        "roots": {
+          "current": {
+            "files": 481,
+            "inventory_sha256": "ba0afef1d660a3141e6ca429175ff73e31883db8fccc6becaf00568ca6ddc7bd"
+          },
+          "historical_initial": {
+            "files": 429,
+            "inventory_sha256": "826134d6927ca197268193a6042e45bc9b485ae0c51b6f7656e4b3f0bf02adc2"
+          },
+          "historical_r1": {
+            "files": 433,
+            "inventory_sha256": "f36a34d4e54b8fd581eae49c2dcc29e731e6adb3eb1e8f35909bd1dabd7e63e8"
+          },
+          "historical_r2": {
+            "files": 447,
+            "inventory_sha256": "88a91c55a2a06dbee7ca35349fed26090b5a4253e4a879fb9d036befdc4b3805"
+          },
+          "historical_r3": {
+            "files": 464,
+            "inventory_sha256": "d9faf9595518623c2092a9a78a02623c4acd45c035ec3fcefb6b7236f33f7abe"
+          }
+        },
+        "runtime_sha256": "cd3fe1453a885e9354cb979ec0c5c40db4d2989cd666008fe6c35891f60cd533",
+        "spec_sha256": "1e99356c4ae99ecf21a0283779d06706a1176a33bea7c2769b1c97787246324b"
+      },
+      "mac": {
+        "actual_authority": false,
+        "epoch": 1792857753.030814,
+        "roots": {
+          "current": {
+            "files": 481,
+            "inventory_sha256": "ba0afef1d660a3141e6ca429175ff73e31883db8fccc6becaf00568ca6ddc7bd"
+          },
+          "historical_initial": {
+            "files": 429,
+            "inventory_sha256": "826134d6927ca197268193a6042e45bc9b485ae0c51b6f7656e4b3f0bf02adc2"
+          },
+          "historical_r1": {
+            "files": 433,
+            "inventory_sha256": "f36a34d4e54b8fd581eae49c2dcc29e731e6adb3eb1e8f35909bd1dabd7e63e8"
+          },
+          "historical_r2": {
+            "files": 447,
+            "inventory_sha256": "88a91c55a2a06dbee7ca35349fed26090b5a4253e4a879fb9d036befdc4b3805"
+          },
+          "historical_r3": {
+            "files": 464,
+            "inventory_sha256": "d9faf9595518623c2092a9a78a02623c4acd45c035ec3fcefb6b7236f33f7abe"
+          }
+        },
+        "runtime_sha256": "cd3fe1453a885e9354cb979ec0c5c40db4d2989cd666008fe6c35891f60cd533",
+        "spec_sha256": "1e99356c4ae99ecf21a0283779d06706a1176a33bea7c2769b1c97787246324b"
+      }
+    },
+    "reused_r1_r2_r3_sources_and_evidence": true,
+    "rhino_python39_public_modules_syntax": 72
   }
 }

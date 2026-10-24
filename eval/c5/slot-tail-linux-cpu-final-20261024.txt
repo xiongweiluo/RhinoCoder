@@ -1,0 +1,41 @@
+....F                                                                    [100%]
+=================================== FAILURES ===================================
+_________ test_full_approved_spec_to_real_owner_and_worker_startup[r4] _________
+eval/test_c5_run_package_startup.py:214: in test_full_approved_spec_to_real_owner_and_worker_startup
+    assert result.returncode==0,result.stderr
+E   AssertionError: Traceback (most recent call last):
+E       File "/tmp/pytest-of-linux/pytest-7/test_full_approved_spec_to_rea3/fixture.py", line 160, in <module>
+E         try:owner.run_interactive(attempt,package_session=session)
+E             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       File "/data/c5-slot-tail-cpu-20261024/067b863-reused-public-source/tools/c5_formal_reuse_owner.py", line 126, in run_interactive
+E         model.start_zero();guard()
+E         ^^^^^^^^^^^^^^^^^^
+E       File "/data/c5-slot-tail-cpu-20261024/067b863-reused-public-source/training/c5_formal_reuse_adapters.py", line 220, in start_zero
+E         ready=self.pipe.wait_ready()
+E               ^^^^^^^^^^^^^^^^^^^^^^
+E       File "/data/c5-slot-tail-cpu-20261024/067b863-reused-public-source/training/c5_formal_reuse_transport.py", line 77, in wait_ready
+E         value=super().wait_ready()
+E               ^^^^^^^^^^^^^^^^^^^^
+E       File "/data/c5-slot-tail-cpu-20261024/067b863-reused-public-source/training/c5_formal_reuse_wire_io.py", line 37, in wait_ready
+E         value=validate_startup_receipt(self._receive(deadline),self.expected)
+E                                        ^^^^^^^^^^^^^^^^^^^^^^^
+E       File "/data/c5-slot-tail-cpu-20261024/067b863-reused-public-source/training/c5_formal_reuse_wire_io.py", line 27, in _receive
+E         require(chunk,'formal_reuse_frame_eof_no_replay');self.buffer+=chunk
+E         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       File "/data/c5-slot-tail-cpu-20261024/067b863-reused-public-source/plugin/rhino_listener/c5_research_native.py", line 30, in require
+E         if not ok: raise NativeError(reason)
+E                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+E     plugin.rhino_listener.c5_research_native.NativeError: formal_reuse_frame_eof_no_replay
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['/data/c5-reuse-compatible-python-20261012-d/runtime/bin/python3.11', '-I', '-B', '/tmp/pytest-...  ^^^^^^^^^^^^^^^^^^^^^^^^^\nplugin.rhino_listener.c5_research_native.NativeError: formal_reuse_frame_eof_no_replay\n').returncode
+=============================== warnings summary ===============================
+../../conda-envs/rhinocoder/lib/python3.11/site-packages/_pytest/config/__init__.py:1464
+  /data/conda-envs/rhinocoder/lib/python3.11/site-packages/_pytest/config/__init__.py:1464: PytestConfigWarning: Unknown config option: asyncio_default_fixture_loop_scope
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED eval/test_c5_run_package_startup.py::test_full_approved_spec_to_real_owner_and_worker_startup[r4]
+1 failed, 4 passed, 1 warning in 96.86s (0:01:36)
