@@ -86,3 +86,5 @@ r4复用r3的32项有效组件，**不复用其被拒绝的整阶段结论为PAS
 核查时main为 `9d20bd70fb0367da9346f11e83bd78d347f443b8`；#8→#25仍是未合并的顺序Draft栈，#7为独立R路线。分支材料不代表main或正式发布已经更新。所有者仍是唯一必需reviewer；后续合并及任何新的现场执行均不由本报告授权。
 
 文档交付验证：三阶段公开字段及驻留算术交叉核对、6份规范化源指纹、378个本地链接和折叠区闭合检查通过；原决策历史正文逐字保留，冻结代码/证据及主目录原有修改不变。`check_release_consistency.py`、`check_secrets.py`、`audit_c5_final_decision.py`与`git diff --check`通过。该文档检查只证明公开表述一致，不替代本人私有原始审核；最终提交的适用CI结果见本分支PR检查。
+
+交付分支 `codex/c5-phased-report-portfolio` 已发布为[Draft PR #26](https://github.com/xiongweiluo/RhinoCoder/pull/26)，依赖Draft #25。报告提交 `8c9d537e963eb99d60a771e0fb257088c5fb12ef` 的[适用CI 40131877102](https://github.com/xiongweiluo/RhinoCoder/actions/runs/40131877102)已成功：impact、release、validate通过，Python和UI按现有影响规则明确跳过；未改CI规则。本段状态记录的最终head检查以PR为准，不自动合并。
