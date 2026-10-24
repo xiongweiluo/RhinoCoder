@@ -322,3 +322,43 @@ def test_late_consent_keeps_global_permission_fault_through_preflight_wrapper(tm
         'public synthetic task','create_box',{'width':2,'depth':3,'height':4},
         scene=Scene(),delegated_scope=DELEGATED_HEADLESS_SCOPE)
     with store._tx() as db:assert db.execute('SELECT count(*) FROM consent_requests').fetchone()[0]==0
+
+
+def test_public_history_permit_over_generic_record_bound_retains_all_bytes(tmp_path):
+    import io, os
+    from training.c5_slot_load_permit import encode, decode, receive, saved
+    from training.c5_reuse_evidence import strict
+    value={'scope': 'public synthetic history', 'rows': ['a'*300000]}
+    raw=encode(value)
+    with pytest.raises(ValueError,match='json_size'):strict(raw)
+    stream=io.BytesIO(raw+b'next-frame\n')
+    assert receive(stream)==value and stream.read()==b'next-frame\n'
+    p=tmp_path/'load-permit.json';p.write_bytes(raw);p.chmod(0o600)
+    assert saved(p)==decode(raw)==value
+
+
+@pytest.mark.parametrize('raw', [b'',b'{}',b'{'+b'a'*1048576+b'}\n',
+    b'{"a":1,"a":2}\n',b'{"a":NaN}\n'], ids=['empty','truncated','oversized','duplicate','nonfinite'])
+def test_public_permit_frames_refuse_size_truncation_duplicates_nonfinite(raw):
+    import io
+    from training.c5_slot_load_permit import receive
+    with pytest.raises(ValueError):receive(io.BytesIO(raw))
+
+
+def test_oversized_permit_rejected_before_any_scope_or_launch():
+    from training.c5_formal_reuse_supervisor import validate_load_permit
+    with pytest.raises(ValueError,match='formal_reuse_load_permit_size'):
+        validate_load_permit({'oversized':'a'*1048576},{},{},5)
+
+
+def test_public_permit_exact_bound_roundtrip_and_export_headroom(tmp_path):
+    import io
+    from training.c5_slot_load_permit import encode, receive, saved, MAX_BYTES
+    assert MAX_BYTES==786432 and 1048576-MAX_BYTES==262144
+    value={'a':'x'*(MAX_BYTES-len(encode({'a':''})))}
+    raw=encode(value);assert len(raw)==MAX_BYTES
+    assert receive(io.BytesIO(raw))==value
+    p=tmp_path/'load-permit.json';p.write_bytes(raw);p.chmod(0o600)
+    assert saved(p)==value
+    value['a']+='x'
+    with pytest.raises(ValueError,match='formal_reuse_load_permit_size'):encode(value)

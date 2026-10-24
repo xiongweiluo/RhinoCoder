@@ -198,10 +198,11 @@ class ModelAdapterV2(ModelAdapter):
         from training.c5_formal_reuse_ssh import argv,verify
         from training.c5_followup_diagnostics import CapturedStreams
         from training.c5_formal_reuse_supervisor import validate_load_permit
-        from training.c5_reuse_evidence import canonical
+        from training.c5_slot_load_permit import encode
         from training.c5_reuse_field_transport import FieldPipe
         verify(self.spec,self.freeze)
         validate_load_permit(self.load_permit,self.spec,self.freeze,self.attempt)
+        raw=encode(self.load_permit)
         self.capture=CapturedStreams(self.state,'serve',stdout_cap=self.spec['raw_stdout_cap_bytes'],
             stderr_cap=self.spec['raw_stderr_cap_bytes']);self.diagnostics_finished=False
         args=argv(self.spec,'serve',self.attempt)
@@ -211,7 +212,7 @@ class ModelAdapterV2(ModelAdapter):
         self.capture.start(self.process,protocol=True)
         publish_json(self.state,'load-permit.json',self.load_permit)
         sender=FieldPipe(self.process.stdin.fileno(),self.process.stdout.fileno())
-        raw=canonical(self.load_permit)+b'\n';offset=0;deadline=time.monotonic()+60
+        offset=0;deadline=time.monotonic()+60
         while offset<len(raw):offset+=sender.write(raw[offset:],deadline)
         expected=startup_receipt(STUDY_ID,digest(self.freeze),self.freeze['source_inventory_sha256'],
             self.freeze['environment_sha256'],self.freeze['model_identities'])

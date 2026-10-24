@@ -20,6 +20,8 @@ from training.c5_reuse_gpu_supervisor import PACKET,progress
 from plugin.rhino_listener.c5_formal_reuse_limits import watchdog_limits
 
 def validate_load_permit(permit,spec,freeze,attempt):
+    from training.c5_slot_load_permit import encode
+    encode(permit)  # Reject oversized public history before remote launch/role claim.
     from training.c5_formal_reuse_admission import campaign_scope
     from training.c5_formal_reuse_admission import formal_replay as replay
     from training.c5_reuse_evidence import ZERO
@@ -88,7 +90,8 @@ def supervise(state,spec,freeze,attempt,guard,child,*,watchdog_type=None):
         and hasattr(signal,'pidfd_send_signal') and threading.active_count()==1 and 'torch' not in sys.modules,
         'formal_reuse_qualification_before_threads_or_model')
     guard();state.mkdir(mode=0o700)
-    permit=strict(sys.stdin.buffer.readline(1048577));validated=validate_load_permit(permit,spec,freeze,attempt)
+    from training.c5_slot_load_permit import receive
+    permit=receive(sys.stdin.buffer);validated=validate_load_permit(permit,spec,freeze,attempt)
     claim_gpu_role(permit,freeze,attempt)
     write_once(state,'load-permit.json',permit)
     write_once(state,'worker-role-consumed.json',{'attempt':attempt,'permit_sha256':sha(permit),'replay_allowed':False})
@@ -248,12 +251,13 @@ class FormalWatchdog:
 
 def export_supervisor(state,freeze,guard):
     import subprocess
+    from training.c5_slot_load_permit import saved
     guard();qualification=strict(read_private(state/'qualification.json'))
     log=EvidenceLog(state/'qualified-stop',{'qualification_sha256':sha(qualification)},guard)
     try:rows=log.rows()
     finally:log.close()
     value={'qualification':qualification,'parent':strict(read_private(state/'parent-identity.json')),
-        'permit':strict(read_private(state/'load-permit.json')),
+        'permit':saved(state/'load-permit.json'),
         'final':strict(read_private(state/'supervisor-final.json')),'stop_rows':rows,
         'stop_binding':{'qualification_sha256':sha(qualification)},'epoch':time.time(),
         'target_proc_present':Path('/proc',str(qualification['target']['pid'])).exists(),

@@ -4,6 +4,7 @@ from .c5_research_native import require, digest
 POLICY = {
     "version": 1,
     "handoff_ttl_seconds": 120,
+    "public_load_permit_bytes_max": 786432,
     "evidence_total_bytes_max": 1073741824,
     "evidence_file_bytes_max": 33554432,
     "evidence_files_max": 20000,
