@@ -68,3 +68,10 @@ GPU驻留已独立追加结算：原资格退出/reap及双流完整证明支持
 原报告提交11e4156的CI40089503851已全部成功。以上后续材料作为同一批公开审核归档提交；新增head的适用CI由PR实际结果单独记录，不借旧head成功声称新head通过。现场批准的spec/runtime及执行源码不变。
 
 追加机器快照：[V2诊断、已结算驻留与待核实收尾](../eval/c5/slot-attempt4-diagnosis-settlement-checkpoint-20261024.json)。此前暂停快照保留当时状态；该新快照明确区分已完成GPU结算与尚未完成的Rhino/原始联合审计。
+
+
+## 最后追加：本人实际晚到收尾及原始审核程序完成（保留拒绝）
+
+本人原退出/审核入口现已完成，实际清理verified，33项组件32项核实；原冻结phase审核以 `slot_final_exact_claim_population` 拒绝。原11份step claim与10份record不匹配，最后claim存在但record/原DB备份缺席，不补造或删除。前10槽独立复算5成功/5失败，第11槽保留失败。254条实际终止回执、原observer Remove及dispatcher退订核实，原非密钥证据不变；全局36条/已用4次/原FIRST/70340.89651274681秒均未改，未新增GPU消费。
+
+完整结论见[最终收尾与拒绝说明](c5-slot-continuation-attempt4-final-review-20261024.md)和[实际本人脱敏摘要](../eval/c5/slot-attempt4-owner-raw-review-result-20261024.json)。前文“待诊断/待收尾/尚未结算”均为当时快照，保留历史；当前程序结束不等于原完整门PASS，不产生恢复授权，仍不加载模型、续跑或重跑。
