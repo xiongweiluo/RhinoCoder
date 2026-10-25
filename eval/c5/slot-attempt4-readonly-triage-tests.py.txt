@@ -1,0 +1,49 @@
+"""Synthetic CPU tests only; never opens actual formal state."""
+import importlib.util,json,tempfile,unittest
+from pathlib import Path
+s=importlib.util.spec_from_file_location('triage_test_core',Path(__file__).with_name('core.py'));m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
+class Tests(unittest.TestCase):
+    def test_known_literal(self):
+        r=m.safe_error({'error_type':'NativeError','error':'public fixed failure'},{'public fixed failure':['public.py:1']})
+        self.assertEqual(r['public_failure_sites'],['public.py:1']);self.assertFalse(r['unknown_error_text_redacted'])
+    def test_private_text_redacted(self):
+        r=m.safe_error({'error_type':'NativeError','error':'SECRET_FORMAL_TASK_PAYLOAD'},{});self.assertNotIn('SECRET',json.dumps(r))
+    def test_unknown_class_redacted(self):
+        r=m.safe_error({'error_type':'SECRET_CLASS_NAME'},{});self.assertNotIn('SECRET',json.dumps(r))
+    def test_malformed_error_class_redacted(self):
+        self.assertEqual(m.safe_error({'error_type':[]},{})['error_type'],'unknown_error_type_redacted')
+    def test_nonfinite_json_rejected(self):
+        with tempfile.TemporaryDirectory() as n:
+            p=Path(n).resolve()/'d.json';p.write_text('{"a":NaN}')
+            with self.assertRaisesRegex(ValueError,'triage_nonfinite'):m.read(p)
+    def test_duplicate_json_rejected(self):
+        with tempfile.TemporaryDirectory() as n:
+            p=Path(n).resolve()/'d.json';p.write_text('{"a":1,"a":2}')
+            with self.assertRaisesRegex(ValueError,'triage_duplicate_key'):m.read(p)
+    def test_symlink_rejected(self):
+        with tempfile.TemporaryDirectory() as n:
+            root=Path(n).resolve();(root/'x').write_text('{}');(root/'y').symlink_to(root/'x')
+            with self.assertRaisesRegex(ValueError,'triage_evidence_symlink'):m.inventory(root)
+    def test_inventory_detects_content_change(self):
+        with tempfile.TemporaryDirectory() as n:
+            root=Path(n).resolve();p=root/'x';p.write_text('a');a=m.inventory(root);p.write_text('b');self.assertNotEqual(a,m.inventory(root))
+    def test_end_to_end_synthetic_closed_summary(self):
+        with tempfile.TemporaryDirectory() as n:
+            root=Path(n).resolve();state=root/'state';state.mkdir(mode=0o700);source=root/'source';source.mkdir()
+            (source/'public.py').write_text("require(False, 'public fixed failure')\n")
+            phase={'attempted_indices':list(range(7,18)),'kind':'interrupted_continuation','generation_stages':17};(state/'slot-phase-result.json').write_text(json.dumps(phase))
+            for index in range(11):
+                label='F%02d-base'%(index+1);row={'slot_id':label,'steps':[{'DO_NOT_DISCLOSE':'SECRET_FORMAL_TASK_PAYLOAD'}],'close':'closed','stop':'stopped','error_type':None}
+                if index==10:row.update(close=None,stop=None,error_type='NativeError',fault={'scope':'unknown','code':'unclassified_exception'})
+                (state/(label+'.result.json')).write_text(json.dumps(row))
+            child=state/'F11-base';child.mkdir();(child/'response-0001.json').write_text(json.dumps({'status':'failed_no_retry','error_type':'NativeError','error':'SECRET_FORMAL_TASK_PAYLOAD'}))
+            (state/'hub-response-0001.json').write_text(json.dumps({'status':'hub_failed_no_retry','error_type':'NativeError','error':'public fixed failure'}))
+            before=m.inventory(state);r=m.triage(state,source,{'source_files':{'public.py':'unused_for_synthetic'}})
+            self.assertEqual(before,m.inventory(state));self.assertNotIn('SECRET',json.dumps(r));self.assertEqual(r['counts']['closed'],10);self.assertEqual(len(r['failed_response_metadata']),2)
+            self.assertFalse(r['resume_authority']);self.assertFalse(r['native_cleanup_verified']);self.assertFalse(r['research_restarted'])
+            self.assertTrue(r['original_evidence_unchanged_during_review']);self.assertEqual(r['counts']['unknown_faults'],1)
+    def test_public_literal_allowlist_only_require_and_errors(self):
+        with tempfile.TemporaryDirectory() as n:
+            root=Path(n).resolve();(root/'p.py').write_text("x='SECRET_UNUSED'\nrequire(False,'public fixed failure')\nraise ValueError('known code')\n")
+            v=m.public_literals(root,{'p.py':'unused'});self.assertNotIn('SECRET_UNUSED',v);self.assertIn('known code',v)
+if __name__=='__main__':unittest.main()

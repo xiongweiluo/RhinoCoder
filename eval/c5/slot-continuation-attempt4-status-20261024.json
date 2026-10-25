@@ -1,0 +1,217 @@
+{
+  "automatic_partial_continuation_started": true,
+  "c5_no_go_changed": false,
+  "continuation": {
+    "attempted": 11,
+    "generation_stages": 17,
+    "interrupted": true,
+    "recorded_indices": [
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17
+    ],
+    "selected_indices": [
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39
+    ],
+    "task_failures": null,
+    "task_successes": null,
+    "unattempted": 22
+  },
+  "executable_field_sources_changed": false,
+  "first_evaluation_preserved": {
+    "attempted": 7,
+    "complete": false
+  },
+  "first_load_epoch": 1792692329.837715,
+  "full40_first_quality_result": null,
+  "global_ever_attempted_slot_count": 18,
+  "gpu_exit_review": {
+    "attempt": 4,
+    "epoch": 1792840211.5803158,
+    "global_settlement_appended": false,
+    "gpu_exit_raw_proof": {
+      "complete_original_stream_capture": true,
+      "permit_first_load_epoch": 1792692329.837715,
+      "physical_origin_cryptographically_proven": false,
+      "qualified_child_exited_reaped": true,
+      "same_gpu_idle_observed": true,
+      "shared_stop_signals": 0
+    },
+    "load_intent_epoch": 1792837549.191566,
+    "native_cleanup_verified": false,
+    "original_boot_id": "5e83729b-b29b-43f6-8635-c98f662d3d56",
+    "original_export_sha256": "c4d273e4e9bff20f9b637041198374641dc804a3062a45b091ea84a23036fc0b",
+    "original_final": {
+      "child_exit_reaped": true,
+      "child_wait_status": 0,
+      "cleanup_errors": [],
+      "epoch": 1792839912.9373415,
+      "primary_error_type": null,
+      "retry_allowed": false,
+      "stop_result": {
+        "error_type": null,
+        "exit_observed": true,
+        "retry_signal_allowed": false,
+        "signal_attempts": 0,
+        "status": "already_exited"
+      }
+    },
+    "original_ledger_unchanged_by_review": true,
+    "original_stop_rows": [
+      {
+        "binding_sha256": "33847c3e232b9b614237dacbc1f52fb9c6867e8209e7418963419b90bcf70944",
+        "kind": "stop_claim",
+        "payload": {
+          "qualification_sha256": "38fdb1e12903ae1cb0a6dc26d86158b72c905195ddcb194ed79ac3fb26f64ea3",
+          "signals_max": 1
+        },
+        "previous_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "record_sha256": "7d6a0338723a9d27ae608227a9e7be7b38ee006e518207d3b151bdaff569195b",
+        "seq": 0
+      },
+      {
+        "binding_sha256": "33847c3e232b9b614237dacbc1f52fb9c6867e8209e7418963419b90bcf70944",
+        "kind": "stop_result",
+        "payload": {
+          "error_type": null,
+          "exit_observed": true,
+          "signal_attempts": 0,
+          "status": "already_exited"
+        },
+        "previous_sha256": "7d6a0338723a9d27ae608227a9e7be7b38ee006e518207d3b151bdaff569195b",
+        "record_sha256": "b0f3df61a4f072b82332f78447786f93f526898ee9000a3011bf7ac6941a5887",
+        "seq": 1
+      }
+    ],
+    "private_content_included": false,
+    "qualified_child_pid": 1392873,
+    "qualified_exit_epoch": 1792839912.9373415,
+    "qualified_parent_pid": 1392827,
+    "residency_upper_seconds_pending_global_settlement": 2363.745775461197,
+    "spec_sha256": "6911d112b1b11bb6bed636eac3f3d456b6400a92ac98dd95dc0105057d46fa22"
+  },
+  "host_terminal_receipt_present": false,
+  "latest_original_gpu_absence": {
+    "boot_id": "5e83729b-b29b-43f6-8635-c98f662d3d56",
+    "child_pid": 1392873,
+    "child_present": false,
+    "epoch": 1792840253.804856,
+    "parent_pid": 1392827,
+    "parent_present": false,
+    "private_content_included": false
+  },
+  "native_hub_stop_present": false,
+  "new_blind_holdout_claimed": false,
+  "new_research_started": false,
+  "next_required_evidence": "owner_private_readonly_failure_diagnosis_then_native_cleanup_reconciliation",
+  "original_campaign_attempts_consumed": 4,
+  "original_gpu_charged_seconds_preserved": 67977.15073728561,
+  "owner_rules_and_actual_execution_approved": true,
+  "package_id": "reuse-formal-20261023-r3",
+  "private_content_included": false,
+  "public_summary": {
+    "attempts_consumed": 4,
+    "audit_error_code": "FileNotFoundError",
+    "audit_status": "incomplete_unknown",
+    "c5_no_go_changed": false,
+    "campaign_head_sha256": "cd7d5152fe1a6699d44971060101f993d9526f21fc9764a2ec276eb854ba7fd3",
+    "continuation": {
+      "attempted": 11,
+      "selected": 33,
+      "uninterrupted_initial_run": false
+    },
+    "engineering_regression": {
+      "attempted": 0,
+      "changes_original_result": false,
+      "waves": 0
+    },
+    "evidence_reuse": {
+      "original_exit_and_partial_raw_audit": true,
+      "original_first_result_unchanged": true
+    },
+    "execution_authority": false,
+    "first_evaluation": {
+      "attempted": 7,
+      "complete": false,
+      "original_audit_sha256": "97770d00de3bb4dd10aad25ec878ecaeb82cc0b5ebe57f7d3fd73fe9c3abd1f2",
+      "original_result_unchanged": true,
+      "unattempted": 33
+    },
+    "first_load_epoch": 1792692329.837715,
+    "fixed_denominator": 40,
+    "full40_first_quality_result": null,
+    "global_ever_attempted_slot_count": 18,
+    "gpu_charged_seconds": 67977.15073728561,
+    "kind": "interrupted_continuation",
+    "new_independent_blind_test": false,
+    "package_id": "reuse-formal-20261023-r3",
+    "phase_statistics": {
+      "recorded_results": null,
+      "task_failures": null,
+      "task_successes": null
+    },
+    "prior_phase_records": [],
+    "private_content_included": false,
+    "raw_audit_sha256": null,
+    "runtime_sha256": "ba39557e57027ee4533b4d4d2468540d7af4765d22a5257b123acc8c14fda4ea",
+    "schema_version": 1,
+    "spec_sha256": "6911d112b1b11bb6bed636eac3f3d456b6400a92ac98dd95dc0105057d46fa22",
+    "status": "SLOT_PAUSED_RECONCILIATION",
+    "study_id": "c5-rhino-paired-20-reuse-v1",
+    "unknowns": [
+      "historical_total_gpu_usage_unknown",
+      "original_full40_quality_unavailable",
+      "physical_origin_not_cryptographically_proven",
+      "current_phase_raw_audit_incomplete",
+      "failure_scope_or_resume_conditions_unconfirmed"
+    ]
+  },
+  "readonly_triage_cpu_tests": 10,
+  "readonly_triage_review_sha256": "f0fa023a1b45ee969a4c26d4b7c657431f7ae4935bb7530bc2f12620c5051e29",
+  "recorded_epoch": 1792840615.09795,
+  "resource_settlement_globally_appended": false,
+  "runtime_sha256": "ba39557e57027ee4533b4d4d2468540d7af4765d22a5257b123acc8c14fda4ea",
+  "schema_version": 1,
+  "spec_sha256": "6911d112b1b11bb6bed636eac3f3d456b6400a92ac98dd95dc0105057d46fa22",
+  "status": "paused_unknown_native_cleanup_and_raw_audit_incomplete"
+}

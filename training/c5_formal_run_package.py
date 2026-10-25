@@ -94,6 +94,8 @@ def replay_package_event(state, kind, payload):
                 'run_package_raw_residency_settlement')
         state['charged_gpu_seconds'] += payload['charged_seconds']
         state['settled_attempts'].append(payload['attempt'])
+        if state.get('slot_protocol') is not None:
+            state['slot_last_qualified_exit_epoch']=max(state.get('slot_last_qualified_exit_epoch',0),payload['stop_epoch'])
     else:
         raise ValueError('run_package_unknown_event')
 
@@ -107,6 +109,9 @@ def verify_package_prefix(package, rows):
 
 def activate_package(spec, freeze, grant):
     """Only the approval registrar calls this, never preparation or status."""
+    if 'slot_protocol' in spec.get('run_package',{}):
+        from training.c5_slot_entry import activate
+        return activate(spec,freeze,grant)
     from plugin.rhino_listener.c5_formal_reuse_scope import authority
     from training.c5_formal_reuse_revision import initial_scope, verify_endpoint
     from training.c5_formal_reuse_admission import ROOTS, NAMESPACE, FormalCampaign, campaign_scope, formal_replay
@@ -262,6 +267,9 @@ def capture_owner_receipt(state, spec, freeze, *, output=print):
 def public_status(campaign, state):
     from training.c5_formal_reuse_public_progress import read_public_progress
     v = campaign.observation(); package = v.get('package')
+    if v.get('slot_protocol') is not None:
+        p=v['slot_protocol']
+        return {'schema_version':2,'study_id':v['scope']['campaign_id'],'package_id':package['layout']['package_id'],'status':v['status'],'kind':p['kind'],'attempts_consumed':v['attempts'],'attempts_max':package['policy']['global_loads_max'],'first_load_epoch':v['first_load_epoch'],'private_exposure_recorded':v['formal_consumed'],'gpu_charged_seconds':v['charged_gpu_seconds'],'current_load_unsettled':v['active'] or v['attempts'] not in v['settled_attempts'],'timeline_elapsed_seconds':max(0,time.time()-v['first_load_epoch']),'lease_expiry_epoch':package['lease_expiry_epoch'],'selected_slots':len(p['selected_indices']),'newly_attempted_slots':len(v['slot_attempted_indices']),'unattempted_selected_slots':len(p['selected_indices'])-len(v['slot_attempted_indices']),'first_evaluation_attempted':7,'fixed_denominator':40,'original_first_result_unchanged':True,'global_ever_attempted_slot_count':len(v.get('slot_global_attempted_indices',range(7))),'prior_phase_count':len(v.get('slot_phase_history',[])),'new_blind_holdout_claimed':False,'legacy_wall_policy_rejudged':False,'private_content_included':False,'execution_authority':False}
     return {'schema_version': 1, 'study_id': v['scope']['campaign_id'],
             'package_id': package['layout']['package_id'] if package else None,
             'status': v['status'], 'attempts_consumed': v['attempts'], 'attempts_max': v['attempts_max'],

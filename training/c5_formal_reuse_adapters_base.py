@@ -261,6 +261,12 @@ class ModelAdapter:
         try:
             require(not self.pipe.blocked, 'formal unknown remote acknowledgement; no reconnect/export retry')
             for key in self.attempts:
+                if 'slot_protocol' in self.spec.get('run_package',{}) and (self.state/(key+'-remote-evidence.json')).exists():
+                    saved=read_json(self.state,key+'-remote-evidence.json')
+                    expected={'kind':'formal_export_step','study_id':STUDY_ID,'runtime_freeze_sha256':digest(self.freeze),'key':key}
+                    require(saved.get('status')=='formal_raw_step_evidence' and saved.get('key')==key
+                        and saved.get('request_sha256')==digest(expected),'slot_prior_export_must_bind_original_step')
+                    continue
                 sent = {'kind': 'formal_export_step', 'study_id': STUDY_ID, 'runtime_freeze_sha256': digest(self.freeze), 'key': key}
                 value = self.pipe.exchange(sent)
                 require(value.get('status') == 'formal_raw_step_evidence' and value.get('key') == key,

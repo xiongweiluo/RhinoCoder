@@ -189,13 +189,16 @@ def serve_child(progress_fd,attempt):
             output.write(frame({'status':status,'request_sha256':digest(bootstrap),
                 'runtime_freeze_sha256':freeze_sha,'generation_requests':0}));output.flush()
             return
-        require(set(bootstrap) == {'kind', 'study_id', 'runtime_freeze_sha256', 'started', 'plans'}
+        require(set(bootstrap) == ({'kind','study_id','runtime_freeze_sha256','started','plans','slot_order'} if 'slot_protocol' in spec.get('run_package',{}) else {'kind','study_id','runtime_freeze_sha256','started','plans'})
             and bootstrap['kind'] == 'formal_bootstrap' and bootstrap['study_id'] == STUDY_ID
             and bootstrap['runtime_freeze_sha256'] == freeze_sha and bootstrap['started'] == {
                 'study_id': STUDY_ID, 'spec_sha256': digest(spec), 'runtime_freeze_sha256': freeze_sha,
                 'public_commitment_sha256': spec['public_commitment_sha256'], 'replay_allowed': False},
             'formal Mac started/bootstrap scope differs')
+        if 'slot_protocol' in spec.get('run_package',{}):
+            require(digest(bootstrap['slot_order'])==spec['slot_order_sha256'],'slot_worker_original_schedule_commitment')
         plans = validate_hashed_plans(bootstrap['plans'])
+        attempted_slot_ids=[]
         publish_json(state, 'bootstrap.json', bootstrap);progress(progress_fd,b'B')
         require(sum(p['max_steps'] for p in plans.values())<=spec['max_model_requests'],
             'formal hashed plan exceeds fixed strata budget')
@@ -250,6 +253,10 @@ def serve_child(progress_fd,attempt):
                 break
             require(not session.blocked and count < min(spec['max_model_requests'],sum(p['max_steps'] for p in plans.values())), 'formal worker blocked/exhausted')
             budget.check(); guard()
+            if 'slot_protocol' in spec.get('run_package',{}):
+                indices=permit['rows'][-1]['payload']['remaining_indices']
+                from training.c5_slot_worker import validate_scheduled_request
+                validate_scheduled_request(sent,plans,bootstrap['slot_order'],indices,attempted_slot_ids)
             key = digest({'slot': sent.get('slot_id'), 'step': sent.get('step_index'), 'freeze': freeze_sha})
             publish_json(state, key + '-request.json', sent)
             attempted.append(key); count += 1
@@ -274,7 +281,7 @@ def serve(attempt):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode', choices=('preflight', 'import-preflight', 'serve', 'stop', 'export-supervisor'))
-    parser.add_argument('--attempt',type=int,choices=range(1,6),default=1)
+    parser.add_argument('--attempt',type=int,choices=range(1,7),default=1)
     args = parser.parse_args()
     if args.mode == 'preflight': print(frame(preflight()[0]).decode(), end='')
     elif args.mode=='import-preflight':print(frame(import_preflight()).decode(),end='')

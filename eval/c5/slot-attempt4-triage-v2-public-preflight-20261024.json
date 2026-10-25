@@ -1,0 +1,10 @@
+{
+  "field_execution_started": false,
+  "observed_epoch": 1792841574.583612,
+  "owner_python_and_absent_bytecode_prefix_verified": true,
+  "private_evidence_bytes_read": 0,
+  "public_exact_pair_and_source_guard_passed": true,
+  "public_source_files": 463,
+  "review_sha256": "f70be79f3fc4eb4a880b90e7f7377593284842386a723fc2c0df288d8e56ee3e",
+  "schema_version": 1
+}

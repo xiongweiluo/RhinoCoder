@@ -36,6 +36,10 @@ def main():
             campaign=open_formal_campaign(spec,freeze,grant,freeze['history'])
             try:
                 state=attempt_state('mac',max(1,campaign.observation()['attempts']))
+                if args.mode=='summary' and 'slot_protocol' in spec.get('run_package',{}):
+                    from training.c5_slot_entry import public_phase_summary
+                    value=public_phase_summary(campaign,state)
+                    print(json.dumps(value,ensure_ascii=False,sort_keys=True));return 0
                 value=read_json(state,'owner-public-audit-summary.json') if args.mode=='summary' \
                     and (state/'owner-public-audit-summary.json').exists() else public_status(campaign,state)
             finally:campaign.log.close()

@@ -55,13 +55,22 @@ class FormalHub:
         require(isinstance(envelope, dict) and set(envelope) == {'payload', 'signature'}, 'exact signed formal hub control')
         p = envelope['payload']
         require(isinstance(p, dict) and set(p) == {'version', 'request_id', 'action', 'slot_id', 'owner_freeze_sha256', 'expires_at'}
-            and type(p['version']) is int and p['version'] == 1 and p['action'] in {'open', 'stop'}
+            and type(p['version']) is int and p['version'] == 1 and p['action'] in ({'open','stop','health'} if 'slot_protocol' in self.spec.get('run_package',{}) else {'open','stop'})
             and p['owner_freeze_sha256'] == digest(self.freeze)
             and isinstance(p['request_id'], str) and 16 <= len(p['request_id']) <= 128
             and p['request_id'] not in self.control_ids and type(p['expires_at']) is int
             and 0 < p['expires_at'] - self.clock() <= 120 and isinstance(envelope['signature'], str)
             and hmac.compare_digest(signature(self.secret, p), envelope['signature']), 'formal hub control rejected')
         self.control_ids.add(p['request_id'])
+        if p['action']=='health':
+            require('slot_protocol' in self.spec.get('run_package',{}) and not self.blocked
+                and p['slot_id'] in self.opened and self.opened[-1]==p['slot_id']
+                and self.child is not None and self.child.stopped and self.fixture is self.child.gate.backend.doc
+                and self.child.gate.backend.closed,'slot_fresh_shared_health_requires_exact_closed_fixture')
+            return {'status':'slot_shared_health_verified','slot_id':p['slot_id'],
+                'request_sha256':digest(envelope),'active_serial':self.active_serial,
+                'active_sha256':self.initial_active,'source_sha256':self.freeze['source_inventory_sha256'],
+                'previous_fixture_closed':True,'previous_bridge_stopped':True}
         if p['action'] == 'stop':
             current_closed = self.fixture is None or (self.child is not None
                 and self.child.gate.backend.doc is self.fixture and self.child.stopped and self.child.gate.backend.closed)
@@ -86,7 +95,14 @@ class FormalHub:
         require(not self.blocked and self.clock() < self.spec['model_generation_cutoff_epoch'], 'formal hub blocked/past cutoff')
         require(self.child is None or self.child.stopped, 'previous formal fixture not stopped')
         order = self.plans['slot_order']
-        require(len(self.opened) < 40 and p['slot_id'] == order[len(self.opened)]['slot_id'], 'formal forty-slot order differs')
+        if 'slot_protocol' in self.spec.get('run_package',{}):
+            from .c5_slot_protocol import select_schedule
+            indices=self.spec['run_package']['slot_protocol']['selected_indices']
+            permit=read_json(self.state,'load-permit.json')
+            from_import=permit['rows'][-1]['payload']['remaining_indices']
+            require(set(from_import)<=set(indices),'slot_hub_remaining_plan_binding')
+            order=[order[i] for i in from_import]
+        require(len(self.opened) < len(order) and p['slot_id'] == order[len(self.opened)]['slot_id'], 'formal forty-slot order differs')
         slot = p['slot_id']; directory = self.state / slot; plan = self.plans['plans'][slot]
         for row in plan['fixture_recipe']:
             validate_native_arguments(row['operation'], row['arguments'], self.schemas)
@@ -132,7 +148,7 @@ class FormalHub:
         name = 'hub-request-%04d.json' % self.seq
         if not (self.state / name).exists(): return
         try:
-            require(self.seq <= 41, 'formal hub controls exhausted')
+            require(self.seq <= (81 if 'slot_protocol' in self.spec.get('run_package',{}) else 41), 'formal hub controls exhausted')
             value = self.handle(read_json(self.state, name))
         except BaseException as exc:
             self.blocked = True

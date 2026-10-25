@@ -61,7 +61,11 @@ jobs:
             python -m pytest -q --tb=short --ignore=eval/test_c5_run_package_startup.py
           fi
       - name: Current public run package (never grants or executes)
-        run: python tools/prepare_c5_run_package.py --check
+        run: |
+          python tools/prepare_c5_run_package.py --check
+          if [ -f eval/c5/reuse-formal-20261023-r3-spec.json ]; then
+            python tools/prepare_c5_slot_package.py --check
+          fi
       - run: python tools/check_secrets.py
   ui:
     needs: impact

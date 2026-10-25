@@ -69,7 +69,7 @@ def history_guard(endpoint,history,*,root=None):
     guard();return guard
 
 def attempt_state(endpoint,attempt):
-    require(endpoint in ('mac','gpu') and type(attempt) is int and 1<=attempt<=(5 if PACKAGE_LAYOUT is not None else 3),
+    require(endpoint in ('mac','gpu') and type(attempt) is int and 1<=attempt<=__import__('plugin.rhino_listener.c5_formal_reuse_scope',fromlist=['MAX_LOADS']).MAX_LOADS,
         'formal_reuse_bounded_preexposure_attempt')
     return (MAC_STATE if endpoint=='mac' else REMOTE_STATE)/('preload-'+str(attempt))
 
@@ -119,6 +119,10 @@ def formal_replay(scope, rows):
     for row in rows:
         scope = state['scope']
         kind, p = (row['kind'], row['payload'])
+        if kind.startswith('slot_'):
+            from training.c5_slot_campaign import EVENTS,replay as replay_slot
+            require(kind in EVENTS,'slot_unknown_event')
+            replay_slot(state,row);continue
         if kind in ('package_owner_session_confirmed','package_owner_custody_consent','package_preload_observed','gpu_residency_settled'):
             from training.c5_formal_run_package import replay_package_event
             replay_package_event(state,kind,p);continue

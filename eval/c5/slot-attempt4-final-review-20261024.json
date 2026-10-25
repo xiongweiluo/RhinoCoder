@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "status": "original_joint_review_procedure_finished_with_rejections",
+  "audit_procedure_finished": true,
+  "full_original_raw_joint_gate_passed": false,
+  "native_cleanup_verified": true,
+  "late_cleanup": true,
+  "resume_authority": false,
+  "research_restarted": false,
+  "private_content_included": false,
+  "owner_public_summary_canonical_sha256": "0f4fdebf1604026cff92883cf760e171b4b7e4c7caa81e6bf1ed613ed6952f6b",
+  "owner_public_summary_file_sha256": "62dda2bd2b4e972e58022aefea5ac97e0b9bebf80c74a57335489744bbea48b1",
+  "verified_components": 32,
+  "refused_components": [
+    {
+      "component": "original_frozen_phase_auditor_unchanged",
+      "error_code": "original_checker_refused",
+      "error_type": "NativeError",
+      "public_error_literal": "slot_final_exact_claim_population",
+      "status": "refused_or_unproven",
+      "unknown_error_text_redacted": false
+    }
+  ],
+  "total_components": 33,
+  "metadata_only_agent_observation": {
+    "private_file_bytes_read": false,
+    "known_paths": {
+      "F09-lora-step-1.claim.json": {
+        "exists": true,
+        "is_symlink": false
+      },
+      "F09-lora-step-1.record.json": {
+        "exists": false,
+        "is_symlink": false
+      },
+      "F09-lora/database-backups.json": {
+        "exists": false,
+        "is_symlink": false
+      }
+    },
+    "counts": {
+      "step_claim_files": 11,
+      "step_record_files": 10
+    }
+  },
+  "attempts_consumed": 4,
+  "campaign_rows": 36,
+  "campaign_head_sha256": "f519939f54e425484599d21b4554fc2a232c58d4372aa05d5423f543b2a77920",
+  "campaign_unchanged_during_close_audit": true,
+  "first_load_epoch": 1792692329.837715,
+  "gpu_charged_seconds": 70340.89651274681,
+  "gpu_attempt4_residency_upper_seconds": 2363.745775461197,
+  "original_first_evaluation_slots": 7,
+  "continuation_slots_recorded": 11,
+  "continuation_indices": [
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+  ],
+  "unattempted_indices": [
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39
+  ],
+  "first_full40_quality": null,
+  "continuation_recomputed_prefix": {
+    "slots": 10,
+    "task_successes": 5,
+    "task_failures": 5
+  },
+  "last_failed_slot_quality_not_rewritten": true,
+  "no_go_changed": false,
+  "spec_sha256": "6911d112b1b11bb6bed636eac3f3d456b6400a92ac98dd95dc0105057d46fa22",
+  "runtime_sha256": "ba39557e57027ee4533b4d4d2468540d7af4765d22a5257b123acc8c14fda4ea",
+  "close_audit_review_sha256": "a06cee38902bbb76c6805c148ca3eb5785bdc80de3dd5d74c224d52e4b358cdc",
+  "historical_total_gpu_usage_unknown": true,
+  "original_16_hour_compliance_claimed": false,
+  "actual_gate_wall_time_independently_recorded": false,
+  "complete_handler_absence_proven": false,
+  "new_model_or_slot_execution_authorized": false
+}

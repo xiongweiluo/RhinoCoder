@@ -1,0 +1,179 @@
+"""Synthetic CPU only. No actual formal evidence, Rhino, SSH or model calls."""
+import ast,copy,hashlib,importlib.util,json,os,tempfile,unittest,sqlite3,sys,io
+from pathlib import Path
+from unittest.mock import patch
+from contextlib import closing
+s=importlib.util.spec_from_file_location('synthetic_close_core',Path(__file__).with_name('core.py'));c=importlib.util.module_from_spec(s);s.loader.exec_module(c)
+
+def write(p,v):
+    p.parent.mkdir(parents=True,exist_ok=True)
+    raw=(json.dumps(v,sort_keys=True,separators=(',',':'),ensure_ascii=False)+'\n').encode()
+    if p.exists():assert p.read_bytes()==raw;return
+    fd=os.open(p,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
+    with os.fdopen(fd,'wb') as f:f.write(raw)
+def read(p):return json.loads(p.read_bytes())
+def inventory(root):
+    values={}
+    for p in sorted(root.rglob('*')):
+        if p.is_file():
+            s=p.stat();values[p.relative_to(root).as_posix()]={'bytes':s.st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'inode':s.st_ino,'mtime_ns':s.st_mtime_ns,'mode':s.st_mode&0o777}
+    return values
+
+def fixture():
+    freeze={'source_inventory_sha256':'f'*64};fsha=c.digest(freeze);secret=b'x'*32;task='a'*64;active='b'*64;state={'document_key':'c'*64,'revision':1,'scene_sha256':'d'*64};native={'synthetic':True}
+    bootstrap={'source_sha256':freeze['source_inventory_sha256'],'task_sha256':task,'active_sha256':active}
+    requests=[];responses=[]
+    for n in range(1,46):
+        action='capture' if n<44 else 'close' if n==44 else 'stop'
+        p={'request_id':'synthetic-request-%04d-abcdefghijkl'%n,'owner_freeze_sha256':fsha,'task_sha256':task,'action':action}
+        sent={'kind':'control','envelope':{'payload':p,'signature':c.signature(secret,p)}}
+        response={'status':'captured','native':native,'state':state}
+        if n==43:
+            p={'request_id':'synthetic-request-0043-abcdefghijkl','owner_freeze_sha256':fsha,'task_sha256':task,'expected':state,'expires_at':100}
+            sent={'kind':'execute','envelope':{'payload':p,'signature':c.signature(secret,p)}}
+            response={'status':'failed_no_retry','error_type':'NativeError','error':'expired/oversized handoff TTL','seq':43}
+        if n==44:response={'status':'closed','close_capture':{'fixture_registry_absent':True,'fixture_before_close_native':native},'key_absence':{'key_removed':True,'actual_absence_checked':True},'source_sha256':freeze['source_inventory_sha256'],'active_sha256':active}
+        if n==45:response={'status':'stopped','had_failure':True,'hook_removed_in_same_callback':True,'source_sha256':freeze['source_inventory_sha256'],'active_sha256':active}
+        requests.append(sent);responses.append(response)
+    return freeze,secret,bootstrap,requests,responses
+
+class Tests(unittest.TestCase):
+    def verify(self,change=None):
+        f,k,b,q,r=fixture()
+        if change:change(q,r)
+        return c.verify_tail(q,r,k,b,f['source_inventory_sha256'],c.digest(f))
+    def test_closed_stopped_but_failed_tail_is_retained(self):
+        self.assertTrue(self.verify()['last_slot_original_stopped_with_failure']);self.assertTrue(self.verify()['original_result_stop_none_not_rewritten'])
+    def test_wrong_signature_refused(self):
+        with self.assertRaisesRegex(c.Refusal,'signature'):self.verify(lambda q,r:q[0]['envelope'].update(signature='0'*64))
+    def test_duplicate_request_refused(self):
+        def change(q,r):q[1]=copy.deepcopy(q[0])
+        with self.assertRaisesRegex(c.Refusal,'signature'):self.verify(change)
+    def test_wrong_scope_refused(self):
+        with self.assertRaisesRegex(c.Refusal,'scope'):self.verify(lambda q,r:q[0]['envelope']['payload'].update(owner_freeze_sha256='0'*64))
+    def test_unknown_failed_response_refused(self):
+        with self.assertRaisesRegex(c.Refusal,'last_tail'):self.verify(lambda q,r:r[-3].update(error='unrelated private error'))
+    def test_close_registry_absence_required(self):
+        with self.assertRaisesRegex(c.Refusal,'last_tail'):self.verify(lambda q,r:r[-2]['close_capture'].update(fixture_registry_absent=False))
+    def test_actual_stopped_required(self):
+        with self.assertRaisesRegex(c.Refusal,'last_tail'):self.verify(lambda q,r:r[-1].update(status='unknown'))
+    def test_actual_unhook_required(self):
+        with self.assertRaisesRegex(c.Refusal,'last_tail'):self.verify(lambda q,r:r[-1].update(hook_removed_in_same_callback=False))
+    def test_capture_before_rejected_call_must_equal_close(self):
+        with self.assertRaisesRegex(c.Refusal,'last_capture'):self.verify(lambda q,r:r[-2]['close_capture'].update(fixture_before_close_native={'different':True}))
+    def test_unknown_earlier_failure_refused(self):
+        with self.assertRaisesRegex(c.Refusal,'last_tail'):self.verify(lambda q,r:r[1].update(status='failed_no_retry'))
+    def test_before_evidence_private_copy_verified(self):
+        with tempfile.TemporaryDirectory() as n:
+            root=Path(n).resolve();state=root/'state';state.mkdir();write(state/'original.json',{'synthetic':True});before=inventory(state)
+            c.copy_verified(state,root/'copy',inventory);self.assertEqual(inventory(state),before);self.assertEqual((state/'original.json').read_bytes(),(root/'copy/original.json').read_bytes())
+    def test_original_stop_is_only_control_action_in_entry(self):
+        tree=ast.parse(Path(c.__file__).read_text());actions=[node.args[0].value for node in ast.walk(tree) if isinstance(node,ast.Call) and isinstance(node.func,ast.Attribute) and node.func.attr=='control']
+        self.assertEqual(actions,['stop'])
+    def test_no_model_or_new_slot_or_decryption_entry(self):
+        code=Path(c.__file__).read_text()+Path(__file__).with_name('owner.py').read_text()
+        for forbidden in ['run_interactive(','.open_slot(','.infer(','.execute_observation(','start_zero(','age --decrypt','subprocess.']:self.assertNotIn(forbidden,code)
+    def synthetic_close(self,repeat=False,change=False,host_failure=False):
+        with tempfile.TemporaryDirectory() as n:
+            root=Path(n).resolve();state=root/'package-state/preload-4';state.mkdir(parents=True);closure=root/'closure';f,k,b,q,r=fixture();fsha=c.digest(f);order=[{'slot_id':'F%02d-%s'%(i,route)} for i in range(1,21) for route in ('base','lora')];opened=[s['slot_id'] for s in order[7:18]]
+            for i in range(1,21):
+                for route in ('base','lora'):
+                    label='F%02d-%s'%(i,route);(state/label).mkdir();write(state/'audit-key-custody'/(label+'.json'),{'key_hex':k.hex(),'runtime_sha256':fsha})
+                    if label not in opened:write(state/label/'handoff.key',{'key_hex':k.hex()})
+            write(state/'hub.key',{'key_hex':k.hex()});write(state/'audit-key-custody/hub.json',{'key_hex':k.hex(),'runtime_sha256':fsha});write(state/'native-plans.json',{'slot_order':order});write(state/'immutable-original-result.json',{'original_failed':True})
+            for i,(sent,reply) in enumerate(zip(q,r),1):write(state/'F09-lora'/('request-%04d.json'%i),sent);write(state/'F09-lora'/('response-%04d.json'%i),reply)
+            write(state/'F09-lora/bootstrap.json',b);write(state/'F09-lora/engine-created.json',{})
+            for seq in range(1,22):
+                index=(seq-1)//2;action='open' if seq%2 else 'health';p={'request_id':'hub-synthetic-%04d-abcdefghijkl'%seq,'owner_freeze_sha256':fsha,'action':action,'slot_id':opened[index]}
+                write(state/('hub-request-%04d.json'%seq),{'payload':p,'signature':c.signature(k,p)})
+                write(state/('hub-response-%04d.json'%seq),{'status':'slot_opened','slot_id':opened[index]} if action=='open' else {'status':'slot_shared_health_verified'})
+            pointer={'attempt':0,'runtime_sha256':fsha,'nonce':'0'*64};write(state.parent/'rhino-active-attempt.json',pointer);write(state.parent/('package-dispatcher-detached-'+pointer['nonce']+'.json'),pointer)
+            calls=[]
+            class FakeOriginalChannel:
+                def __init__(self,*args,**kwargs):self.seq=1
+                def control(self,action):
+                    calls.append(action);assert self.seq==22 and action=='stop'
+                    p={'action':'stop','slot_id':None,'owner_freeze_sha256':fsha,'request_id':'late-stop-synthetic-abcdefghijkl'}
+                    write(state/'hub-request-0022.json',{'payload':p,'signature':c.signature(k,p)})
+                    value={'status':'hub_stopped','had_failure':False,'hook_removed_in_same_callback':True,'opened_slots':opened,'hub_key_absence':{'key_removed':True,'actual_absence_checked':True}}
+                    write(state/'hub-response-0022.json',value)
+                    for kind in ('client-time','service-time','host-check'):write(state/('hub-'+kind+'-0022.json'),{'synthetic_timing':True})
+                    write(state/'hub-stop.json',value);write(state/'host-continuity-0001.json',{'synthetic_append':True});seal={'exact_remove_call_completed':True,'runtime_freeze_sha256':fsha,'source_inventory_sha256':f['source_inventory_sha256'],'study_id':'synthetic','record_count':1};write(state/'host-continuity-seal.json',seal);write(state/'host-continuity-terminal-receipt.json',{'seal_sha256':c.digest(seal),'record_count':1})
+                    (state/'hub.key').unlink()
+                    for slot in order:
+                        if slot['slot_id'] not in opened:(state/slot['slot_id']/'handoff.key').unlink()
+                    return value
+            ops={'read':read,'publish':write,'inventory':inventory,'channel_type':FakeOriginalChannel,'closure':closure,'audit_lifecycle':lambda *a,**kw:{},'audit_timing':lambda *a,**kw:{},'audit_host':lambda *a,**kw:{}}
+            if host_failure:
+                def refuse_host(*a,**kw):raise ValueError('synthetic host refusal')
+                ops['audit_host']=refuse_host
+            before=inventory(state)
+            with patch.object(c,'EXPECTED_BEFORE_SHA',c.digest(before)):
+                result=c.close_original_hub(state,{'study_id':'synthetic'},f,lambda:None,ops)
+                if change:
+                    (state/'immutable-original-result.json').write_text('modified synthetic fixture')
+                    with self.assertRaisesRegex(c.Refusal,'original_bytes_changed'):c.close_original_hub(state,{'study_id':'synthetic'},f,lambda:None,ops)
+                elif repeat:self.assertEqual(c.close_original_hub(state,{'study_id':'synthetic'},f,lambda:None,ops),result)
+            self.assertEqual(calls,['stop']);self.assertEqual(result['host_continuity_audit_verified'],not host_failure);self.assertTrue(result['native_cleanup_verified']);self.assertFalse(result['resume_authority']);self.assertEqual(result['preservation']['removed_dispatch_keys'],30)
+            self.assertEqual((closure/'original-before-late-cleanup/immutable-original-result.json').read_bytes(),b'{"original_failed":true}\n')
+    def test_host_audit_refusal_does_not_prevent_narrow_cleanup_or_create_resume_authority(self):self.synthetic_close(host_failure=True)
+    def test_full_synthetic_close_preserves_original_and_only_stops_hub(self):self.synthetic_close()
+    def test_repeat_harvests_same_original_stop_without_resend(self):self.synthetic_close(repeat=True)
+    def test_post_cleanup_original_tamper_refused_without_resend(self):self.synthetic_close(change=True)
+    def tail_database(self,*,extra_write=False,bad_permission=False):
+        # Frozen pure validators only; no model/native constructor is invoked.
+        field=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/reuse-formal-20261023-r3-source');sys.path.insert(0,str(field))
+        try:
+            with tempfile.TemporaryDirectory() as n:
+                state=Path(n).resolve()/'preload-4';directory=state/'F09-lora';directory.mkdir(parents=True)
+                freeze={'source_inventory_sha256':'f'*64};fsha=c.digest(freeze);secret=b'x'*32;task='a'*64;expected={'document_key':'b'*64,'revision':0,'scene_sha256':'c'*64}
+                permissions=[];payloads=[];handoffs=[];events=[]
+                for index in range(2):
+                    rid='synthetic-request-%04d-abcdefghijkl'%index;args={'synthetic':index}
+                    permit={'request_id':rid,'status':'consumed','task_sha256':task,'tool_name':'create_box','arguments_sha256':c.digest(args),'scene_revision':0,'scene_sha256':expected['scene_sha256'],'expires_at':100,'created_at':10+index*10}
+                    payload={'version':1,'request_id':rid,'task_sha256':task,'owner_freeze_sha256':fsha,'expected':expected,'operation':'create_box','arguments':args,'consent_row_sha256':c.digest(permit),'expires_at':100}
+                    permissions.append(permit);payloads.append(payload);handoffs.append({'request_id':rid,'state':'issued','payload_sha256':c.digest(payload)})
+                    for j,kind in enumerate(['requested','approved','consumed','signed_handoff_issued']):events.append({'event_id':index*4+j+1,'request_id':rid,'event_type':kind,'occurred_at':permit['created_at']+j,'reason_code':'codex_delegated_headless' if j==1 else c.digest(payload) if j==3 else 'synthetic'})
+                result={'synthetic':True};rsha=c.digest(result);p0=payloads[0];row={'idempotency_key':hashlib.sha256(p0['request_id'].encode()).hexdigest(),'state':'done','document_key':expected['document_key'],'expected_revision':0,'expected_sha256':expected['scene_sha256'],'request_sha256':c.digest({'operation':p0['operation'],'arguments':p0['arguments']}),'result_sha256':rsha,'created_at':14}
+                receipt={'status':'done','payload':p0,'before_state':expected,'after_state':{**expected,'revision':1},'result':result,'result_sha256':rsha,'ledger_row':row}
+                write(directory/'request-0001.json',{'kind':'execute','envelope':{'payload':p0,'signature':c.signature(secret,p0)}});write(directory/'response-0001.json',receipt)
+                p1=payloads[1];write(directory/'request-0043.json',{'kind':'execute','envelope':{'payload':p1,'signature':c.signature(secret,p1)}});write(directory/'response-0043.json',{'status':'failed_no_retry'})
+                write(state/'audit-key-custody/F09-lora.json',{'key_hex':secret.hex(),'runtime_sha256':fsha})
+                if bad_permission:permissions[0]['status']='requested'
+                def database(path,tables):
+                    with closing(sqlite3.connect(path)) as db,db:
+                        for table,columns,rows in tables:
+                            db.execute('CREATE TABLE '+table+' ('+','.join(name+' '+kind for name,kind in columns)+')')
+                            for value in rows:db.execute('INSERT INTO '+table+' VALUES ('+','.join('?' for _ in columns)+')',[value[name] for name,kind in columns])
+                def cols(rows):return [(k,'INTEGER' if type(v) is int else 'TEXT') for k,v in rows[0].items()]
+                database(directory/'consent.sqlite3',[('consent_requests',cols(permissions),permissions),('consent_events',cols(events),events),('c5_model_handoff',cols(handoffs),handoffs)])
+                writes=[row]
+                if extra_write:writes.append({**row,'idempotency_key':hashlib.sha256(p1['request_id'].encode()).hexdigest()})
+                database(directory/'fixture.sqlite3',[('candidate_write',cols(writes),writes),('c5_read',[('request_id','TEXT'),('state','TEXT'),('payload_sha256','TEXT'),('result_sha256','TEXT')],[])])
+                return c.tail_ledger_review(state,freeze,read)
+        finally:sys.path.remove(str(field))
+    def test_frozen_auditor_refusal_and_rejected_issued_permission_preserved(self):
+        value=self.tail_database();self.assertFalse(value['original_strict_permission_auditor_passed']);self.assertEqual(value['issued_rejected_handoffs'],1);self.assertEqual(value['failed_request_native_dispatches'],0);self.assertTrue(value['ttl_predicate_reproduced_at_boundary_clock']);self.assertFalse(value['actual_gate_wall_time_independently_recorded']);self.assertTrue(value['original_database_backup_missing'])
+    def test_failed_ttl_request_must_not_have_native_reservation(self):
+        with self.assertRaisesRegex(c.Refusal,'failed_request_dispatched'):self.tail_database(extra_write=True)
+    def test_other_permission_damage_not_hidden_as_expected_refusal(self):
+        with self.assertRaisesRegex(c.Refusal,'component_population'):self.tail_database(bad_permission=True)
+    def test_owner_entry_guard_refusal_is_safe_and_saved(self):
+        spec=importlib.util.spec_from_file_location('synthetic_close_owner',Path(__file__).with_name('owner.py'));owner=importlib.util.module_from_spec(spec);spec.loader.exec_module(owner)
+        with tempfile.TemporaryDirectory() as n:
+            out=Path(n).resolve();stdout=io.StringIO()
+            with patch.object(owner,'OUTPUT',out),patch.object(sys,'argv',['owner.py','close-and-audit','--review-sha256','0'*64]),patch.object(sys,'stdin',io.StringIO()),patch.object(sys,'stdout',stdout),patch.object(owner,'public_file',side_effect=AssertionError('no field reads before TTY guard')):
+                self.assertEqual(owner.main(),1)
+            value=json.loads(stdout.getvalue());self.assertEqual(value['error_code'],'close_owner_private_terminal');self.assertFalse(value['resume_authority']);self.assertFalse(value['research_restarted']);self.assertEqual(len(list(out.glob('owner-public-close-audit-refusal-*.json'))),1)
+    def test_hmac_encoding_matches_frozen_original(self):
+        field=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/reuse-formal-20261023-r3-source');sys.path.insert(0,str(field))
+        try:
+            from plugin.rhino_listener.c5_research_gate import signature as frozen_signature
+            payload={'arguments':{'unicode':'test','number':1.25},'expires_at':100,'action':'stop'}
+            self.assertEqual(c.signature(b'x'*32,payload),frozen_signature(b'x'*32,payload))
+        finally:sys.path.remove(str(field))
+    def test_deleted_original_result_never_accepted(self):
+        with self.assertRaisesRegex(c.Refusal,'key_removal_population'):c.verify_delta({'original':{'sha256':'a'}},{},set(),22)
+    def test_nonkey_original_mutation_never_accepted(self):
+        with self.assertRaisesRegex(c.Refusal,'original_bytes_changed'):c.verify_delta({'original':{'sha256':'a'}},{'original':{'sha256':'b'}},set(),22)
+if __name__=='__main__':unittest.main()

@@ -37,6 +37,11 @@ if _layout_path.is_file():
     REMOTE_SOURCE=Path(PACKAGE_LAYOUT['gpu_source_root']);REMOTE_STATE=Path(PACKAGE_LAYOUT['gpu_state_root'])
     SPEC_FILE=PACKAGE_LAYOUT['spec_file'];FREEZE_FILE=PACKAGE_LAYOUT['runtime_file']
 
+MAX_LOADS=3 if PACKAGE_LAYOUT is None else 5
+if PACKAGE_LAYOUT is not None:
+    from .c5_run_package_policy import POLICY as ORIGINAL_PACKAGE_POLICY
+    if PACKAGE_LAYOUT['policy_sha256']!=digest(ORIGINAL_PACKAGE_POLICY):MAX_LOADS=6
+
 APPROVAL_BASIS='direct repository_owner approval of complete disclosed-reuse formal40 spec and runtime freeze'
 SSH_SOCKET=Path('/private/tmp/c5-formal-22158.control')
 SSH_PORT=22158
@@ -89,7 +94,11 @@ def validate_materials(spec,freeze,*,clock=time.time,check_time=True):
     package=spec.get('run_package')
     if package is not None:
         from .c5_run_package_policy import validate_policy,validate_migration
-        validate_policy(package['policy']);validate_migration(package['timing_migration'])
+        validate_policy(package['policy']);validate_migration(package['timing_migration'],attempts_max=package['policy'].get('global_loads_max',5))
+        if package['policy'].get('version')==2:
+            from .c5_slot_protocol import validate_protocol
+            validate_protocol(package.get('slot_protocol'))
+        else:require('slot_protocol' not in package,'slot_rules_require_new_policy')
         require(freeze.get('run_package')==package and PACKAGE_LAYOUT==package['layout']
             and LAYOUT_FILE in freeze['source_files'], 'run_package_complete_material_binding')
     require(all(spec.get(k) is False for k in ('original_final_entry_allowed','original_80_reuse_allowed',
@@ -166,6 +175,6 @@ def validate_formal_binding(spec,freeze,approval):
         'formal_capacity_verified':True,'policy_binding_verified':True,'whole_field_authority_verified':False}
 
 def attempt_state(endpoint,attempt):
-    require(endpoint in ('mac','gpu') and type(attempt) is int and 1<=attempt<=(5 if PACKAGE_LAYOUT is not None else 3),
+    require(endpoint in ('mac','gpu') and type(attempt) is int and 1<=attempt<=MAX_LOADS,
         'formal_reuse_bounded_preexposure_attempt')
     return (MAC_STATE if endpoint=='mac' else REMOTE_STATE)/('preload-'+str(attempt))

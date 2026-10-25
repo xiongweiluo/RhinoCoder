@@ -1,0 +1,143 @@
+"""Synthetic CPU tests only; never opens actual formal state."""
+import importlib.util,json,tempfile,unittest,io,os,sys
+from unittest.mock import patch
+from pathlib import Path
+s=importlib.util.spec_from_file_location('triage_test_core',Path(__file__).with_name('core.py'));m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
+owner_spec=importlib.util.spec_from_file_location('triage_test_owner',Path(__file__).with_name('owner.py'));owner=importlib.util.module_from_spec(owner_spec);owner_spec.loader.exec_module(owner)
+class Tests(unittest.TestCase):
+    def test_known_literal(self):
+        r=m.safe_error({'error_type':'NativeError','error':'public fixed failure'},{'public fixed failure':['public.py:1']})
+        self.assertEqual(r['public_failure_sites'],['public.py:1']);self.assertFalse(r['unknown_error_text_redacted'])
+    def test_private_text_redacted(self):
+        r=m.safe_error({'error_type':'NativeError','error':'SECRET_FORMAL_TASK_PAYLOAD'},{});self.assertNotIn('SECRET',json.dumps(r))
+    def test_unknown_class_redacted(self):
+        r=m.safe_error({'error_type':'SECRET_CLASS_NAME'},{});self.assertNotIn('SECRET',json.dumps(r))
+    def test_malformed_error_class_redacted(self):
+        self.assertEqual(m.safe_error({'error_type':[]},{})['error_type'],'unknown_error_type_redacted')
+    def test_nonfinite_json_rejected(self):
+        with tempfile.TemporaryDirectory() as n:
+            p=Path(n).resolve()/'d.json';p.write_text('{"a":NaN}')
+            with self.assertRaisesRegex(ValueError,'triage_nonfinite'):m.read(p)
+    def test_duplicate_json_rejected(self):
+        with tempfile.TemporaryDirectory() as n:
+            p=Path(n).resolve()/'d.json';p.write_text('{"a":1,"a":2}')
+            with self.assertRaisesRegex(ValueError,'triage_duplicate_key'):m.read(p)
+    def test_symlink_rejected(self):
+        with tempfile.TemporaryDirectory() as n:
+            root=Path(n).resolve();(root/'x').write_text('{}');(root/'y').symlink_to(root/'x')
+            with self.assertRaisesRegex(ValueError,'triage_evidence_symlink'):m.inventory(root)
+    def test_inventory_detects_content_change(self):
+        with tempfile.TemporaryDirectory() as n:
+            root=Path(n).resolve();p=root/'x';p.write_text('a');a=m.inventory(root);p.write_text('b');self.assertNotEqual(a,m.inventory(root))
+    def test_end_to_end_synthetic_closed_summary(self):
+        with tempfile.TemporaryDirectory() as n:
+            root=Path(n).resolve();state=root/'state';state.mkdir(mode=0o700);source=root/'source';source.mkdir()
+            (source/'public.py').write_text("require(False, 'public fixed failure')\n")
+            phase={'attempted_indices':list(range(7,18)),'kind':'interrupted_continuation','generation_stages':17};(state/'slot-phase-result.json').write_text(json.dumps(phase))
+            for index in range(11):
+                label='F%02d-base'%(index+1);row={'slot_id':label,'steps':[{'DO_NOT_DISCLOSE':'SECRET_FORMAL_TASK_PAYLOAD'}],'close':'closed','stop':'stopped','error_type':None}
+                if index==10:row.update(close=None,stop=None,error_type='NativeError',fault={'scope':'unknown','code':'unclassified_exception'})
+                (state/(label+'.result.json')).write_text(json.dumps(row))
+            child=state/'F11-base';child.mkdir();(child/'response-0001.json').write_text(json.dumps({'status':'failed_no_retry','error_type':'NativeError','error':'SECRET_FORMAL_TASK_PAYLOAD'}))
+            (state/'hub-response-0001.json').write_text(json.dumps({'status':'hub_failed_no_retry','error_type':'NativeError','error':'public fixed failure'}))
+            before=m.inventory(state);r=m.triage(state,source,{'source_files':{'public.py':'unused_for_synthetic'}})
+            self.assertEqual(before,m.inventory(state));self.assertNotIn('SECRET',json.dumps(r));self.assertEqual(r['counts']['closed'],10);self.assertEqual(len(r['failed_response_metadata']),2)
+            self.assertFalse(r['resume_authority']);self.assertFalse(r['native_cleanup_verified']);self.assertFalse(r['research_restarted'])
+            self.assertTrue(r['original_evidence_unchanged_during_review']);self.assertEqual(r['counts']['unknown_faults'],1)
+    def test_public_literal_allowlist_only_require_and_errors(self):
+        with tempfile.TemporaryDirectory() as n:
+            root=Path(n).resolve();(root/'p.py').write_text("x='SECRET_UNUSED'\nrequire(False,'public fixed failure')\nraise ValueError('known code')\n")
+            v=m.public_literals(root,{'p.py':'unused'});self.assertNotIn('SECRET_UNUSED',v);self.assertIn('known code',v)
+    def test_actual_scale_cap_old_rejects_new_accepts_without_reading_bytes(self):
+        with tempfile.TemporaryDirectory() as n:
+            root=Path(n).resolve()
+            for index in range(5):
+                with (root/str(index)).open('wb') as f:f.truncate(33554432)
+            with patch.object(m.os,'open',side_effect=AssertionError('metadata must not read private bytes')):
+                with self.assertRaises(m.Refusal) as caught:m.evidence_metadata(root,total_bytes_max=134217728)
+                self.assertEqual(caught.exception.code,'triage_evidence_total_bytes_limit')
+                self.assertEqual(caught.exception.context,{'observed_bytes':167772160,'limit_bytes':134217728})
+                self.assertEqual(len(m.evidence_metadata(root)),5)
+    def test_total_limit_rejects_before_hashing(self):
+        with tempfile.TemporaryDirectory() as n:
+            root=Path(n).resolve()
+            for index in range(9):
+                with (root/str(index)).open('wb') as f:f.truncate(33554432)
+            with patch.object(m.os,'open',side_effect=AssertionError('hashing forbidden after cap refusal')):
+                with self.assertRaises(m.Refusal) as caught:m.inventory(root)
+            self.assertEqual(caught.exception.code,'triage_evidence_total_bytes_limit')
+            self.assertEqual(caught.exception.context['limit_bytes'],268435456)
+    def test_single_file_limit_remains_finite(self):
+        with tempfile.TemporaryDirectory() as n:
+            root=Path(n).resolve()
+            with (root/'x').open('wb') as f:f.truncate(33554433)
+            with self.assertRaises(m.Refusal) as caught:m.evidence_metadata(root)
+            self.assertEqual(caught.exception.code,'triage_evidence_file_bytes_limit')
+    def test_file_count_has_distinct_code(self):
+        with tempfile.TemporaryDirectory() as n:
+            root=Path(n).resolve();(root/'a').write_text('a');(root/'b').write_text('b')
+            with self.assertRaises(m.Refusal) as caught:m.evidence_metadata(root,files_max=1)
+            self.assertEqual(caught.exception.code,'triage_evidence_file_count_limit')
+            self.assertEqual(caught.exception.context,{'observed_files':2,'limit_files':1})
+    def test_total_boundary_exact(self):
+        with tempfile.TemporaryDirectory() as n:
+            root=Path(n).resolve();(root/'a').write_text('123');(root/'b').write_text('12345')
+            self.assertEqual(len(m.evidence_metadata(root,total_bytes_max=8)),2)
+            with self.assertRaises(m.Refusal):m.evidence_metadata(root,total_bytes_max=7)
+    def test_hardlinks_refused(self):
+        with tempfile.TemporaryDirectory() as n:
+            root=Path(n).resolve();(root/'a').write_text('a');os.link(root/'a',root/'b')
+            with self.assertRaises(m.Refusal) as caught:m.inventory(root)
+            self.assertEqual(caught.exception.code,'triage_evidence_identity')
+    def test_json_error_exports_no_raw_document(self):
+        with tempfile.TemporaryDirectory() as n:
+            p=Path(n).resolve()/'x';p.write_text('{SECRET_FORMAL_TASK_PAYLOAD')
+            with self.assertRaises(m.Refusal) as caught:m.read(p)
+            fields=owner.refusal_fields(caught.exception,m)
+            self.assertEqual(fields['error_code'],'triage_invalid_json');self.assertNotIn('SECRET',json.dumps(fields))
+    def test_unknown_exception_message_and_custom_code_redacted(self):
+        error=ValueError('SECRET_FORMAL_TASK_PAYLOAD');error.code='SECRET_CODE'
+        value=owner.refusal_fields(error,m)
+        self.assertEqual(value['error_code'],'triage_unclassified_error');self.assertNotIn('SECRET',json.dumps(value))
+    def test_missing_private_path_redacted(self):
+        value=owner.refusal_fields(FileNotFoundError('/SECRET_PRIVATE_PATH'),m)
+        self.assertEqual(value['error_code'],'triage_required_file_missing');self.assertNotIn('SECRET',json.dumps(value))
+    def test_numeric_limit_context_preserved_at_entry_boundary(self):
+        value=owner.refusal_fields(m.Refusal('triage_evidence_total_bytes_limit',{'observed_bytes':143374572,'limit_bytes':134217728}),m)
+        self.assertEqual(value['error_code'],'triage_evidence_total_bytes_limit');self.assertEqual(value['error_context']['observed_bytes'],143374572)
+    def test_guard_error_code_is_explicit(self):
+        value=owner.refusal_fields(owner.GuardRefusal('triage_review_digest'))
+        self.assertEqual(value['error_code'],'triage_review_digest')
+    def test_entry_refusal_printed_and_durably_saved(self):
+        with tempfile.TemporaryDirectory() as n:
+            out=Path(n).resolve()/'out';stdout=io.StringIO()
+            with patch.object(owner,'OUTPUT',out),patch.object(sys,'argv',['owner.py','audit','--review-sha256','0'*64]),patch.object(sys,'stdin',io.StringIO()),patch.object(sys,'stdout',stdout),patch.object(owner,'read',side_effect=AssertionError('no field or public evidence should be read')):
+                self.assertEqual(owner.main(),1)
+            value=json.loads(stdout.getvalue());files=list(out.glob('owner-public-triage-*.json'))
+            self.assertEqual(value['error_code'],'triage_owner_private_terminal_required');self.assertEqual(value['stage'],'public_package_guard');self.assertTrue(value['refusal_record_saved'])
+            self.assertEqual(len(files),1);self.assertEqual(json.loads(files[0].read_bytes()),value)
+    def test_existing_refusal_snapshot_never_overwritten(self):
+        with tempfile.TemporaryDirectory() as n:
+            with patch.object(owner,'OUTPUT',Path(n).resolve()/'out'):
+                first={'status':'old_refusal','private_content_included':False};second={'status':'new_refusal','error_code':'triage_required_file_missing','private_content_included':False}
+                owner.publish(first);files=list(owner.OUTPUT.glob('*.json'));raw=files[0].read_bytes();owner.publish(second)
+                self.assertEqual(files[0].read_bytes(),raw);self.assertEqual(len(list(owner.OUTPUT.glob('*.json'))),2)
+    def test_invalid_error_context_rejected(self):
+        with self.assertRaises(AssertionError):m.Refusal('triage_evidence_identity',{'private_text':'SECRET'})
+    def test_actual_entry_preserves_core_cap_refusal_code_and_stage(self):
+        # Entirely synthetic public package and state; no actual formal reads.
+        class PrivateSyntheticTTY(io.StringIO):
+            def isatty(self):return True
+        with tempfile.TemporaryDirectory() as n:
+            root=Path(n).resolve();source=root/'source';source.mkdir();field=root/'field';(field/'eval/c5').mkdir(parents=True)
+            core_text="class Refusal(ValueError):\n    def __init__(self,code,context):self.code=code;self.context=context\ndef triage(state,source,freeze,*,stage):\n    stage('scan_evidence_metadata')\n    raise Refusal('triage_evidence_total_bytes_limit',{'observed_bytes':143374572,'limit_bytes':134217728})\n"
+            (source/'core.py').write_text(core_text);(source/'owner.py').write_text('# synthetic entry manifest\n');(source/'tests.py').write_text('# synthetic tests manifest\n')
+            review={'files':{name:owner.file_sha(source/name) for name in ['core.py','owner.py','tests.py']}}
+            (source/'review.json').write_text(json.dumps(review));spec={'synthetic':True};freeze={'source_files':{},'mac_environment':{'python':sys.version}}
+            (field/'eval/c5/reuse-formal-20261023-r3-spec.json').write_text(json.dumps(spec));(field/'eval/c5/reuse-formal-20261023-r3-runtime.json').write_text(json.dumps(freeze))
+            stdout=io.StringIO();out=root/'out';cache='/Users/xiongweiluo/RhinoCoder/data/training/c5/reuse-dev-20261012-d-bytecode-cache-must-remain-absent'
+            with patch.object(owner,'SOURCE',source),patch.object(owner,'FIELD',field),patch.object(owner,'STATE',root/'synthetic-no-formal-evidence'),patch.object(owner,'OUTPUT',out),patch.object(owner,'SPEC',owner.digest(spec)),patch.object(owner,'RUNTIME',owner.digest(freeze)),patch.object(sys,'argv',['owner.py','audit','--review-sha256',owner.digest(review)]),patch.object(sys,'stdin',PrivateSyntheticTTY()),patch.object(sys,'stderr',PrivateSyntheticTTY()),patch.object(sys,'stdout',stdout),patch.object(sys,'pycache_prefix',cache):
+                self.assertEqual(owner.main(),1)
+            value=json.loads(stdout.getvalue());self.assertEqual(value['error_code'],'triage_evidence_total_bytes_limit');self.assertEqual(value['stage'],'scan_evidence_metadata');self.assertEqual(value['error_context'],{'observed_bytes':143374572,'limit_bytes':134217728});self.assertTrue(value['refusal_record_saved'])
+            self.assertEqual(json.loads(next(out.glob('*.json')).read_bytes()),value);self.assertFalse(value['research_restarted'])
+if __name__=='__main__':unittest.main()

@@ -73,8 +73,15 @@ class FormalRunner:
         self.source_guard, self.budget_guard = source_guard, budget_guard
 
     def _guard(self) -> None:
-        self.source_guard()
-        self.budget_guard()
+        if 'slot_protocol' not in self.spec.get('run_package',{}):
+            self.source_guard();self.budget_guard();return
+        from training.c5_slot_runner import GlobalFault
+        try:self.source_guard()
+        except (KeyboardInterrupt,EOFError):raise
+        except BaseException as error:raise GlobalFault('source_drift') from error
+        try:self.budget_guard()
+        except (KeyboardInterrupt,EOFError):raise
+        except BaseException as error:raise GlobalFault('resource_window_insufficient') from error
 
     def _slot(self, slot: Mapping[str, str], case: Mapping[str, Any], freeze_sha: str,
               first_prompts: dict[str, str]) -> dict[str, Any]:
@@ -89,6 +96,7 @@ class FormalRunner:
                   "close": None, "stop": None, "error_type": None,
                   "independently_audited": False}
         opened = False
+        fault_phase='unknown'
         try:
             self._guard()
             opened = True  # Opening may create a fixture before raising.
@@ -97,7 +105,9 @@ class FormalRunner:
                                   max_reads=case["max_reads"], freeze_sha256=freeze_sha)
             initial = self.native.capture(slot_id)
             require(initial.get("status") == "captured", "actual initial Rhino capture missing")
+            fault_phase="fixture_validation"
             validate_fixture_readback(case, initial["native"])
+            fault_phase="unknown"
             record["initial_native"] = initial["native"]
             initial_prompt = step_input(task, semantic(initial["native"]))
             if family_id in first_prompts:
@@ -117,6 +127,7 @@ class FormalRunner:
                 response = self.model.infer(slot_id=slot_id, route=route, step_index=step_index,
                                             task_text=task, scene=semantic(before["native"]),
                                             binding=before["state"], freeze_sha256=freeze_sha)
+                fault_phase="model_contract"
                 observed = response.get("observation") if isinstance(response, Mapping) else None
                 require(isinstance(observed, Mapping) and observed.get("repair_count") == 0
                         and observed.get("dispatch_count") == 0
@@ -139,9 +150,16 @@ class FormalRunner:
                 self._generation_stages += len(receipts)
                 require(self._generation_stages <= self.spec["max_generation_stages"],
                         "frozen generation stage ceiling exceeded")
+                fault_phase="unknown"
                 after_model = self.native.capture(slot_id)
-                require(after_model.get("status") == "captured" and after_model["state"] == before["state"]
-                        and after_model["native"] == before["native"], "Rhino scene changed during model generation")
+                require(after_model.get("status") == "captured", "actual post-model capture missing")
+                fault_phase="native_contract"
+                require(isinstance(after_model.get("state"),Mapping) and isinstance(after_model.get("native"),Mapping),
+                        "post-model native capture contract differs")
+                fault_phase="shared_scene"
+                require(after_model["state"] == before["state"] and after_model["native"] == before["native"],
+                        "Rhino scene changed during model generation")
+                fault_phase="unknown"
                 step = {"step_index": step_index, "before": before, "response": response,
                         "observation": observed, "post_model_capture": after_model,
                         "receipt": None, "policy_denied": False}
@@ -182,6 +200,18 @@ class FormalRunner:
             record["final_native"] = final["native"]
         except BaseException as exc:
             record["error_type"] = type(exc).__name__
+            if 'slot_protocol' in self.spec.get('run_package',{}):
+                from training.c5_formal20_plan import FormalPlanError
+                if isinstance(exc,KeyboardInterrupt):
+                    record['fault']={'scope':'owner_pause','code':'owner_cancelled'}
+                elif isinstance(exc,PermissionError):
+                    record['fault']={'scope':'global','code':'permission_or_safety'}
+                elif isinstance(exc,FormalPlanError) and fault_phase=='fixture_validation':
+                    record['fault']={'scope':'local','code':'fixture_readback_rejected'}
+                elif getattr(exc,'slot_scope',None)=='global':record['fault']={'scope':'global','code':exc.code}
+                elif fault_phase in ('model_contract','native_contract','shared_scene'):
+                    record['fault']={'scope':'global','code':'evidence_chain_damage' if fault_phase in ('model_contract','native_contract') else 'shared_environment_pollution'}
+                else:record['fault']={'scope':'unknown','code':'unclassified_exception'}
         finally:
             try: unresolved = self.native.unresolved(slot_id) if opened else True
             except BaseException: unresolved = True

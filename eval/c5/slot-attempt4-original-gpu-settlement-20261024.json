@@ -1,0 +1,36 @@
+{
+  "after_campaign_rows": 36,
+  "already_settled": false,
+  "attempt": 4,
+  "attempts_consumed": 4,
+  "before_campaign_rows": 35,
+  "campaign_head_sha256": "f519939f54e425484599d21b4554fc2a232c58d4372aa05d5423f543b2a77920",
+  "first_load_epoch": 1792692329.837715,
+  "gpu_charged_seconds_after": 70340.89651274681,
+  "gpu_charged_seconds_before": 67977.15073728561,
+  "native_cleanup_verified": false,
+  "original_campaign_prefix_unchanged": true,
+  "private_content_included": false,
+  "proof": {
+    "charged_seconds_upper": 2363.745775461197,
+    "kind": "gpu_only_original_qualified_exit_review_native_audit_pending",
+    "load_intent_epoch": 1792837549.191566,
+    "native_cleanup_or_joint_audit_claimed": false,
+    "original_export_sha256": "c4d273e4e9bff20f9b637041198374641dc804a3062a45b091ea84a23036fc0b",
+    "proof": {
+      "complete_original_stream_capture": true,
+      "permit_first_load_epoch": 1792692329.837715,
+      "physical_origin_cryptographically_proven": false,
+      "qualified_child_exited_reaped": true,
+      "same_gpu_idle_observed": true,
+      "shared_stop_signals": 0
+    },
+    "qualified_exit_epoch": 1792839912.9373415
+  },
+  "proof_sha256": "afc378a2b6454a3a6838e1f826539be7aaf85c9b4d5727ddd49eb4702d2abee5",
+  "raw_joint_audit_complete": false,
+  "recorded_epoch": 1792841855.15034,
+  "research_restarted": false,
+  "schema_version": 1,
+  "status": "SLOT_PAUSED_RECONCILIATION"
+}
