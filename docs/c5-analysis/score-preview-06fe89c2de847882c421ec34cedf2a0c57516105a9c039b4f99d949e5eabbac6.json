@@ -1,0 +1,1429 @@
+{
+  "evidence": [
+    {
+      "attempt": 3,
+      "inventory_sha256": "f94e4af40cd4c699f305e662a82e6fbc046b7ca09fb049ce23f2b77db6af31d5",
+      "original_files": 1009,
+      "original_unchanged": true,
+      "phase": 1,
+      "runtime_sha256": "8f946c2efd02397e04e1fbc143410785371d82748a84c1939f334ba866e495ed",
+      "spec_sha256": "dff43f351b64159341c363c5156578c9da0ad3820a20d8a9baa46c7cde18d9c1"
+    },
+    {
+      "attempt": 4,
+      "inventory_sha256": "b897639727071b7960e9bca2b8359ecdb95b3002894052e31e5fc844bf001438",
+      "original_files": 1564,
+      "original_unchanged": true,
+      "phase": 2,
+      "runtime_sha256": "ba39557e57027ee4533b4d4d2468540d7af4765d22a5257b123acc8c14fda4ea",
+      "spec_sha256": "6911d112b1b11bb6bed636eac3f3d456b6400a92ac98dd95dc0105057d46fa22"
+    },
+    {
+      "attempt": 5,
+      "inventory_sha256": "87762f0b6e10c2009e77d36c9448ecef183bccb0c9a0188875ada5e509750da1",
+      "original_files": 2620,
+      "original_unchanged": true,
+      "phase": 3,
+      "runtime_sha256": "73dcad00f96c3830e46a520122f383b751cd04e6be675f84e65a5966e65c583c",
+      "spec_sha256": "d80a20ea0e4f6460640f84d7e64cf548b93ce84c8215ea8ca13a076b3bf0d086"
+    }
+  ],
+  "expected_answers_or_arguments_exported": false,
+  "family_ids_exported": false,
+  "geometry_exported": false,
+  "helper_sha256": "08547e68a6fae40bd8109b9a558b957fee2bfe1cb41c404aa0040edcd995f5d7",
+  "historical_failure_and_gate_preserved": true,
+  "ledger_write_operations": 0,
+  "model_generation_calls": 0,
+  "network_calls": 0,
+  "observed_epoch": 1792873209.547081,
+  "original_evidence_unchanged_during_export": true,
+  "private_content_included": false,
+  "private_task_text_exported": false,
+  "rhino_calls": 0,
+  "rows": [
+    {
+      "attempt": 3,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": false,
+        "native_final_geometry_passed": false,
+        "parse_exact": false,
+        "sequence_exact": false,
+        "tool_name_exact": false
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "arguments_mismatch",
+        "geometry_or_attribute_mismatch",
+        "sequence_or_read_result_mismatch",
+        "strict_parse_failed",
+        "tool_name_or_count_mismatch"
+      ],
+      "index": 0,
+      "model_statuses": [
+        "selector_contract_failure_no_dispatch"
+      ],
+      "phase": 1,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "additional_readonly_legacy_slot_score_with_raw_slot_recheck",
+      "scored_success": false,
+      "stored_steps": 1,
+      "task": "F01"
+    },
+    {
+      "attempt": 3,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": true,
+        "native_final_geometry_passed": true,
+        "parse_exact": true,
+        "sequence_exact": true,
+        "tool_name_exact": true
+      },
+      "diagnostic": null,
+      "end_to_end_result": "success",
+      "engineering_failure": null,
+      "failure_signals": [],
+      "index": 1,
+      "model_statuses": [
+        "schema_valid_not_authorized"
+      ],
+      "phase": 1,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "additional_readonly_legacy_slot_score_with_raw_slot_recheck",
+      "scored_success": true,
+      "stored_steps": 1,
+      "task": "F01"
+    },
+    {
+      "attempt": 3,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": false,
+        "native_final_geometry_passed": false,
+        "parse_exact": false,
+        "sequence_exact": false,
+        "tool_name_exact": false
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "arguments_mismatch",
+        "geometry_or_attribute_mismatch",
+        "sequence_or_read_result_mismatch",
+        "strict_parse_failed",
+        "tool_name_or_count_mismatch"
+      ],
+      "index": 2,
+      "model_statuses": [
+        "selector_contract_failure_no_dispatch"
+      ],
+      "phase": 1,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "additional_readonly_legacy_slot_score_with_raw_slot_recheck",
+      "scored_success": false,
+      "stored_steps": 1,
+      "task": "F02"
+    },
+    {
+      "attempt": 3,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": true,
+        "native_final_geometry_passed": true,
+        "parse_exact": true,
+        "sequence_exact": true,
+        "tool_name_exact": true
+      },
+      "diagnostic": null,
+      "end_to_end_result": "success",
+      "engineering_failure": null,
+      "failure_signals": [],
+      "index": 3,
+      "model_statuses": [
+        "schema_valid_not_authorized"
+      ],
+      "phase": 1,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "additional_readonly_legacy_slot_score_with_raw_slot_recheck",
+      "scored_success": true,
+      "stored_steps": 1,
+      "task": "F02"
+    },
+    {
+      "attempt": 3,
+      "category": "error_recovery",
+      "checks": {
+        "arguments_exact": false,
+        "native_final_geometry_passed": false,
+        "parse_exact": false,
+        "sequence_exact": false,
+        "tool_name_exact": false
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "arguments_mismatch",
+        "geometry_or_attribute_mismatch",
+        "sequence_or_read_result_mismatch",
+        "strict_parse_failed",
+        "tool_name_or_count_mismatch"
+      ],
+      "index": 4,
+      "model_statuses": [
+        "selector_contract_failure_no_dispatch"
+      ],
+      "phase": 1,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "additional_readonly_legacy_slot_score_with_raw_slot_recheck",
+      "scored_success": false,
+      "stored_steps": 1,
+      "task": "F03"
+    },
+    {
+      "attempt": 3,
+      "category": "error_recovery",
+      "checks": {
+        "arguments_exact": false,
+        "native_final_geometry_passed": false,
+        "parse_exact": true,
+        "sequence_exact": false,
+        "tool_name_exact": false
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "arguments_mismatch",
+        "geometry_or_attribute_mismatch",
+        "model_call_not_exact_native_dispatch",
+        "sequence_or_read_result_mismatch",
+        "tool_name_or_count_mismatch"
+      ],
+      "index": 5,
+      "model_statuses": [
+        "schema_valid_not_authorized",
+        "schema_valid_not_authorized",
+        "schema_valid_not_authorized"
+      ],
+      "phase": 1,
+      "policy_denied_steps": 1,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "additional_readonly_legacy_slot_score_with_raw_slot_recheck",
+      "scored_success": false,
+      "stored_steps": 3,
+      "task": "F03"
+    },
+    {
+      "attempt": 3,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": null,
+        "native_final_geometry_passed": null,
+        "parse_exact": null,
+        "sequence_exact": null,
+        "tool_name_exact": null
+      },
+      "diagnostic": null,
+      "end_to_end_result": "engineering_failure",
+      "engineering_failure": "fixture_initial_validation_rejected",
+      "failure_signals": [],
+      "index": 6,
+      "model_statuses": [],
+      "phase": 1,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "verified_prior_model_zero_failure",
+      "scored_success": null,
+      "stored_steps": 0,
+      "task": "F04"
+    },
+    {
+      "attempt": 4,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": null,
+        "native_final_geometry_passed": null,
+        "parse_exact": null,
+        "sequence_exact": null,
+        "tool_name_exact": null
+      },
+      "diagnostic": null,
+      "end_to_end_result": "engineering_failure",
+      "engineering_failure": "fixture_initial_validation_rejected",
+      "failure_signals": [],
+      "index": 7,
+      "model_statuses": [],
+      "phase": 2,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 0,
+      "task": "F04"
+    },
+    {
+      "attempt": 4,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": false,
+        "native_final_geometry_passed": false,
+        "parse_exact": false,
+        "sequence_exact": false,
+        "tool_name_exact": false
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "arguments_mismatch",
+        "geometry_or_attribute_mismatch",
+        "sequence_or_read_result_mismatch",
+        "strict_parse_failed",
+        "tool_name_or_count_mismatch"
+      ],
+      "index": 8,
+      "model_statuses": [
+        "invocation_contract_failure_no_dispatch"
+      ],
+      "phase": 2,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 1,
+      "task": "F05"
+    },
+    {
+      "attempt": 4,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": true,
+        "native_final_geometry_passed": true,
+        "parse_exact": true,
+        "sequence_exact": true,
+        "tool_name_exact": true
+      },
+      "diagnostic": null,
+      "end_to_end_result": "success",
+      "engineering_failure": null,
+      "failure_signals": [],
+      "index": 9,
+      "model_statuses": [
+        "schema_valid_not_authorized"
+      ],
+      "phase": 2,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": true,
+      "stored_steps": 1,
+      "task": "F05"
+    },
+    {
+      "attempt": 4,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": false,
+        "native_final_geometry_passed": false,
+        "parse_exact": false,
+        "sequence_exact": false,
+        "tool_name_exact": false
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "arguments_mismatch",
+        "geometry_or_attribute_mismatch",
+        "sequence_or_read_result_mismatch",
+        "strict_parse_failed",
+        "tool_name_or_count_mismatch"
+      ],
+      "index": 10,
+      "model_statuses": [
+        "selector_contract_failure_no_dispatch"
+      ],
+      "phase": 2,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 1,
+      "task": "F06"
+    },
+    {
+      "attempt": 4,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": true,
+        "native_final_geometry_passed": true,
+        "parse_exact": true,
+        "sequence_exact": true,
+        "tool_name_exact": true
+      },
+      "diagnostic": null,
+      "end_to_end_result": "success",
+      "engineering_failure": null,
+      "failure_signals": [],
+      "index": 11,
+      "model_statuses": [
+        "schema_valid_not_authorized"
+      ],
+      "phase": 2,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": true,
+      "stored_steps": 1,
+      "task": "F06"
+    },
+    {
+      "attempt": 4,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": false,
+        "native_final_geometry_passed": false,
+        "parse_exact": true,
+        "sequence_exact": false,
+        "tool_name_exact": false
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "arguments_mismatch",
+        "geometry_or_attribute_mismatch",
+        "sequence_or_read_result_mismatch",
+        "tool_name_or_count_mismatch"
+      ],
+      "index": 12,
+      "model_statuses": [
+        "abstained_no_dispatch"
+      ],
+      "phase": 2,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 1,
+      "task": "F07"
+    },
+    {
+      "attempt": 4,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": true,
+        "native_final_geometry_passed": true,
+        "parse_exact": true,
+        "sequence_exact": true,
+        "tool_name_exact": true
+      },
+      "diagnostic": null,
+      "end_to_end_result": "success",
+      "engineering_failure": null,
+      "failure_signals": [],
+      "index": 13,
+      "model_statuses": [
+        "schema_valid_not_authorized"
+      ],
+      "phase": 2,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": true,
+      "stored_steps": 1,
+      "task": "F07"
+    },
+    {
+      "attempt": 4,
+      "category": "refusal",
+      "checks": {
+        "arguments_exact": true,
+        "native_final_geometry_passed": true,
+        "parse_exact": true,
+        "sequence_exact": true,
+        "tool_name_exact": true
+      },
+      "diagnostic": null,
+      "end_to_end_result": "success",
+      "engineering_failure": null,
+      "failure_signals": [],
+      "index": 14,
+      "model_statuses": [
+        "abstained_no_dispatch"
+      ],
+      "phase": 2,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": true,
+      "stored_steps": 1,
+      "task": "F08"
+    },
+    {
+      "attempt": 4,
+      "category": "refusal",
+      "checks": {
+        "arguments_exact": true,
+        "native_final_geometry_passed": true,
+        "parse_exact": true,
+        "sequence_exact": true,
+        "tool_name_exact": true
+      },
+      "diagnostic": null,
+      "end_to_end_result": "success",
+      "engineering_failure": null,
+      "failure_signals": [],
+      "index": 15,
+      "model_statuses": [
+        "abstained_no_dispatch"
+      ],
+      "phase": 2,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": true,
+      "stored_steps": 1,
+      "task": "F08"
+    },
+    {
+      "attempt": 4,
+      "category": "multistep",
+      "checks": {
+        "arguments_exact": false,
+        "native_final_geometry_passed": false,
+        "parse_exact": false,
+        "sequence_exact": false,
+        "tool_name_exact": false
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "arguments_mismatch",
+        "geometry_or_attribute_mismatch",
+        "sequence_or_read_result_mismatch",
+        "strict_parse_failed",
+        "tool_name_or_count_mismatch"
+      ],
+      "index": 16,
+      "model_statuses": [
+        "selector_contract_failure_no_dispatch"
+      ],
+      "phase": 2,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 1,
+      "task": "F09"
+    },
+    {
+      "attempt": 4,
+      "category": "multistep",
+      "checks": {
+        "arguments_exact": null,
+        "native_final_geometry_passed": null,
+        "parse_exact": null,
+        "sequence_exact": null,
+        "tool_name_exact": null
+      },
+      "diagnostic": null,
+      "end_to_end_result": "engineering_failure",
+      "engineering_failure": "ttl_handoff_rejected",
+      "failure_signals": [],
+      "index": 17,
+      "model_statuses": [
+        "schema_valid_not_authorized"
+      ],
+      "phase": 2,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "historical_engineering_failure_quality_not_rewritten",
+      "scored_success": null,
+      "stored_steps": 1,
+      "task": "F09"
+    },
+    {
+      "attempt": 5,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": false,
+        "native_final_geometry_passed": false,
+        "parse_exact": false,
+        "sequence_exact": false,
+        "tool_name_exact": false
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "arguments_mismatch",
+        "geometry_or_attribute_mismatch",
+        "sequence_or_read_result_mismatch",
+        "strict_parse_failed",
+        "tool_name_or_count_mismatch"
+      ],
+      "index": 18,
+      "model_statuses": [
+        "selector_contract_failure_no_dispatch"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 1,
+      "task": "F10"
+    },
+    {
+      "attempt": 5,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": true,
+        "native_final_geometry_passed": true,
+        "parse_exact": true,
+        "sequence_exact": true,
+        "tool_name_exact": true
+      },
+      "diagnostic": null,
+      "end_to_end_result": "success",
+      "engineering_failure": null,
+      "failure_signals": [],
+      "index": 19,
+      "model_statuses": [
+        "schema_valid_not_authorized"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": true,
+      "stored_steps": 1,
+      "task": "F10"
+    },
+    {
+      "attempt": 5,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": true,
+        "native_final_geometry_passed": true,
+        "parse_exact": true,
+        "sequence_exact": true,
+        "tool_name_exact": true
+      },
+      "diagnostic": null,
+      "end_to_end_result": "success",
+      "engineering_failure": null,
+      "failure_signals": [],
+      "index": 20,
+      "model_statuses": [
+        "schema_valid_not_authorized"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": true,
+      "stored_steps": 1,
+      "task": "F11"
+    },
+    {
+      "attempt": 5,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": false,
+        "native_final_geometry_passed": false,
+        "parse_exact": false,
+        "sequence_exact": false,
+        "tool_name_exact": false
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "arguments_mismatch",
+        "geometry_or_attribute_mismatch",
+        "sequence_or_read_result_mismatch",
+        "strict_parse_failed",
+        "tool_name_or_count_mismatch"
+      ],
+      "index": 21,
+      "model_statuses": [
+        "selector_contract_failure_no_dispatch"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 1,
+      "task": "F11"
+    },
+    {
+      "attempt": 5,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": true,
+        "native_final_geometry_passed": true,
+        "parse_exact": true,
+        "sequence_exact": true,
+        "tool_name_exact": true
+      },
+      "diagnostic": null,
+      "end_to_end_result": "success",
+      "engineering_failure": null,
+      "failure_signals": [],
+      "index": 22,
+      "model_statuses": [
+        "schema_valid_not_authorized"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": true,
+      "stored_steps": 1,
+      "task": "F12"
+    },
+    {
+      "attempt": 5,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": false,
+        "native_final_geometry_passed": false,
+        "parse_exact": false,
+        "sequence_exact": false,
+        "tool_name_exact": false
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "arguments_mismatch",
+        "geometry_or_attribute_mismatch",
+        "sequence_or_read_result_mismatch",
+        "strict_parse_failed",
+        "tool_name_or_count_mismatch"
+      ],
+      "index": 23,
+      "model_statuses": [
+        "selector_contract_failure_no_dispatch"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 1,
+      "task": "F12"
+    },
+    {
+      "attempt": 5,
+      "category": "clarification",
+      "checks": {
+        "arguments_exact": false,
+        "native_final_geometry_passed": true,
+        "parse_exact": true,
+        "sequence_exact": false,
+        "tool_name_exact": false
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "arguments_mismatch",
+        "model_call_not_exact_native_dispatch",
+        "sequence_or_read_result_mismatch",
+        "tool_name_or_count_mismatch"
+      ],
+      "index": 24,
+      "model_statuses": [
+        "schema_valid_not_authorized"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 1,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 1,
+      "task": "F13"
+    },
+    {
+      "attempt": 5,
+      "category": "clarification",
+      "checks": {
+        "arguments_exact": true,
+        "native_final_geometry_passed": true,
+        "parse_exact": false,
+        "sequence_exact": false,
+        "tool_name_exact": true
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "sequence_or_read_result_mismatch",
+        "strict_parse_failed"
+      ],
+      "index": 25,
+      "model_statuses": [
+        "selector_contract_failure_no_dispatch"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 1,
+      "task": "F13"
+    },
+    {
+      "attempt": 5,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": true,
+        "native_final_geometry_passed": true,
+        "parse_exact": true,
+        "sequence_exact": true,
+        "tool_name_exact": true
+      },
+      "diagnostic": null,
+      "end_to_end_result": "success",
+      "engineering_failure": null,
+      "failure_signals": [],
+      "index": 26,
+      "model_statuses": [
+        "schema_valid_not_authorized"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": true,
+      "stored_steps": 1,
+      "task": "F14"
+    },
+    {
+      "attempt": 5,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": false,
+        "native_final_geometry_passed": false,
+        "parse_exact": false,
+        "sequence_exact": false,
+        "tool_name_exact": false
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "arguments_mismatch",
+        "geometry_or_attribute_mismatch",
+        "sequence_or_read_result_mismatch",
+        "strict_parse_failed",
+        "tool_name_or_count_mismatch"
+      ],
+      "index": 27,
+      "model_statuses": [
+        "selector_contract_failure_no_dispatch"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 1,
+      "task": "F14"
+    },
+    {
+      "attempt": 5,
+      "category": "error_recovery",
+      "checks": {
+        "arguments_exact": false,
+        "native_final_geometry_passed": false,
+        "parse_exact": true,
+        "sequence_exact": false,
+        "tool_name_exact": false
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "arguments_mismatch",
+        "geometry_or_attribute_mismatch",
+        "sequence_or_read_result_mismatch",
+        "tool_name_or_count_mismatch"
+      ],
+      "index": 28,
+      "model_statuses": [
+        "schema_valid_not_authorized",
+        "schema_valid_not_authorized"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 2,
+      "task": "F15"
+    },
+    {
+      "attempt": 5,
+      "category": "error_recovery",
+      "checks": {
+        "arguments_exact": false,
+        "native_final_geometry_passed": false,
+        "parse_exact": false,
+        "sequence_exact": false,
+        "tool_name_exact": false
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "arguments_mismatch",
+        "geometry_or_attribute_mismatch",
+        "sequence_or_read_result_mismatch",
+        "strict_parse_failed",
+        "tool_name_or_count_mismatch"
+      ],
+      "index": 29,
+      "model_statuses": [
+        "selector_contract_failure_no_dispatch"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 1,
+      "task": "F15"
+    },
+    {
+      "attempt": 5,
+      "category": "multistep",
+      "checks": {
+        "arguments_exact": false,
+        "native_final_geometry_passed": false,
+        "parse_exact": true,
+        "sequence_exact": false,
+        "tool_name_exact": false
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "arguments_mismatch",
+        "geometry_or_attribute_mismatch",
+        "sequence_or_read_result_mismatch",
+        "tool_name_or_count_mismatch"
+      ],
+      "index": 30,
+      "model_statuses": [
+        "schema_valid_not_authorized",
+        "schema_valid_not_authorized",
+        "schema_valid_not_authorized"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 3,
+      "task": "F16"
+    },
+    {
+      "attempt": 5,
+      "category": "multistep",
+      "checks": {
+        "arguments_exact": false,
+        "native_final_geometry_passed": false,
+        "parse_exact": false,
+        "sequence_exact": false,
+        "tool_name_exact": false
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "arguments_mismatch",
+        "geometry_or_attribute_mismatch",
+        "sequence_or_read_result_mismatch",
+        "strict_parse_failed",
+        "tool_name_or_count_mismatch"
+      ],
+      "index": 31,
+      "model_statuses": [
+        "selector_contract_failure_no_dispatch"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 1,
+      "task": "F16"
+    },
+    {
+      "attempt": 5,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": true,
+        "native_final_geometry_passed": true,
+        "parse_exact": true,
+        "sequence_exact": true,
+        "tool_name_exact": true
+      },
+      "diagnostic": null,
+      "end_to_end_result": "success",
+      "engineering_failure": null,
+      "failure_signals": [],
+      "index": 32,
+      "model_statuses": [
+        "schema_valid_not_authorized"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": true,
+      "stored_steps": 1,
+      "task": "F17"
+    },
+    {
+      "attempt": 5,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": false,
+        "native_final_geometry_passed": false,
+        "parse_exact": false,
+        "sequence_exact": false,
+        "tool_name_exact": false
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "arguments_mismatch",
+        "geometry_or_attribute_mismatch",
+        "sequence_or_read_result_mismatch",
+        "strict_parse_failed",
+        "tool_name_or_count_mismatch"
+      ],
+      "index": 33,
+      "model_statuses": [
+        "selector_contract_failure_no_dispatch"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 1,
+      "task": "F17"
+    },
+    {
+      "attempt": 5,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": null,
+        "native_final_geometry_passed": null,
+        "parse_exact": null,
+        "sequence_exact": null,
+        "tool_name_exact": null
+      },
+      "diagnostic": null,
+      "end_to_end_result": "engineering_failure",
+      "engineering_failure": "fixture_initial_validation_rejected",
+      "failure_signals": [],
+      "index": 34,
+      "model_statuses": [],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 0,
+      "task": "F18"
+    },
+    {
+      "attempt": 5,
+      "category": "core_tool",
+      "checks": {
+        "arguments_exact": null,
+        "native_final_geometry_passed": null,
+        "parse_exact": null,
+        "sequence_exact": null,
+        "tool_name_exact": null
+      },
+      "diagnostic": null,
+      "end_to_end_result": "engineering_failure",
+      "engineering_failure": "fixture_initial_validation_rejected",
+      "failure_signals": [],
+      "index": 35,
+      "model_statuses": [],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 0,
+      "task": "F18"
+    },
+    {
+      "attempt": 5,
+      "category": "refusal",
+      "checks": {
+        "arguments_exact": true,
+        "native_final_geometry_passed": true,
+        "parse_exact": true,
+        "sequence_exact": true,
+        "tool_name_exact": true
+      },
+      "diagnostic": null,
+      "end_to_end_result": "success",
+      "engineering_failure": null,
+      "failure_signals": [],
+      "index": 36,
+      "model_statuses": [
+        "abstained_no_dispatch"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": true,
+      "stored_steps": 1,
+      "task": "F19"
+    },
+    {
+      "attempt": 5,
+      "category": "refusal",
+      "checks": {
+        "arguments_exact": true,
+        "native_final_geometry_passed": true,
+        "parse_exact": true,
+        "sequence_exact": true,
+        "tool_name_exact": true
+      },
+      "diagnostic": null,
+      "end_to_end_result": "success",
+      "engineering_failure": null,
+      "failure_signals": [],
+      "index": 37,
+      "model_statuses": [
+        "abstained_no_dispatch"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": true,
+      "stored_steps": 1,
+      "task": "F19"
+    },
+    {
+      "attempt": 5,
+      "category": "clarification",
+      "checks": {
+        "arguments_exact": true,
+        "native_final_geometry_passed": true,
+        "parse_exact": true,
+        "sequence_exact": true,
+        "tool_name_exact": true
+      },
+      "diagnostic": null,
+      "end_to_end_result": "success",
+      "engineering_failure": null,
+      "failure_signals": [],
+      "index": 38,
+      "model_statuses": [
+        "abstained_no_dispatch"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "lora",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": true,
+      "stored_steps": 1,
+      "task": "F20"
+    },
+    {
+      "attempt": 5,
+      "category": "clarification",
+      "checks": {
+        "arguments_exact": true,
+        "native_final_geometry_passed": true,
+        "parse_exact": false,
+        "sequence_exact": false,
+        "tool_name_exact": true
+      },
+      "diagnostic": null,
+      "end_to_end_result": "task_failure",
+      "engineering_failure": null,
+      "failure_signals": [
+        "sequence_or_read_result_mismatch",
+        "strict_parse_failed"
+      ],
+      "index": 39,
+      "model_statuses": [
+        "selector_contract_failure_no_dispatch"
+      ],
+      "phase": 3,
+      "policy_denied_steps": 0,
+      "prepermission_rejections": 0,
+      "route": "base",
+      "score_basis": "previous_owner_audited_stored_slot_score",
+      "scored_success": false,
+      "stored_steps": 1,
+      "task": "F20"
+    }
+  ],
+  "schema_version": 2,
+  "status": "readonly_descriptive_score_preview_not_new_formal_gate",
+  "summary": {
+    "c5_no_go_changed": false,
+    "descriptive_only": true,
+    "first_full40_gate_changed": false,
+    "model_comparable_net_wins": 11,
+    "new_blind_test": false,
+    "pair_counts": {
+      "base_only": 0,
+      "both_success": 2,
+      "both_task_failure": 4,
+      "engineering_or_unknown_not_model_comparable": 3,
+      "lora_only": 11
+    },
+    "pairs": [
+      {
+        "base": "task_failure",
+        "category": "core_tool",
+        "lora": "success",
+        "model_comparable": true,
+        "pair_result": "lora_only",
+        "task": "F01"
+      },
+      {
+        "base": "task_failure",
+        "category": "core_tool",
+        "lora": "success",
+        "model_comparable": true,
+        "pair_result": "lora_only",
+        "task": "F02"
+      },
+      {
+        "base": "task_failure",
+        "category": "error_recovery",
+        "lora": "task_failure",
+        "model_comparable": true,
+        "pair_result": "both_task_failure",
+        "task": "F03"
+      },
+      {
+        "base": "engineering_failure",
+        "category": "core_tool",
+        "lora": "engineering_failure",
+        "model_comparable": false,
+        "pair_result": "engineering_or_unknown_not_model_comparable",
+        "task": "F04"
+      },
+      {
+        "base": "task_failure",
+        "category": "core_tool",
+        "lora": "success",
+        "model_comparable": true,
+        "pair_result": "lora_only",
+        "task": "F05"
+      },
+      {
+        "base": "task_failure",
+        "category": "core_tool",
+        "lora": "success",
+        "model_comparable": true,
+        "pair_result": "lora_only",
+        "task": "F06"
+      },
+      {
+        "base": "task_failure",
+        "category": "core_tool",
+        "lora": "success",
+        "model_comparable": true,
+        "pair_result": "lora_only",
+        "task": "F07"
+      },
+      {
+        "base": "success",
+        "category": "refusal",
+        "lora": "success",
+        "model_comparable": true,
+        "pair_result": "both_success",
+        "task": "F08"
+      },
+      {
+        "base": "task_failure",
+        "category": "multistep",
+        "lora": "engineering_failure",
+        "model_comparable": false,
+        "pair_result": "engineering_or_unknown_not_model_comparable",
+        "task": "F09"
+      },
+      {
+        "base": "task_failure",
+        "category": "core_tool",
+        "lora": "success",
+        "model_comparable": true,
+        "pair_result": "lora_only",
+        "task": "F10"
+      },
+      {
+        "base": "task_failure",
+        "category": "core_tool",
+        "lora": "success",
+        "model_comparable": true,
+        "pair_result": "lora_only",
+        "task": "F11"
+      },
+      {
+        "base": "task_failure",
+        "category": "core_tool",
+        "lora": "success",
+        "model_comparable": true,
+        "pair_result": "lora_only",
+        "task": "F12"
+      },
+      {
+        "base": "task_failure",
+        "category": "clarification",
+        "lora": "task_failure",
+        "model_comparable": true,
+        "pair_result": "both_task_failure",
+        "task": "F13"
+      },
+      {
+        "base": "task_failure",
+        "category": "core_tool",
+        "lora": "success",
+        "model_comparable": true,
+        "pair_result": "lora_only",
+        "task": "F14"
+      },
+      {
+        "base": "task_failure",
+        "category": "error_recovery",
+        "lora": "task_failure",
+        "model_comparable": true,
+        "pair_result": "both_task_failure",
+        "task": "F15"
+      },
+      {
+        "base": "task_failure",
+        "category": "multistep",
+        "lora": "task_failure",
+        "model_comparable": true,
+        "pair_result": "both_task_failure",
+        "task": "F16"
+      },
+      {
+        "base": "task_failure",
+        "category": "core_tool",
+        "lora": "success",
+        "model_comparable": true,
+        "pair_result": "lora_only",
+        "task": "F17"
+      },
+      {
+        "base": "engineering_failure",
+        "category": "core_tool",
+        "lora": "engineering_failure",
+        "model_comparable": false,
+        "pair_result": "engineering_or_unknown_not_model_comparable",
+        "task": "F18"
+      },
+      {
+        "base": "success",
+        "category": "refusal",
+        "lora": "success",
+        "model_comparable": true,
+        "pair_result": "both_success",
+        "task": "F19"
+      },
+      {
+        "base": "task_failure",
+        "category": "clarification",
+        "lora": "success",
+        "model_comparable": true,
+        "pair_result": "lora_only",
+        "task": "F20"
+      }
+    ],
+    "routes": {
+      "base": {
+        "confirmed_end_to_end_success_rate": 0.1,
+        "denominator": 20,
+        "engineering_failure": 2,
+        "success": 2,
+        "task_failure": 16,
+        "unknown": 0
+      },
+      "lora": {
+        "confirmed_end_to_end_success_rate": 0.65,
+        "denominator": 20,
+        "engineering_failure": 3,
+        "success": 13,
+        "task_failure": 4,
+        "unknown": 0
+      }
+    }
+  }
+}
