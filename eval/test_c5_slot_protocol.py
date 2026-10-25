@@ -2,6 +2,7 @@
 
 import copy, json, hashlib
 from pathlib import Path
+from types import SimpleNamespace
 import pytest
 from plugin.rhino_listener.c5_research_native import digest
 from plugin.rhino_listener.c5_slot_protocol import (
@@ -266,10 +267,18 @@ def real_campaign_fixture(tmp_path):
     return s, f, c, prior
 
 
-def test_original_real_18_events_and_consumption_preserved_during_append(tmp_path):
+def test_original_real_18_events_and_consumption_preserved_during_append(
+    tmp_path, monkeypatch
+):
     from training.c5_slot_entry import require_slot_startable
     from training.c5_formal_reuse_supervisor import validate_load_permit
 
+    # Replay this public historical fixture at its load-intent time. Keep the
+    # real entry/window checks; today's wall clock must not age out this test.
+    monkeypatch.setattr(
+        "training.c5_formal_run_budget.time",
+        SimpleNamespace(time=lambda: 1792779000.0),
+    )
     s, f, c, prior = real_campaign_fixture(tmp_path)
     try:
         v = c.observation()
@@ -324,6 +333,43 @@ def test_original_real_18_events_and_consumption_preserved_during_append(tmp_pat
         with pytest.raises((ValueError, RuntimeError)):
             c._event("slot_attempt_recorded", {**payload, "index": 9})
         assert sum(r["kind"] == "private_exposure_intent" for r in c.log.rows()) == 1
+    finally:
+        c.log.close()
+
+
+@pytest.mark.parametrize(
+    "headroom_seconds", [1, 0, -1, None],
+    ids=["before-cutoff", "exact-cutoff", "insufficient-window", "expired-lease"],
+)
+def test_real_startable_entry_checks_runtime_lease_clock(
+    tmp_path, monkeypatch, headroom_seconds
+):
+    from training.c5_slot_entry import require_slot_startable
+
+    s, f, c, prior = real_campaign_fixture(tmp_path)
+    try:
+        package = s["run_package"]
+        required = (
+            len(package["slot_protocol"]["selected_indices"])
+            * POLICY["slot_work_upper_seconds"]
+            + package["policy"]["startup_seconds"]
+            + package["policy"]["export_reserve_seconds"]
+        )
+        now = (
+            package["lease_expiry_epoch"] + 1
+            if headroom_seconds is None
+            else package["lease_expiry_epoch"] - required - headroom_seconds
+        )
+        monkeypatch.setattr(
+            "training.c5_formal_run_budget.time", SimpleNamespace(time=lambda: now)
+        )
+        if headroom_seconds is not None and headroom_seconds >= 0:
+            assert require_slot_startable(c, 4)["attempts"] == 3
+        else:
+            with pytest.raises(
+                RuntimeError, match="run_package_remaining_work_window_unavailable"
+            ):
+                require_slot_startable(c, 4)
     finally:
         c.log.close()
 
