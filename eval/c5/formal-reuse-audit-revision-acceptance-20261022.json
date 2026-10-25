@@ -1,0 +1,12 @@
+{
+  "accepted": true,
+  "accepted_review_head": "47631d2c4ec14976d28382b66751b8ca07deb4c0",
+  "accepted_review_source_inventory_sha256": "e3cc97fcf2e6cb889bae43c138e947b7619e4148f43a2e3f077b0c9772d2315c",
+  "actor": "repository_owner",
+  "complete_supplemental_joint_audit_passed": true,
+  "formal_execution_approved": false,
+  "merge_approved": false,
+  "original_frozen_pass_claimed": false,
+  "owner_statement": "\u63a5\u53d7\u8fd9\u4efd\u53ea\u8bfb\u5ba1\u8ba1\u4fee\u8ba2\uff0c\u8bf7\u7ee7\u7eed\u5b8c\u6210\u6b63\u5f0f40\u69fd\u7684\u5b8c\u6574\u51bb\u7ed3\u51c6\u5907",
+  "scope": "post_execution_readonly_audit_revision_and_formal_preparation_only"
+}
