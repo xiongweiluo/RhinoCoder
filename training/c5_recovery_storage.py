@@ -79,7 +79,7 @@ class EvidenceLog:
 
     def rows(self):
         names=set(os.listdir(self.root))-{'manifest.json'}
-        require(len(names)<=256 and names=={'event-%04d.json'%i for i in range(len(names))},
+        require(len(names)<=512 and names=={'event-%04d.json'%i for i in range(len(names))},
                 'recovery_log_population')
         rows=[];head=ZERO
         for i in range(len(names)):
@@ -94,7 +94,7 @@ class EvidenceLog:
         return rows
 
     def append_locked(self,kind,payload):
-        rows=self.rows();require(len(rows)<256,'recovery_log_capacity')
+        rows=self.rows();require(len(rows)<512,'recovery_log_capacity')
         value={'seq':len(rows),'previous_sha256':rows[-1]['record_sha256'] if rows else ZERO,
                'binding_sha256':sha(self.binding),'kind':kind,'payload':payload}
         value['record_sha256']=sha(value);write_once(self.root,'event-%04d.json'%len(rows),value)

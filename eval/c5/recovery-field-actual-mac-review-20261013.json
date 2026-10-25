@@ -1,0 +1,19 @@
+{
+  "audit_tokenizer_files_reverified": 6,
+  "epoch": 1791906633.7704031,
+  "gpu_current_assets_verified": false,
+  "mac_boot_session_uuid": "F873EC8A-960B-4B86-B35E-65A973D84E99",
+  "mac_environment_files_reverified": 3552,
+  "model_or_rhino_calls": 0,
+  "new_actual_lease_expiry_verified": false,
+  "new_execution_grant_received": false,
+  "new_recovery_state_and_v3_ledger_absent": true,
+  "old_active_grants_absent": true,
+  "old_d_source_files_reverified": 338,
+  "original_mac_boot_and_rhino_process_unchanged": true,
+  "private_formal_reads": 0,
+  "readable_host_files_reverified": 339,
+  "retirements_a_through_d_reverified": 4,
+  "rhino_process_observation": "44652   501 Sun Oct 11 16:14:32 2026     /Applications/Rhino 8.app/Contents/MacOS/Rhinoceros",
+  "same_global_history_files_reverified": 7
+}
