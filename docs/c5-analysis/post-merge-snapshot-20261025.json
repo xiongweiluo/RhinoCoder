@@ -1,0 +1,322 @@
+{
+  "observed_at_utc": "2026-10-25T18:15:07.785315+00:00",
+  "repository": "xiongweiluo/RhinoCoder",
+  "main_sha": "258158155d5fa53049ed759d7117a7a053305e2a",
+  "pull_requests": [
+    {
+      "base_sha": "675de87b4301beeb91b6f4570873f72bdff2764b",
+      "draft": false,
+      "head_sha": "150b6529337b89d429744f71a52bf948242f4c9f",
+      "merge_commit_sha": "01647f1cee38e2f09dd1d561289bfd42f103b9c5",
+      "merged_at": "2026-09-21T13:22:55Z",
+      "number": 1,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/1"
+    },
+    {
+      "base_sha": "01647f1cee38e2f09dd1d561289bfd42f103b9c5",
+      "draft": false,
+      "head_sha": "c444f5f732e7d05dd81cded955dee712d1488383",
+      "merge_commit_sha": "722142b41f7da0609a17b45d0a01226c5a6407b7",
+      "merged_at": "2026-10-09T22:13:12Z",
+      "number": 2,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/2"
+    },
+    {
+      "base_sha": "722142b41f7da0609a17b45d0a01226c5a6407b7",
+      "draft": false,
+      "head_sha": "86235f77185f8a557136cae5e8fd2be77ebd6d77",
+      "merge_commit_sha": "e69df0e4cfe9905b4a14d0448808b30680e1c762",
+      "merged_at": "2026-10-09T22:15:32Z",
+      "number": 3,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/3"
+    },
+    {
+      "base_sha": "e69df0e4cfe9905b4a14d0448808b30680e1c762",
+      "draft": false,
+      "head_sha": "19b44f36276cd0a0c7805da1b9851b93fa47e0b8",
+      "merge_commit_sha": "b0de1583d76f5435eb359de4e213caf332a8a9f1",
+      "merged_at": "2026-10-09T22:17:38Z",
+      "number": 4,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/4"
+    },
+    {
+      "base_sha": "b0de1583d76f5435eb359de4e213caf332a8a9f1",
+      "draft": false,
+      "head_sha": "da2fc6d8bef7b1c06ff63e73d7d6ff76fcad5bbb",
+      "merge_commit_sha": "7508ecb44e64bee80f56295f3084b1f7d49b5605",
+      "merged_at": "2026-10-09T22:19:40Z",
+      "number": 5,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/5"
+    },
+    {
+      "base_sha": "7508ecb44e64bee80f56295f3084b1f7d49b5605",
+      "draft": false,
+      "head_sha": "bd8b7128d6261e61d975a7124f95933eeee24b25",
+      "merge_commit_sha": "9d20bd70fb0367da9346f11e83bd78d347f443b8",
+      "merged_at": "2026-10-10T12:09:35Z",
+      "number": 6,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/6"
+    },
+    {
+      "base_sha": "01647f1cee38e2f09dd1d561289bfd42f103b9c5",
+      "draft": true,
+      "head_sha": "ea85df0918147da13d58d5210269fed54f9876ef",
+      "merge_commit_sha": null,
+      "merged_at": null,
+      "number": 7,
+      "state": "open",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/7"
+    },
+    {
+      "base_sha": "9d20bd70fb0367da9346f11e83bd78d347f443b8",
+      "draft": false,
+      "head_sha": "ef98aed6713bfbb8f254a87b4069a129da11661e",
+      "merge_commit_sha": "8d0fb06f071810036d662cabf61348d6c60d4166",
+      "merged_at": "2026-10-24T22:58:28Z",
+      "number": 8,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/8"
+    },
+    {
+      "base_sha": "8d0fb06f071810036d662cabf61348d6c60d4166",
+      "draft": false,
+      "head_sha": "c91b9a607bf24899572b18fc096e0a8788e9d273",
+      "merge_commit_sha": "82c7ce4b9a40dcc8165ad3c8d18e09d1cddc58af",
+      "merged_at": "2026-10-24T23:09:01Z",
+      "number": 9,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/9"
+    },
+    {
+      "base_sha": "82c7ce4b9a40dcc8165ad3c8d18e09d1cddc58af",
+      "draft": false,
+      "head_sha": "ad9f7ae9dcfe39be309cbb75c4e77af9d0349c75",
+      "merge_commit_sha": "366ec2796bfcfe048169cb49aff50ffd457ad0c9",
+      "merged_at": "2026-10-24T23:17:17Z",
+      "number": 10,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/10"
+    },
+    {
+      "base_sha": "366ec2796bfcfe048169cb49aff50ffd457ad0c9",
+      "draft": false,
+      "head_sha": "ff98a9edf06e63278ad1d2ea28c0329ead4ba249",
+      "merge_commit_sha": "ee7c3fa6211420cfb3cb23566f550cab4e0fb7e9",
+      "merged_at": "2026-10-24T23:32:09Z",
+      "number": 11,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/11"
+    },
+    {
+      "base_sha": "ee7c3fa6211420cfb3cb23566f550cab4e0fb7e9",
+      "draft": false,
+      "head_sha": "c02f82ab29623f93efd67030155aba268a54cf77",
+      "merge_commit_sha": "bc8c08b59bc3bf96a87331a63d33f9e70c362232",
+      "merged_at": "2026-10-24T23:48:00Z",
+      "number": 12,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/12"
+    },
+    {
+      "base_sha": "bc8c08b59bc3bf96a87331a63d33f9e70c362232",
+      "draft": false,
+      "head_sha": "ef36e208c332fe3c0a19b2e8470515d823696b70",
+      "merge_commit_sha": "c2059e8576e7a12b516b8d675ca9a0623407b893",
+      "merged_at": "2026-10-25T00:03:00Z",
+      "number": 13,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/13"
+    },
+    {
+      "base_sha": "c2059e8576e7a12b516b8d675ca9a0623407b893",
+      "draft": false,
+      "head_sha": "03302f95580bdc0d10953920cd394424148bc081",
+      "merge_commit_sha": "fab1718d23b670f3d6994c54d1f279f3462b2aa0",
+      "merged_at": "2026-10-25T00:11:45Z",
+      "number": 14,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/14"
+    },
+    {
+      "base_sha": "fab1718d23b670f3d6994c54d1f279f3462b2aa0",
+      "draft": false,
+      "head_sha": "abe63120b07bb5614b669b1bae512e6418856c9c",
+      "merge_commit_sha": "07776d91771e12005a76441dc3e1f4238c62ef6a",
+      "merged_at": "2026-10-25T00:27:05Z",
+      "number": 15,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/15"
+    },
+    {
+      "base_sha": "07776d91771e12005a76441dc3e1f4238c62ef6a",
+      "draft": false,
+      "head_sha": "8a9436cd33a9a3b4dc56eab5acb9eb55b8f4c039",
+      "merge_commit_sha": "19ef39557f692734aeaa4de335afc3d22908a939",
+      "merged_at": "2026-10-25T00:45:06Z",
+      "number": 16,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/16"
+    },
+    {
+      "base_sha": "19ef39557f692734aeaa4de335afc3d22908a939",
+      "draft": false,
+      "head_sha": "96e4fb3b83d5903f6296e4b381e4186bdf2cf3ad",
+      "merge_commit_sha": "e4ac78596d1c6585005c5b061b95232da75f520c",
+      "merged_at": "2026-10-25T01:03:02Z",
+      "number": 17,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/17"
+    },
+    {
+      "base_sha": "e4ac78596d1c6585005c5b061b95232da75f520c",
+      "draft": false,
+      "head_sha": "82fdf3954244b957da70353a8adc185bf08291cc",
+      "merge_commit_sha": "852d0e433804650db3b8fc4e11a5a5d4b747f2f6",
+      "merged_at": "2026-10-25T01:20:58Z",
+      "number": 18,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/18"
+    },
+    {
+      "base_sha": "852d0e433804650db3b8fc4e11a5a5d4b747f2f6",
+      "draft": false,
+      "head_sha": "9fdcec36d44953067f75d9c8e94bd016b2522081",
+      "merge_commit_sha": "87dfcabd3e6ce0cd827f413068fb506a85beec5e",
+      "merged_at": "2026-10-25T01:30:55Z",
+      "number": 19,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/19"
+    },
+    {
+      "base_sha": "87dfcabd3e6ce0cd827f413068fb506a85beec5e",
+      "draft": false,
+      "head_sha": "f6c204116389f1f2a6ef661d8f61753f2e2da9ca",
+      "merge_commit_sha": "062789e3038f824dc8014dcdc6cdf97c91a644f6",
+      "merged_at": "2026-10-25T01:48:50Z",
+      "number": 20,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/20"
+    },
+    {
+      "base_sha": "062789e3038f824dc8014dcdc6cdf97c91a644f6",
+      "draft": false,
+      "head_sha": "47631d2c4ec14976d28382b66751b8ca07deb4c0",
+      "merge_commit_sha": "cff2ecfd546dfcea994dbbb6ad7275d19a4ddbfe",
+      "merged_at": "2026-10-25T02:08:10Z",
+      "number": 21,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/21"
+    },
+    {
+      "base_sha": "cff2ecfd546dfcea994dbbb6ad7275d19a4ddbfe",
+      "draft": false,
+      "head_sha": "16693dc7b5000c7dbb63c1c61ce7a024d098b45d",
+      "merge_commit_sha": "1a321682739b5485d3588ae6b6c71d0241d92630",
+      "merged_at": "2026-10-25T02:22:34Z",
+      "number": 22,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/22"
+    },
+    {
+      "base_sha": "1a321682739b5485d3588ae6b6c71d0241d92630",
+      "draft": false,
+      "head_sha": "189d0cc2e523c6c89c5dc1a79e874b4d102951ea",
+      "merge_commit_sha": "ba7903371bbbf8db3efc803c2fafb0c6e590a59f",
+      "merged_at": "2026-10-25T10:16:56Z",
+      "number": 23,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/23"
+    },
+    {
+      "base_sha": "ba7903371bbbf8db3efc803c2fafb0c6e590a59f",
+      "draft": false,
+      "head_sha": "ef0ee558f436b3e69d21463292f2ca9ac05ac227",
+      "merge_commit_sha": "40c26f4aec08d27370ae11076eb3f6594b17cba7",
+      "merged_at": "2026-10-25T10:40:48Z",
+      "number": 24,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/24"
+    },
+    {
+      "base_sha": "b4daff4544d6bde2eff07ae8aa407aa8c8a860f0",
+      "draft": false,
+      "head_sha": "d9c14473baf8a07e86ca4729f57f44a14547cc11",
+      "merge_commit_sha": "672abc2946e3fcc6e4b4ad7e70181a51b5100553",
+      "merged_at": "2026-10-25T12:15:33Z",
+      "number": 25,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/25"
+    },
+    {
+      "base_sha": "672abc2946e3fcc6e4b4ad7e70181a51b5100553",
+      "draft": false,
+      "head_sha": "e19d0a83ea3dccbbc3f2122c72c2d13e7dfaf247",
+      "merge_commit_sha": "ed0d93130cca106512ccf31a35b926b08c1ef088",
+      "merged_at": "2026-10-25T12:42:36Z",
+      "number": 26,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/26"
+    },
+    {
+      "base_sha": "ed0d93130cca106512ccf31a35b926b08c1ef088",
+      "draft": false,
+      "head_sha": "f87a1b85fc48f42ca45272ac7324a525e4c21b39",
+      "merge_commit_sha": "258158155d5fa53049ed759d7117a7a053305e2a",
+      "merged_at": "2026-10-25T13:07:24Z",
+      "number": 27,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/27"
+    },
+    {
+      "base_sha": "40c26f4aec08d27370ae11076eb3f6594b17cba7",
+      "draft": false,
+      "head_sha": "87396abb32aa8c792d28ab72c27766238f61256a",
+      "merge_commit_sha": "b4daff4544d6bde2eff07ae8aa407aa8c8a860f0",
+      "merged_at": "2026-10-25T11:30:55Z",
+      "number": 28,
+      "state": "closed",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/pull/28"
+    }
+  ],
+  "merged_heads_and_merge_commits_are_main_ancestors": true,
+  "main_ci": {
+    "headSha": "258158155d5fa53049ed759d7117a7a053305e2a",
+    "conclusion": "success",
+    "url": "https://github.com/xiongweiluo/RhinoCoder/actions/runs/40196177986",
+    "updatedAt": "2026-10-25T13:21:16Z"
+  },
+  "main_ci_jobs": [
+    {
+      "name": "impact",
+      "conclusion": "success",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/actions/runs/40196177986/job/121177375133"
+    },
+    {
+      "name": "release",
+      "conclusion": "success",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/actions/runs/40196177986/job/121177409971"
+    },
+    {
+      "name": "ui",
+      "conclusion": "success",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/actions/runs/40196177986/job/121177410012"
+    },
+    {
+      "name": "python",
+      "conclusion": "success",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/actions/runs/40196177986/job/121177410031"
+    },
+    {
+      "name": "validate",
+      "conclusion": "success",
+      "url": "https://github.com/xiongweiluo/RhinoCoder/actions/runs/40196177986/job/121180536299"
+    }
+  ],
+  "scope": "Public GitHub metadata and Git ancestry only; not runtime or private-evidence verification."
+}
