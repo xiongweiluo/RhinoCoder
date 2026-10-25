@@ -1,0 +1,342 @@
+{
+  "schema_version": 1,
+  "evidence_scope": "public_metadata_source_and_cpu_components_only",
+  "historical_private_records_read": 0,
+  "live_model_rhino_training_runs": 0,
+  "final_test_created_or_consumed": false,
+  "phase_one_complete": false,
+  "source_sha256": {
+    "eval/c5/dataset-v2-freeze-manifest.json": "8a08059fbcaa7b8650f096106bef3d699a4240fdca9c64ad999e62904f585903",
+    "eval/c5/dataset-v2-review-audit.json": "2248eb42d4a1ac85374da596764895c6c01989beec795b20e5baac4ec1fef249",
+    "eval/c5/dataset-v2-split-plan.json": "cad6102121da488551224e3196e6adb3903b37f6522b71012b0a7cb184990d91",
+    "training/c5_dataset.py": "5c5f4d8f019e3df0d5336dfa1dbe72de97ac0d9c9c679b555aa45716a3277f4f",
+    "training/c5_rhino_adapter.py": "967d5927413b3c11a671984812c0230ab48438b9785304609bee57ba083297c1",
+    "training/c5_reuse_generation.py": "ca776e10b4419b42755c865f2b87e014102b260def957d2e3babbe2cd522a879",
+    "training/lora_dev_feedback.py": "d1233c1de337597c58a99d6b6f76c6f8888822adfca0f6c3efa356f860737278",
+    "training/lora_development_cases.py": "6514af8ce3d1ed014882463f1b993c5e3180fba29022e3f6ce3bee0af4a1ca71",
+    "training/lora_development_plan.py": "acdc3cd8e70f2908c205d4b506ac2fbfb9b4fd2c6ed1bcb067f04ae6face00df",
+    "eval/lora-development/proposed-development-plan.json": "d50f139fb26f771f55b38552938f063729d6f4eb8701103c2d757f7809034bda"
+  },
+  "public_coverage": {
+    "total_families": 440,
+    "total_records": 943,
+    "splits": [
+      {
+        "path": "train.jsonl",
+        "families": 320,
+        "records": 697
+      },
+      {
+        "path": "validation.jsonl",
+        "families": 60,
+        "records": 126
+      },
+      {
+        "path": "development.jsonl",
+        "families": 60,
+        "records": 120
+      }
+    ],
+    "category_family_counts": {
+      "clarification": 20,
+      "core_invocation": 240,
+      "historical_source": 103,
+      "multistep_or_recovery": 24,
+      "refusal": 20,
+      "selector_noncore": 33
+    },
+    "split_category_family_counts": {
+      "development": {
+        "clarification": 4,
+        "core_invocation": 29,
+        "historical_source": 8,
+        "multistep_or_recovery": 4,
+        "refusal": 4,
+        "selector_noncore": 11
+      },
+      "train": {
+        "clarification": 12,
+        "core_invocation": 180,
+        "historical_source": 89,
+        "multistep_or_recovery": 16,
+        "refusal": 12,
+        "selector_noncore": 11
+      },
+      "validation": {
+        "clarification": 4,
+        "core_invocation": 31,
+        "historical_source": 6,
+        "multistep_or_recovery": 4,
+        "refusal": 4,
+        "selector_noncore": 11
+      }
+    },
+    "split_assignment_matches_frozen_manifest": true,
+    "formal_split_locked": true,
+    "historical_split_plan_was_provisional": true,
+    "current_feedback_contract_coverage_count": null,
+    "private_historical_family_overlap_certified": false
+  },
+  "development_proposal_review": {
+    "study_id": "lora-optimization-development-v1",
+    "scope": "inert_development_review_only",
+    "slots": 32,
+    "max_step_requests": 64,
+    "max_generation_stages": 128,
+    "planned_worst_case_seconds": 6900,
+    "remaining_headroom_seconds": 300,
+    "missing_before_execution": [
+      "exact_source_runtime_and_resource_binding",
+      "gpu_environment_and_model_file_verification",
+      "historical_family_overlap_review",
+      "lease_expiry_and_cost_ceiling",
+      "new_field_runtime_and_failure_cleanup_validation",
+      "owner_development_execution_approval",
+      "real_tokenizer_no_truncation_audit",
+      "rhino_isolated_document_scope"
+    ],
+    "timing_feasibility_observed": false,
+    "execution_authorized": false,
+    "phase_one_complete": false
+  },
+  "results": {
+    "V1": "same_scene_progress_collision_observed_in_public_cpu_case_candidate_distinguishes",
+    "V2": "both_parse_and_geometry_true_only_abstention_succeeds_denied_call_has_zero_native_dispatch",
+    "historical_cause_resolved": false,
+    "model_benefit_measured": false,
+    "training_decision": "defer_not_supported_by_current_evidence"
+  },
+  "limits": [
+    "deterministic tokenizer double is not real token-budget evidence",
+    "new public development acceptance cases are exposed and not a final blind test",
+    "signed receipt verification and new field runtime are not supplied by the development seam",
+    "no global training/development family independence certification",
+    "no final confidence interval or sample-size decision"
+  ],
+  "proposed_schedule": [
+    {
+      "slot_id": "lora-dev-00",
+      "role": "selection",
+      "family_id": "DEV-S01",
+      "route": "base",
+      "system": "original"
+    },
+    {
+      "slot_id": "lora-dev-01",
+      "role": "selection",
+      "family_id": "DEV-S01",
+      "route": "current_lora",
+      "system": "original"
+    },
+    {
+      "slot_id": "lora-dev-02",
+      "role": "selection",
+      "family_id": "DEV-S01",
+      "route": "base",
+      "system": "read_progress_v1"
+    },
+    {
+      "slot_id": "lora-dev-03",
+      "role": "selection",
+      "family_id": "DEV-S01",
+      "route": "current_lora",
+      "system": "read_progress_v1"
+    },
+    {
+      "slot_id": "lora-dev-04",
+      "role": "selection",
+      "family_id": "DEV-S02",
+      "route": "current_lora",
+      "system": "original"
+    },
+    {
+      "slot_id": "lora-dev-05",
+      "role": "selection",
+      "family_id": "DEV-S02",
+      "route": "base",
+      "system": "read_progress_v1"
+    },
+    {
+      "slot_id": "lora-dev-06",
+      "role": "selection",
+      "family_id": "DEV-S02",
+      "route": "current_lora",
+      "system": "read_progress_v1"
+    },
+    {
+      "slot_id": "lora-dev-07",
+      "role": "selection",
+      "family_id": "DEV-S02",
+      "route": "base",
+      "system": "original"
+    },
+    {
+      "slot_id": "lora-dev-08",
+      "role": "selection",
+      "family_id": "DEV-S03",
+      "route": "base",
+      "system": "read_progress_v1"
+    },
+    {
+      "slot_id": "lora-dev-09",
+      "role": "selection",
+      "family_id": "DEV-S03",
+      "route": "current_lora",
+      "system": "read_progress_v1"
+    },
+    {
+      "slot_id": "lora-dev-10",
+      "role": "selection",
+      "family_id": "DEV-S03",
+      "route": "base",
+      "system": "original"
+    },
+    {
+      "slot_id": "lora-dev-11",
+      "role": "selection",
+      "family_id": "DEV-S03",
+      "route": "current_lora",
+      "system": "original"
+    },
+    {
+      "slot_id": "lora-dev-12",
+      "role": "selection",
+      "family_id": "DEV-S04",
+      "route": "current_lora",
+      "system": "read_progress_v1"
+    },
+    {
+      "slot_id": "lora-dev-13",
+      "role": "selection",
+      "family_id": "DEV-S04",
+      "route": "base",
+      "system": "original"
+    },
+    {
+      "slot_id": "lora-dev-14",
+      "role": "selection",
+      "family_id": "DEV-S04",
+      "route": "current_lora",
+      "system": "original"
+    },
+    {
+      "slot_id": "lora-dev-15",
+      "role": "selection",
+      "family_id": "DEV-S04",
+      "route": "base",
+      "system": "read_progress_v1"
+    },
+    {
+      "slot_id": "lora-dev-16",
+      "role": "acceptance",
+      "family_id": "DEV-A01",
+      "route": "base",
+      "system": "original"
+    },
+    {
+      "slot_id": "lora-dev-17",
+      "role": "acceptance",
+      "family_id": "DEV-A01",
+      "route": "current_lora",
+      "system": "original"
+    },
+    {
+      "slot_id": "lora-dev-18",
+      "role": "acceptance",
+      "family_id": "DEV-A01",
+      "route": "base",
+      "system": "read_progress_v1"
+    },
+    {
+      "slot_id": "lora-dev-19",
+      "role": "acceptance",
+      "family_id": "DEV-A01",
+      "route": "current_lora",
+      "system": "read_progress_v1"
+    },
+    {
+      "slot_id": "lora-dev-20",
+      "role": "acceptance",
+      "family_id": "DEV-A02",
+      "route": "current_lora",
+      "system": "original"
+    },
+    {
+      "slot_id": "lora-dev-21",
+      "role": "acceptance",
+      "family_id": "DEV-A02",
+      "route": "base",
+      "system": "read_progress_v1"
+    },
+    {
+      "slot_id": "lora-dev-22",
+      "role": "acceptance",
+      "family_id": "DEV-A02",
+      "route": "current_lora",
+      "system": "read_progress_v1"
+    },
+    {
+      "slot_id": "lora-dev-23",
+      "role": "acceptance",
+      "family_id": "DEV-A02",
+      "route": "base",
+      "system": "original"
+    },
+    {
+      "slot_id": "lora-dev-24",
+      "role": "acceptance",
+      "family_id": "DEV-A03",
+      "route": "base",
+      "system": "read_progress_v1"
+    },
+    {
+      "slot_id": "lora-dev-25",
+      "role": "acceptance",
+      "family_id": "DEV-A03",
+      "route": "current_lora",
+      "system": "read_progress_v1"
+    },
+    {
+      "slot_id": "lora-dev-26",
+      "role": "acceptance",
+      "family_id": "DEV-A03",
+      "route": "base",
+      "system": "original"
+    },
+    {
+      "slot_id": "lora-dev-27",
+      "role": "acceptance",
+      "family_id": "DEV-A03",
+      "route": "current_lora",
+      "system": "original"
+    },
+    {
+      "slot_id": "lora-dev-28",
+      "role": "acceptance",
+      "family_id": "DEV-A04",
+      "route": "current_lora",
+      "system": "read_progress_v1"
+    },
+    {
+      "slot_id": "lora-dev-29",
+      "role": "acceptance",
+      "family_id": "DEV-A04",
+      "route": "base",
+      "system": "original"
+    },
+    {
+      "slot_id": "lora-dev-30",
+      "role": "acceptance",
+      "family_id": "DEV-A04",
+      "route": "current_lora",
+      "system": "original"
+    },
+    {
+      "slot_id": "lora-dev-31",
+      "role": "acceptance",
+      "family_id": "DEV-A04",
+      "route": "base",
+      "system": "read_progress_v1"
+    }
+  ]
+}
