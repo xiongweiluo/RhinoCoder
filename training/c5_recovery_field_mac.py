@@ -83,6 +83,12 @@ def backup_database(directory,name):
     return {'name':target.name,'raw_sha256':hashlib.sha256(read_bytes(target,limit=16*1024*1024,private=True)).hexdigest()}
 
 
+def retain_fixture_audit_key(keys,slot,secret,runtime):
+    require(slot in ORDER and type(secret) is bytes and len(secret)==32,'recovery_original_fixture_key')
+    # Separate private audit input; never reconstruct a removed dispatch key.
+    publish_json(keys,slot+'.json',{'key_hex':secret.hex(),'runtime_sha256':runtime})
+
+
 class MacController:
     def __init__(self,binding,plan,schemas,registry,guard,budget,*,session_factory=FieldSSHSession,
                  channel_factory=NativeChannel,epoch=time.time,clock=time.monotonic,sleep=time.sleep):
@@ -169,6 +175,7 @@ class MacController:
                 opened=hub.control('open',slot)
                 require(opened.get('status')=='slot_opened' and opened.get('slot_id')==slot,'reuse_native_open_unknown')
                 directory=self.state/slot;secret=bytes.fromhex(read_json(directory,'handoff.key')['key_hex'])
+                retain_fixture_audit_key(keys,slot,secret,self.binding['runtime_sha256'])
                 task=self.public['task_plans'][slot]['steps'][0]
                 child=self.channel_factory(directory,secret,self.binding['runtime_sha256'],self.guard,
                                             task=hashlib.sha256(task.encode()).hexdigest())
@@ -194,9 +201,6 @@ class MacController:
                 receipt=handoff.execute(sent,result,before,current,execute_signed,secret)
                 self.journal.append('slot_native_result',{'slot_id':slot,'post_model_capture':post,
                     'model_result':result,'native_result':receipt})
-                # Keep original keyed verifier input in separate private audit
-                # custody; removing dispatch keys is NOT a memory-erasure claim.
-                publish_json(keys,slot+'.json',{'key_hex':secret.hex(),'runtime_sha256':self.binding['runtime_sha256']})
                 close=child.control('close');require(close.get('status')=='closed','reuse_native_close_unknown')
                 self.child_closed=True
                 stop=child.control('stop');require(stop.get('status')=='stopped','reuse_native_stop_unknown')

@@ -1,0 +1,28 @@
+{
+  "compatible_linux_cpu": {
+    "passed": 18,
+    "raw_output_sha256": "a46fa6d6c72be79060bcb978a1aea61141f4813099ee02bdf99a7c87b64978b2",
+    "seconds": 0.15
+  },
+  "initial_cpu_passed": 13,
+  "local_affected_cpu": {
+    "passed": 18,
+    "raw_output_sha256": "d1efbdbcba767fd8324dac7d96e0938b3d3ca094a0c42728bbf25bf7f267a4bc",
+    "seconds": 0.09
+  },
+  "only_gpu_budget_function_differs": true,
+  "original_frozen_verifier_preserved": true,
+  "original_runtime_sha256": "c0dfc0e1e0499966af2f24bc095bc447a71e3ebccb88568cba19d7d14d35dcd2",
+  "original_spec_sha256": "82b919bc1aca6c9d35436b374009d23ecb50ec3b9c91cae75d62eb2e6fcae6dc",
+  "owner_acceptance_required_before_formal_gate": true,
+  "post_execution_revision_disclosed": true,
+  "production_source_or_record_mutation": false,
+  "review_source_files": {
+    "eval/c5/recovery-attempt3-budget-audit-regression-20261014.json": "57d9963d3780a1e5616a97ea38225a3e0bcd188ba93a50da54db9201ee3247d0",
+    "eval/test_c5_completed_field_audit.py": "8e43c0de690162176f2e990d508121a2841109f5b815f3404dcc7b6d2efdad8a",
+    "tools/review_c5_completed_field_audit.py": "4b7d53620ee71cc0134db5768416703ec82e23856b3dc747b3e7e9af206fd7e9",
+    "training/c5_completed_field_gpu_audit.py": "b7c758e9b24f09e06f761ceab17e765c43fab1bd25fa68422349d950466d943f"
+  },
+  "status": "SEPARATE_READONLY_SUPPLEMENTAL_SOURCE_REVIEW_ORIGINAL_REJECTION_RETAINED",
+  "two_virtual_torch_namespaces_bound_to_exact_type_singleton_and_frozen_defining_source": true
+}

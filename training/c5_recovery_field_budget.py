@@ -20,7 +20,7 @@ class FieldBudget:
         require(state['first_load_epoch']==self.first,'recovery_budget_origin_changed')
         remaining=min(self.first+self.cap,self.campaign.scope['generation_cutoff_epoch']-60)-utc
         require(remaining>0,'recovery_shared_budget_exhausted');self.last_mono=now
-        # At most 300 observations in 5h, plus bounded transition events. The
+        # At most 720 observations in the maximum 12h, plus bounded transition events. The
         # UTC and monotonic checks still run at EVERY RPC/native checkpoint.
         if self.persist and utc-self.last_durable>=60:
             self.campaign.budget();self.last_durable=utc

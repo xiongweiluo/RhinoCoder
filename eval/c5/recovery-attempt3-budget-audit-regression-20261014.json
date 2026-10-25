@@ -1,0 +1,52 @@
+{
+  "approved_runtime_sha256": "c0dfc0e1e0499966af2f24bc095bc447a71e3ebccb88568cba19d7d14d35dcd2",
+  "approved_spec_sha256": "82b919bc1aca6c9d35436b374009d23ecb50ec3b9c91cae75d62eb2e6fcae6dc",
+  "budgets": {
+    "launch": {
+      "elapsed_wall_seconds": 65437.01995015144,
+      "operational_cap_seconds": 86340,
+      "physical_gpu_release_independently_verified": null,
+      "prior_cumulative_upper_bound_seconds": null,
+      "reserved_wall_seconds": 86400,
+      "start_epoch": 1791916117.781239,
+      "stop_reserve_seconds": 60,
+      "within_reserved_wall_seconds": true
+    },
+    "supervisor_final": {
+      "elapsed_wall_seconds": 66771.61362409592,
+      "operational_cap_seconds": 86340,
+      "physical_gpu_release_independently_verified": null,
+      "prior_cumulative_upper_bound_seconds": null,
+      "reserved_wall_seconds": 86400,
+      "start_epoch": 1791916117.781239,
+      "stop_reserve_seconds": 60,
+      "within_reserved_wall_seconds": true
+    },
+    "worker_settlement": {
+      "elapsed_wall_seconds": 66771.31372833252,
+      "operational_cap_seconds": 86340,
+      "physical_gpu_release_independently_verified": null,
+      "prior_cumulative_upper_bound_seconds": null,
+      "reserved_wall_seconds": 86400,
+      "start_epoch": 1791916117.781239,
+      "stop_reserve_seconds": 60,
+      "within_reserved_wall_seconds": true
+    }
+  },
+  "new_field_execution_or_budget_reset": false,
+  "original_export_raw_sha256": "618913f7413bf64154a64b029854f9c6601de74c23674563341213435ad2505e",
+  "original_frozen_rejection": "recovery_audit_shared_wall_budget",
+  "resources": {
+    "actual_lease_basis": "\u672c\u4eba\u76f4\u63a5\u56de\u590d\uff1a10\u670814\u65e520:00\u745e\u58eb\u65f6\u95f4\uff082026-10-14 20:00 Europe/Zurich\uff09",
+    "development_seconds_max": 86400,
+    "export_reserve_seconds": 900,
+    "formal_seconds_max": 64800,
+    "generation_cutoff_epoch": 1791999900.0,
+    "historical_cumulative_upper_bound_seconds": null,
+    "lease_expiry_epoch": 1792000800.0,
+    "old_budget_recredited": false,
+    "original_16_hour_compliance_claimed": false,
+    "research_seconds_max": 151200,
+    "unused_development_transferred_to_formal": false
+  }
+}

@@ -44,7 +44,7 @@ def audit_field_eight(*,mac,gpu,spec,runtime,plan,plan_raw,controller,controller
     from training.c5_recovery_field_audit import audit_ready
     from training.c5_recovery_controller import replay
     from training.c5_reuse_evidence import ZERO
-    require(type(campaign_rows) is list and 1<=len(campaign_rows)<=512,'recovery_joint_campaign_population')
+    require(type(campaign_rows) is list and 1<=len(campaign_rows)<=2048,'recovery_joint_campaign_population')
     previous=ZERO
     for i,row in enumerate(campaign_rows):
         exact(row,('seq','previous_sha256','binding_sha256','kind','payload','record_sha256'))

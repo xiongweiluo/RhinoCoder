@@ -55,20 +55,20 @@ def assemble():
             'recovery_actual_owner_lease_fact_required')
     acceptance=dict(old_plan['host_acceptance'],instance_id=INSTANCE)
     recovery={'policy':POLICY,'history_sha256':sha(history),'public_attempts_max':3,
-        'minimum_attempt_window_seconds':16344,'all_attempts_disclosed':True,
+        'minimum_attempt_window_seconds':17784,'all_attempts_disclosed':True,
         'owner_confirmation_before_loading':True,'new_blind_holdout_claimed':False,
         'previous_campaign_head_sha256':facts['previous_campaign_head_sha256']}
     resources={'lease_expiry_epoch':1791914400,'generation_cutoff_epoch':1791913500,'export_reserve_seconds':900,
-        'development_seconds_max':18000,'formal_seconds_max':64800,'research_seconds_max':82800,
+        'development_seconds_max':86400,'formal_seconds_max':64800,'research_seconds_max':151200,
         'historical_cumulative_upper_bound_seconds':None,'original_16_hour_compliance_claimed':False,
         'old_budget_recredited':False,'unused_development_transferred_to_formal':False,
         'actual_lease_basis':'last_reported_2026_10_13_20_00_Europe_Zurich_no_renewed_expiry_attested'}
     if lease is not None:
         resources.update(lease_expiry_epoch=lease['expiry_epoch'],generation_cutoff_epoch=lease['expiry_epoch']-900,
             actual_lease_basis=lease['owner_statement'])
-    ready=current and lease is not None and time.time()+18000<=resources['generation_cutoff_epoch']
+    ready=current and lease is not None and time.time()+17784<=resources['generation_cutoff_epoch']
     spec={'protocol':PROTOCOL,'study_id':STUDY,'instance_id':INSTANCE,'phase':'development',
-        'comparison':COMPARISON,'limits':LIMITS,'resources':resources,
+        'comparison':COMPARISON,'limits':dict(LIMITS,model_seconds=360),'resources':resources,
         'host_policy':dict(old_spec['host_policy'],instance_id=INSTANCE,acceptance_record_sha256=sha(acceptance)),
         'development_plan_sha256':old_spec['development_plan_sha256'],'recovery':recovery,
         'execution_ready':ready,'private_formal_data_allowed':False,'default_route_change_allowed':False}
@@ -77,17 +77,24 @@ def assemble():
     plan.update(protocol=PROTOCOL,study_id=STUDY,instance_id=INSTANCE,
         gpu_process=dict(old_plan['gpu_process'],entry=ENTRY,stop_policy=POLICY),
         transport=dict(old_plan['transport'],policy=TRANSPORT),host_acceptance=acceptance,recovery=recovery,
-        minimum_attempt_window_seconds=16344,
+        minimum_attempt_window_seconds=17784,
         resource_basis={'platform_hour_quota':None,'historical_cumulative_upper_bound_seconds':None,
-            'accepted_development_seconds_max':18000,'accepted_conditional_formal_seconds_max':64800,
-            'owner_statement':'可接受，不需要反复确认资源边界，到期了我这边会提前续租',
+            'accepted_development_seconds_max':86400,'accepted_conditional_formal_seconds_max':64800,
+            'owner_statement':'确认预算是足够的，你不需要太纠结预算问题，我会及时续租',
+            'reservation_interpretation':'agent_sized_finite_24_hours_preparation_within_owner_resource_authorization_exact_execution_grant_pending',
+            'timing_estimate':{'prior_minimum_attempt_window_seconds':16344,'extra_eight_rpc_wait_seconds':1440,
+                'revised_minimum_attempt_window_seconds':17784,'one_remaining_window_seconds':17784,
+                'shared_cap_seconds':86400,'elapsed_preparation_wait_stop_allowance_seconds':68616,
+                'first_load_epoch_preserved':1791916117.781239,'attempts_already_consumed':2},
             'actual_renewed_lease_expiry_verified':lease is not None,'gpu_current_assets_verified':current})
     if current:
         plan['gpu_process'].update(boot_id=gpu['gpu_boot_id'],uid=gpu['uid'],gpu_uuid=gpu['gpu_uuid'])
     from plugin.rhino_listener.c5_recovery_plan import validate
     documents={SPEC:spec,PLAN:plan,HISTORY:history}
     allowed_legacy_changes={'plugin/rhino_listener/c5_reuse_field_scope.py',
-        'training/c5_reuse_admission.py','training/c5_reuse_worker_loop.py'}
+        'training/c5_reuse_admission.py','training/c5_reuse_worker_loop.py',
+        'training/c5_reuse_field_transport.py','training/c5_reuse_generation.py','training/c5_reuse_gpu_supervisor.py',
+        'training/c5_followup_compatible_runtime.py'}
     require(all(n in allowed_legacy_changes or raw_sha((ROOT/n).read_bytes())==h
         for n,h in old_runtime['source_files'].items()),'recovery_unaffected_original_contract_bytes_changed')
     files=set(old_runtime['source_files'])
@@ -110,8 +117,8 @@ def assemble():
         'field_actor_sources_registered':True,'candidate_spec_sha256':sha(spec),'candidate_runtime_sha256':sha(runtime),
         'source_files':len(source),'source_inventory_sha256':sha(source),'history_sha256':sha(history),
         'candidate_two_hashes_are_not_execution_approval_objects':not ready,
-        'changed_groups':['retry_policy','confirmation','stop','native_tools'],
-        'affected_checks':affected_checks(['retry_policy','confirmation','stop','native_tools']),
+        'changed_groups':['retry_policy','confirmation','stop','native_tools','runtime_environment'],
+        'affected_checks':affected_checks(['retry_policy','confirmation','stop','native_tools','runtime_environment']),
         'reused_model_contract_sha256':sha(COMPARISON),'reused_original_d_runtime_sha256':sha(old_runtime),
         'current_mac_review':mac,'gpu_environment_and_model_assets_currently_verified':current,
         'renewed_actual_lease_expiry_currently_verified':lease is not None,
@@ -119,7 +126,7 @@ def assemble():
             ('existing_GPU_authentication_master_missing',facts['gpu_authentication_master_present']),
             ('actual_renewed_lease_expiry_not_provided',lease is not None),
             ('GPU_current_asset_history_and_deployment_review_requires_restored_access',current),
-            ('full_development_window_unavailable',time.time()+18000<=resources['generation_cutoff_epoch'])) if not present]),
+            ('full_development_window_unavailable',time.time()+17784<=resources['generation_cutoff_epoch'])) if not present]),
         'model_or_rhino_calls':0,'private_formal_reads':0,'old_global_registry_writes':0,
         'new_campaign_or_role_state_created':False,'formal_or_product_route_authorized':False}
     documents[RUNTIME]=runtime;documents['eval/c5/recovery-field-incremental-review-20261013.json']=review

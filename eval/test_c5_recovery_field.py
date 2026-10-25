@@ -407,7 +407,8 @@ def test_full_five_hour_ledger_capacity_includes_transition_reserve(monkeypatch,
 
 
 @pytest.mark.skipif(sys.platform!='linux' or not hasattr(os,'pidfd_open'),reason='real Linux CPU fork/pidfd barrier')
-def test_actual_gpu_supervisor_cpu_child_is_qualified_before_loader_and_stops_once(monkeypatch,tmp_path):
+@pytest.mark.parametrize('revised_boundary',(0,43200,86400))
+def test_actual_gpu_supervisor_cpu_child_is_qualified_before_loader_and_stops_once(monkeypatch,tmp_path,revised_boundary):
     import shutil
     import time
     from training.c5_reuse_field_wire import frame,envelope
@@ -417,7 +418,10 @@ def test_actual_gpu_supervisor_cpu_child_is_qualified_before_loader_and_stops_on
     s,r,p,b,g,plans,raw=fixture(monkeypatch,tmp_path)
     h=history_fixture(tmp_path,field.PARENTS)
     s['recovery']['history_sha256']=sha(h)
-    s['resources'].update(generation_cutoff_epoch=time.time()+30000,lease_expiry_epoch=time.time()+30900)
+    if revised_boundary:
+        s['resources'].update(development_seconds_max=revised_boundary,research_seconds_max=revised_boundary+64800)
+        s['limits']['model_seconds']=360
+    s['resources'].update(generation_cutoff_epoch=time.time()+100000,lease_expiry_epoch=time.time()+100900)
     # Keep exact 900-second export boundary in this CPU-only timestamp fixture.
     s['resources']['lease_expiry_epoch']=s['resources']['generation_cutoff_epoch']+900
     r.update(spec_sha256=sha(s),resources=copy.deepcopy(s['resources']),recovery=copy.deepcopy(s['recovery']))
@@ -476,7 +480,9 @@ log.close()
         with selectors.DefaultSelector() as select:
             select.register(child.stdout,selectors.EVENT_READ)
             assert select.select(30),'CPU worker failed to publish ready'
-        line=child.stdout.readline();ready=json.loads(line)
+        line=child.stdout.readline()
+        assert line,child.stderr.read().decode()
+        ready=json.loads(line)
         snap,receipt=preload(b)
         begin={'kind':'reuse_begin_after_preload_confirmation','protocol':PROTOCOL,'scope_sha256':sha(common_scope(b)),
             'preload_snapshot':snap,'preload_receipt':receipt,'host_baseline_head_sha256':'e'*64,'worker_readiness_sha256':sha(ready)}
@@ -546,7 +552,10 @@ def test_actual_proof_command_retains_both_cpu_streams(monkeypatch,tmp_path,mode
 
 @pytest.mark.parametrize('error,category',(
     (TimeoutError('followup_capture_read_deadline'),'transport'),
+    (ValueError('field_transport_eof'),'transport'),
+    (ValueError('field_oversize_chunk'),'integrity'),
     (ValueError('field_pipe_deadline'),'transport'),
+    (ValueError('field_whole_exchange_deadline'),'transport'),
     (ValueError('followup_capture_limit_or_error_no_retry'),'capture'),
     (TimeoutError('recovery_shared_budget_exhausted'),'integrity'),
     (ValueError('followup_capture_persisted_bytes_drift'),'integrity'),
@@ -555,3 +564,130 @@ def test_actual_proof_command_retains_both_cpu_streams(monkeypatch,tmp_path,mode
 def test_actual_entry_failure_classification_keeps_unknowns_closed(error,category):
     from tools.run_c5_recovery_mac_entry import failure_category
     assert failure_category(error)==category
+
+
+@pytest.mark.parametrize('cap',(43200,86400))
+def test_revision_material_extended_hours_360_seconds_keeps_legacy_bindings(monkeypatch,tmp_path,cap):
+    s,r,p,old,g,plans,raw=fixture(monkeypatch,tmp_path)
+    s['resources'].update(development_seconds_max=cap,research_seconds_max=cap+64800)
+    s['limits']['model_seconds']=360
+    r.update(spec_sha256=sha(s),resources=s['resources'])
+    new=field.material(s,r,endpoint='gpu',attempt=2,now=100)
+    assert new['limits']['model_seconds']==360 and new['recovery']['scope']['development_seconds_max']==cap
+    validate_binding(old);validate_binding(new)
+
+
+@pytest.mark.parametrize('cap',(43200,86400))
+def test_qualified_watchdog_uses_bound_request_deadline_and_larger_shared_reservation(cap):
+    from training.c5_reuse_gpu_supervisor import Watchdog,PACKET
+    clock=[100.];limits=dict(LIMITS,model_seconds=360)
+    with pytest.raises(ValueError,match='watchdog_reservation'):Watchdog(100.,86401,clock=lambda:clock[0],limits=limits)
+    w=Watchdog(100.,cap-60,clock=lambda:clock[0],limits=limits)
+    for code in (b'L',b'B',b'R'):w.feed(PACKET.pack(code,100.))
+    clock[0]=280.;assert w.check()==180
+    clock[0]=460.
+    with pytest.raises(ValueError,match='watchdog_deadline'):w.check()
+
+
+def test_original_fixture_key_private_custody_survives_dispatch_key_cleanup(monkeypatch,tmp_path):
+    from training.c5_recovery_field_mac import retain_fixture_audit_key
+    from plugin.rhino_listener.c5_research_channel import read_json
+    import stat
+    private=tmp_path/'private';private.mkdir(mode=0o700)
+    original=bytes(range(32));retain_fixture_audit_key(private,'write-base',original,'a'*64)
+    record=read_json(private,'write-base.json')
+    assert bytes.fromhex(record['key_hex'])==original and record['runtime_sha256']=='a'*64
+    assert stat.S_IMODE((private/'write-base.json').stat().st_mode)==0o600
+    with pytest.raises(FileExistsError):retain_fixture_audit_key(private,'write-base',original,'a'*64)
+
+
+def test_partial_failure_cannot_be_promoted_without_original_private_key(monkeypatch,tmp_path):
+    from training import c5_recovery_field_native_failure_audit as audit
+    s,r,p,b,g,plans,raw=fixture(monkeypatch,tmp_path);b=field.material(s,r,endpoint='mac',attempt=1,now=100)
+    state=Path(b['paths']['state_root']);state.mkdir(mode=0o700,parents=True)
+    from plugin.rhino_listener.c5_research_channel import publish_json
+    release={'source_inventory_sha256':sha(r['source_files'])};publish_json(state,'entry-return-release.json',release)
+    publish_json(state,'host-continuity-ready.json',{})
+    kinds=['native_controller_open','host_ready_before_remote_launch','slot_open_intent','slot_model_scene',
+        'controller_retired_no_retry','failure_cleanup_intent','failure_cleanup_observed','failure_cleanup_intent',
+        'failure_cleanup_observed','failure_cleanup_intent','failure_cleanup_observed','failure_cleanup_attempts_observed']
+    payloads=[{'binding':b},{'release':release,'ready':{}},{'slot_id':'write-base'},{'slot_id':'write-base'}, {},
+        {'action':'close','scope':'known_current_fixture_only'},{}, {'action':'stop','scope':'known_current_fixture_only'}, {},
+        {'action':'stop','scope':'known_hub_only'}, {}, {'errors':[]}]
+    rows=[{'seq':i,'previous_sha256':ZERO,'scope_sha256':sha(b),'kind':k,'payload':p} for i,(k,p) in enumerate(zip(kinds,payloads))]
+    head=chain(rows)
+    with pytest.raises(FileNotFoundError):audit.audit_known_first_hub_stop(rows,b,head,r)
+
+
+@pytest.mark.parametrize('corrupt',('none','fixture_signature','hub_signature','dispatch_key','hidden_dispatch','hub_source'))
+def test_actual_cpu_native_first_exchange_timeout_keeps_original_keys_and_audits_cleanup(tmp_path,monkeypatch,corrupt):
+    from eval import test_c5_reuse_native_entry as cpu
+    from training.c5_recovery_field_mac import MacController
+    from training.c5_recovery_field_native_failure_audit import audit_known_first_hub_stop
+    from plugin.rhino_listener.c5_research_channel import read_json,publish_json
+    from types import SimpleNamespace
+    monkeypatch.setattr(cpu,'MacController',MacController)
+    runner,external,peer,mr,gr,hub,event,public,runtime,calls=cpu.setup(tmp_path,monkeypatch)
+    Original=runner.session_factory
+    class TimeoutSession(Original):
+        def __init__(self,*args):
+            super().__init__(*args);self.capture=SimpleNamespace(check=lambda:None);self.diagnostics_spent=False
+            def exchange(_):raise TimeoutError('CPU first whole exchange timeout')
+            self.channel.exchange=exchange
+        def finalize_diagnostics(self):return {'cpu_only':True}
+    runner.session_factory=TimeoutSession
+    try:
+        with pytest.raises(TimeoutError):runner.drive(external)
+        assert runner.session.stops==1 and hub.stopped and not event.handlers and calls==[]
+        state=runner.state;slot=state/'write-base'
+        assert (state/'audit-key-custody/write-base.json').exists() and not (slot/'handoff.key').exists()
+        if corrupt in ('fixture_signature','hub_signature'):
+            p=slot/'request-0001.json' if corrupt=='fixture_signature' else state/'hub-request-0001.json'
+            v=read_json(p.parent,p.name)
+            if corrupt=='fixture_signature':v['envelope']['signature']='0'*64
+            else:v['signature']='0'*64
+            p.write_text(json.dumps(v));p.chmod(0o600)
+        elif corrupt=='hub_source':
+            p=state/'hub-stop.json';v=read_json(state,p.name);v['source_sha256']='0'*64
+            p.write_text(json.dumps(v));p.chmod(0o600)
+        elif corrupt=='dispatch_key':publish_json(slot,'handoff.key',{'key_hex':bytes(range(32)).hex()})
+        elif corrupt=='hidden_dispatch':publish_json(slot,'execute-0001.json',{'status':'done'})
+        if corrupt=='none':
+            result=audit_known_first_hub_stop(runner.journal.rows,runner.binding,runner.journal.head,runtime)
+            assert result['known_native_cleanup_complete'] and result['fixture_control_signatures_verified']==3
+            assert result['hub_control_signatures_verified']==2 and result['quality'] is None and not result['complete_eight_gate_passed']
+        else:
+            with pytest.raises((ValueError,cpu.NativeError)):audit_known_first_hub_stop(runner.journal.rows,runner.binding,runner.journal.head,runtime)
+    finally:mr.close();gr.close()
+
+
+@pytest.mark.parametrize('duration,allowed',((200,True),(360,False)))
+def test_actual_peer_and_framed_channel_share_frozen_whole_request_deadline(monkeypatch,tmp_path,duration,allowed):
+    from training.c5_reuse_generation import GenerationPeer
+    from training.c5_reuse_field_transport import FieldModelChannel
+    from training.c5_model_transport import request
+    from training.c5_reuse_field_wire import envelope,frame
+    s,r,p,b,g,plans,raw=fixture(monkeypatch,tmp_path)
+    s['limits']['model_seconds']=360;r['spec_sha256']=sha(s)
+    gpu=field.material(s,r,endpoint='gpu',attempt=1,now=100);mac=field.material(s,r,endpoint='mac',attempt=1,now=100)
+    for binding in (mac,gpu):Path(binding['paths']['state_root']).mkdir(mode=0o700,parents=True)
+    class Registry:
+        def __init__(self,b):self.binding=b
+        def claim(self,role):return {'study_id':self.binding['study_id'],'role':role,'scope_sha256':sha(self.binding),'replay_allowed':False}
+    clock=[100.]
+    def generate(prompt,stage):
+        if stage=='selector':clock[0]+=duration
+        raw='{"tool":"create_box"}' if stage=='selector' else '{"name":"create_box","arguments":{"width":2,"depth":3,"height":4}}'
+        return {'raw':raw,'tokens':10,'seconds':0.01,'prompt_sha256':raw_sha(prompt.encode()),'output_sha256':raw_sha(raw.encode())}
+    peer=GenerationPeer(gpu,Registry(gpu),plans,Tokenizer(),generate,lambda _:contextlib.nullcontext(),lambda:None,lambda:None,clock=lambda:clock[0])
+    class Pipe:
+        def write(self,raw,deadline):self.raw=frame(peer.infer(json.loads(raw)));return len(raw)
+        def read(self,deadline):assert deadline==460.;return self.raw
+    channel=FieldModelChannel(mac,Registry(mac),Pipe(),lambda:None,lambda:None,plans,clock=lambda:clock[0])
+    task=plans['write-base']['steps'][0]
+    sent=envelope(mac,request(mac['study_id'],'write-base','base',0,task,{'unit':'Millimeters','objects':[],'groups':{}},
+        {'document_key':'a'*64,'revision':0,'scene_sha256':'b'*64},mac['runtime_sha256'],'cpu-duration'))
+    if allowed:assert channel.exchange(sent)['observation']['status']=='schema_valid_not_authorized'
+    else:
+        with pytest.raises(ValueError,match='deadline'):channel.exchange(sent)
+        assert channel.journal.blocked and len(channel.spent)==1
