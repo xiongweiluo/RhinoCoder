@@ -1,0 +1,226 @@
+{
+  "actual_invocations": {
+    "controller_drive": 1,
+    "gpu_independent_stop_commands": 1,
+    "gpu_serve_intents": 1,
+    "mac_prepare": 1,
+    "new_formal_entry_calls": 0,
+    "private_formal_reads": 0,
+    "qualified_child_sigterm_attempts": 1,
+    "rhino_wrapper_run": 1
+  },
+  "actual_physical_generation_total_independently_proven": null,
+  "all_a_b_c_retirement_pins_preserved": true,
+  "approved_head_dual_ci": {
+    "pr": {
+      "all_20_steps_success": true,
+      "conclusion": "SUCCESS",
+      "head": "96e4fb3b83d5903f6296e4b381e4186bdf2cf3ad",
+      "log_raw_sha256": "01199bb17a6076130d0fa4b8bbfeeecaf4710ef9143dc9447b7278b77acc0a1c",
+      "passed": 1958,
+      "run_id": 38292706371,
+      "seconds": 989.35,
+      "skipped": 11,
+      "url": "https://github.com/xiongweiluo/RhinoCoder/actions/runs/38292706371/job/114956346625"
+    },
+    "push": {
+      "all_20_steps_success": true,
+      "conclusion": "SUCCESS",
+      "head": "96e4fb3b83d5903f6296e4b381e4186bdf2cf3ad",
+      "log_raw_sha256": "53d9403986dc0dcb269ea3b0d4060892dd6dc303a10763b2c2e2c317e6287fd1",
+      "passed": 1958,
+      "run_id": 38292633328,
+      "seconds": 636.49,
+      "skipped": 11,
+      "url": "https://github.com/xiongweiluo/RhinoCoder/actions/runs/38292633328/job/114956115008"
+    }
+  },
+  "approved_publication_head": "96e4fb3b83d5903f6296e4b381e4186bdf2cf3ad",
+  "available_failure_raw_audit": {
+    "actual_physical_generation_total_independently_proven": null,
+    "complete_host_cleanup_hidden_handler_absence_or_memory_erasure_proven": false,
+    "conservative_seconds_from_supervisor_budget_start_to_release_observation": 774.1240632534027,
+    "epoch": 1791835931.447826,
+    "external_begin_frames_recorded": 0,
+    "formal_execution_authorized": false,
+    "generation_stages_recorded": 0,
+    "instance_id": "reuse-dev-20261012-d",
+    "journal_counts": {
+      "gpu_independent-stop": 5,
+      "gpu_supervisor": 5,
+      "gpu_worker": 1,
+      "gpu_worker-lifecycle": 4,
+      "mac_controller": 1,
+      "mac_controller-lifecycle": 8,
+      "mac_native-controller": 6
+    },
+    "journal_heads": {
+      "gpu_independent-stop": "e2785764f0ec0ce2d7657cc9e7b6eb44335dabe07ba76c4edc80aff698fbd1ba",
+      "gpu_supervisor": "f7a77f4e4b9a3609df8bad887cd0ebd78f7b1387520574c566fff52924b66e9d",
+      "gpu_worker": "62fddb9df8b1522b6eb6f3848f2f70a75be10732b152ce81b00ce1427e205e0e",
+      "gpu_worker-lifecycle": "2747451239674adfbd5e619ea35cdd7f2cd44d0c3b0b9926f6b38e2540a765e2",
+      "mac_controller": "689f944462667df0ac5b55e7ff4d02b02984609c4861ac389e0cc61cee64ca64",
+      "mac_controller-lifecycle": "bb6083d2479a23ac00a967ced86b9a8d37a61fe7005221e598eabc8b04250188",
+      "mac_native-controller": "9362371ef40818f1fc1661e765e5e6e791fce989beeaf6be14bc89d14bec421e"
+    },
+    "known_hub_stop_hmac_and_two_timing_receipts_verified": true,
+    "legacy_history_and_three_retirements_unchanged": true,
+    "limited_host_replay": {
+      "causal_origin_or_emitted_bytes_proven": false,
+      "complete_handler_absence_proven": false,
+      "execution_authority": false,
+      "legacy_byte_closure_verified": false,
+      "limited_visible_continuity_verified": true,
+      "normal_checkpoint_count": 1,
+      "policy_id": "c5-frozen-source-trusted-host-visible-continuity-v2",
+      "raw_external_seal_sha256": "2dac37555f24e6f33b767340bffd2456487b1d0b93a3d0fd6217a7f7ff240ff2",
+      "record_count": 9,
+      "status": "limited_host_continuity_audit_verified",
+      "study_id": "C5DEV-REUSE-20261012-D"
+    },
+    "model_requests_recorded": 0,
+    "nine_dispatch_keys_absent_without_re_reading_removed_secrets": true,
+    "normal_ready_final_export_missing": true,
+    "original_no_go_changed": false,
+    "owner_terminal_report": {
+      "error": "reuse_owner_interactive_confirmation_required",
+      "exact_input_character_or_tty_failure_cause_proven": false,
+      "failed_before_owner_readiness_publish": true,
+      "human_origin_cryptographically_proven": false,
+      "original_terminal_input_bytes_obtained": false,
+      "owner_reports_actual_confirmation_and_failed_receipt_custody": true,
+      "provided_rendered_traceback": true
+    },
+    "qualified_child_exit_reaped_by_parent": true,
+    "qualified_target_and_parent_absent_current_gpu_idle": true,
+    "quality": null,
+    "raw_stdout_stderr_complete_and_persisted_bytes_rehashed": true,
+    "raw_ui_terminal_receipt_matches_disk_observation": true,
+    "release_observation": {
+      "boot_id": "77b495a6-c67c-4721-9038-e87c7fcc3fc6",
+      "compute_returncode": 0,
+      "compute_stderr": "",
+      "compute_stdout": "",
+      "epoch": 1791835831.9585836,
+      "gpu_returncode": 0,
+      "gpu_stderr": "",
+      "gpu_stdout": "GPU-3a14915f-3804-46b7-b98a-aa09f7bbab4f, 11\n",
+      "model_or_cuda_calls": 0,
+      "parent_proc_present": false,
+      "physical_release_origin_independently_authenticated": false,
+      "private_formal_reads": 0,
+      "qualified_target": {
+        "argv_sha256": "90e213b20b4cd2f333d6aea6ffbb5935d9864fe8466a544bef60d10a27ca54a7",
+        "boot_id": "77b495a6-c67c-4721-9038-e87c7fcc3fc6",
+        "cwd": "/data/reuse-dev-20261012-d-source",
+        "executable_sha256": "eb00b56f15497b7aecdd5e3aef1ca71974779fc6f77283f2b5111b71341eec9c",
+        "pid": 184642,
+        "start_ticks": 1917412,
+        "uid": 1000
+      },
+      "target_proc_present": false
+    },
+    "retry_allowed": false,
+    "runtime_sha256": "af589bebd37a6786a01843275ec3add7b868edcc9e6a495fa989d67b93842f67",
+    "second_signal_observed": false,
+    "single_qualified_pidfd_sigterm_observed": true,
+    "slots_completed_recorded": 0,
+    "slots_started_recorded": 0,
+    "source_public_files_verified_per_endpoint": 338,
+    "spec_sha256": "62e6a66c77604858a0b0109003af1cff74f3ffbdb2ae33b8756c76951746e1d6",
+    "status": "AVAILABLE_D_FAILURE_RAW_CHAINS_REPLAYED_NOT_COMPLETE_EIGHT_AUDIT",
+    "study_id": "C5DEV-REUSE-20261012-D",
+    "supervisor_duplicate_stop_claim_rejected": true,
+    "whole_eight_raw_audit_pass": false,
+    "worker_ready_recomputed_and_cross_joined": true
+  },
+  "controller_result": {
+    "epoch": 1791835521.399145,
+    "exit_code": 1,
+    "invocations": 1,
+    "stderr_bytes": 1717,
+    "stdout_bytes": 739
+  },
+  "direct_owner_execution_approval": {
+    "actor": "repository_owner",
+    "context": "direct approval of immediately preceding complete D spec/runtime hashes for one fixed public eight-slot development validation",
+    "direct_reply": "明确批准上述两个完整哈",
+    "epoch": 1791834766.3414552,
+    "formal_authorized": false,
+    "human_origin_cryptographically_proven": false,
+    "instance_id": "reuse-dev-20261012-d",
+    "published_head": "96e4fb3b83d5903f6296e4b381e4186bdf2cf3ad",
+    "retries_authorized": false,
+    "runtime_sha256": "af589bebd37a6786a01843275ec3add7b868edcc9e6a495fa989d67b93842f67",
+    "spec_sha256": "62e6a66c77604858a0b0109003af1cff74f3ffbdb2ae33b8756c76951746e1d6",
+    "study_id": "C5DEV-REUSE-20261012-D"
+  },
+  "failure": {
+    "controller_primary_error": "reuse_missing_external_readiness_no_retry",
+    "exact_unicode_or_tty_rejection_cause_proven": false,
+    "normal_owner_readiness_file_present_at_final_observation": false,
+    "owner_original_input_bytes_obtained": false,
+    "owner_pasted_stack": "confirm rejected before guard and publish_json(owner-readiness.json)",
+    "owner_pasted_terminal_error": "reuse_owner_interactive_confirmation_required",
+    "owner_reported_confirmation": true,
+    "owner_reported_failed_terminal_receipt_custody": true,
+    "research_restarted_or_role_reset": false,
+    "second_claim_caused_second_signal": false,
+    "supervisor_secondary_error": "FileExistsError at second claim of followup-d-stop.consumed.json"
+  },
+  "failure_record_head_ci": "SEE_PR_EXACT_HEAD_CHECKS",
+  "formal_freeze_or_consumption_authorized": false,
+  "full_eight_original_raw_joint_audit_pass": false,
+  "independent_raw_receipt_sha256": {
+    "gpu": "3593fb660e0b468bdbaa33cb24c60b718681f816a5767253dc0338d528d208a6",
+    "mac": "99511130eb625708c7e66de89774bd1910f6dbece0412febda62d64a71a19319"
+  },
+  "instance_id": "reuse-dev-20261012-d",
+  "lease_renewal_or_payment_performed": false,
+  "main_merged": false,
+  "new_d_permanent_consumed_roles": {
+    "gpu": [
+      "worker",
+      "stop"
+    ],
+    "mac": [
+      "controller",
+      "host"
+    ]
+  },
+  "new_replacement_research_identity_authorized": false,
+  "old_c_four_files_and_two_rows_preserved": true,
+  "original_c5_no_go_changed": false,
+  "public_source_bytes_reverified_after_failure_per_endpoint": 338,
+  "quality": null,
+  "record_epoch": 1791836194.24738,
+  "retirement": {
+    "gpu": {
+      "active_grant_absent": true,
+      "endpoint": "gpu",
+      "epoch": 1791835990.3160162,
+      "global_history_or_role_files_modified": false,
+      "grant_preserved_raw_sha256": "0d4e4eb088be82b2a955d10640cd0eaa53fe8ab348d660eeccb3b0add34ac0b8",
+      "model_or_rhino_calls": 0,
+      "retired_no_retry": true,
+      "retirement_raw_sha256": "7dcb6371e303d4a7a4bc4e726873271f6901e351fe4debe66505a8e2889e3826",
+      "signals_sent": 0
+    },
+    "mac": {
+      "active_grant_absent": true,
+      "endpoint": "mac",
+      "epoch": 1791835990.431097,
+      "global_history_or_role_files_modified": false,
+      "grant_preserved_raw_sha256": "0d4e4eb088be82b2a955d10640cd0eaa53fe8ab348d660eeccb3b0add34ac0b8",
+      "model_or_rhino_calls": 0,
+      "retired_no_retry": true,
+      "retirement_raw_sha256": "7dcb6371e303d4a7a4bc4e726873271f6901e351fe4debe66505a8e2889e3826",
+      "signals_sent": 0
+    }
+  },
+  "retry_or_slot_refill_allowed": false,
+  "runtime_sha256": "af589bebd37a6786a01843275ec3add7b868edcc9e6a495fa989d67b93842f67",
+  "spec_sha256": "62e6a66c77604858a0b0109003af1cff74f3ffbdb2ae33b8756c76951746e1d6",
+  "status": "OWNER_READY_GATE_FAILED_RETIRED_NO_RETRY",
+  "study_id": "C5DEV-REUSE-20261012-D"
+}

@@ -41,7 +41,7 @@ RhinoCoder 是一个面向 Rhino 8 的可验证空间设计 Agent。它把自然
 
 [C 退休后的只读启动诊断与禁用草案](docs/c5-reuse-startup-readonly-diagnosis-and-continuation-proposal-20261012.md)：冻结 GPU Python 缺少入口必需的 `os.pidfd_open`；这解释当前启动阻塞，但原 stderr 缺失，唯一历史异常仍未认证。两端冻结/退休和已消费准入保持，64 项 CPU 控制通过。是否结束追加研究或仅准备显式后续协议待本人选择，尚无新研究执行权限。
 
-[披露式D后续完整冻结](docs/c5-reuse-followup-d-exact-freeze-review-20261012.md)：本人已接受仅准备范围与有限资源边界；新原生pidfd兼容环境、原消费历史保留及异常原始双流留存已实现，两端完整公共部署/无grant预检和独立字节核查通过。尚无现场执行批准或准入初始化，原A/B/C失败与NO-GO保留；实际一次8槽仍须新完整两哈希批准和本人原始保管审计。
+[披露式 D 一次开发失败与永久退休](docs/c5-reuse-followup-d-readiness-failure-20261012.md)：完整两哈希批准后实际模型加载和 worker ready 完成；本人保管入口交互条件拒绝、readiness 未落盘，控制器超时，8槽未启动。一次资格 pidfd 停机及已知宿主收尾、原始双流/失败审计完成，两端 D grant 封存和消费历史保留；没有完整工程 PASS或正式40槽授权，质量保持null，原NO-GO与默认混合不改。
 
 - **完成必须有几何证据**：模型说“完成”不算完成；系统重新读取 Rhino 场景，并核对数量、尺寸、颜色和空间关系。
 - **隐私门先于模型和 MCP**：Critical 请求提前阻断，High 强制本地且禁止云 fallback，Medium 先最小化再出站；关闭普通路由也不能绕过。
