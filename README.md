@@ -37,6 +37,8 @@ RhinoCoder 是一个面向 Rhino 8 的可验证空间设计 Agent。它把自然
 
 [嵌入式启动修复](docs/c5-reuse-embedded-bootstrap-repair-20261012.md)补齐真实临时包/Python3.9隔离回归；后续[B单次准备预检失败](docs/c5-reuse-development-preparation-failure-20261012-b.md)：本人精确批准后，代理调用的受限沙箱拒绝宿主身份查询，尚未进入prepare或Rhino/模型链路。B两端已退休、不重试，工程门未通过；原A失败、NO-GO及默认混合保持。
 
+[C单次启动失败与退休](docs/c5-reuse-development-startup-failure-20261012-c.md)：本人精确批准后，prepare与Rhino基线成功，唯一controller在worker-ready前收到EOF，独立stop也失败。未记录模型请求/槽运行，质量不可估计；既有空hub首次收尾和有限宿主复算完成，两端C入口封存，不重跑或进入正式消费。原NO-GO与默认混合保持。
+
 - **完成必须有几何证据**：模型说“完成”不算完成；系统重新读取 Rhino 场景，并核对数量、尺寸、颜色和空间关系。
 - **隐私门先于模型和 MCP**：Critical 请求提前阻断，High 强制本地且禁止云 fallback，Medium 先最小化再出站；关闭普通路由也不能绕过。
 - **恢复不会重复造物体**：变更工具携带幂等键，模型降级发生在规划边界，不重放已完成工具；支持取消、重试、Undo 与任务级精准回滚。

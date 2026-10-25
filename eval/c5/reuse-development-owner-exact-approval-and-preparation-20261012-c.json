@@ -1,0 +1,151 @@
+{
+  "exact_published_head": "5815a043908a3510fdf5cf41bd531100ab00c54a",
+  "formal_consumption_authorized": false,
+  "instance_id": "reuse-dev-20261012-c",
+  "mac_prepare": {
+    "exit_code": 0,
+    "invocations": 1,
+    "permission_mode": "require_escalated",
+    "population_exact": true,
+    "prepared": {
+      "model_calls": 0,
+      "private_formal_reads": 0,
+      "runtime_sha256": "160e74bb15497960d51d499f51bac6a8be67b38c0124af385296c1119ecedc24",
+      "spec_sha256": "10f821cacb0e5681c3b2f8286230eab7dfdd69102ed7ca3adf540f6cd2148446",
+      "study_id": "C5DEV-REUSE-20261012-C"
+    },
+    "slot_keys_present_checked_without_reading_contents": 8
+  },
+  "model_or_rhino_calls_at_record": 0,
+  "new_exact_hash_approval_needed": false,
+  "original_no_go_changed": false,
+  "owner_execution_approval": {
+    "actor": "repository_owner",
+    "canonical_private_grant_raw_sha256": "359892d9adc45bc33a966bc013b5bc4f2a04b979100e760ee506f2edf2304225",
+    "context": "direct approval of immediately preceding complete C boot-revision spec/runtime pair for one fixed public eight-slot validation",
+    "direct_reply": "可批准",
+    "human_origin_cryptographically_proven": false,
+    "runtime_sha256": "160e74bb15497960d51d499f51bac6a8be67b38c0124af385296c1119ecedc24",
+    "spec_sha256": "10f821cacb0e5681c3b2f8286230eab7dfdd69102ed7ca3adf540f6cd2148446"
+  },
+  "owner_private_ready_custody_pending": true,
+  "postapproval_readonly_preflights": {
+    "gpu": {
+      "actual_installed_asset_bytes_verified": true,
+      "both_retired_predecessors_verified": true,
+      "budget_check_not_actual_research_start": {
+        "elapsed_wall_seconds": 0.02354621499989662,
+        "operational_cap_seconds": 17940,
+        "physical_gpu_release_independently_verified": null,
+        "prior_cumulative_upper_bound_seconds": null,
+        "reserved_wall_seconds": 18000,
+        "start_epoch": 1791818991.7348642,
+        "stop_reserve_seconds": 60,
+        "within_reserved_wall_seconds": true
+      },
+      "candidate_materials_bound": true,
+      "endpoint": "gpu",
+      "epoch": 1791818991.7584088,
+      "execution_authority": false,
+      "execution_ready": false,
+      "full_development_window_verified": true,
+      "human_or_transport_origin_proven": false,
+      "installed_check": "gpu_fixed_interpreter_boot_uid_uuid_model_environment_bytes",
+      "model_or_rhino_calls": 0,
+      "owner_grant_used": false,
+      "private_formal_reads": 0,
+      "research_started": false,
+      "runtime_sha256": "160e74bb15497960d51d499f51bac6a8be67b38c0124af385296c1119ecedc24",
+      "source_check": {
+        "actual_installed_assets_verified": false,
+        "candidate_execution_ready": true,
+        "complete_closure_binding_verified": true,
+        "execution_ready": false,
+        "human_approval_origin_verified": false,
+        "source_files_individually_verified": 307,
+        "source_population_exact": true
+      },
+      "spec_sha256": "10f821cacb0e5681c3b2f8286230eab7dfdd69102ed7ca3adf540f6cd2148446",
+      "state_or_owner_grant_or_key_or_claim_created": false,
+      "unchanged_shared_admission_checked": true
+    },
+    "mac": {
+      "actual_installed_asset_bytes_verified": true,
+      "both_retired_predecessors_verified": true,
+      "budget_check_not_actual_research_start": {
+        "elapsed_wall_seconds": 0.01287708303425461,
+        "operational_cap_seconds": 17940,
+        "physical_gpu_release_independently_verified": null,
+        "prior_cumulative_upper_bound_seconds": null,
+        "reserved_wall_seconds": 18000,
+        "start_epoch": 1791818937.5309298,
+        "stop_reserve_seconds": 60,
+        "within_reserved_wall_seconds": true
+      },
+      "candidate_materials_bound": true,
+      "endpoint": "mac",
+      "epoch": 1791818937.543807,
+      "execution_authority": false,
+      "execution_ready": false,
+      "full_development_window_verified": true,
+      "human_or_transport_origin_proven": false,
+      "installed_check": "mac_fixed_interpreter_process_host_controller_tokenizer_bytes",
+      "model_or_rhino_calls": 0,
+      "owner_grant_used": false,
+      "private_formal_reads": 0,
+      "research_started": false,
+      "runtime_sha256": "160e74bb15497960d51d499f51bac6a8be67b38c0124af385296c1119ecedc24",
+      "source_check": {
+        "actual_installed_assets_verified": false,
+        "candidate_execution_ready": true,
+        "complete_closure_binding_verified": true,
+        "execution_ready": false,
+        "human_approval_origin_verified": false,
+        "source_files_individually_verified": 307,
+        "source_population_exact": true
+      },
+      "spec_sha256": "10f821cacb0e5681c3b2f8286230eab7dfdd69102ed7ca3adf540f6cd2148446",
+      "state_or_owner_grant_or_key_or_claim_created": false,
+      "unchanged_shared_admission_checked": true
+    }
+  },
+  "postprepare_readonly_checker_correction": {
+    "corrected_checker_keeps_regular_file_nlink1_and_secure_directory_checks": true,
+    "initial_checker_exit_code": 1,
+    "initial_checker_mutations": 0,
+    "prepare_reinvoked": false,
+    "reason": "checker incorrectly applied regular-file nlink==1 to directories; observed directory nlink3, mode0700, no alias"
+  },
+  "private_formal_reads": 0,
+  "record_epoch": 1791819289.927191,
+  "registration": {
+    "gpu": {
+      "approval_raw_sha256": "359892d9adc45bc33a966bc013b5bc4f2a04b979100e760ee506f2edf2304225",
+      "both_retirements_verified": true,
+      "endpoint": "gpu",
+      "exact_c_revision_approval_registered": true,
+      "full_five_hour_window_verified": true,
+      "model_or_rhino_calls": 0,
+      "observed_epoch": 1791819050.300575,
+      "shared_registry_preserved": true,
+      "source_files_checked": 307,
+      "state_created_no_replace": true
+    },
+    "mac": {
+      "approval_raw_sha256": "359892d9adc45bc33a966bc013b5bc4f2a04b979100e760ee506f2edf2304225",
+      "both_retirements_verified": true,
+      "endpoint": "mac",
+      "exact_c_revision_approval_registered": true,
+      "full_five_hour_window_verified": true,
+      "model_or_rhino_calls": 0,
+      "observed_epoch": 1791819035.964894,
+      "shared_registry_preserved": true,
+      "source_files_checked": 307,
+      "state_created_no_replace": true
+    }
+  },
+  "rhino_wrapper_or_controller_drive_invocations_at_record": 0,
+  "shared_admission_rows_after_prepare": 0,
+  "study_id": "C5DEV-REUSE-20261012-C",
+  "whole_field_pass": false
+}

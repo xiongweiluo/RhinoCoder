@@ -16,7 +16,7 @@ import time
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 LOG_NAME='controller-output.log'
-BYTE_RECEIPTS=Path('/private/tmp/rhinocoder-c5-reuse-b-actual-deployment-byte-receipts.json')
+BYTE_RECEIPTS=Path('/private/tmp/rhinocoder-c5-reuse-c-actual-deployment-byte-receipts.json')
 CONFIRM='确认并保管'
 
 
@@ -119,7 +119,7 @@ def main():
         require(not os.path.lexists(custody),'reuse_owner_custody_no_replace');custody.mkdir(mode=0o700)
         receipts=byte_receipts(strict(read_bytes(BYTE_RECEIPTS,private=True)),binding,runtime)
         publish_json(custody,'actual-deployment-byte-receipts.json',receipts)
-        print('C5_REUSE_OWNER_CUSTODY_ARMED_B; 等待实际host/worker输出，不要关闭此终端。',flush=True)
+        print('C5_REUSE_OWNER_CUSTODY_ARMED_C; 等待实际host/worker输出，不要关闭此终端。',flush=True)
         value=live_line(state/LOG_NAME,b'C5_REUSE_EXTERNAL_READINESS_REQUIRED ',read_bytes,guard)
         require(set(value)=={'host','worker'} and value['host']==read_json(state,'host-continuity-ready.json'),
                 'reuse_owner_current_host_output')

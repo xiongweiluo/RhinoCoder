@@ -35,9 +35,9 @@ def validate_plan(spec,runtime,plan):
     revised=spec['resources'].get('resource_policy')=='incremental_reuse_unknown_history_v1'
     exact(plan,('protocol','study_id','instance_id','environment','model_assets','host_readable_files',
                 'gpu_process','loader_policy','transport','host_acceptance','resource_basis')+
-          (('predecessor',) if spec['instance_id']=='reuse-dev-20261012-b' else ()))
-    if spec['instance_id']=='reuse-dev-20261012-b':
-        from plugin.rhino_listener.c5_reuse_predecessor import POLICY as PREDECESSOR
+          (('predecessor',) if spec['instance_id']=='reuse-dev-20261012-c' else ()))
+    if spec['instance_id']=='reuse-dev-20261012-c':
+        from plugin.rhino_listener.c5_reuse_predecessor import POLICIES as PREDECESSOR
         require(plan['predecessor']==PREDECESSOR,'reuse_plan_retired_predecessor')
     require(plan['protocol']==PROTOCOL and plan['study_id']==STUDY
             and plan['instance_id']==spec['instance_id'],'reuse_plan_identity')
@@ -82,7 +82,7 @@ def validate_plan(spec,runtime,plan):
             and basis['resource_revision_acceptance']==RESOURCE_ACCEPTANCE
             and sha(basis['resource_revision_acceptance'])==spec['resources']['resource_revision_acceptance_sha256'],
             'reuse_incremental_resource_reservation_basis')
-    else:require(spec['instance_id'] not in ('reuse-dev-20261011-a','reuse-dev-20261012-b') and basis['platform_hour_quota'] is None
+    else:require(spec['instance_id'] not in ('reuse-dev-20261011-a','reuse-dev-20261012-c') and basis['platform_hour_quota'] is None
             and basis['remaining_gpu_seconds_meaning']=='research_reservation_within_original_cap_not_platform_balance'
             and type(basis['prior_cumulative_upper_bound_basis']) is str
             and 0<len(basis['prior_cumulative_upper_bound_basis'])<=2048,'reuse_resource_reservation_basis')

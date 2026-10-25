@@ -1,0 +1,110 @@
+{
+  "approval_received": {
+    "actor": "repository_owner",
+    "basis": "direct user message: 批准C上述spec/runtime两个完整哈希，执行一次固定公开8槽开发验证",
+    "exact_approved_publication_head": "84a0336ab32883c4f16cf7bca775421062387d0a",
+    "registered_on_either_endpoint": false,
+    "runtime_sha256": "04caaac2a915b635211751f35d020ec79134d5bdd46d7efff88120be17992df2",
+    "spec_sha256": "10f821cacb0e5681c3b2f8286230eab7dfdd69102ed7ca3adf540f6cd2148446"
+  },
+  "formal_consumption_authorized": false,
+  "frozen_gpu_boot_id": "0a861fa3-31c9-4899-a022-c4f9cdb8dbfe",
+  "gpu_candidate_preflight": {
+    "code": "reuse_candidate_gpu_boot",
+    "exit_code": 1,
+    "research_effects": false
+  },
+  "independent_gpu_source_check": {
+    "actual_installed_assets_verified": false,
+    "candidate_execution_ready": true,
+    "complete_closure_binding_verified": true,
+    "execution_ready": false,
+    "human_approval_origin_verified": false,
+    "source_files_individually_verified": 307,
+    "source_population_exact": true
+  },
+  "instance_id": "reuse-dev-20261012-c",
+  "mac_candidate_preflight": {
+    "actual_installed_asset_bytes_verified": true,
+    "both_retired_predecessors_verified": true,
+    "budget_check_not_actual_research_start": {
+      "elapsed_wall_seconds": 0.011689833016134799,
+      "operational_cap_seconds": 17940,
+      "physical_gpu_release_independently_verified": null,
+      "prior_cumulative_upper_bound_seconds": null,
+      "reserved_wall_seconds": 18000,
+      "start_epoch": 1791816977.698024,
+      "stop_reserve_seconds": 60,
+      "within_reserved_wall_seconds": true
+    },
+    "candidate_materials_bound": true,
+    "endpoint": "mac",
+    "epoch": 1791816977.709713,
+    "execution_authority": false,
+    "execution_ready": false,
+    "full_development_window_verified": true,
+    "human_or_transport_origin_proven": false,
+    "installed_check": "mac_fixed_interpreter_process_host_controller_tokenizer_bytes",
+    "model_or_rhino_calls": 0,
+    "owner_grant_used": false,
+    "private_formal_reads": 0,
+    "research_started": false,
+    "runtime_sha256": "04caaac2a915b635211751f35d020ec79134d5bdd46d7efff88120be17992df2",
+    "source_check": {
+      "actual_installed_assets_verified": false,
+      "candidate_execution_ready": true,
+      "complete_closure_binding_verified": true,
+      "execution_ready": false,
+      "human_approval_origin_verified": false,
+      "source_files_individually_verified": 307,
+      "source_population_exact": true
+    },
+    "spec_sha256": "10f821cacb0e5681c3b2f8286230eab7dfdd69102ed7ca3adf540f6cd2148446",
+    "state_or_owner_grant_or_key_or_claim_created": false,
+    "unchanged_shared_admission_checked": true
+  },
+  "model_or_rhino_calls": 0,
+  "model_requests_recorded": 0,
+  "new_c_custody_on_either_endpoint": false,
+  "new_c_state_on_either_endpoint": false,
+  "new_identity_created": false,
+  "observed_gpu": {
+    "boot_epoch": 1791815942,
+    "boot_id": "77b495a6-c67c-4721-9038-e87c7fcc3fc6",
+    "clock_ticks_per_second": 100,
+    "compute_processes": {
+      "returncode": 0,
+      "rows": []
+    },
+    "epoch": 1791817090.247981,
+    "executable": "/data/conda-envs/rhinocoder/bin/python3.11",
+    "executable_sha256": "1b473ff72cfa63de341095fa5192c0d030ac06a56c995d77de3626098f81e055",
+    "expected_environment_exists": true,
+    "gpu": {
+      "returncode": 0,
+      "rows": [
+        "GPU-3a14915f-3804-46b7-b98a-aa09f7bbab4f, NVIDIA GeForce RTX 3090, 11, 24576, 0"
+      ]
+    },
+    "model_or_rhino_calls": 0,
+    "original_worker_43776_present": false,
+    "private_evidence_reads": 0,
+    "python": "3.11.16 (main, Aug 27 2026, 14:44:21) [GCC 14.3.0]",
+    "remote_files_written": 0,
+    "status": "readonly_current_environment_observation_not_execution_authority",
+    "uid": 1000
+  },
+  "old_exact_approval_transferred_to_revised_materials": false,
+  "original_c5_no_go_changed": false,
+  "prepare_wrapper_drive_invocations": 0,
+  "prior_a_and_b_retirement_unchanged": true,
+  "quality_result": null,
+  "record_epoch": 1791817208.640623,
+  "research_attempt_consumed": false,
+  "revision_scope": "same unstarted C; only fresh GPU boot binding in complete plan/runtime; original approved snapshot preserved; another complete two-hash approval required before any grant or entry",
+  "slots_completed": 0,
+  "slots_started": 0,
+  "status": "POSTAPPROVAL_READONLY_BOOT_DRIFT_BEFORE_GRANT_OR_ENTRY",
+  "study_id": "C5DEV-REUSE-20261012-C",
+  "whole_field_pass": false
+}

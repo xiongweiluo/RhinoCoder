@@ -46,7 +46,7 @@ def strict(raw):
     return json.loads(raw, object_pairs_hook=pairs, parse_constant=constant)
 
 
-STUDY = 'C5DEV-REUSE-20261012-B'
+STUDY = 'C5DEV-REUSE-20261012-C'
 PROTOCOL = 'c5-reuse-field-development-v1'
 APPROVAL_BASIS = 'direct repository_owner approval of new reuse development spec and complete runtime freeze'
 COMPARISON = {
@@ -91,7 +91,7 @@ def endpoint_paths(instance, endpoints):
                         for b in (source,state,admission) if a!=b), 'field_path_identity')
 
 
-def bind(spec, runtime, approval, *, now, endpoint, cleanup_only=False):
+def _material_binding(spec, runtime, *, now, endpoint, cleanup_only=False):
     """Pure exact binding. No filesystem access or execution authority minting."""
     exact(spec, ('protocol', 'study_id', 'phase', 'instance_id', 'comparison', 'limits',
                  'resources', 'host_policy', 'execution_ready', 'automatic_retry_allowed',
@@ -103,6 +103,7 @@ def bind(spec, runtime, approval, *, now, endpoint, cleanup_only=False):
             and spec['study_id'] == runtime['study_id'] == STUDY
             and spec['phase'] == 'development' and type(spec['instance_id']) is str
             and re.fullmatch(r'reuse-dev-[a-z0-9-]{1,48}', spec['instance_id'])
+            and spec['instance_id'] not in ('reuse-dev-20261011-a','reuse-dev-20261012-b')
             and spec['instance_id'] == runtime['instance_id'], 'new_development_identity')
     require(canonical(spec['comparison']) == canonical(COMPARISON)
             and canonical(spec['limits']) == canonical(LIMITS), 'field_contract_limits_drift')
@@ -126,7 +127,7 @@ def bind(spec, runtime, approval, *, now, endpoint, cleanup_only=False):
     revised=type(resources) is dict and 'resource_policy' in resources
     exact(resources,resource_keys+('resource_policy','resource_revision_acceptance_sha256',
                                  'original_cumulative_compliance_claimed') if revised else resource_keys)
-    require(spec['instance_id'] not in ('reuse-dev-20261011-a','reuse-dev-20261012-b') or revised,'field_actual_resource_revision_required')
+    require(spec['instance_id'] not in ('reuse-dev-20261011-a','reuse-dev-20261012-c') or revised,'field_actual_resource_revision_required')
     require(all(type(resources[k]) is int and resources[k]>=0 for k in resource_keys
                 if k!='prior_cumulative_upper_bound_seconds')
             and resources['export_reserve_seconds'] >= 900
@@ -175,10 +176,6 @@ def bind(spec, runtime, approval, *, now, endpoint, cleanup_only=False):
     require(endpoint in ('mac','gpu'), 'field_endpoint')
     endpoint_paths(spec['instance_id'], runtime['endpoints'])
     paths = runtime['endpoints'][endpoint]
-    expected = {'study_id': STUDY, 'instance_id': spec['instance_id'], 'actor': 'repository_owner',
-                'approved': True, 'spec_sha256': sha(spec), 'runtime_sha256': sha(runtime),
-                'approval_basis': APPROVAL_BASIS}
-    require(canonical(approval) == canonical(expected), 'field_exact_owner_approval')
     value = {'protocol': PROTOCOL, 'study_id': STUDY, 'instance_id': spec['instance_id'],
             'spec_sha256': sha(spec), 'runtime_sha256': sha(runtime), 'paths': paths,
             'endpoint':endpoint, 'endpoints':runtime['endpoints'],
@@ -186,6 +183,23 @@ def bind(spec, runtime, approval, *, now, endpoint, cleanup_only=False):
             'whole_field_authority_verified': False,
             'approval_origin_verified': False, 'record_binding_verified': True}
     return strict(canonical(value))
+
+
+def bind(spec, runtime, approval, *, now, endpoint, cleanup_only=False):
+    """Pure supplied exact grant binding; never certifies human origin."""
+    value=_material_binding(spec,runtime,now=now,endpoint=endpoint,cleanup_only=cleanup_only)
+    expected = {'study_id': STUDY, 'instance_id': spec['instance_id'], 'actor': 'repository_owner',
+                'approved': True, 'spec_sha256': sha(spec), 'runtime_sha256': sha(runtime),
+                'approval_basis': APPROVAL_BASIS}
+    require(canonical(approval) == canonical(expected), 'field_exact_owner_approval')
+    return value
+
+
+def check_candidate_materials(spec,runtime,*,now,endpoint):
+    """No synthetic owner grant; report material validity without authority."""
+    value=_material_binding(spec,runtime,now=now,endpoint=endpoint)
+    return {'spec_sha256':value['spec_sha256'],'runtime_sha256':value['runtime_sha256'],
+            'candidate_materials_bound':True,'execution_authority':False,'owner_grant_used':False}
 
 
 def validate_binding(value):

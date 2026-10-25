@@ -29,7 +29,9 @@ def file_sha(p):
 start=time.time()
 manifest=Path('/data/RhinoCoder-c5/base-snapshot-manifest.json')
 assert file_sha(manifest)=='5b9ad4c8257ed072cfdee022e4b92303ffc849f53014dbf76d0986b3d1428cdd'
-m=json.loads(manifest.read_bytes())
+manifest_raw=manifest.read_bytes()
+assert hashlib.sha256(manifest_raw).hexdigest()=='5b9ad4c8257ed072cfdee022e4b92303ffc849f53014dbf76d0986b3d1428cdd'
+m=json.loads(manifest_raw)
 base=Path(m['snapshot_dir'])
 assert base==Path('/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242')
 assert len(m['file_sha256'])==14
@@ -70,7 +72,7 @@ print(json.dumps({'status':'current_public_assets_rehashed_not_execution_authori
  'target_runtime':json.loads(target_runtime.stdout),
  'boot_id':Path('/proc/sys/kernel/random/boot_id').read_text().strip(),
  'gpu_rows':p.stdout.strip().splitlines(),'base_files':base_files,'adapter_files':actual_adapter,
- 'base_manifest_sha256':file_sha(manifest),'base_files_match_pinned_manifest':True,
+ 'base_manifest_sha256':file_sha(manifest),'base_manifest_raw_hex':manifest_raw.hex(),'base_files_match_pinned_manifest':True,
  'packages':packages,'distribution_file_sha256':distribution_files,'distribution_inventory_sha256':digest(distribution_files),
  'stdlib_file_sha256':stdlib,'stdlib_inventory_sha256':digest(stdlib),'libpython_file_sha256':libpython,
  'interpreter_sha256':file_sha(env/'bin/python'),'missing_metadata_files':sorted(missing),

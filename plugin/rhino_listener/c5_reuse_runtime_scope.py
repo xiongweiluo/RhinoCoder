@@ -13,12 +13,12 @@ import time
 
 from .c5_reuse_field_scope import bind, canonical, exact, require, sha, strict, is_sha
 
-INSTANCE='reuse-dev-20261012-b'
+INSTANCE='reuse-dev-20261012-c'
 MAC_PARENT=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5')
 GPU_PARENT=Path('/data')
-SPEC='eval/c5/reuse-development-spec-20261012-b.json'
-RUNTIME='eval/c5/reuse-development-runtime-freeze-20261012-b.json'
-PLAN='eval/c5/reuse-field-environment-plan-20261012-b.json'
+SPEC='eval/c5/reuse-development-spec-20261012-c.json'
+RUNTIME='eval/c5/reuse-development-runtime-freeze-20261012-c.json'
+PLAN='eval/c5/reuse-field-environment-plan-20261012-c.json'
 
 
 def fixed_paths(endpoint):
@@ -60,6 +60,7 @@ class ReuseSourceGuard:
                         or name in (SPEC,PLAN,'eval/c5/rhino-runtime-schema-v1.json',
                         'eval/c5/hostassurance-development-spec-20261007-d.json',
                         'eval/c5/c5-engineering-config.json','eval/c5/reuse-development-startup-failure-20261012.json',
+                        'eval/c5/reuse-development-preparation-failure-20261012-b.json',
                         'requirements-training.txt','requirements.txt'))
                     and is_sha(value),'reuse_source_public_population')
 
