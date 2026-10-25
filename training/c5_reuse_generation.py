@@ -16,7 +16,7 @@ from training.c5_reuse_field_wire import envelope, validate_return
 
 class GenerationPeer:
     def __init__(self, binding, registry, plans, tokenizer, generate, route_context,
-                 guard, check_budget, *, clock=time.monotonic):
+                 guard, check_budget, *, clock=time.monotonic, journal=None):
         validate_binding(binding)
         require(binding['endpoint']=='gpu', 'peer_gpu_endpoint_required')
         require(sha(plans) == binding['development_plan_sha256'] and type(plans) is dict
@@ -26,7 +26,19 @@ class GenerationPeer:
             require(type(slot) is str and p['route'] in ('base','lora') and type(p['steps']) is list
                     and 0 < len(p['steps']) <= 3 and all(type(s) is str for s in p['steps']), 'development_plan_shape')
         guard(); check_budget()
-        self.journal = FieldJournal(binding, 'worker', registry)
+        if journal is None:
+            journal=FieldJournal(binding,'worker',registry)
+        else:
+            require(journal.binding==binding and journal.role=='worker' and len(journal.records)==1
+                    and journal.records[0]['kind']=='open' and not journal.blocked,'peer_new_supervised_journal')
+            from training.c5_reuse_field_journal import read_journal
+            require(read_journal(journal.root,binding,'worker',journal.head)==journal.records,'peer_supervised_disk_journal')
+        require(journal.lock.acquire(blocking=False),'peer_entry_ownership_busy')
+        try:
+            require(not getattr(journal,'generation_owner_attached',False),'peer_entry_owner_already_attached')
+            journal.generation_owner_attached=True
+        finally:journal.lock.release()
+        self.journal = journal
         self.binding, self.plans, self.tokenizer = strict(canonical(binding)), strict(canonical(plans)), tokenizer
         self.generate, self.context, self.guard, self.check_budget, self.clock = generate, route_context, guard, check_budget, clock
         self.spent, self.completed = set(), {}

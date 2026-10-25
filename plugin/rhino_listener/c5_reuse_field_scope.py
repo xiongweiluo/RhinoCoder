@@ -5,6 +5,7 @@ Actual entry wiring and current environment/asset verification remain required.
 The formal reuse phase is intentionally not admitted by this development scope.
 """
 import re
+import math
 from pathlib import Path
 
 import hashlib
@@ -80,7 +81,7 @@ def endpoint_paths(instance, endpoints):
                         for b in (source,state,admission) if a!=b), 'field_path_identity')
 
 
-def bind(spec, runtime, approval, *, now, endpoint):
+def bind(spec, runtime, approval, *, now, endpoint, cleanup_only=False):
     """Pure exact binding. No filesystem access or execution authority minting."""
     exact(spec, ('protocol', 'study_id', 'phase', 'instance_id', 'comparison', 'limits',
                  'resources', 'host_policy', 'execution_ready', 'automatic_retry_allowed',
@@ -102,7 +103,8 @@ def bind(spec, runtime, approval, *, now, endpoint):
     for name in ('environment_sha256', 'model_assets_sha256', 'host_readable_files_sha256'):
         require(is_sha(runtime[name]), 'field_asset_evidence_missing')
     require(type(runtime['source_files']) is dict and 0 < len(runtime['source_files']) <= 512
-            and all(type(k) is str and re.fullmatch(r'(training|plugin|tools|eval|agent|mcp|data_pipeline)/[a-zA-Z0-9_./-]+', k)
+            and all(type(k) is str and (re.fullmatch(r'(training|plugin|tools|eval|agent|mcp|data_pipeline)/[a-zA-Z0-9_./-]+', k)
+                    or k in ('requirements-training.txt','requirements.txt'))
                     and not Path(k).is_absolute() and '..' not in Path(k).parts
                     and str(Path(k)) == k and is_sha(v) for k, v in runtime['source_files'].items()),
             'field_source_evidence_missing')
@@ -115,7 +117,8 @@ def bind(spec, runtime, approval, *, now, endpoint):
             and resources['export_reserve_seconds'] >= 900
             and resources['lease_expiry_epoch'] - resources['generation_cutoff_epoch']
                 >= resources['export_reserve_seconds']
-            and type(now) in (int, float) and 0 < now < resources['generation_cutoff_epoch']
+            and type(cleanup_only) is bool and type(now) in (int, float) and math.isfinite(now) and 0 < now
+            and (cleanup_only or now < resources['generation_cutoff_epoch'])
             and 0 < resources['development_seconds_max'] <= 3600
             and 0 < resources['formal_seconds_max'] <= 18000
             and 0 < resources['research_seconds_max'] <= 21600
