@@ -1,0 +1,70 @@
+{
+  "execution_ready": false,
+  "final_full_mac_cpu": {
+    "passed": 1766,
+    "seconds": 320.65,
+    "skipped": 11
+  },
+  "gpu_refresh": {
+    "prior_disabled_runtime_sha256": "3719141109b5a5ef8b932c5f778eaff002f965b8d0856979d87d9cf9618ff7a7",
+    "prior_inventory_used_only_as_expected_map": true,
+    "status": "Broken pipe; no valid fresh receipt; no target source refresh"
+  },
+  "interrupted_or_collection_failed_runs_claimed_pass": false,
+  "local_review_path": "/private/tmp/rhinocoder-c5-native-freeze-review-20261012-resource-draft",
+  "mac_deployment": {
+    "actual_bytes_and_population_verified": true,
+    "candidate_execution_ready": false,
+    "runtime_sha256": "f810cf27a2724f613779d943e781788decf7a85a7fa9f3510febf20348fa3097",
+    "source_files": 302,
+    "spec_sha256": "caf2bdf6f29d517563582ff2160658e8fffe2ab99044905e1735e561a340f3fb",
+    "state_grants_keys_or_admission_created": false
+  },
+  "mac_fresh_readable_inventory": {
+    "boot_session_uuid": "F873EC8A-960B-4B86-B35E-65A973D84E99",
+    "changed": 0,
+    "controller_files": 3552,
+    "host_files": 339,
+    "missing": 0,
+    "pid": 44652,
+    "start_utc": "2026-10-11T16:14:32Z",
+    "uid": 501
+  },
+  "model_or_rhino_calls": 0,
+  "new_exact_head_double_ci_observed": false,
+  "new_execution_owner_grants": 0,
+  "new_resource_and_mac_identity_cpu_controls": {
+    "passed": 22,
+    "seconds": 2.25
+  },
+  "pending": [
+    "restore_existing_gpu_authentication_master",
+    "fresh_gpu_full_assets_and_complete_actual_source_freeze",
+    "independent_both_endpoint_byte_checks",
+    "final_exact_head_double_ci",
+    "direct_owner_final_development_spec_runtime_two_hash_approval"
+  ],
+  "primary_workspace_protected_diff_sha256": "b407093a909b70b9b1c4ea6547517373ad6c7fb230103d97b0502044a0e8aa6c",
+  "prior_head_linux_ci": {
+    "head": "edc1dfabe80a5f02c5c167414e4990dc87ea9e1b",
+    "reason": "Linux watchdog test double did not accept limits keyword; corrected test forwards kwargs",
+    "runs": [
+      38178764420,
+      38178767009
+    ],
+    "status": "FAILURE"
+  },
+  "private_formal_reads": 0,
+  "python_39_inert_imports_passed": true,
+  "release_consistency_passed": true,
+  "resource_acceptance_sha256": "508636af56aa6c9753b1947d858c8af6c16080d93cc5b4cf982b0a629771413a",
+  "resource_entry_native_cpu_controls_before_mac_identity_fix": {
+    "passed": 206,
+    "seconds": 38.32,
+    "skipped": 2
+  },
+  "secret_scan_passed": true,
+  "source_inventory_sha256": "32d80b827ac60bcee361d28c13bd0d09cc9bbcd93749dc1208958665670f42f6",
+  "source_parent_head": "edc1dfabe80a5f02c5c167414e4990dc87ea9e1b",
+  "status": "resource_policy_cpu_and_mac_disabled_freeze_preparation_gpu_access_blocked"
+}

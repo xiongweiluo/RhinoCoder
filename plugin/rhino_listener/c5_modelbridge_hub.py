@@ -24,7 +24,8 @@ class DevelopmentHub:
     The entry checks the exact human record, source freeze and prepared scope.
     Unknown/partial opening retains the actual fixture reference for audit.
     """
-    def __init__(self,state,spec,freeze,schemas,source,active,*,clock=time.time,bridge_factory=IdleBridge):
+    def __init__(self,state,spec,freeze,schemas,source,active,*,clock=time.time,bridge_factory=IdleBridge,
+                 runtime_sha=None,max_messages=16):
         self.state,self.spec,self.freeze,self.schemas,self.source = state,spec,freeze,schemas,source
         self.active,self.active_serial = active,int(active.RuntimeSerialNumber)
         # A's watermark-bearing digest was over-sensitive: read-only Rhino
@@ -33,6 +34,11 @@ class DevelopmentHub:
         # content-only protection already used by NativeDoc for the active UI.
         self.initial_active = active_content_digest(active)
         self.clock,self.seq = clock,1
+        require(runtime_sha is None or (isinstance(runtime_sha,str) and len(runtime_sha)==64
+                and all(c in '0123456789abcdef' for c in runtime_sha)), 'explicit runtime SHA required')
+        require(type(max_messages) is int and max_messages in (16,41), 'bounded hub capacity required')
+        self.runtime_sha = digest(freeze) if runtime_sha is None else runtime_sha
+        self.max_messages = max_messages
         self.bridge_factory = bridge_factory
         self.secret = bytes.fromhex(read_json(state,'hub.key')['key_hex'])
         self.child,self.fixture = None,None
@@ -52,7 +58,7 @@ class DevelopmentHub:
         self.guard()
         require(not self.attached,'hub already attached')
         publish_json(self.state,'hub-bootstrap.json',{'probe_id':self.spec['probe_id'],
-                     'runtime_freeze_sha256':digest(self.freeze),'source_sha256':self.freeze['source_inventory_sha256'],
+                     'runtime_freeze_sha256':self.runtime_sha,'source_sha256':self.freeze['source_inventory_sha256'],
                      'active_serial':self.active_serial,'active_sha256':self.initial_active})
         Rhino.RhinoApp.Idle += self._callback
         self.attached=True
@@ -63,7 +69,7 @@ class DevelopmentHub:
         p=envelope['payload']
         require(isinstance(p,dict) and set(p)=={'version','request_id','action','slot_id','owner_freeze_sha256','expires_at'}
                 and type(p['version']) is int and p['version']==1 and p['action'] in {'open','stop'}
-                and p['owner_freeze_sha256']==digest(self.freeze)
+                and p['owner_freeze_sha256']==self.runtime_sha
                 and isinstance(p['request_id'],str) and 16 <= len(p['request_id']) <= 128
                 and p['request_id'] not in self.control_ids
                 and type(p['expires_at']) is int and 0 < p['expires_at']-self.clock() <= 120
@@ -106,14 +112,14 @@ class DevelopmentHub:
                 'fixed counterbalanced slot order differs')
         slot=p['slot_id']; directory=self.state/slot
         publish_json(self.state,slot+'.engine-started.claim.json',{'probe_id':self.spec['probe_id'],
-                     'slot_id':slot,'runtime_freeze_sha256':digest(self.freeze),'replay_allowed':False})
+                     'slot_id':slot,'runtime_freeze_sha256':self.runtime_sha,'replay_allowed':False})
         import Rhino
         fixture=Rhino.RhinoDoc.CreateHeadless(None)
         require(fixture is not None,'headless opening unknown; do not retry')
         self.fixture=fixture  # Retain identity before any further operation.
         self.opened.append(slot)
         publish_json(directory,'engine-created.json',{'fixture_serial':int(fixture.RuntimeSerialNumber),
-                     'active_serial':self.active_serial,'runtime_freeze_sha256':digest(self.freeze),
+                     'active_serial':self.active_serial,'runtime_freeze_sha256':self.runtime_sha,
                      'rhino_version':str(Rhino.RhinoApp.Version),'python_major_minor':[3,9],'rhino_major':8})
         fixture.ModelUnitSystem=Rhino.UnitSystem.Millimeters
         fixture.ModelAbsoluteTolerance=0.000001
@@ -125,7 +131,7 @@ class DevelopmentHub:
         task=plan['steps'][0]
         secret=bytes.fromhex(read_json(directory,'handoff.key')['key_hex'])
         policy=self.spec['slot_policies'][slot]
-        gate=ResearchGate(backend,atomic,secret,digest(self.freeze),task_sha256=hashlib.sha256(task.encode()).hexdigest(),
+        gate=ResearchGate(backend,atomic,secret,self.runtime_sha,task_sha256=hashlib.sha256(task.encode()).hexdigest(),
                           max_writes=policy['max_writes'],max_reads=policy['max_reads'])
         self.child=self.bridge_factory(gate,directory,key_name='handoff.key',
                  source_sha256=self.freeze['source_inventory_sha256'],guard_source=self.source)
@@ -139,7 +145,7 @@ class DevelopmentHub:
         name='hub-request-%04d.json'%self.seq
         if not (self.state/name).exists():return
         try:
-            require(self.seq <= 16,'hub message count exhausted')
+            require(self.seq <= self.max_messages,'hub message count exhausted')
             result=self.handle(read_json(self.state,name))
         except BaseException as exc:
             self.blocked=True

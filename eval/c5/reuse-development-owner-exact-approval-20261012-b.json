@@ -1,0 +1,20 @@
+{
+  "approval": {
+    "actor": "repository_owner",
+    "approval_basis": "direct repository_owner approval of new reuse development spec and complete runtime freeze",
+    "approved": true,
+    "instance_id": "reuse-dev-20261012-b",
+    "runtime_sha256": "8b2243663e571113b8912174835fe0adde169ac451706f2829af7299fcbee1b4",
+    "spec_sha256": "cdd2571e63f040fd145b56d6b322fb7914c0d63816b53eca762001f632131488",
+    "study_id": "C5DEV-REUSE-20261012-B"
+  },
+  "approval_raw_sha256": "175bb33bf80d2f7559f4ee6d03c6634225c9df4839ef5f84686cd5814dd57574",
+  "approved_publication_head": "03391629b03dcf2b50392479965ef3485a632a61",
+  "cryptographic_human_origin_proven": false,
+  "direct_owner_message": "批准B上述完整spec/runtime两个哈希，执行一次固定公开8槽开发验证",
+  "formal_execution_authorized": false,
+  "gpu_registration_epoch": 1791772922.8665137,
+  "mac_registration_epoch": 1791772926.736382,
+  "recorded_epoch": 1791773168.673224,
+  "scope": "single_fixed_public_eight_development_only"
+}

@@ -1,0 +1,218 @@
+{
+  "actual_deployment": {
+    "gpu": {
+      "endpoint": "gpu",
+      "execution_ready": false,
+      "files_individually_written_and_rechecked": 303,
+      "model_calls": 0,
+      "package_raw_sha256": "218eb9c50abf9e4d9c94122ad929156ca67286a73610b432572e48d64a85168f",
+      "private_formal_reads": 0,
+      "rhino_calls": 0,
+      "state_or_owner_grant_or_admission_created": false
+    },
+    "mac": {
+      "endpoint": "mac",
+      "execution_ready": false,
+      "files_individually_written_and_rechecked": 303,
+      "model_calls": 0,
+      "package_raw_sha256": "46f7c8656bff8e194c47203bea31cb4f095f7f352a66513e854a708a89a3572e",
+      "private_formal_reads": 0,
+      "rhino_calls": 0,
+      "state_or_owner_grant_or_admission_created": false
+    }
+  },
+  "all_checkout_source_bytes_match_frozen_inventory": true,
+  "audit_asset_and_entry_cpu": {
+    "passed": 141,
+    "seconds": 3.86,
+    "skipped": 2
+  },
+  "current_gpu_environment": {
+    "boot_id": "0a861fa3-31c9-4899-a022-c4f9cdb8dbfe",
+    "distribution_files": 21614,
+    "full_readonly_observation_epochs": [
+      1791758625.3848813,
+      1791758687.0214605
+    ],
+    "gpu_uuid": "GPU-3a14915f-3804-46b7-b98a-aa09f7bbab4f",
+    "libpython_files": 2,
+    "missing_metadata_preserved": true,
+    "opaque_kernel_driver_trusted": true,
+    "stdlib_files": 960,
+    "uid": 1000
+  },
+  "current_mac_readable": {
+    "audit_tokenizer": {
+      "directory": "/Users/xiongweiluo/RhinoCoder/data/training/c5/modelbridge-tokenizer/c03e6d358207e414f1eca0bb1891e29f1db0e242",
+      "file_sha256": {
+        "config.json": "c0242402ad6a13b331ea320feea8c7e3776ffb7a4eff0757b9cd667e116d9a28",
+        "generation_config.json": "1a628a5775bc69cde01c6749a531150ca4d3189652c618a174f7077923acf3b1",
+        "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+        "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+        "tokenizer_config.json": "959e7f1d9a1b7641a6d6ce05ca97b75c7894fcb66cbe5a040406458fb1128ee4",
+        "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+      },
+      "population_exact": true
+    },
+    "complete_host_byte_closure_claimed": false,
+    "controller_files": 3552,
+    "host_acceptance": {
+      "absence_of_hidden_handlers_or_memory_erasure_proven": false,
+      "agent_rhino_script_subscription_warmup_geometry_calls": 0,
+      "execution_ready": false,
+      "fresh_process_identity_observation": {
+        "blank_document_independently_inspected": false,
+        "epoch": 1791758810.946434,
+        "historic_boot_wall_microseconds_not_an_identity_key": true,
+        "mac_boot_session_uuid": "F873EC8A-960B-4B86-B35E-65A973D84E99",
+        "pid_uid_start_identity_independently_rechecked": true,
+        "policy": "boot_session_uuid_pid_uid_start_utc_whole_second",
+        "rhino_script_or_subscription_calls": 0
+      },
+      "full_byte_closure_claimed": false,
+      "instance_id": "reuse-dev-20261011-a",
+      "new_development_spec_runtime_approval_received": false,
+      "old_instance_guarantee_transferred": false,
+      "original_host_acceptance_raw_sha256": "325cd0c34413569ccdb0a0d5d637ece88d60ccf8035ac40fc50e637bd037e212",
+      "owner_accepts_readable_files_frozen_opaque_host_trusted_visible_checkpoints_only": true,
+      "owner_confirms_blank_active_document": true,
+      "owner_confirms_exclusive_use_and_no_other_operations_during_research": true,
+      "owner_opened_rhino_independently": true,
+      "owner_statement": "\u4e09\u9879\u5747\u786e\u8ba4",
+      "private_formal_data_reads": 0,
+      "process_observation": {
+        "blank_document_independently_inspected": false,
+        "executable": "/Applications/Rhino 8.app/Contents/MacOS/Rhinoceros",
+        "mac_boot_epoch_seconds": 1790688926,
+        "mac_boot_microseconds": 281231,
+        "mac_boot_session_uuid": "F873EC8A-960B-4B86-B35E-65A973D84E99",
+        "observed_at_utc": "2026-10-11T16:24:07Z",
+        "pid": 44652,
+        "start_time_utc_to_whole_second": "2026-10-11T16:14:32Z",
+        "uid": 501
+      },
+      "purpose": "new_host_preparation_acceptance_not_execution_approval",
+      "schema_version": 1,
+      "study_id": "C5DEV-REUSE-20261011-A"
+    },
+    "host_files": 339,
+    "observation_epoch": 1791759190.582892
+  },
+  "current_model_assets": {
+    "adapter_files": 2,
+    "audit_tokenizer_files": 6,
+    "base_files": 14,
+    "same_original_base_tokenizer_hashes": true
+  },
+  "exact_two_hash_execution_approval_received": false,
+  "execution_ready": false,
+  "formal_execution_authorized": false,
+  "independent_actual_asset_map_check": {
+    "execution_ready": false,
+    "gpu_observation_epochs": [
+      1791758625.3848813,
+      1791758687.0214605
+    ],
+    "human_or_transport_acquisition_origin_proven": false,
+    "mac_observation_epoch": 1791759190.582892,
+    "model_calls": 0,
+    "rhino_calls": 0,
+    "supplied_actual_installed_asset_maps_verified": true
+  },
+  "independent_source_byte_checks": {
+    "gpu": {
+      "actual_installed_assets_verified": false,
+      "candidate_execution_ready": true,
+      "complete_closure_binding_verified": true,
+      "execution_ready": false,
+      "human_approval_origin_verified": false,
+      "source_files_individually_verified": 302,
+      "source_population_exact": true
+    },
+    "mac": {
+      "actual_installed_assets_verified": false,
+      "candidate_execution_ready": true,
+      "complete_closure_binding_verified": true,
+      "execution_ready": false,
+      "human_approval_origin_verified": false,
+      "source_files_individually_verified": 302,
+      "source_population_exact": true
+    }
+  },
+  "local_full_cpu": {
+    "passed": 1779,
+    "seconds": 319.17,
+    "skipped": 11
+  },
+  "new_model_or_rhino_calls": 0,
+  "new_state_grants_keys_or_admissions_created": false,
+  "original_c5_no_go_changed": false,
+  "payload_bytes": 3286497,
+  "primary_workspace_protected_diff_sha256": "b407093a909b70b9b1c4ea6547517373ad6c7fb230103d97b0502044a0e8aa6c",
+  "prior_source_parent_double_ci": {
+    "conclusion": "SUCCESS",
+    "head": "4004507ac10e421be5fd00b898a28c8ded86833a",
+    "linux_passed": 1768,
+    "linux_skipped": 9,
+    "runs": [
+      38180452581,
+      38180455510
+    ]
+  },
+  "private_formal_reads": 0,
+  "python_39_inert_imports_passed": true,
+  "raw_file_sha256": {
+    "eval/c5/reuse-development-runtime-freeze-20261011-a.json": "397529f36cf03743ac73ffddb12d1958f0265ded687f9db0b00251d4a9781fd4",
+    "eval/c5/reuse-development-spec-20261011-a.json": "68c3646ea11c6be5a03d0b9537760dcee76722747334b2376daa249bac629643",
+    "eval/c5/reuse-field-environment-plan-20261011-a.json": "530b22487e7dfde502cadd8f18fa2d98af539af0da47fd1390222c8727dcdebf"
+  },
+  "readonly_receipt_raw_sha256": {
+    "gpu": "ff2e73f620d704265f16b9927e17dfc173407575003ac95af8850a3c10487caf",
+    "mac": "9a4e19dbabd67bd6726f98614c63da27294d212a74e193fef172d91a468b64d1"
+  },
+  "release_consistency_passed": true,
+  "resource_basis": {
+    "platform_hour_quota": null,
+    "prior_cumulative_upper_bound_basis": "owner_reported_unknown_not_original_16_hour_compliance",
+    "remaining_gpu_seconds_meaning": "incremental_research_reservation_not_platform_balance",
+    "resource_revision_acceptance": {
+      "accepted": true,
+      "actor": "repository_owner",
+      "development_seconds_max": 18000,
+      "exact_two_hash_execution_approval_received": false,
+      "export_reserve_seconds": 900,
+      "formal_seconds_max": 64800,
+      "generation_cutoff_epoch": 1791913500,
+      "historical_cumulative_upper_bound_seconds": null,
+      "lease_expiry_epoch": 1791914400,
+      "original_16_hour_compliance_claimed": false,
+      "renewal_or_payment_authorized": false,
+      "research_seconds_max": 82800,
+      "scope": "resource_revision_only_not_execution",
+      "unused_development_transferred_to_formal": false
+    }
+  },
+  "resources": {
+    "development_seconds_max": 18000,
+    "export_reserve_seconds": 900,
+    "formal_seconds_max": 64800,
+    "generation_cutoff_epoch": 1791913500,
+    "lease_expiry_epoch": 1791914400,
+    "original_cumulative_compliance_claimed": false,
+    "original_cumulative_seconds_max": 57600,
+    "prior_cumulative_upper_bound_seconds": null,
+    "remaining_gpu_seconds": 82800,
+    "research_seconds_max": 82800,
+    "resource_policy": "incremental_reuse_unknown_history_v1",
+    "resource_revision_acceptance_sha256": "508636af56aa6c9753b1947d858c8af6c16080d93cc5b4cf982b0a629771413a"
+  },
+  "review_path": "/private/tmp/rhinocoder-c5-reuse-development-freeze-20261012-complete-v2",
+  "runtime_sha256": "6c27d31987bed8289b498fd547dd680402b0f526cd773bd58a5c09dfaa9b2ac6",
+  "secret_scan_passed": true,
+  "source_files": 302,
+  "source_parent_head": "4004507ac10e421be5fd00b898a28c8ded86833a",
+  "spec_sha256": "32f02512402ada907f6ed07381417d7f91c41896acef79ec5fe9b5d037b6d900",
+  "status": "complete_new_development_freeze_materials_not_execution_approval",
+  "superseded_unapproved_runtime_sha256": "236bc03135a67a173edd02dba66a212c03924dd3ff5e365338136e9d75872e93",
+  "this_final_freeze_head_double_ci_observed": false
+}

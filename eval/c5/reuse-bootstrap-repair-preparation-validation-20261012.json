@@ -1,0 +1,58 @@
+{
+  "asset_maps": {
+    "execution_ready": false,
+    "gpu_observation_epochs": [
+      1791766961.872495,
+      1791767023.221503
+    ],
+    "human_or_transport_acquisition_origin_proven": false,
+    "mac_observation_epoch": 1791766959.705847,
+    "model_calls": 0,
+    "rhino_calls": 0,
+    "supplied_actual_installed_asset_maps_verified": true
+  },
+  "candidate_instance_id": "reuse-dev-20261012-b",
+  "candidate_study_id": "C5DEV-REUSE-20261012-B",
+  "engineering_gate_passed": false,
+  "epoch": 1791767991.5095308,
+  "host_process_observation": {
+    "a_retired_grant_bytes_verified": true,
+    "b_state_absent": true,
+    "model_or_rhino_calls": 0,
+    "observation_epoch": 1791766961.000561,
+    "private_formal_reads": 0,
+    "retained_accepted_rhino_process_verified": true
+  },
+  "isolated_actual_run_path_bootstrap_cases": 8,
+  "local_full": {
+    "passed": 1833,
+    "seconds": 316.39,
+    "skipped": 11
+  },
+  "model_or_rhino_calls": 0,
+  "new_b_state_grant_key_admission_created": false,
+  "new_exact_execution_approval_received": false,
+  "original_a_frozen_source_modified": false,
+  "original_a_retired": true,
+  "owner_custody_cpu_cases": 29,
+  "predecessor_head": "a69921b5ed9ec7271d20f996951e179aa2df1608",
+  "predecessor_shared_registry_cases": 17,
+  "private_formal_reads": 0,
+  "source_files_sha256": {
+    "plugin/rhino_listener/c5_reuse_admission.py": "e037ee171e01f7e7418ecf981015c660d2a1efae2eabe211652b1a8dcb2c65c3",
+    "plugin/rhino_listener/c5_reuse_field_scope.py": "fee5795f2f793e663ac56b6b0f2cdfcf3e99baea00ec80c5da8201fc28996a25",
+    "plugin/rhino_listener/c5_reuse_host_session.py": "d3d5d22decb5e579dc58231d1d2f61e07f5bd0a85c9b9ec0849c7891d22fe164",
+    "plugin/rhino_listener/c5_reuse_predecessor.py": "7979d239bf9c4153bd6161e681d70e4b9af2e46fbe8266f3aedc6deca0d24179",
+    "plugin/rhino_listener/c5_reuse_runtime_scope.py": "fb14957f55893501cb6493183408f013c47678d4fabd6334c954e9aa9f0bcc52",
+    "tools/check_c5_reuse_field_freeze.py": "39c50ea7a6b9956b38ad9bc5e00666c859411120edeffa25be62a87aef7bf4b4",
+    "tools/run_c5_reuse_mac_entry.py": "7a6acd7a50d8cce06b9b6a9562c88a7fe353170f10b89570047df9ee4dbced11",
+    "tools/run_c5_reuse_owner_custody.py": "f1e48b456dc79d3ab23bd81d0e63784982e24157110eec2861ae1ba1bbbe0fb3",
+    "tools/run_c5_reuse_rhino_entry.py": "ae9f477a1a723f1fb03933a4e8d09d7ea85c877b6881c94e337c4add8b2ef04a",
+    "tools/stage_c5_reuse_field_source.py": "2e0fbf16f2aa6f3db1d0cde4541fbf8b85dde7c36c13ea55627a1449aa892855",
+    "training/c5_reuse_freeze_materials.py": "a419e352c3f70a6229a6ee5bf7a3b8057c93e02cd873f6186881e3278b771c18",
+    "training/c5_reuse_gpu_entry_audit.py": "88248104ee6a975569eca975888c326230cf00c437d3bf02850f5f1c5c13afb5",
+    "training/c5_reuse_gpu_loader.py": "06ef09546af6214711836dbe45092b6f706c398043496693ee28bfdc76d09d3c"
+  },
+  "source_head_double_ci_observed": false,
+  "status": "cpu_bootstrap_repair_and_candidate_b_preparation_not_execution"
+}

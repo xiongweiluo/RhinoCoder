@@ -1,0 +1,29 @@
+{
+  "accepted_on_client_date": "2026-10-12",
+  "actor": "repository_owner",
+  "exact_two_hash_execution_approval_received": false,
+  "execution_ready": false,
+  "historical_cumulative_upper_bound_seconds": null,
+  "new_renewed_expiry_reported": false,
+  "owner_reply": "确认",
+  "proposal": "eval/c5/reuse-chain-time-resource-proposal-20261011.json",
+  "proposal_raw_sha256": "ed13cf2965b6dae848fc642e8a30ab7b17597610f49eec9bb4524572717bb344",
+  "resource_acceptance": {
+    "accepted": true,
+    "actor": "repository_owner",
+    "development_seconds_max": 18000,
+    "exact_two_hash_execution_approval_received": false,
+    "export_reserve_seconds": 900,
+    "formal_seconds_max": 64800,
+    "generation_cutoff_epoch": 1791913500,
+    "historical_cumulative_upper_bound_seconds": null,
+    "lease_expiry_epoch": 1791914400,
+    "original_16_hour_compliance_claimed": false,
+    "renewal_or_payment_authorized": false,
+    "research_seconds_max": 82800,
+    "scope": "resource_revision_only_not_execution",
+    "unused_development_transferred_to_formal": false
+  },
+  "resource_acceptance_sha256": "508636af56aa6c9753b1947d858c8af6c16080d93cc5b4cf982b0a629771413a",
+  "status": "accepted_resource_revision_not_execution_approval"
+}

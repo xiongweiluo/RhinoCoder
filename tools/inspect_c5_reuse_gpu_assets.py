@@ -62,8 +62,12 @@ def loadable(name):
  return '__pycache__' not in Path(name).parts and Path(name).suffix not in ('.pyc','.pyo')
 normalized_distribution={str(Path(n).relative_to(env)):v for n,v in distribution_files.items() if loadable(n)}
 normalized_stdlib={str(Path(n).relative_to(env)):v for n,v in stdlib.items() if loadable(n)}
+target_runtime=subprocess.run([str(env/'bin/python3.11'),'-I','-S','-B','-c',
+ 'import sys,platform,json; print(json.dumps({"python":sys.version,"platform":platform.platform()}))'],
+ capture_output=True,text=True,timeout=15,check=True)
 print(json.dumps({'status':'current_public_assets_rehashed_not_execution_authority',
  'start_epoch':start,'finish_epoch':time.time(),
+ 'target_runtime':json.loads(target_runtime.stdout),
  'boot_id':Path('/proc/sys/kernel/random/boot_id').read_text().strip(),
  'gpu_rows':p.stdout.strip().splitlines(),'base_files':base_files,'adapter_files':actual_adapter,
  'base_manifest_sha256':file_sha(manifest),'base_files_match_pinned_manifest':True,

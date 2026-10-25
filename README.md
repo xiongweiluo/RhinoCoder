@@ -33,6 +33,10 @@ RhinoCoder 是一个面向 Rhino 8 的可验证空间设计 Agent。它把自然
 
 [C5-7最终裁决：NO-GO](docs/c5-research-evidence-and-decision-report.md)，依据正式现场证据不完整；本人部分失败核查已核实消费/案例与计划绑定，但40槽未完成、质量不可估计、完整联合/历史宿主清理未核实。不是LoRa 0/20或能力失败，不进入产品接入，训练/离线77/80与失败资产保留；默认混合未切换。本人已正常退出研究Rhino且[独立进程缺席核对](eval/c5/formal20-v4-owner-host-exit-observation-20261009.json)完成当前会话交接，不追认历史清理或内存擦除；PR/main尚未收口，整体Goal未完成。
 
+[10月12日追加公开8槽开发验证](docs/c5-reuse-development-startup-failure-20261012.md)：本人批准完整冻结后，唯一Rhino包装器因嵌入式模块导入错误在warmup/订阅和模型加载前终止；工程门未通过，质量不可估计，两端入口已退休，不重试或进入正式消费。原C5 NO-GO与默认混合路线不变。
+
+[嵌入式启动修复](docs/c5-reuse-embedded-bootstrap-repair-20261012.md)补齐真实临时包/Python3.9隔离回归；后续[B单次准备预检失败](docs/c5-reuse-development-preparation-failure-20261012-b.md)：本人精确批准后，代理调用的受限沙箱拒绝宿主身份查询，尚未进入prepare或Rhino/模型链路。B两端已退休、不重试，工程门未通过；原A失败、NO-GO及默认混合保持。
+
 - **完成必须有几何证据**：模型说“完成”不算完成；系统重新读取 Rhino 场景，并核对数量、尺寸、颜色和空间关系。
 - **隐私门先于模型和 MCP**：Critical 请求提前阻断，High 强制本地且禁止云 fallback，Medium 先最小化再出站；关闭普通路由也不能绕过。
 - **恢复不会重复造物体**：变更工具携带幂等键，模型降级发生在规划边界，不重放已完成工具；支持取消、重试、Undo 与任务级精准回滚。

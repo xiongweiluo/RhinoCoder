@@ -12,11 +12,14 @@ PUBLIC_RUNTIME_RAW_SHA256 = 'f1a2096064edf49991bc060bd3bb956126552924a2347cdf45a
 PREFIXES = ('/Applications/Rhino 8.app/Contents/', '/Users/xiongweiluo/.rhinocode/',
  '/Users/xiongweiluo/Library/Application Support/McNeel/', '/Users/xiongweiluo/.codex/worktrees/',
  '/opt/anaconda3/lib/', '/opt/anaconda3/bin/')
+TOKENIZER_DIR=Path('/Users/xiongweiluo/RhinoCoder/data/training/c5/modelbridge-tokenizer/c03e6d358207e414f1eca0bb1891e29f1db0e242')
+TOKENIZER_NAMES={'config.json','generation_config.json','merges.txt','tokenizer.json','tokenizer_config.json','vocab.json'}
 
 
 def file_sha(path):
     path = Path(path).resolve(strict=True)
-    assert any(str(path).startswith(prefix) for prefix in PREFIXES), 'non-code path'
+    assert any(str(path).startswith(prefix) for prefix in PREFIXES) or (
+        path.parent==TOKENIZER_DIR and path.name in TOKENIZER_NAMES), 'non-code/non-public-tokenizer path'
     before = path.stat()
     h = hashlib.sha256()
     with path.open('rb') as stream:
@@ -53,6 +56,11 @@ def inspect(repository):
                        'population_is_historical_readable_code_inventory_not_complete_closure':True}
     info=plistlib.loads(Path('/Applications/Rhino 8.app/Contents/Info.plist').read_bytes())
     result['rhino_bundle_version']={k:info.get(k) for k in ('CFBundleVersion','CFBundleShortVersionString')}
+    assert old['tokenizer_dir']==str(TOKENIZER_DIR) and set(old['tokenizer_file_sha256'])==TOKENIZER_NAMES
+    assert TOKENIZER_DIR.resolve()==TOKENIZER_DIR and {p.name for p in TOKENIZER_DIR.iterdir()}==TOKENIZER_NAMES
+    tokens={n:file_sha(TOKENIZER_DIR/n) for n in sorted(TOKENIZER_NAMES)}
+    assert tokens==old['tokenizer_file_sha256'], 'audit tokenizer drift'
+    result['audit_tokenizer']={'directory':str(TOKENIZER_DIR),'file_sha256':tokens,'population_exact':True}
     return result
 
 

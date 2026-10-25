@@ -55,7 +55,7 @@ def validate_begin(value,binding):
 
 
 def serve(peer,pipe,qualification,guard,budget,journal,*,clock=time.monotonic,on_ready=lambda:None,
-          on_request_start=lambda:None,on_request_end=lambda:None):
+          on_request_start=lambda:None,on_request_end=lambda:None,on_begin=lambda:None):
     require(set(peer.plans)==set(ORDER) and all(len(p['steps'])==1 for p in peer.plans.values()),'reuse_worker_exact_eight_plan')
     def check():guard();budget()
     check();ready=readiness(peer.binding,qualification,peer.journal.head)
@@ -66,8 +66,10 @@ def serve(peer,pipe,qualification,guard,budget,journal,*,clock=time.monotonic,on
     owner=validate_begin(begin,peer.binding)
     require(owner['worker_readiness_sha256']==sha(ready),'reuse_external_worker_ready_binding')
     journal('worker_begin_record_received',{'begin':begin,'human_provenance_independently_verified':False})
-    for slot in ORDER:
-        sent=receive(pipe,clock()+180,check)
+    on_begin()
+    for index,slot in enumerate(ORDER):
+        gap=peer.binding['limits']['first_request_idle_seconds'] if index==0 else peer.binding['limits']['between_requests_idle_seconds']
+        sent=receive(pipe,clock()+gap,check)
         require(sent['request']['slot_id']==slot and sent['request']['step_index']==0,'reuse_worker_order_no_fill')
         on_request_start()
         result=peer.infer(sent)
@@ -75,7 +77,7 @@ def serve(peer,pipe,qualification,guard,budget,journal,*,clock=time.monotonic,on
         on_request_end()
         if peer.journal.blocked:raise RuntimeError('reuse_worker_retired_no_retry')
     # An explicit close frame prevents an EOF from being advertised as complete.
-    closing=receive(pipe,clock()+180,check)
+    closing=receive(pipe,clock()+peer.binding['limits']['between_requests_idle_seconds'],check)
     require(closing=={'kind':'reuse_worker_close','protocol':PROTOCOL,'scope_sha256':sha(common_scope(peer.binding))},
             'reuse_worker_close_scope')
     final={'kind':'reuse_worker_closed','protocol':PROTOCOL,'scope_sha256':sha(common_scope(peer.binding)),
