@@ -172,7 +172,15 @@ class IdleBridge:
             # Only a separately signed close/stop may follow; no quality retry.
             response = pending['response_name'] if pending else 'response-%04d.json'%self.seq
             try:
-                publish_json(self.directory,response,{'status':'failed_no_retry','error_type':type(exc).__name__,
-                             'error':str(exc),'seq':self.seq,'manual_review_required':True})
+                value={'status':'failed_no_retry','error_type':type(exc).__name__,
+                       'error':str(exc),'seq':self.seq,'manual_review_required':True}
+                context=getattr(exc,'ttl_observation',None)
+                if (type(exc).__name__=='NativeError' and str(exc)=='expired/oversized handoff TTL'
+                    and type(context) is dict and set(context)=={'gate_epoch','expires_at','maximum_ttl_seconds'}
+                    and type(context['gate_epoch']) in (int,float)
+                    and (context['expires_at'] is None or type(context['expires_at']) is int)
+                    and context['maximum_ttl_seconds']==300):
+                    value['ttl_observation']=context
+                publish_json(self.directory,response,value)
             finally:
                 self.seq += 1

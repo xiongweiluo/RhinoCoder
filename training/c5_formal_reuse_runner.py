@@ -97,6 +97,13 @@ class FormalRunner:
                   "independently_audited": False}
         opened = False
         fault_phase='unknown'
+        from training.c5_slot_tail_repair import enabled, error_record
+        tail = enabled(self.spec)
+        pending_step = None
+        pending_written = False
+        if tail:
+            record['cleanup_errors'] = []
+            record['stop_had_failure'] = None
         try:
             self._guard()
             opened = True  # Opening may create a fixture before raising.
@@ -120,19 +127,28 @@ class FormalRunner:
                 self._guard()
                 before = self.native.capture(slot_id)
                 require(before.get("status") == "captured", "actual pre-model capture missing")
+                if tail:
+                    pending_step = {"step_index": step_index, "before": before,
+                        "response": None, "observation": None, "post_model_capture": None,
+                        "receipt": None, "policy_denied": False}
+                    pending_written = False
+                    fault_phase = 'step_claim'
                 publish_json(self.state, slot_id + "-step-%d.claim.json" % step_index,
                              {"slot_id": slot_id, "step_index": step_index,
                               "scene_sha256": digest(before["native"]),
                               "runtime_freeze_sha256": freeze_sha, "replay_allowed": False})
+                if tail: fault_phase='model_request'
                 response = self.model.infer(slot_id=slot_id, route=route, step_index=step_index,
                                             task_text=task, scene=semantic(before["native"]),
                                             binding=before["state"], freeze_sha256=freeze_sha)
+                if tail: pending_step['response'] = response
                 fault_phase="model_contract"
                 observed = response.get("observation") if isinstance(response, Mapping) else None
                 require(isinstance(observed, Mapping) and observed.get("repair_count") == 0
                         and observed.get("dispatch_count") == 0
                         and observed.get("scene_binding") == before["state"],
                         "strict scene-bound raw model observation required")
+                if tail: pending_step['observation'] = observed
                 receipts = response.get("generation_receipts")
                 require(isinstance(receipts, list) and len(receipts) in (1, 2)
                         and [item.get("stage") for item in receipts] == ["selector", "invocation"][:len(receipts)],
@@ -151,7 +167,9 @@ class FormalRunner:
                 require(self._generation_stages <= self.spec["max_generation_stages"],
                         "frozen generation stage ceiling exceeded")
                 fault_phase="unknown"
+                if tail: fault_phase='post_model_capture'
                 after_model = self.native.capture(slot_id)
+                if tail: pending_step['post_model_capture'] = after_model
                 require(after_model.get("status") == "captured", "actual post-model capture missing")
                 fault_phase="native_contract"
                 require(isinstance(after_model.get("state"),Mapping) and isinstance(after_model.get("native"),Mapping),
@@ -163,6 +181,7 @@ class FormalRunner:
                 step = {"step_index": step_index, "before": before, "response": response,
                         "observation": observed, "post_model_capture": after_model,
                         "receipt": None, "policy_denied": False}
+                if tail: pending_step = step
                 if status == "schema_valid_not_authorized":
                     name = observed.get("name")
                     require(isinstance(name, str), "structured name missing")
@@ -173,6 +192,7 @@ class FormalRunner:
                     else:
                         # Adapter MUST reparse unchanged raw outputs, consume
                         # permission before signing, and use native actual scene.
+                        if tail: fault_phase='native_execute'
                         receipt = self.native.execute_observation(slot_id=slot_id, task_text=task,
                             response=response, before=before)
                         if receipt.get('status') == 'known_prepermission_rejection_no_dispatch':
@@ -181,6 +201,7 @@ class FormalRunner:
                             step['execution_rejection'] = receipt
                             record['steps'].append(step)
                             publish_json(self.state, slot_id + '-step-%d.record.json' % step_index, step)
+                            if tail: pending_written = True
                             break  # Score a task failure; never retry its call.
                         require(isinstance(receipt, Mapping) and receipt.get("status") == "done"
                                 and receipt.get("payload", {}).get("operation") == name
@@ -191,6 +212,7 @@ class FormalRunner:
                         else: used_writes += 1
                 record["steps"].append(step)
                 publish_json(self.state, slot_id + "-step-%d.record.json" % step_index, step)
+                if tail: pending_written = True
                 if status == "operational_failure_no_retry":
                     raise FormalRunError("uncertain model operation; no further route")
                 if status != "schema_valid_not_authorized" or step["policy_denied"]:
@@ -199,6 +221,15 @@ class FormalRunner:
             require(final.get("status") == "captured", "actual final Rhino capture missing")
             record["final_native"] = final["native"]
         except BaseException as exc:
+            if tail and pending_step is not None and not pending_written and (
+                self.state / (slot_id+'-step-%d.claim.json'%pending_step['step_index'])).exists():
+                pending_step['failure'] = error_record(exc, fault_phase)
+                # The permanent claim is consumed even when inference, capture,
+                # signing or native dispatch raises. Never regenerate this step.
+                publish_json(self.state, slot_id + '-step-%d.record.json' % pending_step['step_index'], pending_step)
+                if not any(value is pending_step for value in record['steps']):
+                    record['steps'].append(pending_step)
+                pending_written = True
             record["error_type"] = type(exc).__name__
             if 'slot_protocol' in self.spec.get('run_package',{}):
                 from training.c5_formal20_plan import FormalPlanError
@@ -223,7 +254,20 @@ class FormalRunner:
                     stop = self.native.stop_slot(slot_id)
                     require(stop.get("status") == "stopped", "fixture stop unverified")
                     record["stop"] = "stopped"
+                    if tail: record['stop_had_failure'] = stop.get('had_failure')
                 except BaseException as exc:
+                    if tail:
+                        record['cleanup_errors'].append(error_record(exc, 'close_or_stop'))
+                        receipt = getattr(exc, 'cleanup_receipt', None)
+                        if receipt is not None:
+                            record['stop'] = 'stopped'
+                            record['stop_had_failure'] = receipt['had_failure']
+                        if isinstance(exc, KeyboardInterrupt):
+                            record['fault'] = {'scope':'owner_pause','code':'owner_cancelled'}
+                        elif isinstance(exc, PermissionError):
+                            record['fault'] = {'scope':'global','code':'permission_or_safety'}
+                        elif record['error_type'] is None:
+                            record['fault'] = {'scope':'unknown','code':'cleanup_evidence_unconfirmed'}
                     record["error_type"] = record["error_type"] or type(exc).__name__
             publish_json(self.state, slot_id + ".result.json", record)
         return record

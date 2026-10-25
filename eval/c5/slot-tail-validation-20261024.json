@@ -1,0 +1,245 @@
+{
+  "ci": {
+    "actual_final_outcome_reference": "GitHub PR current exact-head checks, do not commit CI status back into freeze",
+    "exact_head_pass_required_before_delivery": true,
+    "selection": "full: shared generic ConsentStore and CI definition changed",
+    "trigger": "single pull_request workflow, startup four modes once and excluded from rest"
+  },
+  "code_inventory_sha256": "edf2b9acdd02716568980cd068433e2624aebc398e22e4ccfe6dfed15e1cebd1",
+  "environment_reuse": {
+    "gpu_adapter_files_verified": 2,
+    "gpu_base_files_verified": 14,
+    "gpu_compatible_runtime_files_verified": 2684,
+    "gpu_native_libraries_verified": 27,
+    "gpu_native_symlinks_verified": 8,
+    "mac_deployed_loaded_external_origins": 3357,
+    "mac_external_runtime_files": 3552,
+    "original_distribution_21614_file_proof_reused_not_all_rehashed": true,
+    "rhino_python39_public_modules_syntax": 72,
+    "rhino_readable_files": 339
+  },
+  "files_sha256": {
+    "slot-tail-final-gpu-readback-20261024.json": "fdab1c52dca8ec3515585e212d14eb0e3b99822e862a41d27c2ef4521bd24aac",
+    "slot-tail-final-mac-readback-20261024.json": "741d0da14c66e3b7851c3ff1213da6de84113a5d8aca6dcb51887b0f40ee20e9",
+    "slot-tail-independent-public-readback-20261024.txt": "4fa9c0e84eda0396d7551ca6d3f5982271143107650e36645e8000a67fc1c081",
+    "slot-tail-linux-cpu-final-20261024.txt": "1e6e44059de06f74556b3020734e962e1dba65b95de4e732f293a0de4396b9e6",
+    "slot-tail-linux-cpu-prefix-20261024.txt": "74ebee903aa9d378647fe62f8513c88c9c0c269fe1ba456a1929020b5351dcf9",
+    "slot-tail-linux-cpu-remaining-20261024.txt": "488d8e049ed8d767c6d298c12779d1cf9a6ed32299468a24359dd6dde7984f13",
+    "slot-tail-mac-cpu-20261024.txt": "421f5f863642382e1049218c06dd50f18a5bdef15c6467201cbc6c6d3c2110e1",
+    "slot-tail-permit-boundary-mac-20261024.txt": "7ebc52cf8ca16c249702a26b9ae16e0870f7c5f39f390644a3815482ddfc2ce7",
+    "slot-tail-permit-fix-linux-20261024.txt": "7b6e54a971403ce3f495df344c003f02719f32a9a4ee64452bd43a1a5afda79d"
+  },
+  "final_readback": {
+    "gpu": {
+      "actual_execution_authority": false,
+      "charged_seconds_preserved": 70340.89651274681,
+      "code_inventory_sha256": "edf2b9acdd02716568980cd068433e2624aebc398e22e4ccfe6dfed15e1cebd1",
+      "current_lease_remaining_seconds": 96910.61585831642,
+      "endpoint": "gpu",
+      "epoch": 1792857889.384144,
+      "first_load_epoch_preserved": 1792692329.837715,
+      "full_window_currently_available": true,
+      "historical_full_gate_passed": false,
+      "model_or_rhino_calls": 0,
+      "new_loads_or_slots": 0,
+      "new_state_or_grant_present": false,
+      "old_refusals_retained": true,
+      "prior_attempts_preserved": 4,
+      "prior_rows_preserved": 36,
+      "private_formal_reads": 0,
+      "remaining_work_plus_startup_export_seconds": 34500,
+      "roots": {
+        "current": {
+          "files": 481,
+          "inventory_sha256": "272bb12751dcaff6e4c7148da7434898e79216c2b750ff6e1a1fbeb4c4c04b84"
+        },
+        "historical_initial": {
+          "files": 429,
+          "inventory_sha256": "826134d6927ca197268193a6042e45bc9b485ae0c51b6f7656e4b3f0bf02adc2"
+        },
+        "historical_r1": {
+          "files": 433,
+          "inventory_sha256": "f36a34d4e54b8fd581eae49c2dcc29e731e6adb3eb1e8f35909bd1dabd7e63e8"
+        },
+        "historical_r2": {
+          "files": 447,
+          "inventory_sha256": "88a91c55a2a06dbee7ca35349fed26090b5a4253e4a879fb9d036befdc4b3805"
+        },
+        "historical_r3": {
+          "files": 464,
+          "inventory_sha256": "d9faf9595518623c2092a9a78a02623c4acd45c035ec3fcefb6b7236f33f7abe"
+        }
+      },
+      "runtime_sha256": "73dcad00f96c3830e46a520122f383b751cd04e6be675f84e65a5966e65c583c",
+      "source_inventory_sha256": "96409cfaa93bb9bebca4d535fd3af8c4ed2f661dc6a73c87425c4953b4d56fb4",
+      "spec_sha256": "d80a20ea0e4f6460640f84d7e64cf548b93ce84c8215ea8ca13a076b3bf0d086",
+      "status": "INDEPENDENT_PUBLIC_FREEZE_READBACK_VERIFIED_NO_AUTHORITY"
+    },
+    "mac": {
+      "actual_execution_authority": false,
+      "charged_seconds_preserved": 70340.89651274681,
+      "code_inventory_sha256": "edf2b9acdd02716568980cd068433e2624aebc398e22e4ccfe6dfed15e1cebd1",
+      "current_lease_remaining_seconds": 96951.09671592712,
+      "endpoint": "mac",
+      "epoch": 1792857848.903286,
+      "first_load_epoch_preserved": 1792692329.837715,
+      "full_window_currently_available": true,
+      "historical_full_gate_passed": false,
+      "model_or_rhino_calls": 0,
+      "new_loads_or_slots": 0,
+      "new_state_or_grant_present": false,
+      "old_refusals_retained": true,
+      "prior_attempts_preserved": 4,
+      "prior_rows_preserved": 36,
+      "private_formal_reads": 0,
+      "remaining_work_plus_startup_export_seconds": 34500,
+      "roots": {
+        "current": {
+          "files": 481,
+          "inventory_sha256": "272bb12751dcaff6e4c7148da7434898e79216c2b750ff6e1a1fbeb4c4c04b84"
+        },
+        "historical_initial": {
+          "files": 429,
+          "inventory_sha256": "826134d6927ca197268193a6042e45bc9b485ae0c51b6f7656e4b3f0bf02adc2"
+        },
+        "historical_r1": {
+          "files": 433,
+          "inventory_sha256": "f36a34d4e54b8fd581eae49c2dcc29e731e6adb3eb1e8f35909bd1dabd7e63e8"
+        },
+        "historical_r2": {
+          "files": 447,
+          "inventory_sha256": "88a91c55a2a06dbee7ca35349fed26090b5a4253e4a879fb9d036befdc4b3805"
+        },
+        "historical_r3": {
+          "files": 464,
+          "inventory_sha256": "d9faf9595518623c2092a9a78a02623c4acd45c035ec3fcefb6b7236f33f7abe"
+        }
+      },
+      "runtime_sha256": "73dcad00f96c3830e46a520122f383b751cd04e6be675f84e65a5966e65c583c",
+      "source_inventory_sha256": "96409cfaa93bb9bebca4d535fd3af8c4ed2f661dc6a73c87425c4953b4d56fb4",
+      "spec_sha256": "d80a20ea0e4f6460640f84d7e64cf548b93ce84c8215ea8ca13a076b3bf0d086",
+      "status": "INDEPENDENT_PUBLIC_FREEZE_READBACK_VERIFIED_NO_AUTHORITY"
+    }
+  },
+  "history": {
+    "actual_global_head_sha256": "f519939f54e425484599d21b4554fc2a232c58d4372aa05d5423f543b2a77920",
+    "actual_global_public_rows_unchanged": 36,
+    "attempts_consumed": 4,
+    "charged_gpu_seconds": 70340.89651274681,
+    "first_load_epoch": 1792692329.837715,
+    "global_attempted_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17
+    ],
+    "historical_r3_continuation_attempted": 11,
+    "old_public_freeze_counts": [
+      429,
+      433,
+      447,
+      464
+    ],
+    "original_c5_no_go_changed": false,
+    "original_first_run_attempted": 7,
+    "original_full_phase_gate_passed": false,
+    "original_refusal": "slot_final_exact_claim_population",
+    "prepared_unattempted_indices": [
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39
+    ]
+  },
+  "impact": {
+    "actual_field_execution_authority": false,
+    "formal_calls_or_new_ledger_events": 0,
+    "historical_public_bytes_unchanged": true,
+    "model_prompt_scorer_data_unchanged": true,
+    "new_private_evidence_access": false,
+    "real_model_loads": 0,
+    "regression_targets": [],
+    "shared_logic_changed": true
+  },
+  "linux_cpu": {
+    "additional_boundary_nodes": 8,
+    "affected_permit_and_all_four_startup_recheck_passed": 12,
+    "affected_recheck_returncode": 0,
+    "baseline_collected": 126,
+    "completed_prefix_without_reported_failure_before_cpu_deadline": 83,
+    "distinct_final_covered_nodes": 134,
+    "final_baseline_batch_failed_r4_eof": 1,
+    "final_baseline_batch_passed": 4,
+    "final_baseline_returncode": 1,
+    "final_log": "slot-tail-linux-cpu-final-20261024.txt",
+    "first_batch_deadline_seconds": 240,
+    "first_batch_final_pytest_summary_available": false,
+    "first_batch_returncode": -15,
+    "four_actual_linux_startup_fork_pidfd_and_abort_cases_passed": true,
+    "generic_evidence_max_bytes_unchanged": 262144,
+    "new_control_permit_bytes_max": 786432,
+    "original_eof_cause": "control permit exceeded generic 256 KiB parser",
+    "prefix_log": "slot-tail-linux-cpu-prefix-20261024.txt",
+    "remaining_log": "slot-tail-linux-cpu-remaining-20261024.txt",
+    "second_batch_completed_prefix_without_reported_failure": 38,
+    "second_batch_deadline_seconds": 600,
+    "second_batch_final_pytest_summary_available": false,
+    "second_batch_returncode": -15,
+    "valid_baseline_evidence_reused_and_only_affected_nodes_rechecked": true
+  },
+  "mac_cpu": {
+    "additional_boundary_passed": 8,
+    "baseline_passed_reused": 122,
+    "distinct_final_passed_coverage": 130,
+    "log": "slot-tail-mac-cpu-20261024.txt",
+    "skipped_linux_only": 4,
+    "tail_overlap_recheck_passed": 43,
+    "tail_overlap_scope": "prior to final 768KiB constant; final 8 boundary nodes validate the tightened control cap"
+  },
+  "preparation_refusals": {
+    "all_are_preparation_only_not_research_attempts": true,
+    "cpu_240_and_600_second_timeouts_retained": true,
+    "oversized_ssh_mux_message_refusal_retained": true,
+    "stdin_public_transfer_timeout_retained": true
+  },
+  "primary_checkout_tracked_diff_sha256": "b407093a909b70b9b1c4ea6547517373ad6c7fb230103d97b0502044a0e8aa6c",
+  "private_content_included": false,
+  "runtime_sha256": "73dcad00f96c3830e46a520122f383b751cd04e6be675f84e65a5966e65c583c",
+  "schema_version": 1,
+  "source_code_revision": "d7dc1671d1eaa6f65ad72092ddd19ba60c16c7b9",
+  "source_inventory_sha256": "96409cfaa93bb9bebca4d535fd3af8c4ed2f661dc6a73c87425c4953b4d56fb4",
+  "spec_sha256": "d80a20ea0e4f6460640f84d7e64cf548b93ce84c8215ea8ca13a076b3bf0d086",
+  "status": "AFFECTED_CPU_AND_FINAL_DUAL_PUBLIC_FREEZE_VERIFIED_NO_EXECUTION"
+}

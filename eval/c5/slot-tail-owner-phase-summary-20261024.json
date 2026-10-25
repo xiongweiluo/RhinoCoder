@@ -1,0 +1,82 @@
+{
+  "attempts_consumed": 5,
+  "audit_error_code": null,
+  "audit_status": "verified_raw_components",
+  "c5_no_go_changed": false,
+  "campaign_head_sha256": "73204f2dd44896b0a2c67c9e7249d6acd4825db252a83fc33119254c160ee93e",
+  "continuation": {
+    "attempted": 22,
+    "selected": 22,
+    "uninterrupted_initial_run": false
+  },
+  "engineering_regression": {
+    "attempted": 0,
+    "changes_original_result": false,
+    "waves": 0
+  },
+  "evidence_reuse": {
+    "original_exit_and_partial_raw_audit": true,
+    "original_first_result_unchanged": true
+  },
+  "evidence_reuse_prior_tail": {
+    "historical_last_failed_slot_rewritten": false,
+    "original_full_phase_gate_passed": false,
+    "original_refusal_retained": "slot_final_exact_claim_population",
+    "owner_review_sha256": "0f4fdebf1604026cff92883cf760e171b4b7e4c7caa81e6bf1ed613ed6952f6b",
+    "verified_raw_components_reused": 32
+  },
+  "execution_authority": false,
+  "first_evaluation": {
+    "attempted": 7,
+    "complete": false,
+    "original_audit_sha256": "97770d00de3bb4dd10aad25ec878ecaeb82cc0b5ebe57f7d3fd73fe9c3abd1f2",
+    "original_result_unchanged": true,
+    "unattempted": 33
+  },
+  "first_load_epoch": 1792692329.837715,
+  "fixed_denominator": 40,
+  "full40_first_quality_result": null,
+  "global_ever_attempted_slot_count": 40,
+  "gpu_charged_seconds": 72581.37416148186,
+  "kind": "interrupted_continuation",
+  "new_independent_blind_test": false,
+  "package_id": "reuse-formal-20261024-r4",
+  "phase_statistics": {
+    "recorded_results": 22,
+    "task_failures": 14,
+    "task_successes": 8
+  },
+  "prior_phase_records": [
+    {
+      "attempted_indices": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "kind": "interrupted_continuation",
+      "runtime_sha256": "ba39557e57027ee4533b4d4d2468540d7af4765d22a5257b123acc8c14fda4ea",
+      "spec_sha256": "6911d112b1b11bb6bed636eac3f3d456b6400a92ac98dd95dc0105057d46fa22",
+      "status": "SLOT_PAUSED_RECONCILIATION"
+    }
+  ],
+  "private_content_included": false,
+  "raw_audit_sha256": "3d8fdde3374c74bd04c7954301226914252c3fc789111d0eb31472765c786d73",
+  "runtime_sha256": "73dcad00f96c3830e46a520122f383b751cd04e6be675f84e65a5966e65c583c",
+  "schema_version": 1,
+  "spec_sha256": "d80a20ea0e4f6460640f84d7e64cf548b93ce84c8215ea8ca13a076b3bf0d086",
+  "status": "SLOT_PHASE_COMPLETE",
+  "study_id": "c5-rhino-paired-20-reuse-v1",
+  "unknowns": [
+    "historical_total_gpu_usage_unknown",
+    "original_full40_quality_unavailable",
+    "physical_origin_not_cryptographically_proven"
+  ]
+}

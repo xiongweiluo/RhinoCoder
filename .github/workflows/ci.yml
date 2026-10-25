@@ -66,6 +66,9 @@ jobs:
           if [ -f eval/c5/reuse-formal-20261023-r3-spec.json ]; then
             python tools/prepare_c5_slot_package.py --check
           fi
+          if [ -f eval/c5/reuse-formal-20261024-r4-spec.json ]; then
+            python tools/prepare_c5_slot_tail_package.py --check
+          fi
       - run: python tools/check_secrets.py
   ui:
     needs: impact

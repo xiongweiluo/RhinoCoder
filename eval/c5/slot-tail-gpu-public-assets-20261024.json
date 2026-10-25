@@ -1,0 +1,19 @@
+{
+  "adapter_files_verified": 2,
+  "base_files_verified": 14,
+  "boot_id": "5e83729b-b29b-43f6-8635-c98f662d3d56",
+  "compatible_runtime_files_verified": 2684,
+  "compute_pids": [],
+  "cuda_initialized": false,
+  "finish_epoch": 1792852881.5503178,
+  "gpu_row": "GPU-0e00f0ad-fa5a-eed9-6eee-5877984e02f9, NVIDIA GeForce RTX 3090, 11, 0",
+  "model_loaded": false,
+  "native_libraries_verified": 27,
+  "native_symlinks_verified": 8,
+  "original_distribution_proof_reused_not_all_21614_files_rehashed": true,
+  "original_source_files_verified": 464,
+  "private_formal_reads": 0,
+  "remote_files_written": 0,
+  "research_restarted": false,
+  "start_epoch": 1792852869.4009628
+}

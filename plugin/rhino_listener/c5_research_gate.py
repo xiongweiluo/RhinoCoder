@@ -9,12 +9,13 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import math
 import re
 import sqlite3
 import time
 from contextlib import closing
 
-from .c5_research_native import READS, canonical, digest, require, validate_native_arguments
+from .c5_research_native import READS, NativeError, canonical, digest, require, validate_native_arguments
 
 SHA = re.compile(r"[0-9a-f]{64}\Z")
 REQUEST = re.compile(r"[A-Za-z0-9_-]{24,128}\Z")
@@ -57,7 +58,14 @@ class ResearchGate:
         require(payload["task_sha256"] == self.task_sha
                 and payload["owner_freeze_sha256"] == self.owner_freeze, "task/owner scope differs")
         expiry = payload["expires_at"]
-        require(type(expiry) is int and self.clock() < expiry <= self.clock()+300, "expired/oversized handoff TTL")
+        now = self.clock()  # One wall-clock sample: no crossed-boundary predicate.
+        require(type(now) in (int,float) and math.isfinite(now), "invalid native handoff clock")
+        if not (type(expiry) is int and now < expiry <= now+300):
+            error = NativeError("expired/oversized handoff TTL")
+            error.ttl_observation = {"gate_epoch": now,
+                "expires_at": expiry if type(expiry) is int else None,
+                "maximum_ttl_seconds": 300}
+            raise error
         expected = payload["expected"]
         require(isinstance(expected, dict) and set(expected) == {"document_key", "revision", "scene_sha256"}
                 and type(expected["revision"]) is int and expected["revision"] >= 0

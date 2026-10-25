@@ -98,6 +98,8 @@ def validate_materials(spec,freeze,*,clock=time.time,check_time=True):
         if package['policy'].get('version')==2:
             from .c5_slot_protocol import validate_protocol
             validate_protocol(package.get('slot_protocol'))
+            from .c5_slot_tail_policy import enabled
+            enabled(spec)
         else:require('slot_protocol' not in package,'slot_rules_require_new_policy')
         require(freeze.get('run_package')==package and PACKAGE_LAYOUT==package['layout']
             and LAYOUT_FILE in freeze['source_files'], 'run_package_complete_material_binding')

@@ -27,6 +27,24 @@ class NativeAdapterV2(NativeAdapter):
         hub_limit=81 if 'slot_protocol' in spec.get('run_package',{}) else 41
         super().__init__(*args,channel_factory=partial(channel_factory,cleanup_guard=self.cleanup_guard,hub_limit=hub_limit),**kwargs)
         self.armed=False
+        self._tail_closed, self._tail_stopped = {}, {}
+
+    def close_slot(self, slot_id):
+        from training.c5_slot_tail_repair import enabled
+        if not enabled(self.spec): return super().close_slot(slot_id)
+        value = super().close_slot(slot_id)
+        require(value.get('status') == 'closed'
+            and value.get('close_capture',{}).get('fixture_registry_absent') is True
+            and value.get('key_absence') == {'key_removed':True,'actual_absence_checked':True},
+            'slot_tail_close_receipt_incomplete')
+        self._tail_closed[slot_id] = value
+        return value
+
+    def stop_slot(self, slot_id):
+        from training.c5_slot_tail_repair import enabled, stop_known_child
+        if not enabled(self.spec): return super().stop_slot(slot_id)
+        from training.c5_formal_reuse_adapters_base import database_backup
+        return stop_known_child(self, slot_id, database_backup, publish_json)
 
     def shared_health(self,slot_id):
         self.cleanup_guard()
@@ -180,10 +198,11 @@ class ModelAdapterV2(ModelAdapter):
         from training.c5_formal_reuse_ssh import argv,verify
         from training.c5_followup_diagnostics import CapturedStreams
         from training.c5_formal_reuse_supervisor import validate_load_permit
-        from training.c5_reuse_evidence import canonical
+        from training.c5_slot_load_permit import encode
         from training.c5_reuse_field_transport import FieldPipe
         verify(self.spec,self.freeze)
         validate_load_permit(self.load_permit,self.spec,self.freeze,self.attempt)
+        raw=encode(self.load_permit)
         self.capture=CapturedStreams(self.state,'serve',stdout_cap=self.spec['raw_stdout_cap_bytes'],
             stderr_cap=self.spec['raw_stderr_cap_bytes']);self.diagnostics_finished=False
         args=argv(self.spec,'serve',self.attempt)
@@ -193,7 +212,7 @@ class ModelAdapterV2(ModelAdapter):
         self.capture.start(self.process,protocol=True)
         publish_json(self.state,'load-permit.json',self.load_permit)
         sender=FieldPipe(self.process.stdin.fileno(),self.process.stdout.fileno())
-        raw=canonical(self.load_permit)+b'\n';offset=0;deadline=time.monotonic()+60
+        offset=0;deadline=time.monotonic()+60
         while offset<len(raw):offset+=sender.write(raw[offset:],deadline)
         expected=startup_receipt(STUDY_ID,digest(self.freeze),self.freeze['source_inventory_sha256'],
             self.freeze['environment_sha256'],self.freeze['model_identities'])
