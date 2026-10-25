@@ -21,17 +21,19 @@ RhinoCoder 是一个面向 Rhino 8 的可验证空间设计 Agent。它把自然
 | **隐私审计 0 敏感发现** | 12 条红队、1,609 条 Trace、7,016 行 SQLite、3 份 Replay 及模拟日志/请求面；[A4 报告](docs/privacy-red-team-report.md) |
 | **C3 A5 一次性评测完成，未达到 GO 门槛** | 基座与 LoRA 在 45 条锁定 holdout 上的结构化四指标均为 0/45；差值 0.0pp、净胜 0，第二 run 已禁止；[C3 报告](docs/c3-a5-holdout-report.md) |
 | **C4 决策：NO-GO** | 冻结 P2 真实 Rhino 配对的描述性结果为基座 4/30、LoRA 5/30，差值 +3.3pp、净胜 1、McNemar `p=1.0`，未达到 +10pp / 净胜 3 门槛；事后发现 LoRA 基础设施补位超出冻结规则，见[诊断与限制](docs/c4-posthoc-failure-diagnosis.md)；[C4 原报告](docs/c4-model-decision.md) |
-| **独立 C5 离线与严格控制器门通过** | 全新80家族单次配对，sequence基座20/80、LoRA77/80，+71.25pp、净胜57；原门槛与公开逐家族复算通过。尚未完成真实Rhino迁移门，不是整体GO或默认接入；[C5最终报告](docs/c5-final-evaluation-report.md) |
+| **独立 C5 离线与严格控制器门通过** | 全新80家族单次配对，sequence基座20/80、LoRA77/80，+71.25pp、净胜57；原门槛与公开逐家族复算通过。原C5仍为NO-GO；后续现场证据分阶段报告，不是整体GO或默认接入；[C5最终报告](docs/c5-final-evaluation-report.md) |
 
 当前正式版本：[`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0)。招聘者可直接打开[在线只读演示](https://rhinocoder-demo.xiongweiluo1.chatgpt.site)，无需 Rhino、模型密钥或安装；Unreleased 证据补充了[真实 Rhino 单窗口短片](docs/assets/rhinocoder-real-rhino-demo.mov)与[结果帧](docs/assets/rhinocoder-real-rhino-result.png)。短片由已逐帧复核的真实 Rhino 执行前/后窗口帧组成，不是连续桌面录屏，也不包含音频或真实项目数据。
 
 > **诚实边界：** `local-mock` 只是确定性的本地接口与安全替身，证明统一后端、隐私强制路由和禁止云端降级；它不是能完成 Rhino 建模的真实本地模型。P2a 是外部用户出题、Agent 自动执行的困难集，不是真人操作 UI 的可用性研究；P2b 延期。第一轮 C0–C4 的 A5 两路0/45、P2描述性4/30对5/30及C4 `NO-GO`永久保留。独立C5只证明在冻结双阶段契约和80家族离线集上的结构化改善，不证明真实Rhino几何或开放世界质量，不能追认第一轮成功；默认部署仍为现有混合路线。
 
+**合并后状态（2026-10-25）：** C5研究栈及公开报告已进入 `main@2581581`，绑定该提交的 [CI五项全部通过](https://github.com/xiongweiluo/RhinoCoder/actions/runs/40196177986)。#2–#6、#8–#28已合并；独立R的#7仍为Draft。原C5 NO-GO与默认混合路线保持，尚未进入LoRA产品接入；正式Release仍为v0.3.0，在线演示未随研究材料重新发布。见[收口记录](docs/c5-post-merge-closeout-20261025.md)。
+
 ## 为什么这个项目不是普通 “LLM + 工具” Demo
 
-**C5追加描述性评分（2026-10-25）：** 用户提供的三阶段40槽脱敏导出按每模型固定20题复算：基座 **2/20（10%）**，LoRA **13/20（65%）**；工程失败分别2/3槽留在分母。已曝光题、中断修复和原审核拒绝使它不能作为新盲测或改判NO-GO。见[逐题差异与失败分布](docs/c5-descriptive-score-analysis-20261025.md)和[#8～#26合并审核](docs/c5-pr-8-26-merge-review-20261025.md)。未合并、未新增执行、默认路线不变。
+**C5追加描述性评分（2026-10-25）：** 用户提供的三阶段40槽脱敏导出按每模型固定20题复算：基座 **2/20（10%）**，LoRA **13/20（65%）**；工程失败分别2/3槽留在分母。已曝光题、中断修复和原审核拒绝使它不能作为新盲测或改判NO-GO。见[逐题差异与失败分布](docs/c5-descriptive-score-analysis-20261025.md)和[#8～#26合并审核](docs/c5-pr-8-26-merge-review-20261025.md)。材料已合并至上述main；本次状态收口未新增执行，默认路线不变。
 
-**C5追加研究最新结果（2026-10-24）：** 首次r2尝试7/40槽，6槽原始链核实但公开质量分数未报告；r3续跑11槽，仅前10槽复算5成功/5失败，末槽失败与原整阶段审核拒绝保留；r4续跑22槽，**8成功/14失败**，本阶段原始联合审核、退出清理与驻留结算完成。原40索引均曾尝试不等于首次40/40成功，也不构成新盲测；**原C5 NO-GO和默认混合路线保持**。见[分阶段研究报告](docs/c5-reuse-phased-research-report-20261024.md)与[作品集证据](docs/portfolio-evidence.md)。这些是未合并分支材料，未更新正式Release或在线演示。
+**C5追加研究最新结果（2026-10-24）：** 首次r2尝试7/40槽，6槽原始链核实但公开质量分数未报告；r3续跑11槽，仅前10槽复算5成功/5失败，末槽失败与原整阶段审核拒绝保留；r4续跑22槽，**8成功/14失败**，本阶段原始联合审核、退出清理与驻留结算完成。原40索引均曾尝试不等于首次40/40成功，也不构成新盲测；**原C5 NO-GO和默认混合路线保持**。见[分阶段研究报告](docs/c5-reuse-phased-research-report-20261024.md)与[作品集证据](docs/portfolio-evidence.md)。这些研究材料已合并；正式Release与在线演示未随之更新。
 
 <details>
 <summary>10月9–13日研究与A～D开发历史（原文保留）</summary>
