@@ -24,12 +24,12 @@ class ReuseHostSession(HostAssuranceSession):
         require(registry.binding == field_binding, 'reuse_host_registry_scope')
         self.state = Path(field_binding['paths']['state_root']) / 'host'
         self.field_binding, self.registry = strict(canonical(field_binding)), registry
-        self.binding = {'study_id': STUDY, 'runtime_freeze_sha256': field_binding['runtime_sha256'],
+        self.binding = {'study_id': field_binding['study_id'], 'runtime_freeze_sha256': field_binding['runtime_sha256'],
                         'policy_id': POLICY, 'whole_field_authority_verified': False}
         self.backend, self.source_guard, self.source_sha, self.clock = backend, source_guard, source_sha, clock
         self.cleanup_source = source_guard if cleanup_source is None else cleanup_source
         self.start_time = clock()
-        self.genesis = digest({'study_id': STUDY, 'runtime_freeze_sha256': field_binding['runtime_sha256'],
+        self.genesis = digest({'study_id': field_binding['study_id'], 'runtime_freeze_sha256': field_binding['runtime_sha256'],
                                'policy_id': POLICY, 'source_inventory_sha256': source_sha})
         self.head, self.sequence, self.checkpoints = self.genesis, 0, 0
         self.started = self.subscribe_attempted = self.detached = self.finished = self.blocked = False
@@ -47,7 +47,7 @@ class ReuseHostSession(HostAssuranceSession):
         elapsed = self.clock() - self.start_time
         require(math.isfinite(elapsed) and elapsed >= 0, 'reuse_host_clock')
         self.quota.admit_record(kind)
-        row = {'schema_version': 1, 'study_id': STUDY, 'policy_id': POLICY,
+        row = {'schema_version': 1, 'study_id': self.field_binding['study_id'], 'policy_id': POLICY,
                'runtime_freeze_sha256': self.binding['runtime_freeze_sha256'], 'sequence': self.sequence,
                'elapsed_seconds': elapsed, 'previous_sha256': self.head, 'kind': kind, 'payload': payload}
         row['record_sha256'] = digest(row)

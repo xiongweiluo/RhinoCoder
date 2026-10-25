@@ -37,7 +37,7 @@ def validate_return(value, prompt_sha, stage):
 def envelope(binding, request):
     validate_binding(binding)
     validate_request(request)
-    require(request['probe_id'] == STUDY and request['runtime_freeze_sha256'] == binding['runtime_sha256'],
+    require(request['probe_id'] == binding['study_id'] and request['runtime_freeze_sha256'] == binding['runtime_sha256'],
             'new_peer_request_scope')
     return {'protocol': PROTOCOL, 'scope_sha256': sha(common_scope(binding)), 'request': request}
 

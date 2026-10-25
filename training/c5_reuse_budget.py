@@ -9,7 +9,7 @@ class ReuseBudget:
     def __init__(self,resources,*,wall=time.time,mono=time.monotonic):
         self.resources=dict(resources); self.wall,self.mono=wall,mono
         self.start_wall,self.start_mono=wall(),mono(); self.last=self.start_mono
-        if resources.get('resource_policy')=='incremental_reuse_unknown_history_v1':
+        if resources.get('resource_policy') in ('incremental_reuse_unknown_history_v1','incremental_disclosed_followup_unknown_history_v2'):
             require(resources['prior_cumulative_upper_bound_seconds'] is None
                 and resources['original_cumulative_compliance_claimed'] is False
                 and resources['development_seconds_max']==18000 and resources['remaining_gpu_seconds']==82800
