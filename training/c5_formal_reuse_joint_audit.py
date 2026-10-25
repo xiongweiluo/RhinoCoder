@@ -65,6 +65,9 @@ def audit_run_v2(state,cases,spec,freeze,tokenizer,*,source_guard,external_seal_
     require(supervisor['permit_first_load_epoch']==admission['first_load_epoch'],
         'formal_reuse_original_clock_join')
     private.update(signature_audit=signatures,qualified_gpu_audit=supervisor,formal_admission_audit=admission)
+    if 'run_package' in freeze:
+        from training.c5_formal_reuse_evidence_audit import audit_residency_join
+        private['resource_and_transport'].update(audit_residency_join(state,spec,freeze))
 
     keys=read_json(state,'worker-stop-response.json')['raw_records']['worker-summary.json']['attempted_keys']
     for sequence,key in enumerate(keys,1):

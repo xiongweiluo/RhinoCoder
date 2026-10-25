@@ -37,6 +37,13 @@ def verify_endpoint(endpoint,freeze):
         history_guard(endpoint,freeze['history'])()
         require(all(hashlib.sha256(read_private(parent/n)).hexdigest()==h for n,h in prefix.items()),
             'formal_reuse_original_campaign_prefix_changed')
+    package=freeze.get('run_package')
+    if package is not None:
+        previous=Path(package['previous_'+endpoint+'_source_root']);old_pins=package['previous_public_source_files']
+        require(previous.resolve()==previous and previous.is_dir()
+            and {p.relative_to(previous).as_posix() for p in previous.rglob('*') if p.is_file() or p.is_symlink()}==set(old_pins)
+            and all(not (previous/n).is_symlink() and hashlib.sha256((previous/n).read_bytes()).hexdigest()==h
+                for n,h in old_pins.items()),'run_package_original_r1_source_bytes')
     guard();return guard
 
 def activate_mac(spec,freeze,grant):

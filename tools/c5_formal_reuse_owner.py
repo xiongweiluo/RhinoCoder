@@ -33,7 +33,7 @@ def commitment(spec):
         'formal_reuse_original_commitment_drift')
     return json.loads(p.read_bytes())
 
-def run_interactive(attempt):
+def run_interactive(attempt, *, package_session=None):
     require(sys.stdin.isatty() and sys.stderr.isatty(),'formal_reuse_owner_private_terminal_required')
     spec,freeze,approval,source=scope();public=commitment(spec)
     root=Path(freeze['history']['mac_global_root'])
@@ -45,7 +45,11 @@ def run_interactive(attempt):
         def guard():
             source()
             if budget is not None:budget.check()
-        native=NativeAdapterV2(state,spec,freeze,guard=guard,cleanup_guard=source)
+        cleanup_source=source
+        if package_session is not None:
+            from training.c5_formal_reuse_control import control_scope
+            _,_,cleanup_source=control_scope(ROOT)
+        native=NativeAdapterV2(state,spec,freeze,guard=guard,cleanup_guard=cleanup_source)
         if not (state/'formal20.zero-prepared.json').exists():
             claim={'study_id':STUDY_ID,'runtime_freeze_sha256':digest(freeze),'replay_allowed':False}
             if (state/'formal20.zero-started.claim.json').exists():
@@ -58,6 +62,9 @@ def run_interactive(attempt):
                 and not (state/'remote-launch-intent.json').exists()
                 and not (state/'formal20.started.json').exists(),'formal_reuse_resume_only_unloaded_preparation')
             native.verify_prepared_keys()
+        if package_session is not None:
+            from training.c5_formal_run_package_entry import request_rhino_attempt
+            request_rhino_attempt(spec,freeze,attempt)
         print('C5_FORMAL_REUSE_WAIT_APPROVED_RHINO_ARM_ZERO_PRIVATE_ROWS',flush=True)
         native.wait_zero_ready();source()
         basis=read_json(state,'host-continuity-ready.json')
@@ -65,27 +72,50 @@ def run_interactive(attempt):
         if not (state/snap_name).exists():
             publish_json(state,snap_name,snapshot(campaign.scope,digest(basis),hashlib.sha256(secrets.token_bytes(32)).hexdigest()))
         snap=read_json(state,snap_name)
-        previous=campaign.observation()['receipt']
-        if previous is not None and previous['snapshot']==snap and campaign.observation()['status']=='PREPARED':
-            from training.c5_recovery_confirmation import validate_receipt
-            receipt=validate_receipt(campaign.scope,snap,previous['receipt'])
+        if package_session is not None:
+            require(package_session.get('confirmed') is True and campaign.observation()['package_owner_consent'],
+                'run_package_actual_session_consent_required')
+            campaign._event('package_preload_observed',{'scope_sha256':__import__(
+                'training.c5_reuse_evidence',fromlist=['sha']).sha(campaign.scope),
+                'attempt':attempt,'host_ready_sha256':digest(basis),'snapshot_sha256':digest(snap),
+                'manual_owner_attestation':False})
         else:
-            receipt=confirm_preload(campaign.scope,snap,source)
-            if receipt is None:return {'status':'WAITING_OWNER_MODEL_NOT_LOADED','attempt_consumed':False}
-            campaign.confirm(snap,receipt)
-        require(time.time()<=spec['latest_owner_start_epoch'],'formal_reuse_full_window_unavailable')
+            previous=campaign.observation()['receipt']
+            if previous is not None and previous['snapshot']==snap and campaign.observation()['status']=='PREPARED':
+                from training.c5_recovery_confirmation import validate_receipt
+                receipt=validate_receipt(campaign.scope,snap,previous['receipt'])
+            else:
+                receipt=confirm_preload(campaign.scope,snap,source)
+                if receipt is None:return {'status':'WAITING_OWNER_MODEL_NOT_LOADED','attempt_consumed':False}
+                campaign.confirm(snap,receipt)
+        if package_session is not None:
+            from training.c5_formal_run_package_entry import prepare_private_session
+            prepare_private_session(package_session,campaign,spec,freeze,public,source)
+        else:
+            require(time.time()<=spec['latest_owner_start_epoch'],'formal_reuse_full_window_unavailable')
+        if package_session is not None:
+            from training.c5_formal_reuse_ssh import verify as verify_preload_transport
+            verify_preload_transport(spec,freeze);source()
         campaign.start();started=True
-        first=campaign.observation()['first_load_epoch'];now,mono=time.time(),time.monotonic()
-        budget=FormalBudgetV2(freeze['resource_boundary'],start={'wall':first,'mono':mono-(now-first)})
+        first=campaign.observation()['first_load_epoch']
         model=ModelAdapterV2(state,spec,freeze,guard=guard);model.attempt=attempt
         model.load_permit={'scope':campaign.scope,'rows':campaign.log.rows(),'attempt':attempt,'first_load_epoch':first}
+        if package_session is not None:
+            observed=campaign.observation()
+            model.load_permit['budget_basis']={'charged_before_seconds':observed['charged_gpu_seconds'],
+                'load_intent_epoch':observed['load_intent_epoch'],'legacy_first_load_epoch':first}
+        from training.c5_formal_run_budget import budget_for
+        budget=budget_for(freeze,model.load_permit)
         model.start_zero();guard()
         ready=read_json(state,'worker-startup-ready.json');campaign.ready(digest(ready))
         publish_json(state,'formal20.zero-readiness.json',{'study_id':STUDY_ID,
             'runtime_freeze_sha256':digest(freeze),'host_ready_sha256':digest(basis),
             'model_ready_sha256':digest(ready),'private_rows_read':0,'formal_started_present':False})
-        sealed=Path(getpass.getpass('原封存 age 文件绝对路径（仅本人终端，不回显）：').strip())
-        identity=Path(getpass.getpass('age identity 文件绝对路径（不回显）：').strip())
+        if package_session is None:
+            sealed=Path(getpass.getpass('原封存 age 文件绝对路径（仅本人终端，不回显）：').strip())
+            identity=Path(getpass.getpass('age identity 文件绝对路径（不回显）：').strip())
+        else:
+            sealed,identity=package_session['sealed'],package_session['identity']
         verify_private_metadata(sealed,identity,public,freeze);guard()
         consume_before_private(campaign,attempt,state);exposed=True;campaign.begin(digest(ready))
         runner=FormalRunner(state=state,spec=spec,freeze=freeze,approval=approval,model=model,native=native,
@@ -192,7 +222,7 @@ def reconcile_owner(attempt):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('mode',choices=('run','audit','reconcile'))
-    p.add_argument('--attempt',type=int,choices=(1,2,3),default=2);a=p.parse_args()
+    p.add_argument('--attempt',type=int,choices=range(1,6),default=2);a=p.parse_args()
     try:
         result={'run':run_interactive,'audit':audit_owner,'reconcile':reconcile_owner}[a.mode](a.attempt)
         print(json.dumps(result,sort_keys=True));return 0

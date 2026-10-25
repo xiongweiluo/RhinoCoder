@@ -108,7 +108,7 @@ class TimedSyntheticWire(SyntheticWire):
             publish_json(self.local,prefix+'time.json',self.last_phase)
         return value
 
-def complete_scoped_field(tmp_path,monkeypatch):
+def complete_scoped_field(tmp_path,monkeypatch,*,fail_before_model_at=None):
     state,cases,spec,freeze,_,rhino,_=setup_field(tmp_path,monkeypatch)
     # Real signature/SQLite/timing code below; ONLY geometry/model are fake.
     new_spec,new_freeze,_=records()
@@ -198,12 +198,26 @@ def complete_scoped_field(tmp_path,monkeypatch):
     native.prepare=prepare
     runner=FormalRunner(state=state,spec=spec,freeze=freeze,approval=grant,model=model,native=native,
         source_guard=lambda:None,budget_guard=lambda:None)
+    if fail_before_model_at is not None:
+        validate=runner_module.validate_fixture_readback
+        calls=[0]
+        def fail_public_fixture(case,actual):
+            calls[0]+=1
+            if calls[0]==fail_before_model_at:
+                from training.c5_formal20_plan import FormalPlanError
+                raise FormalPlanError('synthetic_pre_model_failure_not_actual_fixture_rejection')
+            return validate(case,actual)
+        monkeypatch.setattr(runner_module,'validate_fixture_readback',fail_public_fixture)
     result=runner.run(lambda:cases)
-    assert result['status']=='formal_execution_complete_awaiting_independent_audit',result
+    if fail_before_model_at is None:
+        assert result['status']=='formal_execution_complete_awaiting_independent_audit',result
+    else:
+        assert result['status']=='formal_incomplete_no_replay' and result['slots_attempted']==fail_before_model_at,result
     publish_json(state,'resource-settlement.json',{'study_id':spec['study_id'],'status':'formal_mac_driver_finished',
         'resource_boundary_sha256':digest(freeze['resource_boundary']),'replay_allowed':False,
         'elapsed_seconds_including_load_and_idle':time.time()-wire.start,'cap_seconds':64800,'start_epoch':wire.start,'stop_epoch':time.time()})
     receipt=read_json(state,'host-continuity-terminal-receipt.json')
+    if fail_before_model_at is not None:return state,cases,spec,freeze,receipt,None,None
     private=audit_run_v2(state,cases,spec,freeze,Tokenizer(),source_guard=lambda:None,external_seal_sha=receipt['seal_sha256'])
     public=public_summary(private,spec,freeze,receipt['seal_sha256'])
     assert public['paired_summary']['route_slots']==40 and not public['private_content_included']
