@@ -73,6 +73,8 @@ class StepOutcome:
     selected_tool: str | None = None
     before_revision: int | None = None
     after_revision: int | None = None
+    task_sha256: str | None = None
+    before_scene_sha256: str | None = None
 
 
 class SceneProvider(Protocol):
