@@ -1,5 +1,7 @@
 # 第一阶段：首次真实开发执行集中审批包
 
+> 2026-10-26执行状态更新：本页保留首次包的事前规格。该包已获批准，随后在资产预检阶段停止；两次加载额度已用、32槽未尝试。收尾审核、必要修复与待批准接续见[执行审核](lora-development-execution-review-20261026.md)。下文“待批准/尚未执行”均为原准备时点。
+
 这是[同一研究主任务](lora-next-study-plan-20261025.md)内的开发执行检查点，**不是第一阶段完成，也不是最终比较授权**。公开CPU开发、相关回归和资源准备已推进到具体执行包；当前尚无本包的所有者执行批准，没有生成、Rhino、训练或最终测试消费。
 
 机器材料：[开发提案](../eval/lora-development/proposed-development-plan.json)、[精确执行包](../eval/lora-development/development-package-20261026.json)、[CPU与双端准备证据](../eval/lora-development/runtime-cpu-review-20261026.json)。包内`execution_ready=true`只表示材料可供审核；嵌入的提案仍`execution_enabled=false`。三个实际入口都必须读取与**完整包SHA**一致的另行所有者记录，旧C5批准、资源确认和本页不能替代它。

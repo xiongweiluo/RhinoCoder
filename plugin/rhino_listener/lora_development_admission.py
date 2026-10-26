@@ -4,6 +4,7 @@ Checks exact owner record and frozen project bytes; does not claim closure of
 the entire already-running Rhino host, loaded CLR assemblies or third-party UI.
 """
 import hashlib
+import os
 from pathlib import Path
 import time
 
@@ -39,3 +40,25 @@ def admit(root, package, endpoint):
     source_guard(root, package['source_files'])
     require(time.time() < package['lease_end_epoch'], 'lease ended')
     return state
+
+
+def sessions_available(modules, package):
+    """Allow only the precisely retired new-study predecessor; never detach old work."""
+    prior = package.get('continuation')
+    for name, module in tuple(modules.items()):
+        if not name.startswith(('rhino_research_', 'rhino_c5_', 'rhino_lora_')): continue
+        session = getattr(module, '_SESSION', None)
+        if session is None: continue
+        require(prior is not None, 'another research session remains; no replacement')
+        endpoint = prior['prior_endpoints']['mac']
+        state = Path(endpoint['state_root'])
+        require(name.startswith('rhino_lora_') and list(getattr(module, '__path__', [])) == [endpoint['source_root']]
+                and getattr(session, 'runtime', None) == prior['prior_package_sha256']
+                and getattr(session, 'state', None) == state / 'host'
+                and getattr(session, 'stopped', None) is True
+                and getattr(getattr(session, 'host', None), 'current', 'unknown') is None,
+                'unrelated or unsettled session cannot be replaced')
+        settled = read_json(state / 'host', 'host-settlement.json')
+        require(settled['runtime_sha256'] == prior['prior_package_sha256'] and settled['status'] == 'host_stopped'
+                and settled['exact_delegate_remove_returned'] is True
+                and not os.path.lexists(state / 'host-secret.json'), 'prior host retirement unverified')

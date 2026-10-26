@@ -18,9 +18,6 @@ ROOT = Path(__file__).resolve().parents[1]
 def start():
     package = json.loads((ROOT / 'lora-development-package.json').read_text())
     sys.dont_write_bytecode = True
-    for name, module in tuple(sys.modules.items()):
-        if name.startswith(('rhino_research_', 'rhino_c5_', 'rhino_lora_')) and getattr(module, '_SESSION', None) is not None:
-            raise RuntimeError('another research session remains; no replacement')
     prefix = 'rhino_lora_' + uuid.uuid4().hex
     for name, path in [(prefix, ROOT), (prefix + '.plugin', ROOT / 'plugin'),
                        (prefix + '.plugin.rhino_listener', ROOT / 'plugin/rhino_listener')]:
@@ -28,6 +25,7 @@ def start():
     def load(name): return importlib.import_module(prefix + '.plugin.rhino_listener.' + name)
     admission = load('lora_development_admission')
     state = admission.admit(ROOT, package, 'mac')
+    admission.sessions_available(sys.modules, package)
     channel, native = load('c5_research_channel'), load('c5_research_native')
     scope = channel.read_json(state, 'mac-started.claim.json')
     runtime = native.digest(package)
@@ -40,7 +38,9 @@ def start():
     def cleanup(): source()  # Disposal is permitted after work cutoff; no new model/native work.
     def guard():
         source()
-        native.require(time.time() < min(package['lease_end_epoch'] - 900, scope['wall'] + 6300), 'host work deadline')
+        reserve = package['limits']['cleanup_export_seconds']
+        native.require(time.time() < min(package['lease_end_epoch'] - reserve,
+            scope['wall'] + package['limits']['gpu_residency_seconds'] - reserve), 'host work deadline')
     guard()
     import Rhino
     native.require(Rhino.RhinoApp.IsOnMainThread and list(sys.version_info[:2]) == [3, 9]

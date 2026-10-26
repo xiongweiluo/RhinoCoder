@@ -10,6 +10,24 @@ from plugin.rhino_listener.c5_research_channel import read_json
 from plugin.rhino_listener.c5_research_native import canonical, digest, require
 
 
+def content_identity(value):
+    return tuple(getattr(value, key) for key in ('st_dev', 'st_ino', 'st_mode', 'st_uid',
+        'st_gid', 'st_nlink', 'st_size', 'st_mtime_ns', 'st_ctime_ns'))
+
+
+def read_stable(path):
+    before = path.lstat()
+    require(stat.S_ISREG(before.st_mode) and before.st_uid == os.getuid() and path.resolve() == path
+            and before.st_size <= 32 * 1024 * 1024, 'bounded regular new evidence file required')
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+    with os.fdopen(fd, 'rb') as stream:
+        require(content_identity(os.fstat(stream.fileno())) == content_identity(before), 'evidence replaced before read')
+        raw = stream.read(32 * 1024 * 1024 + 1)
+        require(len(raw) == before.st_size and content_identity(os.fstat(stream.fileno())) == content_identity(before)
+                and content_identity(path.lstat()) == content_identity(before), 'evidence changed during export')
+    return raw
+
+
 def export_gpu(state, package, stream):
     state = Path(state)
     settled = read_json(state, 'gpu-settlement.json')
@@ -32,13 +50,9 @@ def export_gpu(state, package, stream):
     records, total = {}, 0
     with tarfile.open(fileobj=stream, mode='w|') as archive:
         for path in sorted(files):
-            before = path.lstat()
-            require(stat.S_ISREG(before.st_mode) and before.st_uid == os.getuid() and path.resolve() == path
-                    and before.st_size <= 32 * 1024 * 1024, 'bounded regular new evidence file required')
-            total += before.st_size
+            raw = read_stable(path)
+            total += len(raw)
             require(total <= 512 * 1024 * 1024, 'GPU evidence exceeds declared export budget')
-            raw = path.read_bytes()
-            require(path.stat() == before, 'evidence changed during export')
             name = path.relative_to(state).as_posix()
             info = tarfile.TarInfo(name); info.size = len(raw); info.mode = 0o600
             archive.addfile(info, io.BytesIO(raw))

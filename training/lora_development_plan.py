@@ -43,7 +43,7 @@ def review_plan(plan: dict) -> dict:
         if type(value) is not int or value < 0:
             raise ValueError("integer resource limits required")
     if not (limits["max_steps"] == limits["max_reads"] == 2 and limits["max_writes"] == 0
-            and limits["max_load_attempts"] == 2 and limits["max_infrastructure_recoveries"] == 1):
+            and (limits["max_load_attempts"], limits["max_infrastructure_recoveries"]) in {(2, 1), (1, 0)}):
         raise ValueError("bounded read-only development scope required")
     slots = len(families) * len(plan["routes"]) * len(plan["systems"])
     required = (slots * limits["slot_seconds"] + limits["max_load_attempts"] * limits["load_seconds"]

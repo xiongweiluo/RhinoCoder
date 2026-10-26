@@ -1,0 +1,109 @@
+{
+  "execution_enabled": false,
+  "families": [
+    {
+      "id": "DEV-S01",
+      "mechanism": "read_progress",
+      "role": "selection",
+      "template_family": "explicit_alias_order_two_bbox_reads"
+    },
+    {
+      "id": "DEV-S02",
+      "mechanism": "read_progress",
+      "role": "selection",
+      "template_family": "scene_inventory_then_unique_target_bbox"
+    },
+    {
+      "id": "DEV-S03",
+      "mechanism": "clarification",
+      "role": "selection",
+      "template_family": "missing_target_disambiguation"
+    },
+    {
+      "id": "DEV-S04",
+      "mechanism": "refusal",
+      "role": "selection",
+      "template_family": "explicit_deferred_read_permission"
+    },
+    {
+      "id": "DEV-A01",
+      "mechanism": "read_progress",
+      "role": "acceptance",
+      "template_family": "spatially_defined_target_order_two_reads"
+    },
+    {
+      "id": "DEV-A02",
+      "mechanism": "read_progress",
+      "role": "acceptance",
+      "template_family": "target_bbox_then_scene_inventory"
+    },
+    {
+      "id": "DEV-A03",
+      "mechanism": "clarification",
+      "role": "acceptance",
+      "template_family": "incompatible_target_constraints"
+    },
+    {
+      "id": "DEV-A04",
+      "mechanism": "core_read",
+      "role": "acceptance",
+      "template_family": "authorized_single_scene_inventory"
+    }
+  ],
+  "final_test_material": false,
+  "historical_replay": false,
+  "limits": {
+    "cleanup_export_seconds": 900,
+    "gpu_residency_seconds": 7020,
+    "load_seconds": 600,
+    "max_infrastructure_recoveries": 0,
+    "max_load_attempts": 1,
+    "max_reads": 2,
+    "max_steps": 2,
+    "max_writes": 0,
+    "slot_seconds": 150
+  },
+  "model_identity": {
+    "base": "Qwen/Qwen2.5-Coder-7B-Instruct",
+    "checkpoint": 132,
+    "current_adapter_file_map_sha256": "305d72703270d16e93233d1d34ae27cdaddd777e4530afead88c7edb8dc22cae",
+    "new_training": false,
+    "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242"
+  },
+  "private_material_access": false,
+  "public_development_cases_source": "training/lora_development_cases.py",
+  "required_before_execution": {
+    "exact_source_runtime_and_resource_binding": "development-package-r2-20261026.json; retired first package retained, prior 2 loading attempts plus at most 1 newly approved attempt, cumulative time ceiling 7200 seconds with prior charge 180 seconds; no owner approval yet",
+    "gpu_environment_and_model_file_verification": "readonly-resources-20261026.json; metadata and all 16 pinned asset hashes verified; runtime behavior still unverified",
+    "historical_family_overlap_review": null,
+    "lease_expiry_and_cost_ceiling": "resource-scope-20261026.json; owner confirms paid lease through 2026-10-30 20:00 Europe/Zurich and additional cost ceiling 0; no execution approval",
+    "new_field_runtime_and_failure_cleanup_validation": "execution-review-20261026.json proves first batch stopped before loading/exposure; targeted CPU repairs and actual readonly preflight must pass before revised approval; model and fixture behavior remain unverified",
+    "owner_development_execution_approval": null,
+    "real_tokenizer_no_truncation_audit": "token-budget-native-floats-20261026.json; public analytic scene in native float representation: 364 prompts fit; actual scene still requires runtime check",
+    "rhino_isolated_document_scope": "resource-scope-20261026.json; only new local isolated documents closed after use; no existing user project access or execution approval",
+    "verified_ssh_host_identity": "owner_confirmed_in_conversation"
+  },
+  "resource_status": {
+    "authentication": "owner_opened_control_connection_verified_20261026",
+    "cost_ceiling": 0,
+    "gpu_environment": "gpu-environment-20261026.json; existing compatible Python 3.11.17 with original dedicated packages; no installation",
+    "lease_end": "2026-10-30T20:00:00+01:00",
+    "lease_paid": true,
+    "metadata_observation_only": true,
+    "owner_resource_confirmation": "resource-scope-20261026.json",
+    "rhino_scope": "only_new_local_isolated_documents_closed_after_use",
+    "runtime_behavior_verified": false,
+    "ssh_host_identity": "owner_verified",
+    "timezone": "Europe/Zurich"
+  },
+  "routes": [
+    "base",
+    "current_lora"
+  ],
+  "status": "revised_no_exposure_continuation_pending_new_exact_owner_approval",
+  "study_id": "lora-optimization-development-v1",
+  "systems": [
+    "original",
+    "read_progress_v1"
+  ]
+}

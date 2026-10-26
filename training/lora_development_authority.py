@@ -33,11 +33,12 @@ def verify_source(root, files):
 
 
 def validate_package(package):
+    extra = {'model_path_bindings', 'continuation'} if type(package) is dict and package.get('schema_version') == 2 else set()
     require(type(package) is dict and set(package) == {'schema_version', 'study_id', 'development_plan',
         'source_files', 'model_identities', 'assets', 'endpoints', 'limits', 'lease_end_epoch', 'resource_policy',
         'host_policy', 'evidence_policy', 'historical_family_overlap', 'execution_ready',
-        'loader_policy', 'stop_policy', 'native_scope', 'gpu_hardware'}, "complete development package required")
-    require(type(package['schema_version']) is int and package['schema_version'] == 1 and package['study_id'] == STUDY
+        'loader_policy', 'stop_policy', 'native_scope', 'gpu_hardware'} | extra, "complete development package required")
+    require(type(package['schema_version']) is int and package['schema_version'] in {1, 2} and package['study_id'] == STUDY
             and package['execution_ready'] is True, "prepared new-study package required")
     plan = package['development_plan']
     require(package['gpu_hardware'] == {'name': 'NVIDIA GeForce RTX 3090', 'memory_mib': 24576,
@@ -101,6 +102,42 @@ def validate_package(package):
     overlap = package['historical_family_overlap']
     if overlap['status'] == 'owner_reviewed_family_independence': _sha(overlap['owner_summary_sha256'])
     else: require(overlap['owner_summary_sha256'] is None, "unknown independence cannot carry invented evidence")
+    if package['schema_version'] == 2:
+        continuation = package['continuation']
+        require(set(continuation) == {'prior_package_sha256', 'prior_review', 'prior_review_sha256',
+            'prior_endpoints', 'charged_prior_seconds', 'cumulative_seconds_limit', 'prior_load_attempts',
+            'cumulative_load_attempts_limit'}, 'complete prior-attempt accounting required')
+        require(continuation['prior_package_sha256'] == 'c1cfb2f13d0c56fb58e65481cc413189016ed8589428a6af869e27f76febf249'
+                and continuation['prior_review_sha256'] == digest(continuation['prior_review']), 'prior review binding differs')
+        prior = continuation['prior_review']
+        require(prior['package_sha256'] == continuation['prior_package_sha256'] and prior['replay_allowed'] is False
+                and prior['slot_claims_verified'] == prior['model_generation_stages'] == prior['fixture_documents_created'] == 0
+                and prior['load_attempts_consumed'] == 2 and prior['host_secret_absence_verified'] is True
+                and all(r['exit_observed'] and r['gpu_absence_verified'] for r in prior['stop_evidence'])
+                and len(prior['stop_evidence']) == 2, 'no-exposure settled predecessor required')
+        require(continuation['charged_prior_seconds'] == 180 and continuation['cumulative_seconds_limit'] == 7200
+                and continuation['prior_load_attempts'] == 2 and continuation['cumulative_load_attempts_limit'] == 3
+                and package['limits']['gpu_residency_seconds'] == 7020
+                and package['limits']['max_load_attempts'] == 1 and package['limits']['max_infrastructure_recoveries'] == 0,
+                'one explicitly additional loading attempt with cumulative time accounting required')
+        require(set(continuation['prior_endpoints']) == {'mac', 'gpu'} and all(
+            continuation['prior_endpoints'][k]['state_root'] != package['endpoints'][k]['state_root']
+            and continuation['prior_endpoints'][k]['source_root'] != package['endpoints'][k]['source_root']
+            for k in ('mac', 'gpu')), 'preserve retired source/state roots')
+        expected = {str(Path(assets[root]) / name): sha for root, names in
+                    [('snapshot_dir', 'base_files'), ('adapter_root', 'adapter_files')]
+                    for name, sha in assets[names].items()}
+        require(set(package['model_path_bindings']) == set(expected), 'all model paths must be explicitly bound')
+        for logical, binding in package['model_path_bindings'].items():
+            require(set(binding) == {'resolved_path', 'sha256'} and binding['sha256'] == expected[logical],
+                    'model path digest differs')
+            target = Path(binding['resolved_path'])
+            require(target.is_absolute() and '..' not in target.parts and str(target) == binding['resolved_path'],
+                    'absolute model target required')
+            base = Path(assets['snapshot_dir'])
+            require((Path(logical).parent == base and target.parent == base.parent.parent / 'blobs')
+                    or (Path(logical).parent == Path(assets['adapter_root']) and target == Path(logical)),
+                    'model target outside fixed asset roots')
     return review
 
 

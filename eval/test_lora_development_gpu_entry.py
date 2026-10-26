@@ -11,11 +11,12 @@ from eval.test_lora_development_wire import PLAN, IDENTITY
 
 
 @pytest.mark.parametrize('fault,expected_loads', [(None, 1), ('first_load', 2), ('both_loads', 2),
-    ('cleanup_unknown', 1), ('after_exposure', 1)])
+    ('cleanup_unknown', 1), ('after_exposure', 1), ('single_load', 1)])
 def test_recovery_is_preexposure_once_and_cleanup_unknown_blocks_it(tmp_path, monkeypatch, fault, expected_loads):
     tmp_path.chmod(0o700)
-    package = {'limits': PLAN['limits'], 'lease_end_epoch': 9999999999, 'source_files': {},
+    package = {'limits': dict(PLAN['limits']), 'lease_end_epoch': 9999999999, 'source_files': {},
         'model_identities': {'base': IDENTITY, 'current_lora': IDENTITY}, 'endpoints': {'gpu': {'python': '/synthetic/python'}}}
+    if fault == 'single_load': package['limits'].update(max_load_attempts=1, max_infrastructure_recoveries=0)
     key = digest(package)
     ready = {'status': 'ready', 'package_sha256': key, 'model_identities': package['model_identities']}
     messages = [{'action': 'infer', 'request': {'synthetic': True}}, {'action': 'stop', 'package_sha256': key}]
@@ -35,7 +36,7 @@ def test_recovery_is_preexposure_once_and_cleanup_unknown_blocks_it(tmp_path, mo
         def receive(self, deadline):
             self.count += 1
             if self.count == 1:
-                if fault in {'both_loads', 'cleanup_unknown'} or (fault == 'first_load' and self.index == 0):
+                if fault in {'both_loads', 'cleanup_unknown', 'single_load'} or (fault == 'first_load' and self.index == 0):
                     raise TimeoutError('synthetic loading timeout')
                 return ready
             if fault == 'after_exposure': raise EOFError('synthetic exposed disconnect')
@@ -46,7 +47,7 @@ def test_recovery_is_preexposure_once_and_cleanup_unknown_blocks_it(tmp_path, mo
     monkeypatch.setattr(module, 'OwnedChild', Child)
     result = module.supervise(tmp_path, package, tmp_path)
     assert len(children) == expected_loads and all(c.closed for c in children)
-    assert result['tasks_exposed'] == (fault not in {'both_loads', 'cleanup_unknown'})
+    assert result['tasks_exposed'] == (fault not in {'both_loads', 'cleanup_unknown', 'single_load'})
     assert (tmp_path / 'gpu-settlement.json').exists()
     if fault == 'cleanup_unknown': assert result['status'] == 'gpu_cleanup_unknown'
     if fault == 'after_exposure': assert (tmp_path / 'tasks-exposed.claim.json').exists()

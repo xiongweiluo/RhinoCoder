@@ -1,0 +1,104 @@
+{
+  "additional_cost": 0,
+  "allowed_loading_recovery_consumed": 1,
+  "candidate_feedback_effect": "unknown_no_task_exposure",
+  "charge_basis": "Round up 136.624 seconds controller wall time plus bounded post-stop readonly export/transfer to 180 seconds. CPU diagnosis and development after verified GPU stop are separately outside GPU residency.",
+  "completed_slots": 0,
+  "evidence_file_sha256": {
+    "development-result.json": "b77905805b785dda78f80311ab8530047d49b99a9fe5f9368e2e17f902ab1847",
+    "gpu-evidence.tar": "890c00684282fff258e2a80a163995f7b8184ce4150f4438a36f8ae070e1ab9b",
+    "gpu-export-review.stderr": "e028a47eee1c6eb36f27b848afc5ac051b94b1e6cdce48b5e11c25b728493297",
+    "gpu-readonly-review-manifest.json": "a8733d8b98b735128850acdd7a6191a87529fc417d42b89bd79093e35f966da5",
+    "gpu/gpu-settlement.json": "0a149b6931f0cfd15a4eb3b9190a0dad69c17c52e21d5edbc585fc6171295a65",
+    "gpu/gpu-started.claim.json": "83f397e040b45fa861d12612c0b78adcf85546baa4a5354276c1e49ec11e7877",
+    "gpu/load-0/attempt.claim.json": "2041c45f8d988fbb18d40204ea8cfadaf480b73299b2e6fe86580a61611030f5",
+    "gpu/load-0/child-created.json": "d4ea9dba76ba4ea60e4775499f89f8d7ece79f7c6c2cb7e93a282db8c74f3b75",
+    "gpu/load-0/child-stop.json": "9133882f96baf372f024c9741a45948a61094f3db48918254651804e13d88a81",
+    "gpu/load-0/loading-stop-verified.json": "4548181f5f200787066b56054bcdc7f486604580166418d151341f757780baf3",
+    "gpu/load-0/worker-admitted.claim.json": "cdea7346e6acbaa4f02ee74712996805dbb9c456c70514bda734972b2184d68d",
+    "gpu/load-0/worker.stderr": "9ba7990420df84cd179b755d5ea20623b88aa2aa154c4a90bd82182d4c8b3147",
+    "gpu/load-1/attempt.claim.json": "11d75158240e6eef6a2ae156675c22cfa80e33aaee1167bbe9d765b78c1d212c",
+    "gpu/load-1/child-created.json": "98fb684e654062aee11ab29248df3fac30aa8db5f490fe3a22481ef318fadfba",
+    "gpu/load-1/child-stop.json": "36a00919af502359a94c1678d180788d92fe79ff963d06a7d368eb3b0b53acd9",
+    "gpu/load-1/loading-stop-verified.json": "617e383bb5bac82597bbea21d2c1d690475254bbd571a04d4d5a2ac8c7ebedb0",
+    "gpu/load-1/worker-admitted.claim.json": "ed515904719daa4d08cbb952411d149356af1c7bb49ee3c6ef87b890edde756a",
+    "gpu/load-1/worker.stderr": "9ba7990420df84cd179b755d5ea20623b88aa2aa154c4a90bd82182d4c8b3147",
+    "gpu/model-asset-path-review.json": "2a10b9e6e812fc4f08e234d76ddea5ab58acea05b8c4ae4469981d8575a17ad3",
+    "host/host-settlement.json": "84d668e2f64d5603dd24ae30ff0c6ead3241002aa54d0563e9823063bcfb46f2"
+  },
+  "findings": [
+    {
+      "confirmed": "All 16 asset hashes match; all 14 snapshot files are symlinks. The first canonical-path equality rejects before hash comparison.",
+      "id": "D1",
+      "not_evidence_of": "weight corruption, model capability or any historical failure root cause"
+    },
+    {
+      "confirmed": "GPU terminal settlement was received where Mac expected ready; Mac then raises and drops it, leaving original gpu=null despite verified GPU stop.",
+      "id": "D2"
+    },
+    {
+      "confirmed": "Frozen export compares the entire stat result including atime; read-only transfer observed access-time-only changes on six files with stable dev/inode/size/mtime/ctime and content hashes. Failed archive remains preserved.",
+      "id": "D3"
+    }
+  ],
+  "fixture_documents_created": 0,
+  "gpu_elapsed_seconds_including_load_and_idle": 19.99492620496312,
+  "historical_results_changed": false,
+  "host_secret_absence_verified": true,
+  "host_settlement": {
+    "all_other_host_handlers_absent_claimed": false,
+    "close": null,
+    "error_type": null,
+    "exact_delegate_remove_returned": true,
+    "reason": "controller_shutdown",
+    "runtime_sha256": "c1cfb2f13d0c56fb58e65481cc413189016ed8589428a6af869e27f76febf249",
+    "status": "host_stopped"
+  },
+  "independent_journal_reconciliation": {
+    "records": 0,
+    "slot_claims": 0,
+    "step_claims": 0
+  },
+  "load_attempts_consumed": 2,
+  "mac_controller_elapsed_seconds": 136.62301966710947,
+  "model_generation_stages": 0,
+  "model_weights_loading_reached": false,
+  "next_real_execution_requires_revised_exact_package_and_approval": true,
+  "not_attempted_slots": 32,
+  "original_mac_claimed_slots": null,
+  "original_mac_gpu_settlement": null,
+  "package_sha256": "c1cfb2f13d0c56fb58e65481cc413189016ed8589428a6af869e27f76febf249",
+  "paid_lease_amount_unknown": true,
+  "phase_one_complete": false,
+  "planned_slots": 32,
+  "prior_work_charge_seconds_for_proposed_continuation": 180,
+  "private_readonly_transfer": {
+    "all_hashes_verified": true,
+    "atime_changes_observed_during_read": 6,
+    "files": 15,
+    "owned_gpu_pids_absent_rechecked": true,
+    "raw_bytes": 12938
+  },
+  "replay_allowed": false,
+  "schema_version": 1,
+  "slot_claims_verified": 0,
+  "source_commit": "4978fd0ed6679d31f212c5f070a341496fd63e5b",
+  "status": "stopped_before_model_loading_and_task_exposure",
+  "stop_evidence": [
+    {
+      "exit_observed": true,
+      "gpu_absence_verified": true,
+      "returncode": 1,
+      "signals": []
+    },
+    {
+      "exit_observed": true,
+      "gpu_absence_verified": true,
+      "returncode": 1,
+      "signals": []
+    }
+  ],
+  "study_id": "lora-optimization-development-v1",
+  "training_decision": "no_new_training_evidence",
+  "weights_loading_evidence": "Both exact-source worker traces reject preflight before torch/peft/transformers imports and before load; no peer directory or exposure record exists."
+}

@@ -29,12 +29,15 @@ def preflight(package):
     report, files = inventory()
     require(digest(report) == package['endpoints']['gpu']['environment_sha256'], 'GPU environment bytes differ')
     assets = package['assets']
-    for prefix, names in [(assets['snapshot_dir'], assets['base_files']),
-                          (assets['adapter_root'], assets['adapter_files'])]:
-        for name, expected in names.items():
-            path = Path(prefix) / name
-            require(path.resolve() == path and sha(path) == expected, 'fixed model bytes differ')
-            files[str(path)] = expected
+    from training.lora_development_assets import verify_model_paths
+    bindings = package.get('model_path_bindings')
+    if bindings is None:  # Historical v1 semantics remain strict, never auto-discover an alias.
+        bindings = {str(Path(prefix) / name): {'resolved_path': str(Path(prefix) / name), 'sha256': expected}
+                    for prefix, names in [(assets['snapshot_dir'], assets['base_files']),
+                                          (assets['adapter_root'], assets['adapter_files'])]
+                    for name, expected in names.items()}
+    model_files, check_model_paths = verify_model_paths(assets, bindings)
+    files.update(model_files)
     # Byte verification once, then stable dev/inode/mtime/ctime/size continuity
     # between checkpoints; no claim of whole-machine runtime byte closure.
     def identity(path):
@@ -42,6 +45,7 @@ def preflight(package):
         return (s.st_dev, s.st_ino, s.st_size, s.st_mtime_ns, s.st_ctime_ns)
     identities = {name: identity(name) for name in files}
     def check():
+        check_model_paths()
         require(all(identity(name) == value for name, value in identities.items()), 'verified asset metadata drift')
         for module in tuple(sys.modules.values()):
             origin = getattr(module, '__file__', None)

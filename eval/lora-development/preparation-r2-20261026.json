@@ -1,0 +1,21 @@
+{
+  "actual_gpu_readonly_preflight_status": "unknown_after_transport_timeout",
+  "cpu_related_regressions_passed": 76,
+  "gpu_model_entry_invoked": false,
+  "gpu_prepared_copy_status": "unknown_after_transport_timeout",
+  "mac_prepared_files_verified": 288,
+  "new_execution_approval_created": false,
+  "package_sha256": "aa280fb64ba123e4d7f999f5b5cd7db4302c2c3bb1337f2c459da938d408df9e",
+  "preparation_failures": [
+    {
+      "operation": "public_source_copy_over_owner_ssh_control",
+      "timeout_seconds": 45
+    },
+    {
+      "operation": "readonly_environment_asset_preflight_no_model_import",
+      "timeout_seconds": 120
+    }
+  ],
+  "rhino_entry_invoked": false,
+  "schema_version": 1
+}

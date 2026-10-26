@@ -35,7 +35,7 @@ def supervise(root, package, state):
     exposed, child, stopped, error = False, None, None, None
     attempts = []
     try:
-        for number in range(2):
+        for number in range(package['limits']['max_load_attempts']):
             budget.work(remaining_slots=32, loading=True)
             verify_source(root, package['source_files'])
             attempt = state / ('load-%d' % number)
@@ -65,7 +65,7 @@ def supervise(root, package, state):
                     journal('loading-stop-verified', stopped)
                     attempts.append({'number': number, 'ready': False, 'error_type': type(exc).__name__})
                     require(stopped['exit_observed'] and stopped['gpu_absence_verified'], 'loading cleanup unknown')
-                    if number == 0: continue
+                    if number + 1 < package['limits']['max_load_attempts']: continue
                     raise
                 attempts.append({'number': number, 'ready': True})
                 outer.send(ready, time.monotonic() + 10)

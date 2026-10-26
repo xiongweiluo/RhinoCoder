@@ -22,7 +22,9 @@ def build(root=ROOT):
     from training.lora_development_loader import POLICY
     from training.lora_development_scope import field_views
     record = root / 'eval/lora-development'
-    plan = json.loads((record / 'proposed-development-plan.json').read_text())
+    plan = json.loads((record / 'proposed-development-plan-r2-20261026.json').read_text())
+    prior = json.loads((record / 'development-package-20261026.json').read_text())
+    prior_review = json.loads((record / 'execution-review-20261026.json').read_text())
     model = json.loads((record / 'readonly-resources-20261026.json').read_text())['model_assets']
     gpu = json.loads((record / 'gpu-environment-20261026.json').read_text())
     mac = json.loads((record / 'mac-environment-20261026.json').read_text())
@@ -39,7 +41,12 @@ def build(root=ROOT):
         'local_tokenizer_dir': '/Users/xiongweiluo/RhinoCoder/data/training/c5/modelbridge-tokenizer/' + model['base_revision'],
         'tokenizer_files': {n: model['base_files'][n] for n in ('config.json', 'generation_config.json', 'merges.txt',
                                                             'tokenizer.json', 'tokenizer_config.json', 'vocab.json')}}
-    value = {'schema_version': 1, 'study_id': plan['study_id'], 'development_plan': plan, 'source_files': files,
+    value = {'schema_version': 2, 'study_id': plan['study_id'], 'development_plan': plan, 'source_files': files,
+        'model_path_bindings': json.loads((record / 'model-path-bindings-20261026.json').read_text()),
+        'continuation': {'prior_package_sha256': digest(prior), 'prior_review': prior_review,
+            'prior_review_sha256': digest(prior_review), 'prior_endpoints': prior['endpoints'],
+            'charged_prior_seconds': 180, 'cumulative_seconds_limit': 7200,
+            'prior_load_attempts': 2, 'cumulative_load_attempts_limit': 3},
         'model_identities': {'base': digest({'base': assets['base_files'], 'loader_policy': POLICY}),
             'current_lora': digest({'base': assets['base_files'], 'adapter': assets['adapter_files'], 'loader_policy': POLICY})},
         'assets': assets, 'loader_policy': POLICY,
@@ -47,11 +54,11 @@ def build(root=ROOT):
             'driver_version': '550.107.02', 'uuid': 'GPU-0e00f0ad-fa5a-eed9-6eee-5877984e02f9'},
         'native_scope': {'schedule': views['schedule'], 'native': views['native']},
         'endpoints': {
-            'mac': {'source_root': '/Users/xiongweiluo/RhinoCoder/data/lora-development-20261026/source',
-                'state_root': '/Users/xiongweiluo/RhinoCoder/data/lora-development-20261026/state-lora-development',
+            'mac': {'source_root': '/Users/xiongweiluo/RhinoCoder/data/lora-development-20261026-r2/source',
+                'state_root': '/Users/xiongweiluo/RhinoCoder/data/lora-development-20261026-r2/state-lora-development',
                 'python': '/opt/anaconda3/bin/python3.13', 'environment_sha256': digest(mac)},
-            'gpu': {'source_root': '/data/lora-development-20261026/source',
-                'state_root': '/data/lora-development-20261026/state-lora-development',
+            'gpu': {'source_root': '/data/lora-development-20261026-r2/source',
+                'state_root': '/data/lora-development-20261026-r2/state-lora-development',
                 'python': gpu['python_path'], 'environment_sha256': digest(gpu)}},
         'limits': plan['limits'], 'lease_end_epoch': int(datetime.fromisoformat('2026-10-30T20:00:00+01:00').timestamp()),
         'resource_policy': {'lease_paid': True, 'additional_cost_ceiling': 0, 'new_paid_service_or_renewal': False,

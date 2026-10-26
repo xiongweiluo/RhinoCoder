@@ -99,6 +99,10 @@ def main():
             worker = subprocess.Popen(ssh, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=stderr)
             pipe = JsonPipe(worker.stdout.fileno(), worker.stdin.fileno())
             ready = pipe.receive(time.monotonic() + 1250)
+            publish_json(state, 'gpu-startup-response.json', ready)
+            if ready.get('status') in {'gpu_stopped', 'gpu_cleanup_unknown'}:
+                require(ready.get('package_sha256') == runtime, 'startup settlement binding differs')
+                gpu = ready
             require(ready == {'status': 'ready', 'package_sha256': runtime, 'model_identities': package['model_identities']},
                     'GPU startup did not establish fixed models')
             journal = DevelopmentJournal(state / 'journal', package['development_plan'], runtime)
@@ -112,14 +116,16 @@ def main():
     finally:
         if pipe is not None:
             try:
-                deadline = time.monotonic() + 180
-                pipe.send({'action': 'stop', 'package_sha256': runtime}, deadline)
-                while True:
-                    value = pipe.receive(deadline)
-                    if value.get('status') in {'gpu_stopped', 'gpu_cleanup_unknown'}:
-                        gpu = value; break
-                    # Retain a late model response without admitting another dispatch.
-                    publish_json(state, 'late-model-response.json', value)
+                if gpu is None:
+                    deadline = time.monotonic() + 180
+                    pipe.send({'action': 'stop', 'package_sha256': runtime}, deadline)
+                    while True:
+                        value = pipe.receive(deadline)
+                        if value.get('status') in {'gpu_stopped', 'gpu_cleanup_unknown'}:
+                            require(value.get('package_sha256') == runtime, 'GPU settlement binding differs')
+                            gpu = value; break
+                        # Retain a late model response without admitting another dispatch.
+                        publish_json(state, 'late-model-response.json', value)
             except BaseException as exc: error = error or type(exc).__name__
             finally:
                 worker.stdin.close()
