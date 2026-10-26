@@ -39,8 +39,10 @@ def start():
     def guard():
         source()
         reserve = package['limits']['cleanup_export_seconds']
-        native.require(time.time() < min(package['lease_end_epoch'] - reserve,
-            scope['wall'] + package['limits']['gpu_residency_seconds'] - reserve), 'host work deadline')
+        ceiling = package['limits']['gpu_residency_seconds']
+        deadline = package['lease_end_epoch'] - reserve
+        if ceiling is not None: deadline = min(deadline, scope['wall'] + ceiling - reserve)
+        native.require(time.time() < deadline, 'host work deadline')
     guard()
     import Rhino
     native.require(Rhino.RhinoApp.IsOnMainThread and list(sys.version_info[:2]) == [3, 9]

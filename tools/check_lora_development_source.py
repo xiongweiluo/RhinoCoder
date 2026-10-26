@@ -65,6 +65,7 @@ targets = (
     'training.lora_development_controller', 'training.lora_development_export',
     'training.lora_development_local_tokenizer',
     'plugin.rhino_listener.lora_development_admission',
+    'plugin.rhino_listener.lora_development_campaign',
     'plugin.rhino_listener.lora_development_native',
     'plugin.rhino_listener.lora_development_session',
     'tools.run_lora_development_mac', 'tools.run_lora_development_gpu',

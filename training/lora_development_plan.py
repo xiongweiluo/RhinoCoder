@@ -40,6 +40,8 @@ def review_plan(plan: dict) -> dict:
         raise ValueError("fixed selection/acceptance split required")
     limits = plan["limits"]
     for key, value in limits.items():
+        if key == 'gpu_residency_seconds' and value is None:
+            continue  # Campaign scope has no fixed aggregate duration ceiling.
         if type(value) is not int or value < 0:
             raise ValueError("integer resource limits required")
     if not (limits["max_steps"] == limits["max_reads"] == 2 and limits["max_writes"] == 0
@@ -48,7 +50,8 @@ def review_plan(plan: dict) -> dict:
     slots = len(families) * len(plan["routes"]) * len(plan["systems"])
     required = (slots * limits["slot_seconds"] + limits["max_load_attempts"] * limits["load_seconds"]
                 + limits["cleanup_export_seconds"])
-    if limits["slot_seconds"] <= 0 or limits["cleanup_export_seconds"] < 900 or required > limits["gpu_residency_seconds"]:
+    ceiling = limits['gpu_residency_seconds']
+    if limits["slot_seconds"] <= 0 or limits["cleanup_export_seconds"] < 900 or (ceiling is not None and required > ceiling):
         raise ValueError("whole-window budget insufficient")
     # Even fully populated metadata cannot grant live execution through this API.
     missing = sorted(key for key, value in plan["required_before_execution"].items() if value is None)
@@ -58,7 +61,7 @@ def review_plan(plan: dict) -> dict:
             "slots": slots, "max_step_requests": slots * limits["max_steps"],
             "max_generation_stages": slots * limits["max_steps"] * 2,
             "planned_worst_case_seconds": required,
-            "remaining_headroom_seconds": limits["gpu_residency_seconds"] - required,
+            "remaining_headroom_seconds": None if ceiling is None else ceiling - required,
             "missing_before_execution": missing, "timing_feasibility_observed": False,
             "execution_authorized": False, "phase_one_complete": False}
 

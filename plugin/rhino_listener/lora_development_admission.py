@@ -15,6 +15,9 @@ from .lora_development_channel import STUDY
 
 def retired_predecessors(package):
     """Exact settled R1/R2 lineage; does not read files or grant another run."""
+    if package.get('schema_version') == 4:
+        from .lora_development_campaign import Campaign
+        return Campaign(package, 'mac').retired()
     prior = package.get('continuation')
     if package.get('schema_version') != 3:
         return [prior] if prior is not None else []
@@ -85,6 +88,10 @@ def admit(root, package, endpoint):
         'package_sha256': digest(package),
         'approval_basis': 'repository_owner_explicit_approval_of_this_complete_development_package',
         'scope': 'one_bounded_public_development_no_training_no_final_test'}
+    if package.get('schema_version') == 4:
+        from .lora_development_campaign import Campaign, owner_record
+        expected = owner_record(package['campaign_policy'])
+        Campaign(package, endpoint).revision()
     require(digest(read_json(state, 'owner-approval.json')) == digest(expected), 'exact new owner execution approval required')
     if package.get('schema_version') == 3: retired_predecessors(package)
     source_guard(root, package['source_files'])

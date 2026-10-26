@@ -76,7 +76,8 @@ class DevelopmentJournal:
     plan and runtime. A different output folder cannot be admitted by the
     eventual field entry as a way to reset this ledger.
     """
-    def __init__(self, state: Path, plan: dict, runtime_sha256: str):
+    def __init__(self, state: Path, plan: dict, runtime_sha256: str, *, campaign=None):
+        self.campaign = campaign
         self.root = Path(state)
         os.close(private_directory(self.root))
         self.views = field_views(plan)
@@ -122,6 +123,8 @@ class DevelopmentJournal:
             require(read_json(self.root, "selection.json") == self._selection(),
                     "selection must be fixed before acceptance")
         # O_EXCL publication prevents concurrent or reopened duplicate starts.
+        if self.campaign is not None:
+            self.campaign.claim_slot(slot)  # Global intent survives revision/root changes.
         self._write(slot, ".claim.json", {"identity": identity, "replay_allowed": False})
         return identity
 

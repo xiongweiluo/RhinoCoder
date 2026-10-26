@@ -42,6 +42,11 @@ def main():
     environment = json.loads((ROOT / 'lora-development-mac-environment.json').read_text())
     require(digest(environment) == package['endpoints']['mac']['environment_sha256'], 'CPU environment binding differs')
     verify_environment(environment)
+    campaign = None
+    if package.get('schema_version') == 4:
+        from plugin.rhino_listener.lora_development_campaign import Campaign
+        campaign = Campaign(package, 'mac')
+        campaign.begin_run()
     start = {'wall': time.time(), 'monotonic': time.monotonic(), 'package_sha256': runtime}
     publish_json(state, 'mac-started.claim.json', start)
     budget = WorkBudget(package['limits'], package['lease_end_epoch'], first_wall=start['wall'], first_mono=start['monotonic'])
@@ -51,6 +56,7 @@ def main():
     publish_json(state, 'host-secret.json', {'package_sha256': runtime, 'key_hex': secret.hex()})
     host_state = state / 'host'
     worker = pipe = journal = None
+    gpu_launch_attempted = False
     rows, error, gpu, host_final, key_removed, exported = [], None, None, None, None, None
     slot_deadline = None
     def source(): verify_source(ROOT, package['source_files'])
@@ -96,6 +102,7 @@ def main():
                '-p', '22158', 'linux@175.155.64.171', shlex.join(command)]
         stderr = open(state / 'ssh.stderr', 'xb'); os.chmod(state / 'ssh.stderr', 0o600)
         try:
+            gpu_launch_attempted = True  # Unknown SSH launch outcome is not "never launched".
             worker = subprocess.Popen(ssh, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=stderr)
             pipe = JsonPipe(worker.stdout.fileno(), worker.stdin.fileno())
             ready = pipe.receive(time.monotonic() + 1250)
@@ -105,7 +112,7 @@ def main():
                 gpu = ready
             require(ready == {'status': 'ready', 'package_sha256': runtime, 'model_identities': package['model_identities']},
                     'GPU startup did not establish fixed models')
-            journal = DevelopmentJournal(state / 'journal', package['development_plan'], runtime)
+            journal = DevelopmentJournal(state / 'journal', package['development_plan'], runtime, campaign=campaign)
             controller = DevelopmentController(journal=journal, state=state / 'controller', runtime=runtime, secret=secret,
                 schemas=_schemas(), tokenizer=tokenizer, identities=package['model_identities'], host=host, model=model,
                 guard=guard, cleanup_guard=source)
@@ -178,9 +185,11 @@ def main():
         result = {'package_sha256': runtime, 'rows': rows, 'claimed_slots': claimed_slots,
             'completed_slot_results': len(rows), 'journal_reconciliation_required': True,
             'error_type': error, 'gpu': gpu, 'host': host_final,
+            'gpu_launch_attempted': gpu_launch_attempted,
             'key_removal': key_removed, 'gpu_export': exported, 'elapsed_seconds': time.monotonic() - start['monotonic'],
             'research_complete': False, 'phase_one_complete': False, 'historical_results_changed': False}
         publish_json(state, 'development-result.json', result)
+        if campaign is not None: campaign.settle_run(result)
         print(json.dumps({'status': 'stopped_pending_evidence_review', 'claimed_slots': claimed_slots,
                           'completed_slot_results': len(rows),
                           'error_type': error, 'phase_one_complete': False}), flush=True)

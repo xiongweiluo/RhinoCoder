@@ -26,6 +26,10 @@ def gpu_absent(pid):
 
 
 def supervise(root, package, state):
+    campaign = None
+    if package.get('schema_version') == 4:
+        from plugin.rhino_listener.lora_development_campaign import Campaign
+        campaign = Campaign(package, 'gpu')
     require(shutil.disk_usage(state).free >= 2 * 1024**3, 'GPU evidence reserve unavailable')
     start = {'wall': time.time(), 'monotonic': time.monotonic(), 'package_sha256': digest(package)}
     publish_json(state, 'gpu-started.claim.json', start)
@@ -34,14 +38,17 @@ def supervise(root, package, state):
     outer = JsonPipe(sys.stdin.fileno(), sys.stdout.fileno())
     exposed, child, stopped, error = False, None, None, None
     attempts = []
+    global_load = None
     try:
         for number in range(package['limits']['max_load_attempts']):
             budget.work(remaining_slots=32, loading=True)
             verify_source(root, package['source_files'])
+            if campaign is not None: global_load = campaign.claim_load()
             attempt = state / ('load-%d' % number)
             attempt.mkdir(mode=0o700)
             publish_json(attempt, 'attempt.claim.json', {'number': number, 'first_start': start,
-                         'package_sha256': digest(package), 'tasks_exposed': False})
+                         'package_sha256': digest(package), 'tasks_exposed': False,
+                         'global_load_number': global_load})
             def journal(name, value): publish_json(attempt, name + '.json', value)
             cache = attempt / 'never-created-bytecode-cache'
             require(not cache.exists(), 'new bytecode prefix required')
@@ -75,6 +82,7 @@ def supervise(root, package, state):
                     if message == {'action': 'stop', 'package_sha256': digest(package)}: break
                     require(set(message) == {'action', 'request'} and message['action'] == 'infer', 'fixed GPU action required')
                     exposed = True  # Intent persisted before sending any task to the worker.
+                    if campaign is not None: campaign.exposed()
                     if not (state / 'tasks-exposed.claim.json').exists():
                         publish_json(state, 'tasks-exposed.claim.json', {'request_sha256': digest(message['request'])})
                     verify_source(root, package['source_files'])
@@ -98,8 +106,12 @@ def supervise(root, package, state):
                       else 'gpu_cleanup_unknown', 'package_sha256': digest(package), 'attempts': attempts,
             'tasks_exposed': exposed, 'stop': stopped, 'error_type': error,
             'elapsed_seconds_including_load_and_idle': time.monotonic() - start['monotonic'],
-            'additional_cost': 0, 'paid_lease_amount': None, 'replay_allowed': False}
+            'additional_cost': None if campaign is not None else 0, 'paid_lease_amount': None, 'replay_allowed': False}
+        if campaign is not None:
+            settlement.update(global_load_number=global_load, paid_resource_actions=0,
+                              cost_status='actual_invoice_unknown_no_purchase_or_renewal_performed')
         publish_json(state, 'gpu-settlement.json', settlement)
+        if campaign is not None and global_load is not None: campaign.settle_load(global_load, settlement)
         try: outer.send(settlement, time.monotonic() + 5)
         except (BrokenPipeError, TimeoutError): pass
     return settlement
@@ -110,6 +122,12 @@ def worker(root, package, state, number):
     attempt = state / ('load-%d' % number)
     claimed = read_json(attempt, 'attempt.claim.json')
     require(claimed['number'] == number and claimed['package_sha256'] == digest(package), 'parent attempt differs')
+    if package.get('schema_version') == 4:
+        from plugin.rhino_listener.lora_development_campaign import Campaign
+        campaign = Campaign(package, 'gpu'); campaign.revision()
+        require(number == 0 and read_json(campaign.root, 'load-%d.claim.json' % claimed['global_load_number']) == {
+            'global_load_number': claimed['global_load_number'], 'revision_id': package['revision_id'],
+            'package_sha256': digest(package)}, 'worker requires permanent global loading intent')
     budget = WorkBudget(package['limits'], package['lease_end_epoch'],
         first_wall=claimed['first_start']['wall'], first_mono=claimed['first_start']['monotonic'])
     pipe = JsonPipe(sys.stdin.fileno(), sys.stdout.fileno())

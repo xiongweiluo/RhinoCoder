@@ -1,5 +1,7 @@
 # 第一阶段 R3：两批记录保留后的有界开发审批包
 
+> 2026-10-26接续更新：此R3提案未获执行批准、未执行、不消费第4次；机器包和以下时点记录保留。其五项CI已成功。当前待确认方案已替换为[一次范围批准与逐版技术核验](lora-development-campaign-review-20261026.md)，不能再按本页旧4次/2小时/0费用规则启动。
+
 本包属于同一主任务第一阶段的接续检查点，不是新的正式阶段。R1、R2 已消费 3 次加载，均未达到权重加载或任务曝光；[R2 审核](lora-development-r2-result-20261026.md)和 `e36a68d` 的[五项成功 CI](https://github.com/xiongweiluo/RhinoCoder/actions/runs/40321972458)保持。所有者要求继续完成第一阶段，授权公开 CPU 开发与包准备；**尚未批准本包的新增加载、模型或 Rhino 执行**。
 
 完整包 SHA：`0445c3d728b8bfca125e5af9648d85020fe68d46a595e271c0e4fc870351768d`。见[机器包](../eval/lora-development/development-package-r3-20261026.json)、[承诺摘要](../eval/lora-development/development-package-r3-commitment-20261026.json)、[提案](../eval/lora-development/proposed-development-plan-r3-20261026.json)。`execution_ready=true`表示精确材料可供审核，不是执行权限；未创建本包 state/grant，所有 live 入口仍要求新直接批准。

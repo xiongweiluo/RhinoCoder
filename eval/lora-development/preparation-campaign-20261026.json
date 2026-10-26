@@ -1,0 +1,74 @@
+{
+  "actual_additional_cost": null,
+  "ci": {
+    "exact_proposal_commit": "pending_commit",
+    "execution_requires_all_success": true,
+    "required_jobs": [
+      "impact",
+      "python",
+      "ui",
+      "release",
+      "validate"
+    ]
+  },
+  "cpu_regression": {
+    "command": "python -m pytest -q eval/test_lora_development*.py",
+    "earlier_findings": [
+      "Policy contract shared mutable references with proposal; deep snapshot fixed and regression passed.",
+      "New synthetic supervisor test initially mixed captured real wall clock with injected start time; fixture corrected without changing production clock guards."
+    ],
+    "failed": 0,
+    "passed": 185,
+    "seconds": 36.62,
+    "synthetic_state_only": true
+  },
+  "execution_authorized": false,
+  "fixed_additional_cost_limit": null,
+  "fixed_total_seconds_limit": null,
+  "limitations": [
+    "No model backend ABI, weight loading, generation or Rhino native operation proven",
+    "Historical family overlap and whole-host byte closure remain unknown",
+    "Semantic repair review required in addition to hashes and protected AST",
+    "Only startup/pre-exposure continuation; consumed slots are never replayed"
+  ],
+  "live_campaign_initialized": false,
+  "mac_source_probe": {
+    "backend_imports": 0,
+    "canonical_sha256": "3339d51568c6516c7a753b1fa12313a4090f90792f7cb2b81a91d8e9bd3f9205",
+    "public_origins": 55,
+    "python": "3.13.5",
+    "record": "source-closure-mac-campaign-20261026.json",
+    "status": "passed"
+  },
+  "new_model_loads": 0,
+  "new_slot_claims": 0,
+  "package_sha256": "e22ec832dd8c8c9bb23065e74648e7fcecdacd5d4ebb554f7bc3c1590e6c16be",
+  "paid_resource_actions": 0,
+  "phase_one_complete": false,
+  "policy_sha256": "0b051d6095ad3b6e750e72b76070c3cd36c19a9a8b499258f9e2b41526f75de3",
+  "previous_r3_ci": {
+    "commit": "462a1ef15a6a8ea89d796f87318877e9fccb31fa",
+    "jobs": {
+      "impact": "success",
+      "python": "success",
+      "release": "success",
+      "ui": "success",
+      "validate": "success"
+    },
+    "r3_executed": false,
+    "run_id": 40368096615
+  },
+  "prior_consumed_loads": 3,
+  "proposed_cumulative_limit": 5,
+  "proposed_remaining_loads": 2,
+  "rhino_entries_called": 0,
+  "source_files": 290,
+  "source_inventory_sha256": "2587784267567ccdd207db7876d6fc90479c626725d050ff474e1c64e1305e17",
+  "status": "prepared_pending_owner_confirmation_and_exact_commit_ci",
+  "target_linux_probe": {
+    "last_readonly_result": "Permission denied (publickey,password)",
+    "prior_r3_probe_not_substituted": true,
+    "status": "pending_connection"
+  },
+  "training_or_final_test": false
+}

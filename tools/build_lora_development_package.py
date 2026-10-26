@@ -113,16 +113,56 @@ def build_r3(root=ROOT):
     return value
 
 
+def build_campaign(root=ROOT, *, revision_id=1, policy=None):
+    """Inert campaign candidate. Later revisions must reuse the approved policy.
+
+    Never initializes a ledger, grants authority or executes a live entry.
+    The initial proposal fixes a source baseline; acceptance is separate.
+    """
+    from plugin.rhino_listener.lora_development_campaign import CAMPAIGN, ROOTS, MUTABLE, contract, fragments
+    from training.lora_development_authority import validate_package
+    value = build_r3(root)
+    predecessors = value.pop('continuation')['predecessors']
+    value.update(schema_version=4, revision_id=revision_id)
+    value['limits']['gpu_residency_seconds'] = None
+    value['resource_policy']['additional_cost_ceiling'] = None
+    plan = value['development_plan']
+    plan['status'] = 'campaign_scope_proposal_pending_owner_confirmation'
+    plan['resource_status']['cost_ceiling'] = None
+    plan['resource_status']['owner_resource_confirmation'] = 'campaign scope proposal; execution not yet approved'
+    plan['required_before_execution'].update(
+        exact_source_runtime_and_resource_binding='Original campaign policy plus exact revision manifest; 3 consumed loads, cumulative maximum 5; 32 original slots, no replay',
+        lease_expiry_and_cost_ceiling='Paid existing lease through 2026-10-30T20:00:00+01:00; no fixed aggregate time/cost ceiling; actual accounting; no automatic purchase, renewal or resource change',
+        deployed_source_cpu_imports='Each exact revision must pass relevant CPU regression, deployed Mac/Linux isolated imports, all five commit CI jobs and integrity checks before execution')
+    # Scheduling/task/score fields remain identical; metadata cannot confer approval.
+    for name, endpoint in value['endpoints'].items():
+        base = ROOTS[name] + '/revisions/%04d' % revision_id
+        endpoint.update(source_root=base + '/source', state_root=base + '/state-lora-development')
+    if policy is None:
+        if revision_id != 1: raise ValueError('later revisions must reuse the original campaign policy')
+        policy = {'schema_version': 1, 'campaign_id': CAMPAIGN, 'roots': dict(ROOTS),
+            'baseline_loads': 3, 'max_loads': 5, 'baseline_predecessors': predecessors,
+            'contract': json.loads(json.dumps(contract(value))), 'baseline_source_files': dict(value['source_files']),
+            'mutable_startup_paths': list(MUTABLE),
+            'loader_fragments': fragments(root / 'training/lora_development_loader.py')}
+    value['campaign_policy'] = policy
+    validate_package(value)
+    return value
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--revision', choices=('r2', 'r3'), default='r2')
+    parser.add_argument('--revision', choices=('r2', 'r3', 'campaign'), default='r2')
+    parser.add_argument('--revision-id', type=int, default=1)
+    parser.add_argument('--policy', type=Path, help='Original approved policy, required for later campaign revisions')
     args = parser.parse_args()
     if (ROOT / ('eval/lora-development/owner-authorization-' + args.revision + '-20261026.json')).exists():
         parser.error(args.revision.upper() + ' is consumed: do not regenerate it or reuse its endpoints. '
                      'Use check_lora_development_source.py for CPU-only source checks; '
                      'any later execution needs a separately reviewed package and budget.')
-    value = build_r3() if args.revision == 'r3' else build()
+    value = (build_campaign(revision_id=args.revision_id, policy=json.loads(args.policy.read_text()) if args.policy else None)
+             if args.revision == 'campaign' else build_r3() if args.revision == 'r3' else build())
     with args.output.open('x') as output:
         output.write(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + '\n')
     from plugin.rhino_listener.c5_research_native import digest
