@@ -1,0 +1,21 @@
+{
+  "actual_execution_authorized": false,
+  "model_calls": 0,
+  "new_field_state_created": false,
+  "owner_approval_created": false,
+  "package_file_sha256": "401c858f37192d3d3a88e2260cef11b1b4a4329b593411940a6b2b1c6f95451a",
+  "package_sha256": "62cd2e630f08fb26c98e6ae26931db499dcfff040e74c73717d62827578e5eb0",
+  "phase_one_complete": false,
+  "public_prepared_bundle_files_verified_each_endpoint": 287,
+  "rhino_calls": 0,
+  "schema_version": 1,
+  "source_file_count": 285,
+  "source_inventory_sha256": "c5dd797f176eac01759ef0712120ba74f4504b52375837c8c205f1f5b4f1e0bf",
+  "staged_cpu_checks": {
+    "gpu_inert_imports_and_missing_approval_refusal": true,
+    "mac_inert_imports_and_missing_approval_refusal": true,
+    "mac_pinned_cpu_tokenizer_environment_verified": true,
+    "model_backends_imported": false,
+    "native_host_started": false
+  }
+}

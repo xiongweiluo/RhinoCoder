@@ -1,0 +1,3083 @@
+{
+  "assets": {
+    "adapter_files": {
+      "adapter_config.json": "8a776a47b085b787b7c7f3c9b068aed8c0f018278de2b94bf66130f5542d6d4f",
+      "adapter_model.safetensors": "da8acdcde2671aa397534b35369fe4a84b9d150f80f7b7026a4366a770be2883"
+    },
+    "adapter_root": "/data/c5-runs-20261001/formal/checkpoint-132",
+    "base_files": {
+      ".gitattributes": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361",
+      "LICENSE": "832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e",
+      "README.md": "3c090be37f829adc1e4cdb78733667437732541470430ab2cd785d7f0d460077",
+      "config.json": "c0242402ad6a13b331ea320feea8c7e3776ffb7a4eff0757b9cd667e116d9a28",
+      "generation_config.json": "1a628a5775bc69cde01c6749a531150ca4d3189652c618a174f7077923acf3b1",
+      "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+      "model-00001-of-00004.safetensors": "0b6f069918b07c064cbba8ae4f00f529aa9bbf84b7cdfcb7fc2694a40f6aa8ef",
+      "model-00002-of-00004.safetensors": "c3d46733e7aa054ea7b063fbccd0a5a08446e7bd1814bef26936c5aa1331da62",
+      "model-00003-of-00004.safetensors": "9fe45dacee087385b3d2d6dd27a7413a8a56d95f145772facc148fa86fc73446",
+      "model-00004-of-00004.safetensors": "5aa6e5cbe642377fd441fb4e60e83cca96b2bcd9820e245b9ea06d94653f17f2",
+      "model.safetensors.index.json": "998a078123ffc97763690de7f2a677eb89168af5eaf8a5e12e6bc24d18e25bdb",
+      "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+      "tokenizer_config.json": "959e7f1d9a1b7641a6d6ce05ca97b75c7894fcb66cbe5a040406458fb1128ee4",
+      "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+    },
+    "local_tokenizer_dir": "/Users/xiongweiluo/RhinoCoder/data/training/c5/modelbridge-tokenizer/c03e6d358207e414f1eca0bb1891e29f1db0e242",
+    "snapshot_dir": "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242",
+    "tokenizer_files": {
+      "config.json": "c0242402ad6a13b331ea320feea8c7e3776ffb7a4eff0757b9cd667e116d9a28",
+      "generation_config.json": "1a628a5775bc69cde01c6749a531150ca4d3189652c618a174f7077923acf3b1",
+      "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+      "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+      "tokenizer_config.json": "959e7f1d9a1b7641a6d6ce05ca97b75c7894fcb66cbe5a040406458fb1128ee4",
+      "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+    }
+  },
+  "development_plan": {
+    "execution_enabled": false,
+    "families": [
+      {
+        "id": "DEV-S01",
+        "mechanism": "read_progress",
+        "role": "selection",
+        "template_family": "explicit_alias_order_two_bbox_reads"
+      },
+      {
+        "id": "DEV-S02",
+        "mechanism": "read_progress",
+        "role": "selection",
+        "template_family": "scene_inventory_then_unique_target_bbox"
+      },
+      {
+        "id": "DEV-S03",
+        "mechanism": "clarification",
+        "role": "selection",
+        "template_family": "missing_target_disambiguation"
+      },
+      {
+        "id": "DEV-S04",
+        "mechanism": "refusal",
+        "role": "selection",
+        "template_family": "explicit_deferred_read_permission"
+      },
+      {
+        "id": "DEV-A01",
+        "mechanism": "read_progress",
+        "role": "acceptance",
+        "template_family": "spatially_defined_target_order_two_reads"
+      },
+      {
+        "id": "DEV-A02",
+        "mechanism": "read_progress",
+        "role": "acceptance",
+        "template_family": "target_bbox_then_scene_inventory"
+      },
+      {
+        "id": "DEV-A03",
+        "mechanism": "clarification",
+        "role": "acceptance",
+        "template_family": "incompatible_target_constraints"
+      },
+      {
+        "id": "DEV-A04",
+        "mechanism": "core_read",
+        "role": "acceptance",
+        "template_family": "authorized_single_scene_inventory"
+      }
+    ],
+    "final_test_material": false,
+    "historical_replay": false,
+    "limits": {
+      "cleanup_export_seconds": 900,
+      "gpu_residency_seconds": 7200,
+      "load_seconds": 600,
+      "max_infrastructure_recoveries": 1,
+      "max_load_attempts": 2,
+      "max_reads": 2,
+      "max_steps": 2,
+      "max_writes": 0,
+      "slot_seconds": 150
+    },
+    "model_identity": {
+      "base": "Qwen/Qwen2.5-Coder-7B-Instruct",
+      "checkpoint": 132,
+      "current_adapter_file_map_sha256": "305d72703270d16e93233d1d34ae27cdaddd777e4530afead88c7edb8dc22cae",
+      "new_training": false,
+      "revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242"
+    },
+    "private_material_access": false,
+    "public_development_cases_source": "training/lora_development_cases.py",
+    "required_before_execution": {
+      "exact_source_runtime_and_resource_binding": "development-package-20261026.json binds public source, both interpreter environments, fixed assets, GPU hardware, new state roots and resource policies; separate owner approval remains absent",
+      "gpu_environment_and_model_file_verification": "readonly-resources-20261026.json; metadata and all 16 pinned asset hashes verified; runtime behavior still unverified",
+      "historical_family_overlap_review": null,
+      "lease_expiry_and_cost_ceiling": "resource-scope-20261026.json; owner confirms paid lease through 2026-10-30 20:00 Europe/Zurich and additional cost ceiling 0; no execution approval",
+      "new_field_runtime_and_failure_cleanup_validation": "runtime-cpu-review-20261026.json and current related CPU regressions; entry/transport/owned cleanup implemented; actual model/Rhino behavior still unverified",
+      "owner_development_execution_approval": null,
+      "real_tokenizer_no_truncation_audit": "token-budget-native-floats-20261026.json; public analytic scene in native float representation: 364 prompts fit; actual scene still requires runtime check",
+      "rhino_isolated_document_scope": "resource-scope-20261026.json; only new local isolated documents closed after use; no existing user project access or execution approval",
+      "verified_ssh_host_identity": "owner_confirmed_in_conversation"
+    },
+    "resource_status": {
+      "authentication": "owner_opened_control_connection_verified_20261026",
+      "cost_ceiling": 0,
+      "gpu_environment": "gpu-environment-20261026.json; existing compatible Python 3.11.17 with original dedicated packages; no installation",
+      "lease_end": "2026-10-30T20:00:00+01:00",
+      "lease_paid": true,
+      "metadata_observation_only": true,
+      "owner_resource_confirmation": "resource-scope-20261026.json",
+      "rhino_scope": "only_new_local_isolated_documents_closed_after_use",
+      "runtime_behavior_verified": false,
+      "ssh_host_identity": "owner_verified",
+      "timezone": "Europe/Zurich"
+    },
+    "routes": [
+      "base",
+      "current_lora"
+    ],
+    "status": "prepared_package_pending_owner_execution_approval",
+    "study_id": "lora-optimization-development-v1",
+    "systems": [
+      "original",
+      "read_progress_v1"
+    ]
+  },
+  "endpoints": {
+    "gpu": {
+      "environment_sha256": "60ae4a27c3cb2fa48ff8951730a06556573faf780be099328cf79123b4b9571e",
+      "python": "/data/c5-reuse-compatible-python-20261012-d/runtime/bin/python3.11",
+      "source_root": "/data/lora-development-20261026/source",
+      "state_root": "/data/lora-development-20261026/state-lora-development"
+    },
+    "mac": {
+      "environment_sha256": "071e99e0ac6d97f16d8621cdd0a7da918562685fd20506442288d2dbd8a58bd0",
+      "python": "/opt/anaconda3/bin/python3.13",
+      "source_root": "/Users/xiongweiluo/RhinoCoder/data/lora-development-20261026/source",
+      "state_root": "/Users/xiongweiluo/RhinoCoder/data/lora-development-20261026/state-lora-development"
+    }
+  },
+  "evidence_policy": {
+    "new_public_development_raw_outputs": true,
+    "old_private_materials": false,
+    "private_owner_controlled_storage": true,
+    "public_output": "sanitized_statistics_hashes_and_audit_only"
+  },
+  "execution_ready": true,
+  "gpu_hardware": {
+    "driver_version": "550.107.02",
+    "memory_mib": 24576,
+    "name": "NVIDIA GeForce RTX 3090",
+    "uuid": "GPU-0e00f0ad-fa5a-eed9-6eee-5877984e02f9"
+  },
+  "historical_family_overlap": {
+    "owner_summary_sha256": null,
+    "status": "unknown_disclosed_public_development_only"
+  },
+  "host_policy": {
+    "auxiliary_documents_max": 0,
+    "close_after_use": true,
+    "existing_project_content_access": false,
+    "fixture_documents_max": 32,
+    "legacy_whole_host_byte_closure_claim": false,
+    "model_writes": 0,
+    "only_new_local_documents": true
+  },
+  "lease_end_epoch": 1793386800,
+  "limits": {
+    "cleanup_export_seconds": 900,
+    "gpu_residency_seconds": 7200,
+    "load_seconds": 600,
+    "max_infrastructure_recoveries": 1,
+    "max_load_attempts": 2,
+    "max_reads": 2,
+    "max_steps": 2,
+    "max_writes": 0,
+    "slot_seconds": 150
+  },
+  "loader_policy": {
+    "base_route": "same_PEFT_model_disable_adapter",
+    "device": 0,
+    "local_files_only": true,
+    "lora_trainable": false,
+    "parse_repair": false,
+    "prepare_base": "prepare_model_for_kbit_training_no_checkpoint_hooks",
+    "quantization": "nf4_double_quant_bfloat16",
+    "seed": 20260928,
+    "tf32": true,
+    "training": false,
+    "trust_remote_code": false
+  },
+  "model_identities": {
+    "base": "375f63235f792360a4e2a1c07bb4de815681138477f643763783488f9960c0a7",
+    "current_lora": "af94e1e1135352c570a1c6a8ba43e4e5ef7b9ad52adda665889c5786a06bcea4"
+  },
+  "native_scope": {
+    "native": {
+      "lora-dev-00": {
+        "family_id": "DEV-S01",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 2,
+        "max_writes": 0,
+        "role": "selection",
+        "route": "base",
+        "slot_id": "lora-dev-00",
+        "system": "original",
+        "task_sha256": "faf79e039c0d256bdfb098235e630a22ce7c08e8e46fdab9a4c82ce891c7374f"
+      },
+      "lora-dev-01": {
+        "family_id": "DEV-S01",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 2,
+        "max_writes": 0,
+        "role": "selection",
+        "route": "current_lora",
+        "slot_id": "lora-dev-01",
+        "system": "original",
+        "task_sha256": "faf79e039c0d256bdfb098235e630a22ce7c08e8e46fdab9a4c82ce891c7374f"
+      },
+      "lora-dev-02": {
+        "family_id": "DEV-S01",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 2,
+        "max_writes": 0,
+        "role": "selection",
+        "route": "base",
+        "slot_id": "lora-dev-02",
+        "system": "read_progress_v1",
+        "task_sha256": "faf79e039c0d256bdfb098235e630a22ce7c08e8e46fdab9a4c82ce891c7374f"
+      },
+      "lora-dev-03": {
+        "family_id": "DEV-S01",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 2,
+        "max_writes": 0,
+        "role": "selection",
+        "route": "current_lora",
+        "slot_id": "lora-dev-03",
+        "system": "read_progress_v1",
+        "task_sha256": "faf79e039c0d256bdfb098235e630a22ce7c08e8e46fdab9a4c82ce891c7374f"
+      },
+      "lora-dev-04": {
+        "family_id": "DEV-S02",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 2,
+        "max_writes": 0,
+        "role": "selection",
+        "route": "current_lora",
+        "slot_id": "lora-dev-04",
+        "system": "original",
+        "task_sha256": "bc2b353f7f81111a58ce82a1bd1869dd5eaa0c2a011657ccc34b8e9348b3e641"
+      },
+      "lora-dev-05": {
+        "family_id": "DEV-S02",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 2,
+        "max_writes": 0,
+        "role": "selection",
+        "route": "base",
+        "slot_id": "lora-dev-05",
+        "system": "read_progress_v1",
+        "task_sha256": "bc2b353f7f81111a58ce82a1bd1869dd5eaa0c2a011657ccc34b8e9348b3e641"
+      },
+      "lora-dev-06": {
+        "family_id": "DEV-S02",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 2,
+        "max_writes": 0,
+        "role": "selection",
+        "route": "current_lora",
+        "slot_id": "lora-dev-06",
+        "system": "read_progress_v1",
+        "task_sha256": "bc2b353f7f81111a58ce82a1bd1869dd5eaa0c2a011657ccc34b8e9348b3e641"
+      },
+      "lora-dev-07": {
+        "family_id": "DEV-S02",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 2,
+        "max_writes": 0,
+        "role": "selection",
+        "route": "base",
+        "slot_id": "lora-dev-07",
+        "system": "original",
+        "task_sha256": "bc2b353f7f81111a58ce82a1bd1869dd5eaa0c2a011657ccc34b8e9348b3e641"
+      },
+      "lora-dev-08": {
+        "family_id": "DEV-S03",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 0,
+        "max_writes": 0,
+        "role": "selection",
+        "route": "base",
+        "slot_id": "lora-dev-08",
+        "system": "read_progress_v1",
+        "task_sha256": "e54c7994a53b1a0a97b7e5010dcd9438830b7dad16635293af63af9d5d2ffd94"
+      },
+      "lora-dev-09": {
+        "family_id": "DEV-S03",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 0,
+        "max_writes": 0,
+        "role": "selection",
+        "route": "current_lora",
+        "slot_id": "lora-dev-09",
+        "system": "read_progress_v1",
+        "task_sha256": "e54c7994a53b1a0a97b7e5010dcd9438830b7dad16635293af63af9d5d2ffd94"
+      },
+      "lora-dev-10": {
+        "family_id": "DEV-S03",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 0,
+        "max_writes": 0,
+        "role": "selection",
+        "route": "base",
+        "slot_id": "lora-dev-10",
+        "system": "original",
+        "task_sha256": "e54c7994a53b1a0a97b7e5010dcd9438830b7dad16635293af63af9d5d2ffd94"
+      },
+      "lora-dev-11": {
+        "family_id": "DEV-S03",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 0,
+        "max_writes": 0,
+        "role": "selection",
+        "route": "current_lora",
+        "slot_id": "lora-dev-11",
+        "system": "original",
+        "task_sha256": "e54c7994a53b1a0a97b7e5010dcd9438830b7dad16635293af63af9d5d2ffd94"
+      },
+      "lora-dev-12": {
+        "family_id": "DEV-S04",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 0,
+        "max_writes": 0,
+        "role": "selection",
+        "route": "current_lora",
+        "slot_id": "lora-dev-12",
+        "system": "read_progress_v1",
+        "task_sha256": "8484bf44f5ec9020ebe8482fc55691c8009f5cb09883746a395b21dc7d65fb71"
+      },
+      "lora-dev-13": {
+        "family_id": "DEV-S04",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 0,
+        "max_writes": 0,
+        "role": "selection",
+        "route": "base",
+        "slot_id": "lora-dev-13",
+        "system": "original",
+        "task_sha256": "8484bf44f5ec9020ebe8482fc55691c8009f5cb09883746a395b21dc7d65fb71"
+      },
+      "lora-dev-14": {
+        "family_id": "DEV-S04",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 0,
+        "max_writes": 0,
+        "role": "selection",
+        "route": "current_lora",
+        "slot_id": "lora-dev-14",
+        "system": "original",
+        "task_sha256": "8484bf44f5ec9020ebe8482fc55691c8009f5cb09883746a395b21dc7d65fb71"
+      },
+      "lora-dev-15": {
+        "family_id": "DEV-S04",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 0,
+        "max_writes": 0,
+        "role": "selection",
+        "route": "base",
+        "slot_id": "lora-dev-15",
+        "system": "read_progress_v1",
+        "task_sha256": "8484bf44f5ec9020ebe8482fc55691c8009f5cb09883746a395b21dc7d65fb71"
+      },
+      "lora-dev-16": {
+        "family_id": "DEV-A01",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 2,
+        "max_writes": 0,
+        "role": "acceptance",
+        "route": "base",
+        "slot_id": "lora-dev-16",
+        "system": "original",
+        "task_sha256": "6135f2695ad54bc51be18db075e147fa96df897890a366b08cf8817f7cd87b22"
+      },
+      "lora-dev-17": {
+        "family_id": "DEV-A01",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 2,
+        "max_writes": 0,
+        "role": "acceptance",
+        "route": "current_lora",
+        "slot_id": "lora-dev-17",
+        "system": "original",
+        "task_sha256": "6135f2695ad54bc51be18db075e147fa96df897890a366b08cf8817f7cd87b22"
+      },
+      "lora-dev-18": {
+        "family_id": "DEV-A01",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 2,
+        "max_writes": 0,
+        "role": "acceptance",
+        "route": "base",
+        "slot_id": "lora-dev-18",
+        "system": "read_progress_v1",
+        "task_sha256": "6135f2695ad54bc51be18db075e147fa96df897890a366b08cf8817f7cd87b22"
+      },
+      "lora-dev-19": {
+        "family_id": "DEV-A01",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 2,
+        "max_writes": 0,
+        "role": "acceptance",
+        "route": "current_lora",
+        "slot_id": "lora-dev-19",
+        "system": "read_progress_v1",
+        "task_sha256": "6135f2695ad54bc51be18db075e147fa96df897890a366b08cf8817f7cd87b22"
+      },
+      "lora-dev-20": {
+        "family_id": "DEV-A02",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 2,
+        "max_writes": 0,
+        "role": "acceptance",
+        "route": "current_lora",
+        "slot_id": "lora-dev-20",
+        "system": "original",
+        "task_sha256": "3283324dd3df645ef506c904f0fca12c6236aa877742f4aa61f64657741324f3"
+      },
+      "lora-dev-21": {
+        "family_id": "DEV-A02",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 2,
+        "max_writes": 0,
+        "role": "acceptance",
+        "route": "base",
+        "slot_id": "lora-dev-21",
+        "system": "read_progress_v1",
+        "task_sha256": "3283324dd3df645ef506c904f0fca12c6236aa877742f4aa61f64657741324f3"
+      },
+      "lora-dev-22": {
+        "family_id": "DEV-A02",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 2,
+        "max_writes": 0,
+        "role": "acceptance",
+        "route": "current_lora",
+        "slot_id": "lora-dev-22",
+        "system": "read_progress_v1",
+        "task_sha256": "3283324dd3df645ef506c904f0fca12c6236aa877742f4aa61f64657741324f3"
+      },
+      "lora-dev-23": {
+        "family_id": "DEV-A02",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 2,
+        "max_writes": 0,
+        "role": "acceptance",
+        "route": "base",
+        "slot_id": "lora-dev-23",
+        "system": "original",
+        "task_sha256": "3283324dd3df645ef506c904f0fca12c6236aa877742f4aa61f64657741324f3"
+      },
+      "lora-dev-24": {
+        "family_id": "DEV-A03",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 0,
+        "max_writes": 0,
+        "role": "acceptance",
+        "route": "base",
+        "slot_id": "lora-dev-24",
+        "system": "read_progress_v1",
+        "task_sha256": "a7dd9d0b591699fd9d518dc8f5ec0d96cef7ce873365bb468df127be6a01061a"
+      },
+      "lora-dev-25": {
+        "family_id": "DEV-A03",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 0,
+        "max_writes": 0,
+        "role": "acceptance",
+        "route": "current_lora",
+        "slot_id": "lora-dev-25",
+        "system": "read_progress_v1",
+        "task_sha256": "a7dd9d0b591699fd9d518dc8f5ec0d96cef7ce873365bb468df127be6a01061a"
+      },
+      "lora-dev-26": {
+        "family_id": "DEV-A03",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 0,
+        "max_writes": 0,
+        "role": "acceptance",
+        "route": "base",
+        "slot_id": "lora-dev-26",
+        "system": "original",
+        "task_sha256": "a7dd9d0b591699fd9d518dc8f5ec0d96cef7ce873365bb468df127be6a01061a"
+      },
+      "lora-dev-27": {
+        "family_id": "DEV-A03",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 0,
+        "max_writes": 0,
+        "role": "acceptance",
+        "route": "current_lora",
+        "slot_id": "lora-dev-27",
+        "system": "original",
+        "task_sha256": "a7dd9d0b591699fd9d518dc8f5ec0d96cef7ce873365bb468df127be6a01061a"
+      },
+      "lora-dev-28": {
+        "family_id": "DEV-A04",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 1,
+        "max_writes": 0,
+        "role": "acceptance",
+        "route": "current_lora",
+        "slot_id": "lora-dev-28",
+        "system": "read_progress_v1",
+        "task_sha256": "0ab0ffb7fc5f645f7efaea0d46cddf58c9f6b0fc1e583820fd9d107cb3ad862c"
+      },
+      "lora-dev-29": {
+        "family_id": "DEV-A04",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 1,
+        "max_writes": 0,
+        "role": "acceptance",
+        "route": "base",
+        "slot_id": "lora-dev-29",
+        "system": "original",
+        "task_sha256": "0ab0ffb7fc5f645f7efaea0d46cddf58c9f6b0fc1e583820fd9d107cb3ad862c"
+      },
+      "lora-dev-30": {
+        "family_id": "DEV-A04",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 1,
+        "max_writes": 0,
+        "role": "acceptance",
+        "route": "current_lora",
+        "slot_id": "lora-dev-30",
+        "system": "original",
+        "task_sha256": "0ab0ffb7fc5f645f7efaea0d46cddf58c9f6b0fc1e583820fd9d107cb3ad862c"
+      },
+      "lora-dev-31": {
+        "family_id": "DEV-A04",
+        "fixture_recipe": [
+          {
+            "arguments": {
+              "depth": 5,
+              "height": 7,
+              "width": 3
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-1"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-1"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          },
+          {
+            "arguments": {
+              "depth": 6,
+              "height": 8,
+              "width": 4
+            },
+            "operation": "create_box"
+          },
+          {
+            "arguments": {
+              "object_id": "box-2",
+              "translate_x": 20,
+              "translate_y": 0,
+              "translate_z": 0
+            },
+            "operation": "move_object"
+          },
+          {
+            "arguments": {
+              "layer_name": "C5-LoraDev",
+              "object_id": "box-2"
+            },
+            "operation": "set_object_layer"
+          },
+          {
+            "arguments": {
+              "b": 40,
+              "g": 30,
+              "object_ids": [
+                "box-2"
+              ],
+              "r": 20
+            },
+            "operation": "set_object_color"
+          }
+        ],
+        "max_reads": 1,
+        "max_writes": 0,
+        "role": "acceptance",
+        "route": "base",
+        "slot_id": "lora-dev-31",
+        "system": "read_progress_v1",
+        "task_sha256": "0ab0ffb7fc5f645f7efaea0d46cddf58c9f6b0fc1e583820fd9d107cb3ad862c"
+      }
+    },
+    "schedule": [
+      {
+        "family_id": "DEV-S01",
+        "role": "selection",
+        "route": "base",
+        "slot_id": "lora-dev-00",
+        "system": "original"
+      },
+      {
+        "family_id": "DEV-S01",
+        "role": "selection",
+        "route": "current_lora",
+        "slot_id": "lora-dev-01",
+        "system": "original"
+      },
+      {
+        "family_id": "DEV-S01",
+        "role": "selection",
+        "route": "base",
+        "slot_id": "lora-dev-02",
+        "system": "read_progress_v1"
+      },
+      {
+        "family_id": "DEV-S01",
+        "role": "selection",
+        "route": "current_lora",
+        "slot_id": "lora-dev-03",
+        "system": "read_progress_v1"
+      },
+      {
+        "family_id": "DEV-S02",
+        "role": "selection",
+        "route": "current_lora",
+        "slot_id": "lora-dev-04",
+        "system": "original"
+      },
+      {
+        "family_id": "DEV-S02",
+        "role": "selection",
+        "route": "base",
+        "slot_id": "lora-dev-05",
+        "system": "read_progress_v1"
+      },
+      {
+        "family_id": "DEV-S02",
+        "role": "selection",
+        "route": "current_lora",
+        "slot_id": "lora-dev-06",
+        "system": "read_progress_v1"
+      },
+      {
+        "family_id": "DEV-S02",
+        "role": "selection",
+        "route": "base",
+        "slot_id": "lora-dev-07",
+        "system": "original"
+      },
+      {
+        "family_id": "DEV-S03",
+        "role": "selection",
+        "route": "base",
+        "slot_id": "lora-dev-08",
+        "system": "read_progress_v1"
+      },
+      {
+        "family_id": "DEV-S03",
+        "role": "selection",
+        "route": "current_lora",
+        "slot_id": "lora-dev-09",
+        "system": "read_progress_v1"
+      },
+      {
+        "family_id": "DEV-S03",
+        "role": "selection",
+        "route": "base",
+        "slot_id": "lora-dev-10",
+        "system": "original"
+      },
+      {
+        "family_id": "DEV-S03",
+        "role": "selection",
+        "route": "current_lora",
+        "slot_id": "lora-dev-11",
+        "system": "original"
+      },
+      {
+        "family_id": "DEV-S04",
+        "role": "selection",
+        "route": "current_lora",
+        "slot_id": "lora-dev-12",
+        "system": "read_progress_v1"
+      },
+      {
+        "family_id": "DEV-S04",
+        "role": "selection",
+        "route": "base",
+        "slot_id": "lora-dev-13",
+        "system": "original"
+      },
+      {
+        "family_id": "DEV-S04",
+        "role": "selection",
+        "route": "current_lora",
+        "slot_id": "lora-dev-14",
+        "system": "original"
+      },
+      {
+        "family_id": "DEV-S04",
+        "role": "selection",
+        "route": "base",
+        "slot_id": "lora-dev-15",
+        "system": "read_progress_v1"
+      },
+      {
+        "family_id": "DEV-A01",
+        "role": "acceptance",
+        "route": "base",
+        "slot_id": "lora-dev-16",
+        "system": "original"
+      },
+      {
+        "family_id": "DEV-A01",
+        "role": "acceptance",
+        "route": "current_lora",
+        "slot_id": "lora-dev-17",
+        "system": "original"
+      },
+      {
+        "family_id": "DEV-A01",
+        "role": "acceptance",
+        "route": "base",
+        "slot_id": "lora-dev-18",
+        "system": "read_progress_v1"
+      },
+      {
+        "family_id": "DEV-A01",
+        "role": "acceptance",
+        "route": "current_lora",
+        "slot_id": "lora-dev-19",
+        "system": "read_progress_v1"
+      },
+      {
+        "family_id": "DEV-A02",
+        "role": "acceptance",
+        "route": "current_lora",
+        "slot_id": "lora-dev-20",
+        "system": "original"
+      },
+      {
+        "family_id": "DEV-A02",
+        "role": "acceptance",
+        "route": "base",
+        "slot_id": "lora-dev-21",
+        "system": "read_progress_v1"
+      },
+      {
+        "family_id": "DEV-A02",
+        "role": "acceptance",
+        "route": "current_lora",
+        "slot_id": "lora-dev-22",
+        "system": "read_progress_v1"
+      },
+      {
+        "family_id": "DEV-A02",
+        "role": "acceptance",
+        "route": "base",
+        "slot_id": "lora-dev-23",
+        "system": "original"
+      },
+      {
+        "family_id": "DEV-A03",
+        "role": "acceptance",
+        "route": "base",
+        "slot_id": "lora-dev-24",
+        "system": "read_progress_v1"
+      },
+      {
+        "family_id": "DEV-A03",
+        "role": "acceptance",
+        "route": "current_lora",
+        "slot_id": "lora-dev-25",
+        "system": "read_progress_v1"
+      },
+      {
+        "family_id": "DEV-A03",
+        "role": "acceptance",
+        "route": "base",
+        "slot_id": "lora-dev-26",
+        "system": "original"
+      },
+      {
+        "family_id": "DEV-A03",
+        "role": "acceptance",
+        "route": "current_lora",
+        "slot_id": "lora-dev-27",
+        "system": "original"
+      },
+      {
+        "family_id": "DEV-A04",
+        "role": "acceptance",
+        "route": "current_lora",
+        "slot_id": "lora-dev-28",
+        "system": "read_progress_v1"
+      },
+      {
+        "family_id": "DEV-A04",
+        "role": "acceptance",
+        "route": "base",
+        "slot_id": "lora-dev-29",
+        "system": "original"
+      },
+      {
+        "family_id": "DEV-A04",
+        "role": "acceptance",
+        "route": "current_lora",
+        "slot_id": "lora-dev-30",
+        "system": "original"
+      },
+      {
+        "family_id": "DEV-A04",
+        "role": "acceptance",
+        "route": "base",
+        "slot_id": "lora-dev-31",
+        "system": "read_progress_v1"
+      }
+    ]
+  },
+  "resource_policy": {
+    "additional_cost_ceiling": 0,
+    "historical_budget_reuse": false,
+    "lease_paid": true,
+    "new_paid_service_or_renewal": false
+  },
+  "schema_version": 1,
+  "source_files": {
+    "agent/__init__.py": "5a8d136e22826030ca5cf1f6e71bc9abf566d60e4286c046dacd18836b8332b1",
+    "agent/agent.py": "7a353a7534f16f54b776ceebb136874f5b346262d13347800e3531d05f979694",
+    "agent/cli.py": "2250750a07e4847df516e5cb9a15099557168b49c41da0d11667d93b3d148afd",
+    "agent/cloud_providers.py": "45abfa453fb8bf42b4a3c5c51ee8eb71a06af7164cf56f0de9f289db8a285c2f",
+    "agent/collection_campaign.py": "cd9f08687236cf5d3c0f219ae854cd83e3c3b6eb738a824bacbe1e61a6dc8d86",
+    "agent/data_collector.py": "ebd803ce0d8ea780fce99a47d97851508e70d6d4644fd87339edf70812e29454",
+    "agent/db.py": "15bd597e8309d13af93f31511dda2ed8f3a98d009b266a91f70864b29c7041b5",
+    "agent/feedback.py": "559598d15f2463f3bf5d76b791bedb859076e1e1e8f25b12b868dab615071ec3",
+    "agent/llm.py": "cb38886d7960b2a0a2de2a1e7ec135b47da80dfa9599215f4f9266457a706821",
+    "agent/main.py": "af49438f2e7f46e213811905eb180d20ce5dc433b4aaf23742aabf2849d930d9",
+    "agent/model_backends.py": "0a82110ebc30ef496088d07264ea970f3a0c6636876796dcbbb663890c591e2a",
+    "agent/pricing.py": "b2ab511cbd914e8392d55cd91866af157f7d3919dcc097b0923bfecf4edb56ef",
+    "agent/privacy.py": "2d7b06b8570c4e0ea8cd828b7d7519b7369c1d00536b223b9df2f0f4c9f38eed",
+    "agent/router.py": "2e78992cb734d819f3eeb28a159d208ed681e5388a991003215387180049e902",
+    "agent/runtime.py": "6ed23bbfa4d35f5c9ffea80fe1b788c6da1618a31cf82c72a294720ba103420d",
+    "agent/sanitizer.py": "dd9d2cdc1e243a635c592e576cb6afa86ee35c4769ee3128c8e59f4e77c95a85",
+    "agent/trace_store.py": "ba006eecfc9065ddb49fa1776c048d602bf4c49c3b117a227fbae4a2d4f47d3a",
+    "agent/ui_server.py": "8d8063197a249bdfb550ecc56173c8444fa07e88dea934bdbaf58e2e80f6784b",
+    "agent/version.py": "9861b0d9cda1dc7e2c4d05ab5fb509a600b4c0d145effedd86d586f86cca7b7c",
+    "eval/c5/c5-engineering-config.json": "3de7170a5f150f861875f02d530f86cbd4ffab896b22fb17fccc76dd3aa37b9e",
+    "eval/c5/rhino-runtime-schema-v1.json": "a51c04fb5bda146d1a01595b6bc4a742300f7f666e7a8d9fc98cf0459ad16d89",
+    "plugin/__init__.py": "b5e0006dee8bd0e169c8314d421b59193826c328816e72066555961c431cdc94",
+    "plugin/mcp_server/__init__.py": "b6fd5f284040c60ed193fc6576dba7c4a4c3bc150bbbacf3b416d4a0f305055f",
+    "plugin/mcp_server/_client.py": "07210380fd8eda2a587e7c1e5a119a3011ec26556104682560198cf89971fe9c",
+    "plugin/mcp_server/main.py": "bfc0ee480bbe74cbc2a619cf7e2c261c6cc948d3878237bb75a50ebe1fc6e3d5",
+    "plugin/mcp_server/schemas_geometry.py": "01d3ccb19bd6bdc39be1ecd6e3706795f193696fccad2fc4172acef9fde1a651",
+    "plugin/mcp_server/schemas_perception.py": "37fe17a1f8b5fae1e889b21ede7249937a655a8859a88df120eb975700a08814",
+    "plugin/mcp_server/schemas_property.py": "90cd3babb3568b4543305518883d9debd48bd2a127775899f2d505e9d9b9c35a",
+    "plugin/mcp_server/schemas_transform.py": "945f93e2569ae9917da36dcc423045f8234dfb6c5e95a25a2b003ebc8f793d08",
+    "plugin/rhino_listener/__init__.py": "ea1028f91237bc994acf69a65347eba909ab046c0ec5573dd76e6cf1aca6c7a0",
+    "plugin/rhino_listener/_types.py": "abdbff799f8a462c65171e63b0b731b6977902abccf7a374e2470452ba14e65f",
+    "plugin/rhino_listener/c5_deferred_baseline.py": "3efaec5a4e118cb1ff3c25cfdcce2f111fff0781e1f57486d6c0b0cebe025ee0",
+    "plugin/rhino_listener/c5_followup_admission.py": "d32edc1895f211bc0d751bc4b4cae6210052967ef206f70ffa0fbb0243ef1917",
+    "plugin/rhino_listener/c5_followup_mac_scope.py": "71f70692e31be21a5a0f25a7458bbc4778233d0005987356ae1370e4937b4445",
+    "plugin/rhino_listener/c5_followup_predecessor.py": "d23553353d68b1ebed2b65b0410111388ec5331ec60fab1235c011b5bfd77e48",
+    "plugin/rhino_listener/c5_followup_profile.py": "8362ce3ae77c920ed0267bad99c12ed449754075492f6303f8992c57ecf3571c",
+    "plugin/rhino_listener/c5_followup_runtime_scope.py": "3c8d7decfca8f5b156943d009d8efcf89847e25ca049f3d8d6c3626cb5ef637c",
+    "plugin/rhino_listener/c5_followup_scope.py": "1704b224b376b3b849ee82665e6d5b08d3ebea11821ee2797c3bf6cd154e2176",
+    "plugin/rhino_listener/c5_formal20_environment.py": "c9f5285c05bb331c770b00f3b8a3b498a8b6fbb30af669ae3fe11ac5708cbdc3",
+    "plugin/rhino_listener/c5_formal20_host_session_v2.py": "03e8060a665a4854375da1f650686a45fd47aa010bcc5497153e93a4bad1f203",
+    "plugin/rhino_listener/c5_formal20_hub.py": "d400fe36d961386185c62d20b73672bc36573a8bcb675e5ace6460674b6a4136",
+    "plugin/rhino_listener/c5_formal20_hub_v2.py": "daddeb715d051fbded801e8aa8186733c83276597426b507668aae0b6986703f",
+    "plugin/rhino_listener/c5_formal20_observation_capacity.py": "173bf6174c14d33bc59097e41668b184d3177dd35b3f0ac532d7a416e8afe546",
+    "plugin/rhino_listener/c5_formal20_policy_v2.py": "1a03f0b811504268e116fc2ad95afdd815ab9f8f21f4d22681e4c66fb164d420",
+    "plugin/rhino_listener/c5_formal20_scope.py": "b80c5d87c8c60c9badae9915381543a69daad50ac94321b1752e322b676b8174",
+    "plugin/rhino_listener/c5_formal20_scope_v2.py": "9b19dd65589616a77ffbde66e4c8e15f65332a0b94e6f416fe6a97e2404e09f8",
+    "plugin/rhino_listener/c5_formal_reuse_deadlines.py": "17c46b5f96863e7b105e5906069e92b857ec91891419e84d815d40f9caa50474",
+    "plugin/rhino_listener/c5_formal_reuse_host_session.py": "a0cccb237395c17762a50ca69fdafa606bf3805f43c148eed99ec61c90858ca3",
+    "plugin/rhino_listener/c5_formal_reuse_hub.py": "9700ba394aa8351ff28c297eac6813f4e3814e4d2f6e1d016d2a94cc8cb60282",
+    "plugin/rhino_listener/c5_formal_reuse_hub_base.py": "515de7c471c59e0afc40ee378addb3e118b0e6480f14543e130b5bad0b4aec5c",
+    "plugin/rhino_listener/c5_formal_reuse_limits.py": "25ab6230042b35a09b3e61fde21e0f8f521e696a94f977c2530f99077cbdf0ba",
+    "plugin/rhino_listener/c5_formal_reuse_lineage.py": "cd38a953944dd359eec080f7b1b7f99487ba4e147b37d22221c762a97c21b982",
+    "plugin/rhino_listener/c5_formal_reuse_origins.py": "54a4d06c13131df8e08f8f5b0d13ae00816da5069ccd9706f90234a4fb34150e",
+    "plugin/rhino_listener/c5_formal_reuse_resource_policy.py": "c103256278a83b90cfd571082dd644424f349b55867d172b7d8e1951731f8daf",
+    "plugin/rhino_listener/c5_formal_reuse_scope.py": "7466b7bebc8b403734b59d02d39f1dc47a00ca5f0bd18f7fd092d0fb1ea2a3dd",
+    "plugin/rhino_listener/c5_formal_reuse_source_guard.py": "71d8cf7b07284621fe8380144d0d70eee83aa6ac030faa25e8bc0a747d567884",
+    "plugin/rhino_listener/c5_host_assurance_session.py": "175ca993ad35be7d0224280d8865e40866e8502d2a41e596d9bd37a0650b7d29",
+    "plugin/rhino_listener/c5_host_assurance_session_d.py": "1f127acfeb09a0c9aaf9c9b75583f8419d49a92fe186782f1f8dd8021f82c9f7",
+    "plugin/rhino_listener/c5_host_assurance_v2.py": "bb62ba97fb8f7a663afa66caaf5fdf42672abaf9c632288618bcdb9a4eb737b4",
+    "plugin/rhino_listener/c5_host_observer.py": "d88d2a9ed0d1620c34a60b1e6b918a8314555f64edf0301c6deb9dbe397a3546",
+    "plugin/rhino_listener/c5_host_observer_clr.py": "54da9c1319453ba1cb00ce3c7cad20af6a7379881077329706a45d232570a2fd",
+    "plugin/rhino_listener/c5_host_observer_scope.py": "ec16ed41f903971d64b2f9406b4f89c1f8d239e8720582e63da541696a021cd7",
+    "plugin/rhino_listener/c5_hostassurance_development_hub.py": "47646b91353be5aacebf4ad8388fb45a0a2a97d44724a9bd47f8a15736ba4b34",
+    "plugin/rhino_listener/c5_hostassurance_development_scope.py": "e4093089e5dbec53264c340af880f69a50e6bac2db228c90db09aabc58cb5d6d",
+    "plugin/rhino_listener/c5_hostassurance_development_scope_b.py": "244cff984e46c5f422cf529b5d8ceb38beed59a27c7075713275368ffbf623d8",
+    "plugin/rhino_listener/c5_hostassurance_development_scope_c.py": "ba98bbbd0bf8f989af247ba3c223fea73e217efcd8243ce3881aaddf20b8733c",
+    "plugin/rhino_listener/c5_hostassurance_development_scope_d.py": "c25fdb4281351bc290399a9040fec1a98e7bd79d66fec455bc4ccc58f6f9513f",
+    "plugin/rhino_listener/c5_hostassurance_lifecycle_hub_d.py": "364cc2019426b34d7f78cf894df4c68c8bcdd6d2bda62cafb011ee6005d6d772",
+    "plugin/rhino_listener/c5_lifecycle_deadlines.py": "1184e8d38bb2214fbe447e726774ba0daed62ef341d93a770ded1f6ac5082e2e",
+    "plugin/rhino_listener/c5_modelbridge_hub.py": "e0acd8a674f90d0c3682cc64003e38b377c09a074ea85244041989aad831ea1a",
+    "plugin/rhino_listener/c5_recovery_admission.py": "9cf375e06b7a63c594bd7c3244df0de6019eed9bbeecdc650990009d71076806",
+    "plugin/rhino_listener/c5_recovery_mac_scope.py": "c49abbc15ffdf8cb6bfb74a3117f8ce2e01063b4c385fe90ed72ede64a921f90",
+    "plugin/rhino_listener/c5_recovery_plan.py": "1d56fc1bbf28a2708ec6e043a52496aa00618c4b52eb248320f6a6aa2e4eb181",
+    "plugin/rhino_listener/c5_recovery_profile.py": "ad028ecc375227e20a38638daad70bed5e3b4aee2c57cfa5b1c6e09c40b2bda0",
+    "plugin/rhino_listener/c5_recovery_runtime_scope.py": "1d7824084201592db6c1a5e877701d8a74505974431342460284d39a1c706a7f",
+    "plugin/rhino_listener/c5_recovery_scope.py": "3aff8eeaaf17804265a0bdab9033c4df51386b67afbf15df74fe981b254c6ee6",
+    "plugin/rhino_listener/c5_research_channel.py": "bd841f5e25ef4d48014fa231360012092d0819211a79e9ba033d89465d78073c",
+    "plugin/rhino_listener/c5_research_gate.py": "6efe90f47663fb8277325d9300d6722cd0cb6acb8042f2baf9da12c2ae96cdb6",
+    "plugin/rhino_listener/c5_research_native.py": "2ca8574a815ff158afe064d9e2a08a629400b026de34e78841391ed1d8141972",
+    "plugin/rhino_listener/c5_research_provenance.py": "08fe3e6129e2a8e594e4576b8db715a61c6c7592ba797f71a7c5c51993cbbf9d",
+    "plugin/rhino_listener/c5_research_session.py": "dacbf46cbb866069e501d0ea71ce838c1ff58b4761c80b0c502eb05d542ce31c",
+    "plugin/rhino_listener/c5_reuse_admission.py": "e037ee171e01f7e7418ecf981015c660d2a1efae2eabe211652b1a8dcb2c65c3",
+    "plugin/rhino_listener/c5_reuse_field_scope.py": "65c604a954cad0a6816dd1410ec27ea23580f98136abb2558872bc859f05489b",
+    "plugin/rhino_listener/c5_reuse_host_session.py": "c6cefbef623e0678f68b3f47923265d92e4d8bb036d3cc919b2ea3d64ea8ae16",
+    "plugin/rhino_listener/c5_reuse_mac_scope.py": "caa29e84bf84c8515bba9da89a5ebdf65c3261e499ba6525ece0308e0a3073e5",
+    "plugin/rhino_listener/c5_reuse_native_hub.py": "34a1bfef8f3d2463dd41963655b4b71d1b6db4fd209bb7b41aba0d7d8cd807f7",
+    "plugin/rhino_listener/c5_reuse_predecessor.py": "cc00b2676c247c662665735fb4537ae4b49f821fb23ff71d3b780239288033ea",
+    "plugin/rhino_listener/c5_reuse_public_plan.py": "aa2e54b5529b33b1a8049462f25ab9d49053dcc6df28b1588e8ba83a16e9696c",
+    "plugin/rhino_listener/c5_reuse_runtime_scope.py": "f239bcb275b6f8d0d1f434c6c50420170f9bee9484185cc97908165ce1707f47",
+    "plugin/rhino_listener/c5_run_package_policy.py": "92696feb1e3fb77c80d691535046781e70b74dc4688a1e08b3651b32dde53c8b",
+    "plugin/rhino_listener/c5_slot_protocol.py": "747f648076bb78f49d3c9dd745ca313da6ff1fa56e71c88bc4e14e65c1b550da",
+    "plugin/rhino_listener/c5_slot_tail_policy.py": "e1db6559bcbd74fd06ac2337d7e64f09fe6db1f50b0d1fca7b573b946fb0519b",
+    "plugin/rhino_listener/candidate_alias_scene.py": "dae8033935cb56b3ef1b4c2cac1d5e411e767cb4b4c3068a1451952608a185e8",
+    "plugin/rhino_listener/candidate_atomic_gate.py": "e751305e7b78900ca09f929a4755e41acb1f51e1ffd9585fb32af35f271febf1",
+    "plugin/rhino_listener/listener_main.py": "05247848f40d3737fa8dcf9257293b3ecfb7cc621df09ffec5c38b65de2018b4",
+    "plugin/rhino_listener/lora_development_admission.py": "a99d5172fdcb3d2f506264fbff6527f696e64dd4075a0ef1d48d3d20fdea59c9",
+    "plugin/rhino_listener/lora_development_channel.py": "8d7ef6fdc31bb07fa82c1076d991c275bb320b60e4101726f7d57767707fb1e7",
+    "plugin/rhino_listener/lora_development_host.py": "4b2e1743a17fdeeeae349ce4206284731ed2507b527d45290093e0e07ba5ab0a",
+    "plugin/rhino_listener/lora_development_native.py": "b4e45f4f9c77058ca699568c975849d9680ea3240fb06ddefa0b9f0a0cb6b134",
+    "plugin/rhino_listener/lora_development_session.py": "63d82c801077ec2a457f51ab2ea3487c9b8796c93e1209aeccdad1dff897e32e",
+    "plugin/rhino_listener/tools_evaluation.py": "02e55b6559cb57731ed306acebed37a34515982560d67b2d4b3f44dacd6c99d9",
+    "plugin/rhino_listener/tools_geometry.py": "3c16b6bce9c9251547ad24610cbdf04d9a7edacc67d4cb28b668376c97e5a31d",
+    "plugin/rhino_listener/tools_perception.py": "b0e6221b652ec6eb451d91d8d35415d3e9bbcca508df39db11357ca6b614bf34",
+    "plugin/rhino_listener/tools_property.py": "f6f8dd9aacb935328e558165176b77745756235d4952c23ec753633278b0afab",
+    "plugin/rhino_listener/tools_transform.py": "4725b1ced190b7a3eae9cbc557419b1c66c6577fcf60df766da38c371c2e6aba",
+    "plugin/rhino_listener/validation.py": "439a5d29b548d7f3374b9015f65bc4d855e39c43aa2d64281bc1beb04d841c75",
+    "plugin/rhino_mcp_server.py": "382d92f00191a2e44095ef4652a70d22d2a3c25f0ca1d890c2987ebc50ee5d6b",
+    "plugin/start_rhinocoder_listener.py": "f6c1446e9b53b82293c618ac83be44de13db1202fef679edffca615c6ff24edc",
+    "tools/audit_lora_development_environment.py": "c95493d10a6cdccfd9fdcea76cda25f20d472905ad7252fb90e2c5e650a77f25",
+    "tools/audit_lora_development_token_budget.py": "38721baac44fcb88eb180a2b73378d2bdda76e1753e1304e22d2d37f754f5bc8",
+    "tools/build_lora_development_package.py": "1414c618dcefc76a763763393a7c4dd0d8193b22a8dbd8f9e97426b912bf8f78",
+    "tools/run_lora_development_gpu.py": "87b3bf825d1047abd6d91d6babc49ee05751fd484c75e04022457619fdc334c9",
+    "tools/run_lora_development_mac.py": "86a37253d4e29ec326f7bf1f974abab026e7f93d9e9bf77b7ddf92a15c27c500",
+    "tools/run_lora_development_rhino.py": "9a8cd4b070f137a4a94bd5e145eae7cf895b2bfdf457f36f71c89dd4fe28fe0a",
+    "tools/run_lora_development_rhino_wrapper.py": "ce29b7184ec0d028be0c2a6ea90b8bcf8799f3b9d53c0f53ad7f275a0ca8e575",
+    "training/__init__.py": "12d22720f81b6f35a044421ed915ca8234cdf2dcbfe50539d179c4626506fe3d",
+    "training/c5_cleanup_b_audit.py": "3b0e1da8677b8122d575701459204cb1e819fda68f4fcf6c040d8e71f920ffed",
+    "training/c5_cleanup_diagnosis_audit.py": "a67c25fe2a974fd1ba5c0bbfb24640e546918c981d81b025bacaf861c6f570d2",
+    "training/c5_completed_field_gpu_audit.py": "b7c758e9b24f09e06f761ceab17e765c43fab1bd25fa68422349d950466d943f",
+    "training/c5_contract.py": "fdda0f64ebbaf98b5d8dbac67150efad9db45e4b9387e1046460f7038254b0fd",
+    "training/c5_dataset.py": "5c5f4d8f019e3df0d5336dfa1dbe72de97ac0d9c9c679b555aa45716a3277f4f",
+    "training/c5_engineering.py": "1d4e5b045a10a6f92b7c3230926aa6502805192e15c5c348bd81992ba69e49f2",
+    "training/c5_execution.py": "dc4db19a7947e60977d4654c5c723ab7e6151947b5392a4d83fe8b2c577032a8",
+    "training/c5_final_audit.py": "3345153bb918331d1b721524396ab2eba7ac8069aedc8e5172078476d89b5078",
+    "training/c5_final_evaluation.py": "4db8126d0acf8f2989dfdba1398f15aeae6b5afe485a26c0b7accd35abd59916",
+    "training/c5_followup_compatible_runtime.py": "90e82321e7dc450ec3f8f29f2371196dd593268d6da8e7c20365fd0277fd1ba0",
+    "training/c5_followup_diagnostics.py": "b84b1788ce36828b148c334b95eea36bcdb380309bc421139eed781796568093",
+    "training/c5_followup_freeze_materials.py": "41ecb8a92c578329330011c132cb4ab268b69261acbca31a7fe234527bfc4b19",
+    "training/c5_followup_gpu_loader.py": "89c436e2526e970c420b0b318e725e8da868c2163dd1a3edf09381d7bfc6bb03",
+    "training/c5_followup_gpu_supervisor.py": "0b9bc984f52b120b73170d45de8a356e78937d7d2864cf16b3e3a0b80a4acd41",
+    "training/c5_followup_mac_controller.py": "c008563f4232f09448b168be53df8adbcb9053392e6478de245ccd41c9445a11",
+    "training/c5_followup_ssh.py": "390e0c09a13d6ebd6d0c847587bf9d9201b59a0d0855a6d19de637ceda763582",
+    "training/c5_formal20_adapters.py": "fb3a4c42ec7da26e71cca821748e1e996f46548d85b18cdecdeab3e8788900d6",
+    "training/c5_formal20_adapters_v2.py": "762465887d633e8218196ebcc20d3fa2b5aac4eb913bdcf7acca72e2dd51a4de",
+    "training/c5_formal20_budget_v2.py": "da61a26297a785ca99a567750fdf4bb47e0fde5017f0435f1794f0e91374f1f4",
+    "training/c5_formal20_commitment.py": "1dc59afadc9e64d59ecd0cd5c35ae1fda31271c85598d2d462d1d70e0b528183",
+    "training/c5_formal20_field_scope.py": "4e04c4d3cc8a8481a0201f932499d40c115b4da3b0bdfa3922ecf776b9f7dab1",
+    "training/c5_formal20_field_scope_v2.py": "ca94887d9870a3cf482895de4ee86f0a31bfe22ec81c28473d8b4ed35ec4db6b",
+    "training/c5_formal20_incomplete_audit.py": "d9993c4394c893a694352d2a3206d539c81f79cf98bca9f8c6e45be9f69491a1",
+    "training/c5_formal20_joint_audit.py": "f4c84a485565c24a67cca72b795da9272e53d2bc9fdebcdf32ebabd8426376bd",
+    "training/c5_formal20_joint_audit_v2.py": "1e01dcf9f01274c99e0ae113ed09d6fc248bd533ee9636f17f96d9d9b47d4854",
+    "training/c5_formal20_plan.py": "d7582b859f98a05c0ecd98d1606b0af808fee702e163d50615c5d146b7cd0ae7",
+    "training/c5_formal20_prepermission.py": "140a34775b6b19f38cdb71b538e9aa79718af4a53f2c05ef4eaf65c43248e424",
+    "training/c5_formal20_privacy.py": "fb4cfbd0546a4fa0605aeea718b6a55f1bcec9bb912b38629f7be94ddacf4145",
+    "training/c5_formal20_public_progress.py": "a22fefe7c7697f70d593b15acf0f678a5c295982344b020d5315a0aefb4fc74f",
+    "training/c5_formal20_runner.py": "745cb79fbba1094853b91f15c1b76be5b153f15dd8cd2cd86e69a3df5a0f37ca",
+    "training/c5_formal20_runtime.py": "6747b99c6a36a894a371614dde53e7e0c67fdbdc0ec2eb6b80dece2100c13598",
+    "training/c5_formal20_scorer.py": "2de95c3fa601e9bc95f8e0af0df90c31375b002b4cb8d03eefdce468b095b8be",
+    "training/c5_formal20_transport_v2.py": "69783f884f7972cd375b502ac4fbf62dd30704cabd195686b17fb6c7a0e72ef5",
+    "training/c5_formal_reuse_adapters.py": "f068540626d0ab2189c2318f5b5e311e2faff67068dd1d47b8aaa2261587e112",
+    "training/c5_formal_reuse_adapters_base.py": "72c24d9f74fdb437a06758118be910e3cb42a58144e0fef3cf826ae2bc3b80ac",
+    "training/c5_formal_reuse_admission.py": "1cd57f190b7845887f62fc9f27c5b6c6adb2ab80835ee8f3bbdb8d0936579597",
+    "training/c5_formal_reuse_budget.py": "bce5788e6e3b61ad11d571f3bfd8b9d472a61f29f65e8a3d0ae9fb5c825b4691",
+    "training/c5_formal_reuse_control.py": "9fc86ec6a921116710f1954032329afd597630a2c0bd3028c9abe703daf9a7c9",
+    "training/c5_formal_reuse_deployment.py": "17ab4271a676bb19ef9a7ae11e24aab4b1c3c77ce03709f5c3c746a43272cbd8",
+    "training/c5_formal_reuse_evidence_audit.py": "ee651feab07a3b9cdc1463c825a319387b591150ee6be9eeccc694cbb1548602",
+    "training/c5_formal_reuse_failure_audit.py": "24f94ba8f17938c933f8bc3dffd0b937003e6d8f06599d25803a44104f134b33",
+    "training/c5_formal_reuse_field_scope.py": "221f0dadce5b8f02edce80d28ccdbaa7a019b57653c9b56508b602780e72bd11",
+    "training/c5_formal_reuse_joint_audit.py": "55e9487494c62ce251e3cac64bd33da8f019e13cd423642eecb48a703a90c7a0",
+    "training/c5_formal_reuse_joint_audit_base.py": "f583c7a7961e5c5d6a298e1144fb825b6e4ab7f9e68cb3aa11b439f3f862dc52",
+    "training/c5_formal_reuse_model_native_audit.py": "68b0ec6d482624b05abe119a019cb40c0dd6f46d43073c9845815974d2e26219",
+    "training/c5_formal_reuse_model_wire.py": "256fbaaf7b2f331f2c919869b474b44c48a8e1394ef9aca178b2ffb925b54f39",
+    "training/c5_formal_reuse_partial_audit.py": "8a3c2770337e05f852f075f2b6579afa8dfbf51f401ef5476c6112a9e0f302c0",
+    "training/c5_formal_reuse_public_progress.py": "b743a9e5a0e18353f92209f49174ce3d6b18b2d3567377e09f119ff9f7230fe6",
+    "training/c5_formal_reuse_revision.py": "3b4054888f7f6239ca35f63f48e3d9218d129c7027d899bb1eda9a53970f6512",
+    "training/c5_formal_reuse_runner.py": "c9eb28c1a827e23eb5b6d78b6469871a9fac8d909db7e8689477499ff977d897",
+    "training/c5_formal_reuse_runtime.py": "07a56fd2cdee2112fc6721e9bb53a229221445dd447ae01a8acd44761ea10ee4",
+    "training/c5_formal_reuse_ssh.py": "c5a9db449be38ebc630b9774259eb3664340b01a92e1e0c6a7da8084edf10c60",
+    "training/c5_formal_reuse_supervisor.py": "cffe286edb47467ad633a2f581e727d081988a180ceee541dd105188a7068ddc",
+    "training/c5_formal_reuse_transport.py": "10aa5154eb0451fd8592fd2691172dfb6145b9dbfe126b6500eff812fc995b06",
+    "training/c5_formal_reuse_wire_io.py": "d035b37347572c65151427e19718a7606ac2f098220a7670c9ac688751edaebf",
+    "training/c5_formal_run_budget.py": "dd8937f808a2ee6763e3d18d568cc17b91024d14813ebcde659322a40ae0232c",
+    "training/c5_formal_run_package.py": "42418d2c246a6e3b58b4f509bfe900586614509f0030b66fd2930dd49276233f",
+    "training/c5_formal_run_package_entry.py": "8ad069c8f46a4be327bfa576a767f4e05f2777271a46034d6b701f5600b77dfb",
+    "training/c5_freeze.py": "ea4cf25b7b5f10e69531e78b097c2cd3113da3ef4e15ece75cf25f85b6b08a24",
+    "training/c5_holdout.py": "5be71078717ea9d40b6a310478d8d22448715de211bca25981273fba64e60d6a",
+    "training/c5_host_assurance_audit.py": "ae9f1ee7295afc4d9c9417e9d8747d17e2cd65e1e35273c63af8ce797a1a230d",
+    "training/c5_host_observer_audit.py": "52234c2de721a6985368b9b42ca8968a731e41bb8ee9559d2e89c5c81dbd1838",
+    "training/c5_host_provenance_candidate.py": "8cc7bc23a8606d540fcb02612ab76c8293c59017682179c98852ac7837a6d5f4",
+    "training/c5_inventory.py": "a2250fd3342af016d9df6e9abc19ab1e82f60075b79ea33da4c922c74ad8e041",
+    "training/c5_lifecycle_joint_audit.py": "1cbac4b8f0c0d12413430a59220bd40d2b5cea16d9e08c94cca05e33319bac67",
+    "training/c5_lifecycle_model_transport.py": "1b57809ca516bf9aa1b3be2b908ccfce6fc41b6456ae2841556b4770e6e2cbfc",
+    "training/c5_lifecycle_timing_audit.py": "a9e568bc1f036707d4a0c4ddbb47fe55959422ddfb0d5c3887a405b050d798cd",
+    "training/c5_model_transport.py": "aafb6bb43fc90651c3c31ddcdd564bfb94e61cdb0d3769e0e87ba567ce853612",
+    "training/c5_modelbridge_joint_audit.py": "9829b9a712ffb8abc16875c01685350d47f62c8420745c22074371bedc8c5a97",
+    "training/c5_modelbridge_runtime.py": "3002f0de83afa0ac0f7aafe2a651dceab2926d6e589e313e78452e4ab95423aa",
+    "training/c5_recovery_confirmation.py": "bc444c9a0164314765c93d3e74e6a48c8d88f7dc2cafbb4ff14c7fef73fdf3ea",
+    "training/c5_recovery_controller.py": "99effd907e170c6dbec4e7aa7d7862996b8baacd9a510fd3b6e2d85b2b9e696e",
+    "training/c5_recovery_field_audit.py": "7052a60fad4064ac0dc550262acaae2009d3b65ef5f2b60641d7ad76d31df0bf",
+    "training/c5_recovery_field_budget.py": "10088c35200df87146e857914de3ca9f823254e953ba4fb26335dcf64941342e",
+    "training/c5_recovery_field_eight_audit.py": "3301fccfe8ee4361f49632377a8c6f97aeca621f09053ecbccc17025eb7b3ac2",
+    "training/c5_recovery_field_gpu.py": "47b3674e62a2fba7ca7bf51c278fe5a08d6329d5019dd8cdf688d0bb1e419463",
+    "training/c5_recovery_field_gpu_audit.py": "3f28eebf475701551929fdb7f3ea012a95f78de8073cb55a12eb14eb11e878ab",
+    "training/c5_recovery_field_mac.py": "db44148919760a6a23a54c549112c8c25a776161254de947bc1d2664987b013a",
+    "training/c5_recovery_field_native_failure_audit.py": "ca45a0122b11d422b69de7683b916cea99d1baacd5c4eb533301be41344d6cee",
+    "training/c5_recovery_field_permit.py": "4cb7abcbbae0246f4e949646706842b0de97439f185949edf999621b30153a5c",
+    "training/c5_recovery_field_proofs.py": "7b669a438405032109811cb8074ff84fc4145edf41706689ae9ae489591b055d",
+    "training/c5_recovery_field_shared_stop_audit.py": "b6ff0a9095a62da40b171bc040476e91af17b24bb0ccdcb62cdd57ac09806162",
+    "training/c5_recovery_field_ssh.py": "7ec2bb046b63da081bac3710d6b9552d9590048f7eac0c16c64294b31a27285c",
+    "training/c5_recovery_history.py": "e4ea69fe1c824cfe6bdc829cba7182fb8a9059dd737cc9a070da8efffa939834",
+    "training/c5_recovery_policy.py": "7452233254ed5001442424d478c8fa45e85277e8b0367a26bb9e1cea78e7341f",
+    "training/c5_recovery_stop.py": "5839846bf83a95c59ba5bc43b5985e3cda1b792ef0e11f07fcd05af1d72db3fb",
+    "training/c5_recovery_storage.py": "e4ceeab588606a0e962f3946cef2015350eeac4f3ec586af225510d94dcc95ae",
+    "training/c5_research_audit.py": "d7d6567dc242b7700758a7ad9cb1e84a9707c31c618a041023aa23bad3ba2d8e",
+    "training/c5_research_permission.py": "ff51f5841cf169c1d01eb233440217df762f2254732f3a7df4ced85ba587c9be",
+    "training/c5_retired_dev_timing_audit.py": "d06afe454c0a73c135cdbfe2577d05cffbac07259f323e8104579656ef3d932e",
+    "training/c5_reuse_admission.py": "9e16a1c75af51f6c08d79837f4736897999c2783ad3dd9610f7a869851fcc994",
+    "training/c5_reuse_budget.py": "3d2bc5d3561b9c6a5c4d7fd36dcf8382d59daf7333dc5e20dbad53adef44b6e0",
+    "training/c5_reuse_continuation_proposal.py": "c5429e7d83cd16df93c0a61115250c9db9b10ab26a20cc9b0fc6044dc894db15",
+    "training/c5_reuse_control_journal.py": "50083417ef14b020d6ae70646d6b331c05780e27b3d25a31916188ad0a65fd00",
+    "training/c5_reuse_deployment.py": "52253346d5e1027e5ed2799f1feaa23d6ba39f2820779f92a8aa9c316bca4280",
+    "training/c5_reuse_development_plan.py": "6c330636e9d74aa2c0290279efd34ea635daae09dc048473d086273974cf3eb5",
+    "training/c5_reuse_diagnostic_capture.py": "30c4fd75b8e776ba49a9589d14fb5ab9aaf602cd6b7a0efd1d591d023bfe81e0",
+    "training/c5_reuse_evidence.py": "a6cc4374c1f300d65c951ecc955e15968c259bc663a1c6908bb4a679f72750a5",
+    "training/c5_reuse_field_eight_audit.py": "7616ccab1e0b267da6868f4c2159082b563e6c5514517959de1c90c9a9853f88",
+    "training/c5_reuse_field_journal.py": "38e7e02ef2937a583f350f0ed0852beab1fccc52c3dd0eae0318aec977cbc17d",
+    "training/c5_reuse_field_scope.py": "c6c61be4498cae519979451c246fa961a35c8ae7dc37db140d1d169155c1a12e",
+    "training/c5_reuse_field_transport.py": "a9d25bcc6d6e040171276428e513e4a9a6612aee82afa9fedea510ce9d504689",
+    "training/c5_reuse_field_transport_audit.py": "68fd3a1d6c90ec3d0bbf325a39341f704625601a6ae9264819457a48b0b7444a",
+    "training/c5_reuse_field_wire.py": "36ed207826aa6d85273259968f4f5d149b52a33039d0abeb8c0b9d810042cc2d",
+    "training/c5_reuse_freeze_materials.py": "06b154b38c98dc5f31267253ec12537574f3a111e41c0ddfed14d62ab9b0df3f",
+    "training/c5_reuse_generation.py": "ca776e10b4419b42755c865f2b87e014102b260def957d2e3babbe2cd522a879",
+    "training/c5_reuse_generation_audit.py": "9c6ff6d03d961d07e240cda47341e2ffbf07a7379db7f89e4784e4461d842743",
+    "training/c5_reuse_gpu_entry_audit.py": "88248104ee6a975569eca975888c326230cf00c437d3bf02850f5f1c5c13afb5",
+    "training/c5_reuse_gpu_export.py": "8cf55dc89a53dee4abfc3ed1ba5d3b6bd5b852737a5823a3ca174e3d714feca8",
+    "training/c5_reuse_gpu_loader.py": "65b87a8538afcf0f1154857760b008d0c91d33bc3d1c4cd78baca3e37fd737c6",
+    "training/c5_reuse_gpu_supervisor.py": "cd36d08bc750592c59f9aecdf36d3b9a72fa23a97ec477cf06b918ceb09d064a",
+    "training/c5_reuse_joint.py": "ed8eed9152999e25df7a635b9cef50750c5893fa2a93ab5704218ad4b5295538",
+    "training/c5_reuse_joint_audit.py": "26d90cce2e046f451606d6f9e46b6d5ab0cfe09c92704250748617c30651e476",
+    "training/c5_reuse_mac_controller.py": "76aca466ceaffdd3e7ad8569e46d2e8ee3252da7e47ff56af70ce3016057fa45",
+    "training/c5_reuse_native_audit.py": "dc7faa10e56e7e4e321066363eb9b8e89bcbd979ac61f8a62ba89ebd59358ae7",
+    "training/c5_reuse_native_channel.py": "21ad2ac3c2aef92d7acb3bbdb8103916d0cfe612efbbc0a51bcef79dc7eafa19",
+    "training/c5_reuse_native_handoff.py": "5ef4c311125614a77187496581bd6f4bec6ee6ad8fe8cb45dc93ca6ea1b5563a",
+    "training/c5_reuse_native_handoff_audit.py": "44a1197070f91fc84a8f1d69406a7d62acfb76b4eb670b51fa1d88621ab74bed",
+    "training/c5_reuse_owned_child.py": "4b882cd31ffd899febe8c2cb52deeed77df9eb79810650f86ed73fb7c5a02e44",
+    "training/c5_reuse_process_identity.py": "45d055730ea7cf01905ac4c2aae3c3aa1a770225766eb618d1ab996769ad0ee5",
+    "training/c5_reuse_ssh.py": "707b17ad081a79600a2777685afbdce17cef7c77233b653668755e93e71a46b5",
+    "training/c5_reuse_stop.py": "3ea0d6170fbc7df7563ec1678343a0612b648b41cf5b8d36c739149f8a95bc97",
+    "training/c5_reuse_transport.py": "2a281ee5b68fd9229cef878ef26c09dc8f90827af5e21ce7733f4e471edbac1b",
+    "training/c5_reuse_worker_loop.py": "0ba568f00b235e7ada789e7649ead1798c105ac5f2a4271ec1e836e20fffd5b1",
+    "training/c5_rhino_adapter.py": "967d5927413b3c11a671984812c0230ab48438b9785304609bee57ba083297c1",
+    "training/c5_rhino_scorer.py": "763090c8c1d95410e4ab0f363efbe0c5da1fc65db9f3fa29b98f65eab1af36b2",
+    "training/c5_slot_audit.py": "754134ded6856db62c4697c9aa2ee919cc2082deed8b7ba09f21c8ec7f1f01f0",
+    "training/c5_slot_campaign.py": "bdb05cd81c92113487be32c899519bd45de6ea51efe0b0f6ed39d348ec760b5f",
+    "training/c5_slot_entry.py": "caa0317507b00c96cc61977f5b9a84447b553902c927a02b1a35b43deb52cf59",
+    "training/c5_slot_load_permit.py": "45d7389cd730ccf7321e94d5e66e96eccc007a3f01c830990aba17705fd1be3d",
+    "training/c5_slot_report.py": "22286274eddef155af3bf48bed42a692219c2044bcfe79781cd708efeb7d0ece",
+    "training/c5_slot_runner.py": "62d83e126dade8ce16d7d3ca6dac66ffa03e7797e4ed9d8bfa847a644219b921",
+    "training/c5_slot_tail_audit.py": "c614bd4af14f389b0b5724aba688ca90bf18ecad7ee90639bceb1e37b40723a4",
+    "training/c5_slot_tail_prior.py": "04688d443b52437fbda23c673311fe5387c233d9f4ac1479f53253a883f99087",
+    "training/c5_slot_tail_repair.py": "d48cf141c9e8adc687a3f1e1d3d5505cb965e8f8761eb5bd0041845da749b48f",
+    "training/c5_slot_tail_storage.py": "9bc6b4d10e448042ed00a61d3588002fd37add272a594b985bf7873c608d09bd",
+    "training/c5_slot_worker.py": "971b0449b6bb274db76b2bd996330947d91f9f20190a1e3d07e9b44ad5f2166b",
+    "training/c5_startup_audit.py": "7e3eddc228df1483ff13a73f81afb8d46e25134f156f6d187855a0c07faa1e10",
+    "training/c5_startup_transport.py": "69d280d3b4e108e8e7749f2b7e82637946dface80fd4522fa0f00461fdad1cfa",
+    "training/cluster.py": "3542c1f3e1320c58d7bde8941eeafc7849aff69e5863d5c782411c9480129c3f",
+    "training/config.py": "8231adae4d2284c72b20f39e77cc8dc46b16df3efdb15f8f017c47e055cd9bda",
+    "training/consent_candidate.py": "81bd5883fd0ac698af65b978a9603a1d374545a5c98a0d750e04bcb720786f6a",
+    "training/data.py": "f74a5e5852a3c693d0faa24b475040c05aca40308c1f63d61aa73f13ebfcc0b8",
+    "training/gpu_smoke.py": "3f9d13d1b76d8ac619defb91bba3e7610adf5cc6c667d0064836919096c3f16e",
+    "training/lora_dev_feedback.py": "1e89c2c07934cb97b6e22710aaadcbd57dc9234de5f7ecdde1b294e6a461b50f",
+    "training/lora_development_authority.py": "c9246207cd94ca00daf995df1b18fa5f313176c090beb16f05f26c364fc3d840",
+    "training/lora_development_cases.py": "6514af8ce3d1ed014882463f1b993c5e3180fba29022e3f6ce3bee0af4a1ca71",
+    "training/lora_development_controller.py": "1ddb63a43826f76cd91f1a5c6827a6ada05e8efb02ace0155e6e93e62fe24452",
+    "training/lora_development_export.py": "d0aba4dda6d410cdd8d19528b025454bdeffa38d6d52f5b89846db715140c69d",
+    "training/lora_development_gpu_entry.py": "0e332342c659c123b684404f1d20257e30b44b167295b04263b39b5fb37d5809",
+    "training/lora_development_loader.py": "6dd6b30418cc6522c6ae7a906cb131077371227c98e1216f918a6ce9d81d5470",
+    "training/lora_development_local_tokenizer.py": "b3b8c41b0e0e70e6b3ec053358501e3dcfaeb3ad82a5d957e6dc152624f50637",
+    "training/lora_development_peer.py": "7a9138969f90aa4ee5a3e6c184ce9ec6c380ddded73d6b4ad89dd2f58e98a9e8",
+    "training/lora_development_plan.py": "acdc3cd8e70f2908c205d4b506ac2fbfb9b4fd2c6ed1bcb067f04ae6face00df",
+    "training/lora_development_process.py": "95f8735d13a7025e0f3a85e5a9e9325aa6a4f12d7080a9bf9b491cbc039d9a86",
+    "training/lora_development_read_permission.py": "0acd74232318965a614f2d7cad3a408e73888e6112026f81278395db2403c5b6",
+    "training/lora_development_scope.py": "392734adb98f7afdf9e62e9bd2424d3527e0401bae1e4407ba9a5ca7582416d5",
+    "training/lora_development_wire.py": "9939ad9dc24b37677e71c2f4ee1f4e846dcacc71c790a27f3e02c1efea1db4a7",
+    "training/model_cache.py": "cff7ddff5c7d395f42ba2b77854b2cd7e9689e020d6d78cf065c8276685ef289",
+    "training/p2_inference_server.py": "86c081360e2303b8eb168e7b7ce6192bb6e6dfd7fcaba1001c1f5637720b444b",
+    "training/preregistration.py": "9d4ada9597aab509a3bacc0e812539926f21aa2874e3ed03eede429483ca79ae",
+    "training/reporting.py": "591316ece6827beb5be630316f617118607a68aafdba4c81ce06bdba0c476f3b",
+    "training/runtime.py": "98b516c580aa73e6451ae0a01a88ea78c0ae112174303d114b58e557e68bbce2",
+    "training/smoke.py": "dad47b5e41512804d0fdf5c27127db9f58106b80c485e33f9ab2758c0506facf",
+    "training/tool_contract_candidate.py": "81dfc591386f62af9effb8fc9d938d8876d6f4b431b8e850828b742aa81ca9e3",
+    "training/tool_contract_v3_candidate.py": "0905b85baf00d4416d7e7a2ae3074035a0d2294fa2f845ee77bc3504d9eb3051",
+    "training/tool_controller_candidate.py": "de4b4e52554faba30b48f5a952f0c01c6b7e6bfb76b4a84748f9eb44ac0d2b44",
+    "training/tool_schema_inventory.py": "ccab44ca8645a6b8b4cf5169c4988d835b475892d0d15697d406683c1d6544db",
+    "training/tool_selector_v4_candidate.py": "13d26e9a2b56702a182d68392138d7d453c71e4ad1566ba881f08846c8a4ee1b"
+  },
+  "stop_policy": {
+    "natural_exit_wait_seconds": 5,
+    "sigkill_max": 1,
+    "sigkill_wait_seconds": 10,
+    "sigterm_max": 1,
+    "sigterm_wait_seconds": 10,
+    "target": "only_new_direct_child_pinned_by_pidfd",
+    "unknown_exit_blocks_recovery": true
+  },
+  "study_id": "lora-optimization-development-v1"
+}

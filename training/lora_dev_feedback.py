@@ -2,7 +2,8 @@
 
 The caller must already have verified the native receipt. These consistency
 checks do not authenticate it or authorize another action. Frozen C5 inputs
-remain unchanged; no production or field entry imports this candidate.
+remain unchanged; only the separately approved new development entry may
+use this candidate. Production and historical field entries are unchanged.
 """
 from __future__ import annotations
 
@@ -79,9 +80,29 @@ def read_progress(scene: dict, *, step_index: int, previous_step: dict | None,
 def render_step(task: str, scene: dict, *, step_index: int = 0,
                 previous_step: dict | None = None, current_binding: dict | None = None) -> str:
     """Keep the original task/scene, then append only bounded observed facts."""
-    original = step_input(task, scene)
     facts = read_progress(scene, step_index=step_index, previous_step=previous_step,
                           current_binding=current_binding)
+    return render_progress(task, scene, facts)
+
+
+def render_progress(task: str, scene: dict, facts: dict) -> str:
+    """Render only projected facts; the transport must authenticate their origin.
+
+    This is not a receipt verifier. The Mac projects authenticated native
+    evidence; the worker checks its preceding model observation separately.
+    """
+    original = step_input(task, scene)
+    _require(isinstance(facts, dict) and set(facts) == {"status", "operation", "target_alias"},
+             "exact progress facts required")
+    if facts["status"] == "no_previous_step":
+        _require(facts["operation"] is None and facts["target_alias"] is None, "unexpected predecessor facts")
+    else:
+        _require(facts["status"] == "done" and facts["operation"] in READS, "completed read required")
+        if facts["operation"] == "get_bounding_box":
+            _require(isinstance(facts["target_alias"], str)
+                     and facts["target_alias"] in {o["alias"] for o in scene["objects"]}, "unknown progress target")
+        else:
+            _require(facts["target_alias"] is None, "scene read has no target")
     return (original + "\n上一已完成步骤的事实（不是下一步指令，也不授予执行权）："
             + json.dumps(facts, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
 

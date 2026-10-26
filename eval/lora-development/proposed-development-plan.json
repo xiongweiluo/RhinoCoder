@@ -1,6 +1,6 @@
 {
   "study_id": "lora-optimization-development-v1",
-  "status": "proposal_not_ready_for_execution_approval",
+  "status": "prepared_package_pending_owner_execution_approval",
   "execution_enabled": false,
   "private_material_access": false,
   "historical_replay": false,
@@ -88,9 +88,9 @@
     "lease_expiry_and_cost_ceiling": "resource-scope-20261026.json; owner confirms paid lease through 2026-10-30 20:00 Europe/Zurich and additional cost ceiling 0; no execution approval",
     "rhino_isolated_document_scope": "resource-scope-20261026.json; only new local isolated documents closed after use; no existing user project access or execution approval",
     "historical_family_overlap_review": null,
-    "new_field_runtime_and_failure_cleanup_validation": null,
+    "new_field_runtime_and_failure_cleanup_validation": "runtime-cpu-review-20261026.json and current related CPU regressions; entry/transport/owned cleanup implemented; actual model/Rhino behavior still unverified",
     "real_tokenizer_no_truncation_audit": "token-budget-native-floats-20261026.json; public analytic scene in native float representation: 364 prompts fit; actual scene still requires runtime check",
-    "exact_source_runtime_and_resource_binding": null,
+    "exact_source_runtime_and_resource_binding": "development-package-20261026.json binds public source, both interpreter environments, fixed assets, GPU hardware, new state roots and resource policies; separate owner approval remains absent",
     "owner_development_execution_approval": null
   },
   "resource_status": {
@@ -102,7 +102,7 @@
     "lease_paid": true,
     "rhino_scope": "only_new_local_isolated_documents_closed_after_use",
     "owner_resource_confirmation": "resource-scope-20261026.json",
-    "gpu_environment": "readonly-resources-20261026.json",
+    "gpu_environment": "gpu-environment-20261026.json; existing compatible Python 3.11.17 with original dedicated packages; no installation",
     "runtime_behavior_verified": false,
     "metadata_observation_only": true
   }
