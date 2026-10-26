@@ -18,30 +18,24 @@ APPROVAL_BASIS = "repository_owner_explicit_approval_of_this_complete_developmen
 
 
 def verify_source(root, files):
-    root = Path(root)
-    require(root.is_absolute() and root.resolve() == root and type(files) is dict and 0 < len(files) <= 768,
-            "bounded exact source bundle required")
-    for name, expected in files.items():
-        p = Path(name)
-        require(type(name) is str and not p.is_absolute() and p.as_posix() == name
-                and not any(part in {'.', '..'} for part in p.parts), "relative source path required")
-        path = root / p
-        require(path.resolve() == path and path.is_file() and path.stat().st_size <= 2 * 1024 * 1024,
-                "source file missing, oversized or symlinked")
-        require(hashlib.sha256(path.read_bytes()).hexdigest() == _sha(expected), "frozen source bytes changed: " + name)
+    from plugin.rhino_listener.lora_development_admission import source_guard
+    source_guard(root, files)
     return digest(files)
 
 
 def validate_package(package):
     extra = {'model_path_bindings', 'continuation'} if type(package) is dict and package.get('schema_version') in {2, 3} else set()
-    if type(package) is dict and package.get('schema_version') == 4:
+    if type(package) is dict and package.get('schema_version') in {4, 5}:
         extra = {'model_path_bindings', 'campaign_policy', 'revision_id'}
+        if package['schema_version'] == 5: extra.add('runtime_policy')
     require(type(package) is dict and set(package) == {'schema_version', 'study_id', 'development_plan',
         'source_files', 'model_identities', 'assets', 'endpoints', 'limits', 'lease_end_epoch', 'resource_policy',
         'host_policy', 'evidence_policy', 'historical_family_overlap', 'execution_ready',
         'loader_policy', 'stop_policy', 'native_scope', 'gpu_hardware'} | extra, "complete development package required")
-    require(type(package['schema_version']) is int and package['schema_version'] in {1, 2, 3, 4} and package['study_id'] == STUDY
+    require(type(package['schema_version']) is int and package['schema_version'] in {1, 2, 3, 4, 5} and package['study_id'] == STUDY
             and package['execution_ready'] is True, "prepared new-study package required")
+    from plugin.rhino_listener.lora_development_runtime import configuration
+    configuration(package)
     plan = package['development_plan']
     require(package['gpu_hardware'] == {'name': 'NVIDIA GeForce RTX 3090', 'memory_mib': 24576,
         'driver_version': '550.107.02', 'uuid': 'GPU-0e00f0ad-fa5a-eed9-6eee-5877984e02f9'},
@@ -72,7 +66,7 @@ def validate_package(package):
             assets['base_files'][name] == value for name, value in assets['tokenizer_files'].items()),
         'identical local tokenizer files required')
     require(package['limits'] == plan['limits'] and package['resource_policy'] == {
-        'lease_paid': True, 'additional_cost_ceiling': None if package['schema_version'] == 4 else 0, 'new_paid_service_or_renewal': False,
+        'lease_paid': True, 'additional_cost_ceiling': None if package['schema_version'] in {4, 5} else 0, 'new_paid_service_or_renewal': False,
         'historical_budget_reuse': False}, "owner-confirmed resource policy differs")
     require(package['host_policy'] == {'only_new_local_documents': True, 'model_writes': 0,
         'existing_project_content_access': False, 'fixture_documents_max': 32, 'auxiliary_documents_max': 0,
@@ -129,10 +123,10 @@ def validate_package(package):
     if package['schema_version'] == 3:
         from plugin.rhino_listener.lora_development_admission import retired_predecessors
         retired_predecessors(package)
-    if package['schema_version'] == 4:
+    if package['schema_version'] in {4, 5}:
         from plugin.rhino_listener.lora_development_campaign import validate
         validate(package)
-    if package['schema_version'] in {2, 3, 4}:
+    if package['schema_version'] in {2, 3, 4, 5}:
         expected = {str(Path(assets[root]) / name): sha for root, names in
                     [('snapshot_dir', 'base_files'), ('adapter_root', 'adapter_files')]
                     for name, sha in assets[names].items()}
@@ -155,18 +149,20 @@ def verify_approval(package, approval, *, endpoint, source_root, state_root, now
     expected = {'study_id': STUDY, 'actor': 'repository_owner', 'approved': True,
         'package_sha256': digest(package), 'approval_basis': APPROVAL_BASIS,
         'scope': 'one_bounded_public_development_no_training_no_final_test'}
-    if package['schema_version'] == 4:
+    if package['schema_version'] in {4, 5}:
         from plugin.rhino_listener.lora_development_campaign import Campaign, owner_record
         expected = owner_record(package['campaign_policy'])
     require(approval == expected and type(approval.get('approved')) is bool, "new exact owner execution approval required")
-    if package['schema_version'] == 4:
+    if package['schema_version'] in {4, 5}:
         Campaign(package, endpoint).revision()
     paths = package['endpoints'][endpoint]
     require(str(source_root) == paths['source_root'] and str(state_root) == paths['state_root'], "approved endpoint root differs")
     now = time.time() if now is None else now
     window = package['limits']['gpu_residency_seconds']
     if window is None:
-        window = validate_package(package)['planned_worst_case_seconds']
+        from plugin.rhino_listener.lora_development_runtime import active_schedule
+        window = (len(active_schedule(package)) * package['limits']['slot_seconds']
+                  + package['limits']['load_seconds'] + package['limits']['cleanup_export_seconds'])
     require(type(now) in (int, float) and math.isfinite(now)
             and now + window <= package['lease_end_epoch'],
             "full initial work and cleanup window unavailable")

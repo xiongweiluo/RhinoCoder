@@ -7,6 +7,7 @@ import pytest
 from plugin.rhino_listener.c5_research_channel import read_json
 from plugin.rhino_listener.c5_research_native import digest
 from training import lora_development_gpu_entry as module
+from training.lora_development_scope import field_views
 from eval.test_lora_development_wire import PLAN, IDENTITY
 
 
@@ -15,7 +16,8 @@ from eval.test_lora_development_wire import PLAN, IDENTITY
 def test_recovery_is_preexposure_once_and_cleanup_unknown_blocks_it(tmp_path, monkeypatch, fault, expected_loads):
     tmp_path.chmod(0o700)
     package = {'limits': dict(PLAN['limits']), 'lease_end_epoch': 9999999999, 'source_files': {},
-        'model_identities': {'base': IDENTITY, 'current_lora': IDENTITY}, 'endpoints': {'gpu': {'python': '/synthetic/python'}}}
+        'model_identities': {'base': IDENTITY, 'current_lora': IDENTITY}, 'endpoints': {'gpu': {'python': '/synthetic/python'}},
+        'native_scope': {'schedule': field_views(PLAN)['schedule']}}
     if fault == 'single_load': package['limits'].update(max_load_attempts=1, max_infrastructure_recoveries=0)
     key = digest(package)
     ready = {'status': 'ready', 'package_sha256': key, 'model_identities': package['model_identities']}

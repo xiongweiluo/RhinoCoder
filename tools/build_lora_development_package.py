@@ -150,10 +150,37 @@ def build_campaign(root=ROOT, *, revision_id=1, policy=None):
     return value
 
 
+def build_recovery(root=ROOT, *, revision_id=2, policy=None):
+    """One inert lifecycle revision of the existing campaign; no fresh budget."""
+    from plugin.rhino_listener.c5_research_native import digest
+    from plugin.rhino_listener.lora_development_campaign import ROOTS, RECOVERY_MUTABLE, contract, fragments
+    from plugin.rhino_listener.lora_development_runtime import OPERATIONS, RECOVERY
+    from training.lora_development_authority import validate_package
+    record = root / 'eval/lora-development'
+    value = json.loads((record / 'development-package-campaign-v1-20261026.json').read_text())
+    original_policy = value.pop('campaign_policy')
+    original_package = json.loads((record / 'development-package-campaign-v1-20261026.json').read_text())
+    review = json.loads((record / 'execution-review-campaign-v1-20261026.json').read_text())
+    value.update(schema_version=5, revision_id=revision_id, source_files=source_manifest(root),
+                 runtime_policy={'operations': dict(OPERATIONS), 'recovery': dict(RECOVERY)})
+    for name, endpoint in value['endpoints'].items():
+        base = ROOTS[name] + '/revisions/%04d' % revision_id
+        endpoint.update(source_root=base + '/source', state_root=base + '/state-lora-development')
+    if policy is None and revision_id != 2: raise ValueError('later recovery revisions must reuse the approved policy')
+    policy = policy or dict(original_policy, schema_version=2, roots=dict(ROOTS), contract=contract(value),
+        baseline_source_files=dict(value['source_files']), mutable_startup_paths=list(RECOVERY_MUTABLE),
+        loader_fragments=fragments(root / 'training/lora_development_loader.py'),
+        resume={'review': review, 'review_sha256': digest(review),
+                'prior_policy_sha256': digest(original_policy), 'prior_package_sha256': digest(original_package)})
+    value['campaign_policy'] = policy
+    validate_package(value)
+    return value
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--revision', choices=('r2', 'r3', 'campaign'), default='r2')
+    parser.add_argument('--revision', choices=('r2', 'r3', 'campaign', 'recovery'), default='r2')
     parser.add_argument('--revision-id', type=int, default=1)
     parser.add_argument('--policy', type=Path, help='Original approved policy, required for later campaign revisions')
     args = parser.parse_args()
@@ -161,7 +188,7 @@ if __name__ == '__main__':
         parser.error(args.revision.upper() + ' is consumed: do not regenerate it or reuse its endpoints. '
                      'Use check_lora_development_source.py for CPU-only source checks; '
                      'any later execution needs a separately reviewed package and budget.')
-    value = (build_campaign(revision_id=args.revision_id, policy=json.loads(args.policy.read_text()) if args.policy else None)
+    value = build_recovery(revision_id=max(2, args.revision_id), policy=json.loads(args.policy.read_text()) if args.policy else None) if args.revision == 'recovery' else (build_campaign(revision_id=args.revision_id, policy=json.loads(args.policy.read_text()) if args.policy else None)
              if args.revision == 'campaign' else build_r3() if args.revision == 'r3' else build())
     with args.output.open('x') as output:
         output.write(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + '\n')

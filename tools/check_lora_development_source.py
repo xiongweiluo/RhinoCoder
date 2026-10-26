@@ -63,6 +63,7 @@ load_config(root / 'eval/c5/c5-engineering-config.json')  # Public config only.
 targets = (
     'training.lora_development_gpu_entry', 'training.lora_development_peer',
     'training.lora_development_controller', 'training.lora_development_export',
+    'training.lora_development_preflight',
     'training.lora_development_local_tokenizer',
     'plugin.rhino_listener.lora_development_admission',
     'plugin.rhino_listener.lora_development_campaign',
@@ -73,7 +74,7 @@ targets = (
 for name in targets: importlib.import_module(name)
 origins, cpu_origins = {}, {}
 for module in tuple(sys.modules.values()):
-    origin = getattr(module, '__file__', None)
+    origin = vars(module).get('__file__') if module is not None else None
     if not origin or origin.startswith('<'): continue
     path = pathlib.Path(origin).resolve()
     if path.is_relative_to(root):

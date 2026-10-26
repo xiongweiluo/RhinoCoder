@@ -15,6 +15,7 @@ from plugin.rhino_listener.c5_research_native import digest, require
 from training.lora_development_authority import WorkBudget, verify_source
 from training.lora_development_process import JsonPipe, OwnedChild
 from training.lora_development_scope import field_views
+from plugin.rhino_listener.lora_development_runtime import configuration, active_schedule, failure_record
 
 
 def gpu_absent(pid):
@@ -26,8 +27,9 @@ def gpu_absent(pid):
 
 
 def supervise(root, package, state):
+    config = configuration(package)
     campaign = None
-    if package.get('schema_version') == 4:
+    if package.get('schema_version') in {4, 5}:
         from plugin.rhino_listener.lora_development_campaign import Campaign
         campaign = Campaign(package, 'gpu')
     require(shutil.disk_usage(state).free >= 2 * 1024**3, 'GPU evidence reserve unavailable')
@@ -37,11 +39,12 @@ def supervise(root, package, state):
                         first_wall=start['wall'], first_mono=start['monotonic'])
     outer = JsonPipe(sys.stdin.fileno(), sys.stdout.fileno())
     exposed, child, stopped, error = False, None, None, None
-    attempts = []
+    attempts, failures = [], []
+    phase = 'loading'
     global_load = None
     try:
         for number in range(package['limits']['max_load_attempts']):
-            budget.work(remaining_slots=32, loading=True)
+            budget.work(remaining_slots=len(active_schedule(package)), loading=True)
             verify_source(root, package['source_files'])
             if campaign is not None: global_load = campaign.claim_load()
             attempt = state / ('load-%d' % number)
@@ -60,25 +63,28 @@ def supervise(root, package, state):
                 stopped = None
                 child = OwnedChild(command, cwd=str(root), env=env, stderr=stderr, journal=journal)
                 try:
-                    deadline = time.monotonic() + 600
+                    deadline = time.monotonic() + config['load_seconds']
                     child.pipe.send({'action': 'release_load', 'package_sha256': digest(package),
                                      'parent_pid': os.getpid()}, deadline)
                     ready = child.pipe.receive(deadline)
                     require(ready == {'status': 'ready', 'package_sha256': digest(package),
                         'model_identities': package['model_identities']}, 'model readiness differs')
                 except BaseException as exc:
+                    attempts.append({'number': number, 'ready': False, 'error_type': type(exc).__name__,
+                                     'failure': failure_record(exc, 'loading')})
+                    phase = 'loading_cleanup'
                     stopped = child.close(); child = None
                     stopped['gpu_absence_verified'] = gpu_absent(stopped['pid'])
                     journal('loading-stop-verified', stopped)
-                    attempts.append({'number': number, 'ready': False, 'error_type': type(exc).__name__})
                     require(stopped['exit_observed'] and stopped['gpu_absence_verified'], 'loading cleanup unknown')
                     if number + 1 < package['limits']['max_load_attempts']: continue
                     raise
                 attempts.append({'number': number, 'ready': True})
-                outer.send(ready, time.monotonic() + 10)
+                phase = 'model_transport'
+                outer.send(ready, time.monotonic() + config['protocol_reply_seconds'])
                 while True:
                     budget.work()
-                    message = outer.receive(time.monotonic() + min(150, budget.remaining() - 900))
+                    message = outer.receive(time.monotonic() + min(config['slot_seconds'], budget.remaining() - config['cleanup_export_seconds']))
                     if message == {'action': 'stop', 'package_sha256': digest(package)}: break
                     require(set(message) == {'action', 'request'} and message['action'] == 'infer', 'fixed GPU action required')
                     exposed = True  # Intent persisted before sending any task to the worker.
@@ -86,7 +92,7 @@ def supervise(root, package, state):
                     if not (state / 'tasks-exposed.claim.json').exists():
                         publish_json(state, 'tasks-exposed.claim.json', {'request_sha256': digest(message['request'])})
                     verify_source(root, package['source_files'])
-                    deadline = time.monotonic() + min(150, budget.remaining() - 900)
+                    deadline = time.monotonic() + min(config['slot_seconds'], budget.remaining() - config['cleanup_export_seconds'])
                     child.pipe.send(message, deadline)
                     response = child.pipe.receive(deadline)
                     outer.send(response, deadline)
@@ -95,16 +101,17 @@ def supervise(root, package, state):
                 journal('completion-stop-verified', stopped)
                 break
     except BaseException as exc:
-        error = type(exc).__name__
+        error = type(exc).__name__; failures.append(failure_record(exc, phase))
     finally:
         if child is not None:
             try:
                 stopped = child.close()
                 stopped['gpu_absence_verified'] = gpu_absent(stopped['pid'])
-            except BaseException as exc: error = error or type(exc).__name__
+            except BaseException as exc:
+                error = error or type(exc).__name__; failures.append(failure_record(exc, 'owned_child_cleanup'))
         settlement = {'status': 'gpu_stopped' if stopped and stopped['exit_observed'] and stopped.get('gpu_absence_verified')
                       else 'gpu_cleanup_unknown', 'package_sha256': digest(package), 'attempts': attempts,
-            'tasks_exposed': exposed, 'stop': stopped, 'error_type': error,
+            'tasks_exposed': exposed, 'stop': stopped, 'error_type': error, 'failures': failures,
             'elapsed_seconds_including_load_and_idle': time.monotonic() - start['monotonic'],
             'additional_cost': None if campaign is not None else 0, 'paid_lease_amount': None, 'replay_allowed': False}
         if campaign is not None:
@@ -118,11 +125,12 @@ def supervise(root, package, state):
 
 
 def worker(root, package, state, number):
+    config = configuration(package)
     require(number in {0, 1}, 'bounded loading attempt')
     attempt = state / ('load-%d' % number)
     claimed = read_json(attempt, 'attempt.claim.json')
     require(claimed['number'] == number and claimed['package_sha256'] == digest(package), 'parent attempt differs')
-    if package.get('schema_version') == 4:
+    if package.get('schema_version') in {4, 5}:
         from plugin.rhino_listener.lora_development_campaign import Campaign
         campaign = Campaign(package, 'gpu'); campaign.revision()
         require(number == 0 and read_json(campaign.root, 'load-%d.claim.json' % claimed['global_load_number']) == {
@@ -131,7 +139,7 @@ def worker(root, package, state, number):
     budget = WorkBudget(package['limits'], package['lease_end_epoch'],
         first_wall=claimed['first_start']['wall'], first_mono=claimed['first_start']['monotonic'])
     pipe = JsonPipe(sys.stdin.fileno(), sys.stdout.fileno())
-    message = pipe.receive(time.monotonic() + 10)
+    message = pipe.receive(time.monotonic() + config['protocol_reply_seconds'])
     require(message == {'action': 'release_load', 'package_sha256': digest(package), 'parent_pid': os.getppid()},
             'only the new direct supervisor may release loading')
     owner = read_json(attempt, 'child-created.json')
@@ -151,13 +159,15 @@ def worker(root, package, state, number):
     tokenizer, generate, route, check = load(root, package, guard)
     from training.lora_development_peer import DevelopmentPeer
     peer_state = attempt / 'peer'; peer_state.mkdir(mode=0o700)
-    peer = DevelopmentPeer(state=peer_state, runtime=digest(package), views=field_views(package['development_plan'])['model'],
+    views = field_views(package['development_plan'])['model']
+    allowed = {c['slot_id'] for c in active_schedule(package)}
+    peer = DevelopmentPeer(state=peer_state, runtime=digest(package), views={k: v for k, v in views.items() if k in allowed},
         identities=package['model_identities'], tokenizer=tokenizer, generate=generate, route_context=route, guard=check)
     pipe.send({'status': 'ready', 'package_sha256': digest(package), 'model_identities': package['model_identities']},
-              time.monotonic() + 10)
+              time.monotonic() + config['protocol_reply_seconds'])
     while True:
-        try: message = pipe.receive(time.monotonic() + min(150, budget.remaining() - 900))
+        try: message = pipe.receive(time.monotonic() + min(config['slot_seconds'], budget.remaining() - config['cleanup_export_seconds']))
         except EOFError: return
         require(set(message) == {'action', 'request'} and message['action'] == 'infer', 'fixed worker request required')
         response = peer.infer(message['request'])
-        pipe.send(response, time.monotonic() + 10)
+        pipe.send(response, time.monotonic() + config['protocol_reply_seconds'])

@@ -91,7 +91,7 @@ def test_only_exact_retired_predecessor_session_can_remain(tmp_path, fault):
         with pytest.raises(NativeError): sessions_available({'rhino_lora_old': module}, package)
 
 
-@pytest.mark.parametrize('terminal', ['gpu_stopped', 'gpu_cleanup_unknown'])
+@pytest.mark.parametrize('terminal', ['gpu_stopped', 'gpu_cleanup_unknown', 'local_setup_failed'])
 def test_mac_retains_early_terminal_settlement_and_never_resends_stop(tmp_path, monkeypatch, terminal):
     from tools import run_lora_development_mac as mac
     from training import lora_development_local_tokenizer as tokenizer, lora_development_authority as authority
@@ -124,6 +124,19 @@ def test_mac_retains_early_terminal_settlement_and_never_resends_stop(tmp_path, 
     sent = []
     monkeypatch.setattr(process, 'JsonPipe', lambda *a: SimpleNamespace(
         receive=lambda deadline: settlement, send=lambda *a: sent.append(a)))
+    # This test injects transport/lifecycle outcomes. The real preparation is
+    # exercised separately against the shipped bundle, without this stub.
+    from training import lora_development_preflight as preflight
+    from plugin.rhino_listener.lora_development_runtime import configuration
+    from training.lora_development_scope import field_views
+    monkeypatch.setattr(preflight, 'prepare', lambda *a: {'config': configuration(package),
+        'tokenizer': None, 'check_environment': lambda: None, 'controller': None, 'journal': None,
+        'pipe': process.JsonPipe, 'schedule': field_views(PLAN)['schedule'], 'schemas': {}})
+    if terminal == 'local_setup_failed':
+        def reject_start(directory, name, value):
+            if name == 'mac-started.claim.json': raise OSError('synthetic local setup failure')
+            return publish(directory, name, value)
+        monkeypatch.setattr(channel, 'publish_json', reject_start)
     calls = []
     def popen(command, **kwargs):
         import tempfile
@@ -136,6 +149,13 @@ def test_mac_retains_early_terminal_settlement_and_never_resends_stop(tmp_path, 
     monkeypatch.setattr(exporter, 'verify_archive', lambda *a: {'verified':True})
     mac.main()
     result = read_json(state, 'development-result.json')
+    if terminal == 'local_setup_failed':
+        assert not calls and not sent and result['gpu_launch_attempted'] is False
+        assert result['host'] == {'status': 'not_started', 'capability_published': False}
+        assert result['failures'][0]['stage'] == 'local_setup'
+        assert result['failures'][0]['message'] == 'synthetic local setup failure'
+        assert result['key_removal']['actual_absence_checked']
+        return
     assert result['gpu'] == settlement and result['rows'] == [] and not sent
     assert len(calls) == (2 if terminal == 'gpu_stopped' else 1)
     assert (result['gpu_export'] is not None) == (terminal == 'gpu_stopped')

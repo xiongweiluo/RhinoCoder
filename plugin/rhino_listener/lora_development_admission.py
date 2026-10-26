@@ -15,7 +15,7 @@ from .lora_development_channel import STUDY
 
 def retired_predecessors(package):
     """Exact settled R1/R2 lineage; does not read files or grant another run."""
-    if package.get('schema_version') == 4:
+    if package.get('schema_version') in {4, 5}:
         from .lora_development_campaign import Campaign
         return Campaign(package, 'mac').retired()
     prior = package.get('continuation')
@@ -79,7 +79,7 @@ def source_guard(root, files):
         require(hashlib.sha256(path.read_bytes()).hexdigest() == expected, 'frozen source bytes differ')
 
 
-def admit(root, package, endpoint):
+def admit(root, package, endpoint, *, cleanup=False):
     paths = package['endpoints'][endpoint]
     state = Path(paths['state_root'])
     require(str(root) == paths['source_root'] and package['study_id'] == STUDY
@@ -88,14 +88,14 @@ def admit(root, package, endpoint):
         'package_sha256': digest(package),
         'approval_basis': 'repository_owner_explicit_approval_of_this_complete_development_package',
         'scope': 'one_bounded_public_development_no_training_no_final_test'}
-    if package.get('schema_version') == 4:
+    if package.get('schema_version') in {4, 5}:
         from .lora_development_campaign import Campaign, owner_record
         expected = owner_record(package['campaign_policy'])
         Campaign(package, endpoint).revision()
     require(digest(read_json(state, 'owner-approval.json')) == digest(expected), 'exact new owner execution approval required')
     if package.get('schema_version') == 3: retired_predecessors(package)
     source_guard(root, package['source_files'])
-    require(time.time() < package['lease_end_epoch'], 'lease ended')
+    if not cleanup: require(time.time() < package['lease_end_epoch'], 'lease ended')
     return state
 
 

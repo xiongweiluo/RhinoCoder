@@ -9,13 +9,15 @@ import time
 
 from .c5_research_channel import publish_json, read_json
 from .c5_research_native import digest, require
+from .lora_development_runtime import failure_record
 
 
 class DevelopmentSession:
-    def __init__(self, host, state, runtime, *, attach, detach, work_guard, cleanup_guard, idle_allowed=lambda: True, clock=time.monotonic):
+    def __init__(self, host, state, runtime, *, attach, detach, work_guard, cleanup_guard, idle_allowed=lambda: True, clock=time.monotonic, slot_seconds=150):
         self.host, self.state, self.runtime = host, state, runtime
         self.attach, self.detach, self.work_guard, self.cleanup_guard, self.clock = attach, detach, work_guard, cleanup_guard, clock
         self.idle_allowed = idle_allowed
+        self.slot_seconds, self.failures = slot_seconds, []
         self.callback = self.tick  # Retain this exact delegate identity for removal.
         self.started, self.stopped, self.busy, self.slot_started = False, False, False, None
         self.released, self.ready = False, False
@@ -47,7 +49,7 @@ class DevelopmentSession:
                     'entry_return_release_observed': True})
                 self.ready = True
             if self.slot_started is not None:
-                require(self.clock() - self.slot_started < 150, 'native slot deadline')
+                require(self.clock() - self.slot_started < self.slot_seconds, 'native slot deadline')
             name = 'request-%04d.json' % self.host.sequence
             if not os.path.lexists(self.state / name): return
             request = read_json(self.state, name)
@@ -58,6 +60,7 @@ class DevelopmentSession:
             publish_json(self.state, 'response-%04d.json' % seq, response)
             if action == 'stop' and self.host.current is None: self.slot_started = None
         except BaseException as exc:
+            self.failures.append(failure_record(exc, 'host_event'))
             self.finish(type(exc).__name__)
         finally:
             self.busy = False
@@ -74,13 +77,19 @@ class DevelopmentSession:
                 require(close.get('fixture_registry_absent') is True, 'emergency fixture closure unknown')
                 self.host.closed = True
             require(self.host.current is None or self.host.closed, 'fixture remains unverified')
-        except BaseException as exc: error = type(exc).__name__
+            if self.host.current is not None:
+                terminal = self.host.session.finish()
+                require(terminal.get('status') == 'stopped', 'owned fixture terminal accounting unknown')
+                self.host.current, self.host.session = None, None
+        except BaseException as exc:
+            error = type(exc).__name__; self.failures.append(failure_record(exc, 'host_cleanup'))
         try:
             self.detach(self.callback)
             detached = True
-        except BaseException as exc: error = error or type(exc).__name__
+        except BaseException as exc:
+            error = error or type(exc).__name__; self.failures.append(failure_record(exc, 'host_detach'))
         value = {'status': 'host_stopped' if error is None else 'host_cleanup_unknown', 'reason': reason,
             'runtime_sha256': self.runtime, 'close': close, 'exact_delegate_remove_returned': detached,
-            'all_other_host_handlers_absent_claimed': False, 'error_type': error}
+            'all_other_host_handlers_absent_claimed': False, 'error_type': error, 'failures': self.failures}
         publish_json(self.state, 'host-settlement.json', value)
         return value

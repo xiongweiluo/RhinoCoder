@@ -23,6 +23,7 @@ def start():
                        (prefix + '.plugin.rhino_listener', ROOT / 'plugin/rhino_listener')]:
         module = types.ModuleType(name); module.__path__ = [str(path)]; sys.modules[name] = module
     def load(name): return importlib.import_module(prefix + '.plugin.rhino_listener.' + name)
+    prepared = load('lora_development_runtime').prepare_host(ROOT, package)
     admission = load('lora_development_admission')
     state = admission.admit(ROOT, package, 'mac')
     admission.sessions_available(sys.modules, package)
@@ -47,18 +48,19 @@ def start():
     import Rhino
     native.require(Rhino.RhinoApp.IsOnMainThread and list(sys.version_info[:2]) == [3, 9]
         and str(Rhino.RhinoApp.Version) == '8.21.25188.17002', 'fixed embedded Rhino runtime required')
-    schemas = json.loads((ROOT / 'eval/c5/rhino-runtime-schema-v1.json').read_text())['core_parameters']
+    schemas = prepared['schemas']
     host_module = load('lora_development_host')
     def factory(plan, runtime, secret):
         directory = state / 'fixtures' / plan['slot_id']; directory.mkdir(mode=0o700)
         return host_module.RhinoSession(plan, runtime, secret, directory=directory, schemas=schemas, guard=guard)
     host = host_module.DevelopmentHost(state=host_state, runtime=runtime,
-        native_views=package['native_scope']['native'], schedule=package['native_scope']['schedule'],
+        native_views={c['slot_id']: package['native_scope']['native'][c['slot_id']] for c in prepared['schedule']},
+        schedule=prepared['schedule'],
         secret=secret, factory=factory, guard=guard, cleanup_guard=cleanup)
     def attach(callback): Rhino.RhinoApp.Idle += callback
     def detach(callback): Rhino.RhinoApp.Idle -= callback
     session = load('lora_development_session').DevelopmentSession(host, host_state, runtime,
-        attach=attach, detach=detach, work_guard=guard, cleanup_guard=cleanup,
+        attach=attach, detach=detach, work_guard=guard, cleanup_guard=cleanup, slot_seconds=prepared['config']['slot_seconds'],
         idle_allowed=lambda: not bool(getattr(Rhino.RhinoApp, 'InCommand', False)))
     sys.modules[prefix]._SESSION = session
     session.start()

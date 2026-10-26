@@ -76,13 +76,28 @@ class DevelopmentJournal:
     plan and runtime. A different output folder cannot be admitted by the
     eventual field entry as a way to reset this ledger.
     """
-    def __init__(self, state: Path, plan: dict, runtime_sha256: str, *, campaign=None):
+    def __init__(self, state: Path, plan: dict, runtime_sha256: str, *, campaign=None, recovery=None):
+        self.limits = dict(plan['limits'])
         self.campaign = campaign
+        self.recovery = recovery
+        self.history = recovery['history'] if recovery is not None else {}
         self.root = Path(state)
         os.close(private_directory(self.root))
         self.views = field_views(plan)
         self.scope = {"study_id": STUDY, "plan_sha256": digest(plan),
                       "runtime_sha256": _sha(runtime_sha256), "state_root": str(self.root)}
+        if recovery is not None:
+            require(set(recovery) == {'history', 'resolved_without_native_effect', 'review_sha256', 'incomplete_selection'}
+                    and recovery['incomplete_selection'] == 'retain_original_without_candidate_promotion'
+                    and set(recovery['resolved_without_native_effect']) == set(self.history), 'explicit reviewed continuation required')
+            _sha(recovery['review_sha256'])
+            schedule = self.views['schedule']
+            require(list(self.history) == [c['slot_id'] for c in schedule[:len(self.history)]], 'history must be exact original prefix')
+            for slot, row in self.history.items():
+                cell = self._cell(slot)
+                require(all(row['identity'][k] == cell[k] for k in ('slot_id', 'family_id', 'route', 'system', 'role'))
+                        and row['identity']['study_id'] == STUDY, 'original slot identity differs')
+            self.scope['continuation'] = recovery
         name = "lora-development-scope.json"
         if os.path.lexists(self.root / name):
             require(read_json(self.root, name) == self.scope, "development scope/root/runtime changed")
@@ -98,6 +113,7 @@ class DevelopmentJournal:
         return self.views["model"][slot]
 
     def _identity(self, slot):
+        if slot in self.history: return self.history[slot]['identity']
         cell = self._cell(slot)
         return {"study_id": STUDY, "scope_sha256": digest(self.scope),
                 **{k: cell[k] for k in ("slot_id", "family_id", "route", "system", "role")}}
@@ -106,18 +122,27 @@ class DevelopmentJournal:
         return digest(self._identity(slot))
 
     def _read(self, slot, suffix):
+        if slot in self.history:
+            require(suffix == '.result.json', 'consumed history cannot be opened or replayed')
+            return self.history[slot]
         return read_json(self.root, self.slot_key(slot) + suffix)
+
+    def may_continue_after(self, slot, result):
+        # This is a separate reviewed cleanup resolution, not a rewrite of
+        # the old result's may_advance, effect_known or failed outcome.
+        return (slot in self.history and slot in self.recovery['resolved_without_native_effect']) or result['may_advance'] is True
 
     def _write(self, slot, suffix, value):
         publish_json(self.root, self.slot_key(slot) + suffix, value)
 
     @_exclusive
     def start_slot(self, slot):
+        require(slot not in self.history, 'consumed history cannot be replayed')
         identity = self._identity(slot)
         index = next(i for i, row in enumerate(self.views["schedule"]) if row["slot_id"] == slot)
         for prior in self.views["schedule"][:index]:
             result = self._read(prior["slot_id"], ".result.json")
-            require(result["identity"] == self._identity(prior["slot_id"]) and result["may_advance"] is True,
+            require(result["identity"] == self._identity(prior["slot_id"]) and self.may_continue_after(prior['slot_id'], result),
                     "earlier slot incomplete, uncertain or stopped")
         if identity["role"] == "acceptance":
             require(read_json(self.root, "selection.json") == self._selection(),
@@ -154,7 +179,7 @@ class DevelopmentJournal:
 
     @_exclusive
     def finish_slot(self, slot, *, outcome, fixture_closed, listener_stopped, effect_known,
-                    stop_requested, evidence_sha256):
+                    stop_requested, evidence_sha256, execution=None):
         require(outcome in OUTCOMES and all(type(value) is bool for value in
             (fixture_closed, listener_stopped, effect_known, stop_requested)), "explicit outcome and cleanup required")
         identity = self._identity(slot)
@@ -186,6 +211,9 @@ class DevelopmentJournal:
             "uncertain_steps": uncertain, "evidence_sha256": _sha(evidence_sha256),
             "may_advance": bool(fixture_closed and listener_stopped and effect_known and not stop_requested
                                 and not uncertain and outcome != "evidence_unknown")}
+        if execution is not None:
+            require(self.recovery is not None, 'separate lifecycle fields require the reviewed recovery policy')
+            result['execution'] = execution
         self._write(slot, ".result.json", result)
         return result
 
@@ -193,8 +221,13 @@ class DevelopmentJournal:
         cells = self.views["schedule"][:16]
         results = {cell["slot_id"]: self._read(cell["slot_id"], ".result.json") for cell in cells}
         require(all(results[c["slot_id"]]["identity"] == self._identity(c["slot_id"])
-                    and results[c["slot_id"]]["may_advance"] is True for c in cells),
+                    and self.may_continue_after(c['slot_id'], results[c['slot_id']]) for c in cells),
                 "selection has unresolved/stopped or differently bound evidence")
+        if self.recovery is not None and any(results[c['slot_id']]['outcome'] in {'engineering_failure', 'evidence_unknown'} for c in cells):
+            return {'scope_sha256': digest(self.scope), 'selection_results_sha256': digest(results),
+                    'selected_system': 'original', 'selection_complete': False, 'candidate_promoted': False,
+                    'reason': 'incomplete_selection_retain_original', 'success_gains': None,
+                    'development_selection_not_quality_claim': True}
         gains, new_engineering_failure = {}, False
         for route in ("base", "current_lora"):
             relevant = [cell for cell in cells if cell["route"] == route]

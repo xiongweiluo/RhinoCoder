@@ -52,7 +52,7 @@ def test_timeout_disposes_only_owned_fixture_once_and_detaches(tmp_path, fault):
         closes.append(True)
         if fault == 'close_unknown': raise TimeoutError('synthetic close failed')
         return {'status': 'closed', 'fixture_registry_absent': True}
-    host.current, host.session = 'lora-dev-00', SimpleNamespace(close=close)
+    host.current, host.session = 'lora-dev-00', SimpleNamespace(close=close, finish=lambda: {'status': 'stopped'})
     session.start(); session.release(); session.slot_started = 10
     now[0] = 2000 if fault == 'total_deadline' else 161
     session.tick(); session.tick()
@@ -60,3 +60,5 @@ def test_timeout_disposes_only_owned_fixture_once_and_detaches(tmp_path, fault):
     assert len(closes) == 1 and len(events) == 2 and host.close_attempted
     assert result['status'] == ('host_cleanup_unknown' if fault == 'close_unknown' else 'host_stopped')
     assert not result['all_other_host_handlers_absent_claimed']
+    if fault != 'close_unknown': assert host.current is None and host.session is None
+    assert result['failures'][0]['stage'] == 'host_event'

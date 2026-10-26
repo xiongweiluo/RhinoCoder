@@ -12,6 +12,7 @@ from .c5_research_channel import publish_json
 from .c5_research_gate import signature
 from .c5_research_native import digest, require
 from .lora_development_channel import detached, host_response
+from .lora_development_runtime import failure_record
 
 
 def signed_request(secret, runtime, slot, sequence, request):
@@ -55,7 +56,7 @@ class DevelopmentHost:
         except BaseException as exc:
             self.blocked = True
             value = {'status': 'host_failure_no_retry', 'action': action, 'error_type': type(exc).__name__,
-                     'effect_state': 'unknown', 'cleanup_verified': False}
+                     'effect_state': 'unknown', 'cleanup_verified': False, 'failure': failure_record(exc, 'host_' + action)}
         response = host_response(self.secret, self.runtime, slot, seq, request, value)
         publish_json(self.state, 'host-%04d.response.json' % seq, response)
         return response

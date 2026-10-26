@@ -48,7 +48,7 @@ def preflight(package):
         check_model_paths()
         require(all(identity(name) == value for name, value in identities.items()), 'verified asset metadata drift')
         for module in tuple(sys.modules.values()):
-            origin = getattr(module, '__file__', None)
+            origin = vars(module).get('__file__') if module is not None else None
             if not origin or 'site-packages' not in Path(origin).parts: continue
             path = Path(origin)
             if path.suffix == '.pyc':

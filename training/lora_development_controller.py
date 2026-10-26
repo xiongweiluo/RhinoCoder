@@ -11,6 +11,7 @@ import time
 from plugin.rhino_listener.c5_research_channel import publish_json
 from plugin.rhino_listener.c5_research_native import READS, digest, require
 from plugin.rhino_listener.lora_development_host import signed_request
+from plugin.rhino_listener.lora_development_runtime import failure_record, lifecycle
 from training.c5_formal20_plan import validate_fixture_readback
 from training.c5_formal20_scorer import AUDIT_KEYS, score_route
 from training.c5_modelbridge_joint_audit import semantic
@@ -67,25 +68,38 @@ class DevelopmentController:
 
     def run_slot(self, cell):
         slot, case = cell['slot_id'], self.cases[cell['family_id']]
+        self.guard()  # Preflight precedes permanent task consumption.
         self.journal.start_slot(slot)
         started = self.clock()
         initial = final = close = stop = None
         steps, receipts = [], []
         error, opened, active_step = None, False, None
+        phase, failures = 'slot_preflight', []
+        model_requested = model_returned = False
+        native_requests = 0
+        recovering = self.journal.recovery is not None
+        def failed(exc, stage):
+            nonlocal error
+            failures.append(failure_record(exc, stage))
+            error = error or type(exc).__name__
         def work():
             self.guard()
-            require(self.clock() - started < 150, 'slot deadline reached')
+            require(self.clock() - started < self.journal.limits['slot_seconds'], 'slot deadline reached')
         try:
             work()
+            phase = 'fixture_open'
             opened = True  # Opening may partially create a document before returning.
             value, _ = self.exchange(slot, 'open')
             require(value.get('status') == 'opened', 'new fixture not opened')
+            phase = 'initial_capture'
             captured, _ = self.exchange(slot, 'capture')
             require(captured.get('status') == 'captured', 'initial capture missing')
             initial = captured['native']
+            phase = 'fixture_validation'
             validate_fixture_readback(case, initial)
             previous = None
             for index in range(case['max_steps']):
+                phase = 'step_preflight'
                 work()
                 current, exchange = self.exchange(slot, 'capture')
                 sent = request_from_host(model_views=self.journal.views['model'], runtime=self.runtime,
@@ -93,8 +107,12 @@ class DevelopmentController:
                     capture_request=exchange['request'], capture_sequence=exchange['sequence'], previous=previous)
                 self.journal.start_step(slot, index)
                 active_step = index
+                phase = 'model_request'
+                model_requested = True; model_returned = False
                 returned = self.model(sent)
+                model_returned = True
                 publish_json(self.state, slot + '-step-%d.model.json' % index, {'request': sent, 'response': returned})
+                phase = 'model_verification'
                 observed = reparse_response(returned, sent, model_views=self.journal.views['model'],
                     runtime=self.runtime, identity=self.identities[cell['route']], tokenizer=self.tokenizer)
                 work()
@@ -113,6 +131,8 @@ class DevelopmentController:
                         before, _ = self.exchange(slot, 'capture')
                         handoff = issue_read(sent=sent, observation=observed, current=before, secret=self.secret,
                             schemas=self.schemas, max_reads=case['max_reads'], used_reads=len(receipts), state=self.state)
+                        phase = 'native_dispatch'
+                        native_requests += 1  # Intent before dispatch; unknown replies never replay.
                         receipt, executed = self.exchange(slot, 'execute', envelope=handoff)
                         audit_read(receipt, handoff, observed, before)
                         row['receipt'] = receipt
@@ -122,57 +142,77 @@ class DevelopmentController:
                 elif status in {'abstained_no_dispatch', 'unsupported_for_c5_no_dispatch'}:
                     outcome = 'abstained'
                 else: outcome = 'task_failure'
+                phase = 'step_terminal_record'
                 self.journal.finish_step(slot, index, outcome=outcome, evidence_sha256=digest(row))
                 active_step = None
                 if outcome != 'completed_read': break
+            phase = 'final_capture'
             final_capture, _ = self.exchange(slot, 'capture')
             final = final_capture['native']
             work()
         except BaseException as exc:
-            error = type(exc).__name__
+            failed(exc, phase)
             if active_step is not None:
-                self.journal.finish_step(slot, active_step, outcome='unknown',
-                    evidence_sha256=digest({'error_type': error, 'partial_steps': steps}))
+                try:
+                    self.journal.finish_step(slot, active_step, outcome='unknown',
+                        evidence_sha256=digest({'failure': failures[0], 'partial_steps': steps}))
+                except BaseException as terminal_error: failed(terminal_error, 'step_terminal_record')
         finally:
             if opened:
                 try: close, _ = self.exchange(slot, 'close')
-                except BaseException as exc: error = error or type(exc).__name__
+                except BaseException as exc: failed(exc, 'fixture_close')
                 if close is not None:
                     try: stop, _ = self.exchange(slot, 'stop')
-                    except BaseException as exc: error = error or type(exc).__name__
+                    except BaseException as exc: failed(exc, 'fixture_stop')
         closed = bool(close and close.get('status') == 'closed' and close.get('fixture_registry_absent') is True)
         stopped = bool(stop and stop.get('status') == 'stopped' and stop.get('fixture_registry_absent') is True)
-        scored = None
-        if error is None:
+        scored, integrity = None, False
+        # Cleanup and receipt verification run even when the task failed.
+        # They do not convert a failed task into a scored success.
+        if error is None or recovering and closed and stopped:
             try:
                 require(closed and stopped and stop.get('host_blocked') is False
-                        and close.get('readback_error') is None
-                        and digest(close['fixture_before_close_native']) == digest(final), 'fixture lifecycle differs')
+                        and close.get('readback_error') is None, 'fixture lifecycle differs')
                 audit_ledger(stop['ledger'], receipts)
-                self.guard()  # Entry rechecks source/model/resource identity before accepting evidence.
-                proof = {k: (0 if k in {'critical_safety_errors', 'duplicate_writes', 'unverified_cleanup'} else True)
-                         for k in AUDIT_KEYS}
-                # Only the retained scorer's route vocabulary is mapped; model identity is unchanged.
-                result = {'family_id': cell['family_id'], 'slot_id': slot,
-                    'route': 'base' if cell['route'] == 'base' else 'lora', 'steps': steps,
-                    'initial_native': initial, 'final_native': final, 'close': 'closed', 'stop': 'stopped'}
-                scored = score_route(case, result, proof)
-            except BaseException as exc: error = type(exc).__name__
+                self.guard()
+                integrity = True
+                if error is None:
+                    require(digest(close['fixture_before_close_native']) == digest(final), 'fixture final state differs')
+                    proof = {k: (0 if k in {'critical_safety_errors', 'duplicate_writes', 'unverified_cleanup'} else True)
+                             for k in AUDIT_KEYS}
+                    result = {'family_id': cell['family_id'], 'slot_id': slot,
+                        'route': 'base' if cell['route'] == 'base' else 'lora', 'steps': steps,
+                        'initial_native': initial, 'final_native': final, 'close': 'closed', 'stop': 'stopped'}
+                    scored = score_route(case, result, proof)
+            except BaseException as exc:
+                integrity = False; failed(exc, 'evidence_verification')
+        execution = lifecycle(model_requested=model_requested, model_returned=model_returned,
+            native_requested=native_requests > 0, native_verified=native_requests == len(receipts) and integrity,
+            fixture_attempted=opened, fixture_closed=closed, listener_stopped=stopped, integrity_verified=integrity)
+        # Only a local, known pre-model fixture mismatch may continue in this
+        # same healthy run. Transport, source and protocol errors stop it.
+        local_failure = (recovering and len(failures) == 1 and failures[0]['stage'] == 'fixture_validation'
+                         and not model_requested and execution['resume_eligible'])
+        stop_requested = error is not None and not local_failure
         evidence = {'cell': cell, 'initial_native': initial, 'final_native': final, 'steps': steps,
             'close': close, 'stop': stop, 'score': scored, 'error_type': error,
+            'failures': failures, 'execution': execution, 'stop_current_run': stop_requested,
             'synthetic_or_field_provenance_supplied_by_entry': True}
         publish_json(self.state, slot + '.evidence.json', evidence)
         # A failed execution/evidence channel is an engineering failure, while
         # its effect/cause can remain unknown. It is never relabelled model error.
         outcome = ('engineering_failure' if error else ('success' if scored['outcome_correct'] else 'task_failure'))
         return self.journal.finish_slot(slot, outcome=outcome, fixture_closed=closed, listener_stopped=stopped,
-            effect_known=error is None, stop_requested=error is not None, evidence_sha256=digest(evidence))
+            effect_known=(execution['resume_eligible'] if recovering else error is None),
+            stop_requested=stop_requested, evidence_sha256=digest(evidence),
+            execution=execution if recovering else None)
 
     def run(self):
         # Keep the completed prefix visible even if a subsequent journal write
         # or selection seal raises before run() can return.
         rows = self.results
         for index, cell in enumerate(self.journal.views['schedule']):
+            if cell['slot_id'] in self.journal.history: continue
             if index == 16: self.journal.seal_selection()
             result = self.run_slot(cell)
             rows.append(result)
