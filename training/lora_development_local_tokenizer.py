@@ -34,7 +34,9 @@ def load_tokenizer(assets):
 def observed_environment():
     files = {}
     for module in tuple(sys.modules.values()):
-        origin = getattr(module, '__file__', None)
+        # Reading a lazy alias with getattr may import its target. Auditing
+        # must observe already-materialized origins without executing hooks.
+        origin = vars(module).get('__file__') if module is not None else None
         if not origin or 'site-packages' not in Path(origin).parts: continue
         path = Path(origin)
         if path.suffix == '.pyc':

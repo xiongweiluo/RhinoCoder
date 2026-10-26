@@ -1,0 +1,55 @@
+{
+  "authorization_basis": "direct_repository_owner_reply_to_campaign_scope_proposal",
+  "automatic_purchase_renewal_or_resource_change": false,
+  "ci_test_counts": {
+    "main_passed": 2595,
+    "main_skipped": 12,
+    "startup_passed": 4
+  },
+  "cumulative_load_limit": 5,
+  "executed_at_record_creation": false,
+  "final_test_authorized": false,
+  "fixed_additional_cost_limit": null,
+  "fixed_total_seconds_limit": null,
+  "historical_replay_authorized": false,
+  "initial_package_sha256": "e22ec832dd8c8c9bb23065e74648e7fcecdacd5d4ebb554f7bc3c1590e6c16be",
+  "initial_revision_checks": {
+    "ci": {
+      "impact": "success",
+      "python": "success",
+      "release": "success",
+      "ui": "success",
+      "validate": "success"
+    },
+    "ci_run_id": 40385860878,
+    "commit": "88163934c2464f7b5f6c7bc3da09ce827f9973a4",
+    "cpu_evidence_sha256": [
+      "4948fcba622aa50a5f42fc1f02d4ee3d2b691273ca031f01893258f68bfcc298",
+      "3339d51568c6516c7a753b1fa12313a4090f90792f7cb2b81a91d8e9bd3f9205",
+      "9c828f17087c0ba5da7ae4bb9bb88aceb842dcfba426c85941821276228602dd",
+      "3b93b58cd1025b3ccccb59e8ca2eec5b9536a3c8de9181e1fccc5d2439d973c6",
+      "1e2f603dab80db1ed79cd2d74dfb435814aedbe02cf25f87dd343f1bf32b65ab"
+    ],
+    "failed_load": null,
+    "failure_evidence_sha256": null,
+    "prior_mac_settlement": null,
+    "reason": "Initial campaign acceptance after preserved R1/R2 failures: public dependency closure repaired; approved cumulative loading and lease-only accounting controls; research semantics unchanged.",
+    "repair_category": "initial",
+    "semantic_change_review": "no_research_contract_change"
+  },
+  "merge_authorized": false,
+  "owner_approval": {
+    "actor": "repository_owner",
+    "approval_basis": "repository_owner_approved_campaign_scope_and_targeted_startup_repairs",
+    "approved": true,
+    "campaign_id": "lora-development-startup-repair-20261026-v1",
+    "policy_sha256": "0b051d6095ad3b6e750e72b76070c3cd36c19a9a8b499258f9e2b41526f75de3"
+  },
+  "owner_approval_sha256": "83ca172aa941521ec9de4fdb5c496232422e456f9ebdeec8f40038764dad3e92",
+  "owner_reply": "批准上述范围，满足技术门后执行",
+  "policy_sha256": "0b051d6095ad3b6e750e72b76070c3cd36c19a9a8b499258f9e2b41526f75de3",
+  "prior_loads_consumed": 3,
+  "recorded_at_utc": "2026-10-26T19:38:36.649866+00:00",
+  "schema_version": 1,
+  "training_authorized": false
+}
