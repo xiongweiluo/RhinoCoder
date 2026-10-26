@@ -85,8 +85,8 @@
   "required_before_execution": {
     "verified_ssh_host_identity": "owner_confirmed_in_conversation",
     "gpu_environment_and_model_file_verification": "readonly-resources-20261026.json; metadata and all 16 pinned asset hashes verified; runtime behavior still unverified",
-    "lease_expiry_and_cost_ceiling": null,
-    "rhino_isolated_document_scope": null,
+    "lease_expiry_and_cost_ceiling": "resource-scope-20261026.json; owner confirms paid lease through 2026-10-30 20:00 Europe/Zurich and additional cost ceiling 0; no execution approval",
+    "rhino_isolated_document_scope": "resource-scope-20261026.json; only new local isolated documents closed after use; no existing user project access or execution approval",
     "historical_family_overlap_review": null,
     "new_field_runtime_and_failure_cleanup_validation": null,
     "real_tokenizer_no_truncation_audit": "token-budget-native-floats-20261026.json; public analytic scene in native float representation: 364 prompts fit; actual scene still requires runtime check",
@@ -98,8 +98,10 @@
     "authentication": "owner_opened_control_connection_verified_20261026",
     "lease_end": "2026-10-30T20:00:00+01:00",
     "timezone": "Europe/Zurich",
-    "cost_ceiling": null,
-    "rhino_scope": null,
+    "cost_ceiling": 0,
+    "lease_paid": true,
+    "rhino_scope": "only_new_local_isolated_documents_closed_after_use",
+    "owner_resource_confirmation": "resource-scope-20261026.json",
     "gpu_environment": "readonly-resources-20261026.json",
     "runtime_behavior_verified": false,
     "metadata_observation_only": true

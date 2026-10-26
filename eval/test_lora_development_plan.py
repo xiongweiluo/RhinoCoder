@@ -22,6 +22,17 @@ def test_review_has_a_whole_window_but_no_execution_authority():
     assert result["missing_before_execution"] and not result["execution_authorized"]
 
 
+def test_zero_additional_cost_is_confirmed_but_resource_information_is_not_execution_approval():
+    plan = json.loads(PLAN.read_text())
+    result = review_plan(plan)
+    assert plan["resource_status"]["lease_paid"] is True
+    assert plan["resource_status"]["cost_ceiling"] == 0
+    assert "lease_expiry_and_cost_ceiling" not in result["missing_before_execution"]
+    assert "rhino_isolated_document_scope" not in result["missing_before_execution"]
+    assert "owner_development_execution_approval" in result["missing_before_execution"]
+    assert plan["execution_enabled"] is result["execution_authorized"] is False
+
+
 def test_development_schedule_keeps_acceptance_after_selection_and_counterbalances_each_cell():
     plan = json.loads(PLAN.read_text())
     schedule = development_schedule(plan)

@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-26",
+  "scope": "owner_resource_confirmation_and_public_CPU_controller_accounting",
+  "source_sha256": {
+    "eval/lora-development/proposed-development-plan.json": "3a176b3f124fb0f2c679715d8e28f0f2502a123786bac831a8da981f67140757",
+    "eval/lora-development/resource-scope-20261026.json": "8027caa72290a3c74954e7172f5e99a1338f621e94bd9c5912d32a36bf3b9859",
+    "training/lora_development_scope.py": "392734adb98f7afdf9e62e9bd2424d3527e0401bae1e4407ba9a5ca7582416d5",
+    "eval/test_lora_development_scope.py": "60515e414feef7ee998cbdd504c6bc369bd1f6ed0d26a65a626a412ab8a6f60e",
+    "eval/test_lora_development_plan.py": "7ff841cbbbbe7a5403078033459f07853747903fa9eb3a8b0cb25b73db2805f3"
+  },
+  "prior_preparation_snapshot": {
+    "path": "eval/lora-development/preparation-status-20261026.json",
+    "source_commit": "aded79271fb143d534e66f30635f29f7707054cf",
+    "unchanged": true
+  },
+  "current_development_review": {
+    "study_id": "lora-optimization-development-v1",
+    "scope": "inert_development_review_only",
+    "slots": 32,
+    "max_step_requests": 64,
+    "max_generation_stages": 128,
+    "planned_worst_case_seconds": 6900,
+    "remaining_headroom_seconds": 300,
+    "missing_before_execution": [
+      "exact_source_runtime_and_resource_binding",
+      "historical_family_overlap_review",
+      "new_field_runtime_and_failure_cleanup_validation",
+      "owner_development_execution_approval"
+    ],
+    "timing_feasibility_observed": false,
+    "execution_authorized": false,
+    "phase_one_complete": false
+  },
+  "schedule_sha256": "fee8d799c1e4dd780e0bba9860cc12cb35c951d8ce303d985915a25aa68b2264",
+  "schedule_unchanged_from_231d99f": true,
+  "public_scope_test_count": 16,
+  "related_CPU_tests_passed": 68,
+  "actual_model_generations": 0,
+  "actual_rhino_operations": 0,
+  "actual_development_slot_claims": 0,
+  "private_task_answer_log_reads": 0,
+  "real_state_or_grant_created": false,
+  "synthetic_test_journals_only": true,
+  "receipt_authenticity_or_real_cleanup_verified": false,
+  "full_runtime_binding_ready": false,
+  "execution_authorized": false,
+  "phase_one_complete": false,
+  "remaining": [
+    "Trusted previous receipt validation and minimal feedback transport with common raw output reparse.",
+    "Real model/Rhino entry and owned-process exit, actual cleanup/evidence and bounded resource supervision.",
+    "Only newly created local documents: establish a new blank active document before legacy active-content checks; include auxiliary and per-cell document creation/closure in exact package.",
+    "Exact source/runtime/resources and fixed field state root binding; resource policy must reject renewals/new charges.",
+    "Historical-family independence remains unknown; no private materials are read to fill it.",
+    "One complete development execution approval after the package is concrete."
+  ]
+}
