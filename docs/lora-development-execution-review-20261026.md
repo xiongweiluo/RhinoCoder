@@ -1,5 +1,7 @@
 # 首次公开开发执行审核与受限接续
 
+> 2026-10-26最新状态：R2已获准并在`356ad82`五项CI通过后执行；因公开源码导入依赖遗漏停止，跨批3/3加载耗尽，32槽未尝试。收尾/自动导出已核实，CPU修复与79项相关回归完成。详见[R2结果与接续](lora-development-r2-result-20261026.md)。第一阶段未完成，不自动追加执行；下文较早的“待批准/未执行/待接续”保留对应准备时点。
+
 本页属于同一研究主任务第一阶段。2026-10-26，所有者明确批准完整包 `c1cfb2f13d0c56fb58e65481cc413189016ed8589428a6af869e27f76febf249`，条件为 `4978fd0` CI 全部通过且包字节不变；[CI 40266206245](https://github.com/xiongweiluo/RhinoCoder/actions/runs/40266206245)五项成功、两端字节复核后执行。记录见[批准](../eval/lora-development/owner-authorization-20261026.json)、[脱敏审核](../eval/lora-development/execution-review-20261026.json)。原[包](../eval/lora-development/development-package-20261026.json)、原始结果和失败导出保留，禁止重放。
 
 ## 实际结果与证据范围

@@ -1,0 +1,119 @@
+{
+  "additional_cost": 0,
+  "automatic_recoveries_allowed": 0,
+  "candidate_feedback_effect": "unknown_no_task_exposure",
+  "charge_basis": "Prior approved conservative 180 seconds plus ceiling of R2 controller elapsed (including automatic cleanup/export); no ongoing owned GPU process remains. Later local CPU audit is separate. Remaining seconds do not authorize another load.",
+  "charged_current_seconds": 49,
+  "charged_prior_seconds": 180,
+  "completed_slots": 0,
+  "confirmed_failure": {
+    "cause": "source bundle omits data_pipeline required by c5_execution -> c5_engineering -> c5_dataset/c5_freeze -> data_pipeline.training_views",
+    "earliest_confirmed_stage": "public Python helper import after backend imports, before CUDA capacity check or tokenizer/weight load",
+    "id": "D4",
+    "not_evidence_of": [
+      "historical seven failure causes",
+      "model capability",
+      "training necessity",
+      "weight corruption"
+    ],
+    "test_gap": "Repository-wide imports had the missing public module available; asset preflight did not exercise this helper closure."
+  },
+  "cumulative_charged_seconds": 229,
+  "cumulative_gpu_elapsed_seconds": 51.69166888791369,
+  "cumulative_load_attempts_consumed": 3,
+  "cumulative_load_attempts_limit": 3,
+  "cumulative_seconds_limit": 7200,
+  "evidence_file_sha256": {
+    "development-result.json": "6fafd1209a5196ee14acc2e35328109f16c696ee32ab3d786004c7e0e03cc8b5",
+    "export.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gpu-evidence.tar": "5bc9075af5a9b463b5a8e3b5aa6b3acec3c8d9ba0b2884b4bc5e8625201fb80a",
+    "gpu-export-verified.json": "b3558ac7c4df92a6f8033894598500a6920f14c58002b9486356471ae31d317c",
+    "gpu-startup-response.json": "4bbb44862ee30ac835da775bba00dcaac58034cd4e385b7b8da074b10c7677d8",
+    "gpu/export-manifest.json": "25b8ed765ee67a429c723b1b45a9a8d885cb6f153377cde0e6a3b4e235b2e833",
+    "gpu/gpu-settlement.json": "4bbb44862ee30ac835da775bba00dcaac58034cd4e385b7b8da074b10c7677d8",
+    "gpu/gpu-started.claim.json": "38bf33401ae4cb83d7de253cfdba17198ae3e8a7e4afbe6fbc8b59cf5a2165a9",
+    "gpu/load-0/attempt.claim.json": "fa61240d4e49aee7efcbd1662ba433d28ded08b269c34fdb6b2dfd65384ed067",
+    "gpu/load-0/child-created.json": "f21d089212b648f503e3806f6d6376ce5942adb17072db898a17df31e23a7e93",
+    "gpu/load-0/child-stop.json": "7765f37d12c31a371270279e1c1b8b1b7c5dde655a1c7a4b64583a5eb3ff1d7b",
+    "gpu/load-0/loading-stop-verified.json": "4126bfbb22bbfcba18128d9451384c1f5daad901bf3c489981ee0832a2579afd",
+    "gpu/load-0/worker-admitted.claim.json": "ab9bb08706c19bf317db2c19e3fd68694427892e49a6657bda485cddc489bad7",
+    "gpu/load-0/worker.stderr": "091ee94b202cd5569255d1790798eb1c9f29d4c0bdf16023212b792fc14bff6d",
+    "host/attach.claim.json": "a90a8676d3a9b2dcd7fc1115d8829aa2ff57c1878e91e02a0b047a65b6fc65dc",
+    "host/entry-return-release.json": "a90a8676d3a9b2dcd7fc1115d8829aa2ff57c1878e91e02a0b047a65b6fc65dc",
+    "host/host-ready.json": "9ecb9da3fcb0de1b33291c7e81c5511aedb9a124e5d325a1cec87827982dc832",
+    "host/host-settlement.json": "ba1213860faa8e39ad4321cba7f120ffe90f5f2de6970bddf233b31169f41825",
+    "host/shutdown.request.json": "e5b37903f80a636d7bca93c0556e1b210ad2d4a51546f12d091852a7e857ba17",
+    "mac-started.claim.json": "cb41002a92d312ebfb6c7f18b7b78095c7f329024e0e90385a78d7a9b1b00d04",
+    "owner-approval.json": "113be5929b29a0dc5f5b547c3f7d057d15f3dfbb2c7dad76d51fb20ccf66b2eb",
+    "ssh.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "fixture_documents_created": 0,
+  "gpu_elapsed_seconds_including_load_and_idle": 31.69674268295057,
+  "gpu_export": {
+    "archive_sha256": "5bc9075af5a9b463b5a8e3b5aa6b3acec3c8d9ba0b2884b4bc5e8625201fb80a",
+    "files": 8,
+    "package_sha256": "aa280fb64ba123e4d7f999f5b5cd7db4302c2c3bb1337f2c459da938d408df9e",
+    "raw_bytes": 2876,
+    "verified": true
+  },
+  "historical_results_changed": false,
+  "host_secret_absence_verified": true,
+  "host_settlement": {
+    "all_other_host_handlers_absent_claimed": false,
+    "close": null,
+    "error_type": null,
+    "exact_delegate_remove_returned": true,
+    "reason": "controller_shutdown",
+    "runtime_sha256": "aa280fb64ba123e4d7f999f5b5cd7db4302c2c3bb1337f2c459da938d408df9e",
+    "status": "host_stopped"
+  },
+  "journal_reconciliation": {
+    "original_null_preserved": true,
+    "records": 0,
+    "slot_claims": 0,
+    "step_claims": 0
+  },
+  "load_attempts_consumed": 1,
+  "mac_controller_elapsed_seconds": 48.84769483283162,
+  "model_generation_stages": 0,
+  "model_packages_imported_before_failure": true,
+  "model_quality_result": null,
+  "model_weights_loading_reached": false,
+  "new_execution_authorized": false,
+  "not_attempted_slots": 32,
+  "original_mac_claimed_slots": null,
+  "package_sha256": "aa280fb64ba123e4d7f999f5b5cd7db4302c2c3bb1337f2c459da938d408df9e",
+  "paid_lease_amount_unknown": true,
+  "phase_one_complete": false,
+  "planned_slots": 32,
+  "r1_repairs_observed": {
+    "D1_asset_path_preflight": "passed_before_import_failure",
+    "D2_terminal_settlement": "retained_and_equal_to_exported_gpu_settlement",
+    "D3_export": "automatic_verified_8_files_2876_raw_bytes"
+  },
+  "remaining_load_attempts": 0,
+  "replay_allowed": false,
+  "schema_version": 1,
+  "slot_claims_verified": 0,
+  "source_commit": "356ad82c43e6656a56bb5d2ff4e9eaada5d33d80",
+  "status": "stopped_before_weight_loading_and_task_exposure",
+  "step_claims_verified": 0,
+  "stop_evidence": [
+    {
+      "exit_observed": true,
+      "gpu_absence_verified": true,
+      "returncode": 1,
+      "signals": []
+    }
+  ],
+  "study_id": "lora-optimization-development-v1",
+  "training_decision": "no_new_training_evidence",
+  "unknowns": [
+    "historical failure causes",
+    "model/feedback effect",
+    "actual weight loading and generation",
+    "whole Rhino host byte closure",
+    "all other host handlers absent",
+    "historical family independence"
+  ]
+}

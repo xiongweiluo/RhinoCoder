@@ -16,7 +16,22 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 
+def source_manifest(root=ROOT):
+    """Public runtime source only; never include datasets from data_pipeline."""
+    names = {p.relative_to(root).as_posix() for folder in ('training', 'plugin', 'agent')
+             for p in (root / folder).rglob('*.py') if '__pycache__' not in p.parts}
+    names |= {p.relative_to(root).as_posix() for p in (root / 'tools').glob('*lora_development*.py')}
+    names |= {'data_pipeline/__init__.py', 'data_pipeline/training_views.py',
+              'eval/c5/c5-engineering-config.json', 'eval/c5/rhino-runtime-schema-v1.json'}
+    return {name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in sorted(names)}
+
+
 def build(root=ROOT):
+    """Construct an inert in-memory candidate for checks, not a new run grant.
+
+    The consumed R2 record is immutable. Its source hashes need not equal the
+    current working tree; no owner approval can carry over to changed bytes.
+    """
     from plugin.rhino_listener.c5_research_native import digest
     from training.lora_development_authority import validate_package
     from training.lora_development_loader import POLICY
@@ -28,12 +43,7 @@ def build(root=ROOT):
     model = json.loads((record / 'readonly-resources-20261026.json').read_text())['model_assets']
     gpu = json.loads((record / 'gpu-environment-20261026.json').read_text())
     mac = json.loads((record / 'mac-environment-20261026.json').read_text())
-    # Public project source, not old private run packages, logs or datasets.
-    names = {p.relative_to(root).as_posix() for folder in ('training', 'plugin', 'agent')
-             for p in (root / folder).rglob('*.py') if '__pycache__' not in p.parts}
-    names |= {p.relative_to(root).as_posix() for p in (root / 'tools').glob('*lora_development*.py')}
-    names |= {'eval/c5/c5-engineering-config.json', 'eval/c5/rhino-runtime-schema-v1.json'}
-    files = {name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in sorted(names)}
+    files = source_manifest(root)
     views = field_views(plan)
     assets = {'snapshot_dir': '/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/' + model['base_revision'],
         'adapter_root': '/data/c5-runs-20261001/formal/checkpoint-132',
@@ -81,8 +91,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
+    if (ROOT / 'eval/lora-development/owner-authorization-r2-20261026.json').exists():
+        parser.error('R2 is consumed: do not regenerate it or reuse its endpoints. '
+                     'Use check_lora_development_source.py for CPU-only source checks; '
+                     'any later execution needs a separately reviewed package and budget.')
     value = build()
-    args.output.write_text(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + '\n')
+    with args.output.open('x') as output:
+        output.write(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + '\n')
     from plugin.rhino_listener.c5_research_native import digest
     print(json.dumps({'package_sha256': digest(value), 'source_files': len(value['source_files']),
         'execution_authorized': False, 'phase_one_complete': False}))

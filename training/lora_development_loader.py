@@ -58,8 +58,15 @@ def preflight(package):
     return check
 
 
+def cpu_dependencies():
+    """Resolve the actual lazy helper closure without touching model assets."""
+    from training.c5_execution import generation, load_config, load_pinned_tokenizer
+    return generation, load_config, load_pinned_tokenizer
+
+
 def load(root, package, guard):
     require(package['loader_policy'] == POLICY, 'fixed common inference policy required')
+    generation, load_config, load_pinned_tokenizer = cpu_dependencies()
     check = preflight(package)
     os.environ.update({'HF_HUB_OFFLINE': '1', 'TRANSFORMERS_OFFLINE': '1', 'TOKENIZERS_PARALLELISM': 'false'})
     if str(SITE) not in sys.path: sys.path.append(str(SITE))
@@ -68,7 +75,6 @@ def load(root, package, guard):
         import torch
         from peft import PeftModel, prepare_model_for_kbit_training
         from transformers import AutoModelForCausalLM, BitsAndBytesConfig
-        from training.c5_execution import generation, load_config, load_pinned_tokenizer
         check(); guard()
         require(torch.cuda.is_available() and torch.cuda.is_bf16_supported()
                 and torch.cuda.mem_get_info()[0] >= 16 * 1024**3, 'approved GPU capacity unavailable')

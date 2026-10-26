@@ -11,7 +11,15 @@ from tools.build_lora_development_package import build, ROOT
 
 def test_prepared_package_has_no_execution_authority(tmp_path):
     package = build()
-    assert package == json.loads((ROOT / 'eval/lora-development/development-package-r2-20261026.json').read_text())
+    frozen = json.loads((ROOT / 'eval/lora-development/development-package-r2-20261026.json').read_text())
+    assert digest(frozen) == 'aa280fb64ba123e4d7f999f5b5cd7db4302c2c3bb1337f2c459da938d408df9e'
+    assert validate_package(frozen)['execution_authorized'] is False
+    assert {k: v for k, v in package.items() if k != 'source_files'} == {
+        k: v for k, v in frozen.items() if k != 'source_files'}
+    assert digest(package) != digest(frozen)  # CPU repair never rewrites or reuses R2 approval.
+    r2_approval = json.loads((ROOT / 'eval/lora-development/owner-authorization-r2-20261026.json').read_text())['owner_approval']
+    with pytest.raises(NativeError):
+        verify_approval(package, r2_approval, endpoint='mac', source_root=ROOT, state_root=tmp_path, now=1)
     assert validate_package(package)['execution_authorized'] is False
     assert package['development_plan']['required_before_execution']['owner_development_execution_approval'] is None
     with pytest.raises(NativeError):
