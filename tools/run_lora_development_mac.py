@@ -50,7 +50,7 @@ def main():
     secret = secrets.token_bytes(32)
     publish_json(state, 'host-secret.json', {'package_sha256': runtime, 'key_hex': secret.hex()})
     host_state = state / 'host'
-    worker = pipe = None
+    worker = pipe = journal = None
     rows, error, gpu, host_final, key_removed, exported = [], None, None, None, None, None
     slot_deadline = None
     def source(): verify_source(ROOT, package['source_files'])
@@ -105,7 +105,8 @@ def main():
             controller = DevelopmentController(journal=journal, state=state / 'controller', runtime=runtime, secret=secret,
                 schemas=_schemas(), tokenizer=tokenizer, identities=package['model_identities'], host=host, model=model,
                 guard=guard, cleanup_guard=source)
-            rows = controller.run()
+            rows = controller.results
+            controller.run()
         finally: stderr.close()
     except BaseException as exc: error = type(exc).__name__
     finally:
@@ -162,11 +163,20 @@ def main():
                 exported = verify_archive(path, package)
                 publish_json(state, 'gpu-export-verified.json', exported)
             except BaseException as exc: error = error or type(exc).__name__
-        result = {'package_sha256': runtime, 'rows': rows, 'error_type': error, 'gpu': gpu, 'host': host_final,
+        claimed_slots = None
+        if journal is not None:
+            try:
+                claimed_slots = sum(os.path.lexists(journal.root / (journal.slot_key(c['slot_id']) + '.claim.json'))
+                                    for c in journal.views['schedule'])
+            except BaseException as exc: error = error or type(exc).__name__
+        result = {'package_sha256': runtime, 'rows': rows, 'claimed_slots': claimed_slots,
+            'completed_slot_results': len(rows), 'journal_reconciliation_required': True,
+            'error_type': error, 'gpu': gpu, 'host': host_final,
             'key_removal': key_removed, 'gpu_export': exported, 'elapsed_seconds': time.monotonic() - start['monotonic'],
             'research_complete': False, 'phase_one_complete': False, 'historical_results_changed': False}
         publish_json(state, 'development-result.json', result)
-        print(json.dumps({'status': 'stopped_pending_evidence_review', 'attempted_slots': len(rows),
+        print(json.dumps({'status': 'stopped_pending_evidence_review', 'claimed_slots': claimed_slots,
+                          'completed_slot_results': len(rows),
                           'error_type': error, 'phase_one_complete': False}), flush=True)
 
 

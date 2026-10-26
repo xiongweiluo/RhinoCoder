@@ -3,19 +3,25 @@
   "model_calls": 0,
   "new_field_state_created": false,
   "owner_approval_created": false,
-  "package_file_sha256": "401c858f37192d3d3a88e2260cef11b1b4a4329b593411940a6b2b1c6f95451a",
-  "package_sha256": "62cd2e630f08fb26c98e6ae26931db499dcfff040e74c73717d62827578e5eb0",
+  "package_file_sha256": "5a8b21e00c5ceb459fc160dc33001771794bdeaec552e0e72a9be0fe7a7d70ee",
+  "package_sha256": "c1cfb2f13d0c56fb58e65481cc413189016ed8589428a6af869e27f76febf249",
   "phase_one_complete": false,
   "public_prepared_bundle_files_verified_each_endpoint": 287,
   "rhino_calls": 0,
   "schema_version": 1,
   "source_file_count": 285,
-  "source_inventory_sha256": "c5dd797f176eac01759ef0712120ba74f4504b52375837c8c205f1f5b4f1e0bf",
+  "source_inventory_sha256": "a076a39a6557129645ae81d0bc1a83498e2aaf871b154382cbc00609600060c9",
   "staged_cpu_checks": {
     "gpu_inert_imports_and_missing_approval_refusal": true,
     "mac_inert_imports_and_missing_approval_refusal": true,
     "mac_pinned_cpu_tokenizer_environment_verified": true,
     "model_backends_imported": false,
-    "native_host_started": false
+    "native_host_started": false,
+    "original_probe_package_sha256": "62cd2e630f08fb26c98e6ae26931db499dcfff040e74c73717d62827578e5eb0",
+    "subsequent_source_delta": "Only controller prefix retention and Mac settlement counts; existing environment/tokenizer and inert-import evidence reused. Nineteen affected controller/authority CPU regressions passed; all 287 prepared public files reverified at both endpoints."
+  },
+  "supersedes_unapproved_package": {
+    "package_sha256": "62cd2e630f08fb26c98e6ae26931db499dcfff040e74c73717d62827578e5eb0",
+    "reason": "Preserve completed prefix and distinguish claimed slots from completed results if subsequent journal writes fail; no execution approval or state existed."
   }
 }

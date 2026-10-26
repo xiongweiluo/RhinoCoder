@@ -47,6 +47,7 @@ class DevelopmentController:
         self.secret, self.schemas, self.tokenizer, self.identities = secret, schemas, tokenizer, identities
         self.host, self.model, self.guard, self.cleanup_guard, self.clock = host, model, guard, cleanup_guard, monotonic
         self.sequence = 1
+        self.results = []
         self.cases = {r['case']['family_id']: r['case'] for r in build_cases()}
 
     def exchange(self, slot, action, *, envelope=None):
@@ -168,7 +169,9 @@ class DevelopmentController:
             effect_known=error is None, stop_requested=error is not None, evidence_sha256=digest(evidence))
 
     def run(self):
-        rows = []
+        # Keep the completed prefix visible even if a subsequent journal write
+        # or selection seal raises before run() can return.
+        rows = self.results
         for index, cell in enumerate(self.journal.views['schedule']):
             if index == 16: self.journal.seal_selection()
             result = self.run_slot(cell)

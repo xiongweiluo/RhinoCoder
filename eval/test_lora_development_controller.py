@@ -142,3 +142,17 @@ def test_host_replay_and_wrong_scope_never_reach_fixture(tmp_path):
     wrong = signed_request(SECRET, 'f' * 64, 'lora-dev-00', 2, {'action': 'capture'})
     with pytest.raises(NativeError): host.handle(wrong)
     assert len(sessions) == 1 and not calls
+
+
+def test_controller_loop_failure_preserves_completed_prefix_for_settlement(tmp_path, monkeypatch):
+    controller, host, sessions, calls = setup(tmp_path)
+    start = controller.journal.start_slot
+    def fail_next(slot):
+        if slot == 'lora-dev-01': raise OSError('synthetic journal write failure')
+        return start(slot)
+    monkeypatch.setattr(controller.journal, 'start_slot', fail_next)
+    returned_prefix = controller.results
+    with pytest.raises(OSError): controller.run()
+    assert len(returned_prefix) == 1 and returned_prefix[0]['outcome'] == 'success'
+    assert len(sessions) == 1 and sessions[0].closed and len(calls) == 2
+    assert len(list(controller.journal.root.glob('*.claim.json'))) == 3  # one slot plus two steps
