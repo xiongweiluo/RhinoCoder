@@ -1,0 +1,410 @@
+{
+  "ci": {
+    "conclusion": "success",
+    "headSha": "82e3dee514fbb15c4f537f97100b2f61e3cb2621",
+    "jobs": [
+      {
+        "completedAt": "2026-10-26T21:42:14Z",
+        "conclusion": "success",
+        "databaseId": 121865660441,
+        "name": "impact",
+        "startedAt": "2026-10-26T21:42:08Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-26T21:42:10Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-26T21:42:09Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:12Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 2,
+            "startedAt": "2026-10-26T21:42:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:12Z",
+            "conclusion": "success",
+            "name": "Run if [ \"$EVENT_NAME\" = pull_request ]; then",
+            "number": 3,
+            "startedAt": "2026-10-26T21:42:12Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:12Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 6,
+            "startedAt": "2026-10-26T21:42:12Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:12Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 7,
+            "startedAt": "2026-10-26T21:42:12Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/xiongweiluo/RhinoCoder/actions/runs/40406546105/job/121865660441"
+      },
+      {
+        "completedAt": "2026-10-26T21:56:45Z",
+        "conclusion": "success",
+        "databaseId": 121865739123,
+        "name": "python",
+        "startedAt": "2026-10-26T21:42:17Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-26T21:42:19Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-26T21:42:18Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:21Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 2,
+            "startedAt": "2026-10-26T21:42:19Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:21Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+            "number": 3,
+            "startedAt": "2026-10-26T21:42:21Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:31Z",
+            "conclusion": "success",
+            "name": "Run python -m pip install -r requirements-lock.txt",
+            "number": 4,
+            "startedAt": "2026-10-26T21:42:21Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:31Z",
+            "conclusion": "success",
+            "name": "Compile",
+            "number": 5,
+            "startedAt": "2026-10-26T21:42:31Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:43Z",
+            "conclusion": "success",
+            "name": "Approved spec to actual worker startup CPU gate",
+            "number": 6,
+            "startedAt": "2026-10-26T21:42:31Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:56:40Z",
+            "conclusion": "success",
+            "name": "Unit and actual Linux stop regressions, once",
+            "number": 7,
+            "startedAt": "2026-10-26T21:42:43Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:56:42Z",
+            "conclusion": "success",
+            "name": "Current public run package (never grants or executes)",
+            "number": 8,
+            "startedAt": "2026-10-26T21:56:40Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:56:43Z",
+            "conclusion": "success",
+            "name": "Run python tools/check_secrets.py",
+            "number": 9,
+            "startedAt": "2026-10-26T21:56:42Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:56:43Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+            "number": 17,
+            "startedAt": "2026-10-26T21:56:43Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:56:43Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 18,
+            "startedAt": "2026-10-26T21:56:43Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:56:43Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 19,
+            "startedAt": "2026-10-26T21:56:43Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/xiongweiluo/RhinoCoder/actions/runs/40406546105/job/121865739123"
+      },
+      {
+        "completedAt": "2026-10-26T21:43:20Z",
+        "conclusion": "success",
+        "databaseId": 121865739187,
+        "name": "ui",
+        "startedAt": "2026-10-26T21:42:18Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-26T21:42:19Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-26T21:42:19Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:21Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 2,
+            "startedAt": "2026-10-26T21:42:19Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:21Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+            "number": 3,
+            "startedAt": "2026-10-26T21:42:21Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:35Z",
+            "conclusion": "success",
+            "name": "Run python -m pip install -r requirements-lock.txt",
+            "number": 4,
+            "startedAt": "2026-10-26T21:42:21Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:40Z",
+            "conclusion": "success",
+            "name": "Run npm ci --prefix agent/ui",
+            "number": 5,
+            "startedAt": "2026-10-26T21:42:35Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:43:04Z",
+            "conclusion": "success",
+            "name": "Run npm run test:e2e --prefix agent/ui",
+            "number": 6,
+            "startedAt": "2026-10-26T21:42:40Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:43:17Z",
+            "conclusion": "success",
+            "name": "Run npm run test:e2e:public --prefix agent/ui",
+            "number": 7,
+            "startedAt": "2026-10-26T21:43:04Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:43:17Z",
+            "conclusion": "success",
+            "name": "Run python tools/check_ui_performance.py",
+            "number": 8,
+            "startedAt": "2026-10-26T21:43:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:43:17Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+            "number": 15,
+            "startedAt": "2026-10-26T21:43:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:43:17Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 16,
+            "startedAt": "2026-10-26T21:43:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:43:17Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 17,
+            "startedAt": "2026-10-26T21:43:17Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/xiongweiluo/RhinoCoder/actions/runs/40406546105/job/121865739187"
+      },
+      {
+        "completedAt": "2026-10-26T21:42:38Z",
+        "conclusion": "success",
+        "databaseId": 121865739247,
+        "name": "release",
+        "startedAt": "2026-10-26T21:42:18Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-26T21:42:20Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-26T21:42:19Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:21Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 2,
+            "startedAt": "2026-10-26T21:42:20Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:22Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+            "number": 3,
+            "startedAt": "2026-10-26T21:42:21Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:34Z",
+            "conclusion": "success",
+            "name": "Run python -m pip install -r requirements-lock.txt",
+            "number": 4,
+            "startedAt": "2026-10-26T21:42:22Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:35Z",
+            "conclusion": "success",
+            "name": "Benchmark, trace, release and training templates",
+            "number": 5,
+            "startedAt": "2026-10-26T21:42:34Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:36Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+            "number": 9,
+            "startedAt": "2026-10-26T21:42:35Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:36Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 10,
+            "startedAt": "2026-10-26T21:42:36Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:42:36Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 11,
+            "startedAt": "2026-10-26T21:42:36Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/xiongweiluo/RhinoCoder/actions/runs/40406546105/job/121865739247"
+      },
+      {
+        "completedAt": "2026-10-26T21:56:51Z",
+        "conclusion": "success",
+        "databaseId": 121872526852,
+        "name": "validate",
+        "startedAt": "2026-10-26T21:56:48Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-26T21:56:49Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-26T21:56:49Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:56:49Z",
+            "conclusion": "success",
+            "name": "Run python - <<'PY'",
+            "number": 2,
+            "startedAt": "2026-10-26T21:56:49Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-26T21:56:49Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 3,
+            "startedAt": "2026-10-26T21:56:49Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/xiongweiluo/RhinoCoder/actions/runs/40406546105/job/121872526852"
+      }
+    ],
+    "url": "https://github.com/xiongweiluo/RhinoCoder/actions/runs/40406546105"
+  },
+  "execution_started": false,
+  "observations": {
+    "gpu": {
+      "check_seconds": 22.368666250025854,
+      "environment_and_model_assets_verified": true,
+      "existing_gpu_compute_processes": 0,
+      "free_disk_bytes": 68753997824,
+      "lease_seconds_remaining": 334488.40340042114,
+      "package_sha256": "3ddd03265f0485f1d6947cb47c5c95c60325ee6acb492b737820de04c5093ab6",
+      "pending_slots": 31,
+      "prior_loads": 4,
+      "prior_slots": 1,
+      "python": "3.11.17 (main, Oct 13 2026, 01:24:22) [GCC 11.4.0]",
+      "python_path": "/data/c5-reuse-compatible-python-20261012-d/runtime/bin/python3.11",
+      "source_inventory_sha256": "aa710306239bf866e171ddc47b4a273bfe317f9346a420a1975a9d99bd2d4634",
+      "state_created": false
+    },
+    "mac": {
+      "check_seconds": 2.9559151669964194,
+      "cpu_environment_and_tokenizer_verified": true,
+      "free_disk_bytes": 5242073088,
+      "lease_seconds_remaining": 334490.0863249302,
+      "package_sha256": "3ddd03265f0485f1d6947cb47c5c95c60325ee6acb492b737820de04c5093ab6",
+      "pending_slots": 31,
+      "prior_loads": 4,
+      "prior_slots": 1,
+      "python": "3.13.5 | packaged by Anaconda, Inc. | (main, Jun 12 2025, 11:23:37) [Clang 14.0.6 ]",
+      "python_path": "/opt/anaconda3/bin/python3.13",
+      "source_inventory_sha256": "aa710306239bf866e171ddc47b4a273bfe317f9346a420a1975a9d99bd2d4634",
+      "state_created": false
+    }
+  },
+  "package_sha256": "3ddd03265f0485f1d6947cb47c5c95c60325ee6acb492b737820de04c5093ab6",
+  "recorded_at_utc": "2026-10-26T22:05:32.336298+00:00"
+}
