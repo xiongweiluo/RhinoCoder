@@ -37,8 +37,14 @@ class TemplateCapture:
         return {"input_ids": [0]}
 
 
-def public_contexts():
+def public_contexts(*, native_floats=False):
     _, scene, _ = fixture_design()
+    if native_floats:
+        # NativeDoc.readback -> point() uses float coordinates. This is still
+        # an analytic representation check, never an observed Rhino capture.
+        for obj in scene['objects']:
+            for key in ('min', 'max'):
+                obj[key] = [float(value) for value in obj[key]]
     binding = {"document_key": "a" * 64, "revision": 0, "scene_sha256": "b" * 64}
     rows = []
     for entry in build_cases():
@@ -110,11 +116,12 @@ def main():
     parser.add_argument("--ssh-target", required=True)
     parser.add_argument("--ssh-port", type=int, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--native-floats", action="store_true")
     args = parser.parse_args()
     if not args.ssh_control.is_socket() or args.output.exists():
         raise ValueError("authenticated control socket and new output path required")
     capture, tools = TemplateCapture(), load_public_mcp_tools()
-    contexts = public_contexts()
+    contexts = public_contexts(native_floats=args.native_floats)
     for row in contexts:
         row["templates"] = [json.loads(render_selection(capture, row["user_step"], tools).prompt)] + [
             json.loads(render_invocation(capture, row["user_step"], tools, name).prompt) for name in CORE_INVOCATION_TOOLS]
@@ -137,7 +144,8 @@ def main():
     sources = ["tools/audit_lora_development_token_budget.py", "training/lora_dev_feedback.py",
                "training/lora_development_cases.py", "training/c5_contract.py", "training/c5_inventory.py",
                "training/tool_selector_v4_candidate.py", "training/tool_contract_v3_candidate.py",
-               "training/tool_contract_candidate.py", "training/c5_rhino_adapter.py"]
+               "training/tool_contract_candidate.py", "training/c5_rhino_adapter.py",
+               "plugin/rhino_listener/c5_research_native.py"]
     report.update({"schema_version": 1, "scope": "public_development_CPU_tokenization_only",
         "input_sha256": hashlib.sha256(canonical(payload).encode()).hexdigest(), "tokenizer_files": files,
         "source_sha256": {n: hashlib.sha256((ROOT / n).read_bytes()).hexdigest() for n in sources},
@@ -146,6 +154,7 @@ def main():
         "max_selector_prompt_tokens": max(r["prompt_tokens"][0] for r in report["contexts"]),
         "max_invocation_prompt_tokens": max(max(r["prompt_tokens"][1:]) for r in report["contexts"]),
         "synthetic_predecessor_facts_not_native_receipts": True, "actual_execution_authorized": False,
+        "scene_numeric_representation": "native_float_coordinates" if args.native_floats else "analytic_integer_coordinates",
         "preparation_history": ["Initial CPU audit stopped before tokenization: raising from the import guard rejected a harmless torch availability query. None sentinels preserve the import prohibition and allow availability checks; no model backend or weights were loaded."],
         "limitations": ["analytic public fixture only; live scene must match", "no model decisions or latency measured",
                         "all core invocation schemas audited for possible wrong selections; model write budget remains zero"]})
