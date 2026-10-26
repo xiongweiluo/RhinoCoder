@@ -1,10 +1,13 @@
 {
-  "actual_gpu_readonly_preflight_status": "unknown_after_transport_timeout",
+  "actual_gpu_readonly_preflight_sha256": "654f12e0b13c6ccc9f98a5d187a69747c40beb80696ead467ef6cde4958cf6c3",
+  "actual_gpu_readonly_preflight_status": "passed",
   "cpu_related_regressions_passed": 76,
   "gpu_model_entry_invoked": false,
-  "gpu_prepared_copy_status": "unknown_after_transport_timeout",
+  "gpu_prepared_copy_status": "verified_288_public_files",
+  "gpu_prepared_files_verified": 288,
   "mac_prepared_files_verified": 288,
   "new_execution_approval_created": false,
+  "original_mac_source_unchanged": true,
   "package_sha256": "aa280fb64ba123e4d7f999f5b5cd7db4302c2c3bb1337f2c459da938d408df9e",
   "preparation_failures": [
     {
@@ -16,6 +19,10 @@
       "timeout_seconds": 120
     }
   ],
+  "r2_gpu_state_exists": false,
+  "r2_mac_state_exists": false,
   "rhino_entry_invoked": false,
-  "schema_version": 1
+  "schema_version": 1,
+  "source_commit": "6ef66d738951ea7bec3b261a51792a395f611bc7",
+  "timeout_resolution": "A new owner-established SSH connection verified the earlier source directory was absent; compressed public preparation then completed and all bytes were rechecked."
 }

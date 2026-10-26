@@ -29,9 +29,11 @@ Rhino冻结入口实际启动，返回后由Idle发布ready；控制器停机后
 
 ## 已授权CPU修复与待批准接续
 
-已完成三处修复和相关CPU回归；同时明确追加一次加载的上限，并只允许已核实退役的本批旧宿主对象留在内存中。精确旧runtime、源码路径、state、stopped、无在用夹具、回调移除及删钥证据必须一致；不会清除或接管其他研究会话。无须关闭用户Rhino或改动现有工程。
+已完成三处修复和76项相关CPU回归；同时明确追加一次加载的上限，并只允许已核实退役的本批旧宿主对象留在内存中。精确旧runtime、源码路径、state、stopped、无在用夹具、回调移除及删钥证据必须一致；不会清除或接管其他研究会话。无须关闭用户Rhino或改动现有工程。
 
-修订候选见[新提案](../eval/lora-development/proposed-development-plan-r2-20261026.json)及[新包](../eval/lora-development/development-package-r2-20261026.json)，**尚未获执行批准**。它属于本次无曝光启动失败的显式接续，不是重置历史或另起研究：
+两端各288个公开准备文件核对一致；[实际远端只读预检](../eval/lora-development/readonly-preflight-r2-20261026.json)在21.012秒内核实硬件、完整Python环境、16个资产字节及绑定路径/后续守卫，没有导入模型库。此前45秒传输与120秒只读命令超时保留在[准备记录](../eval/lora-development/preparation-r2-20261026.json)；恢复连接后先核实远端新目录未创建，再完成准备，未重试模型。
+
+修订完整包SHA为`aa280fb64ba123e4d7f999f5b5cd7db4302c2c3bb1337f2c459da938d408df9e`，见[摘要](../eval/lora-development/development-package-r2-commitment-20261026.json)。两端没有修订批准或state。修订候选见[新提案](../eval/lora-development/proposed-development-plan-r2-20261026.json)及[新包](../eval/lora-development/development-package-r2-20261026.json)，**尚未获执行批准**。它属于本次无曝光启动失败的显式接续，不是重置历史或另起研究：
 
 - 同一8个公开开发家族、固定32槽、两权重×两种输入、原严格解析/评分/选择规则均不变；无新题、无训练、无最终测试、无自动合并。
 - 旧批2次加载永久保留；修订拟**追加最多1次加载，0自动恢复，跨批最多3次**。失败即停止并报告，不循环修复重跑。
