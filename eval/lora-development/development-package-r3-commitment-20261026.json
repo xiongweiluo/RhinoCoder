@@ -1,0 +1,31 @@
+{
+  "additional_cost_ceiling": 0,
+  "authorization_required": "Direct owner approval of this complete SHA and 1 additional loading attempt, conditional on exact-head CI success and unchanged package bytes",
+  "automatic_recoveries": 0,
+  "charged_prior_seconds": 229,
+  "cumulative_seconds_limit": 7200,
+  "execution_authorized": false,
+  "final_test_authorized": false,
+  "historical_results_changed": false,
+  "merge_authorized": false,
+  "new_grant_created": false,
+  "new_state_created": false,
+  "package_file_sha256": "68075ce3bb0997fbccc445bc567dd3bd4ec4c37ec9012ccd17ce0d15853244cc",
+  "package_sha256": "0445c3d728b8bfca125e5af9648d85020fe68d46a595e271c0e4fc870351768d",
+  "phase_one_complete": false,
+  "prepared_files_per_endpoint": 291,
+  "prior_load_attempts_consumed": 3,
+  "proposed_additional_load_attempts": 1,
+  "proposed_batch_seconds_limit": 6971,
+  "proposed_cumulative_load_attempts_limit": 4,
+  "remaining_runtime_unknowns": [
+    "actual model backend/weights loading and generation",
+    "Rhino native task success and actual current session state",
+    "historical family independence",
+    "whole-host byte closure"
+  ],
+  "schema_version": 1,
+  "source_files": 289,
+  "source_inventory_sha256": "c96e270b1352bb6db048e7b4a321d27863638d22be972191a95b33d19e682335",
+  "training_authorized": false
+}

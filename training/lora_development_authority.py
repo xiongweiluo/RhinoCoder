@@ -33,12 +33,12 @@ def verify_source(root, files):
 
 
 def validate_package(package):
-    extra = {'model_path_bindings', 'continuation'} if type(package) is dict and package.get('schema_version') == 2 else set()
+    extra = {'model_path_bindings', 'continuation'} if type(package) is dict and package.get('schema_version') in {2, 3} else set()
     require(type(package) is dict and set(package) == {'schema_version', 'study_id', 'development_plan',
         'source_files', 'model_identities', 'assets', 'endpoints', 'limits', 'lease_end_epoch', 'resource_policy',
         'host_policy', 'evidence_policy', 'historical_family_overlap', 'execution_ready',
         'loader_policy', 'stop_policy', 'native_scope', 'gpu_hardware'} | extra, "complete development package required")
-    require(type(package['schema_version']) is int and package['schema_version'] in {1, 2} and package['study_id'] == STUDY
+    require(type(package['schema_version']) is int and package['schema_version'] in {1, 2, 3} and package['study_id'] == STUDY
             and package['execution_ready'] is True, "prepared new-study package required")
     plan = package['development_plan']
     require(package['gpu_hardware'] == {'name': 'NVIDIA GeForce RTX 3090', 'memory_mib': 24576,
@@ -124,6 +124,10 @@ def validate_package(package):
             continuation['prior_endpoints'][k]['state_root'] != package['endpoints'][k]['state_root']
             and continuation['prior_endpoints'][k]['source_root'] != package['endpoints'][k]['source_root']
             for k in ('mac', 'gpu')), 'preserve retired source/state roots')
+    if package['schema_version'] == 3:
+        from plugin.rhino_listener.lora_development_admission import retired_predecessors
+        retired_predecessors(package)
+    if package['schema_version'] in {2, 3}:
         expected = {str(Path(assets[root]) / name): sha for root, names in
                     [('snapshot_dir', 'base_files'), ('adapter_root', 'adapter_files')]
                     for name, sha in assets[names].items()}

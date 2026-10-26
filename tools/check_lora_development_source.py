@@ -22,7 +22,7 @@ PROBE = r'''
 import hashlib, importlib, json, os, pathlib, sys, sysconfig
 root = pathlib.Path(sys.argv[1]).resolve()
 stdlib = pathlib.Path(sysconfig.get_path('stdlib')).resolve()
-site = pathlib.Path(sysconfig.get_path('purelib')).resolve()
+site = pathlib.Path(sys.argv[2] or sysconfig.get_path('purelib')).resolve()
 cpu = {'jsonschema', 'jsonschema_specifications', 'referencing', 'rpds',
        'attrs', 'attr', 'typing_extensions'}
 project = {'training', 'plugin', 'agent', 'data_pipeline', 'tools'}
@@ -67,7 +67,8 @@ targets = (
     'plugin.rhino_listener.lora_development_admission',
     'plugin.rhino_listener.lora_development_native',
     'plugin.rhino_listener.lora_development_session',
-    'tools.run_lora_development_mac', 'tools.run_lora_development_rhino')
+    'tools.run_lora_development_mac', 'tools.run_lora_development_gpu',
+    'tools.run_lora_development_rhino', 'tools.run_lora_development_rhino_wrapper')
 for name in targets: importlib.import_module(name)
 origins, cpu_origins = {}, {}
 for module in tuple(sys.modules.values()):
@@ -86,7 +87,7 @@ print(json.dumps({'status': 'passed', 'origins': origins, 'cpu_origins': cpu_ori
 '''
 
 
-def probe_source(root, files):
+def probe_source(root, files, *, site=None):
     from training.lora_development_authority import verify_source
     root = Path(root).resolve()
     source_sha = verify_source(root, files)
@@ -99,7 +100,9 @@ def probe_source(root, files):
             target = bundle / name
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(raw)
-        result = subprocess.run([sys.executable, '-I', '-S', '-B', '-c', PROBE, str(bundle)],
+        result = subprocess.run([sys.executable, '-I', '-S', '-B', '-X',
+                                'pycache_prefix=' + str(bundle / 'never-created-bytecode-cache'),
+                                '-c', PROBE, str(bundle), str(site or '')],
                                 cwd=bundle, capture_output=True, text=True, timeout=30)
     if result.returncode:
         return {'status': 'rejected', 'source_inventory_sha256': source_sha,
@@ -108,7 +111,8 @@ def probe_source(root, files):
     if not observed['origins'] or any(files.get(name) != sha for name, sha in observed['origins'].items()):
         raise ValueError('loaded source was not in the exact inventory')
     return {**observed, 'source_inventory_sha256': source_sha, 'source_files': len(files),
-            'python_version': sys.version.split()[0], 'execution_authorized': False,
+            'python_version': sys.version.split()[0], 'python_executable': str(Path(sys.executable).resolve()),
+            'cpu_site_override': str(site) if site is not None else None, 'execution_authorized': False,
             'private_data_read': False, 'model_or_host_readiness_proven': False}
 
 
@@ -116,10 +120,15 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, default=ROOT)
     parser.add_argument('--manifest', type=Path, help='Public frozen package; defaults to current source inventory')
+    parser.add_argument('--site', type=Path, help='Existing explicit CPU dependency directory for the target Python')
     args = parser.parse_args()
+    if args.site:
+        if not args.site.is_absolute() or args.site.resolve() != args.site or not args.site.is_dir():
+            parser.error('existing canonical absolute CPU site required')
+        sys.path.append(str(args.site))  # -S: no .pth/site hooks; never installs packages.
     sys.path.insert(0, str(ROOT))
     from tools.build_lora_development_package import source_manifest
     files = json.loads(args.manifest.read_text())['source_files'] if args.manifest else source_manifest(args.root)
-    report = probe_source(args.root, files)
+    report = probe_source(args.root, files, site=args.site)
     print(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True))
     raise SystemExit(0 if report['status'] == 'passed' else 1)

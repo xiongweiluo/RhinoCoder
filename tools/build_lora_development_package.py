@@ -87,15 +87,42 @@ def build(root=ROOT):
     return value
 
 
+def build_r3(root=ROOT):
+    """Inert proposal after all three approved loads were consumed; no grant."""
+    from plugin.rhino_listener.c5_research_native import digest
+    from training.lora_development_authority import validate_package
+    from training.lora_development_scope import field_views
+    value = build(root)
+    record = root / 'eval/lora-development'
+    plan = json.loads((record / 'proposed-development-plan-r3-20261026.json').read_text())
+    predecessors = []
+    for suffix in ('', '-r2'):
+        prior = json.loads((record / ('development-package' + suffix + '-20261026.json')).read_text())
+        review = json.loads((record / ('execution-review' + suffix + '-20261026.json')).read_text())
+        predecessors.append({'prior_package_sha256': digest(prior), 'prior_review': review,
+            'prior_review_sha256': digest(review), 'prior_endpoints': prior['endpoints']})
+    value.update(schema_version=3, development_plan=plan, limits=plan['limits'], continuation={
+        'predecessors': predecessors, 'charged_prior_seconds': 229, 'cumulative_seconds_limit': 7200,
+        'prior_load_attempts': 3, 'cumulative_load_attempts_limit': 4})
+    for endpoint in value['endpoints'].values():
+        for name in ('source_root', 'state_root'):
+            endpoint[name] = endpoint[name].replace('20261026-r2/', '20261026-r3/')
+    views = field_views(plan)
+    value['native_scope'] = {'schedule': views['schedule'], 'native': views['native']}
+    validate_package(value)
+    return value
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--revision', choices=('r2', 'r3'), default='r2')
     args = parser.parse_args()
-    if (ROOT / 'eval/lora-development/owner-authorization-r2-20261026.json').exists():
-        parser.error('R2 is consumed: do not regenerate it or reuse its endpoints. '
+    if (ROOT / ('eval/lora-development/owner-authorization-' + args.revision + '-20261026.json')).exists():
+        parser.error(args.revision.upper() + ' is consumed: do not regenerate it or reuse its endpoints. '
                      'Use check_lora_development_source.py for CPU-only source checks; '
                      'any later execution needs a separately reviewed package and budget.')
-    value = build()
+    value = build_r3() if args.revision == 'r3' else build()
     with args.output.open('x') as output:
         output.write(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + '\n')
     from plugin.rhino_listener.c5_research_native import digest
