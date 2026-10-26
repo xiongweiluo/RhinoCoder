@@ -37,7 +37,7 @@
 
 - 策略 canonical SHA-256：`0b051d6095ad3b6e750e72b76070c3cd36c19a9a8b499258f9e2b41526f75de3`。
 - 初始候选[完整包](../eval/lora-development/development-package-campaign-v1-20261026.json) canonical SHA-256：`e22ec832dd8c8c9bb23065e74648e7fcecdacd5d4ebb554f7bc3c1590e6c16be`，290项公开源码/配置。`execution_ready=true`只表示可供核验，不是owner批准。
-- [准备记录](../eval/lora-development/preparation-campaign-20261026.json)列出最终本地回归、两端CPU导入与CI接续门。测试只使用临时合成授权/账本，不建立真实campaign授权或执行状态。R1/R2/R3原包、审核与冻结来源不改。
+- [准备记录](../eval/lora-development/preparation-campaign-20261026.json)：185项相关CPU检查通过；Mac3.13.5/Linux3.11.17各292个准备文件、55个公开源码来源隔离导入通过，后端导入0，推理AST跨Python一致。秘密扫描、发布/链接一致性及diff检查通过；精确head CI以[PR检查](https://github.com/xiongweiluo/RhinoCoder/pull/31/checks)为准并在接纳版本时逐项存证。测试只使用临时合成授权/账本，不建立真实campaign授权或执行状态。R1/R2/R3原包、审核与冻结来源不改。
 
 CPU验证支持跨版本计数、无重放、规则保持、依赖导入及停止控制，不能证明权重加载、后端ABI、模型质量、原生任务成功、历史家族独立性或整个Rhino宿主字节闭包。后两项继续未知，不要求读取私有历史补齐。
 

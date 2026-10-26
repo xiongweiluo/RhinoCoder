@@ -1,15 +1,18 @@
 {
   "actual_additional_cost": null,
   "ci": {
-    "exact_proposal_commit": "pending_commit",
+    "acceptance_status_at_preparation": "pending_current_PR_head_CI",
     "execution_requires_all_success": true,
+    "reference": "https://github.com/xiongweiluo/RhinoCoder/pull/31/checks",
     "required_jobs": [
       "impact",
       "python",
       "ui",
       "release",
       "validate"
-    ]
+    ],
+    "source_commit": "e1759397c45af1f19dabdcb882a43a94fde8a667",
+    "source_manifest_must_match": true
   },
   "cpu_regression": {
     "command": "python -m pytest -q eval/test_lora_development*.py",
@@ -62,13 +65,32 @@
   "proposed_cumulative_limit": 5,
   "proposed_remaining_loads": 2,
   "rhino_entries_called": 0,
+  "scope_integrity": {
+    "diff_check": "passed",
+    "historical_plan_body_unchanged": true,
+    "r1_r2_r3_packages_and_reviews_unchanged": true,
+    "release_consistency": "passed_0.3.0_23_tools",
+    "secret_scan": "passed",
+    "source_manifest_matches_prepared_package": true
+  },
   "source_files": 290,
   "source_inventory_sha256": "2587784267567ccdd207db7876d6fc90479c626725d050ff474e1c64e1305e17",
   "status": "prepared_pending_owner_confirmation_and_exact_commit_ci",
   "target_linux_probe": {
-    "last_readonly_result": "Permission denied (publickey,password)",
-    "prior_r3_probe_not_substituted": true,
-    "status": "pending_connection"
+    "canonical_sha256": "9c828f17087c0ba5da7ae4bb9bb88aceb842dcfba426c85941821276228602dd",
+    "live_campaign_initialized": false,
+    "policy_check": {
+      "cross_python_inference_ast": "matched",
+      "execution_authorized": false,
+      "model_backend_imports": 0,
+      "policy_validation": "passed",
+      "source_integrity": "passed"
+    },
+    "prepared_files": 292,
+    "public_origins": 55,
+    "python": "3.11.17",
+    "record": "source-closure-linux-campaign-20261026.json",
+    "status": "passed"
   },
   "training_or_final_test": false
 }
