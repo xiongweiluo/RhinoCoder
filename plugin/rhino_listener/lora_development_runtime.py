@@ -62,8 +62,9 @@ def common_capacity(plan):
                          for layer, n in plan['strata'].items())
     messages = 5 * slots + 14 * steps  # two captures + eleven signer captures + dispatch
     peer_files = 8 * steps + 32
-    probe = plan['study_id'] == 'lora-common-native-probe-v1'
-    return {'families': sum(plan['strata'].values()), 'slots': slots,
+    diagnostic = plan['study_id'] == 'lora-common-state-diagnostic-v1'
+    probe = plan['study_id'] in {'lora-common-native-probe-v1', 'lora-common-state-diagnostic-v1'}
+    value = {'families': sum(plan['strata'].values()), 'slots': slots,
         'model_step_requests_max': 0 if probe else steps, 'scripted_step_requests_max': steps if probe else 0,
         'generation_stages_max': 0 if probe else 2*steps,
         'host_messages_max': messages, 'signer_captures_per_step_max': 11,
@@ -71,6 +72,12 @@ def common_capacity(plan):
         'worst_window_seconds': slots*plan['limits']['slot_seconds'] + plan['limits']['host_ready_seconds']
             + plan['limits']['load_seconds'] + plan['limits']['cleanup_export_seconds'],
         'execution_authorized': False}
+    if diagnostic:
+        # A capture takes two snapshots; an execution at most five. Recording
+        # each already-required fingerprint adds files, not native operations.
+        value['fingerprint_records_max'] = 5 * messages
+        value['evidence_files_max'] += value['fingerprint_records_max']
+    return value
 
 
 def common_configuration(plan):

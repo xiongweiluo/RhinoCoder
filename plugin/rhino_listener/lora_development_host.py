@@ -109,15 +109,27 @@ class DevelopmentHost:
 
 class RhinoSession:
     """Real implementation; only the separately approved UI entry calls it."""
-    def __init__(self, plan, runtime, secret, *, directory, schemas, guard):
+    def __init__(self, plan, runtime, secret, *, directory, schemas, guard, fingerprint_limit=0):
         self.plan, self.runtime, self.secret = plan, runtime, secret
         self.directory, self.schemas, self.guard = directory, schemas, guard
         self.doc = self.backend = self.gate = None
         self.close_attempted = False
+        self.fingerprint_limit, self.fingerprint_sequence = fingerprint_limit, 0
+
+    def scene_digest(self):
+        from .candidate_atomic_gate import rhino_scene_digest, rhino_scene_fingerprint
+        if not self.fingerprint_limit:
+            return rhino_scene_digest(self.doc)
+        require(self.fingerprint_sequence < self.fingerprint_limit, 'fingerprint evidence capacity reached')
+        value = rhino_scene_fingerprint(self.doc)
+        self.fingerprint_sequence += 1
+        publish_json(self.directory, 'fingerprint-%04d.json' % self.fingerprint_sequence,
+                     {'sequence': self.fingerprint_sequence, **value})
+        return value['scene_sha256']
 
     def open(self):
         import Rhino
-        from .candidate_atomic_gate import RhinoAtomicGate, rhino_scene_digest
+        from .candidate_atomic_gate import RhinoAtomicGate
         from .c5_research_gate import ResearchGate
         from .c5_research_native import validate_native_arguments
         from .lora_development_native import DevelopmentDoc
@@ -137,7 +149,7 @@ class RhinoSession:
             value = self.backend.dispatch(row['operation'], row['arguments'])
             publish_json(self.directory, 'seed-%02d.result.json' % index, {'result': value})
         atomic = RhinoAtomicGate(self.directory / 'fixture.sqlite3', str(self.backend.serial),
-                                lambda: rhino_scene_digest(self.doc), create_ledger=True)
+                                self.scene_digest, create_ledger=True)
         self.gate = ResearchGate(self.backend, atomic, self.secret, self.runtime,
             task_sha256=self.plan['task_sha256'], max_reads=self.plan['max_reads'], max_writes=self.plan['max_writes'])
         return {'status': 'opened', 'fixture_serial': self.backend.serial}

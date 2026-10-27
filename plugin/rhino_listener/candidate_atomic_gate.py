@@ -38,7 +38,26 @@ def _json(value):
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
 
 
-def rhino_scene_digest(doc):
+def scene_fingerprint(document, items, layers):
+    """Explain the unchanged full digest without retaining raw geometry/IDs.
+
+    Component hashes are diagnostics only, never a substitute authorization
+    identity. In particular, equal semantic geometry cannot waive a drift.
+    """
+    return {
+        'scene_sha256': _hash(_json({'document': document, 'objects': items, 'layers': layers})),
+        'components': {
+            'document_settings_sha256': _hash(_json(document[:3])),
+            'process_next_object_serial': document[3],
+            'document_next_undo_serial': document[4],
+            'layers_sha256': _hash(_json(layers)),
+            'objects': {_hash(item[0]): {'geometry_sha256': _hash(item[1]),
+                                       'attributes_sha256': _hash(item[2])} for item in items},
+        },
+    }
+
+
+def rhino_scene_fingerprint(doc):
     """Read the active document on the UI thread, failing closed on any gap.
 
     RhinoCommon's archival JSON covers geometry and object attributes; neither
@@ -75,7 +94,11 @@ def rhino_scene_digest(doc):
         int(Rhino.DocObjects.RhinoObject.NextRuntimeSerialNumber),
         int(doc.NextUndoRecordSerialNumber),
     )
-    return _hash(_json({"document": document, "objects": items, "layers": layers}))
+    return scene_fingerprint(document, items, layers)
+
+
+def rhino_scene_digest(doc):
+    return rhino_scene_fingerprint(doc)['scene_sha256']
 
 
 class RhinoAtomicGate:

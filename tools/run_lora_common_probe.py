@@ -80,7 +80,7 @@ def main():
         publish_json(state, 'probe-result.json', {'package_sha256': runtime, 'rows': rows, 'failures': failures,
             'host': final, 'key_removal': key, 'elapsed_seconds': time.monotonic()-started,
             'model_loads': 0, 'model_quality_evidence': False, 'phase_one_complete': False})
-    require(not failures and len(rows) == 2 and all(r['outcome'] == 'success' for r in rows),
+    require(not failures and len(rows) == package['capacity']['slots'] and all(r['outcome'] == 'success' for r in rows),
             'probe incomplete or failed; retain evidence, no automatic retry')
 
 

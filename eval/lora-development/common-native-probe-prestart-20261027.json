@@ -1,0 +1,23 @@
+{
+  "available_window_seconds": 314295.1963660717,
+  "checked_epoch": 1793072504.803634,
+  "ci_jobs": {
+    "impact": "success",
+    "python": "success",
+    "release": "success",
+    "ui": "success",
+    "validate": "success"
+  },
+  "ci_run_id": 40442746428,
+  "deployment_equals_approved_package": true,
+  "disk_free_bytes": 5716746240,
+  "executed_source_commit": "056978e5a209f96987e7c0d76436aa999e95f3e6",
+  "gpu_calls": 0,
+  "lease_end_epoch": 1793386800,
+  "model_loads": 0,
+  "package_sha256": "85ba112e4aa98073760f0a73e0d10c35d1e94015bc0c57c70326ccf5382f5ebb",
+  "rhino_bundle_version": "8.21.25188.17002",
+  "source_files_verified": 303,
+  "source_inventory_sha256": "559fa17e50458583c419fe3ac04014825fb1753fa129e1bdc2fb63112eb9cb87",
+  "state_previously_absent": true
+}

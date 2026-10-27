@@ -15,12 +15,14 @@ from training.c5_formal20_plan import NAME, validate_case
 
 FINAL_STUDY = 'lora-common-final-comparison-v1'
 PROBE_STUDY = 'lora-common-native-probe-v1'
+DIAGNOSTIC_STUDY = 'lora-common-state-diagnostic-v1'
 STRATA = {'core_tool': 12, 'multistep': 8, 'error_recovery': 8, 'clarification': 6, 'refusal': 6}
 
 
-def proposal(*, native_probe=False):
+def proposal(*, native_probe=False, fingerprint_diagnostic=False):
     """Unapproved parameters; never construct or expose a final task."""
-    return {
+    require(not fingerprint_diagnostic or native_probe, 'diagnostic must be zero-model')
+    value = {
         'schema_version': 1,
         'study_id': PROBE_STUDY if native_probe else FINAL_STUDY,
         'execution_authorized': False,
@@ -35,11 +37,16 @@ def proposal(*, native_probe=False):
         'unknown_effect_or_cleanup': 'stop',
         'model_weights_changed': False,
     }
+    if fingerprint_diagnostic:
+        value.update(study_id=DIAGNOSTIC_STUDY, strata={'multistep': 1},
+                     purpose='explain_full_fingerprint_drift_not_repair_or_replace_prior_result')
+    return value
 
 
 def validate_plan(plan):
-    require(type(plan) is dict and plan.get('study_id') in {PROBE_STUDY, FINAL_STUDY}, 'new study identity required')
-    reference = proposal(native_probe=plan['study_id'] == PROBE_STUDY)
+    require(type(plan) is dict and plan.get('study_id') in {PROBE_STUDY, DIAGNOSTIC_STUDY, FINAL_STUDY}, 'new study identity required')
+    reference = proposal(native_probe=plan['study_id'] != FINAL_STUDY,
+                         fingerprint_diagnostic=plan['study_id'] == DIAGNOSTIC_STUDY)
     require(digest(plan) == digest(reference), 'comparison preparation choices changed; review the complete proposal')
     return plan
 
@@ -102,7 +109,7 @@ def validate_compiled(plan, compiled):
             and set(ids) == set(views['model']) == set(views['native']), 'fixed slot identities required')
     for cell in schedule:
         require(set(cell) == {'slot_id', 'family_id', 'route', 'system', 'role'}
-                and cell['role'] == ('native_probe' if plan['study_id'] == PROBE_STUDY else 'comparison'),
+                and cell['role'] == ('comparison' if plan['study_id'] == FINAL_STUDY else 'native_probe'),
                 'exact fixed schedule fields required')
         model, native = views['model'][cell['slot_id']], views['native'][cell['slot_id']]
         require(all(model[k] == native[k] == v for k, v in cell.items())

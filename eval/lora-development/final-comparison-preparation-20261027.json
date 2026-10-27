@@ -16,6 +16,14 @@
   },
   "cumulative_loads_if_separately_approved": 6,
   "custodian": "repository_owner_separated_from_generation_training_selection_and_agent",
+  "execution_evidence_limits": {
+    "full_common_chain_real_model_writes_validated": false,
+    "new_public_development_independence_from_all_historical_training_proven": false,
+    "real_models_in_read_only_development": true,
+    "time_and_storage_limits_are_stopping_budgets_not_completion_guarantees": true,
+    "unknown_historical_failure_causes_retained": true,
+    "whole_host_byte_closure_proven": false
+  },
   "final_data_access_authorized": false,
   "final_data_created": false,
   "fixed_weights": {
@@ -27,6 +35,17 @@
   },
   "interval_method": "stratified_CP_Bonferroni_95_percent",
   "live_execution_authorized": false,
+  "measured_native_probe": {
+    "backup_copies": 1,
+    "complete_property_repair_slot_seconds": 7.630634416826069,
+    "completed_successfully": 1,
+    "elapsed_seconds": 18.426965791964903,
+    "engineering_failure": 1,
+    "evidence_bytes": 612011,
+    "evidence_files": 444,
+    "failed_move_slot_seconds": 2.9672129589598626,
+    "not_a_full_tool_or_model_latency_guarantee": true
+  },
   "models": {
     "assets": {
       "adapter_files": {
@@ -79,6 +98,7 @@
       "trust_remote_code": false
     }
   },
+  "native_probe_result": "eval/lora-development/common-native-probe-result-20261027.json",
   "phase_two_freeze_dependency": "bind owner-only final case commitment, exact source/environment roots, admission and actual transport entries; CPU check before exposure; old live CLI cannot admit this new study",
   "plan": {
     "execution_authorized": false,
@@ -140,8 +160,8 @@
   },
   "proposed_additional_final_loads": 1,
   "remaining_phase_one": [
-    "approved native seam verification and cleanup review",
-    "measured native timings and bounded storage review",
+    "explain observed post-move full fingerprint drift; preserve semantic/full-state distinction and do not relax guard without evidence",
+    "if a justified fix is found, complete its CPU checks and separately approved necessary native verification",
     "owner confirmation of complete comparison choices before test creation"
   ],
   "runtime_configuration": {
@@ -171,8 +191,26 @@
     "slot_seconds": 420,
     "transport_exit_seconds": 40
   },
+  "scope_of_final_inference": {
+    "causal_gain_from_old_to_new_system_chain": false,
+    "comparison_to_historical_13_of_20_as_independent_baseline": false,
+    "current_lora_vs_base_in_same_fixed_chain": true,
+    "new_adapter_weight_improvement": false,
+    "product_access_or_rollout_authorized": false
+  },
   "selected_system": "original",
-  "source_inventory_sha256": "559fa17e50458583c419fe3ac04014825fb1753fa129e1bdc2fb63112eb9cb87",
-  "status": "phase_one_proposal_not_final_execution_grant",
-  "training_decision": "no_training_supported_by_current_evidence"
+  "source_inventory_sha256": "44e6a192983fb06a51588d1c97d5f594f1f1aaa7f46b04c59b656e6d9f3b9eed",
+  "status": "phase_one_blocked_on_explained_native_fingerprint_continuity_not_final_execution_grant",
+  "training_decision": "no_training_supported_by_current_evidence",
+  "training_decision_evidence": {
+    "current_lora_candidate_development_successes": 5,
+    "current_lora_original_development_successes": 2,
+    "decision": "retain current weights; no targeted training proposal justified; no epoch/rank search",
+    "development_denominator": 8,
+    "full_private_corpus_contract_coverage": "unknown",
+    "public_coverage_audit": "eval/lora-development/public-review-20261025.json",
+    "real_development_review": "eval/lora-development/execution-review-recovery-20261026.json",
+    "selection_incomplete_original_retained": true,
+    "specific_remaining_deficit_replicated_across_independent_families": false
+  }
 }

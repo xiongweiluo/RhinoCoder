@@ -40,3 +40,10 @@ def public_probes():
             'initial_assertions': initial, 'final_assertions': final, 'expected_operations': operations,
             'max_steps': len(operations), 'max_reads': 1, 'max_writes': len(operations) - 1}))
     return output
+
+
+def diagnostic_probes():
+    """One disclosed repeat of P01's mechanism, never a replacement result."""
+    case = copy.deepcopy(public_probes()[0])
+    case.update(family_id='COMMON-D01', template_family='diagnose_move_fingerprint_transition')
+    return [validate_case(case)]
