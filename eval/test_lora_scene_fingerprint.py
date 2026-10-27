@@ -98,3 +98,22 @@ def test_one_diagnostic_reuses_complete_synthetic_controller_path(tmp_path):
     run = controller(Path(p['source_root']),p,s,secret,host.handle,lambda:None,lambda:None)
     assert [r['outcome'] for r in run.run()] == ['success']
     assert len(run.results) == 1 and host.finish()['owned_fixture_remaining'] is False
+
+
+def test_postrun_component_audit_distinguishes_counter_and_refuses_conflicting_evidence():
+    import importlib.util
+    path = Path(__file__).parent/'lora-development/common-probe-audit-procedure-20261027.py'
+    spec = importlib.util.spec_from_file_location('probe_audit_cpu', path)
+    audit = importlib.util.module_from_spec(spec); spec.loader.exec_module(audit)
+    before = atomic.scene_fingerprint(*inputs())
+    document, objects, layers = inputs(); document[3] += 1
+    after = atomic.scene_fingerprint(document, objects, layers)
+    records = [{'sequence':1, **before}, {'sequence':2, **after}]
+    summary = audit.fingerprint_changes(records, before['scene_sha256'], after['scene_sha256'])
+    assert summary['changed_components'] == ['process_next_object_serial']
+    assert summary['changed_objects'] == [] and summary['change_origin_proven'] is False
+    conflict = copy.deepcopy(records); conflict[1]['scene_sha256'] = conflict[0]['scene_sha256']
+    with pytest.raises(AssertionError):
+        audit.fingerprint_changes(conflict, before['scene_sha256'], after['scene_sha256'])
+    with pytest.raises(KeyError):
+        audit.fingerprint_changes(records[:1], before['scene_sha256'], after['scene_sha256'])

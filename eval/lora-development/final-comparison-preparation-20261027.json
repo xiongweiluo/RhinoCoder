@@ -16,6 +16,18 @@
   },
   "cumulative_loads_if_separately_approved": 6,
   "custodian": "repository_owner_separated_from_generation_training_selection_and_agent",
+  "diagnostic_checkpoint": {
+    "all_five_ci_successful": true,
+    "approval_received": true,
+    "approved_package_sha256": "931aad6fc68afc1752c089ce6c6291e8808321d712c07f422c009a5edaef36cf",
+    "ci_run_id": 40446893205,
+    "diagnostic_slots_consumed": 0,
+    "executed_source_ci_commit": "d46dc568d4563255db2a7b3097667b5e81a08c3c",
+    "native_operations": 0,
+    "owner_action": "release at least 500 MiB and request continuation; recheck all gates; no repeated package approval needed",
+    "record": "eval/lora-development/common-state-diagnostic-resource-stop-20261027.json",
+    "status": "disk_gate_blocked_before_any_probe_claim"
+  },
   "execution_evidence_limits": {
     "full_common_chain_real_model_writes_validated": false,
     "new_public_development_independence_from_all_historical_training_proven": false,

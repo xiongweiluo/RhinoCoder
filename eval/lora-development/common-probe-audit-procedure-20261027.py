@@ -1,4 +1,4 @@
-"""Post-run CPU review of the two approved public native probes only.
+"""Post-run CPU review of the exact approved public probe package only.
 
 No model, Rhino, network, old evidence, authority writer, retry or new task.
 Audit SQLite/WAL copies; keep the stopped original and one bounded backup.
@@ -13,14 +13,42 @@ import sys
 import tempfile
 
 
+def fingerprint_changes(records, before_sha, after_sha):
+    """Explain recorded components, without inferring who caused a change."""
+    by_hash = {}
+    for sequence, record in enumerate(records, 1):
+        assert record['sequence'] == sequence
+        components = record['components']; sha = record['scene_sha256']
+        assert set(components) == {'document_settings_sha256', 'process_next_object_serial',
+                                  'document_next_undo_serial', 'layers_sha256', 'objects'}
+        assert sha not in by_hash or by_hash[sha] == components
+        by_hash[sha] = components
+    before, after = by_hash[before_sha], by_hash[after_sha]
+    changed = [k for k in before if before[k] != after[k]]
+    objects = []
+    for identity in sorted(set(before['objects']) | set(after['objects'])):
+        a, b = before['objects'].get(identity), after['objects'].get(identity)
+        if a != b:
+            objects.append({'identity_sha256': identity,
+                            'fields': ['membership'] if a is None or b is None else [k for k in a if a[k] != b[k]]})
+    return {'changed_components': changed, 'changed_objects': objects,
+            'process_serial_before': before['process_next_object_serial'],
+            'process_serial_after': after['process_next_object_serial'],
+            'document_undo_before': before['document_next_undo_serial'],
+            'document_undo_after': after['document_next_undo_serial'],
+            'change_origin_proven': False}
+
+
 def main():
     if not __debug__:
         raise RuntimeError('Assertions are required; do not use -O.')
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--diagnostic', action='store_true', help='Review only the separately approved single-slot diagnostic')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[2]
-    package = json.loads((root/'eval/lora-development/common-native-probe-package-20261027.json').read_text())
+    package_name = 'common-state-diagnostic-package-20261027.json' if args.diagnostic else 'common-native-probe-package-20261027.json'
+    package = json.loads((root/'eval/lora-development'/package_name).read_text())
     source, state = Path(package['source_root']), Path(package['state_root'])
     sys.path.insert(0, str(source))
     from plugin.rhino_listener.c5_research_native import digest
@@ -29,6 +57,8 @@ def main():
     from training.lora_development_export import read_stable
     from training.lora_common_probe_runner import ScriptedTokenizer, IDENTITY
     from training.lora_common_probes import public_probes
+    if args.diagnostic:
+        from training.lora_common_probes import diagnostic_probes
     from training.lora_common_chain import CommonChain
     from training.lora_common_wire import reparse_response, check_predecessor, user_step
     from training.c5_rhino_adapter import step_input
@@ -37,7 +67,8 @@ def main():
     from training.c5_formal20_scorer import score_route, AUDIT_KEYS
     from training.c5_research_audit import _tables, audit_permission_tables
     runtime = digest(package)
-    assert runtime == '85ba112e4aa98073760f0a73e0d10c35d1e94015bc0c57c70326ccf5382f5ebb'
+    assert runtime == ('931aad6fc68afc1752c089ce6c6291e8808321d712c07f422c009a5edaef36cf' if args.diagnostic else
+                       '85ba112e4aa98073760f0a73e0d10c35d1e94015bc0c57c70326ccf5382f5ebb')
     source_guard(source, package['source_files'])
     read = lambda p: json.loads(read_stable(p))
     result = read(state/'probe-result.json')
@@ -73,11 +104,12 @@ def main():
     assert inventory(backup) == (original, raw_bytes)
     s = backup
     rows, views = result['rows'], package['compiled']['views']
-    assert not result['failures'] and len(rows) == 2
+    assert not result['failures'] and len(rows) == package['capacity']['slots']
     assert [r['identity']['slot_id'] for r in rows] == [c['slot_id'] for c in views['schedule']]
     assert not (s/'journal/selection.json').exists()
-    cases = {c['family_id']: c for c in public_probes()}
-    contract = CommonChain(package['plan'], package['compiled'], public_probes(), s/'permission')
+    definitions = diagnostic_probes() if args.diagnostic else public_probes()
+    cases = {c['family_id']: c for c in definitions}
+    contract = CommonChain(package['plan'], package['compiled'], definitions, s/'permission')
     exchanges = {}
     requests = sorted((s/'host').glob('host-*.request.json'))
     assert len(requests) <= package['capacity']['host_messages_max']
@@ -169,31 +201,55 @@ def main():
         else:
             # Preserve this actual failure; do not score the incomplete task as
             # success just because the first write and cleanup are verified.
-            assert case['family_id'] == 'COMMON-P01' and row['outcome'] == 'engineering_failure'
+            assert case['family_id'] == ('COMMON-D01' if args.diagnostic else 'COMMON-P01') and row['outcome'] == 'engineering_failure'
             assert e['score'] is None and len(e['steps']) == 1 and e['final_native'] is None
             assert [(f['stage'],f['message']) for f in e['failures']] == [('step_preflight','noncontiguous native execution')]
             last = receipts[-1]; current = captures[-1]
-            assert last['after'] == current['native'] == e['close']['fixture_before_close_native']
+            assert current['native'] == e['close']['fixture_before_close_native']
+            if not args.diagnostic:
+                assert last['after'] == current['native']
             assert last['after_state']['document_key'] == current['state']['document_key']
             assert last['after_state']['revision'] != current['state']['revision']
             assert last['after_state']['scene_sha256'] != current['state']['scene_sha256']
             continuity_failure = {'stage':'step_preflight','message':'noncontiguous native execution',
                 'changed_binding_fields':['revision','scene_sha256'],'same_document':True,
-                'same_semantic_and_native_readback':True,'failed_before_next_scripted_request':True,
+                'same_semantic_and_native_readback':last['after'] == current['native'],'failed_before_next_scripted_request':True,
                 'receipt_revision':last['after_state']['revision'],'next_capture_revision':current['state']['revision'],
                 'which_full_digest_component_changed':'unknown; old package records only aggregate digest',
                 'unknown_native_effect_not_relabelled_as_success':True}
+        fingerprint_review = None
+        if args.diagnostic:
+            files = sorted(fixture.glob('fingerprint-*.json'))
+            assert 0 < len(files) <= package['capacity']['fingerprint_records_max']
+            assert [f.name for f in files] == ['fingerprint-%04d.json'%i for i in range(1,len(files)+1)]
+            records = [read(f) for f in files]
+            covered = {r['scene_sha256'] for r in records}
+            required = {v['state']['scene_sha256'] for v in captures}
+            required.update(r[k]['scene_sha256'] for r in receipts for k in ('before_state','after_state'))
+            assert required <= covered
+            after_write = receipts[0]['after_state']['scene_sha256']
+            first_execution = next(i for i,(req,_,_,_) in enumerate(history) if req['action'] == 'execute')
+            successor = next(v for req,v,_,_ in history[first_execution+1:] if req['action'] == 'capture')
+            fingerprint_review = {'records':len(records),'all_captured_and_receipt_states_covered':True,
+                **fingerprint_changes(records,after_write,successor['state']['scene_sha256'])}
+            if continuity_failure is not None:
+                continuity_failure['which_full_digest_component_changed'] = fingerprint_review['changed_components']
         summaries.append({'slot_id':slot,'family_id':cell['family_id'],'outcome':row['outcome'],
             'steps':len(receipts),'writes':audit['write_count'],'reads':audit['read_count'],
             'seconds_including_cleanup':e['slot_elapsed_seconds_including_cleanup'],
             'evidence_sha256':digest(e),'original_score_recomputed':e['error_type'] is None,'cleanup_verified':True,
             'actual_scene_and_successor_input_verified':e['error_type'] is None,
-            'continuity_failure':continuity_failure,'permission_and_native_sqlite_verified':True})
-    assert (native_writes,native_reads,steps_total,seeds) == (3,1,4,14)
-    assert len(list((s/'controller').glob('*.model.json'))) == 4
+            'continuity_failure':continuity_failure,'fingerprint_review':fingerprint_review,
+            'execution_status_preserved':e['execution'],'permission_and_native_sqlite_verified':True})
+    if args.diagnostic:
+        assert native_writes == 1 and native_reads in (0,1) and steps_total == 1+native_reads and seeds == 7
+    else:
+        assert (native_writes,native_reads,steps_total,seeds) == (3,1,4,14)
+    assert len(list((s/'controller').glob('*.model.json'))) == steps_total
     assert inventory(state) == inventory(backup) == (original,raw_bytes)
     report = {'date':'2026-10-27','package_sha256':runtime,'source_inventory_sha256':digest(package['source_files']),
-        'executed_ci_commit':'056978e5a209f96987e7c0d76436aa999e95f3e6','ci_run_id':40442746428,
+        'executed_ci_commit':'d46dc568d4563255db2a7b3097667b5e81a08c3c' if args.diagnostic else '056978e5a209f96987e7c0d76436aa999e95f3e6',
+        'ci_run_id':40446893205 if args.diagnostic else 40442746428,
         'rows':summaries,'native_writes':native_writes,'native_reads':native_reads,'fixture_seed_operations':seeds,
         'host_messages':len(requests),'elapsed_seconds':result['elapsed_seconds'],'evidence_files':len(original),
         'evidence_bytes':raw_bytes,'retained_backup_copies':1,'evidence_inventory_sha256':digest(original),
@@ -204,7 +260,7 @@ def main():
         'actual_paid_lease_amount':None,'hmac_reverified_after_key_deletion':False,
         'whole_host_byte_closure_proven':False,
         'limitations':['scripted public mechanism only; no weight comparison or historical attribution',
-            'only move/layer/color plus two reads exercised; other tools rely on prior component/CPU evidence',
+            'only the reported native operations exercised; other tools rely on prior component/CPU evidence',
             'placeholder token counts do not validate real model context or latency',
             'HMAC verified live; deleted secret not recreated for post-run verification']}
     with args.output.open('x') as out:
