@@ -34,6 +34,12 @@ def main():
         print(json.dumps(report(ROOT, package, 'mac'), sort_keys=True)); return
     if args.ssh_control is None: parser.error('--ssh-control is required for an approved live run')
     prepared = prepare(ROOT, package, 'mac')
+    run(ROOT, package, prepared, args.ssh_control)
+
+
+def run(root, package, prepared, ssh_control):
+    """One transport and cleanup implementation, with explicit study admission."""
+    final = package.get('kind') == 'lora-common-final-comparison-v1'
     config = prepared['config']
     tokenizer, verify_environment = prepared['tokenizer'], prepared['check_environment']
     DevelopmentController, DevelopmentJournal, JsonPipe = prepared['controller'], prepared['journal'], prepared['pipe']
@@ -42,8 +48,15 @@ def main():
     from plugin.rhino_listener.c5_research_native import digest, require
     from plugin.rhino_listener.lora_development_runtime import failure_record, recovery_context
     state = Path(package['endpoints']['mac']['state_root'])
-    runtime = verify_approval(package, read_json(state, 'owner-approval.json'), endpoint='mac', source_root=ROOT, state_root=state)
-    require(shutil.disk_usage(state).free >= 2 * 1024**3, 'Mac evidence reserve unavailable')
+    if final:
+        from plugin.rhino_listener.lora_final_admission import admit
+        admitted, _, _ = admit(root, 'mac')
+        require(admitted == package, 'final runtime changed')
+        require(time.time() + config['gpu_residency_seconds'] < package['lease_end_epoch'], 'complete final window unavailable')
+        runtime = digest(package)
+    else:
+        runtime = verify_approval(package, read_json(state, 'owner-approval.json'), endpoint='mac', source_root=root, state_root=state)
+    require(shutil.disk_usage(state).free >= (config['minimum_free_bytes'] if final else 2 * 1024**3), 'Mac evidence reserve unavailable')
     require(Path(sys.executable).resolve() == Path(package['endpoints']['mac']['python']), 'fixed CPU Python required')
     campaign = None
     if package.get('schema_version') in {4, 5}:
@@ -51,7 +64,7 @@ def main():
         campaign = Campaign(package, 'mac')
         campaign.begin_run()
     start = {'wall': time.time(), 'monotonic': time.monotonic(), 'package_sha256': runtime}
-    budget = WorkBudget(package['limits'], package['lease_end_epoch'], first_wall=start['wall'], first_mono=start['monotonic'])
+    budget = WorkBudget(package['limits'], package['lease_end_epoch'], first_wall=start['wall'], first_mono=start['monotonic'], maximum_slots=len(prepared['schedule']))
     host_state = state / 'host'
     worker = pipe = journal = None
     gpu_launch_attempted = host_capability_published = False
@@ -61,11 +74,17 @@ def main():
         nonlocal error
         error = error or type(exc).__name__; failures.append(failure_record(exc, stage))
     slot_deadline = None
-    def source(): verify_source(ROOT, package['source_files'])
+    def source(): verify_source(root, package['source_files'])
     def guard():
         source(); verify_environment(); budget.work()
+        if final:
+            from training.lora_comparison_storage import check_evidence_budget
+            check_evidence_budget(state, config)
         require(slot_deadline is None or time.monotonic() < slot_deadline, 'controller slot deadline')
     def await_json(directory, name, deadline):
+        if final:
+            from plugin.rhino_listener.lora_common_probe import wait_for_host_reply
+            return wait_for_host_reply(directory, name, deadline, runtime, stop_on_timeout=name != 'host-settlement.json')
         while time.monotonic() < deadline:
             if os.path.lexists(directory / name): return read_json(directory, name)
             if directory == host_state and name != 'host-settlement.json' and os.path.lexists(directory / 'host-settlement.json'):
@@ -78,7 +97,8 @@ def main():
         if action == 'open':
             remaining = len([c for c in prepared['schedule'] if c['slot_id'] >= p['slot_id']])
             budget.work(remaining_slots=remaining)
-            slot_deadline = time.monotonic() + config['slot_seconds']
+            # Final 420 seconds includes both bounded close/stop calls.
+            slot_deadline = time.monotonic() + config['slot_seconds'] - (2 * config['host_cleanup_seconds'] if final else 0)
         deadline = (time.monotonic() + config['host_cleanup_seconds'] if action in {'close', 'stop'} else slot_deadline)
         publish_json(host_state, 'request-%04d.json' % seq, envelope)
         response = await_json(host_state, 'response-%04d.json' % seq, deadline)
@@ -99,15 +119,15 @@ def main():
         host_capability_published = True
         publish_json(state, 'host-secret.json', {'package_sha256': runtime, 'key_hex': secret.hex()})
         phase = 'host_readiness'
-        print('Waiting for the approved Rhino wrapper: ' + str(ROOT / 'tools/run_lora_development_rhino_wrapper.py'), flush=True)
+        print('Waiting for the approved Rhino wrapper: ' + str(root / (package['entrypoints']['rhino'] if final else 'tools/run_lora_development_rhino_wrapper.py')), flush=True)
         ready = await_json(host_state, 'host-ready.json', time.monotonic() + config['host_ready_seconds'])
         require(ready['status'] == 'ready' and ready['runtime_sha256'] == runtime
                 and ready['entry_return_release_observed'] is True, 'host readiness differs')
         budget.work(remaining_slots=len(prepared['schedule']), loading=True)
         remote = package['endpoints']['gpu']
         command = [remote['python'], '-I', '-S', '-B', '-X', 'pycache_prefix=' + remote['state_root'] + '/never-created-supervisor-cache',
-                   remote['source_root'] + '/tools/run_lora_development_gpu.py', '--serve']
-        ssh = ['ssh', '-T', '-S', str(args.ssh_control), '-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=yes',
+                   remote['source_root'] + '/' + (package['entrypoints']['gpu'] if final else 'tools/run_lora_development_gpu.py'), '--serve']
+        ssh = ['ssh', '-T', '-S', str(ssh_control), '-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=yes',
                '-o', 'ConnectTimeout=10', '-o', 'ServerAliveInterval=20', '-o', 'ServerAliveCountMax=3',
                '-p', '22158', 'linux@175.155.64.171', shlex.join(command)]
         stderr = open(state / 'ssh.stderr', 'xb'); os.chmod(state / 'ssh.stderr', 0o600)
@@ -124,11 +144,12 @@ def main():
             require(ready == {'status': 'ready', 'package_sha256': runtime, 'model_identities': package['model_identities']},
                     'GPU startup did not establish fixed models')
             phase = 'controller'
-            journal = DevelopmentJournal(state / 'journal', package['development_plan'], runtime, campaign=campaign,
-                                         recovery=recovery_context(package))
+            journal = DevelopmentJournal(state / 'journal', package['comparison_plan'] if final else package['development_plan'], runtime, campaign=campaign,
+                                         recovery=recovery_context(package), compiled=package['compiled'] if final else None)
+            contract = prepared['contract_class'](package['comparison_plan'], package['compiled'], prepared['cases'], state / 'permission') if final else None
             controller = DevelopmentController(journal=journal, state=state / 'controller', runtime=runtime, secret=secret,
                 schemas=prepared['schemas'], tokenizer=tokenizer, identities=package['model_identities'], host=host, model=model,
-                guard=guard, cleanup_guard=source)
+                guard=guard, cleanup_guard=source, contract=contract)
             rows = controller.results
             controller.run()
         finally:
@@ -160,7 +181,11 @@ def main():
                 except BaseException as exc: record_failure(exc, 'ssh_stdout_close')
         if host_capability_published:
             try:
-                publish_json(host_state, 'shutdown.request.json', {'runtime_sha256': runtime, 'action': 'shutdown'})
+                if final:
+                    from plugin.rhino_listener.lora_common_probe import request_shutdown
+                    request_shutdown(host_state, runtime)
+                else:
+                    publish_json(host_state, 'shutdown.request.json', {'runtime_sha256': runtime, 'action': 'shutdown'})
                 host_final = await_json(host_state, 'host-settlement.json', time.monotonic() + config['host_cleanup_seconds'])
             except BaseException as exc: record_failure(exc, 'host_shutdown')
         else:
@@ -215,7 +240,16 @@ def main():
             'gpu_launch_attempted': gpu_launch_attempted,
             'key_removal': key_removed, 'gpu_export': exported, 'elapsed_seconds': time.monotonic() - start['monotonic'],
             'research_complete': False, 'phase_one_complete': False, 'historical_results_changed': False}
-        publish_json(state, 'development-result.json', result)
+        if final:
+            result.pop('phase_one_complete')
+            result.update(final_comparison_complete=False, independent_evidence_review_pending=True,
+                          actual_additional_cost=None, automatic_paid_resource_actions=0)
+            try:
+                from training.lora_comparison_storage import check_evidence_budget
+                result['cleanup_storage'] = check_evidence_budget(state, config, cleanup=True)
+            except BaseException as exc: record_failure(exc, 'cleanup_storage')
+            result['error_type'] = error
+        publish_json(state, 'final-result.json' if final else 'development-result.json', result)
         if campaign is not None: campaign.settle_run(result)
         print(json.dumps({'status': 'stopped_pending_evidence_review', 'claimed_slots': claimed_slots,
                           'completed_slot_results': len(rows),

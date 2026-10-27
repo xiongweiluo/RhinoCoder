@@ -222,8 +222,9 @@
     "repository_delivery": "PR31 branch; not main; owner review and merge remain separate",
     "research_choices_fixed": true
   },
-  "phase_two_freeze_dependency": "bind owner-only final case commitment, exact source/environment roots, admission and actual transport entries; CPU check before exposure; old live CLI cannot admit this new study",
-  "phase_two_status": "not_started_new_test_custody_and_exact_execution_authorization_pending",
+  "phase_two_freeze_dependency": "public final entries and source specification prepared; exact complete freeze awaits owner-only new40 sealing receipt, current CI, environment and final explicit approval",
+  "phase_two_reference": "docs/lora-phase2-final-freeze-20261027.md",
+  "phase_two_status": "public_preparation_started_owner_new40_not_created_no_execution_authority",
   "plan": {
     "execution_authorized": false,
     "limits": {

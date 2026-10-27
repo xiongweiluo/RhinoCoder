@@ -57,11 +57,11 @@ def supervise(root, package, state):
     if package.get('schema_version') in {4, 5}:
         from plugin.rhino_listener.lora_development_campaign import Campaign
         campaign = Campaign(package, 'gpu')
-    require(shutil.disk_usage(state).free >= 2 * 1024**3, 'GPU evidence reserve unavailable')
+    require(shutil.disk_usage(state).free >= config.get('minimum_free_bytes', 2 * 1024**3), 'GPU evidence reserve unavailable')
     start = {'wall': time.time(), 'monotonic': time.monotonic(), 'package_sha256': digest(package)}
     publish_json(state, 'gpu-started.claim.json', start)
     budget = WorkBudget(package['limits'], package['lease_end_epoch'],
-                        first_wall=start['wall'], first_mono=start['monotonic'])
+                        first_wall=start['wall'], first_mono=start['monotonic'], maximum_slots=len(active_schedule(package)))
     outer = JsonPipe(sys.stdin.fileno(), sys.stdout.fileno())
     exposed, child, stopped, error = False, None, None, None
     attempts, failures = [], []
@@ -81,7 +81,7 @@ def supervise(root, package, state):
             cache = attempt / 'never-created-bytecode-cache'
             require(not cache.exists(), 'new bytecode prefix required')
             command = [package['endpoints']['gpu']['python'], '-I', '-S', '-B', '-X', 'pycache_prefix=' + str(cache),
-                       str(root / 'tools/run_lora_development_gpu.py'), '--worker', str(number)]
+                       str(root / (package['entrypoints']['gpu'] if package.get('kind') == 'lora-common-final-comparison-v1' else 'tools/run_lora_development_gpu.py')), '--worker', str(number)]
             env = {k: v for k, v in os.environ.items() if k in {'PATH', 'HOME', 'LANG', 'LC_ALL'}}
             with open(attempt / 'worker.stderr', 'xb') as stderr:
                 os.chmod(attempt / 'worker.stderr', 0o600)
@@ -138,7 +138,7 @@ def supervise(root, package, state):
                       else 'gpu_cleanup_unknown', 'package_sha256': digest(package), 'attempts': attempts,
             'tasks_exposed': exposed, 'stop': stopped, 'error_type': error, 'failures': failures,
             'elapsed_seconds_including_load_and_idle': time.monotonic() - start['monotonic'],
-            'additional_cost': None if campaign is not None else 0, 'paid_lease_amount': None, 'replay_allowed': False}
+            'additional_cost': None if campaign is not None or package.get('kind') == 'lora-common-final-comparison-v1' else 0, 'paid_lease_amount': None, 'replay_allowed': False}
         if campaign is not None:
             settlement.update(global_load_number=global_load, paid_resource_actions=0,
                               cost_status='actual_invoice_unknown_no_purchase_or_renewal_performed')
@@ -162,7 +162,7 @@ def worker(root, package, state, number):
             'global_load_number': claimed['global_load_number'], 'revision_id': package['revision_id'],
             'package_sha256': digest(package)}, 'worker requires permanent global loading intent')
     budget = WorkBudget(package['limits'], package['lease_end_epoch'],
-        first_wall=claimed['first_start']['wall'], first_mono=claimed['first_start']['monotonic'])
+        first_wall=claimed['first_start']['wall'], first_mono=claimed['first_start']['monotonic'], maximum_slots=len(active_schedule(package)))
     pipe = JsonPipe(sys.stdin.fileno(), sys.stdout.fileno())
     message = pipe.receive(time.monotonic() + config['protocol_reply_seconds'])
     require(message == {'action': 'release_load', 'package_sha256': digest(package), 'parent_pid': os.getppid()},

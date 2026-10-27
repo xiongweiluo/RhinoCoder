@@ -177,9 +177,11 @@ class WorkBudget:
     This arithmetic guard does not interrupt a blocked GPU call: its separate
     qualified-child supervisor enforces the same deadline out of process.
     """
-    def __init__(self, limits, lease_end_epoch, *, first_wall, first_mono, wall=time.time, mono=time.monotonic):
+    def __init__(self, limits, lease_end_epoch, *, first_wall, first_mono, wall=time.time, mono=time.monotonic, maximum_slots=32):
         require(all(type(v) in (int, float) and math.isfinite(v) and v >= 0
                     for v in (first_wall, first_mono, lease_end_epoch)), 'valid initial clocks required')
+        require(type(maximum_slots) is int and 0 < maximum_slots <= 80, 'bounded study population required')
+        self.maximum_slots = maximum_slots
         self.limits, self.lease = dict(limits), lease_end_epoch
         self.first_wall, self.first_mono, self.wall, self.mono = first_wall, first_mono, wall, mono
         self.last_wall, self.last_mono = first_wall, first_mono
@@ -195,7 +197,7 @@ class WorkBudget:
         return lease_remaining if ceiling is None else min(ceiling - elapsed, lease_remaining)
 
     def work(self, *, remaining_slots=0, loading=False):
-        require(type(remaining_slots) is int and 0 <= remaining_slots <= 32 and type(loading) is bool,
+        require(type(remaining_slots) is int and 0 <= remaining_slots <= self.maximum_slots and type(loading) is bool,
                 "bounded work request required")
         need = (self.limits['cleanup_export_seconds'] + remaining_slots * self.limits['slot_seconds']
                 + (self.limits['load_seconds'] if loading else 0))

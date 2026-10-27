@@ -79,6 +79,11 @@ if (root / 'training/lora_common_chain.py').exists():
         targets += ('plugin.rhino_listener.controlled_snapshot_probe',)
 if (root / 'tools/run_lora_common_probe.py').exists():
     targets += ('tools.run_lora_common_probe', 'tools.run_lora_common_probe_rhino')
+if (root / 'tools/run_lora_final_mac.py').exists():
+    targets += ('training.lora_final_preparation', 'training.lora_final_custody',
+                'plugin.rhino_listener.lora_final_admission', 'tools.seal_lora_final_owner',
+                'tools.run_lora_final_mac', 'tools.run_lora_final_gpu', 'tools.run_lora_final_rhino',
+                'tools.run_lora_common_probe_rhino')
 for name in targets: importlib.import_module(name)
 if (root / 'common-probe-package.json').exists():
     from training.lora_common_probe_runner import prepare
