@@ -16,12 +16,15 @@ from training.c5_formal20_plan import NAME, validate_case
 FINAL_STUDY = 'lora-common-final-comparison-v1'
 PROBE_STUDY = 'lora-common-native-probe-v1'
 DIAGNOSTIC_STUDY = 'lora-common-state-diagnostic-v1'
+SCOPE_STUDY = 'lora-common-document-scope-probe-v1'
+STUDIES = frozenset({FINAL_STUDY, PROBE_STUDY, DIAGNOSTIC_STUDY, SCOPE_STUDY})
 STRATA = {'core_tool': 12, 'multistep': 8, 'error_recovery': 8, 'clarification': 6, 'refusal': 6}
 
 
-def proposal(*, native_probe=False, fingerprint_diagnostic=False):
+def proposal(*, native_probe=False, fingerprint_diagnostic=False, document_scope_probe=False):
     """Unapproved parameters; never construct or expose a final task."""
-    require(not fingerprint_diagnostic or native_probe, 'diagnostic must be zero-model')
+    require(not (fingerprint_diagnostic or document_scope_probe) or native_probe, 'diagnostic must be zero-model')
+    require(not (fingerprint_diagnostic and document_scope_probe), 'one explicit probe scope')
     value = {
         'schema_version': 1,
         'study_id': PROBE_STUDY if native_probe else FINAL_STUDY,
@@ -40,13 +43,17 @@ def proposal(*, native_probe=False, fingerprint_diagnostic=False):
     if fingerprint_diagnostic:
         value.update(study_id=DIAGNOSTIC_STUDY, strata={'multistep': 1},
                      purpose='explain_full_fingerprint_drift_not_repair_or_replace_prior_result')
+    if document_scope_probe:
+        value.update(study_id=SCOPE_STUDY, strata={'multistep': 1},
+                     purpose='document_local_state_guard_and_move_read_not_model_quality')
     return value
 
 
 def validate_plan(plan):
-    require(type(plan) is dict and plan.get('study_id') in {PROBE_STUDY, DIAGNOSTIC_STUDY, FINAL_STUDY}, 'new study identity required')
+    require(type(plan) is dict and plan.get('study_id') in STUDIES, 'new study identity required')
     reference = proposal(native_probe=plan['study_id'] != FINAL_STUDY,
-                         fingerprint_diagnostic=plan['study_id'] == DIAGNOSTIC_STUDY)
+                         fingerprint_diagnostic=plan['study_id'] == DIAGNOSTIC_STUDY,
+                         document_scope_probe=plan['study_id'] == SCOPE_STUDY)
     require(digest(plan) == digest(reference), 'comparison preparation choices changed; review the complete proposal')
     return plan
 

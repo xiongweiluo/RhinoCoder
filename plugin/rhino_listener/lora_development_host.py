@@ -109,19 +109,23 @@ class DevelopmentHost:
 
 class RhinoSession:
     """Real implementation; only the separately approved UI entry calls it."""
-    def __init__(self, plan, runtime, secret, *, directory, schemas, guard, fingerprint_limit=0):
+    def __init__(self, plan, runtime, secret, *, directory, schemas, guard, fingerprint_limit=0,
+                 document_scope_probe=False):
         self.plan, self.runtime, self.secret = plan, runtime, secret
         self.directory, self.schemas, self.guard = directory, schemas, guard
         self.doc = self.backend = self.gate = None
         self.close_attempted = False
         self.fingerprint_limit, self.fingerprint_sequence = fingerprint_limit, 0
+        self.document_scope_probe, self.document_clock = document_scope_probe, None
 
     def scene_digest(self):
         from .candidate_atomic_gate import rhino_scene_digest, rhino_scene_fingerprint
-        if not self.fingerprint_limit:
+        if not self.fingerprint_limit and not self.document_scope_probe:
             return rhino_scene_digest(self.doc)
+        require(not self.document_scope_probe or self.document_clock is not None, 'document clock required')
         require(self.fingerprint_sequence < self.fingerprint_limit, 'fingerprint evidence capacity reached')
-        value = rhino_scene_fingerprint(self.doc)
+        value = (rhino_scene_fingerprint(self.doc, document_clock=self.document_clock)
+                 if self.document_scope_probe else rhino_scene_fingerprint(self.doc))
         self.fingerprint_sequence += 1
         publish_json(self.directory, 'fingerprint-%04d.json' % self.fingerprint_sequence,
                      {'sequence': self.fingerprint_sequence, **value})
@@ -137,19 +141,30 @@ class RhinoSession:
         require(Rhino.RhinoApp.IsOnMainThread and self.doc is None, "new UI-thread fixture required")
         self.doc = Rhino.RhinoDoc.CreateHeadless(None)
         require(self.doc is not None, "fixture creation unknown")
+        if self.document_scope_probe:
+            from .document_mutation_clock import for_rhino_document
+            self.document_clock = for_rhino_document(self.doc)
+            self.document_clock.start()
         self.doc.ModelUnitSystem = Rhino.UnitSystem.Millimeters
         self.doc.ModelAbsoluteTolerance = 0.000001
         self.backend = DevelopmentDoc(self.doc, self.schemas)
         publish_json(self.directory, 'created.json', {'serial': self.backend.serial, 'headless': True,
                      'runtime_sha256': self.runtime, 'existing_document_content_read': False})
+        atomic = None
+        if self.document_scope_probe:
+            from .document_scope_probe import check
+            atomic = RhinoAtomicGate(self.directory / 'fixture.sqlite3', str(self.backend.serial),
+                                    self.scene_digest, create_ledger=True)
+            check(self, atomic)
         for index, row in enumerate(self.plan['fixture_recipe']):
             self.guard()
             validate_native_arguments(row['operation'], row['arguments'], self.schemas)
             publish_json(self.directory, 'seed-%02d.claim.json' % index, row)
             value = self.backend.dispatch(row['operation'], row['arguments'])
             publish_json(self.directory, 'seed-%02d.result.json' % index, {'result': value})
-        atomic = RhinoAtomicGate(self.directory / 'fixture.sqlite3', str(self.backend.serial),
-                                self.scene_digest, create_ledger=True)
+        if atomic is None:
+            atomic = RhinoAtomicGate(self.directory / 'fixture.sqlite3', str(self.backend.serial),
+                                    self.scene_digest, create_ledger=True)
         self.gate = ResearchGate(self.backend, atomic, self.secret, self.runtime,
             task_sha256=self.plan['task_sha256'], max_reads=self.plan['max_reads'], max_writes=self.plan['max_writes'])
         return {'status': 'opened', 'fixture_serial': self.backend.serial}
@@ -166,6 +181,27 @@ class RhinoSession:
         return self.gate.execute(envelope)
 
     def close(self):
+        # The host has permanently entered close: no capture/dispatch can
+        # follow. Unsubscribe before disposal invalidates event.Document, then
+        # attempt disposal even if exact event cleanup failed. Never replay it.
+        failures = []
+        try:
+            if self.document_clock is not None:
+                receipt = (self.document_clock.close_result if self.document_clock.closed
+                           else self.document_clock.close())
+                publish_json(self.directory, 'document-clock-close.json', receipt)
+                require(receipt['removal_verified'], 'document event cleanup unknown')
+        except BaseException as exc:
+            failures.append(exc)
+        try:
+            result = self._close_document()
+        except BaseException as exc:
+            failures.append(exc)
+        if failures:
+            raise failures[0]
+        return result
+
+    def _close_document(self):
         import Rhino
         require(not self.close_attempted and Rhino.RhinoApp.IsOnMainThread, "one UI-thread closure attempt")
         self.close_attempted = True

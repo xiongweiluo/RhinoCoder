@@ -44,20 +44,22 @@ def scene_fingerprint(document, items, layers):
     Component hashes are diagnostics only, never a substitute authorization
     identity. In particular, equal semantic geometry cannot waive a drift.
     """
+    local = isinstance(document[3], dict)
     return {
         'scene_sha256': _hash(_json({'document': document, 'objects': items, 'layers': layers})),
         'components': {
             'document_settings_sha256': _hash(_json(document[:3])),
-            'process_next_object_serial': document[3],
+            ('document_mutation_clock' if local else 'process_next_object_serial'): document[3],
             'document_next_undo_serial': document[4],
             'layers_sha256': _hash(_json(layers)),
             'objects': {_hash(item[0]): {'geometry_sha256': _hash(item[1]),
-                                       'attributes_sha256': _hash(item[2])} for item in items},
+                                       'attributes_sha256': _hash(item[2]),
+                                       **({'runtime_serial': item[3]} if local else {})} for item in items},
         },
     }
 
 
-def rhino_scene_fingerprint(doc):
+def rhino_scene_fingerprint(doc, *, document_clock=None):
     """Read the active document on the UI thread, failing closed on any gap.
 
     RhinoCommon's archival JSON covers geometry and object attributes; neither
@@ -66,6 +68,9 @@ def rhino_scene_fingerprint(doc):
 
     import Rhino  # noqa: PLC0415
 
+    if document_clock is not None and document_clock.serial != int(doc.RuntimeSerialNumber):
+        raise AtomicGateError('wrong_document_clock')
+    before = document_clock.snapshot() if document_clock is not None else None
     options = Rhino.FileIO.SerializationOptions()
     options.WriteUserData = True
     settings = Rhino.DocObjects.ObjectEnumeratorSettings()
@@ -79,7 +84,8 @@ def rhino_scene_fingerprint(doc):
     for obj in doc.Objects.GetObjectList(settings):
         if obj.Geometry is None or obj.Attributes is None:
             raise AtomicGateError("scene_unreadable")
-        items.append((str(obj.Id), obj.Geometry.ToJSON(options), obj.Attributes.ToJSON(options)))
+        item = (str(obj.Id), obj.Geometry.ToJSON(options), obj.Attributes.ToJSON(options))
+        items.append(item + (int(obj.RuntimeSerialNumber),) if document_clock is not None else item)
     items.sort(key=lambda item: item[0])
     layers = sorted(
         (str(layer.Id), str(layer.Name), str(layer.ParentLayerId),
@@ -91,9 +97,12 @@ def rhino_scene_fingerprint(doc):
         float(doc.ModelAngleToleranceRadians),
         # Monotone process-local watermarks also reject add/delete/undo ABA
         # even if the final object serialization becomes identical again.
-        int(Rhino.DocObjects.RhinoObject.NextRuntimeSerialNumber),
+        ({'schema': 'document_mutation_v1', 'epoch': before} if document_clock is not None
+         else int(Rhino.DocObjects.RhinoObject.NextRuntimeSerialNumber)),
         int(doc.NextUndoRecordSerialNumber),
     )
+    if document_clock is not None and document_clock.snapshot() != before:
+        raise AtomicGateError('scene_changed_during_fingerprint')
     return scene_fingerprint(document, items, layers)
 
 

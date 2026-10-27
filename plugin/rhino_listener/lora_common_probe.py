@@ -14,7 +14,8 @@ from .lora_development_admission import source_guard
 def prepare(root, package):
     source_guard(root, package['source_files'])
     choices = {'public_common_native_probe_v1': ('lora-common-native-probe-v1', 2),
-               'public_common_state_diagnostic_v1': ('lora-common-state-diagnostic-v1', 1)}
+               'public_common_state_diagnostic_v1': ('lora-common-state-diagnostic-v1', 1),
+               'public_common_document_scope_probe_v1': ('lora-common-document-scope-probe-v1', 1)}
     require(package['kind'] in choices, 'known zero-model probe package required')
     study, slots = choices[package['kind']]
     require(package['model_loads'] == 0 and package['execution_authorized'] is False
@@ -29,7 +30,9 @@ def prepare(root, package):
 
 def approval_record(package):
     return {'actor': 'repository_owner', 'approved': True, 'package_sha256': digest(package),
-            'scope': ('one_move_fingerprint_diagnostic_zero_models_no_final_test'
+            'scope': ('one_document_scope_and_move_read_probe_zero_models_no_final_test'
+                      if package['kind'] == 'public_common_document_scope_probe_v1' else
+                      'one_move_fingerprint_diagnostic_zero_models_no_final_test'
                       if package['kind'] == 'public_common_state_diagnostic_v1' else
                       'two_new_public_scripted_native_probes_zero_models_no_final_test')}
 

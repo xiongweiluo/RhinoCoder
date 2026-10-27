@@ -62,8 +62,9 @@ def common_capacity(plan):
                          for layer, n in plan['strata'].items())
     messages = 5 * slots + 14 * steps  # two captures + eleven signer captures + dispatch
     peer_files = 8 * steps + 32
-    diagnostic = plan['study_id'] == 'lora-common-state-diagnostic-v1'
-    probe = plan['study_id'] in {'lora-common-native-probe-v1', 'lora-common-state-diagnostic-v1'}
+    scoped = plan['study_id'] == 'lora-common-document-scope-probe-v1'
+    diagnostic = plan['study_id'] == 'lora-common-state-diagnostic-v1' or scoped
+    probe = plan['study_id'] in {'lora-common-native-probe-v1', 'lora-common-state-diagnostic-v1'} or scoped
     value = {'families': sum(plan['strata'].values()), 'slots': slots,
         'model_step_requests_max': 0 if probe else steps, 'scripted_step_requests_max': steps if probe else 0,
         'generation_stages_max': 0 if probe else 2*steps,
@@ -77,6 +78,12 @@ def common_capacity(plan):
         # each already-required fingerprint adds files, not native operations.
         value['fingerprint_records_max'] = 5 * messages
         value['evidence_files_max'] += value['fingerprint_records_max']
+    if scoped:
+        value['additional_fixture_operations_max'] = 3
+        value['isolated_documents_max'] = 2
+        value['document_events_max'] = 256
+        value['fingerprint_records_max'] += 2  # native scope-check atomic snapshots
+        value['evidence_files_max'] += 18  # two snapshots plus bounded scope/cleanup records
     return value
 
 

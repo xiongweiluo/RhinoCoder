@@ -39,15 +39,63 @@ def fingerprint_changes(records, before_sha, after_sha):
             'change_origin_proven': False}
 
 
+
+def review_document_scope(fixture, read, captures, receipts, capacity, events):
+    """Strict positive-path review; missing/partial evidence refuses verification.
+
+    A startup/cleanup failure retains its raw failure record and is reported as
+    incomplete; this function cannot turn missing evidence into success.
+    """
+    proof = read(fixture/'scope-check.json')
+    assert proof['status'] == 'passed' and proof['fixed_native_operations'] == 3
+    assert proof['other_document_did_not_change_identity'] and proof['owned_add_delete_aba_rejected']
+    assert proof['stale_dispatch_calls'] == 0
+    assert read(fixture/'scope-helper-created.json')['serial'] != read(fixture/'created.json')['serial']
+    helper = read(fixture/'scope-helper-result.json')
+    assert helper['owned_fingerprint_unchanged'] and helper['process_serial_after'] > helper['process_serial_before']
+    assert read(fixture/'scope-helper-close.json')['fixture_registry_absent'] is True
+    for name, expected in (
+        ('scope-helper-add.claim.json', {'action':'AddPoint','point':[0,0,0]}),
+        ('scope-owned-add.claim.json', {'action':'AddPoint','point':[0,0,0]}),
+        ('scope-owned-delete.claim.json', {'action':'Delete','target':'new_scope_point'})):
+        assert read(fixture/name) == expected
+    closed = read(fixture/'document-clock-close.json')
+    assert closed['removal_verified'] and not closed['faults'] and closed['exact_delegates_removed'] == sorted(events)
+    assert set(closed['counts']) == set(events) and closed['epoch'] == sum(closed['counts'].values())
+    assert 0 < proof['epoch'] <= closed['epoch'] <= capacity['document_events_max']
+    assert proof['clock_counts']['AddRhinoObject'] >= 1 and proof['clock_counts']['DeleteRhinoObject'] >= 1
+    files = sorted(fixture.glob('fingerprint-*.json'))
+    assert 0 < len(files) <= capacity['fingerprint_records_max']
+    hashes, previous_epoch = {}, -1
+    for index, path in enumerate(files, 1):
+        record = read(path); comp = record['components']; sha = record['scene_sha256']
+        assert path.name == 'fingerprint-%04d.json'%index and record['sequence'] == index
+        assert set(comp) == {'document_settings_sha256','document_mutation_clock','document_next_undo_serial','layers_sha256','objects'}
+        epoch = comp['document_mutation_clock']
+        assert epoch['schema'] == 'document_mutation_v1' and previous_epoch <= epoch['epoch'] <= closed['epoch']
+        previous_epoch = epoch['epoch']
+        assert sha not in hashes or hashes[sha] == comp
+        hashes[sha] = comp
+    required = {v['state']['scene_sha256'] for v in captures}
+    required.update(r[k]['scene_sha256'] for r in receipts for k in ('before_state','after_state'))
+    assert required <= set(hashes)
+    return {'scope_checks_verified':True,'cleanup_verified':True,'fingerprint_records':len(files),
+            'all_captured_and_receipt_states_covered':True,'event_counts':closed['counts'],
+            'historical_counter_origin_proven':False,'all_native_event_types_validated':False}
+
+
 def main():
     if not __debug__:
         raise RuntimeError('Assertions are required; do not use -O.')
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--diagnostic', action='store_true', help='Review only the separately approved single-slot diagnostic')
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument('--diagnostic', action='store_true', help='Review only the separately approved single-slot diagnostic')
+    modes.add_argument('--document-scope', action='store_true', help='Review only the separately approved document-scope probe')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[2]
-    package_name = 'common-state-diagnostic-package-20261027.json' if args.diagnostic else 'common-native-probe-package-20261027.json'
+    package_name = ('common-document-scope-package-20261027.json' if args.document_scope else
+                    'common-state-diagnostic-package-20261027.json' if args.diagnostic else 'common-native-probe-package-20261027.json')
     package = json.loads((root/'eval/lora-development'/package_name).read_text())
     source, state = Path(package['source_root']), Path(package['state_root'])
     sys.path.insert(0, str(source))
@@ -59,6 +107,9 @@ def main():
     from training.lora_common_probes import public_probes
     if args.diagnostic:
         from training.lora_common_probes import diagnostic_probes
+    if args.document_scope:
+        from training.lora_common_probes import document_scope_probes
+        from plugin.rhino_listener.document_mutation_clock import EVENTS
     from training.lora_common_chain import CommonChain
     from training.lora_common_wire import reparse_response, check_predecessor, user_step
     from training.c5_rhino_adapter import step_input
@@ -67,7 +118,8 @@ def main():
     from training.c5_formal20_scorer import score_route, AUDIT_KEYS
     from training.c5_research_audit import _tables, audit_permission_tables
     runtime = digest(package)
-    assert runtime == ('931aad6fc68afc1752c089ce6c6291e8808321d712c07f422c009a5edaef36cf' if args.diagnostic else
+    assert runtime == ('25296784f4305a1045249774f0305c0c98a2f294b2e1b2f891c3137371135583' if args.document_scope else
+                       '931aad6fc68afc1752c089ce6c6291e8808321d712c07f422c009a5edaef36cf' if args.diagnostic else
                        '85ba112e4aa98073760f0a73e0d10c35d1e94015bc0c57c70326ccf5382f5ebb')
     source_guard(source, package['source_files'])
     read = lambda p: json.loads(read_stable(p))
@@ -107,7 +159,7 @@ def main():
     assert not result['failures'] and len(rows) == package['capacity']['slots']
     assert [r['identity']['slot_id'] for r in rows] == [c['slot_id'] for c in views['schedule']]
     assert not (s/'journal/selection.json').exists()
-    definitions = diagnostic_probes() if args.diagnostic else public_probes()
+    definitions = document_scope_probes() if args.document_scope else diagnostic_probes() if args.diagnostic else public_probes()
     cases = {c['family_id']: c for c in definitions}
     contract = CommonChain(package['plan'], package['compiled'], definitions, s/'permission')
     exchanges = {}
@@ -201,7 +253,7 @@ def main():
         else:
             # Preserve this actual failure; do not score the incomplete task as
             # success just because the first write and cleanup are verified.
-            assert case['family_id'] == ('COMMON-D01' if args.diagnostic else 'COMMON-P01') and row['outcome'] == 'engineering_failure'
+            assert case['family_id'] == ('COMMON-S01' if args.document_scope else 'COMMON-D01' if args.diagnostic else 'COMMON-P01') and row['outcome'] == 'engineering_failure'
             assert e['score'] is None and len(e['steps']) == 1 and e['final_native'] is None
             assert [(f['stage'],f['message']) for f in e['failures']] == [('step_preflight','noncontiguous native execution')]
             last = receipts[-1]; current = captures[-1]
@@ -234,22 +286,31 @@ def main():
                 **fingerprint_changes(records,after_write,successor['state']['scene_sha256'])}
             if continuity_failure is not None:
                 continuity_failure['which_full_digest_component_changed'] = fingerprint_review['changed_components']
+        scope_review = None
+        if args.document_scope:
+            scope_review = review_document_scope(fixture, read, captures, receipts, package['capacity'], EVENTS)
         summaries.append({'slot_id':slot,'family_id':cell['family_id'],'outcome':row['outcome'],
             'steps':len(receipts),'writes':audit['write_count'],'reads':audit['read_count'],
             'seconds_including_cleanup':e['slot_elapsed_seconds_including_cleanup'],
             'evidence_sha256':digest(e),'original_score_recomputed':e['error_type'] is None,'cleanup_verified':True,
             'actual_scene_and_successor_input_verified':e['error_type'] is None,
             'continuity_failure':continuity_failure,'fingerprint_review':fingerprint_review,
-            'execution_status_preserved':e['execution'],'permission_and_native_sqlite_verified':True})
-    if args.diagnostic:
+            'execution_status_preserved':e['execution'],'permission_and_native_sqlite_verified':True,
+            **({'document_scope_review':scope_review} if args.document_scope else {})})
+    if args.diagnostic or args.document_scope:
         assert native_writes == 1 and native_reads in (0,1) and steps_total == 1+native_reads and seeds == 7
     else:
         assert (native_writes,native_reads,steps_total,seeds) == (3,1,4,14)
     assert len(list((s/'controller').glob('*.model.json'))) == steps_total
     assert inventory(state) == inventory(backup) == (original,raw_bytes)
+    prestart = None
+    if args.document_scope:
+        prestart = read(root/'eval/lora-development/common-document-scope-prestart-20261027.json')
+        assert prestart['package_sha256'] == runtime and prestart['all_five_ci_successful'] is True
     report = {'date':'2026-10-27','package_sha256':runtime,'source_inventory_sha256':digest(package['source_files']),
-        'executed_ci_commit':'d46dc568d4563255db2a7b3097667b5e81a08c3c' if args.diagnostic else '056978e5a209f96987e7c0d76436aa999e95f3e6',
-        'ci_run_id':40446893205 if args.diagnostic else 40442746428,
+        'executed_ci_commit':prestart['source_commit'] if prestart else 'd46dc568d4563255db2a7b3097667b5e81a08c3c' if args.diagnostic else '056978e5a209f96987e7c0d76436aa999e95f3e6',
+        'ci_run_id':prestart['ci_run_id'] if prestart else 40446893205 if args.diagnostic else 40442746428,
+        **({'additional_fixed_fixture_operations':3, 'isolated_documents':2} if args.document_scope else {}),
         'rows':summaries,'native_writes':native_writes,'native_reads':native_reads,'fixture_seed_operations':seeds,
         'host_messages':len(requests),'elapsed_seconds':result['elapsed_seconds'],'evidence_files':len(original),
         'evidence_bytes':raw_bytes,'retained_backup_copies':1,'evidence_inventory_sha256':digest(original),

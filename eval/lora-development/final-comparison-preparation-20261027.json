@@ -20,13 +20,27 @@
     "all_five_ci_successful": true,
     "approval_received": true,
     "approved_package_sha256": "931aad6fc68afc1752c089ce6c6291e8808321d712c07f422c009a5edaef36cf",
+    "changed_component": "process_next_object_serial_752_to_756_only",
     "ci_run_id": 40446893205,
-    "diagnostic_slots_consumed": 0,
+    "diagnostic_slots_consumed": 1,
     "executed_source_ci_commit": "d46dc568d4563255db2a7b3097667b5e81a08c3c",
-    "native_operations": 0,
-    "owner_action": "release at least 500 MiB and request continuation; recheck all gates; no repeated package approval needed",
-    "record": "eval/lora-development/common-state-diagnostic-resource-stop-20261027.json",
-    "status": "disk_gate_blocked_before_any_probe_claim"
+    "native_operations": 8,
+    "owner_action": "resource gate restored; approved single attempt completed and audited",
+    "record": "eval/lora-development/common-state-diagnostic-result-20261027.json",
+    "status": "completed_engineering_failure_component_localized_origin_unknown"
+  },
+  "document_scope_candidate": {
+    "additional_fixed_operations": 3,
+    "approved": false,
+    "executed": false,
+    "model_loads": 0,
+    "new_isolated_documents_max": 2,
+    "original_seed_operations": 7,
+    "package_sha256": "25296784f4305a1045249774f0305c0c98a2f294b2e1b2f891c3137371135583",
+    "reads_max": 1,
+    "record": "eval/lora-development/common-document-scope-preparation-20261027.json",
+    "selected_for_final_comparison": false,
+    "signed_writes_max": 1
   },
   "execution_evidence_limits": {
     "full_common_chain_real_model_writes_validated": false,
@@ -172,9 +186,9 @@
   },
   "proposed_additional_final_loads": 1,
   "remaining_phase_one": [
-    "explain observed post-move full fingerprint drift; preserve semantic/full-state distinction and do not relax guard without evidence",
-    "if a justified fix is found, complete its CPU checks and separately approved necessary native verification",
-    "owner confirmation of complete comparison choices before test creation"
+    "separately approved native verification of document-local state candidate: cross-document isolation, owned add-delete ABA rejection and move/read continuity",
+    "combine bounded system evidence without claiming full real-model write-chain validation or historical root causes",
+    "owner confirmation of complete comparison choices before final-test creation"
   ],
   "runtime_configuration": {
     "cleanup_export_seconds": 900,
@@ -212,7 +226,7 @@
   },
   "selected_system": "original",
   "source_inventory_sha256": "44e6a192983fb06a51588d1c97d5f594f1f1aaa7f46b04c59b656e6d9f3b9eed",
-  "status": "phase_one_blocked_on_explained_native_fingerprint_continuity_not_final_execution_grant",
+  "status": "phase_one_document_scope_candidate_cpu_ready_native_verification_unapproved_not_final_execution_grant",
   "training_decision": "no_training_supported_by_current_evidence",
   "training_decision_evidence": {
     "current_lora_candidate_development_successes": 5,

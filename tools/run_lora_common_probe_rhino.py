@@ -1,5 +1,5 @@
 #! python 3
-"""Single ScriptEditor entry; zero models, only two new headless probes."""
+"""Single ScriptEditor entry; zero models, only the exact admitted new headless probe scope."""
 import importlib
 import json
 from pathlib import Path
@@ -43,7 +43,8 @@ def start():
     def factory(plan, runtime, secret):
         directory = state/'fixtures'/plan['slot_id']; directory.mkdir(mode=0o700)
         return host_module.RhinoSession(plan, runtime, secret, directory=directory, schemas=prepared['schemas'], guard=guard,
-            fingerprint_limit=package['capacity'].get('fingerprint_records_max', 0))
+            fingerprint_limit=package['capacity'].get('fingerprint_records_max', 0),
+            document_scope_probe=package['kind'] == 'public_common_document_scope_probe_v1')
     host = host_module.DevelopmentHost(state=state/'host', runtime=runtime, native_views=prepared['views']['native'],
         schedule=prepared['views']['schedule'], secret=secret, factory=factory, guard=guard, cleanup_guard=source,
         operations=native.CORE, messages_max=prepared['capacity']['host_messages_max'], study=package['plan']['study_id'])

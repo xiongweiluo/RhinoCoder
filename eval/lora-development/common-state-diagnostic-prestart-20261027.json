@@ -1,0 +1,19 @@
+{
+  "approved_source_commit": "d46dc568d4563255db2a7b3097667b5e81a08c3c",
+  "available_window_seconds": 286724.6429219246,
+  "checked_epoch": 1793100075.357078,
+  "disk_free_bytes": 5300113408,
+  "lease_end_epoch": 1793386800,
+  "minimum_free_bytes": 4294967296,
+  "model_loads": 0,
+  "only_prior_owner_approval_present": true,
+  "owner_reply": "已释放，继续",
+  "package_sha256": "931aad6fc68afc1752c089ce6c6291e8808321d712c07f422c009a5edaef36cf",
+  "prior_resource_stop_retained": true,
+  "probe_claim_absent": true,
+  "python_version": "3.13.5",
+  "rhino_bundle_version": "8.21.25188.17002",
+  "rhino_calls": 0,
+  "source_files_verified": 303,
+  "source_inventory_sha256": "44e6a192983fb06a51588d1c97d5f594f1f1aaa7f46b04c59b656e6d9f3b9eed"
+}

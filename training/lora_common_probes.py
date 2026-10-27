@@ -47,3 +47,10 @@ def diagnostic_probes():
     case = copy.deepcopy(public_probes()[0])
     case.update(family_id='COMMON-D01', template_family='diagnose_move_fingerprint_transition')
     return [validate_case(case)]
+
+
+def document_scope_probes():
+    """Explicit repair verification of the exposed P01 mechanism, not new data."""
+    case = copy.deepcopy(public_probes()[0])
+    case.update(family_id='COMMON-S01', template_family='document_local_guard_move_read')
+    return [validate_case(case)]

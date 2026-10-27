@@ -13,7 +13,7 @@ from plugin.rhino_listener.lora_development_channel import PROTOCOL, detached, v
 from training.c5_formal20_privacy import allowed
 from training.c5_modelbridge_joint_audit import semantic
 from training.c5_rhino_adapter import step_input
-from training.lora_comparison_plan import FINAL_STUDY, PROBE_STUDY, DIAGNOSTIC_STUDY
+from training.lora_comparison_plan import STUDIES
 from training.lora_development_scope import _sha
 from training.lora_development_wire import reparse_generations
 
@@ -24,7 +24,7 @@ def validate_request(value, model_views, runtime):
         'step_index', 'task', 'scene', 'binding', 'predecessor', 'host_evidence_sha256'}, 'exact original request required')
     plan = model_views.get(value['slot_id'])
     require(plan is not None and value['protocol'] == PROTOCOL
-            and value['study_id'] in {FINAL_STUDY, PROBE_STUDY, DIAGNOSTIC_STUDY}
+            and value['study_id'] in STUDIES
             and all(value[k] == plan[k] for k in ('study_id', 'route', 'system', 'task'))
             and value['system'] == 'original' and value['runtime_sha256'] == _sha(runtime)
             and type(value['step_index']) is int and 0 <= value['step_index'] < plan['max_steps'],
