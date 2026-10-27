@@ -14,15 +14,36 @@
     "slots": 80,
     "worst_window_seconds": 35280
   },
-  "controlled_snapshot_candidate": {
+  "controlled_continuity_proposal": {
+    "approved": false,
     "attempts_consumed": 0,
+    "fixed_operations_repeated": 0,
+    "isolated_documents_max": 1,
+    "package_sha256": "703f407082b25b94131bde6e0c541dc5a825babae4367eeadfe14e89b6d9ce50",
+    "phase_one_final_choices_in_same_confirmation": true,
+    "preparation": "eval/lora-development/common-controlled-continuity-preparation-20261027.json",
+    "reads_max": 1,
+    "seed_operations_max": 7,
+    "signed_writes_max": 1
+  },
+  "controlled_snapshot_candidate": {
+    "actual_fixed_operations": 2,
+    "actual_reads": 0,
+    "actual_seed_operations": 7,
+    "actual_signed_writes": 0,
+    "approval_consumed": true,
+    "attempts_consumed": 1,
+    "attempts_remaining": 0,
+    "fixed_history_check_passed": true,
     "fixed_protection_operations_max": 2,
     "isolated_documents_max": 1,
+    "move_read_validated": false,
     "native_candidate_validated": false,
-    "native_execution_authorized": false,
+    "native_execution_authorized": true,
     "package_sha256": "cbd0a1202c378a1d137b77e133c3556592f29f1386cfb7d44a0abe5ca5a73424",
     "preparation": "eval/lora-development/common-controlled-snapshot-preparation-20261027.json",
     "reads_max": 1,
+    "result": "eval/lora-development/common-controlled-snapshot-result-20261027.json",
     "seed_operations_max": 7,
     "signed_writes_max": 1,
     "source_inventory_sha256": "08550dae903496e349a4ebfb85a892b4e1e7667391175e72f820bb03fa70d095"
@@ -215,9 +236,9 @@
   },
   "proposed_additional_final_loads": 1,
   "remaining_phase_one": [
-    "owner approval and technical gates for one controlled-snapshot native check, no model load",
-    "audit new evidence and freeze complete common-chain/comparison choices with explicit external-ABA exclusion",
-    "retain full real-model write-chain limitation; final test custody and exact execution approval remain phase two"
+    "one consolidated confirmation for additional move-read probe and conditional phase-one comparison choices",
+    "new source CI/integrity/resource gates; once-only native execution and full cleanup/audit",
+    "publish complete preparation if gates pass, otherwise bounded incomplete report; retain real-model-write limitation"
   ],
   "runtime_configuration": {
     "cleanup_export_seconds": 900,
@@ -254,17 +275,19 @@
     "product_access_or_rollout_authorized": false
   },
   "selected_system": "original",
-  "source_inventory_sha256": "08550dae903496e349a4ebfb85a892b4e1e7667391175e72f820bb03fa70d095",
+  "source_inventory_sha256": "e1fbb5fd84e006be4f2c15849b4dd2b52583e3230553dafd8e181ea1e1fcf34f",
   "state_protection_decision": {
     "contract": "controlled_snapshot_v1",
     "design_authorized": true,
     "external_aba_detection": false,
+    "fixed_history_native_check_passed": true,
     "native_execution_authorized": false,
+    "note": "B01 authorized and consumed; no additional native execution authorized",
     "owner_selected_route": "B",
     "product_safety_claim": false,
     "record": "eval/lora-development/common-controlled-snapshot-decision-20261027.json"
   },
-  "status": "phase_one_controlled_snapshot_cpu_ready_native_execution_unapproved",
+  "status": "phase_one_controlled_history_native_passed_move_read_timeout_additional_scope_unapproved",
   "training_decision": "no_training_supported_by_current_evidence",
   "training_decision_evidence": {
     "current_lora_candidate_development_successes": 5,

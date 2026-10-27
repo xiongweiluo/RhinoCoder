@@ -19,14 +19,15 @@ PROBE_STUDY = 'lora-common-native-probe-v1'
 DIAGNOSTIC_STUDY = 'lora-common-state-diagnostic-v1'
 SCOPE_STUDY = 'lora-common-document-scope-probe-v1'
 SNAPSHOT_STUDY = 'lora-common-controlled-snapshot-probe-v1'
-STUDIES = frozenset({FINAL_STUDY, PROBE_STUDY, DIAGNOSTIC_STUDY, SCOPE_STUDY, SNAPSHOT_STUDY})
+CONTINUITY_STUDY = 'lora-common-controlled-continuity-probe-v1'
+STUDIES = frozenset({FINAL_STUDY, PROBE_STUDY, DIAGNOSTIC_STUDY, SCOPE_STUDY, SNAPSHOT_STUDY, CONTINUITY_STUDY})
 STRATA = {'core_tool': 12, 'multistep': 8, 'error_recovery': 8, 'clarification': 6, 'refusal': 6}
 
 
-def proposal(*, native_probe=False, fingerprint_diagnostic=False, document_scope_probe=False, controlled_snapshot_probe=False):
+def proposal(*, native_probe=False, fingerprint_diagnostic=False, document_scope_probe=False, controlled_snapshot_probe=False, controlled_continuity_probe=False):
     """Unapproved parameters; never construct or expose a final task."""
-    require(not (fingerprint_diagnostic or document_scope_probe or controlled_snapshot_probe) or native_probe, 'diagnostic must be zero-model')
-    require(sum(map(bool, (fingerprint_diagnostic, document_scope_probe, controlled_snapshot_probe))) <= 1, 'one explicit probe scope')
+    require(not (fingerprint_diagnostic or document_scope_probe or controlled_snapshot_probe or controlled_continuity_probe) or native_probe, 'diagnostic must be zero-model')
+    require(sum(map(bool, (fingerprint_diagnostic, document_scope_probe, controlled_snapshot_probe, controlled_continuity_probe))) <= 1, 'one explicit probe scope')
     value = {
         'schema_version': 1,
         'study_id': PROBE_STUDY if native_probe else FINAL_STUDY,
@@ -51,7 +52,10 @@ def proposal(*, native_probe=False, fingerprint_diagnostic=False, document_scope
     if controlled_snapshot_probe:
         value.update(study_id=SNAPSHOT_STUDY, strata={'multistep': 1},
                      purpose='controlled_write_snapshot_and_move_read_not_external_aba_or_model_quality')
-    if controlled_snapshot_probe or not native_probe:
+    if controlled_continuity_probe:
+        value.update(study_id=CONTINUITY_STUDY, strata={'multistep':1},
+                     purpose='controlled_move_read_after_transport_fix_reuse_prior_fixed_check')
+    if controlled_snapshot_probe or controlled_continuity_probe or not native_probe:
         value['state_contract'] = CONTROLLED_SNAPSHOT
     return value
 
@@ -61,7 +65,8 @@ def validate_plan(plan):
     reference = proposal(native_probe=plan['study_id'] != FINAL_STUDY,
                          fingerprint_diagnostic=plan['study_id'] == DIAGNOSTIC_STUDY,
                          document_scope_probe=plan['study_id'] == SCOPE_STUDY,
-                         controlled_snapshot_probe=plan['study_id'] == SNAPSHOT_STUDY)
+                         controlled_snapshot_probe=plan['study_id'] == SNAPSHOT_STUDY,
+                         controlled_continuity_probe=plan['study_id'] == CONTINUITY_STUDY)
     require(digest(plan) == digest(reference), 'comparison preparation choices changed; review the complete proposal')
     return plan
 

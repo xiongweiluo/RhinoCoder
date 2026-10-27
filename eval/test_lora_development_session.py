@@ -44,6 +44,52 @@ def test_pending_entry_can_be_cancelled_without_exposure(tmp_path):
     assert session.stopped and not (tmp_path / 'host-ready.json').exists()
 
 
+@pytest.mark.parametrize('initial_ready', [False, True])
+def test_work_timeout_cancels_queued_open_before_later_idle(tmp_path, initial_ready):
+    from plugin.rhino_listener.lora_common_probe import wait_for_host_reply, request_shutdown
+    session, host, events, now, allowed = setup(tmp_path)
+    calls = []
+    host.handle = lambda request: calls.append(request)
+    session.start(); session.release()
+    if initial_ready:
+        session.tick()
+        assert (tmp_path/'host-ready.json').exists()
+    # A prior ready observation does not guarantee that subsequent Idle runs.
+    allowed[0] = False
+    publish_json(tmp_path, 'request-0001.json', {'payload': {'request': {'action':'open'}}})
+    def pause(seconds):
+        now[0] += seconds
+        session.tick()
+    with pytest.raises(TimeoutError, match='host reply timeout'):
+        wait_for_host_reply(tmp_path, 'response-0001.json', 10.1, 'a'*64,
+            stop_on_timeout=True, clock=lambda:now[0], pause=pause)
+    stop = (tmp_path/'shutdown.request.json').read_bytes()
+    request_shutdown(tmp_path, 'a'*64)  # outer cleanup confirms the same record
+    assert (tmp_path/'shutdown.request.json').read_bytes() == stop
+    allowed[0] = True; session.tick(); session.tick()
+    assert calls == [] and host.current is None and session.stopped
+    assert not (tmp_path/'response-0001.json').exists()
+    assert len(events) == 2 and events[0][1] is events[1][1]
+    assert read_json(tmp_path, 'host-settlement.json')['status'] == 'host_stopped'
+
+
+def test_reply_wait_preserves_response_and_does_not_rebind_shutdown(tmp_path):
+    from plugin.rhino_listener.lora_common_probe import wait_for_host_reply, request_shutdown
+    from plugin.rhino_listener.c5_research_native import NativeError
+    tmp_path.chmod(0o700)
+    publish_json(tmp_path,'response-0001.json',{'value':'synthetic'})
+    value = wait_for_host_reply(tmp_path,'response-0001.json',1,'a'*64,
+        stop_on_timeout=True,clock=lambda:0)
+    assert value == {'value':'synthetic'} and not (tmp_path/'shutdown.request.json').exists()
+    with pytest.raises(TimeoutError):
+        wait_for_host_reply(tmp_path,'host-settlement.json',0,'a'*64,
+            stop_on_timeout=False,clock=lambda:0)
+    assert not (tmp_path/'shutdown.request.json').exists()
+    request_shutdown(tmp_path,'a'*64)
+    with pytest.raises(NativeError,match='shutdown binding'):
+        request_shutdown(tmp_path,'b'*64)
+
+
 @pytest.mark.parametrize('fault', ['slot_deadline', 'total_deadline', 'close_unknown'])
 def test_timeout_disposes_only_owned_fixture_once_and_detaches(tmp_path, fault):
     session, host, events, now, allowed = setup(tmp_path)

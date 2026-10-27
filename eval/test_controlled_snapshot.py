@@ -137,6 +137,10 @@ def test_actual_session_options_fixed_guard_then_task_ledger_and_close(tmp_path,
     read=lambda p:json.loads(p.read_text())
     checked=audit.review_controlled_snapshot(d,read,[],[],package['capacity'],fixed)
     assert checked['controlled_aba_and_fixed_ledger_verified'] and not checked['external_aba_detection']
+    hashes,count=audit.review_controlled_fingerprints(d,read,[],[],package['capacity'])
+    assert count==checked['fingerprint_records'] and proof['states'][0]['scene_sha256'] in hashes
+    with pytest.raises(AssertionError):
+        audit.review_controlled_fingerprints(d,read,[{'state':{'scene_sha256':'f'*64}}],[],package['capacity'])
     broken=copy.deepcopy(fixed);broken['candidate_write'][1]['state']='uncertain'
     with pytest.raises(AssertionError):audit.review_controlled_snapshot(d,read,[],[],package['capacity'],broken)
     def missing(p):
@@ -163,13 +167,14 @@ def test_new_probe_has_one_doc_no_events_and_cannot_inherit_scope_approval(tmp_p
     with pytest.raises(NativeError,match='contract'):prepare(Path(p['source_root']),drift)
 
 
-def test_new_contract_runs_same_controller_and_audits_new_revision_receipt(tmp_path):
+@pytest.mark.parametrize('mode', ['controlled_snapshot_probe', 'controlled_continuity_probe'])
+def test_new_contract_runs_same_controller_and_audits_new_revision_receipt(tmp_path, mode):
     from eval.test_lora_common_chain import WriteFixture
     from tools.build_lora_common_probe import build
     from training.lora_common_probe_runner import controller
     from plugin.rhino_listener.lora_development_host import DevelopmentHost
     from plugin.rhino_listener.c5_research_native import CORE
-    p=build(Path(__file__).resolve().parents[1],tmp_path/'bundle',controlled_snapshot_probe=True)
+    p=build(Path(__file__).resolve().parents[1],tmp_path/'bundle',**{mode:True})
     state=tmp_path/'synthetic';state.mkdir(mode=0o700)
     for name in ('host','controller','journal','permission','fixtures'):(state/name).mkdir(mode=0o700)
     secret=b'x'*32
@@ -188,6 +193,26 @@ def test_new_contract_runs_same_controller_and_audits_new_revision_receipt(tmp_p
     e=json.loads((state/'controller/common-000.evidence.json').read_text())
     assert len(e['steps'])==2 and e['execution']['native_effect']=='verified_writes'
     assert e['score']['outcome_correct'] and e['execution']['fixture_cleanup']=='verified'
+
+
+def test_continuity_probe_reuses_contract_without_repeating_fixed_checks(tmp_path):
+    from tools.build_lora_common_probe import build
+    from training.lora_common_probe_runner import prepare
+    from plugin.rhino_listener.lora_common_probe import approval_record, admit
+    from plugin.rhino_listener.c5_research_channel import publish_json
+    p=build(Path(__file__).resolve().parents[1],tmp_path/'bundle',controlled_continuity_probe=True)
+    ready=prepare(Path(p['source_root']),p)
+    assert [c['family_id'] for c in ready['cases']]==['COMMON-B02']
+    assert ready['session_options']['state_contract']=='controlled_snapshot_v1'
+    assert ready['session_options']['snapshot_probe'] is False
+    assert p['capacity']['additional_fixture_operations_max']==0
+    assert p['capacity']['isolated_documents_max']==1
+    assert p['capacity']['model_step_requests_max']==0
+    state=Path(p['state_root']); assert not state.exists(); state.mkdir(mode=0o700)
+    wrong=approval_record(p)
+    wrong['scope']='one_controlled_snapshot_move_read_probe_zero_models_no_external_aba_no_final_test'
+    publish_json(state,'owner-approval.json',wrong)
+    with pytest.raises(NativeError,match='approval'):admit(Path(p['source_root']),p)
 
 
 def test_partial_fixed_write_failure_keeps_uncertain_ledger_and_closes_owned_doc(tmp_path,monkeypatch):
@@ -214,6 +239,8 @@ def test_partial_fixed_write_failure_keeps_uncertain_ledger_and_closes_owned_doc
 
 
 @pytest.mark.parametrize('arguments,code,expected', [(['--help'],0,'--snapshot'),
+    (['--help'],0,'--continuity'),
+    (['--snapshot','--continuity','--output','unused.json'],2,'not allowed'),
     (['--snapshot','--diagnostic','--output','unused.json'],2,'not allowed')])
 def test_actual_audit_cli_exposes_snapshot_and_rejects_mixed_modes(arguments,code,expected):
     import subprocess

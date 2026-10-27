@@ -19,7 +19,7 @@ def main():
     sys.path.insert(0, str(ROOT))
     sys.path.append('/opt/anaconda3/lib/python3.13/site-packages')
     from training.lora_common_probe_runner import prepare, controller
-    from plugin.rhino_listener.lora_common_probe import admit
+    from plugin.rhino_listener.lora_common_probe import admit, request_shutdown, wait_for_host_reply
     from plugin.rhino_listener.lora_development_admission import source_guard
     from plugin.rhino_listener.c5_research_channel import read_json, publish_json, remove_private_key
     from plugin.rhino_listener.c5_research_native import digest, require
@@ -42,27 +42,22 @@ def main():
         require(shutil.disk_usage(state).free >= 2*1024**3, 'cleanup storage reserve reached')
         require(time.time() < package['lease_end_epoch'] - 900, 'lease cleanup cutoff')
         require(deadline is None or time.monotonic() < deadline, 'slot deadline')
-    def await_json(name, until):
-        while time.monotonic() < until:
-            if os.path.lexists(host_state/name): return read_json(host_state, name)
-            if name != 'host-settlement.json' and os.path.lexists(host_state/'host-settlement.json'):
-                raise RuntimeError('host stopped')
-            time.sleep(.05)
-        raise TimeoutError('host reply timeout')
+    def await_json(name, until, *, stop_on_timeout=False):
+        return wait_for_host_reply(host_state,name,until,runtime,stop_on_timeout=stop_on_timeout)
     def host(envelope):
         nonlocal deadline
         p = envelope['payload']; action = p['request']['action']
         if action == 'open': deadline = time.monotonic() + package['plan']['limits']['slot_seconds']
         until = time.monotonic()+30 if action in {'close', 'stop'} else deadline
         publish_json(host_state, 'request-%04d.json'%p['sequence'], envelope)
-        result = await_json('response-%04d.json'%p['sequence'], until)
+        result = await_json('response-%04d.json'%p['sequence'], until, stop_on_timeout=action not in {'close','stop'})
         if action == 'stop': deadline = None
         return result
     secret = secrets.token_bytes(32)
     try:
         publish_json(state, 'host-secret.json', {'package_sha256': runtime, 'key_hex': secret.hex()})
         print('Waiting for the separately approved common probe Rhino entry', flush=True)
-        ready = await_json('host-ready.json', time.monotonic()+package['plan']['limits']['host_ready_seconds'])
+        ready = await_json('host-ready.json', time.monotonic()+package['plan']['limits']['host_ready_seconds'], stop_on_timeout=True)
         require(ready['runtime_sha256'] == runtime and ready['entry_return_release_observed'] is True,
                 'host readiness differs')
         runner = controller(ROOT, package, state, secret, host, guard, source)
@@ -71,7 +66,7 @@ def main():
         failures.append(failure_record(exc, 'probe'))
     finally:
         try:
-            publish_json(host_state, 'shutdown.request.json', {'runtime_sha256': runtime, 'action': 'shutdown'})
+            request_shutdown(host_state, runtime)
             final = await_json('host-settlement.json', time.monotonic()+30)
             require(final['runtime_sha256'] == runtime and final['status'] == 'host_stopped'
                     and final['exact_delegate_remove_returned'] is True, 'host cleanup unknown')

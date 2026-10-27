@@ -64,8 +64,9 @@ def common_capacity(plan):
     peer_files = 8 * steps + 32
     scoped = plan['study_id'] == 'lora-common-document-scope-probe-v1'
     snapshot = plan['study_id'] == 'lora-common-controlled-snapshot-probe-v1'
-    diagnostic = plan['study_id'] == 'lora-common-state-diagnostic-v1' or scoped or snapshot
-    probe = plan['study_id'] in {'lora-common-native-probe-v1', 'lora-common-state-diagnostic-v1'} or scoped or snapshot
+    continuity = plan['study_id'] == 'lora-common-controlled-continuity-probe-v1'
+    diagnostic = plan['study_id'] == 'lora-common-state-diagnostic-v1' or scoped or snapshot or continuity
+    probe = plan['study_id'] in {'lora-common-native-probe-v1', 'lora-common-state-diagnostic-v1'} or scoped or snapshot or continuity
     value = {'families': sum(plan['strata'].values()), 'slots': slots,
         'model_step_requests_max': 0 if probe else steps, 'scripted_step_requests_max': steps if probe else 0,
         'generation_stages_max': 0 if probe else 2*steps,
@@ -85,6 +86,9 @@ def common_capacity(plan):
         value['document_events_max'] = 256
         value['fingerprint_records_max'] += 2  # native scope-check atomic snapshots
         value['evidence_files_max'] += 18  # two snapshots plus bounded scope/cleanup records
+    if continuity:
+        value['additional_fixture_operations_max'] = 0
+        value['isolated_documents_max'] = 1
     if snapshot:
         value['additional_fixture_operations_max'] = 2
         value['isolated_documents_max'] = 1

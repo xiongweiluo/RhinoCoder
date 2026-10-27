@@ -61,3 +61,10 @@ def controlled_snapshot_probes():
     case = copy.deepcopy(public_probes()[0])
     case.update(family_id='COMMON-B01', template_family='controlled_write_snapshot_move_read')
     return [validate_case(case)]
+
+
+def controlled_continuity_probes():
+    """One declared additional attempt; prior B01 remains failed/consumed."""
+    case = copy.deepcopy(public_probes()[0])
+    case.update(family_id='COMMON-B02', template_family='controlled_move_read_after_transport_fix')
+    return [validate_case(case)]
