@@ -22,6 +22,7 @@ from pathlib import Path
 
 _KEY = re.compile(r"[A-Za-z0-9_-]{24,128}\Z")
 _DIGEST = re.compile(r"[0-9a-f]{64}\Z")
+CONTROLLED_SNAPSHOT = 'controlled_snapshot_v1'
 
 
 class AtomicGateError(RuntimeError):
@@ -45,11 +46,12 @@ def scene_fingerprint(document, items, layers):
     identity. In particular, equal semantic geometry cannot waive a drift.
     """
     local = isinstance(document[3], dict)
+    snapshot = local and document[3].get('schema') == CONTROLLED_SNAPSHOT
     return {
         'scene_sha256': _hash(_json({'document': document, 'objects': items, 'layers': layers})),
         'components': {
             'document_settings_sha256': _hash(_json(document[:3])),
-            ('document_mutation_clock' if local else 'process_next_object_serial'): document[3],
+            ('state_contract' if snapshot else 'document_mutation_clock' if local else 'process_next_object_serial'): document[3],
             'document_next_undo_serial': document[4],
             'layers_sha256': _hash(_json(layers)),
             'objects': {_hash(item[0]): {'geometry_sha256': _hash(item[1]),
@@ -59,7 +61,7 @@ def scene_fingerprint(document, items, layers):
     }
 
 
-def rhino_scene_fingerprint(doc, *, document_clock=None):
+def rhino_scene_fingerprint(doc, *, document_clock=None, controlled_snapshot=False):
     """Read the active document on the UI thread, failing closed on any gap.
 
     RhinoCommon's archival JSON covers geometry and object attributes; neither
@@ -68,6 +70,8 @@ def rhino_scene_fingerprint(doc, *, document_clock=None):
 
     import Rhino  # noqa: PLC0415
 
+    if controlled_snapshot and document_clock is not None:
+        raise AtomicGateError('conflicting_state_contracts')
     if document_clock is not None and document_clock.serial != int(doc.RuntimeSerialNumber):
         raise AtomicGateError('wrong_document_clock')
     before = document_clock.snapshot() if document_clock is not None else None
@@ -85,7 +89,7 @@ def rhino_scene_fingerprint(doc, *, document_clock=None):
         if obj.Geometry is None or obj.Attributes is None:
             raise AtomicGateError("scene_unreadable")
         item = (str(obj.Id), obj.Geometry.ToJSON(options), obj.Attributes.ToJSON(options))
-        items.append(item + (int(obj.RuntimeSerialNumber),) if document_clock is not None else item)
+        items.append(item + (int(obj.RuntimeSerialNumber),) if document_clock is not None or controlled_snapshot else item)
     items.sort(key=lambda item: item[0])
     layers = sorted(
         (str(layer.Id), str(layer.Name), str(layer.ParentLayerId),
@@ -97,7 +101,8 @@ def rhino_scene_fingerprint(doc, *, document_clock=None):
         float(doc.ModelAngleToleranceRadians),
         # Monotone process-local watermarks also reject add/delete/undo ABA
         # even if the final object serialization becomes identical again.
-        ({'schema': 'document_mutation_v1', 'epoch': before} if document_clock is not None
+        ({'schema': CONTROLLED_SNAPSHOT, 'external_aba_detection': False} if controlled_snapshot else
+         {'schema': 'document_mutation_v1', 'epoch': before} if document_clock is not None
          else int(Rhino.DocObjects.RhinoObject.NextRuntimeSerialNumber)),
         int(doc.NextUndoRecordSerialNumber),
     )
@@ -114,7 +119,10 @@ class RhinoAtomicGate:
     """One live document session, one UI thread, with SQLite at-most-once keys."""
 
     def __init__(self, path, document_identity, scene_digest, *,
-                 create_ledger=False, clock=time.time):
+                 create_ledger=False, clock=time.time, state_contract='legacy_global_v1'):
+        if state_contract not in {'legacy_global_v1', CONTROLLED_SNAPSHOT}:
+            raise AtomicGateError('unknown_state_contract')
+        self.state_contract = state_contract
         self.path = Path(path)
         if self.path.is_symlink():
             raise AtomicGateError("unsafe_ledger_path")
@@ -241,6 +249,12 @@ class RhinoAtomicGate:
                     (key, self.document_key, signature, current["revision"],
                      current["scene_sha256"], "reserved", None, int(self.clock()), None),
                 )
+                if self.state_contract == CONTROLLED_SNAPSHOT:
+                    # Same durable transaction as the reservation. Even a
+                    # no-op or content-restoring controlled write invalidates
+                    # older authorizations. This does not observe external ABA.
+                    db.execute("UPDATE candidate_scene SET revision=revision+1 WHERE document_key=?",
+                               (self.document_key,))
         if drifted:
             raise AtomicGateError("scene_changed")
         # Durable barrier: no Rhino mutation before the transaction commits.

@@ -12,7 +12,7 @@ from plugin.rhino_listener.lora_common_probe import prepare as prepare_host
 from training.c5_rhino_adapter import invoke_step
 from training.c5_formal20_privacy import allowed
 from training.lora_common_chain import CommonChain
-from training.lora_common_probes import public_probes, diagnostic_probes, document_scope_probes
+from training.lora_common_probes import public_probes, diagnostic_probes, document_scope_probes, controlled_snapshot_probes
 from training.lora_comparison_plan import proposal, compile_cases, capacity
 from training.lora_development_controller import DevelopmentController
 from training.lora_development_scope import DevelopmentJournal
@@ -35,8 +35,9 @@ def prepare(root, package):
     ready = prepare_host(root, package)
     diagnostic = package['kind'] == 'public_common_state_diagnostic_v1'
     scoped = package['kind'] == 'public_common_document_scope_probe_v1'
-    plan = proposal(native_probe=True, fingerprint_diagnostic=diagnostic, document_scope_probe=scoped)
-    cases = document_scope_probes() if scoped else diagnostic_probes() if diagnostic else public_probes()
+    snapshot = package['kind'] == 'public_common_controlled_snapshot_probe_v1'
+    plan = proposal(native_probe=True, fingerprint_diagnostic=diagnostic, document_scope_probe=scoped, controlled_snapshot_probe=snapshot)
+    cases = controlled_snapshot_probes() if snapshot else document_scope_probes() if scoped else diagnostic_probes() if diagnostic else public_probes()
     require(package['plan'] == plan and package['compiled'] == compile_cases(plan, cases)
             and package['capacity'] == capacity(plan), 'exact public probe composition differs')
     return {**ready, 'cases': cases, 'tokenizer': ScriptedTokenizer()}

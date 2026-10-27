@@ -14,6 +14,19 @@
     "slots": 80,
     "worst_window_seconds": 35280
   },
+  "controlled_snapshot_candidate": {
+    "attempts_consumed": 0,
+    "fixed_protection_operations_max": 2,
+    "isolated_documents_max": 1,
+    "native_candidate_validated": false,
+    "native_execution_authorized": false,
+    "package_sha256": "cbd0a1202c378a1d137b77e133c3556592f29f1386cfb7d44a0abe5ca5a73424",
+    "preparation": "eval/lora-development/common-controlled-snapshot-preparation-20261027.json",
+    "reads_max": 1,
+    "seed_operations_max": 7,
+    "signed_writes_max": 1,
+    "source_inventory_sha256": "08550dae903496e349a4ebfb85a892b4e1e7667391175e72f820bb03fa70d095"
+  },
   "cumulative_loads_if_separately_approved": 6,
   "custodian": "repository_owner_separated_from_generation_training_selection_and_agent",
   "diagnostic_checkpoint": {
@@ -136,9 +149,9 @@
   },
   "native_probe_result": "eval/lora-development/common-native-probe-result-20261027.json",
   "no_new_native_proposal_until": [
-    "applicable API/version/headless support evidenced",
-    "change-history guarantee and exclusions explicit",
-    "material host or protected-contract changes centrally decided"
+    "actual deployment CPU preparation passed",
+    "owner-selected B limitation explicit",
+    "new exact package/scope presented together for native execution approval"
   ],
   "phase_two_freeze_dependency": "bind owner-only final case commitment, exact source/environment roots, admission and actual transport entries; CPU check before exposure; old live CLI cannot admit this new study",
   "plan": {
@@ -159,6 +172,7 @@
     ],
     "schedule_seed": 20261027,
     "schema_version": 1,
+    "state_contract": "controlled_snapshot_v1",
     "strata": {
       "clarification": 6,
       "core_tool": 12,
@@ -201,9 +215,9 @@
   },
   "proposed_additional_final_loads": 1,
   "remaining_phase_one": [
-    "resolve document-state/history guarantee against the pinned Rhino 8.21 headless API; preserve protection by default and do not retry static-event candidate",
-    "complete a supported CPU implementation and only separately approved necessary native verification after capability and scope decision",
-    "combine bounded evidence and obtain owner confirmation of complete comparison choices before final-test creation"
+    "owner approval and technical gates for one controlled-snapshot native check, no model load",
+    "audit new evidence and freeze complete common-chain/comparison choices with explicit external-ABA exclusion",
+    "retain full real-model write-chain limitation; final test custody and exact execution approval remain phase two"
   ],
   "runtime_configuration": {
     "cleanup_export_seconds": 900,
@@ -240,8 +254,17 @@
     "product_access_or_rollout_authorized": false
   },
   "selected_system": "original",
-  "source_inventory_sha256": "44e6a192983fb06a51588d1c97d5f594f1f1aaa7f46b04c59b656e6d9f3b9eed",
-  "status": "phase_one_blocked_on_supported_document_change_history_contract_candidate_rejected",
+  "source_inventory_sha256": "08550dae903496e349a4ebfb85a892b4e1e7667391175e72f820bb03fa70d095",
+  "state_protection_decision": {
+    "contract": "controlled_snapshot_v1",
+    "design_authorized": true,
+    "external_aba_detection": false,
+    "native_execution_authorized": false,
+    "owner_selected_route": "B",
+    "product_safety_claim": false,
+    "record": "eval/lora-development/common-controlled-snapshot-decision-20261027.json"
+  },
+  "status": "phase_one_controlled_snapshot_cpu_ready_native_execution_unapproved",
   "training_decision": "no_training_supported_by_current_evidence",
   "training_decision_evidence": {
     "current_lora_candidate_development_successes": 5,

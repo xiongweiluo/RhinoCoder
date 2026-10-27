@@ -54,3 +54,10 @@ def document_scope_probes():
     case = copy.deepcopy(public_probes()[0])
     case.update(family_id='COMMON-S01', template_family='document_local_guard_move_read')
     return [validate_case(case)]
+
+
+def controlled_snapshot_probes():
+    """Exposed P01 mechanism under the selected narrower research contract."""
+    case = copy.deepcopy(public_probes()[0])
+    case.update(family_id='COMMON-B01', template_family='controlled_write_snapshot_move_read')
+    return [validate_case(case)]

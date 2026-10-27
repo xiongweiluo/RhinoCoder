@@ -13,7 +13,8 @@ from .lora_development_admission import source_guard
 
 def prepare(root, package):
     source_guard(root, package['source_files'])
-    choices = {'public_common_native_probe_v1': ('lora-common-native-probe-v1', 2),
+    choices = {'public_common_controlled_snapshot_probe_v1': ('lora-common-controlled-snapshot-probe-v1', 1),
+               'public_common_native_probe_v1': ('lora-common-native-probe-v1', 2),
                'public_common_state_diagnostic_v1': ('lora-common-state-diagnostic-v1', 1),
                'public_common_document_scope_probe_v1': ('lora-common-document-scope-probe-v1', 1)}
     require(package['kind'] in choices, 'known zero-model probe package required')
@@ -25,12 +26,21 @@ def prepare(root, package):
             and len(package['compiled']['views']['schedule']) == slots,
             'exact scripted public probe scope only')
     schemas = json.loads((Path(root)/'eval/c5/rhino-runtime-schema-v1.json').read_text())['core_parameters']
-    return {'schemas': schemas, 'views': package['compiled']['views'], 'capacity': package['capacity']}
+    snapshot = package['kind'] == 'public_common_controlled_snapshot_probe_v1'
+    state_contract = package['plan'].get('state_contract', 'legacy_global_v1')
+    require(state_contract == ('controlled_snapshot_v1' if snapshot else 'legacy_global_v1'),
+            'probe state contract differs')
+    return {'schemas': schemas, 'views': package['compiled']['views'], 'capacity': package['capacity'],
+        'session_options': {'fingerprint_limit': package['capacity'].get('fingerprint_records_max', 0),
+            'document_scope_probe': package['kind'] == 'public_common_document_scope_probe_v1',
+            'state_contract': state_contract, 'snapshot_probe': snapshot}}
 
 
 def approval_record(package):
     return {'actor': 'repository_owner', 'approved': True, 'package_sha256': digest(package),
-            'scope': ('one_document_scope_and_move_read_probe_zero_models_no_final_test'
+            'scope': ('one_controlled_snapshot_move_read_probe_zero_models_no_external_aba_no_final_test'
+                      if package['kind'] == 'public_common_controlled_snapshot_probe_v1' else
+                      'one_document_scope_and_move_read_probe_zero_models_no_final_test'
                       if package['kind'] == 'public_common_document_scope_probe_v1' else
                       'one_move_fingerprint_diagnostic_zero_models_no_final_test'
                       if package['kind'] == 'public_common_state_diagnostic_v1' else

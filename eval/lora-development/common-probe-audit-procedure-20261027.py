@@ -136,6 +136,55 @@ def review_document_scope_open_stop(fixture, read, evidence, history, events):
         'original_execution_classification_preserved':True}
 
 
+
+def review_controlled_snapshot(fixture, read, captures, receipts, capacity, fixed_ledger):
+    """Positive-path audit. Partial/missing evidence never becomes a pass."""
+    proof = read(fixture/'snapshot-check.json')
+    assert proof['status'] == 'passed' and proof['fixed_native_operations'] == 2
+    assert proof['state_contract'] == 'controlled_snapshot_v1' and proof['controlled_aba_rejected']
+    assert proof['stale_dispatch_calls'] == 0 and proof['external_aba_detection'] is False and proof['content_restored']
+    states = proof['states']; assert len(states) == 3
+    assert len({r['document_key'] for r in states}) == 1
+    assert states[0]['revision'] < states[1]['revision'] < states[2]['revision']
+    writes = fixed_ledger['candidate_write']; assert len(writes) == 2
+    by_key = {r['idempotency_key']: r for r in writes}; assert len(by_key) == 2
+    for index, operation in enumerate(('fixed_add_point','fixed_delete_point')):
+        claim = read(fixture/('snapshot-fixed-%d.claim.json'%index))
+        result = read(fixture/('snapshot-fixed-%d.result.json'%index))
+        assert claim['operation'] == operation and claim['arguments'] == {} and claim['before_state'] == states[index]
+        row = by_key[claim['key']]
+        assert row == result['ledger'] and row['state'] == 'done'
+        assert row['document_key'] == states[index]['document_key']
+        assert row['expected_revision'] == states[index]['revision'] and row['expected_sha256'] == states[index]['scene_sha256']
+        expected_result = {'operation':operation,'completed':True}
+        digest = lambda v: hashlib.sha256(json.dumps(v,ensure_ascii=False,sort_keys=True,separators=(',',':'),allow_nan=False).encode()).hexdigest()
+        assert row['request_sha256'] == digest({'operation':operation,'arguments':{}})
+        assert result['result'] == expected_result and row['result_sha256'] == digest(expected_result)
+        assert result['after_state'] == states[index+1]
+    assert len(fixed_ledger['candidate_scene']) == 1
+    final = fixed_ledger['candidate_scene'][0]
+    assert {k:final[k] for k in states[-1]} == states[-1]
+    files = sorted(fixture.glob('fingerprint-*.json'))
+    assert 0 < len(files) <= capacity['fingerprint_records_max']
+    hashes = {}
+    for index, path in enumerate(files, 1):
+        record = read(path); comp = record['components']; sha = record['scene_sha256']
+        assert record['sequence'] == index and path.name == 'fingerprint-%04d.json'%index
+        assert set(comp) == {'document_settings_sha256','state_contract','document_next_undo_serial','layers_sha256','objects'}
+        assert comp['state_contract'] == {'schema':'controlled_snapshot_v1','external_aba_detection':False}
+        assert sha not in hashes or hashes[sha] == comp
+        hashes[sha] = comp
+    required = {s['scene_sha256'] for s in states} | {v['state']['scene_sha256'] for v in captures}
+    required.update(r[k]['scene_sha256'] for r in receipts for k in ('before_state','after_state'))
+    assert required <= set(hashes)
+    before, after = [hashes[states[i]['scene_sha256']] for i in (0,2)]
+    assert all(before[f] == after[f] for f in ('document_settings_sha256','objects','layers_sha256'))
+    assert not list(fixture.glob('scope-*.json')) and not (fixture/'document-clock-close.json').exists()
+    return {'controlled_aba_and_fixed_ledger_verified':True,'fixed_operations':2,
+            'external_aba_detection':False,'fingerprint_records':len(files),
+            'task_and_fixed_ledgers_separate':True,'model_quality_evidence':False}
+
+
 def main():
     if not __debug__:
         raise RuntimeError('Assertions are required; do not use -O.')
@@ -144,9 +193,10 @@ def main():
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument('--diagnostic', action='store_true', help='Review only the separately approved single-slot diagnostic')
     modes.add_argument('--document-scope', action='store_true', help='Review only the separately approved document-scope probe')
+    modes.add_argument('--snapshot', action='store_true', help='Review only the separately approved controlled-snapshot probe')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[2]
-    package_name = ('common-document-scope-package-20261027.json' if args.document_scope else
+    package_name = ('common-controlled-snapshot-package-20261027.json' if args.snapshot else 'common-document-scope-package-20261027.json' if args.document_scope else
                     'common-state-diagnostic-package-20261027.json' if args.diagnostic else 'common-native-probe-package-20261027.json')
     package = json.loads((root/'eval/lora-development'/package_name).read_text())
     source, state = Path(package['source_root']), Path(package['state_root'])
@@ -162,6 +212,8 @@ def main():
     if args.document_scope:
         from training.lora_common_probes import document_scope_probes
         from plugin.rhino_listener.document_mutation_clock import EVENTS
+    if args.snapshot:
+        from training.lora_common_probes import controlled_snapshot_probes
     from training.lora_common_chain import CommonChain
     from training.lora_common_wire import reparse_response, check_predecessor, user_step
     from training.c5_rhino_adapter import step_input
@@ -170,7 +222,7 @@ def main():
     from training.c5_formal20_scorer import score_route, AUDIT_KEYS
     from training.c5_research_audit import _tables, audit_permission_tables
     runtime = digest(package)
-    assert runtime == ('25296784f4305a1045249774f0305c0c98a2f294b2e1b2f891c3137371135583' if args.document_scope else
+    assert runtime == (json.loads((root/'eval/lora-development/common-controlled-snapshot-preparation-20261027.json').read_text())['package_sha256'] if args.snapshot else '25296784f4305a1045249774f0305c0c98a2f294b2e1b2f891c3137371135583' if args.document_scope else
                        '931aad6fc68afc1752c089ce6c6291e8808321d712c07f422c009a5edaef36cf' if args.diagnostic else
                        '85ba112e4aa98073760f0a73e0d10c35d1e94015bc0c57c70326ccf5382f5ebb')
     source_guard(source, package['source_files'])
@@ -211,7 +263,7 @@ def main():
     assert not result['failures'] and len(rows) == package['capacity']['slots']
     assert [r['identity']['slot_id'] for r in rows] == [c['slot_id'] for c in views['schedule']]
     assert not (s/'journal/selection.json').exists()
-    definitions = document_scope_probes() if args.document_scope else diagnostic_probes() if args.diagnostic else public_probes()
+    definitions = controlled_snapshot_probes() if args.snapshot else document_scope_probes() if args.document_scope else diagnostic_probes() if args.diagnostic else public_probes()
     cases = {c['family_id']: c for c in definitions}
     contract = CommonChain(package['plan'], package['compiled'], definitions, s/'permission')
     exchanges = {}
@@ -328,6 +380,10 @@ def main():
                     (td/path.name).write_bytes(read_stable(path))
             ledger = _tables(td/'fixture.sqlite3', ('candidate_write','c5_read'))
             consent = _tables(td/(slot+'.consent.sqlite3'), ('consent_requests','consent_events','c5_model_handoff'))
+            if args.snapshot:
+                for path in fixture.glob('snapshot-protection.sqlite3*'):
+                    (td/path.name).write_bytes(read_stable(path))
+                fixed_ledger = _tables(td/'snapshot-protection.sqlite3', ('candidate_write','candidate_scene'))
         assert ledger == e['stop']['ledger']
         audit = audit_permission_tables(consent, ledger, receipts,
             task_sha256=hashlib.sha256(case['task_text'].encode()).hexdigest(), owner_freeze_sha256=runtime)
@@ -341,7 +397,7 @@ def main():
         else:
             # Preserve this actual failure; do not score the incomplete task as
             # success just because the first write and cleanup are verified.
-            assert case['family_id'] == ('COMMON-S01' if args.document_scope else 'COMMON-D01' if args.diagnostic else 'COMMON-P01') and row['outcome'] == 'engineering_failure'
+            assert case['family_id'] == ('COMMON-B01' if args.snapshot else 'COMMON-S01' if args.document_scope else 'COMMON-D01' if args.diagnostic else 'COMMON-P01') and row['outcome'] == 'engineering_failure'
             assert e['score'] is None and len(e['steps']) == 1 and e['final_native'] is None
             assert [(f['stage'],f['message']) for f in e['failures']] == [('step_preflight','noncontiguous native execution')]
             last = receipts[-1]; current = captures[-1]
@@ -377,6 +433,8 @@ def main():
         scope_review = None
         if args.document_scope:
             scope_review = review_document_scope(fixture, read, captures, receipts, package['capacity'], EVENTS)
+        if args.snapshot:
+            scope_review = review_controlled_snapshot(fixture, read, captures, receipts, package['capacity'], fixed_ledger)
         summaries.append({'slot_id':slot,'family_id':cell['family_id'],'outcome':row['outcome'],
             'steps':len(receipts),'writes':audit['write_count'],'reads':audit['read_count'],
             'seconds_including_cleanup':e['slot_elapsed_seconds_including_cleanup'],
@@ -384,18 +442,19 @@ def main():
             'actual_scene_and_successor_input_verified':e['error_type'] is None,
             'continuity_failure':continuity_failure,'fingerprint_review':fingerprint_review,
             'execution_status_preserved':e['execution'],'permission_and_native_sqlite_verified':True,
-            **({'document_scope_review':scope_review} if args.document_scope else {})})
+            **({'state_contract_review':scope_review} if args.snapshot else {'document_scope_review':scope_review} if args.document_scope else {})})
     if scope_open_stop:
         assert (native_writes,native_reads,steps_total,seeds) == (0,0,0,0)
-    elif args.diagnostic or args.document_scope:
+    elif args.diagnostic or args.document_scope or args.snapshot:
         assert native_writes == 1 and native_reads in (0,1) and steps_total == 1+native_reads and seeds == 7
     else:
         assert (native_writes,native_reads,steps_total,seeds) == (3,1,4,14)
     assert len(list((s/'controller').glob('*.model.json'))) == steps_total
     assert inventory(state) == inventory(backup) == (original,raw_bytes)
     prestart = None
-    if args.document_scope:
-        prestart = read(root/'eval/lora-development/common-document-scope-prestart-20261027.json')
+    if args.document_scope or args.snapshot:
+        prestart_name = 'common-controlled-snapshot-prestart-20261027.json' if args.snapshot else 'common-document-scope-prestart-20261027.json'
+        prestart = read(root/'eval/lora-development'/prestart_name)
         assert prestart['package_sha256'] == runtime and prestart['all_five_ci_successful'] is True
     report = {'date':'2026-10-27','package_sha256':runtime,'source_inventory_sha256':digest(package['source_files']),
         'executed_ci_commit':prestart['source_commit'] if prestart else 'd46dc568d4563255db2a7b3097667b5e81a08c3c' if args.diagnostic else '056978e5a209f96987e7c0d76436aa999e95f3e6',
@@ -407,6 +466,9 @@ def main():
                 ["KeyError: fixture_serial; host open failed before the successful-open record",
                  "Early-stop audit initially assumed permission directory absent; actual CommonChain.start creates empty tables before open. Replaced by copy-based emptiness verification, never by accepting permission rows."] if scope_open_stop else None}
            if args.document_scope else {}),
+        **({'additional_fixed_fixture_operations':2,'isolated_documents':1,
+            'state_contract':'controlled_snapshot_v1','external_aba_detection':False,
+            'native_candidate_accepted':all(r['outcome']=='success' for r in rows)} if args.snapshot else {}),
         'rows':summaries,'native_writes':native_writes,'native_reads':native_reads,'fixture_seed_operations':seeds,
         'host_messages':len(requests),'elapsed_seconds':result['elapsed_seconds'],'evidence_files':len(original),
         'evidence_bytes':raw_bytes,'retained_backup_copies':1,'evidence_inventory_sha256':digest(original),

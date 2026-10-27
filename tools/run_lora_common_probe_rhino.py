@@ -43,8 +43,7 @@ def start():
     def factory(plan, runtime, secret):
         directory = state/'fixtures'/plan['slot_id']; directory.mkdir(mode=0o700)
         return host_module.RhinoSession(plan, runtime, secret, directory=directory, schemas=prepared['schemas'], guard=guard,
-            fingerprint_limit=package['capacity'].get('fingerprint_records_max', 0),
-            document_scope_probe=package['kind'] == 'public_common_document_scope_probe_v1')
+            **prepared['session_options'])
     host = host_module.DevelopmentHost(state=state/'host', runtime=runtime, native_views=prepared['views']['native'],
         schedule=prepared['views']['schedule'], secret=secret, factory=factory, guard=guard, cleanup_guard=source,
         operations=native.CORE, messages_max=prepared['capacity']['host_messages_max'], study=package['plan']['study_id'])

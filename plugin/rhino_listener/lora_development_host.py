@@ -110,25 +110,34 @@ class DevelopmentHost:
 class RhinoSession:
     """Real implementation; only the separately approved UI entry calls it."""
     def __init__(self, plan, runtime, secret, *, directory, schemas, guard, fingerprint_limit=0,
-                 document_scope_probe=False):
+                 document_scope_probe=False, state_contract='legacy_global_v1', snapshot_probe=False):
+        from .candidate_atomic_gate import CONTROLLED_SNAPSHOT
+        require(state_contract in {'legacy_global_v1', CONTROLLED_SNAPSHOT}
+                and not (document_scope_probe and state_contract == CONTROLLED_SNAPSHOT)
+                and (not snapshot_probe or state_contract == CONTROLLED_SNAPSHOT), 'explicit state contract required')
         self.plan, self.runtime, self.secret = plan, runtime, secret
         self.directory, self.schemas, self.guard = directory, schemas, guard
         self.doc = self.backend = self.gate = None
         self.close_attempted = False
         self.fingerprint_limit, self.fingerprint_sequence = fingerprint_limit, 0
         self.document_scope_probe, self.document_clock = document_scope_probe, None
+        self.state_contract, self.snapshot_probe = state_contract, snapshot_probe
 
     def scene_digest(self):
-        from .candidate_atomic_gate import rhino_scene_digest, rhino_scene_fingerprint
-        if not self.fingerprint_limit and not self.document_scope_probe:
+        from .candidate_atomic_gate import rhino_scene_digest, rhino_scene_fingerprint, CONTROLLED_SNAPSHOT
+        controlled = self.state_contract == CONTROLLED_SNAPSHOT
+        if not self.fingerprint_limit and not self.document_scope_probe and not controlled:
             return rhino_scene_digest(self.doc)
         require(not self.document_scope_probe or self.document_clock is not None, 'document clock required')
-        require(self.fingerprint_sequence < self.fingerprint_limit, 'fingerprint evidence capacity reached')
-        value = (rhino_scene_fingerprint(self.doc, document_clock=self.document_clock)
+        require((controlled and not self.fingerprint_limit) or self.fingerprint_sequence < self.fingerprint_limit,
+                'fingerprint evidence capacity reached')
+        value = (rhino_scene_fingerprint(self.doc, controlled_snapshot=True) if controlled else
+                 rhino_scene_fingerprint(self.doc, document_clock=self.document_clock)
                  if self.document_scope_probe else rhino_scene_fingerprint(self.doc))
-        self.fingerprint_sequence += 1
-        publish_json(self.directory, 'fingerprint-%04d.json' % self.fingerprint_sequence,
-                     {'sequence': self.fingerprint_sequence, **value})
+        if self.fingerprint_limit:
+            self.fingerprint_sequence += 1
+            publish_json(self.directory, 'fingerprint-%04d.json' % self.fingerprint_sequence,
+                         {'sequence': self.fingerprint_sequence, **value})
         return value['scene_sha256']
 
     def open(self):
@@ -151,6 +160,9 @@ class RhinoSession:
         publish_json(self.directory, 'created.json', {'serial': self.backend.serial, 'headless': True,
                      'runtime_sha256': self.runtime, 'existing_document_content_read': False})
         atomic = None
+        if self.snapshot_probe:
+            from .controlled_snapshot_probe import check
+            check(self)
         if self.document_scope_probe:
             from .document_scope_probe import check
             atomic = RhinoAtomicGate(self.directory / 'fixture.sqlite3', str(self.backend.serial),
@@ -164,7 +176,7 @@ class RhinoSession:
             publish_json(self.directory, 'seed-%02d.result.json' % index, {'result': value})
         if atomic is None:
             atomic = RhinoAtomicGate(self.directory / 'fixture.sqlite3', str(self.backend.serial),
-                                    self.scene_digest, create_ledger=True)
+                                    self.scene_digest, create_ledger=True, state_contract=self.state_contract)
         self.gate = ResearchGate(self.backend, atomic, self.secret, self.runtime,
             task_sha256=self.plan['task_sha256'], max_reads=self.plan['max_reads'], max_writes=self.plan['max_writes'])
         return {'status': 'opened', 'fixture_serial': self.backend.serial}

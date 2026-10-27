@@ -75,6 +75,8 @@ if (root / 'training/lora_common_chain.py').exists():
     targets += ('training.lora_common_chain', 'training.lora_common_probe_runner',
                 'training.lora_comparison_statistics', 'training.lora_comparison_storage',
                 'plugin.rhino_listener.lora_common_probe')
+    if (root / 'plugin/rhino_listener/controlled_snapshot_probe.py').exists():
+        targets += ('plugin.rhino_listener.controlled_snapshot_probe',)
 if (root / 'tools/run_lora_common_probe.py').exists():
     targets += ('tools.run_lora_common_probe', 'tools.run_lora_common_probe_rhino')
 for name in targets: importlib.import_module(name)
