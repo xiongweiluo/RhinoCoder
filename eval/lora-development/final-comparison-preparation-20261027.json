@@ -30,17 +30,27 @@
     "status": "completed_engineering_failure_component_localized_origin_unknown"
   },
   "document_scope_candidate": {
+    "actual_fixed_operations": 3,
+    "actual_reads": 0,
+    "actual_seed_operations": 0,
+    "actual_signed_writes": 0,
     "additional_fixed_operations": 3,
-    "approved": false,
-    "executed": false,
+    "api_review": "eval/lora-development/common-document-scope-api-review-20261027.json",
+    "approved": true,
+    "attempts_consumed": 1,
+    "attempts_remaining": 0,
+    "executed": true,
     "model_loads": 0,
     "new_isolated_documents_max": 2,
     "original_seed_operations": 7,
     "package_sha256": "25296784f4305a1045249774f0305c0c98a2f294b2e1b2f891c3137371135583",
     "reads_max": 1,
     "record": "eval/lora-development/common-document-scope-preparation-20261027.json",
+    "result": "eval/lora-development/common-document-scope-result-20261027.json",
+    "runtime_admission_in_new_source": "retired_before_claim",
     "selected_for_final_comparison": false,
-    "signed_writes_max": 1
+    "signed_writes_max": 1,
+    "status": "rejected_static_RhinoDoc_events_do_not_cover_headless"
   },
   "execution_evidence_limits": {
     "full_common_chain_real_model_writes_validated": false,
@@ -125,6 +135,11 @@
     }
   },
   "native_probe_result": "eval/lora-development/common-native-probe-result-20261027.json",
+  "no_new_native_proposal_until": [
+    "applicable API/version/headless support evidenced",
+    "change-history guarantee and exclusions explicit",
+    "material host or protected-contract changes centrally decided"
+  ],
   "phase_two_freeze_dependency": "bind owner-only final case commitment, exact source/environment roots, admission and actual transport entries; CPU check before exposure; old live CLI cannot admit this new study",
   "plan": {
     "execution_authorized": false,
@@ -186,9 +201,9 @@
   },
   "proposed_additional_final_loads": 1,
   "remaining_phase_one": [
-    "separately approved native verification of document-local state candidate: cross-document isolation, owned add-delete ABA rejection and move/read continuity",
-    "combine bounded system evidence without claiming full real-model write-chain validation or historical root causes",
-    "owner confirmation of complete comparison choices before final-test creation"
+    "resolve document-state/history guarantee against the pinned Rhino 8.21 headless API; preserve protection by default and do not retry static-event candidate",
+    "complete a supported CPU implementation and only separately approved necessary native verification after capability and scope decision",
+    "combine bounded evidence and obtain owner confirmation of complete comparison choices before final-test creation"
   ],
   "runtime_configuration": {
     "cleanup_export_seconds": 900,
@@ -226,7 +241,7 @@
   },
   "selected_system": "original",
   "source_inventory_sha256": "44e6a192983fb06a51588d1c97d5f594f1f1aaa7f46b04c59b656e6d9f3b9eed",
-  "status": "phase_one_document_scope_candidate_cpu_ready_native_verification_unapproved_not_final_execution_grant",
+  "status": "phase_one_blocked_on_supported_document_change_history_contract_candidate_rejected",
   "training_decision": "no_training_supported_by_current_evidence",
   "training_decision_evidence": {
     "current_lora_candidate_development_successes": 5,

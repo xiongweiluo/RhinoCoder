@@ -243,3 +243,58 @@ def test_scope_audit_never_promotes_missing_or_failed_cleanup(tmp_path):
     with pytest.raises(KeyError): run(missing)
     broken = copy.deepcopy(evidence); broken['document-clock-close.json']['removal_verified'] = False
     with pytest.raises(AssertionError): run(broken)
+
+
+def test_missing_native_event_review_preserves_failure_and_requires_both_closures(tmp_path):
+    import copy
+    import importlib.util
+    path = Path(__file__).parent/'lora-development/common-probe-audit-procedure-20261027.py'
+    spec = importlib.util.spec_from_file_location('scope_stop_audit_cpu', path)
+    audit = importlib.util.module_from_spec(spec); spec.loader.exec_module(audit)
+    clock, _, _ = clock_fixture()
+    first = fingerprint(clock); first['components']['objects'] = {}
+    (tmp_path/'fingerprint-0001.json').touch()
+    rows = {'created.json':{'serial':17}, 'scope-helper-created.json':{'serial':99},
+        'scope-helper-result.json':{'owned_fingerprint_unchanged':True,'process_serial_before':10,'process_serial_after':12},
+        'scope-helper-close.json':{'fixture_registry_absent':True},
+        'scope-helper-create.claim.json':{'action':'new_headless_document'},
+        'scope-helper-add.claim.json':{'action':'AddPoint','point':[0,0,0]},
+        'scope-owned-add.claim.json':{'action':'AddPoint','point':[0,0,0]},
+        'scope-owned-delete.claim.json':{'action':'Delete','target':'new_scope_point'},
+        'document-clock-close.json':clock.close(),'fingerprint-0001.json':{'sequence':1,**first}}
+    failed = {'status':'host_failure_no_retry','action':'open','effect_state':'unknown','cleanup_verified':False,
+        'failure':{'stage':'host_open','message':'ABA event bridge missing'}}
+    closed = {'status':'closed','fixture_registry_absent':True,'fixture_serial':17,'readback_error':None,
+        'existing_document_content_read':False,'fixture_before_close_native':{'groups':{},'objects':[],'unit':'Millimeters'}}
+    stopped = {'status':'stopped','fixture_registry_absent':True,'host_blocked':True,
+        'ledger':{'candidate_write':[],'c5_read':[]}}
+    evidence = {'failures':[{'stage':'fixture_open','message':'host effect unknown; stop batch'},
+        {'stage':'evidence_verification','message':'fixture lifecycle differs'}],
+        'steps':[],'initial_native':None,'final_native':None,'score':None,'close':closed,'stop':stopped,
+        'execution':{'evidence_integrity':'not_verified','fixture_cleanup':'verified','model_request':'not_sent',
+                     'native_effect':'none','resume_eligible':False}}
+    history = [({'action':a},v,None,i) for i,(a,v) in enumerate(zip(['open','close','stop'],[failed,closed,stopped]),1)]
+    def review(data, ev=evidence):
+        return audit.review_document_scope_open_stop(tmp_path,lambda p:data[p.name],ev,history,EVENTS)
+    result = review(rows)
+    assert result['partial_failure_and_cleanup_audited'] and not result['native_candidate_accepted']
+    assert not result['stale_authorization_rejection_reached'] and not result['task_started']
+    missing = dict(rows); del missing['scope-helper-close.json']
+    with pytest.raises(KeyError): review(missing)
+    unknown = copy.deepcopy(rows); unknown['scope-helper-close.json']['fixture_registry_absent'] = False
+    with pytest.raises(AssertionError): review(unknown)
+    relabelled = copy.deepcopy(evidence); relabelled['execution']['evidence_integrity'] = 'verified'
+    with pytest.raises(AssertionError): review(rows,relabelled)
+
+
+def test_retired_static_headless_candidate_cannot_be_admitted_even_with_exact_approval(tmp_path):
+    from tools.build_lora_common_probe import build
+    from plugin.rhino_listener.lora_common_probe import approval_record, admit
+    from plugin.rhino_listener.c5_research_channel import publish_json
+    from plugin.rhino_listener.c5_research_native import NativeError
+    package = build(Path(__file__).resolve().parents[1], tmp_path/'bundle', document_scope_probe=True)
+    state = Path(package['state_root']); state.mkdir(mode=0o700)
+    publish_json(state, 'owner-approval.json', approval_record(package))
+    with pytest.raises(NativeError, match='retired static-event candidate'):
+        admit(Path(package['source_root']), package)
+    assert [p.name for p in state.iterdir()] == ['owner-approval.json']

@@ -84,6 +84,58 @@ def review_document_scope(fixture, read, captures, receipts, capacity, events):
             'historical_counter_origin_proven':False,'all_native_event_types_validated':False}
 
 
+def review_document_scope_open_stop(fixture, read, evidence, history, events):
+    """Audit the observed missing-event stop without passing the candidate.
+
+    Preserve the controller's not_verified/effect_known=false classifications.
+    The verified source fails at this point only after the three fixed setup
+    operations and content-restoration assertions returned. No task was sent.
+    """
+    assert [req['action'] for req,_,_,_ in history] == ['open','close','stop']
+    failed, closed, stopped = [value for _,value,_,_ in history]
+    assert failed['status'] == 'host_failure_no_retry' and failed['action'] == 'open'
+    assert failed['effect_state'] == 'unknown' and failed['cleanup_verified'] is False
+    assert failed['failure']['stage'] == 'host_open' and failed['failure']['message'] == 'ABA event bridge missing'
+    assert [(f['stage'],f['message']) for f in evidence['failures']] == [
+        ('fixture_open','host effect unknown; stop batch'), ('evidence_verification','fixture lifecycle differs')]
+    assert evidence['steps'] == [] and evidence['initial_native'] is None and evidence['final_native'] is None
+    assert evidence['score'] is None and evidence['close'] == closed and evidence['stop'] == stopped
+    assert evidence['execution'] == {'evidence_integrity':'not_verified','fixture_cleanup':'verified',
+        'model_request':'not_sent','native_effect':'none','resume_eligible':False}
+    created, helper = read(fixture/'created.json'), read(fixture/'scope-helper-created.json')
+    assert created['serial'] != helper['serial'] and closed['fixture_serial'] == created['serial']
+    assert closed['status'] == 'closed' and closed['fixture_registry_absent'] is True
+    assert closed['readback_error'] is None and not closed['existing_document_content_read']
+    assert closed['fixture_before_close_native'] == {'groups':{},'objects':[],'unit':'Millimeters'}
+    assert stopped['status'] == 'stopped' and stopped['host_blocked'] is True and stopped['fixture_registry_absent']
+    assert stopped['ledger'] == {'candidate_write':[],'c5_read':[]}
+    assert read(fixture/'scope-helper-close.json')['fixture_registry_absent'] is True
+    isolated = read(fixture/'scope-helper-result.json')
+    assert isolated['owned_fingerprint_unchanged'] is True and isolated['process_serial_after'] > isolated['process_serial_before']
+    for name, expected in (
+        ('scope-helper-create.claim.json', {'action':'new_headless_document'}),
+        ('scope-helper-add.claim.json', {'action':'AddPoint','point':[0,0,0]}),
+        ('scope-owned-add.claim.json', {'action':'AddPoint','point':[0,0,0]}),
+        ('scope-owned-delete.claim.json', {'action':'Delete','target':'new_scope_point'})):
+        assert read(fixture/name) == expected
+    clock = read(fixture/'document-clock-close.json')
+    assert clock['removal_verified'] and not clock['faults'] and clock['exact_delegates_removed'] == sorted(events)
+    assert clock['epoch'] == 0 and clock['counts'] == dict.fromkeys(events, 0)
+    assert not (fixture/'scope-check.json').exists() and not list(fixture.glob('seed-*.json'))
+    files = sorted(fixture.glob('fingerprint-*.json'))
+    assert [p.name for p in files] == ['fingerprint-0001.json']
+    first = read(files[0]); assert first['sequence'] == 1
+    assert first['components']['document_mutation_clock'] == {'schema':'document_mutation_v1','epoch':0}
+    assert first['components']['objects'] == {}
+    return {'native_candidate_accepted':False,'partial_failure_and_cleanup_audited':True,
+        'cross_document_identity_check':True,'local_event_counter_advanced':False,
+        'stale_authorization_rejection_reached':False,'task_started':False,
+        'event_counts':clock['counts'],'process_serial_before':isolated['process_serial_before'],
+        'process_serial_after':isolated['process_serial_after'],'fixed_operations_reached':3,
+        'operation_count_basis':'verified failure location after guarded native calls; not model-write ledger',
+        'original_execution_classification_preserved':True}
+
+
 def main():
     if not __debug__:
         raise RuntimeError('Assertions are required; do not use -O.')
@@ -175,6 +227,7 @@ def main():
         assert rp['slot_id'] == p['slot_id'] and rp['request_sha256'] == digest(p['request'])
         exchanges.setdefault(p['slot_id'], []).append((p['request'], rp['value'], res, seq))
     summaries, native_writes, native_reads, steps_total, seeds = [], 0, 0, 0, 0
+    scope_open_stop = False
     proof = {k: 0 if k in {'critical_safety_errors','duplicate_writes','unverified_cleanup'} else True for k in AUDIT_KEYS}
     for row, cell in zip(rows, views['schedule']):
         slot = cell['slot_id']; case = cases[cell['family_id']]; history = exchanges[slot]
@@ -186,6 +239,41 @@ def main():
         assert read(s/'journal'/(key+'.claim.json')) == {'identity': row['identity'], 'replay_allowed': False}
         fixture = s/'fixtures'/slot; created = read(fixture/'created.json')
         assert created['runtime_sha256'] == runtime and created['headless'] and not created['existing_document_content_read']
+        if args.document_scope and history[0][1].get('status') == 'host_failure_no_retry':
+            partial = review_document_scope_open_stop(fixture, read, e, history, EVENTS)
+            assert row['outcome'] == 'engineering_failure' and row['effect_known'] is False
+            assert not list((s/'controller').glob('*.model.json'))
+            # CommonChain.start creates empty consent tables before open.
+            # Existence is not a permission issue; nonempty rows would be.
+            permission_files = list((s/'permission').iterdir())
+            assert {p.name for p in permission_files} <= {
+                slot+'.consent.sqlite3',slot+'.consent.sqlite3-wal',slot+'.consent.sqlite3-shm'}
+            assert not list((s/'journal').glob('*.step-*'))
+            # Read a disposable SQLite/WAL copy; the stopped original/backup
+            # stay byte-identical. ResearchGate was not constructed at failure.
+            with tempfile.TemporaryDirectory(prefix='common-scope-stop-audit-') as td:
+                import sqlite3
+                from contextlib import closing
+                td = Path(td).resolve()
+                for path in fixture.glob('fixture.sqlite3*'): (td/path.name).write_bytes(read_stable(path))
+                for path in permission_files: (td/path.name).write_bytes(read_stable(path))
+                consent = _tables(td/(slot+'.consent.sqlite3'), ('consent_requests','consent_events','c5_model_handoff'))
+                assert consent == {'consent_requests':[],'consent_events':[],'c5_model_handoff':[]}
+                with closing(sqlite3.connect(td/'fixture.sqlite3')) as db:
+                    assert db.execute('PRAGMA quick_check').fetchone()[0] == 'ok'
+                    assert {r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")} == {'candidate_scene','candidate_write'}
+                    assert db.execute('SELECT COUNT(*) FROM candidate_write').fetchone()[0] == 0
+                    scene = db.execute('SELECT revision,scene_sha256 FROM candidate_scene').fetchall()
+                    assert scene == [(0,read(fixture/'fingerprint-0001.json')['scene_sha256'])]
+            summaries.append({'slot_id':slot,'family_id':cell['family_id'],'outcome':row['outcome'],
+                'steps':0,'writes':0,'reads':0,'seconds_including_cleanup':e['slot_elapsed_seconds_including_cleanup'],
+                'evidence_sha256':digest(e),'original_score_recomputed':False,'cleanup_verified':True,
+                'actual_scene_and_successor_input_verified':False,'execution_status_preserved':e['execution'],
+                'permission_and_native_sqlite_verified':False,'empty_atomic_write_table_verified':True,
+                'empty_consent_tables_verified':True,
+                'document_scope_review':partial})
+            scope_open_stop = True
+            continue
         assert history[0][0]['action'] == 'open' and history[0][1]['fixture_serial'] == created['serial']
         assert len(list(fixture.glob('seed-*.claim.json'))) == len(case['fixture_recipe'])
         assert len(list(fixture.glob('seed-*.result.json'))) == len(case['fixture_recipe'])
@@ -297,7 +385,9 @@ def main():
             'continuity_failure':continuity_failure,'fingerprint_review':fingerprint_review,
             'execution_status_preserved':e['execution'],'permission_and_native_sqlite_verified':True,
             **({'document_scope_review':scope_review} if args.document_scope else {})})
-    if args.diagnostic or args.document_scope:
+    if scope_open_stop:
+        assert (native_writes,native_reads,steps_total,seeds) == (0,0,0,0)
+    elif args.diagnostic or args.document_scope:
         assert native_writes == 1 and native_reads in (0,1) and steps_total == 1+native_reads and seeds == 7
     else:
         assert (native_writes,native_reads,steps_total,seeds) == (3,1,4,14)
@@ -310,7 +400,13 @@ def main():
     report = {'date':'2026-10-27','package_sha256':runtime,'source_inventory_sha256':digest(package['source_files']),
         'executed_ci_commit':prestart['source_commit'] if prestart else 'd46dc568d4563255db2a7b3097667b5e81a08c3c' if args.diagnostic else '056978e5a209f96987e7c0d76436aa999e95f3e6',
         'ci_run_id':prestart['ci_run_id'] if prestart else 40446893205 if args.diagnostic else 40442746428,
-        **({'additional_fixed_fixture_operations':3, 'isolated_documents':2} if args.document_scope else {}),
+        **({'additional_fixed_fixture_operations':3, 'isolated_documents':2,
+            'native_candidate_accepted':not scope_open_stop and all(r['outcome']=='success' for r in rows),
+            'audit_scope':'incomplete_native_check_failure_and_cleanup' if scope_open_stop else 'complete_probe',
+            'positive_path_auditor_initial_rejection_retained':
+                ["KeyError: fixture_serial; host open failed before the successful-open record",
+                 "Early-stop audit initially assumed permission directory absent; actual CommonChain.start creates empty tables before open. Replaced by copy-based emptiness verification, never by accepting permission rows."] if scope_open_stop else None}
+           if args.document_scope else {}),
         'rows':summaries,'native_writes':native_writes,'native_reads':native_reads,'fixture_seed_operations':seeds,
         'host_messages':len(requests),'elapsed_seconds':result['elapsed_seconds'],'evidence_files':len(original),
         'evidence_bytes':raw_bytes,'retained_backup_copies':1,'evidence_inventory_sha256':digest(original),

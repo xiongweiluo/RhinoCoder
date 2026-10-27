@@ -1,0 +1,32 @@
+{
+  "actor": "repository_owner",
+  "approval_received": true,
+  "approved_source_commit": "822532c8b90c0efe5dee9ce59bd63d83eca0c230",
+  "ci_run_id": 40498015465,
+  "ci_status_at_record": "822532c_python_running_other_three_completed_validate_not_yet",
+  "cleanup_and_new_evidence_review_authorized": true,
+  "conditions": [
+    "all five CI succeed for approved source",
+    "unchanged package and source",
+    "environment/disk/lease gates pass"
+  ],
+  "direct_reply": "批准上述方案",
+  "document_event_delegates": 9,
+  "execution_started_at_this_record": false,
+  "final_test_creation_or_execution": false,
+  "fixed_scope_check_operations_max": 3,
+  "gpu_calls": 0,
+  "model_loads": 0,
+  "new_isolated_documents_max": 2,
+  "original_fixture_seed_operations_max": 7,
+  "package_sha256": "25296784f4305a1045249774f0305c0c98a2f294b2e1b2f891c3137371135583",
+  "preflight_preparation_error_retained": "First read used CFBundleShortVersionString (8.21), so exact full-version assertion stopped before state or native effects; full version confirmed via CFBundleVersion 8.21.25188.17002; no package code changed.",
+  "reads_max": 1,
+  "recorded_epoch": 1793102083.370789,
+  "retries_authorized": 0,
+  "scope": "one_document_scope_and_move_read_probe_zero_models_no_final_test",
+  "signed_writes_max": 1,
+  "source_inventory_sha256": "986a54a44bc6efeee125e593672d2110137f5488f0cc34f5bf521c49924b9fde",
+  "training": false,
+  "window_seconds": 1260
+}

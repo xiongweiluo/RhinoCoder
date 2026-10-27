@@ -42,6 +42,11 @@ def admit(root, package):
     require(str(root) == package['source_root'], 'fixed source root required')
     state = Path(package['state_root'])
     require(read_json(state, 'owner-approval.json') == approval_record(package), 'new exact owner approval required')
+    # Retire the disproven candidate in newly built source. The consumed frozen
+    # bundle and its failure evidence remain unchanged. RhinoDoc static events
+    # do not fire for headless documents; headless EventWatcher is a Rhino 9 API.
+    require(package['kind'] != 'public_common_document_scope_probe_v1',
+            'retired static-event candidate: incompatible with pinned Rhino 8 headless documents')
     require(time.time() < package['lease_end_epoch'] - package['capacity']['worst_window_seconds'],
             'complete probe window unavailable')
     return state
