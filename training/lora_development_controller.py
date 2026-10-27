@@ -17,7 +17,8 @@ from training.c5_formal20_scorer import AUDIT_KEYS, score_route
 from training.c5_modelbridge_joint_audit import semantic
 from training.lora_development_cases import build_cases
 from training.lora_development_read_permission import issue_read
-from training.lora_development_wire import reparse_response, request_from_host, verify_host
+from training.lora_development_wire import verify_host
+from training import lora_development_wire as default_wire
 
 
 def audit_read(receipt, envelope, observation, before):
@@ -43,17 +44,26 @@ def audit_ledger(ledger, receipts):
 
 class DevelopmentController:
     def __init__(self, *, journal, state, runtime, secret, schemas, tokenizer, identities,
-                 host, model, guard, cleanup_guard, monotonic=time.monotonic):
+                 host, model, guard, cleanup_guard, monotonic=time.monotonic, contract=None):
         self.journal, self.state, self.runtime = journal, state, runtime
         self.secret, self.schemas, self.tokenizer, self.identities = secret, schemas, tokenizer, identities
         self.host, self.model, self.guard, self.cleanup_guard, self.clock = host, model, guard, cleanup_guard, monotonic
         self.sequence = 1
         self.results = []
-        self.cases = {r['case']['family_id']: r['case'] for r in build_cases()}
+        self.contract = contract
+        require((contract is not None) == journal.common_chain, 'controller/journal contract differs')
+        if contract is not None:
+            require(contract.directory.parent == self.state.parent == journal.root.parent,
+                    'one common evidence root required')
+        self.wire = contract.wire if contract is not None else default_wire
+        self.cases = contract.cases if contract is not None else {r['case']['family_id']: r['case'] for r in build_cases()}
+        if contract is not None: contract.bind_schedule(journal.views['schedule'])
 
     def exchange(self, slot, action, *, envelope=None):
         if action in {'close', 'stop'}: self.cleanup_guard()
-        else: self.guard()
+        else:
+            self.guard()
+            if self.contract is not None: self.contract.work_guard()
         request = {'action': action}
         if envelope is not None: request['envelope'] = envelope
         seq = self.sequence
@@ -62,13 +72,15 @@ class DevelopmentController:
         publish_json(self.state, 'controller-host-%04d.request.json' % seq, signed)
         returned = self.host(signed)
         publish_json(self.state, 'controller-host-%04d.response.json' % seq, returned)
-        value = verify_host(returned, secret=self.secret, runtime=self.runtime, slot=slot, sequence=seq, request=request)
+        value = verify_host(returned, secret=self.secret, runtime=self.runtime, slot=slot, sequence=seq,
+                            request=request, study=self.journal.scope['study_id'])
         require(value.get('status') != 'host_failure_no_retry', 'host effect unknown; stop batch')
         return value, {'envelope': returned, 'request': request, 'sequence': seq}
 
     def run_slot(self, cell):
         slot, case = cell['slot_id'], self.cases[cell['family_id']]
         self.guard()  # Preflight precedes permanent task consumption.
+        if self.contract is not None: self.contract.work_guard()
         self.journal.start_slot(slot)
         started = self.clock()
         initial = final = close = stop = None
@@ -77,7 +89,7 @@ class DevelopmentController:
         phase, failures = 'slot_preflight', []
         model_requested = model_returned = False
         native_requests = 0
-        recovering = self.journal.recovery is not None
+        recovering = self.journal.recovery is not None or self.contract is not None
         def failed(exc, stage):
             nonlocal error
             failures.append(failure_record(exc, stage))
@@ -87,6 +99,7 @@ class DevelopmentController:
             require(self.clock() - started < self.journal.limits['slot_seconds'], 'slot deadline reached')
         try:
             work()
+            if self.contract is not None: self.contract.start(slot)
             phase = 'fixture_open'
             opened = True  # Opening may partially create a document before returning.
             value, _ = self.exchange(slot, 'open')
@@ -102,7 +115,7 @@ class DevelopmentController:
                 phase = 'step_preflight'
                 work()
                 current, exchange = self.exchange(slot, 'capture')
-                sent = request_from_host(model_views=self.journal.views['model'], runtime=self.runtime,
+                sent = self.wire.request_from_host(model_views=self.journal.views['model'], runtime=self.runtime,
                     slot=slot, step_index=index, secret=self.secret, capture=exchange['envelope'],
                     capture_request=exchange['request'], capture_sequence=exchange['sequence'], previous=previous)
                 self.journal.start_step(slot, index)
@@ -113,7 +126,7 @@ class DevelopmentController:
                 model_returned = True
                 publish_json(self.state, slot + '-step-%d.model.json' % index, {'request': sent, 'response': returned})
                 phase = 'model_verification'
-                observed = reparse_response(returned, sent, model_views=self.journal.views['model'],
+                observed = self.wire.reparse_response(returned, sent, model_views=self.journal.views['model'],
                     runtime=self.runtime, identity=self.identities[cell['route']], tokenizer=self.tokenizer)
                 work()
                 row = {'observation': observed, 'receipt': None, 'policy_denied': False}
@@ -124,28 +137,33 @@ class DevelopmentController:
                     allowed = (observed['name'] in READS and len(receipts) < case['max_reads']
                         and (observed['name'] != 'get_bounding_box' or observed['arguments']['object_id'] in
                              {o['alias'] for o in sent['scene']['objects']}))
+                    if self.contract is not None:
+                        allowed = self.contract.allowed(observed, case, receipts, current, self.schemas)
                     if not allowed:
                         row['policy_denied'] = True
                         outcome = 'task_failure'
                     else:
                         before, _ = self.exchange(slot, 'capture')
-                        handoff = issue_read(sent=sent, observation=observed, current=before, secret=self.secret,
-                            schemas=self.schemas, max_reads=case['max_reads'], used_reads=len(receipts), state=self.state)
+                        phase = 'permission_issue'
+                        handoff = (self.contract.issue(self, slot, sent, observed, case) if self.contract is not None else
+                            issue_read(sent=sent, observation=observed, current=before, secret=self.secret,
+                            schemas=self.schemas, max_reads=case['max_reads'], used_reads=len(receipts), state=self.state))
                         phase = 'native_dispatch'
                         native_requests += 1  # Intent before dispatch; unknown replies never replay.
                         receipt, executed = self.exchange(slot, 'execute', envelope=handoff)
-                        audit_read(receipt, handoff, observed, before)
+                        if self.contract is not None: self.contract.audit_receipt(receipt, handoff, observed, before)
+                        else: audit_read(receipt, handoff, observed, before)
                         row['receipt'] = receipt
                         receipts.append(receipt)
                         previous = {**executed, 'step_index': index, 'observation': observed}
-                        outcome = 'completed_read'
+                        outcome = 'completed_read' if observed['name'] in READS else 'completed_write'
                 elif status in {'abstained_no_dispatch', 'unsupported_for_c5_no_dispatch'}:
                     outcome = 'abstained'
                 else: outcome = 'task_failure'
                 phase = 'step_terminal_record'
                 self.journal.finish_step(slot, index, outcome=outcome, evidence_sha256=digest(row))
                 active_step = None
-                if outcome != 'completed_read': break
+                if outcome not in {'completed_read', 'completed_write'}: break
             phase = 'final_capture'
             final_capture, _ = self.exchange(slot, 'capture')
             final = final_capture['native']
@@ -173,7 +191,8 @@ class DevelopmentController:
             try:
                 require(closed and stopped and stop.get('host_blocked') is False
                         and close.get('readback_error') is None, 'fixture lifecycle differs')
-                audit_ledger(stop['ledger'], receipts)
+                if self.contract is not None: self.contract.audit_ledger(slot, stop['ledger'], receipts, self.runtime)
+                else: audit_ledger(stop['ledger'], receipts)
                 self.guard()
                 integrity = True
                 if error is None:
@@ -188,6 +207,7 @@ class DevelopmentController:
                 integrity = False; failed(exc, 'evidence_verification')
         execution = lifecycle(model_requested=model_requested, model_returned=model_returned,
             native_requested=native_requests > 0, native_verified=native_requests == len(receipts) and integrity,
+            native_writes=any(r['payload']['operation'] not in READS for r in receipts),
             fixture_attempted=opened, fixture_closed=closed, listener_stopped=stopped, integrity_verified=integrity)
         # Only a local, known pre-model fixture mismatch may continue in this
         # same healthy run. Transport, source and protocol errors stop it.
@@ -198,6 +218,9 @@ class DevelopmentController:
             'close': close, 'stop': stop, 'score': scored, 'error_type': error,
             'failures': failures, 'execution': execution, 'stop_current_run': stop_requested,
             'synthetic_or_field_provenance_supplied_by_entry': True}
+        if self.contract is not None:
+            evidence['slot_elapsed_seconds_including_cleanup'] = self.clock() - started
+            evidence['provider_kind'] = 'scripted_probe' if cell['route'] == 'scripted_probe' else 'model'
         publish_json(self.state, slot + '.evidence.json', evidence)
         # A failed execution/evidence channel is an engineering failure, while
         # its effect/cause can remain unknown. It is never relabelled model error.
@@ -213,7 +236,7 @@ class DevelopmentController:
         rows = self.results
         for index, cell in enumerate(self.journal.views['schedule']):
             if cell['slot_id'] in self.journal.history: continue
-            if index == 16: self.journal.seal_selection()
+            if index == self.journal.selection_boundary: self.journal.seal_selection()
             result = self.run_slot(cell)
             rows.append(result)
             if not result['may_advance']: break

@@ -1,0 +1,178 @@
+{
+  "additional_loads_authorized": 0,
+  "candidate_promoted": false,
+  "capacity": {
+    "evidence_files_max": 18944,
+    "execution_authorized": false,
+    "families": 40,
+    "generation_stages_max": 288,
+    "host_messages_max": 2416,
+    "model_step_requests_max": 144,
+    "peer_files_max": 1184,
+    "scripted_step_requests_max": 0,
+    "signer_captures_per_step_max": 11,
+    "slots": 80,
+    "worst_window_seconds": 35280
+  },
+  "cumulative_loads_if_separately_approved": 6,
+  "custodian": "repository_owner_separated_from_generation_training_selection_and_agent",
+  "final_data_access_authorized": false,
+  "final_data_created": false,
+  "fixed_weights": {
+    "clarification": 0.15,
+    "core_tool": 0.3,
+    "error_recovery": 0.2,
+    "multistep": 0.2,
+    "refusal": 0.15
+  },
+  "interval_method": "stratified_CP_Bonferroni_95_percent",
+  "live_execution_authorized": false,
+  "models": {
+    "assets": {
+      "adapter_files": {
+        "adapter_config.json": "8a776a47b085b787b7c7f3c9b068aed8c0f018278de2b94bf66130f5542d6d4f",
+        "adapter_model.safetensors": "da8acdcde2671aa397534b35369fe4a84b9d150f80f7b7026a4366a770be2883"
+      },
+      "adapter_root": "/data/c5-runs-20261001/formal/checkpoint-132",
+      "base_files": {
+        ".gitattributes": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361",
+        "LICENSE": "832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e",
+        "README.md": "3c090be37f829adc1e4cdb78733667437732541470430ab2cd785d7f0d460077",
+        "config.json": "c0242402ad6a13b331ea320feea8c7e3776ffb7a4eff0757b9cd667e116d9a28",
+        "generation_config.json": "1a628a5775bc69cde01c6749a531150ca4d3189652c618a174f7077923acf3b1",
+        "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+        "model-00001-of-00004.safetensors": "0b6f069918b07c064cbba8ae4f00f529aa9bbf84b7cdfcb7fc2694a40f6aa8ef",
+        "model-00002-of-00004.safetensors": "c3d46733e7aa054ea7b063fbccd0a5a08446e7bd1814bef26936c5aa1331da62",
+        "model-00003-of-00004.safetensors": "9fe45dacee087385b3d2d6dd27a7413a8a56d95f145772facc148fa86fc73446",
+        "model-00004-of-00004.safetensors": "5aa6e5cbe642377fd441fb4e60e83cca96b2bcd9820e245b9ea06d94653f17f2",
+        "model.safetensors.index.json": "998a078123ffc97763690de7f2a677eb89168af5eaf8a5e12e6bc24d18e25bdb",
+        "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+        "tokenizer_config.json": "959e7f1d9a1b7641a6d6ce05ca97b75c7894fcb66cbe5a040406458fb1128ee4",
+        "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+      },
+      "local_tokenizer_dir": "/Users/xiongweiluo/RhinoCoder/data/training/c5/modelbridge-tokenizer/c03e6d358207e414f1eca0bb1891e29f1db0e242",
+      "snapshot_dir": "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242",
+      "tokenizer_files": {
+        "config.json": "c0242402ad6a13b331ea320feea8c7e3776ffb7a4eff0757b9cd667e116d9a28",
+        "generation_config.json": "1a628a5775bc69cde01c6749a531150ca4d3189652c618a174f7077923acf3b1",
+        "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+        "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+        "tokenizer_config.json": "959e7f1d9a1b7641a6d6ce05ca97b75c7894fcb66cbe5a040406458fb1128ee4",
+        "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+      }
+    },
+    "identities": {
+      "base": "375f63235f792360a4e2a1c07bb4de815681138477f643763783488f9960c0a7",
+      "current_lora": "af94e1e1135352c570a1c6a8ba43e4e5ef7b9ad52adda665889c5786a06bcea4"
+    },
+    "loader_policy": {
+      "base_route": "same_PEFT_model_disable_adapter",
+      "device": 0,
+      "local_files_only": true,
+      "lora_trainable": false,
+      "parse_repair": false,
+      "prepare_base": "prepare_model_for_kbit_training_no_checkpoint_hooks",
+      "quantization": "nf4_double_quant_bfloat16",
+      "seed": 20260928,
+      "tf32": true,
+      "training": false,
+      "trust_remote_code": false
+    }
+  },
+  "phase_two_freeze_dependency": "bind owner-only final case commitment, exact source/environment roots, admission and actual transport entries; CPU check before exposure; old live CLI cannot admit this new study",
+  "plan": {
+    "execution_authorized": false,
+    "limits": {
+      "cleanup_export_seconds": 900,
+      "host_ready_seconds": 180,
+      "load_seconds": 600,
+      "max_steps": 3,
+      "slot_seconds": 420
+    },
+    "model_weights_changed": false,
+    "purpose": "exploratory_paired_comparison",
+    "replay_consumed_slots": false,
+    "routes": [
+      "base",
+      "current_lora"
+    ],
+    "schedule_seed": 20261027,
+    "schema_version": 1,
+    "strata": {
+      "clarification": 6,
+      "core_tool": 12,
+      "error_recovery": 8,
+      "multistep": 8,
+      "refusal": 6
+    },
+    "study_id": "lora-common-final-comparison-v1",
+    "system": "original",
+    "tools": [
+      "boolean_difference",
+      "create_box",
+      "create_cylinder",
+      "create_sphere",
+      "get_bounding_box",
+      "get_scene_summary",
+      "group_objects",
+      "move_object",
+      "rotate_object",
+      "scale_object",
+      "set_object_color",
+      "set_object_layer"
+    ],
+    "unknown_effect_or_cleanup": "stop"
+  },
+  "primary_comparison": [
+    "base",
+    "current_lora"
+  ],
+  "product_validation_recommendation_thresholds": {
+    "complete_slots_required": 80,
+    "critical_safety_errors_max": 0,
+    "duplicate_writes_max": 0,
+    "engineering_failures_per_route_max": 2,
+    "lora_success_count_min": 28,
+    "multistep_recovery_lora_success_min": 8,
+    "net_wins_min": 4,
+    "other_strata_not_below_base": true,
+    "unknown_cleanup_max": 0
+  },
+  "proposed_additional_final_loads": 1,
+  "remaining_phase_one": [
+    "approved native seam verification and cleanup review",
+    "measured native timings and bounded storage review",
+    "owner confirmation of complete comparison choices before test creation"
+  ],
+  "runtime_configuration": {
+    "cleanup_export_seconds": 900,
+    "evidence_cleanup_reserve_bytes": 268435456,
+    "evidence_files_max": 18944,
+    "evidence_total_bytes_max": 1073741824,
+    "evidence_work_bytes_max": 268435456,
+    "export_bytes_max": 538968064,
+    "export_files_max": 1216,
+    "export_seconds": 180,
+    "gpu_archive_reserve_bytes": 536870912,
+    "gpu_evidence_total_bytes_max": 536870912,
+    "gpu_evidence_work_bytes_max": 402653184,
+    "gpu_ready_seconds": 600,
+    "gpu_residency_seconds": 35280,
+    "gpu_stop_seconds": 180,
+    "host_cleanup_seconds": 30,
+    "host_messages_max": 2416,
+    "host_ready_seconds": 180,
+    "load_seconds": 600,
+    "max_infrastructure_recoveries": 0,
+    "max_load_attempts": 1,
+    "max_steps": 3,
+    "minimum_free_bytes": 4294967296,
+    "protocol_reply_seconds": 10,
+    "slot_seconds": 420,
+    "transport_exit_seconds": 40
+  },
+  "selected_system": "original",
+  "source_inventory_sha256": "559fa17e50458583c419fe3ac04014825fb1753fa129e1bdc2fb63112eb9cb87",
+  "status": "phase_one_proposal_not_final_execution_grant",
+  "training_decision": "no_training_supported_by_current_evidence"
+}

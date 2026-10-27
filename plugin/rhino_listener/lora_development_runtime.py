@@ -27,6 +27,8 @@ RECOVERY = {
 
 def configuration(package):
     """One source of operational limits; callers must not invent defaults."""
+    if package.get('kind') == 'lora-common-final-comparison-v1':
+        return common_configuration(package['comparison_plan'])
     limits = package['limits']
     require(limits['slot_seconds'] == 150 and limits['load_seconds'] == 600
             and limits['cleanup_export_seconds'] == 900, 'fixed development operation limits differ')
@@ -46,8 +48,44 @@ def history(package):
 
 
 def active_schedule(package):
+    if package.get('kind') == 'lora-common-final-comparison-v1':
+        return package['compiled']['views']['schedule']
     consumed = history(package)
     return [row for row in package['native_scope']['schedule'] if row['slot_id'] not in consumed]
+
+
+def common_capacity(plan):
+    """Pure shared arithmetic; case/authority validation belongs to the entry."""
+    routes = len(plan['routes'])
+    slots = routes * sum(plan['strata'].values())
+    steps = routes * sum(n * (3 if layer in {'multistep', 'error_recovery'} else 1)
+                         for layer, n in plan['strata'].items())
+    messages = 5 * slots + 14 * steps  # two captures + eleven signer captures + dispatch
+    peer_files = 8 * steps + 32
+    probe = plan['study_id'] == 'lora-common-native-probe-v1'
+    return {'families': sum(plan['strata'].values()), 'slots': slots,
+        'model_step_requests_max': 0 if probe else steps, 'scripted_step_requests_max': steps if probe else 0,
+        'generation_stages_max': 0 if probe else 2*steps,
+        'host_messages_max': messages, 'signer_captures_per_step_max': 11,
+        'peer_files_max': peer_files, 'evidence_files_max': 6*messages + peer_files + 40*slots + 64,
+        'worst_window_seconds': slots*plan['limits']['slot_seconds'] + plan['limits']['host_ready_seconds']
+            + plan['limits']['load_seconds'] + plan['limits']['cleanup_export_seconds'],
+        'execution_authorized': False}
+
+
+def common_configuration(plan):
+    require(plan['study_id'] == 'lora-common-final-comparison-v1'
+            and plan['routes'] == ['base', 'current_lora'] and plan['system'] == 'original'
+            and plan['execution_authorized'] is False, 'new two-route preparation contract required')
+    cap = common_capacity(plan)
+    return {**OPERATIONS, **plan['limits'], 'max_load_attempts': 1, 'max_infrastructure_recoveries': 0,
+        'gpu_residency_seconds': cap['worst_window_seconds'], 'gpu_ready_seconds': plan['limits']['load_seconds'],
+        'host_messages_max': cap['host_messages_max'], 'export_files_max': cap['peer_files_max']+32,
+        'evidence_files_max': cap['evidence_files_max'],
+        'evidence_work_bytes_max': 256*1024*1024, 'evidence_total_bytes_max': 1024*1024*1024,
+        'gpu_archive_reserve_bytes': 512*1024*1024,
+        'gpu_evidence_work_bytes_max': 384*1024*1024, 'gpu_evidence_total_bytes_max': 512*1024*1024,
+        'evidence_cleanup_reserve_bytes': 256*1024*1024, 'minimum_free_bytes': 4*1024**3}
 
 
 def recovery_context(package):
@@ -72,8 +110,10 @@ def failure_record(exc, stage):
 
 
 def lifecycle(*, model_requested, model_returned, native_requested, native_verified,
-              fixture_attempted, fixture_closed, listener_stopped, integrity_verified):
+              fixture_attempted, fixture_closed, listener_stopped, integrity_verified, native_writes=False):
     effect = 'verified_reads' if native_requested and native_verified else 'unknown' if native_requested else 'none'
+    if native_writes and native_requested and native_verified:
+        effect = 'verified_writes'
     cleanup = ('not_created' if not fixture_attempted else
                'verified' if fixture_closed and listener_stopped else 'unknown')
     return {

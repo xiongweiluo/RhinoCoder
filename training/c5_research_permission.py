@@ -47,7 +47,7 @@ class ResearchSigner:
         with store._tx() as db:
             db.execute("CREATE TABLE IF NOT EXISTS c5_model_handoff (observation_sha256 TEXT PRIMARY KEY, state TEXT NOT NULL, request_id TEXT UNIQUE, payload_sha256 TEXT)")
 
-    def issue(self, observed, *, schemas):
+    def issue(self, observed, *, schemas, step_request_sha256=None):
         """Reparse raw outputs; no expected tool/args, correction or retry.
 
         Zero-write task policies deny model-selected writes before permission
@@ -86,6 +86,12 @@ class ResearchSigner:
         observation_sha = digest({"user_step_sha256":observed["user_step_sha256"],
                                   "scene_binding":observed["scene_binding"],
                                   "outputs":[c["output_sha256"] for c in calls]})
+        if step_request_sha256 is not None:
+            # A separately claimed step may legitimately repeat the same read.
+            # Bind its transport request, without adding progress to the prompt.
+            require(type(step_request_sha256) is str and SHA.fullmatch(step_request_sha256),
+                    "exact independently claimed step required")
+            observation_sha = digest({'observation': observation_sha, 'step_request': step_request_sha256})
         with self.store._tx() as db:
             require(db.execute("SELECT count(*) FROM c5_model_handoff WHERE observation_sha256=?",(observation_sha,)).fetchone()[0] == 0,
                     "model observation already reserved; never reissue")

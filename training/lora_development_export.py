@@ -10,6 +10,13 @@ from plugin.rhino_listener.c5_research_channel import read_json
 from plugin.rhino_listener.c5_research_native import canonical, digest, require
 
 
+def file_limit(package):
+    if package.get('kind') == 'lora-common-final-comparison-v1':
+        from plugin.rhino_listener.lora_development_runtime import configuration
+        return configuration(package)['export_files_max']
+    return 1024
+
+
 def content_identity(value):
     return tuple(getattr(value, key) for key in ('st_dev', 'st_ino', 'st_mode', 'st_uid',
         'st_gid', 'st_nlink', 'st_size', 'st_mtime_ns', 'st_ctime_ns'))
@@ -46,7 +53,7 @@ def export_gpu(state, package, stream):
         if peer.exists():
             require(peer.resolve() == peer, 'peer directory alias refused')
             files.extend(peer.glob('*.json'))
-    require(len(files) <= 1024, 'bounded evidence population')
+    require(len(files) <= file_limit(package), 'bounded evidence population')
     records, total = {}, 0
     with tarfile.open(fileobj=stream, mode='w|') as archive:
         for path in sorted(files):
@@ -70,7 +77,7 @@ def verify_archive(path, package):
             require(item.isfile() and item.size <= 32 * 1024 * 1024 and not item.name.startswith('/')
                     and '..' not in Path(item.name).parts and item.name not in records, 'unsafe or duplicate archive member')
             total += item.size
-            require(total <= 513 * 1024 * 1024 and len(records) <= 1024, 'bounded private export required')
+            require(total <= 513 * 1024 * 1024 and len(records) <= file_limit(package), 'bounded private export required')
             raw = archive.extractfile(item).read()
             if item.name == 'export-manifest.json':
                 require(manifest is None, 'duplicate manifest')

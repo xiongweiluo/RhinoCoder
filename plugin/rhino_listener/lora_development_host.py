@@ -10,8 +10,8 @@ import hmac
 
 from .c5_research_channel import publish_json
 from .c5_research_gate import signature
-from .c5_research_native import digest, require
-from .lora_development_channel import detached, host_response
+from .c5_research_native import CORE, READS, digest, require
+from .lora_development_channel import STUDY, detached, host_response
 from .lora_development_runtime import failure_record
 
 
@@ -21,13 +21,18 @@ def signed_request(secret, runtime, slot, sequence, request):
 
 
 class DevelopmentHost:
-    def __init__(self, *, state, runtime, native_views, schedule, secret, factory, guard, cleanup_guard):
+    def __init__(self, *, state, runtime, native_views, schedule, secret, factory, guard, cleanup_guard,
+                 operations=READS, messages_max=512, study=STUDY):
         self.state, self.runtime, self.views, self.schedule = state, runtime, detached(native_views), detached(schedule)
         self.secret, self.factory, self.guard, self.cleanup_guard = secret, factory, guard, cleanup_guard
         self.sequence, self.opened = 1, []
         self.current, self.session = None, None
         self.blocked, self.closed, self.stopped = False, False, False
         self.close_attempted = False
+        require(frozenset(operations) in {READS, CORE} and type(messages_max) is int
+                and messages_max > 0, 'explicit bounded host contract required')
+        self.operations, self.messages_max = frozenset(operations), messages_max
+        self.study = study
 
     def handle(self, envelope):
         envelope = detached(envelope)
@@ -35,7 +40,7 @@ class DevelopmentHost:
         p = envelope['payload']
         require(type(p) is dict and set(p) == {'runtime_sha256', 'slot_id', 'sequence', 'request'}
                 and p['runtime_sha256'] == self.runtime and type(p['sequence']) is int
-                and p['sequence'] == self.sequence and self.sequence <= 512,
+                and p['sequence'] == self.sequence and self.sequence <= self.messages_max,
                 "host runtime/sequence/cap differs")
         require(type(envelope['signature']) is str and hmac.compare_digest(signature(self.secret, p), envelope['signature']),
                 "host request signature differs")
@@ -57,7 +62,7 @@ class DevelopmentHost:
             self.blocked = True
             value = {'status': 'host_failure_no_retry', 'action': action, 'error_type': type(exc).__name__,
                      'effect_state': 'unknown', 'cleanup_verified': False, 'failure': failure_record(exc, 'host_' + action)}
-        response = host_response(self.secret, self.runtime, slot, seq, request, value)
+        response = host_response(self.secret, self.runtime, slot, seq, request, value, study=self.study)
         publish_json(self.state, 'host-%04d.response.json' % seq, response)
         return response
 
@@ -78,7 +83,7 @@ class DevelopmentHost:
         if action == 'execute':
             require(not self.closed and not self.close_attempted, "execute after closure")
             p = request['envelope']['payload']
-            require(p['operation'] in {'get_bounding_box', 'get_scene_summary'}, "model writes forbidden")
+            require(p['operation'] in self.operations, "operation outside frozen host contract")
             return self.session.execute(request['envelope'])
         if action == 'close':
             require(not self.close_attempted, "close already attempted; no replay")
@@ -134,7 +139,7 @@ class RhinoSession:
         atomic = RhinoAtomicGate(self.directory / 'fixture.sqlite3', str(self.backend.serial),
                                 lambda: rhino_scene_digest(self.doc), create_ledger=True)
         self.gate = ResearchGate(self.backend, atomic, self.secret, self.runtime,
-            task_sha256=self.plan['task_sha256'], max_reads=self.plan['max_reads'], max_writes=0)
+            task_sha256=self.plan['task_sha256'], max_reads=self.plan['max_reads'], max_writes=self.plan['max_writes'])
         return {'status': 'opened', 'fixture_serial': self.backend.serial}
 
     def capture(self):
@@ -175,5 +180,5 @@ class RhinoSession:
                 db.execute('PRAGMA query_only=ON')
                 require(db.execute('PRAGMA quick_check').fetchone()[0] == 'ok', "new fixture ledger corrupt")
                 rows = {name: [dict(r) for r in db.execute('SELECT * FROM ' + name)] for name in rows}
-            require(not rows['candidate_write'], "unexpected model write ledger")
+            require(len(rows['candidate_write']) <= self.plan['max_writes'], "unexpected model write ledger")
         return {'status': 'stopped', 'ledger': rows, 'fixture_registry_absent': True}

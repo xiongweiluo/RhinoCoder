@@ -179,8 +179,14 @@ def test_shared_config_rejects_drift_and_retains_all_task_model_score_contracts(
     for key in ('development_plan', 'native_scope', 'model_identities', 'assets', 'loader_policy', 'limits'):
         assert package[key] == prior[key]
     assert len(active_schedule(package)) == 31
-    for name in ('training/c5_formal20_scorer.py', 'training/lora_development_cases.py',
-                 'training/lora_development_wire.py', 'training/lora_development_read_permission.py'):
+    executed = json.loads((ROOT / 'eval/lora-development/development-package-recovery-20261026.json').read_text())
+    contracts = ('training/c5_formal20_scorer.py', 'training/lora_development_cases.py',
+                 'training/lora_development_wire.py', 'training/lora_development_read_permission.py')
+    for name in contracts:
+        assert executed['source_files'][name] == prior['source_files'][name]
+    # A later common-chain refactor shares raw parsing. Executed package bytes
+    # remain immutable; current prompt/parser parity has separate wire tests.
+    for name in set(contracts) - {'training/lora_development_wire.py'}:
         assert package['source_files'][name] == prior['source_files'][name]
     package['runtime_policy']['operations']['gpu_ready_seconds'] += 1
     with pytest.raises(NativeError, match='contract differs'): configuration(package)

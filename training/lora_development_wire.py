@@ -110,6 +110,11 @@ def model_response(sent, observation, generations, identity):
 
 def reparse_response(value, sent, *, model_views, runtime, identity, tokenizer):
     sent = validate_request(sent, model_views, runtime)
+    return reparse_generations(value, sent, identity=identity, tokenizer=tokenizer, rendered=user_step(sent))
+
+
+def reparse_generations(value, sent, *, identity, tokenizer, rendered):
+    """Common raw parser; caller first validates its study-specific request."""
     value = detached(value)
     require(set(value) == {"protocol", "request_sha256", "model_identity_sha256", "observation", "generations"}
             and value["protocol"] == PROTOCOL and value["request_sha256"] == digest(sent)
@@ -128,7 +133,6 @@ def reparse_response(value, sent, *, model_views, runtime, identity, tokenizer):
                 and row["prompt_sha256"] == hashlib.sha256(prompt.encode()).hexdigest()
                 and row["output_sha256"] == hashlib.sha256(row["raw"].encode()).hexdigest(), "raw generation receipt differs")
         return row
-    rendered = user_step(sent)
     observed = invoke_step(tokenizer, replay, rendered, scene_binding=sent["binding"],
                            privacy_guard=lambda text: text == rendered and allowed(sent["task"], sent["scene"]))
     require(cursor == len(rows) and digest(observed) == digest(value["observation"])

@@ -26,8 +26,33 @@ def gpu_absent(pid):
     return str(pid) not in rows
 
 
+def peer_contract(package):
+    """CPU-only selection, shared by the actual worker; no loader invocation.
+
+    New final owner admission remains separate. Old live CLI validation cannot
+    admit this kind or inherit its grants. Its views arrive only after custody.
+    """
+    if package.get('kind') == 'lora-common-final-comparison-v1':
+        from training.lora_comparison_plan import validate_compiled
+        from training import lora_common_wire
+        validate_compiled(package['comparison_plan'], package['compiled'])
+        require(package['limits'] == configuration(package),
+                'worker limits differ from the one common configuration')
+        return package['compiled']['views']['model'], lora_common_wire
+    from training import lora_development_wire
+    return field_views(package['development_plan'])['model'], lora_development_wire
+
+
+def work_source(root, package, state):
+    verify_source(root, package['source_files'])
+    if package.get('kind') == 'lora-common-final-comparison-v1':
+        from training.lora_comparison_storage import check_evidence_budget
+        check_evidence_budget(state, configuration(package), endpoint='gpu')
+
+
 def supervise(root, package, state):
     config = configuration(package)
+    if package.get('kind') == 'lora-common-final-comparison-v1': peer_contract(package)
     campaign = None
     if package.get('schema_version') in {4, 5}:
         from plugin.rhino_listener.lora_development_campaign import Campaign
@@ -45,7 +70,7 @@ def supervise(root, package, state):
     try:
         for number in range(package['limits']['max_load_attempts']):
             budget.work(remaining_slots=len(active_schedule(package)), loading=True)
-            verify_source(root, package['source_files'])
+            work_source(root, package, state)
             if campaign is not None: global_load = campaign.claim_load()
             attempt = state / ('load-%d' % number)
             attempt.mkdir(mode=0o700)
@@ -91,7 +116,7 @@ def supervise(root, package, state):
                     if campaign is not None: campaign.exposed()
                     if not (state / 'tasks-exposed.claim.json').exists():
                         publish_json(state, 'tasks-exposed.claim.json', {'request_sha256': digest(message['request'])})
-                    verify_source(root, package['source_files'])
+                    work_source(root, package, state)
                     deadline = time.monotonic() + min(config['slot_seconds'], budget.remaining() - config['cleanup_export_seconds'])
                     child.pipe.send(message, deadline)
                     response = child.pipe.receive(deadline)
@@ -150,19 +175,19 @@ def worker(root, package, state, number):
     import ctypes
     libc = ctypes.CDLL(None, use_errno=True)
     require(libc.prctl(1, 15, 0, 0, 0) == 0 and os.getppid() == message['parent_pid'], 'parent lifeline unavailable')
-    def guard(): verify_source(root, package['source_files']); budget.work()
+    def guard(): work_source(root, package, state); budget.work()
     import resource
     resource.setrlimit(resource.RLIMIT_FSIZE, (32 * 1024 * 1024, 32 * 1024 * 1024))
     os.environ.update({'XDG_CACHE_HOME': str(attempt / 'cache'), 'TRITON_CACHE_DIR': str(attempt / 'triton-cache'),
                        'TORCHINDUCTOR_CACHE_DIR': str(attempt / 'torch-cache')})
+    views, wire = peer_contract(package)
     from training.lora_development_loader import load
     tokenizer, generate, route, check = load(root, package, guard)
     from training.lora_development_peer import DevelopmentPeer
     peer_state = attempt / 'peer'; peer_state.mkdir(mode=0o700)
-    views = field_views(package['development_plan'])['model']
     allowed = {c['slot_id'] for c in active_schedule(package)}
     peer = DevelopmentPeer(state=peer_state, runtime=digest(package), views={k: v for k, v in views.items() if k in allowed},
-        identities=package['model_identities'], tokenizer=tokenizer, generate=generate, route_context=route, guard=check)
+        identities=package['model_identities'], tokenizer=tokenizer, generate=generate, route_context=route, guard=check, wire=wire)
     pipe.send({'status': 'ready', 'package_sha256': digest(package), 'model_identities': package['model_identities']},
               time.monotonic() + config['protocol_reply_seconds'])
     while True:

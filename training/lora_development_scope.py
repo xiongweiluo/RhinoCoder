@@ -21,7 +21,7 @@ from training.lora_development_plan import development_schedule
 
 STUDY = "lora-optimization-development-v1"
 OUTCOMES = {"success", "task_failure", "engineering_failure", "evidence_unknown"}
-STEP_OUTCOMES = {"completed_read", "abstained", "task_failure", "engineering_failure", "unknown"}
+STEP_OUTCOMES = {"completed_read", "completed_write", "abstained", "task_failure", "engineering_failure", "unknown"}
 
 
 def _sha(value):
@@ -76,16 +76,27 @@ class DevelopmentJournal:
     plan and runtime. A different output folder cannot be admitted by the
     eventual field entry as a way to reset this ledger.
     """
-    def __init__(self, state: Path, plan: dict, runtime_sha256: str, *, campaign=None, recovery=None):
+    def __init__(self, state: Path, plan: dict, runtime_sha256: str, *, campaign=None, recovery=None,
+                 compiled=None):
         self.limits = dict(plan['limits'])
         self.campaign = campaign
         self.recovery = recovery
         self.history = recovery['history'] if recovery is not None else {}
         self.root = Path(state)
         os.close(private_directory(self.root))
-        self.views = field_views(plan)
-        self.scope = {"study_id": STUDY, "plan_sha256": digest(plan),
+        if compiled is None:
+            self.views, study = field_views(plan), STUDY
+        else:
+            from training.lora_comparison_plan import validate_compiled
+            validate_compiled(plan, compiled)
+            require(campaign is None and recovery is None, 'new study cannot inherit old execution grants')
+            self.views, study = compiled['views'], compiled['study_id']
+        self.selection_boundary = 16 if compiled is None else None
+        self.common_chain = compiled is not None
+        self.scope = {"study_id": study, "plan_sha256": digest(plan),
                       "runtime_sha256": _sha(runtime_sha256), "state_root": str(self.root)}
+        if compiled is not None:
+            self.scope['compiled_sha256'] = digest(compiled)
         if recovery is not None:
             require(set(recovery) == {'history', 'resolved_without_native_effect', 'review_sha256', 'incomplete_selection'}
                     and recovery['incomplete_selection'] == 'retain_original_without_candidate_promotion'
@@ -115,7 +126,7 @@ class DevelopmentJournal:
     def _identity(self, slot):
         if slot in self.history: return self.history[slot]['identity']
         cell = self._cell(slot)
-        return {"study_id": STUDY, "scope_sha256": digest(self.scope),
+        return {"study_id": self.scope['study_id'], "scope_sha256": digest(self.scope),
                 **{k: cell[k] for k in ("slot_id", "family_id", "route", "system", "role")}}
 
     def slot_key(self, slot):
@@ -160,7 +171,8 @@ class DevelopmentJournal:
         require(self._read(slot, ".claim.json")["identity"] == self._identity(slot), "slot not claimed")
         require(not os.path.lexists(self.root / (self.slot_key(slot) + ".result.json")), "slot already ended")
         for previous in range(step_index):
-            require(self._read(slot, f".step-{previous}.result.json")["outcome"] == "completed_read",
+            require(self._read(slot, f".step-{previous}.result.json")["outcome"] in (
+                {'completed_read', 'completed_write'} if self.common_chain else {'completed_read'}),
                     "predecessor incomplete or not a completed read")
         self._write(slot, f".step-{step_index}.claim.json", {"identity": self._identity(slot),
                     "step_index": step_index, "replay_allowed": False})
@@ -204,7 +216,9 @@ class DevelopmentJournal:
             require(step_outcomes, "pre-model infrastructure failure is not a task failure")
         if outcome == "success":
             require(fixture_closed and listener_stopped and effect_known and not stop_requested
-                    and step_outcomes and not uncertain and all(s in {"completed_read", "abstained"} for s in step_outcomes),
+                    and step_outcomes and not uncertain and all(s in (
+                        {'completed_read', 'completed_write', 'abstained'} if self.common_chain else
+                        {'completed_read', 'abstained'}) for s in step_outcomes),
                     "success cannot hide incomplete/failed model work")
         result = {"identity": identity, "outcome": outcome, "fixture_closed": fixture_closed,
             "listener_stopped": listener_stopped, "effect_known": effect_known, "stop_requested": stop_requested,
@@ -212,7 +226,8 @@ class DevelopmentJournal:
             "may_advance": bool(fixture_closed and listener_stopped and effect_known and not stop_requested
                                 and not uncertain and outcome != "evidence_unknown")}
         if execution is not None:
-            require(self.recovery is not None, 'separate lifecycle fields require the reviewed recovery policy')
+            require(self.recovery is not None or self.common_chain,
+                    'separate lifecycle fields require an explicit study contract')
             result['execution'] = execution
         self._write(slot, ".result.json", result)
         return result

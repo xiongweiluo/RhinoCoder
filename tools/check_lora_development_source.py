@@ -71,7 +71,16 @@ targets = (
     'plugin.rhino_listener.lora_development_session',
     'tools.run_lora_development_mac', 'tools.run_lora_development_gpu',
     'tools.run_lora_development_rhino', 'tools.run_lora_development_rhino_wrapper')
+if (root / 'training/lora_common_chain.py').exists():
+    targets += ('training.lora_common_chain', 'training.lora_common_probe_runner',
+                'training.lora_comparison_statistics', 'training.lora_comparison_storage',
+                'plugin.rhino_listener.lora_common_probe')
+if (root / 'tools/run_lora_common_probe.py').exists():
+    targets += ('tools.run_lora_common_probe', 'tools.run_lora_common_probe_rhino')
 for name in targets: importlib.import_module(name)
+if (root / 'common-probe-package.json').exists():
+    from training.lora_common_probe_runner import prepare
+    prepare(root, json.loads((root / 'common-probe-package.json').read_text()))
 origins, cpu_origins = {}, {}
 for module in tuple(sys.modules.values()):
     origin = vars(module).get('__file__') if module is not None else None
