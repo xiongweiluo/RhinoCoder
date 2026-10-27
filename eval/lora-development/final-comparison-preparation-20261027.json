@@ -15,14 +15,22 @@
     "worst_window_seconds": 35280
   },
   "controlled_continuity_proposal": {
-    "approved": false,
-    "attempts_consumed": 0,
+    "actual_fixed_operations_repeated": 0,
+    "actual_reads": 1,
+    "actual_seed_operations": 7,
+    "actual_signed_writes": 1,
+    "approval_consumed": true,
+    "approved": true,
+    "attempts_consumed": 1,
+    "attempts_remaining": 0,
     "fixed_operations_repeated": 0,
     "isolated_documents_max": 1,
+    "native_candidate_validated": true,
     "package_sha256": "703f407082b25b94131bde6e0c541dc5a825babae4367eeadfe14e89b6d9ce50",
     "phase_one_final_choices_in_same_confirmation": true,
     "preparation": "eval/lora-development/common-controlled-continuity-preparation-20261027.json",
     "reads_max": 1,
+    "result": "eval/lora-development/common-controlled-continuity-result-20261027.json",
     "seed_operations_max": 7,
     "signed_writes_max": 1
   },
@@ -105,6 +113,18 @@
   },
   "interval_method": "stratified_CP_Bonferroni_95_percent",
   "live_execution_authorized": false,
+  "measured_controlled_continuity": {
+    "elapsed_seconds": 26.510553959058598,
+    "evidence_bytes": 353393,
+    "evidence_files": 276,
+    "fixture_seed_operations": 7,
+    "host_messages": 30,
+    "native_reads": 1,
+    "native_writes": 1,
+    "not_a_full_model_latency_guarantee": true,
+    "retained_backup_copies": 1,
+    "slot_seconds_including_cleanup": 17.676545291906223
+  },
   "measured_native_probe": {
     "backup_copies": 1,
     "complete_property_repair_slot_seconds": 7.630634416826069,
@@ -170,11 +190,40 @@
   },
   "native_probe_result": "eval/lora-development/common-native-probe-result-20261027.json",
   "no_new_native_proposal_until": [
-    "actual deployment CPU preparation passed",
-    "owner-selected B limitation explicit",
-    "new exact package/scope presented together for native execution approval"
+    "new specific authorized research need; no additional phase-one execution requested"
   ],
+  "phase_one_complete": true,
+  "phase_one_completion": {
+    "choices_fields": [
+      "plan",
+      "models",
+      "selected_system",
+      "primary_comparison",
+      "interval_method",
+      "fixed_weights",
+      "product_validation_recommendation_thresholds",
+      "runtime_configuration",
+      "training_decision",
+      "scope_of_final_inference",
+      "custodian"
+    ],
+    "choices_sha256": "807fe4847d2077c888012d106bfbd2cc341d6a18214cc75389af5ad3dd138377",
+    "common_chain_source_inventory_sha256": "e1fbb5fd84e006be4f2c15849b4dd2b52583e3230553dafd8e181ea1e1fcf34f",
+    "condition_satisfied_by": "eval/lora-development/common-controlled-continuity-result-20261027.json",
+    "date": "2026-10-27",
+    "executed_source_ci_run_id": 40515316076,
+    "executed_source_commit": "7a9a7c11942a99ce23168d2eed5adbc9b201f341",
+    "full_real_model_write_chain_proven": false,
+    "native_package_sha256": "703f407082b25b94131bde6e0c541dc5a825babae4367eeadfe14e89b6d9ce50",
+    "new_report_ci_not_execution_gate_retroactively": true,
+    "no_product_safety_claim": true,
+    "no_weight_improvement_claim": true,
+    "owner_confirmation": "eval/lora-development/common-controlled-continuity-authorization-20261027.json",
+    "repository_delivery": "PR31 branch; not main; owner review and merge remain separate",
+    "research_choices_fixed": true
+  },
   "phase_two_freeze_dependency": "bind owner-only final case commitment, exact source/environment roots, admission and actual transport entries; CPU check before exposure; old live CLI cannot admit this new study",
+  "phase_two_status": "not_started_new_test_custody_and_exact_execution_authorization_pending",
   "plan": {
     "execution_authorized": false,
     "limits": {
@@ -235,10 +284,12 @@
     "unknown_cleanup_max": 0
   },
   "proposed_additional_final_loads": 1,
-  "remaining_phase_one": [
-    "one consolidated confirmation for additional move-read probe and conditional phase-one comparison choices",
-    "new source CI/integrity/resource gates; once-only native execution and full cleanup/audit",
-    "publish complete preparation if gates pass, otherwise bounded incomplete report; retain real-model-write limitation"
+  "remaining_phase_one": [],
+  "remaining_phase_two": [
+    "owner-authorized independent new set creation and custody after these choices; no agent private task/answer access",
+    "bind final case commitment, exact sources/environment/resources and actual transport entries; CPU gate before private exposure",
+    "consolidated exact final execution approval; one formal comparison or safe incomplete report",
+    "cleanup, evidence audit, statistics, complete report and product-validation recommendation"
   ],
   "runtime_configuration": {
     "cleanup_export_seconds": 900,
@@ -282,12 +333,13 @@
     "external_aba_detection": false,
     "fixed_history_native_check_passed": true,
     "native_execution_authorized": false,
-    "note": "B01 authorized and consumed; no additional native execution authorized",
+    "native_seam_check_passed": true,
+    "note": "B01 fixed controlled history and B02 move/read audited; approvals consumed; no further native execution authorized",
     "owner_selected_route": "B",
     "product_safety_claim": false,
     "record": "eval/lora-development/common-controlled-snapshot-decision-20261027.json"
   },
-  "status": "phase_one_controlled_history_native_passed_move_read_timeout_additional_scope_unapproved",
+  "status": "phase_one_preparation_complete_final_execution_not_authorized",
   "training_decision": "no_training_supported_by_current_evidence",
   "training_decision_evidence": {
     "current_lora_candidate_development_successes": 5,
