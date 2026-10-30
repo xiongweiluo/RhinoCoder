@@ -223,8 +223,8 @@
     "research_choices_fixed": true
   },
   "phase_two_freeze_dependency": "public final entries and source specification prepared; exact complete freeze awaits owner-only new40 sealing receipt, current CI, environment and final explicit approval",
-  "phase_two_reference": "docs/lora-phase2-final-freeze-20261027.md",
-  "phase_two_status": "public_preparation_started_owner_new40_not_created_no_execution_authority",
+  "phase_two_reference": "docs/lora-final-owner-formatting-20261030.md",
+  "phase_two_status": "owner_reports_40_text_or_table_cases_structure_and_seal_pending_no_execution_authority",
   "plan": {
     "execution_authorized": false,
     "limits": {

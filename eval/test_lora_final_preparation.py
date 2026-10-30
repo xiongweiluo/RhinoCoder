@@ -82,9 +82,77 @@ def test_custody_refuses_incomplete_or_contaminated_seals(fault):
     with pytest.raises((ValueError,NativeError,RuntimeError)): seal(toy_spec(),cases,exclusions,encrypted,attestation)
 
 
-def test_public_owner_entry_refuses_noninteractive_before_any_private_prompt():
-    result=subprocess.run([sys.executable,str(ROOT/'tools/seal_lora_final_owner.py')],input='',text=True,capture_output=True,timeout=10)
+@pytest.mark.parametrize('arguments', [[], ['--check-cases']])
+def test_public_owner_entry_refuses_noninteractive_before_any_private_prompt(arguments):
+    result=subprocess.run([sys.executable,str(ROOT/'tools/seal_lora_final_owner.py'),*arguments],input='',text=True,capture_output=True,timeout=10)
     assert result.returncode==2 and result.stdout.strip()=='owner_interactive_terminal_required' and not result.stderr
+
+
+def test_owner_case_check_reuses_contract_without_sealing_or_echoing_cases():
+    from training.lora_final_case_check import check_cases
+    cases=synthetic()[0]; before=copy.deepcopy(cases)
+    report=check_cases(build(),cases)
+    assert report['status']=='case_structure_passed_not_sealed' and not report['sealed']
+    assert cases==before and not report['execution_authorized']
+    assert not report['geometry_correctness_verified'] and not report['independence_verified']
+    assert all(c['family_id'] not in json.dumps(report) and c['task_text'] not in json.dumps(report) for c in cases)
+    cases[0]['max_steps']=3
+    report=check_cases(build(),cases)
+    assert report['errors']==[{'row':1,'code':'dispatch_or_step_budget_differs_from_expected_sequence'}]
+
+
+@pytest.mark.parametrize('fault', ['count','strata','reuse','unhashable','blank','exception'])
+def test_owner_case_check_never_repairs_input_or_prints_unknown_private_exception(fault,monkeypatch):
+    import training.lora_final_case_check as check
+    cases=synthetic()[0]
+    if fault=='count': cases.pop()
+    if fault=='strata': cases[12]['stratum']='error_recovery'
+    if fault=='reuse': cases[1]['family_id']=cases[0]['family_id']
+    if fault=='unhashable': cases[0]['expected_operations'][0]['name']={'private-secret':'private-value'}
+    if fault=='blank': cases[0]=json.loads((ROOT/'eval/lora-development/final-case-blank-template.json').read_text())
+    if fault=='exception':
+        def fail(case): raise ValueError('private-secret private-value')
+        monkeypatch.setattr(check,'validate_case',fail)
+    before=copy.deepcopy(cases)
+    report=check.check_cases(build(),cases)
+    assert report['status']=='needs_correction' and report['errors'] and cases==before
+    assert 'private-secret' not in json.dumps(report) and 'private-value' not in json.dumps(report)
+
+
+def test_new_lease_binding_keeps_research_choices_and_historical_freeze():
+    old=json.loads((ROOT/'eval/lora-development/final-public-spec-20261027.json').read_text())
+    new=build()
+    assert old['lease_end_epoch']==int(datetime(2026,10,30,19,tzinfo=timezone.utc).timestamp())
+    assert new['lease_end_epoch']==int(datetime(2026,11,4,19,tzinfo=timezone.utc).timestamp())
+    for key in ('choices','choices_sha256','comparison_plan','limits','assets','model_identities','loader_policy'):
+        assert new[key]==old[key]
+    assert new['resource_policy']['extension_cost'] is None
+    assert not new['execution_authorized']
+
+
+def test_owner_interactive_case_check_reads_only_cases_and_writes_nothing(tmp_path,monkeypatch,capsys):
+    import tools.seal_lora_final_owner as owner
+    import tools.c5_rhino_formal20_owner_exclusion as private
+    import plugin.rhino_listener.lora_development_admission as development
+    root=tmp_path/'public'; root.mkdir()
+    (root/'lora-final-spec.json').write_text(json.dumps(build()))
+    path=tmp_path/'private-synthetic-cases.json'
+    path.write_text(json.dumps(synthetic()[0]))
+    monkeypatch.setattr(owner,'ROOT',root)
+    monkeypatch.setattr(owner.sys,'argv',['owner','--check-cases'])
+    monkeypatch.setattr(owner.sys.stdin,'isatty',lambda:True)
+    monkeypatch.setattr(owner.sys.stdout,'isatty',lambda:True)
+    monkeypatch.setattr(private,'_worktrees',lambda **kwargs:[ROOT])
+    monkeypatch.setattr(development,'source_guard',lambda *args:None)
+    prompts=[]
+    def prompt(label): prompts.append(label); return str(path)
+    monkeypatch.setattr(owner.getpass,'getpass',prompt)
+    before={p.relative_to(tmp_path):p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
+    assert owner.main()==0 and len(prompts)==1
+    output=capsys.readouterr()
+    assert json.loads(output.out)['status']=='case_structure_passed_not_sealed' and not output.err
+    assert str(path) not in output.out
+    assert before=={p.relative_to(tmp_path):p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
 
 
 def test_real_historical_inventory_cannot_be_replaced_by_toy_exclusions():

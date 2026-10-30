@@ -18,7 +18,8 @@ sys.path.insert(0,str(ROOT))
 
 def main():
     check = sys.argv[1:] == ['--check']
-    if sys.argv[1:] and not check:
+    check_cases_only = sys.argv[1:] == ['--check-cases']
+    if sys.argv[1:] and not (check or check_cases_only):
         print('only_public_check_or_interactive_owner_mode_supported'); return 2
     # Before prompting or opening any data. This is a workflow barrier, not an
     # OS security boundary against an agent that disregards its instructions.
@@ -41,6 +42,13 @@ def main():
                 'model_calls':0,'rhino_calls':0,'execution_authorized':False})); return 0
         # Repo location is public; used only to enumerate ALL managed worktrees.
         roots=_worktrees(repository_root=Path('/Users/xiongweiluo/RhinoCoder'))
+        if check_cases_only:
+            path=Path(getpass.getpass('私有40家族JSON数组路径（不回显）：')).expanduser()
+            _require_owner_private_path(path,roots+[ROOT])
+            from training.lora_final_case_check import check_cases
+            report=check_cases(spec,_json(path))
+            print(json.dumps(report,ensure_ascii=False,sort_keys=True,indent=2))
+            return 0 if not report['errors'] else 2
         paths={key:Path(getpass.getpass(label)).expanduser() for key,label in (
             ('cases','私有40家族JSON数组路径（不回显）：'),
             ('exclusions','私有排除清单JSON路径（不回显）：'),
@@ -64,7 +72,8 @@ def main():
     except Exception:
         # Private exceptions may include task text, IDs or paths. Keep them local
         # and unprinted; failed partial output is retained, never made a grant.
-        print('seal_failed_no_authority_created; owner privately inspect inputs; do not send private files')
+        print('private_case_check_failed_no_authority_created; check local JSON/path/public deployment; do not send private files'
+              if check_cases_only else 'seal_failed_no_authority_created; owner privately inspect inputs; do not send private files')
         return 2
 
 
