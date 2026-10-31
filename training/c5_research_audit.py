@@ -28,6 +28,16 @@ def audit_permission_execution(consent_path, ledger_path, receipts, *, task_sha2
     require(handoff_table in {'c5_model_handoff','c5_native_control_handoff'}, 'unknown handoff evidence class')
     consent = _tables(consent_path,('consent_requests','consent_events',handoff_table))
     ledger = _tables(ledger_path,('candidate_write','c5_read'))
+    return audit_permission_tables(consent, ledger, receipts, task_sha256=task_sha256,
+        owner_freeze_sha256=owner_freeze_sha256, handoff_table=handoff_table)
+
+
+def audit_permission_tables(consent, ledger, receipts, *, task_sha256, owner_freeze_sha256,
+                            handoff_table='c5_model_handoff'):
+    """Same audit for authenticated host snapshots; origin is the caller's duty."""
+    require(handoff_table in {'c5_model_handoff', 'c5_native_control_handoff'}, 'unknown handoff evidence class')
+    require(set(consent) == {'consent_requests', 'consent_events', handoff_table}
+            and set(ledger) == {'candidate_write', 'c5_read'}, 'complete ledger tables required')
     require(isinstance(receipts,list), "raw receipts required")
     writes = {r['idempotency_key']:r for r in ledger['candidate_write']}
     reads = {r['request_id']:r for r in ledger['c5_read']}

@@ -1,0 +1,34 @@
+{
+  "additional_cost_ceiling": 0,
+  "additional_load_attempts_max": 1,
+  "authorization_basis": "direct_repository_owner_reply_approved_revised_package_after_CI_20261026",
+  "automatic_recoveries": 0,
+  "ci_checks": {
+    "impact": "success",
+    "python": "success",
+    "release": "success",
+    "ui": "success",
+    "validate": "success"
+  },
+  "ci_run_id": 40316723109,
+  "cumulative_seconds_limit": 7200,
+  "final_test_authorized": false,
+  "merge_authorized": false,
+  "owner_approval": {
+    "actor": "repository_owner",
+    "approval_basis": "repository_owner_explicit_approval_of_this_complete_development_package",
+    "approved": true,
+    "package_sha256": "aa280fb64ba123e4d7f999f5b5cd7db4302c2c3bb1337f2c459da938d408df9e",
+    "scope": "one_bounded_public_development_no_training_no_final_test",
+    "study_id": "lora-optimization-development-v1"
+  },
+  "owner_approval_sha256": "2af51bc3b3b1d6a79adcb839d82903eeb82efc41338ec1d2a866cf968c327312",
+  "package_sha256": "aa280fb64ba123e4d7f999f5b5cd7db4302c2c3bb1337f2c459da938d408df9e",
+  "prior_charge_seconds": 180,
+  "prior_load_attempts": 2,
+  "prior_package_sha256": "c1cfb2f13d0c56fb58e65481cc413189016ed8589428a6af869e27f76febf249",
+  "schema_version": 1,
+  "source_commit": "356ad82c43e6656a56bb5d2ff4e9eaada5d33d80",
+  "this_package_seconds_limit": 7020,
+  "training_authorized": false
+}

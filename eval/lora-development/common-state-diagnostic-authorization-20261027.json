@@ -1,0 +1,30 @@
+{
+  "actor": "repository_owner",
+  "approved": true,
+  "automatic_merge": false,
+  "automatic_retry": false,
+  "ci_jobs": {
+    "impact": "success",
+    "python": "success",
+    "release": "success",
+    "ui": "success",
+    "validate": "success"
+  },
+  "ci_run_id": 40446893205,
+  "date": "2026-10-27",
+  "direct_reply": "可批准",
+  "execution_condition": "all five CI jobs and package/environment/disk/lease gates passed",
+  "execution_started": false,
+  "final_test_creation_or_execution": false,
+  "gpu_execution": false,
+  "isolated_documents_max": 1,
+  "model_loads": 0,
+  "package_sha256": "931aad6fc68afc1752c089ce6c6291e8808321d712c07f422c009a5edaef36cf",
+  "proposal_commit": "d46dc568d4563255db2a7b3097667b5e81a08c3c",
+  "reads_max": 1,
+  "scope": "one_move_fingerprint_diagnostic_zero_models_no_final_test",
+  "seed_operations_max": 7,
+  "signed_writes_max": 1,
+  "slots_max": 1,
+  "training": false
+}

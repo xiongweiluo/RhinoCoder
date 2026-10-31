@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "observed_date": "2026-10-26",
+  "timezone": "Europe/Zurich",
+  "scope": "resource_identity_and_public_CPU_input_length_only",
+  "source_sha256": {
+    "eval/lora-development/proposed-development-plan.json": "9696d9cceb89b255e0aa7c0231d8f1cad9fb9146803c3aa9523dbcd230b97485",
+    "eval/lora-development/readonly-resources-20261026.json": "220c1687ee39bc19f0a9c61353e35f3b04942dd6b77f18cdd2a40b5c72908f9d",
+    "eval/lora-development/token-budget-audit-20261026.json": "2d3c5a0c3ac27ce258e1c884c78c277445462ecd257ce5c4291ffe8ab6742f25",
+    "eval/lora-development/token-budget-native-floats-20261026.json": "0e3b05a9f4267dcc7b978e06f507e581890cc1d978f272898d9c0cf4cacb4a07",
+    "tools/audit_lora_development_token_budget.py": "38721baac44fcb88eb180a2b73378d2bdda76e1753e1304e22d2d37f754f5bc8"
+  },
+  "historical_evidence_bindings": [
+    {
+      "record": "eval/lora-development/public-review-20261025.json",
+      "source_commit": "231d99f14bee1ac11840aa00025e4100b0445af0",
+      "unchanged": true
+    },
+    {
+      "record": "eval/lora-development/token-budget-audit-20261026.json",
+      "source_commit": "8d6cf819b816e2fcb459952d5d58ace4cd35caba",
+      "unchanged": true
+    }
+  ],
+  "current_development_review": {
+    "study_id": "lora-optimization-development-v1",
+    "scope": "inert_development_review_only",
+    "slots": 32,
+    "max_step_requests": 64,
+    "max_generation_stages": 128,
+    "planned_worst_case_seconds": 6900,
+    "remaining_headroom_seconds": 300,
+    "missing_before_execution": [
+      "exact_source_runtime_and_resource_binding",
+      "historical_family_overlap_review",
+      "lease_expiry_and_cost_ceiling",
+      "new_field_runtime_and_failure_cleanup_validation",
+      "owner_development_execution_approval",
+      "rhino_isolated_document_scope"
+    ],
+    "timing_feasibility_observed": false,
+    "execution_authorized": false,
+    "phase_one_complete": false
+  },
+  "schedule_unchanged_from_231d99f": true,
+  "actual_execution_authorized": false,
+  "model_generations": 0,
+  "rhino_operations": 0,
+  "training_runs": 0,
+  "historical_private_task_answer_log_reads": 0,
+  "final_test_created_or_consumed": false,
+  "historical_seven_failure_causes_still_unknown": true,
+  "phase_one_complete": false,
+  "remaining_independent_work": [
+    "Implement new development field seams without reusing historical study grants or claims; verify trusted feedback, per-cell namespace, fixed schedule, and failure/cleanup accounting on CPU.",
+    "Complete exact source/runtime/resource binding after field implementation and resource scope are settled."
+  ],
+  "pending_owner_information": {
+    "cost_ceiling": null,
+    "rhino_isolated_document_scope": null,
+    "historical_family_overlap_summary": null
+  },
+  "runtime_latency_or_model_quality_observed": false
+}

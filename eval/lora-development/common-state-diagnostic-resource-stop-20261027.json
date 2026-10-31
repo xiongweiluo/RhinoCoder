@@ -1,0 +1,31 @@
+{
+  "303_deployed_source_files_match_executed_commit": true,
+  "all_ci_passed": true,
+  "automatic_retry": false,
+  "checked_epoch": 1793099268.147445,
+  "ci_run_id": 40446893205,
+  "consumed_slots": 0,
+  "controller_entry_invocations": 1,
+  "cpu_entry_check_passed": true,
+  "date": "2026-10-27",
+  "documents_created": 0,
+  "history_rewritten": false,
+  "host_callbacks_created": 0,
+  "host_keys_created": 0,
+  "initial_observed_free_bytes": 4214718464,
+  "latest_free_bytes": 4211683328,
+  "model_loads": 0,
+  "native_operations": 0,
+  "next_gate": "verify restored disk and all remaining gates before any field execution; retain this pre-admission stop",
+  "orchestration_error": "Controller entry invoked before failed outer preflight result was handled; entry disk guard stopped before claim/key/host creation. No field execution occurred.",
+  "package_sha256": "931aad6fc68afc1752c089ce6c6291e8808321d712c07f422c009a5edaef36cf",
+  "private_state_entries": [
+    "owner-approval.json"
+  ],
+  "probe_claims": 0,
+  "required_free_bytes": 4294967296,
+  "rhino_bundle_version": "8.21.25188.17002",
+  "rhino_calls": 0,
+  "source_commit": "d46dc568d4563255db2a7b3097667b5e81a08c3c",
+  "status": "stopped_before_probe_claim_at_disk_gate"
+}

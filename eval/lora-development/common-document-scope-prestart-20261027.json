@@ -1,0 +1,26 @@
+{
+  "all_five_ci_successful": true,
+  "checked_at_epoch": 1793102305.972338,
+  "ci_jobs": [
+    "impact",
+    "python",
+    "release",
+    "ui",
+    "validate"
+  ],
+  "ci_run_id": 40498015465,
+  "date": "2026-10-27",
+  "direct_owner_approval": "批准上述方案",
+  "free_bytes": 5897314304,
+  "lease_end_epoch": 1793386800,
+  "minimum_free_bytes": 4294967296,
+  "model_loads": 0,
+  "native_operations_at_prestart": 0,
+  "package_sha256": "25296784f4305a1045249774f0305c0c98a2f294b2e1b2f891c3137371135583",
+  "probe_claim_existed": false,
+  "python_version": "3.13.5",
+  "rhino_bundle_version": "8.21.25188.17002",
+  "source_commit": "822532c8b90c0efe5dee9ce59bd63d83eca0c230",
+  "source_files": 305,
+  "source_inventory_sha256": "986a54a44bc6efeee125e593672d2110137f5488f0cc34f5bf521c49924b9fde"
+}

@@ -1,0 +1,193 @@
+{
+  "alpha": 0.05,
+  "assumptions": [
+    "Independent equally weighted paired task families with homogeneous outcome probabilities.",
+    "Only the predeclared primary pair; success includes engineering failures as non-success in fixed denominator.",
+    "Values are hypothetical planning parameters, not estimated from historical 20 or unobserved development.",
+    "Ignores additional engineering-completeness and usefulness gates; therefore an upper bound on joint acceptance power.",
+    "Fixed-stratum heterogeneous distribution needs its own frozen calculation; this homogeneous grid is illustrative only.",
+    "Two-sided rejection includes either direction; beneficial-direction and practical-effect requirements can only reduce joint acceptance probability."
+  ],
+  "confirmatory_claim": false,
+  "crosscheck": {
+    "max_absolute_difference_bound": 1e-12,
+    "scipy_binomtest_comparisons": 329
+  },
+  "hypothetical_grid": [
+    {
+      "hypothesized_discordance_probability": 0.2,
+      "hypothesized_success_difference": 0.0,
+      "n_independent_families": 40,
+      "two_sided_exact_mcnemar_rejection_probability": 0.01870807536480653
+    },
+    {
+      "hypothesized_discordance_probability": 0.1,
+      "hypothesized_success_difference": 0.1,
+      "n_independent_families": 40,
+      "two_sided_exact_mcnemar_rejection_probability": 0.20627266871283975
+    },
+    {
+      "hypothesized_discordance_probability": 0.2,
+      "hypothesized_success_difference": 0.1,
+      "n_independent_families": 40,
+      "two_sided_exact_mcnemar_rejection_probability": 0.17242718864372486
+    },
+    {
+      "hypothesized_discordance_probability": 0.4,
+      "hypothesized_success_difference": 0.1,
+      "n_independent_families": 40,
+      "two_sided_exact_mcnemar_rejection_probability": 0.11536887981979023
+    },
+    {
+      "hypothesized_discordance_probability": 0.2,
+      "hypothesized_success_difference": 0.2,
+      "n_independent_families": 40,
+      "two_sided_exact_mcnemar_rejection_probability": 0.8386711827678379
+    },
+    {
+      "hypothesized_discordance_probability": 0.4,
+      "hypothesized_success_difference": 0.2,
+      "n_independent_families": 40,
+      "two_sided_exact_mcnemar_rejection_probability": 0.4397231834120232
+    },
+    {
+      "hypothesized_discordance_probability": 0.4,
+      "hypothesized_success_difference": 0.3,
+      "n_independent_families": 40,
+      "two_sided_exact_mcnemar_rejection_probability": 0.8629984934433722
+    },
+    {
+      "hypothesized_discordance_probability": 0.2,
+      "hypothesized_success_difference": 0.0,
+      "n_independent_families": 80,
+      "two_sided_exact_mcnemar_rejection_probability": 0.028163728060634687
+    },
+    {
+      "hypothesized_discordance_probability": 0.1,
+      "hypothesized_success_difference": 0.1,
+      "n_independent_families": 80,
+      "two_sided_exact_mcnemar_rejection_probability": 0.823083475583695
+    },
+    {
+      "hypothesized_discordance_probability": 0.2,
+      "hypothesized_success_difference": 0.1,
+      "n_independent_families": 80,
+      "two_sided_exact_mcnemar_rejection_probability": 0.43679367155234555
+    },
+    {
+      "hypothesized_discordance_probability": 0.4,
+      "hypothesized_success_difference": 0.1,
+      "n_independent_families": 80,
+      "two_sided_exact_mcnemar_rejection_probability": 0.23000347268610338
+    },
+    {
+      "hypothesized_discordance_probability": 0.2,
+      "hypothesized_success_difference": 0.2,
+      "n_independent_families": 80,
+      "two_sided_exact_mcnemar_rejection_probability": 0.9994495056685903
+    },
+    {
+      "hypothesized_discordance_probability": 0.4,
+      "hypothesized_success_difference": 0.2,
+      "n_independent_families": 80,
+      "two_sided_exact_mcnemar_rejection_probability": 0.7794915788265662
+    },
+    {
+      "hypothesized_discordance_probability": 0.4,
+      "hypothesized_success_difference": 0.3,
+      "n_independent_families": 80,
+      "two_sided_exact_mcnemar_rejection_probability": 0.9951402797517438
+    },
+    {
+      "hypothesized_discordance_probability": 0.2,
+      "hypothesized_success_difference": 0.0,
+      "n_independent_families": 120,
+      "two_sided_exact_mcnemar_rejection_probability": 0.02961306839003347
+    },
+    {
+      "hypothesized_discordance_probability": 0.1,
+      "hypothesized_success_difference": 0.1,
+      "n_independent_families": 120,
+      "two_sided_exact_mcnemar_rejection_probability": 0.9839596656528105
+    },
+    {
+      "hypothesized_discordance_probability": 0.2,
+      "hypothesized_success_difference": 0.1,
+      "n_independent_families": 120,
+      "two_sided_exact_mcnemar_rejection_probability": 0.633396651352495
+    },
+    {
+      "hypothesized_discordance_probability": 0.4,
+      "hypothesized_success_difference": 0.1,
+      "n_independent_families": 120,
+      "two_sided_exact_mcnemar_rejection_probability": 0.3617628386807042
+    },
+    {
+      "hypothesized_discordance_probability": 0.2,
+      "hypothesized_success_difference": 0.2,
+      "n_independent_families": 120,
+      "two_sided_exact_mcnemar_rejection_probability": 0.9999994761226123
+    },
+    {
+      "hypothesized_discordance_probability": 0.4,
+      "hypothesized_success_difference": 0.2,
+      "n_independent_families": 120,
+      "two_sided_exact_mcnemar_rejection_probability": 0.9343521737869654
+    },
+    {
+      "hypothesized_discordance_probability": 0.4,
+      "hypothesized_success_difference": 0.3,
+      "n_independent_families": 120,
+      "two_sided_exact_mcnemar_rejection_probability": 0.9999100910089812
+    },
+    {
+      "hypothesized_discordance_probability": 0.2,
+      "hypothesized_success_difference": 0.0,
+      "n_independent_families": 160,
+      "two_sided_exact_mcnemar_rejection_probability": 0.03147782679798016
+    },
+    {
+      "hypothesized_discordance_probability": 0.1,
+      "hypothesized_success_difference": 0.1,
+      "n_independent_families": 160,
+      "two_sided_exact_mcnemar_rejection_probability": 0.9990933130785712
+    },
+    {
+      "hypothesized_discordance_probability": 0.2,
+      "hypothesized_success_difference": 0.1,
+      "n_independent_families": 160,
+      "two_sided_exact_mcnemar_rejection_probability": 0.7772477547549097
+    },
+    {
+      "hypothesized_discordance_probability": 0.4,
+      "hypothesized_success_difference": 0.1,
+      "n_independent_families": 160,
+      "two_sided_exact_mcnemar_rejection_probability": 0.47357882528436424
+    },
+    {
+      "hypothesized_discordance_probability": 0.2,
+      "hypothesized_success_difference": 0.2,
+      "n_independent_families": 160,
+      "two_sided_exact_mcnemar_rejection_probability": 0.9999999997143152
+    },
+    {
+      "hypothesized_discordance_probability": 0.4,
+      "hypothesized_success_difference": 0.2,
+      "n_independent_families": 160,
+      "two_sided_exact_mcnemar_rejection_probability": 0.9817097734808462
+    },
+    {
+      "hypothesized_discordance_probability": 0.4,
+      "hypothesized_success_difference": 0.3,
+      "n_independent_families": 160,
+      "two_sided_exact_mcnemar_rejection_probability": 0.9999986490326532
+    }
+  ],
+  "method": "D~Binomial(N,q); B|D~Binomial(D,(q+delta)/(2q)); sum exact two-sided McNemar rejection probability with p<0.05",
+  "n40_observed_net_gain_four_best_possible_p": 0.125,
+  "n40_observed_net_gain_six_all_discordances_one_way_p": 0.03125,
+  "not_a_sample_size_selection": true,
+  "random_sampling_used": false,
+  "schema_version": 1,
+  "scope": "analytic_design_only_no_tasks_no_test_dataset_no_model_execution"
+}

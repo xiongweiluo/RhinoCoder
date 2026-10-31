@@ -1,0 +1,25 @@
+{
+  "actual_deployed_entry_check": "passed",
+  "additional_native_fingerprint_reads": 0,
+  "cpu_regression_command": "python -m pytest -q eval/test_lora_scene_fingerprint.py eval/test_lora_common_chain.py eval/test_lora_development_controller.py eval/test_lora_development_source.py eval/test_c5_research_gate.py eval/test_c5_modelbridge_hub.py",
+  "cpu_regressions_passed": 65,
+  "date": "2026-10-27",
+  "diagnostic_scope": "record components of already-required full fingerprint reads; one additional P01-mechanism attempt proposed, never replacing the failed result",
+  "full_digest_algorithm_and_continuity_check_unchanged": true,
+  "historical_root_cause_claimed": false,
+  "isolated_import": {
+    "backend_imports": 0,
+    "python_version": "3.13.5",
+    "runtime_entries_called": 0,
+    "source_files": 303,
+    "status": "passed"
+  },
+  "model_loads": 0,
+  "package_sha256": "931aad6fc68afc1752c089ce6c6291e8808321d712c07f422c009a5edaef36cf",
+  "rhino_calls": 0,
+  "rhino_python_39_syntax": "passed",
+  "source_files": 303,
+  "source_inventory_sha256": "44e6a192983fb06a51588d1c97d5f594f1f1aaa7f46b04c59b656e6d9f3b9eed",
+  "state_exists": false,
+  "status": "prepared_not_approved_not_executed"
+}

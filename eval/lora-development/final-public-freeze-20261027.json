@@ -1,0 +1,151 @@
+{
+  "choices_sha256": "807fe4847d2077c888012d106bfbd2cc341d6a18214cc75389af5ad3dd138377",
+  "complete_final_freeze": false,
+  "cpu_checks": {
+    "gpu": {
+      "actual_entry_preparation_used": true,
+      "endpoint": "gpu",
+      "execution_authorized": false,
+      "grant_or_live_state_created": false,
+      "model_calls": 0,
+      "model_or_native_readiness_proven": false,
+      "private_inputs_read": false,
+      "report_sha256": "bda71b136fd107e73b1d156439c56c47f718960b0c9e430bc7791288abf7b953",
+      "rhino_calls": 0,
+      "source_inventory_sha256": "417ad68d67dbe2fba3d7ad90daf022f3c0298949cb061ac430ec0b4648237527",
+      "spec_sha256": "2922fa6571da5dbb6b769bc669f1ab7ede7459b02f4cd9341e96cf38b4f4aa68",
+      "status": "passed"
+    },
+    "gpu_import": {
+      "backend_imports": 0,
+      "cpu_origins_sha256": "9a96bae1a8d85001b6180846ab34dd6a8cc42d05c4490e157ecb88dda3665183",
+      "cpu_site_override": "/data/conda-envs/rhinocoder/lib/python3.11/site-packages",
+      "execution_authorized": false,
+      "loaded_public_files": 81,
+      "loaded_public_origins_sha256": "039cfd09989d5192531c78095cf21ed8f864ce6b6fc0270726b205570d5d81d0",
+      "model_or_host_readiness_proven": false,
+      "private_data_read": false,
+      "python_executable": "/data/c5-reuse-compatible-python-20261012-d/runtime/bin/python3.11",
+      "python_version": "3.11.17",
+      "report_sha256": "18bd44661fd3f6f785d958da9ef401b8c8f16765d6c08ff23a7bca28a4df6dba",
+      "runtime_entries_called": 0,
+      "source_files": 316,
+      "source_inventory_sha256": "417ad68d67dbe2fba3d7ad90daf022f3c0298949cb061ac430ec0b4648237527",
+      "status": "passed"
+    },
+    "mac": {
+      "actual_entry_preparation_used": true,
+      "endpoint": "mac",
+      "execution_authorized": false,
+      "grant_or_live_state_created": false,
+      "model_calls": 0,
+      "model_or_native_readiness_proven": false,
+      "private_inputs_read": false,
+      "report_sha256": "494705637b918fa22d7b43227050ed78fab443af9fd582f32b2d38cb6c51674c",
+      "rhino_calls": 0,
+      "source_inventory_sha256": "417ad68d67dbe2fba3d7ad90daf022f3c0298949cb061ac430ec0b4648237527",
+      "spec_sha256": "2922fa6571da5dbb6b769bc669f1ab7ede7459b02f4cd9341e96cf38b4f4aa68",
+      "status": "passed"
+    },
+    "mac_import": {
+      "backend_imports": 0,
+      "cpu_origins_sha256": "ef634327f31f4f7da4b99342122d6fff6dd3fab6c1b088888f72bdc68f09a634",
+      "cpu_site_override": null,
+      "execution_authorized": false,
+      "loaded_public_files": 81,
+      "loaded_public_origins_sha256": "039cfd09989d5192531c78095cf21ed8f864ce6b6fc0270726b205570d5d81d0",
+      "model_or_host_readiness_proven": false,
+      "private_data_read": false,
+      "python_executable": "/opt/anaconda3/bin/python3.13",
+      "python_version": "3.13.5",
+      "report_sha256": "8503b9ca56745c45912ddb9bed2fb4aec6dc27f0a62ad89d558f85c12f066daa",
+      "runtime_entries_called": 0,
+      "source_files": 316,
+      "source_inventory_sha256": "417ad68d67dbe2fba3d7ad90daf022f3c0298949cb061ac430ec0b4648237527",
+      "status": "passed"
+    },
+    "owner": {
+      "execution_authorized": false,
+      "model_calls": 0,
+      "private_inputs_read": false,
+      "report_sha256": "602e756915eadb0f285f05a855a3f48cdf1bb5dd80a863906e4f0acc6d493f93",
+      "rhino_calls": 0,
+      "spec_sha256": "2922fa6571da5dbb6b769bc669f1ab7ede7459b02f4cd9341e96cf38b4f4aa68",
+      "status": "passed"
+    }
+  },
+  "date": "2026-10-27",
+  "execution_authorized": false,
+  "final_approval": null,
+  "final_cases_generated": false,
+  "final_runtime_package_sha256": null,
+  "final_slots_consumed": 0,
+  "full_repository_cpu": {
+    "affected_rerun": "41_passed_including_all_three_failures",
+    "failures": [
+      "two_legacy_shutdown_transport_injection_regressions",
+      "one_then_unwritten_public_metadata_link"
+    ],
+    "full_new_head_CI_required": true,
+    "initial_elapsed_seconds": 690.62,
+    "initial_failed": 3,
+    "initial_passed": 2705,
+    "initial_skipped": 22,
+    "resolution": "legacy_entry_keeps_original_shutdown_publication; final_entry_keeps_idempotent_cancellation; linked_metadata_written"
+  },
+  "gpu_calls": 0,
+  "historical_development_loads_preserved": 5,
+  "historical_results_changed": false,
+  "initial_pr31_ci": {
+    "commit": "6bc572c5c27039b0c7dc7769c0e72f7b2d1221af",
+    "jobs": {
+      "impact": "success",
+      "python": "success",
+      "release": "success",
+      "ui": "success",
+      "validate": "success"
+    },
+    "merged": false,
+    "run_id": 40521378144
+  },
+  "model_loads": 0,
+  "new_commit_ci": "must_verify_actual_new_head_before_final_approval_not_inherited_from_initial_head",
+  "private_cases_or_answers_read": false,
+  "private_commitment": null,
+  "private_new40_status": "owner_confirmed_not_created",
+  "readiness_limits": [
+    "CPU_only_not_model_or_native_readiness",
+    "original_host_byte_closure_unknown",
+    "external_modify_restore_outside_B_contract",
+    "full_common_chain_real_model_write_not_prevalidated"
+  ],
+  "related_regression": {
+    "failed": 0,
+    "new_final_tests": 20,
+    "overlapping_suites_not_added_together": true,
+    "passed": 41,
+    "synthetic_development_only": true
+  },
+  "remaining": [
+    "owner_independent_new40_authoring_and_private_seal",
+    "sanitized_receipt_binding_and_exact_final_package_review",
+    "new_head_CI_and_current_resource_integrity",
+    "one_explicit_complete_final_execution_approval"
+  ],
+  "resource_actions": {
+    "actual_cost": null,
+    "billing_resource_change": 0,
+    "purchase": 0,
+    "renewal": 0
+  },
+  "rhino39_syntax": "passed_for_final_host_entry_shared_entry_and_admission",
+  "rhino_calls": 0,
+  "schema_version": 1,
+  "source_files": 316,
+  "source_inventory_sha256": "417ad68d67dbe2fba3d7ad90daf022f3c0298949cb061ac430ec0b4648237527",
+  "spec_path": "eval/lora-development/final-public-spec-20261027.json",
+  "spec_sha256": "2922fa6571da5dbb6b769bc669f1ab7ede7459b02f4cd9341e96cf38b4f4aa68",
+  "status": "public_source_specification_frozen_complete_private_freeze_pending",
+  "study_id": "lora-common-final-comparison-v1",
+  "training_calls": 0
+}

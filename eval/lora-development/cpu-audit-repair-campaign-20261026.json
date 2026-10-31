@@ -1,0 +1,32 @@
+{
+  "actual_python": "3.13.5",
+  "after_actual_tokenizer_template_encode_decode": "passed",
+  "after_public_controller_construction": "passed",
+  "applied_to_frozen_execution_package": false,
+  "candidate_source_sha256": "38a60d8d534533e737631edead7655f36fdeb06d57b5c861737d71e823a20c8c",
+  "checks": [
+    {
+      "modules_added_by_audit": [],
+      "pass_index": 1,
+      "status": "passed"
+    },
+    {
+      "modules_added_by_audit": [],
+      "pass_index": 2,
+      "status": "passed"
+    }
+  ],
+  "cpu_only": true,
+  "cpu_regression": {
+    "command": "python -m pytest -q eval/test_lora_development*.py",
+    "failed": 0,
+    "passed": 190,
+    "seconds": 37.83
+  },
+  "expected_environment_manifest_unchanged": true,
+  "model_calls": 0,
+  "model_generation_calls": 0,
+  "new_slots": 0,
+  "rhino_calls": 0,
+  "synthetic_template_calls": 1
+}

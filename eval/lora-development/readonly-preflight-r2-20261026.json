@@ -1,0 +1,12 @@
+{
+  "actual_remote_preflight_passed": true,
+  "elapsed_seconds": 21.012116242956836,
+  "field_state_created": false,
+  "hardware_environment_assets_and_bound_paths_verified": true,
+  "model_backends_imported": false,
+  "model_generations": 0,
+  "package_sha256": "aa280fb64ba123e4d7f999f5b5cd7db4302c2c3bb1337f2c459da938d408df9e",
+  "postcheck_metadata_guard_passed": true,
+  "rhino_execution": 0,
+  "source_files_verified": 286
+}
