@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-31",
+  "status": "owner_field_diagnostics_ready_not_execution_authority",
+  "spec_path": "eval/lora-development/final-public-spec-20261031.json",
+  "spec_sha256": "8bf7445eca351420996f99038f63f3794b23b6747977fbc8cf6b8e2c7d05fbfa",
+  "source_inventory_sha256": "7994d6892c7ea4346a5ca9ab2420eb488a95b4358ea9e58f34eb95e2e6887aeb",
+  "source_files": 318,
+  "choices_sha256": "807fe4847d2077c888012d106bfbd2cc341d6a18214cc75389af5ad3dd138377",
+  "research_and_scoring_unchanged": true,
+  "prior_freeze_preserved": "eval/lora-development/final-public-freeze-20261030.json",
+  "owner_reported_format_errors": {
+    "final_assertion_shape": 4,
+    "fixture_seed_arguments_invalid": 35,
+    "row_without_reported_individual_error": 30,
+    "whole_set_passed": false
+  },
+  "cpu_checks": {
+    "related_regression_passed": 45,
+    "failed": 0,
+    "deployed_owner_public_check": "passed",
+    "deployed_mac_public_check": "passed",
+    "deployed_field_diagnostic_public_synthetic_check": "passed",
+    "isolated_import": "passed",
+    "isolated_import_report_sha256": "c2f59d75f99cc0ae3da262fc253505495cf46354f86f5791b37ee6eb2150102d",
+    "target_linux": "pending_no_remote_execution"
+  },
+  "previous_head_ci": {
+    "commit": "2751d05ceeff96e8e193ae4eeb02e5dd8ddc4434",
+    "run_id": 41107394037,
+    "conclusion": "success"
+  },
+  "new_head_ci": "verify_new_head_separately",
+  "private_inputs_read": false,
+  "private_data_modified": false,
+  "model_calls": 0,
+  "rhino_calls": 0,
+  "training_calls": 0,
+  "formal_slots_consumed": 0,
+  "sealed": false,
+  "execution_authorized": false,
+  "complete_final_freeze": false,
+  "remaining": [
+    "owner_private_format_correction_and_original_custody_seal",
+    "target_linux_CPU_check_and_current_CI",
+    "exact_final_execution_approval"
+  ]
+}

@@ -1,5 +1,7 @@
 # 将已准备的40题整理为私有评测输入
 
+> 2026-10-31：本人返回的脱敏格式结果为4行断言类型错误、35行夹具参数错误；第30行未报告单项错误，不表示整套通过。新增字段定位仅辅助本人修正，原验证器与评分不变。请使用下方10月31日本机入口；旧部署和冻结记录保留。
+
 2026-10-30所有者确认：已有40道题目文本或表格；尚不是可直接封存的case包。租约截止更新为**2026-11-04 20:00 Europe/Zurich**（19:00 UTC），延期费用未知；代理未采购、续租或更换资源。固定9小时48分完整窗口不变，最迟须在11月4日10:12前启动并另外留出预检时间。这个时间绑定不是执行批准。
 
 本页接续[第二阶段完整方案](lora-phase2-final-freeze-20261027.md)，只补充格式填写与新资源绑定。原模型、权重、original、B契约、评分、40家族80槽、分层、统计、停止规则及第一阶段选择摘要均不变。10月27日公开冻结记录保留，不能用其旧租期规格进行新封存。
@@ -62,12 +64,16 @@
 本人填写后，在**macOS终端**运行下列命令；入口会不回显地询问私有`cases.json`路径，不要把路径写进命令或聊天。不能由代理代跑私有输入。
 
 ```bash
-/opt/anaconda3/bin/python3.13 -I -S -B /Users/xiongweiluo/.rhinocoder-final/comparison-20261030/source/tools/seal_lora_final_owner.py --check-cases
+/opt/anaconda3/bin/python3.13 -I -S -B /Users/xiongweiluo/.rhinocoder-final/comparison-20261031/source/tools/seal_lora_final_owner.py --check-cases
 ```
 
-这一模式复用原`validate_case/compile_cases`，不修数据、不写文件、不封存、不启动模型或Rhino，不创建正式claim。它只输出数组行号与白名单错误码、结构是否通过；不打印题文、身份、参数、答案、路径或原始异常。可以在任何模型消费前修正格式后重复检查，不消耗正式槽位；不构成新增研究步骤或逐项批准要求。
+这一模式复用原`validate_case/compile_cases`，不修数据、不写文件、不封存、不启动模型或Rhino，不创建正式claim。它只输出数组行号、公开字段路径与白名单错误码、结构是否通过；不打印题文、身份、参数、答案、路径或原始异常。可以在任何模型消费前修正格式后重复检查，不消耗正式槽位；不构成新增研究步骤或逐项批准要求。
 
 - `case_structure_passed_not_sealed`：40项结构、固定分层/核心工具覆盖、80槽编译与通道字节预算通过。**尚未完成独立性、排除、几何正确性、加密或封存**。
+- 新增`details`逐项列出`field/reason/expected`，不输出实际值、私有键名、别名或原始异常。例如`final_assertions.objects`需对象，`final_assertions.unchanged`需数组；请保留真实评分内容，不把它们清空来通过检查。
+- `fixture_recipe[0]`表示第1个夹具操作，`scale_factor[1]`表示该数组第2项；方括号从0起，最外层`row`从1起。`<unknown-field-4>`表示参数对象内按JSON书写顺序第4个键，键名隐去；`expected`列出该工具允许的公开参数名。
+- `missing_required_field`表示缺少必填参数；`schema_type_or_array_limit`表示类型/数组契约不符；`vector_length`要求3个分量；`nonpositive_dimension/nonpositive_scale`要求正数；`numeric_bound`要求有限值且绝对值不超过100000；`rgb_range`要求0–255；别名/字符串错误会给出原约束。整数是否有效仍依照原验证器，不自动转换字符串。
+- 每行同时定位这两类问题，不限于最先失败的夹具；仍保留原首个失败码。为避免异常文件生成无限输出，每行最多8个夹具、每夹具64个参数、128条提示；未列出不代表其余字段正确，修正后继续原校验。诊断不补写参数、不推测答案、不改变通过条件。
 - `row`从1起对应JSON数组位置；每行报告最早结构错误。例如`dispatch_or_step_budget_differs_from_expected_sequence`表示读/写/步数未与参考序列一致。
 - `private_case_check_failed_no_authority_created`：在本人环境检查JSON编码、路径位于所有worktree之外、公开部署完整性；不要发送原始文件或异常截图。
 
@@ -77,6 +83,6 @@
 
 接着按[已有四项输入与本人确认表](lora-phase2-final-freeze-20261027.md#所有者需在私有环境准备的四项输入)准备完整历史排除、本人确认及独立加密往返副本；不新增材料类别。四项齐备后使用同一新版入口，去掉`--check-cases`，完成一次私有CPU封存；仅返回工具输出的`owner-receipt`，不要返回runtime、scorer-cases、题文、答案或密钥。
 
-新公开规格/本机检查见[10月30日准备记录](../eval/lora-development/final-public-freeze-20261030.json)。当前租期身份将进入回执，原10月27日部署和记录保留。目标Linux新版实际入口尚须恢复连接后CPU核验；这不妨碍本人整理输入，也不能据旧版CPU结果声称新版目标部署通过。新版完整CI亦以PR #31当前提交结果为准。
+新公开规格/本机检查见[10月31日准备记录](../eval/lora-development/final-public-freeze-20261031.json)。当前源码与租期身份将进入回执，原10月27日部署和记录保留。目标Linux新版实际入口尚须恢复连接后CPU核验；这不妨碍本人整理输入，也不能据旧版CPU结果声称新版目标部署通过。新版完整CI亦以PR #31当前提交结果为准。
 
 回执、源码/环境、最新CI齐备后，形成唯一精确最终执行方案供本人集中确认；确认前不启动模型、Rhino、训练或正式比较，不自动合并。原C4/C5 NO-GO、历史失败与未知、默认混合路线保留；本轮仅是同一第二阶段的准备接续。
