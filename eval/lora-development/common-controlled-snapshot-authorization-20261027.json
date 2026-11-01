@@ -1,0 +1,30 @@
+{
+  "actor": "repository_owner",
+  "approval_received": true,
+  "approved_source_commit": "3cf6099afeffa9ab5161e16eebdc01e3ce795e30",
+  "cleanup_and_new_evidence_review_authorized": true,
+  "conditions": [
+    "approved source all five CI successful",
+    "unchanged package and source",
+    "environment/disk/lease gates pass"
+  ],
+  "direct_reply": "批准完整方案，技术门通过后执行",
+  "document_event_delegates": 0,
+  "execution_started_at_this_record": false,
+  "external_aba_detection": false,
+  "final_test_creation_or_execution": false,
+  "fixed_protection_operations_max": 2,
+  "gpu_calls": 0,
+  "model_loads": 0,
+  "new_isolated_documents_max": 1,
+  "original_fixture_seed_operations_max": 7,
+  "package_sha256": "cbd0a1202c378a1d137b77e133c3556592f29f1386cfb7d44a0abe5ca5a73424",
+  "reads_max": 1,
+  "recorded_epoch": 1793107420.206721,
+  "retries_authorized": 0,
+  "scope": "one_controlled_snapshot_move_read_probe_zero_models_no_external_aba_no_final_test",
+  "signed_writes_max": 1,
+  "source_inventory_sha256": "08550dae903496e349a4ebfb85a892b4e1e7667391175e72f820bb03fa70d095",
+  "training": false,
+  "window_seconds": 1260
+}

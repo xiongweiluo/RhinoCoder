@@ -1,0 +1,63 @@
+{
+  "IncludeHeadlessDocuments_documented": false,
+  "additional_static_review": {
+    "BeginUndoRecord": "Explicit recording API may return 0; wrapping our writes cannot establish observation of arbitrary external ABA.",
+    "Cplusplus_watcher": "Headless-aware constructor documented in current 9.0 reference; pinned Mac 8.21 ABI/deployable support not established.",
+    "Modified": "Documented settable boolean; not a documented monotonic change-history counter.",
+    "NextUndoRecordSerialNumber": "Next undo-record identity, not a documented counter of all native mutations.",
+    "controlled_write_and_snapshot_alternative": "Narrower protected contract; no implementation or execution selected, cannot exclude external modify-restore between observations.",
+    "default": "Retain approved protection; decide supported-host route or explicit research-contract scope before preparing another native proposal.",
+    "native_calls": 0,
+    "new_execution_authorized": false
+  },
+  "conclusion": "The proposed static-event clock is incompatible with the pinned Rhino 8.21 headless execution contract; do not promote or retry it.",
+  "date": "2026-10-27",
+  "installed_rhino_version": "8.21.25188.17002",
+  "instance_EventWatcher_documented": false,
+  "local_probe_epoch": 0,
+  "local_xml_path": "/Applications/Rhino 8.app/Contents/Frameworks/RhCore.framework/Versions/A/Resources/RhinoCommon.xml",
+  "local_xml_sha256": "8b33b95e9f0db7292ea59c1e221be2485183d46a40d7a6356dd03ab2e899e009",
+  "native_calls_for_this_api_review": 0,
+  "not_authorized_or_performed": [
+    "Rhino upgrade",
+    "new native plugin",
+    "switch to visible document",
+    "additional native attempt",
+    "model load",
+    "training",
+    "final test"
+  ],
+  "preparation_error": "Reviewed general static event APIs and injected-event CPU logic without checking headless and installed-version support before proposing the live probe.",
+  "sources": [
+    {
+      "finding": "Official documentation states static RhinoDoc events are never raised for headless documents.",
+      "url": "https://mcneel.github.io/rhinocommon-api-docs/api/RhinoCommon/html/T_Rhino_EventWatcher.htm"
+    },
+    {
+      "finding": "The headless-aware instance EventWatcher constructor is documented since Rhino 9.0.",
+      "url": "https://mcneel.github.io/rhinocommon-api-docs/api/RhinoCommon/html/M_Rhino_EventWatcher__ctor.htm"
+    },
+    {
+      "finding": "Modified is a get/set boolean, also present in installed 8.21 XML.",
+      "url": "https://mcneel.github.io/rhinocommon-api-docs/api/RhinoCommon/html/P_Rhino_RhinoDoc_Modified.htm"
+    },
+    {
+      "finding": "Next undo record serial; also present in installed 8.21 XML.",
+      "url": "https://mcneel.github.io/rhinocommon-api-docs/api/RhinoCommon/html/P_Rhino_RhinoDoc_NextUndoRecordSerialNumber.htm"
+    },
+    {
+      "finding": "Explicit recording; returns 0 when recording already active or disabled. Also in installed 8.21 XML.",
+      "url": "https://mcneel.github.io/rhinocommon-api-docs/api/RhinoCommon/html/M_Rhino_RhinoDoc_BeginUndoRecord.htm"
+    },
+    {
+      "finding": "Headless-aware constructor; current reference labels itself 9.0. No current Mac 8.21 deployment claimed.",
+      "url": "https://developer.rhino3d.com/api/cpp/class_c_rhino_event_watcher_ex.html"
+    }
+  ],
+  "static_AddRhinoObject_documented": true,
+  "unknowns_retained": [
+    "source of prior 752-to-756 process counter increment",
+    "historical seven failure mechanisms",
+    "whole host byte closure"
+  ]
+}

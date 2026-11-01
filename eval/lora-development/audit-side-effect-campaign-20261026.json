@@ -1,0 +1,25 @@
+{
+  "cases_constructed": false,
+  "cause_scope": "audit introspection itself materializes a lazy CPU module; original run retained only NativeError so historical message remains unavailable",
+  "checks": [
+    {
+      "error": null,
+      "modules_added_by_audit": [
+        "transformers.tokenization_python",
+        "transformers.tokenization_utils_sentencepiece"
+      ],
+      "pass_index": 1,
+      "status": "passed"
+    },
+    {
+      "error": "unregistered loaded CPU dependency",
+      "modules_added_by_audit": [],
+      "pass_index": 2,
+      "status": "failed"
+    }
+  ],
+  "cpu_only": true,
+  "model_calls": 0,
+  "new_slots": 0,
+  "rhino_calls": 0
+}

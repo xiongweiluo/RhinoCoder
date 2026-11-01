@@ -1,0 +1,15 @@
+{
+  "actor": "repository_owner",
+  "additional_model_loads": 0,
+  "authorization": "code_cpu_preparation_and_plan_only",
+  "date": "2026-10-27",
+  "exact_reply": "B：限定受控研究，准备快照方案",
+  "execution_authorized": false,
+  "external_aba_detection": false,
+  "final_test_creation_or_consumption": false,
+  "historical_protection_and_results_not_relabelled": true,
+  "product_safety_claim": false,
+  "research_contract_selected": "controlled_snapshot_v1",
+  "rhino_upgrade_or_plugin_install": false,
+  "training": false
+}

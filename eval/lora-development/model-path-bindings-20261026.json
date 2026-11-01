@@ -1,0 +1,66 @@
+{
+  "/data/c5-runs-20261001/formal/checkpoint-132/adapter_config.json": {
+    "resolved_path": "/data/c5-runs-20261001/formal/checkpoint-132/adapter_config.json",
+    "sha256": "8a776a47b085b787b7c7f3c9b068aed8c0f018278de2b94bf66130f5542d6d4f"
+  },
+  "/data/c5-runs-20261001/formal/checkpoint-132/adapter_model.safetensors": {
+    "resolved_path": "/data/c5-runs-20261001/formal/checkpoint-132/adapter_model.safetensors",
+    "sha256": "da8acdcde2671aa397534b35369fe4a84b9d150f80f7b7026a4366a770be2883"
+  },
+  "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242/.gitattributes": {
+    "resolved_path": "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/blobs/a6344aac8c09253b3b630fb776ae94478aa0275b",
+    "sha256": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361"
+  },
+  "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242/LICENSE": {
+    "resolved_path": "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/blobs/6634c8cc3133b3848ec74b9f275acaaa1ea618ab",
+    "sha256": "832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e"
+  },
+  "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242/README.md": {
+    "resolved_path": "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/blobs/f29baca4ff38a69df22ec441e22f7ac8dfac277b",
+    "sha256": "3c090be37f829adc1e4cdb78733667437732541470430ab2cd785d7f0d460077"
+  },
+  "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242/config.json": {
+    "resolved_path": "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/blobs/1a2ea88621f4248fccfb575beaf64c1ea5d9587f",
+    "sha256": "c0242402ad6a13b331ea320feea8c7e3776ffb7a4eff0757b9cd667e116d9a28"
+  },
+  "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242/generation_config.json": {
+    "resolved_path": "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/blobs/b7849b3dad857bc1e227afd6ca21d1e4cb3f8f82",
+    "sha256": "1a628a5775bc69cde01c6749a531150ca4d3189652c618a174f7077923acf3b1"
+  },
+  "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242/merges.txt": {
+    "resolved_path": "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/blobs/20024bfe7c83998e9aeaf98a0cd6a2ce6306c2f0",
+    "sha256": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3"
+  },
+  "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242/model-00001-of-00004.safetensors": {
+    "resolved_path": "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/blobs/0b6f069918b07c064cbba8ae4f00f529aa9bbf84b7cdfcb7fc2694a40f6aa8ef",
+    "sha256": "0b6f069918b07c064cbba8ae4f00f529aa9bbf84b7cdfcb7fc2694a40f6aa8ef"
+  },
+  "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242/model-00002-of-00004.safetensors": {
+    "resolved_path": "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/blobs/c3d46733e7aa054ea7b063fbccd0a5a08446e7bd1814bef26936c5aa1331da62",
+    "sha256": "c3d46733e7aa054ea7b063fbccd0a5a08446e7bd1814bef26936c5aa1331da62"
+  },
+  "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242/model-00003-of-00004.safetensors": {
+    "resolved_path": "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/blobs/9fe45dacee087385b3d2d6dd27a7413a8a56d95f145772facc148fa86fc73446",
+    "sha256": "9fe45dacee087385b3d2d6dd27a7413a8a56d95f145772facc148fa86fc73446"
+  },
+  "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242/model-00004-of-00004.safetensors": {
+    "resolved_path": "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/blobs/5aa6e5cbe642377fd441fb4e60e83cca96b2bcd9820e245b9ea06d94653f17f2",
+    "sha256": "5aa6e5cbe642377fd441fb4e60e83cca96b2bcd9820e245b9ea06d94653f17f2"
+  },
+  "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242/model.safetensors.index.json": {
+    "resolved_path": "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/blobs/6ca5084b88f1a95fef37f1b94c6e87ff69422bb7",
+    "sha256": "998a078123ffc97763690de7f2a677eb89168af5eaf8a5e12e6bc24d18e25bdb"
+  },
+  "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242/tokenizer.json": {
+    "resolved_path": "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/blobs/443909a61d429dff23010e5bddd28ff530edda00",
+    "sha256": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539"
+  },
+  "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242/tokenizer_config.json": {
+    "resolved_path": "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/blobs/acee076f49bf3c0298e15de0909d1da7b392f0c3",
+    "sha256": "959e7f1d9a1b7641a6d6ce05ca97b75c7894fcb66cbe5a040406458fb1128ee4"
+  },
+  "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/snapshots/c03e6d358207e414f1eca0bb1891e29f1db0e242/vocab.json": {
+    "resolved_path": "/data/hf-cache/models--Qwen--Qwen2.5-Coder-7B-Instruct/blobs/4783fe10ac3adce15ac8f358ef5462739852c569",
+    "sha256": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+  }
+}

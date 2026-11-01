@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "family_id": null,
+  "template_family": null,
+  "stratum": null,
+  "primary_tool": null,
+  "task_text": null,
+  "fixture_recipe": null,
+  "initial_assertions": {
+    "object_count": null,
+    "objects": null,
+    "unchanged": null,
+    "read_result": null
+  },
+  "max_steps": null,
+  "max_writes": null,
+  "max_reads": null,
+  "expected_operations": null,
+  "final_assertions": {
+    "object_count": null,
+    "objects": null,
+    "unchanged": null,
+    "read_result": null
+  }
+}

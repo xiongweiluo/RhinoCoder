@@ -1,0 +1,59 @@
+{
+  "actual_gpu_readonly_preflight_seconds": 22.340332288993523,
+  "both_mac_predecessor_sources_and_recorded_settlements_verified": true,
+  "cpu_related_distinct_regressions_passed": 104,
+  "cpu_test_groups": [
+    {
+      "files": [
+        "eval/test_lora_development_r3.py",
+        "eval/test_lora_development_authority.py",
+        "eval/test_lora_development_source.py",
+        "eval/test_lora_development_startup_repair.py"
+      ],
+      "seconds": 1.45,
+      "tests_passed": 55
+    },
+    {
+      "files": [
+        "eval/test_lora_development_source.py",
+        "eval/test_lora_development_gpu_entry.py",
+        "eval/test_lora_development_export.py",
+        "eval/test_lora_development_native.py",
+        "eval/test_lora_development_session.py",
+        "eval/test_lora_development_controller.py",
+        "eval/test_lora_development_plan.py"
+      ],
+      "reason_for_source_recheck": "bytecode prefix isolation was strengthened after initial group; three source tests repeated",
+      "seconds": 18.71,
+      "tests_passed": 52
+    }
+  ],
+  "evidence_file_sha256": {
+    "readonly-preflight-r3-20261026.json": "0927dbb12ea3286bf8260544f62db75c40043e7bab725484eea39a62c10bf726",
+    "source-closure-mac-r3-20261026.json": "0e1be9829c2461619c113ae9914d634a2471314a9c1cee322ff8a27319f32195"
+  },
+  "gpu_actual_python": "3.11.17",
+  "gpu_model_entry_invoked": false,
+  "gpu_prepared_copy": {
+    "files_sha256": "bf7f1a7986cac2fc0018d2de851fc0937ae114fb22c721d245665ca162e1c8c7",
+    "model_or_Rhino_entry_invoked": false,
+    "new_state_exists": false,
+    "prepared_files": 291
+  },
+  "initial_ssh_status": "retired control failed authentication; new owner-opened control verified",
+  "mac_actual_python": "3.13.5",
+  "mac_environment_recheck": {
+    "environment_sha256": "071e99e0ac6d97f16d8621cdd0a7da918562685fd20506442288d2dbd8a58bd0",
+    "fixed_CPU_files_verified": 714,
+    "model_backends_imported": false
+  },
+  "mac_prepared_files_rechecked_after_cpu": 291,
+  "mac_prepared_files_verified": 291,
+  "new_execution_approval_created": false,
+  "original_r1_r2_sources_modified": false,
+  "package_sha256": "0445c3d728b8bfca125e5af9648d85020fe68d46a595e271c0e4fc870351768d",
+  "rhino_admission_python39_syntax_checked": true,
+  "rhino_entry_invoked": false,
+  "schema_version": 1,
+  "target_cpu_and_readonly_preflight": "passed"
+}

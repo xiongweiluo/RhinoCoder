@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-01",
+  "status": "read_only_seal_preflight_ready_actual_failure_cause_unknown",
+  "spec_path": "eval/lora-development/final-public-spec-20261101-preflight.json",
+  "spec_sha256": "6032755347746a1f7e34988edcba064d0ff3721c875e632f0d97ff23cbf46c19",
+  "source_inventory_sha256": "a1c6d7c347f2745101d73f597252ad99920659595b97ec14ce48db6c29fd0bf3",
+  "source_files": 319,
+  "choices_sha256": "807fe4847d2077c888012d106bfbd2cc341d6a18214cc75389af5ad3dd138377",
+  "research_scoring_and_custody_policy_unchanged": true,
+  "owner_reported_failure": "seal_failed_no_authority_created",
+  "owner_existing_output_state": "unknown_preserve_existing_files",
+  "cpu_checks": {
+    "passed": 70,
+    "failed": 0,
+    "synthetic_only": true,
+    "initial_run": {
+      "passed": 68,
+      "failed": 1,
+      "reason": "test_fixture_was_near_duplicate_not_numeric_identical",
+      "resolution": "separate_public_fixtures_for_numeric_and_near_duplicate_without_changing_validator"
+    },
+    "read_only_no_file_or_directory_writes": "verified_across_success_and_failures",
+    "deployed_owner_check": "passed",
+    "deployed_mac_check": "passed",
+    "isolated_import": "passed",
+    "isolated_import_report_sha256": "b0974bdaa44df6289aa1f8e29b5021bf02f60166b396e24b648aa1fd94c64305",
+    "rhino39_syntax": "passed",
+    "target_linux": "pending_not_deployed"
+  },
+  "private_inputs_read_by_agent": false,
+  "actual_sealed_receipt": null,
+  "complete_final_freeze": false,
+  "execution_authorized": false,
+  "model_calls": 0,
+  "gpu_calls": 0,
+  "rhino_calls": 0,
+  "training_calls": 0,
+  "formal_slots_consumed": 0,
+  "new_commit_ci": "verify_new_head_separately"
+}

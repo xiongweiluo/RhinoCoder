@@ -1,0 +1,35 @@
+{
+  "backend_imports": 0,
+  "elapsed_seconds": 20.678324873035308,
+  "fixed_environment_and_16_assets_verified": true,
+  "free_disk_bytes": 68761440256,
+  "initial_cpu_driver_failure": {
+    "before_model_or_gpu_loading": true,
+    "correction": "same existing site as frozen GPU entry appended; no package bytes changed",
+    "error": "jsonschema not found because manual -S driver omitted explicit existing site"
+  },
+  "lease_window_sufficient": true,
+  "live_campaign_initialized": false,
+  "model_calls": 0,
+  "package_sha256": "e22ec832dd8c8c9bb23065e74648e7fcecdacd5d4ebb554f7bc3c1590e6c16be",
+  "prior_batches": [
+    {
+      "gpu_settlement_sha256": "82b04fdff5e73467f8d5f45a2e31ff629b5e01616296db6dcfc2b54d1f56d17c",
+      "package_sha256": "c1cfb2f13d0c56fb58e65481cc413189016ed8589428a6af869e27f76febf249",
+      "record_hash_matched": true,
+      "source_unchanged": true,
+      "stop_verified": true,
+      "tasks_exposed": false
+    },
+    {
+      "gpu_settlement_sha256": "14a05131608e624aac233c9ce828225b5f2309083c4e42d33be6b6865cc1d14e",
+      "package_sha256": "aa280fb64ba123e4d7f999f5b5cd7db4302c2c3bb1337f2c459da938d408df9e",
+      "record_hash_matched": true,
+      "source_unchanged": true,
+      "stop_verified": true,
+      "tasks_exposed": false
+    }
+  ],
+  "rhino_calls": 0,
+  "source_verified": true
+}

@@ -1,0 +1,36 @@
+{
+  "mode": "CPU_only_no_live_entry_no_model_or_Rhino",
+  "new_loaded_public_cpu_dependencies": {
+    "/opt/anaconda3/lib/python3.13/site-packages/transformers/tokenization_python.py": "5d4f902cbd27120ef323604699c6df670bb70477458dbc1f016a9cbf7f44ac4c"
+  },
+  "new_loads": 0,
+  "new_slots": 0,
+  "results": [
+    {
+      "check": "source",
+      "status": "passed"
+    },
+    {
+      "check": "environment_before_cases",
+      "status": "passed"
+    },
+    {
+      "check": "schemas",
+      "status": "passed"
+    },
+    {
+      "check": "views",
+      "status": "passed"
+    },
+    {
+      "check": "cases",
+      "status": "passed"
+    },
+    {
+      "check": "environment_after_cases",
+      "error_type": "NativeError",
+      "message": "unregistered loaded CPU dependency",
+      "status": "failed"
+    }
+  ]
+}
