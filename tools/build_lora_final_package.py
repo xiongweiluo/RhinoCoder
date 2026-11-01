@@ -19,11 +19,12 @@ def build(root=ROOT):
     from plugin.rhino_listener.c5_research_native import digest
     record = root/'eval/lora-development'
     previous = json.loads((record/'development-package-recovery-20261026.json').read_text())
-    resources = json.loads((record/'final-resource-binding-20261031.json').read_text())
+    resources = json.loads((record/'final-resource-binding-20261101.json').read_text())
     preparation = json.loads((record/'final-comparison-preparation-20261027.json').read_text())
     choices = {k:preparation[k] for k in preparation['phase_one_completion']['choices_fields']}
     value = {key: previous[key] for key in ('model_path_bindings', 'model_identities', 'assets', 'loader_policy',
         'gpu_hardware', 'lease_end_epoch', 'stop_policy')}
+    value['custody_policy'] = json.loads((record/'final-custody-policy-20261101.json').read_text())
     plan = proposal()
     value.update(schema_version=1, kind=plan['study_id'], study_id=plan['study_id'], comparison_plan=plan,
         choices=choices, choices_sha256=digest(choices), limits=common_configuration(plan), execution_authorized=False,
@@ -49,7 +50,8 @@ def build(root=ROOT):
     files = source_manifest(root)
     names = [p.relative_to(root).as_posix() for p in (root/'tools').glob('*lora_final*.py')]
     names += ['tools/c5_rhino_formal20_owner_exclusion.py', 'tools/build_lora_development_package.py', 'tools/run_lora_common_probe_rhino.py',
-        'eval/lora-development/final-resource-binding-20261031.json',
+        'eval/lora-development/final-resource-binding-20261101.json',
+        'eval/lora-development/final-custody-policy-20261101.json',
         'eval/c5/dataset-v2-freeze-manifest.json', 'eval/c5/historical-exclusions.json', 'eval/c5/final-holdout-commitment.json']
     for name in names: files[name] = hashlib.sha256((root/name).read_bytes()).hexdigest()
     value['source_files'] = dict(sorted(files.items()))

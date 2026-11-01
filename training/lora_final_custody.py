@@ -61,3 +61,47 @@ def seal(spec, cases, exclusions, encrypted, attestation):
         'automated_overlap_count':0, 'execution_authorized':False,
         'agent_private_access':False, 'model_calls':0, 'rhino_calls':0}
     return package, receipt
+
+
+def seal_owner_confirmed(spec, cases, encrypted, binding):
+    """Active owner-only flow: two private files, no inventory/attestation files.
+
+    The owner statement replaces full-history evidence submission, not proof of
+    a machine scan. Legacy seal() is retained for existing v1 evidence/tests.
+    """
+    from plugin.rhino_listener.lora_final_admission import validate_owner_summary, validate_receipt
+    from plugin.rhino_listener.c5_research_native import canonical
+    from plugin.rhino_listener.c5_research_channel import LIMIT
+    validate_spec(spec)
+    validate_owner_summary(spec, binding)
+    sealed = binding['sealed_at_utc']
+    require(type(sealed) is str and sealed.endswith('Z'), 'UTC seal time required')
+    stamp = datetime.fromisoformat(sealed.replace('Z','+00:00'))
+    require(datetime(2026,11,1,tzinfo=timezone.utc) <= stamp <= datetime.now(timezone.utc), 'seal time outside preparation window')
+    compiled = compile_cases(spec['comparison_plan'], cases)
+    require(set(encrypted) == {'sha256', 'bytes', 'format'} and encrypted['format'] in {'age-x25519','aes-256-gcm'}
+            and type(encrypted['bytes']) is int and 0 < encrypted['bytes'] <= 10*1024**2
+            and type(encrypted['sha256']) is str and len(encrypted['sha256']) == 64
+            and all(c in '0123456789abcdef' for c in encrypted['sha256']), 'encrypted artifact commitment required')
+    signatures = [numeric_template_signature(c['task_text']) for c in cases]
+    require(len(set(signatures)) == 40, 'new numeric templates overlap')
+    published = spec['exclusion_reference']['historical_numeric_hashes']
+    for i, text in enumerate(signatures):
+        require(hashlib.sha256(('historical-text:'+text).encode()).hexdigest() not in published,
+                'published historical fingerprint overlap')
+        require(all(SequenceMatcher(None,text,other).ratio() < .92 for other in signatures[:i]),
+                'new-set near-duplicate overlap')
+    package = dict(spec, compiled=compiled)
+    require(all(len((canonical(v)+'\n').encode()) <= LIMIT for v in (cases,package)), 'private channel package exceeds fixed byte budget')
+    receipt = {'schema_version':2, 'study_id':spec['study_id'], 'status':'owner_sealed_unconsumed_not_execution_authority',
+        'spec_sha256':digest(spec), 'choices_sha256':spec['choices_sha256'], 'runtime_package_sha256':digest(package),
+        'cases_sha256':digest(cases), 'compiled_sha256':digest(compiled), 'schedule_sha256':digest(compiled['views']['schedule']),
+        'family_count':40, 'slot_count':80, 'strata':dict(spec['comparison_plan']['strata']),
+        'encrypted_artifact':encrypted, 'custodian_attestation':binding,
+        'exclusions':None, 'automated_overlap_count':None, 'historical_inventory_machine_checked':False,
+        'automated_checks':{'new_set_numeric_and_near_duplicates':'passed',
+                            'published_historical_fingerprints':'passed',
+                            'full_private_historical_inventory':'not_performed'},
+        'execution_authorized':False, 'agent_private_access':False, 'model_calls':0, 'rhino_calls':0}
+    validate_receipt(spec, receipt)
+    return package, receipt

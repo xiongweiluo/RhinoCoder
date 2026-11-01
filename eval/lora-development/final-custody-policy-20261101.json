@@ -1,0 +1,16 @@
+{
+  "schema_version": 2,
+  "mode": "owner_confirmation_without_inventory_files",
+  "exclusions_file_required": false,
+  "attestation_file_required": false,
+  "full_historical_inventory_machine_check": false,
+  "legacy_individual_attestation_flags_inferred": false,
+  "owner_confirmation": {
+    "actor": "repository_owner",
+    "date": "2026-11-01",
+    "source": "direct_user_message",
+    "statement": "防止新题与旧题重复、记录你确认过什么，这两个我已经确认过了，帮我修改一下规范，不需要再准备这两份文件了",
+    "historical_overlap_review": "owner_reported_complete",
+    "review_record": "owner_reported_complete"
+  }
+}

@@ -20,6 +20,25 @@ FLAGS = ('complete_exclusion_inventory_reviewed', 'independent_of_model_and_prom
          'keys_and_plaintext_not_shared_with_agent', 'not_consumed_by_model_or_formal_runner')
 
 
+BINDING_FLAGS = ('current_cases_match_owner_review', 'encryption_roundtrip_verified',
+                 'keys_and_plaintext_not_shared_with_agent', 'not_consumed_by_model_or_formal_runner')
+
+
+def validate_owner_summary(spec, attestation):
+    policy = spec.get('custody_policy', {})
+    require(policy.get('mode') == 'owner_confirmation_without_inventory_files'
+            and policy.get('exclusions_file_required') is False
+            and policy.get('attestation_file_required') is False
+            and policy.get('full_historical_inventory_machine_check') is False
+            and policy.get('legacy_individual_attestation_flags_inferred') is False,
+            'explicit owner-confirmed custody policy required')
+    require(set(attestation) == {'actor', 'sealed_at_utc', 'owner_confirmation', *BINDING_FLAGS}
+            and attestation['actor'] == 'repository_owner'
+            and attestation['owner_confirmation'] == policy['owner_confirmation']
+            and all(attestation[k] is True for k in BINDING_FLAGS),
+            'current case and encryption binding required')
+
+
 def approval_record(spec, receipt):
     return {'actor': 'repository_owner', 'approved': True, 'study_id': STUDY,
         'scope': 'one_frozen_final_comparison_no_training_no_replay',
@@ -36,14 +55,26 @@ def validate_receipt(spec, receipt):
             and receipt['execution_authorized'] is False,
             'sealed owner receipt differs')
     attestation = receipt['custodian_attestation']
-    require(set(attestation) == {'actor', 'sealed_at_utc', *FLAGS}
-            and attestation['actor'] == 'repository_owner' and all(attestation[k] is True for k in FLAGS)
-            and receipt['automated_overlap_count'] == 0 and receipt['agent_private_access'] is False
-            and receipt['model_calls'] == receipt['rhino_calls'] == 0
-            and set(receipt['exclusions']) == set(CATEGORIES), 'complete unconsumed owner custody required')
-    for key, n in spec['exclusion_reference']['minimum_counts'].items():
-        require(type(receipt['exclusions'][key]['rows']) is int and receipt['exclusions'][key]['rows'] >= n,
-                'owner exclusion population incomplete')
+    require(receipt['agent_private_access'] is False
+            and receipt['model_calls'] == receipt['rhino_calls'] == 0, 'unconsumed owner custody required')
+    if receipt.get('schema_version') == 2:
+        validate_owner_summary(spec, attestation)
+        require(receipt['exclusions'] is None and receipt['automated_overlap_count'] is None
+                and receipt['historical_inventory_machine_checked'] is False
+                and receipt['automated_checks'] == {
+                    'new_set_numeric_and_near_duplicates': 'passed',
+                    'published_historical_fingerprints': 'passed',
+                    'full_private_historical_inventory': 'not_performed'},
+                'human review must not be represented as full automated historical scan')
+    else:
+        require(receipt.get('schema_version') == 1
+                and set(attestation) == {'actor', 'sealed_at_utc', *FLAGS}
+                and attestation['actor'] == 'repository_owner' and all(attestation[k] is True for k in FLAGS)
+                and receipt['automated_overlap_count'] == 0
+                and set(receipt['exclusions']) == set(CATEGORIES), 'complete legacy owner custody required')
+        for key, n in spec['exclusion_reference']['minimum_counts'].items():
+            require(type(receipt['exclusions'][key]['rows']) is int and receipt['exclusions'][key]['rows'] >= n,
+                    'owner exclusion population incomplete')
     for key in ('runtime_package_sha256', 'cases_sha256', 'compiled_sha256', 'schedule_sha256'):
         value = receipt[key]
         require(type(value) is str and len(value) == 64 and all(c in '0123456789abcdef' for c in value),

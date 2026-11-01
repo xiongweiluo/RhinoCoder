@@ -2,7 +2,7 @@
 """Owner terminal only: private CPU checks and an inert seal, never execution.
 
 No arguments containing private paths. No task, answer, identity or private
-path is printed. The owner supplies newly authored cases, exclusions and an
+path is printed. The owner supplies newly authored cases and an
 independently encrypted/round-trip-verified copy. Never invoke on agent input.
 """
 import getpass
@@ -30,7 +30,7 @@ def main():
     from tools.c5_rhino_formal20_owner_exclusion import _json, _worktrees, _require_owner_private_path
     from plugin.rhino_listener.c5_research_channel import publish_json
     from plugin.rhino_listener.lora_development_admission import source_guard
-    from training.lora_final_custody import seal
+    from training.lora_final_custody import seal_owner_confirmed
     try:
         spec=json.loads((ROOT/'lora-final-spec.json').read_text())
         source_guard(ROOT,spec['source_files'])
@@ -51,8 +51,6 @@ def main():
             return 0 if not report['errors'] else 2
         paths={key:Path(getpass.getpass(label)).expanduser() for key,label in (
             ('cases','私有40家族JSON数组路径（不回显）：'),
-            ('exclusions','私有排除清单JSON路径（不回显）：'),
-            ('attestation','本人核查确认JSON路径（不回显）：'),
             ('encrypted','已加密且往返核实的题目文件路径（不回显）：'),
             ('output','新的私有封存输出目录（不回显）：'))}
         for path in paths.values(): _require_owner_private_path(path,roots+[ROOT])
@@ -61,9 +59,17 @@ def main():
         if encrypted.is_symlink() or not encrypted.is_file() or not 0 < encrypted.stat().st_size <= 10*1024**2: raise ValueError('encrypted size')
         format_=getpass.getpass('加密格式 age-x25519 或 aes-256-gcm（不回显）：')
         cases=_json(paths['cases'])
-        package,receipt=seal(spec,cases,_json(paths['exclusions']),
+        # Prior review comes from the owner's recorded instruction, not a new file.
+        # Only bind that review to these exact bytes and the newly prepared encryption.
+        confirmed = getpass.getpass('已记录查重与核查确认。确认本次文件是该已核查版本、密文已往返核对且密钥/明文未交给代理、题目未经模型或正式运行消费；输入 SEAL（不回显）：')
+        if confirmed != 'SEAL': raise ValueError('binding not confirmed')
+        from datetime import datetime, timezone
+        from plugin.rhino_listener.lora_final_admission import BINDING_FLAGS
+        binding = dict(actor='repository_owner', sealed_at_utc=datetime.now(timezone.utc).isoformat().replace('+00:00','Z'),
+                       owner_confirmation=spec['custody_policy']['owner_confirmation'], **{k:True for k in BINDING_FLAGS})
+        package,receipt=seal_owner_confirmed(spec,cases,
             {'format':format_,'bytes':encrypted.stat().st_size,'sha256':hashlib.sha256(encrypted.read_bytes()).hexdigest()},
-            _json(paths['attestation']))
+            binding)
         paths['output'].mkdir(mode=0o700)  # Never replace or consume an earlier seal.
         for name,value in [('runtime-package.json',package),('scorer-cases.json',cases),('owner-receipt.json',receipt)]:
             publish_json(paths['output'],name,value)
