@@ -591,3 +591,6 @@ code { color: #b3cec6; font-family: "SFMono-Regular", Consolas, monospace; font-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
+:where(.project-status) { padding: 20px; margin-top: 20px; }
+:where(.project-status p) { line-height: 1.6; max-width: 100ch; }
+:where(.project-status summary) { cursor: pointer; }

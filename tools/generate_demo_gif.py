@@ -71,7 +71,7 @@ def render_frame(events: list[dict[str, Any]], caption: str):
     _text(draw, (898, 29), "Replay", body, "#aebbc0")
 
     _round(draw, (28, 68, 932, 124), "#141b1e")
-    _text(draw, (48, 82), "创建并校正一个蓝色球体", body_bold)
+    _text(draw, (48, 82), "Create and correct a blue sphere", body_bold)
     _text(draw, (48, 104), caption, small, "#8fc9ff")
 
     route = next((event for event in events if event.get("type") == "route.selected"), None)

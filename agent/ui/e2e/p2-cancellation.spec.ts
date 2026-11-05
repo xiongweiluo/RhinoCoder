@@ -24,7 +24,7 @@ test("a live cancellation terminal leaves the UI out of its running state", asyn
         const message = JSON.parse(raw);
         if (message.type === "instruction") {
           this.emit({type: "control.accepted", action: "start", run_id: this.runId});
-          this.emit({type: "run.started", run_id: this.runId, seq: 1, timestamp: "2026-09-08T00:00:00Z", payload: {prompt: "已最小化"}});
+          this.emit({type: "run.started", run_id: this.runId, seq: 1, timestamp: "2026-09-08T00:00:00Z", payload: {prompt: "Minimized"}});
           this.emit({type: "planning.started", run_id: this.runId, seq: 2, timestamp: "2026-09-08T00:00:01Z", payload: {round: 1}});
         }
         if (message.type === "cancel") {
@@ -32,8 +32,8 @@ test("a live cancellation terminal leaves the UI out of its running state", asyn
           this.emit(terminal);
           this.emit({
             type: "history.updated",
-            history: [{run_id: this.runId, prompt: "创建一排柱子", closed_loop: true, status: "cancelled", events: [
-              {type: "run.started", run_id: this.runId, seq: 1, timestamp: "2026-09-08T00:00:00Z", payload: {prompt: "已最小化"}},
+            history: [{run_id: this.runId, prompt: "Create a row of columns", closed_loop: true, status: "cancelled", events: [
+              {type: "run.started", run_id: this.runId, seq: 1, timestamp: "2026-09-08T00:00:00Z", payload: {prompt: "Minimized"}},
               {type: "planning.started", run_id: this.runId, seq: 2, timestamp: "2026-09-08T00:00:01Z", payload: {round: 1}},
               terminal,
             ]}],
@@ -55,11 +55,11 @@ test("a live cancellation terminal leaves the UI out of its running state", asyn
 
   await page.goto("/");
   await expect(page.getByRole("status").filter({hasText: "Connected"})).toBeVisible();
-  await page.getByPlaceholder("选择一个固定场景，或输入 Rhino 建模任务。").fill("创建一排柱子");
-  await page.getByRole("button", {name: "执行任务"}).click();
-  await expect(page.locator(".dashboard").getByText("执行中", {exact: true})).toBeVisible();
-  await page.getByRole("button", {name: "停止"}).click();
-  await expect(page.locator(".dashboard").getByText("已取消", {exact: true})).toBeVisible();
-  await expect(page.getByRole("button", {name: "停止"})).toBeDisabled();
-  await expect(page.locator(".timeline .event-kind").filter({hasText: "任务取消"})).toBeVisible();
+  await page.getByPlaceholder("Choose a fixed scenario or enter a Rhino modeling task.").fill("Create a row of columns");
+  await page.getByRole("button", {name: "Run task"}).click();
+  await expect(page.locator(".dashboard").getByText("Running", {exact: true})).toBeVisible();
+  await page.getByRole("button", {name: "Stop"}).click();
+  await expect(page.locator(".dashboard").getByText("Cancelled", {exact: true})).toBeVisible();
+  await expect(page.getByRole("button", {name: "Stop"})).toBeDisabled();
+  await expect(page.locator(".timeline .event-kind").filter({hasText: "Run cancelled"})).toBeVisible();
 });

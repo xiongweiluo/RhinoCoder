@@ -1,76 +1,59 @@
 # RhinoCoder
 
-> **让 AI 不只“写 Rhino 脚本”，而是执行、观察、验证并在失败后恢复。**
+> **A verifiable spatial-design agent that executes, observes, checks, and recovers inside Rhino 8.**
 
-[在线只读演示](https://rhinocoder-demo.xiongweiluo1.chatgpt.site) · [真实 Rhino 证据短片](docs/assets/rhinocoder-real-rhino-demo.mov) · [English](README.en.md) · [无 Rhino 的 5 分钟 Replay](#quickstart-a无需-rhino) · [真实 Rhino Quickstart](#quickstart-b真实-rhino-8) · [证据索引](docs/portfolio-evidence.md) · [架构](docs/architecture.md)
+[Live read-only demo](https://rhinocoder-demo.xiongweiluo1.chatgpt.site) · [Real Rhino evidence clip](docs/assets/rhinocoder-real-rhino-demo.mov) · [5-minute Replay](#quickstart-a-no-rhino-required) · [Real Rhino quickstart](#quickstart-b-real-rhino-8) · [Evidence index](docs/portfolio-evidence.md) · [Architecture](docs/architecture.md)
 
-RhinoCoder 是一个面向 Rhino 8 的可验证空间设计 Agent。它把自然语言任务转成 23 个版本化 MCP 工具调用，在 Rhino 主线程执行几何操作，再通过 `get_scene_summary` 和程序化断言读取并核对真实场景。每次运行的隐私判断、模型路由、工具调用、纠错、成本和证据都由同一 `run_id` 关联，可停止、重试、Undo、精准回滚，也可在没有 Rhino 和模型密钥时重放脱敏合成 Replay。
-
-**English in one paragraph.** RhinoCoder is a verifiable, recoverable, privacy-aware spatial agent for Rhino 8. It executes natural-language tasks through 23 versioned MCP tools, reads the resulting scene back, checks geometry with programmatic assertions, and links privacy, routing, tools, corrections, cost, and evidence under one auditable `run_id`. Reviewers without Rhino can run sanitized synthetic Replay locally; see the [English README](README.en.md).
+RhinoCoder is a verifiable, recoverable, privacy-aware spatial-design agent for Rhino 8. It translates natural-language tasks into 23 versioned MCP tool calls, executes geometry on Rhino's main thread, reads the resulting scene back, and checks it with programmatic assertions. Privacy decisions, model routing, tool calls, corrections, cost, and evidence share one auditable `run_id`. A sanitized synthetic Replay lets reviewers inspect the loop without Rhino or a model key.
 
 ![RhinoCoder synthetic self-correction Replay](docs/assets/replay-demo.gif)
 
-## 30 秒看懂结果
+## Results at a glance
 
-| 已验证结果 | 口径与证据 |
+| Verified result | Scope and evidence |
 |---|---|
-| **500/500 黄金 Trace，46 个标签** | 断言、场景自检、人工确认、脱敏四道准入；[A7 报告](docs/a7-500-marginal-value.md) |
-| **8/8 覆盖缺口达到计划量** | A7 新增 200 条：布尔替代恢复与多轮修订各 40，其余 6 类各 20；[A7 报告](docs/a7-500-marginal-value.md) |
-| **270/270 固定真实 Rhino 运行通过** | 30 题 × 3 次 × 主模型/低成本模型/规则路由；该固定集已饱和，不能外推为开放世界效果；[A6 报告](docs/a6-no-finetune-baseline.md) |
-| **P2a 外部来源困难集：18/30 有效基线通过** | 首轮 5 次连接中断依协议用冻结 Prompt 重填同槽且保留记录；60.0%，Wilson 95% 区间 42.3%–75.4%；[P2a 报告](docs/p2-external-hard-set.md) |
-| **隐私审计 0 敏感发现** | 12 条红队、1,609 条 Trace、7,016 行 SQLite、3 份 Replay 及模拟日志/请求面；[A4 报告](docs/privacy-red-team-report.md) |
-| **C3 A5 一次性评测完成，未达到 GO 门槛** | 基座与 LoRA 在 45 条锁定 holdout 上的结构化四指标均为 0/45；差值 0.0pp、净胜 0，第二 run 已禁止；[C3 报告](docs/c3-a5-holdout-report.md) |
-| **C4 决策：NO-GO** | 冻结 P2 真实 Rhino 配对的描述性结果为基座 4/30、LoRA 5/30，差值 +3.3pp、净胜 1、McNemar `p=1.0`，未达到 +10pp / 净胜 3 门槛；事后发现 LoRA 基础设施补位超出冻结规则，见[诊断与限制](docs/c4-posthoc-failure-diagnosis.md)；[C4 原报告](docs/c4-model-decision.md) |
-| **独立 C5 离线与严格控制器门通过** | 全新80家族单次配对，sequence基座20/80、LoRA77/80，+71.25pp、净胜57；原门槛与公开逐家族复算通过。原C5仍为NO-GO；后续现场证据分阶段报告，不是整体GO或默认接入；[C5最终报告](docs/c5-final-evaluation-report.md) |
+| **500/500 admitted golden traces across 46 tags** | Assertion, scene self-check, human approval, and privacy gates; [A7 report](docs/a7-500-marginal-value.md) |
+| **All 8 measured coverage gaps filled** | 200 A7 tasks: 40 each for multi-round revision and Boolean-alternative recovery, 20 each for six other gaps; [A7 report](docs/a7-500-marginal-value.md) |
+| **270/270 locked real-Rhino runs passed** | 30 tasks × 3 repeats × main/economy/rule-router; the saturated set is not an open-world claim; [A6 report](docs/a6-no-finetune-baseline.md) |
+| **P2a external hard set: 18/30 valid baseline passes** | Five first-wave connection interruptions resumed the same slots with the frozen prompt and remain recorded; 60.0%, Wilson 95% CI 42.3%–75.4%; [P2a report](docs/p2-external-hard-set.md) |
+| **Zero sensitive findings in the A4 audit** | 12 red-team cases, 1,609 traces, 7,016 SQLite rows, three Replays, and simulated log/request surfaces; [A4 report](docs/privacy-red-team-report.md) |
+| **One-time C3 A5 evaluation completed; GO threshold missed** | Base and LoRA both scored 0/45 on all four structured holdout metrics: 0.0pp difference and zero net wins; a second run is forbidden; [C3 report](docs/c3-a5-holdout-report.md) |
+| **C4 decision: NO-GO** | Descriptive real-Rhino P2 pairing scored base 4/30 vs LoRA 5/30: +3.3pp, one net win, exact McNemar `p=1.0`; below the +10pp / three-net-win gate. A post-hoc audit found excess LoRA infrastructure fills under the frozen retry rule; see [diagnosis and limitation](docs/c4-posthoc-failure-diagnosis.md) and the [original C4 report](docs/c4-model-decision.md). |
+| **Independent C5 offline and strict-controller gates passed** | One-time paired evaluation on 80 new families: sequence exact base 20/80 vs LoRA 77/80, +71.25pp and 57 net wins. Frozen gates and hash-only row statistics independently audited; the original C5 decision remains NO-GO; later field evidence is reported separately. [C5 report](docs/c5-final-evaluation-report.md). |
 
-当前正式版本：[`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0)。招聘者可直接打开[在线只读演示](https://rhinocoder-demo.xiongweiluo1.chatgpt.site)，无需 Rhino、模型密钥或安装；Unreleased 证据补充了[真实 Rhino 单窗口短片](docs/assets/rhinocoder-real-rhino-demo.mov)与[结果帧](docs/assets/rhinocoder-real-rhino-result.png)。短片由已逐帧复核的真实 Rhino 执行前/后窗口帧组成，不是连续桌面录屏，也不包含音频或真实项目数据。
+Current release: [`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0). Recruiters can open the [live read-only demo](https://rhinocoder-demo.xiongweiluo1.chatgpt.site) without Rhino, a model key, or installation. Unreleased evidence now includes a [real-Rhino single-window clip](docs/assets/rhinocoder-real-rhino-demo.mov) and [result frame](docs/assets/rhinocoder-real-rhino-result.png). The clip is an explicitly labeled, privacy-reviewed before/after frame sequence—not continuous desktop footage—and contains no audio or real project data.
 
-> **诚实边界：** `local-mock` 只是确定性的本地接口与安全替身，证明统一后端、隐私强制路由和禁止云端降级；它不是能完成 Rhino 建模的真实本地模型。P2a 是外部用户出题、Agent 自动执行的困难集，不是真人操作 UI 的可用性研究；P2b 延期。第一轮 C0–C4 的 A5 两路0/45、P2描述性4/30对5/30及C4 `NO-GO`永久保留。独立C5只证明在冻结双阶段契约和80家族离线集上的结构化改善，不证明真实Rhino几何或开放世界质量，不能追认第一轮成功；默认部署仍为现有混合路线。
+## Project status — November 5, 2026
 
-**合并后状态（2026-10-25）：** C5研究栈及公开报告已进入 `main@2581581`，绑定该提交的 [CI五项全部通过](https://github.com/xiongweiluo/RhinoCoder/actions/runs/40196177986)。#2–#6、#8–#28已合并；独立R的#7仍为Draft。原C5 NO-GO与默认混合路线保持，尚未进入LoRA产品接入；正式Release仍为v0.3.0，在线演示未随研究材料重新发布。见[收口记录](docs/c5-post-merge-closeout-20261025.md)。
+The latest verified main commit is [`e42a89e`](https://github.com/xiongweiluo/RhinoCoder/commit/e42a89e11e7526e1744b076b033713b2c1776604), with [all five CI jobs passing](https://github.com/xiongweiluo/RhinoCoder/actions/runs/40220673195). The C5 research stack, results, and documentation closeout are merged through PR #29. Independent R [PR #7](https://github.com/xiongweiluo/RhinoCoder/pull/7) remains a draft. The formal release is still **v0.3.0**. **C4 and the original C5 decision remain NO-GO; the hybrid route remains the product default.** See the [merged closeout evidence](docs/c5-post-merge-closeout-20261025.md).
 
-## 为什么这个项目不是普通 “LLM + 工具” Demo
+New research is under review in [PR #30](https://github.com/xiongweiluo/RhinoCoder/pull/30) and [PR #31](https://github.com/xiongweiluo/RhinoCoder/pull/31), outside `main`. Phase-one diagnosis and research selection are complete. The owner sealed a new **40-family / 80-slot** comparison set on November 1; its public receipt is validated and PR #31's [exact-head CI passed](https://github.com/xiongweiluo/RhinoCoder/actions/runs/41333383369). The set remains **unconsumed and execution is not authorized**. Target-Linux CPU verification, a current resource window, and explicit approval of the final execution plan remain prerequisites. Full historical overlap is owner-reported, not a completed automated inventory check. No new training or product promotion is claimed; the proposed comparison retains the base model and checkpoint132. See the [sealed handoff](https://github.com/xiongweiluo/RhinoCoder/blob/a1c305c752aae0811aee78d5908796f57a681121/docs/lora-final-sealed-handoff-20261101.md).
 
-**C5追加描述性评分（2026-10-25）：** 用户提供的三阶段40槽脱敏导出按每模型固定20题复算：基座 **2/20（10%）**，LoRA **13/20（65%）**；工程失败分别2/3槽留在分母。已曝光题、中断修复和原审核拒绝使它不能作为新盲测或改判NO-GO。见[逐题差异与失败分布](docs/c5-descriptive-score-analysis-20261025.md)和[#8～#26合并审核](docs/c5-pr-8-26-merge-review-20261025.md)。材料已合并至上述main；本次状态收口未新增执行，默认路线不变。
+The public website is an English, browser-only **synthetic Replay** of three workflows. Its scene geometry and assertions are illustrative fixtures, independent of the research scores below.
 
-**C5追加研究最新结果（2026-10-24）：** 首次r2尝试7/40槽，6槽原始链核实但公开质量分数未报告；r3续跑11槽，仅前10槽复算5成功/5失败，末槽失败与原整阶段审核拒绝保留；r4续跑22槽，**8成功/14失败**，本阶段原始联合审核、退出清理与驻留结算完成。原40索引均曾尝试不等于首次40/40成功，也不构成新盲测；**原C5 NO-GO和默认混合路线保持**。见[分阶段研究报告](docs/c5-reuse-phased-research-report-20261024.md)与[作品集证据](docs/portfolio-evidence.md)。这些研究材料已合并；正式Release与在线演示未随之更新。
+**Additional descriptive scores (2026-10-25):** The supplied redacted export covers 40 slots across three interrupted phases. With a fixed 20-task denominator per model, the base model scored **2/20 (10%)** and LoRA **13/20 (65%)**, retaining 2 and 3 engineering failures respectively. Exposed tasks, intervening repairs and retained audit rejections prevent treating this as a new blind test or overturning C5 NO-GO. See [per-task differences and failure distributions](docs/c5-descriptive-score-analysis-20261025.md) and the [PR #8–#26 merge review](docs/c5-pr-8-26-merge-review-20261025.md). These materials are merged into main; this presentation update adds no research execution or route change.
 
-<details>
-<summary>10月9–13日研究与A～D开发历史（原文保留）</summary>
+**C5 reuse study update (2026-10-24):** The initial r2 run attempted 7/40 slots; six raw chains were verified, but public quality scores were not reported. The r3 continuation attempted 11 slots: its audited ten-slot prefix scored 5 successes / 5 failures; the last failure and the original whole-phase audit rejection remain. The r4 continuation completed 22 slots with **8 successes / 14 failures** and verified that phase's raw joint audit, cleanup and residency settlement. All 40 original indices have now been attempted across interrupted phases; this is neither a successful uninterrupted first evaluation nor a new blind test. **The original C5 NO-GO and default hybrid route remain unchanged.** See the [phased report](docs/c5-reuse-phased-research-report-20261024.md) and [portfolio evidence](docs/portfolio-evidence.md). These research materials are merged; they do not change the formal release or turn Replay into a live model demonstration.
 
-以下“当前”“待完成”及权限状态是对应日期快照，后续获准执行与最终结果以上述分阶段报告为准。
+`local-mock` remains an interface/safety test double. The offline 80-family structured gain is not evidence of open-world or product quality. First-round C4, the original October 9 C5 failure, and all later failures remain recorded.
 
-研究续接：独立[D单次现场工程门](docs/c5-hostassurance-development-d-result.md)已核实小规模模型→许可→Rhino→账本→清理链路；不是未见20题质量结果或整体C5 GO。[正式20题唯一运行](docs/c5-formal20-v4-incomplete-result.md)已跨消费屏障后因管道/SSH异常在第一槽前停止，真实配对质量不可用、不可重跑；失败与安全审计仍待完成，默认混合路线未切换。
+The [original C5-7 NO-GO decision](docs/c5-research-evidence-and-decision-report.md) followed an incomplete formal field run, whose failure and consumption remain recorded. It does not mean LoRA scored 0/20. Later repairs and interrupted continuations do not retrospectively convert that run into a pass. Full research history remains in the [roadmap](PROJECT_OPTIMIZATION_PLAN.md) and linked reports.
 
-[C5-7最终裁决：NO-GO](docs/c5-research-evidence-and-decision-report.md)，依据正式现场证据不完整；本人部分失败核查已核实消费/案例与计划绑定，但40槽未完成、质量不可估计、完整联合/历史宿主清理未核实。不是LoRa 0/20或能力失败，不进入产品接入，训练/离线77/80与失败资产保留；默认混合未切换。本人已正常退出研究Rhino且[独立进程缺席核对](eval/c5/formal20-v4-owner-host-exit-observation-20261009.json)完成当前会话交接，不追认历史清理或内存擦除；PR/main尚未收口，整体Goal未完成。
+## Engineering approach
 
-[10月12日追加公开8槽开发验证](docs/c5-reuse-development-startup-failure-20261012.md)：本人批准完整冻结后，唯一Rhino包装器因嵌入式模块导入错误在warmup/订阅和模型加载前终止；工程门未通过，质量不可估计，两端入口已退休，不重试或进入正式消费。原C5 NO-GO与默认混合路线不变。
+- Success requires geometry evidence: RhinoCoder reads Rhino back and checks count, dimensions, color, and spatial relations.
+- An enforceable privacy gate runs before routing, model initialization, and MCP. Critical input is blocked; high-risk input is forced local; medium-risk input is minimized.
+- Mutations carry idempotency keys. Backend fallback occurs only at a planning boundary and never replays completed Rhino tool calls.
+- A monotonic event envelope, Trace, and SQLite lineage tie decisions, tools, assertions, cost, feedback, and recovery to one run.
+- Limitations sit beside metrics: Mock, GPU preparation, and 100% on a saturated 30-task set are never presented as local-model or open-world performance.
 
-[嵌入式启动修复](docs/c5-reuse-embedded-bootstrap-repair-20261012.md)补齐真实临时包/Python3.9隔离回归；后续[B单次准备预检失败](docs/c5-reuse-development-preparation-failure-20261012-b.md)：本人精确批准后，代理调用的受限沙箱拒绝宿主身份查询，尚未进入prepare或Rhino/模型链路。B两端已退休、不重试，工程门未通过；原A失败、NO-GO及默认混合保持。
+## Quickstart A: no Rhino required
 
-[C单次启动失败与退休](docs/c5-reuse-development-startup-failure-20261012-c.md)：本人精确批准后，prepare与Rhino基线成功，唯一controller在worker-ready前收到EOF，独立stop也失败。未记录模型请求/槽运行，质量不可估计；既有空hub首次收尾和有限宿主复算完成，两端C入口封存，不重跑或进入正式消费。原NO-GO与默认混合保持。
+Fastest path: open the **[RhinoCoder live read-only demo](https://rhinocoder-demo.xiongweiluo1.chatgpt.site)** and choose normal execution, self-correction, or privacy-aware routing. It plays frozen sanitized synthetic data in the browser, with no model, Rhino, WebSocket, or mutation capability.
 
-[C 退休后的只读启动诊断与禁用草案](docs/c5-reuse-startup-readonly-diagnosis-and-continuation-proposal-20261012.md)：冻结 GPU Python 缺少入口必需的 `os.pidfd_open`；这解释当前启动阻塞，但原 stderr 缺失，唯一历史异常仍未认证。两端冻结/退休和已消费准入保持，64 项 CPU 控制通过。是否结束追加研究或仅准备显式后续协议待本人选择，尚无新研究执行权限。
+To inspect the same experience locally, use:
 
-[披露式 D 一次开发失败与永久退休](docs/c5-reuse-followup-d-readiness-failure-20261012.md)：完整两哈希批准后实际模型加载和 worker ready 完成；本人保管入口交互条件拒绝、readiness 未落盘，控制器超时，8槽未启动。一次资格 pidfd 停机及已知宿主收尾、原始双流/失败审计完成，两端 D grant 封存和消费历史保留；没有完整工程 PASS或正式40槽授权，质量保持null，原NO-GO与默认混合不改。
-
-[工程恢复规则修订准备](docs/c5-engineering-recovery-preparation-20261013.md)：已实现公开工程有限重试、加载前本人确认、同一累计预算及共享一次停机；保留 A～D 历史/消费与原材料，受影响CPU和审核完成情况见准备PR。尚无新的现场身份、完整执行批准或正式40槽授权，原NO-GO与默认混合不改。
-
-</details>
-
-- **完成必须有几何证据**：模型说“完成”不算完成；系统重新读取 Rhino 场景，并核对数量、尺寸、颜色和空间关系。
-- **隐私门先于模型和 MCP**：Critical 请求提前阻断，High 强制本地且禁止云 fallback，Medium 先最小化再出站；关闭普通路由也不能绕过。
-- **恢复不会重复造物体**：变更工具携带幂等键，模型降级发生在规划边界，不重放已完成工具；支持取消、重试、Undo 与任务级精准回滚。
-- **指标能回到一次运行**：统一事件信封、Trace 与 SQLite 血缘让路由、工具、断言、成本和反馈都能按 `run_id` 复核。
-- **评测边界写在结果旁边**：公开饱和基准、失败与成本，不把 Mock、本地训练准备或 30 题 100% 包装成真实本地模型/开放世界能力。
-
-## Quickstart A：无需 Rhino
-
-最快方式：直接打开 **[RhinoCoder 在线只读演示](https://rhinocoder-demo.xiongweiluo1.chatgpt.site)**，选择正常闭环、错误恢复或隐私与路由。它在浏览器内播放冻结的脱敏合成数据，不连接模型、Rhino 或 WebSocket，也不提供写操作。
-
-如需在本地复核，同样无需 Rhino、模型密钥或 `.env` 中的真实配置：
-
-前置：Python 3.11–3.13；Node.js `^20.19.0` 或 `>=22.12.0`。
+Requirements: Python 3.11–3.13 and Node.js `^20.19.0` or `>=22.12.0`.
 
 ```bash
 git clone https://github.com/xiongweiluo/RhinoCoder.git
@@ -79,25 +62,23 @@ RHINOCODER_PYTHON=python3 ./scripts/bootstrap.sh
 ./scripts/start-replay.sh
 ```
 
-本地启动后打开任一只读入口：
+After local startup, open one of these read-only entry points:
 
-- `http://127.0.0.1:7860/?demo=normal-loop&mode=replay`：正常闭环，包含隐私、路由、工具、场景与通过断言。
-- `http://127.0.0.1:7860/?demo=self-correction&mode=replay`：首次断言失败、定向纠错、二次场景检查与通过。
-- `http://127.0.0.1:7860/?demo=privacy-route&mode=replay`：合成邮箱信号最小化、规则路由、分组桌子与审计摘要。
+- `http://127.0.0.1:7860/?demo=normal-loop&mode=replay` for a successful privacy → route → tool → scene → assertion loop;
+- `http://127.0.0.1:7860/?demo=self-correction&mode=replay` for a failed first assertion, targeted correction, second scene read, and pass;
+- `http://127.0.0.1:7860/?demo=privacy-route&mode=replay` for synthetic email minimization, rule-based routing, grouped-table geometry, and an audit summary.
 
-预期：顶部为 `Read-only demo`；页面展示可筛选证据时间线、同一 `run_id` 仪表盘、操作前后 Scene Summary、断言明细、禁用的恢复写操作与脱敏摘要。Replay 只通过 GET 读取，不建立 WebSocket，不调用模型、不连接 Rhino、不修改场景。自动 clean-room 验证入口：
+Expected: `Read-only demo`, a filterable evidence timeline, a same-`run_id` dashboard, before/after Scene Summary, assertion detail, disabled mutation controls, and a browser-surface privacy summary. Replay is loaded only with GET: it opens no WebSocket, calls neither a model nor Rhino, and cannot mutate a scene. To rebuild a temporary public workspace and verify the first Replay:
 
 ```bash
 python tools/verify_clean_install.py
 ```
 
-三个固定场景的目标、输入、预期结果、断言与证据入口由 [P1 场景清单](docs/demo/p1-scenarios.json) 锁定；实现与浏览器验收见 [P1 招聘者演示链路报告](docs/p1-recruiter-demo.md)。
+The [P1 scenario catalog](docs/demo/p1-scenarios.json) locks each goal, input, expected result, assertion, Replay, and evidence link. See the [P1 recruiter demo report](docs/p1-recruiter-demo.md) for implementation boundaries and browser acceptance.
 
-## Quickstart B：真实 Rhino 8
+## Quickstart B: real Rhino 8
 
-前置：macOS 14+、Rhino 8、Python 3.11–3.13、受支持 Node.js，以及 DeepSeek 兼容模型配置。请在**空白、可丢弃**的 Rhino 文档中首次运行。
-
-### 1. 安装并配置
+Requirements: macOS 14+, Rhino 8, supported Python/Node versions, and a DeepSeek-compatible model configuration. Start with a blank, disposable Rhino document.
 
 ```bash
 git clone https://github.com/xiongweiluo/RhinoCoder.git
@@ -105,154 +86,90 @@ cd RhinoCoder
 RHINOCODER_PYTHON=python3 ./scripts/bootstrap.sh
 ```
 
-编辑本地 `.env` 中的模型占位符；不要提交密钥。安装脚本会创建 `.venv`、安装 `requirements-lock.txt`、执行 `npm ci` 并构建前端。
-
-### 2. 在 Rhino Script Editor 启动 Listener
+Fill the local `.env` placeholders; never commit a real key. In Rhino's Script Editor, start the Listener:
 
 ```text
 _-ScriptEditor _Run "/absolute/path/to/RhinoCoder/plugin/start_rhinocoder_listener.py"
 ```
 
-该入口使用 Rhino 8 新脚本基础设施并支持安全热重载；不要使用可能调用旧 Python 引擎的 `RunPythonScript`。
-
-### 3. 健康检查与只读首任务
+Then run a health check and a read-only first task:
 
 ```bash
 .venv/bin/python tools/doctor.py
-.venv/bin/python agent/main.py --prompt "读取当前 Rhino 场景摘要并报告对象数量；不要创建、删除、移动或修改任何对象。"
-```
-
-预期：`Rhino Listener` 健康；Agent 完成只读场景摘要，不创建对象。然后启动 UI：
-
-```bash
+.venv/bin/python agent/main.py --prompt "Read the current Rhino scene summary and report the object count. Do not create, delete, move, or modify any object."
 ./scripts/start.sh
 ```
 
-在 `http://127.0.0.1:7860` 运行固定演示输入：
+Open `http://127.0.0.1:7860` and try:
 
 ```text
-在原点创建一个 20x20x2 的基座，再在顶面居中放一个半径 8 的红色球体。
+Create a 20x20x2 base at the origin, then place a red sphere of radius 8 centered on its top face.
 ```
 
-预期：Rhino 视口出现两个对象；UI 显示隐私/路由决定、工具 Trace、Scene Summary、指标与完成态。可用 `--local-rhino` 在临时公开工作区验证安装和本地只读 MCP 链路：
+Expected: two Rhino objects plus privacy/route decisions, tool trace, Scene Summary, metrics, and a completed state in the UI. With a running Listener, the clean-room verifier can include the localhost read-only MCP path:
 
 ```bash
 python tools/verify_clean_install.py --local-rhino
 ```
 
-## 代表性链路
+## Architecture and evidence
 
-`self_correction.json` 提供一条可公开、可复核的合成失败恢复链：
-
-```text
-instruction
-  → privacy.assessed: low / allow
-  → route.selected: cloud-main / no fallback
-  → create_sphere
-  → scene.checked
-  → assertion.checked: mismatch
-  → correction.started
-  → scale_object + set_object_color
-  → scene.checked
-  → assertion.checked: pass
-  → run.completed: metrics
-```
-
-它与真实运行消费同一种 `AgentEvent` 信封，但坐标、对象 ID、图层和模型名均为合成值。[打开 Replay JSON](eval/replays/self_correction.json) · [查看指标与限制的证据映射](docs/portfolio-evidence.md)。
-
-## 架构与数据边界
-
-[直接打开架构 SVG](docs/assets/architecture.svg) · [直接打开数据流 SVG](docs/assets/data-flow.svg) · [详细架构说明](docs/architecture.md)
+[Open the runtime architecture SVG](docs/assets/architecture.svg) · [Open the data-flow SVG](docs/assets/data-flow.svg) · [Detailed architecture](docs/architecture.md)
 
 ![RhinoCoder runtime architecture](docs/assets/architecture.svg)
 
 ![RhinoCoder runtime and training data flow](docs/assets/data-flow.svg)
 
-运行时主链：
+The representative `self_correction.json` chain is:
 
 ```text
-React UI / CLI
-  → local privacy gate
-  → rule-first router → cloud-main / cloud-economy / local-mock
-  → agent loop ↔ FastMCP server
-  → localhost HTTP Listener → Rhino main thread
-  → scene summary → assertions → Trace / SQLite / feedback
+instruction → privacy decision → route decision → Rhino tool
+→ scene read → failed assertion → targeted correction
+→ second scene read → passing assertion → metrics + auditable result
 ```
 
-训练数据在任务层先做模板与数字变体合并，再执行 70/15/15 分区与 split lock，之后才提取四类训练视图。A5 holdout 与已冻结的 P2 困难集不进入训练或反复调参；本轮 `holdout_read=0`。最终锁定方案只能通过独立审计入口一次性消费 A5，训练加载器继续拒绝 holdout；P2 作为训练前冻结、但已用于既有系统失败分析的外部困难回归集单独报告。完整真实 Trace、SQLite、截图与用户反馈默认受 Git 忽略；公开仓库只保留脱敏报告、合成 Replay、聚合结果与哈希。
+The JSON, GIF, diagrams, and hashes are public and synthetic: [Replay](eval/replays/self_correction.json) · [GIF](docs/assets/replay-demo.gif) · [asset manifest](docs/demo/demo-assets-manifest.json). Full real traces, SQLite databases, screenshots, user identities, and project files stay in Git-ignored local storage.
 
-## 评测、审计与发布验证
+The original training data is grouped by task template and numeric variants before deterministic 70/15/15 splitting and view extraction. Training loaders reject holdout data. The original A5 holdout and C5 80-family final set have each been consumed once through audited evaluation and cannot be reused as fresh blind tests. The previously analyzed P2 hard set is reported separately. The new 40-family comparison remains sealed and unconsumed in PR #31; private cases and answers are not part of the public repository.
 
-常规本地检查：
+## Verification
 
 ```bash
 ./scripts/check.sh
-```
-
-它覆盖 Python 编译、测试、30 题格式、采集清单、P2 冻结与公开结果复算、密钥扫描、Trace/Replay/隐私审计、训练静态门禁、版本一致性、前端构建、P1 场景审计、UI 体积预算与真实浏览器端到端测试。`v0.3.0` 本地发布验收还包含 `git diff --check`、演示资产哈希与 clean-room Replay：
-
-```bash
 ./scripts/release-verify.sh
-# Rhino Listener 已启动时可追加：
+# Add a local read-only Rhino check when the Listener is running:
 ./scripts/release-verify.sh --local-rhino
 ```
 
-该脚本不会 commit、Tag、push 或创建 GitHub Release。发布状态见 [v0.3.0 发布清单](docs/release-checklist.md)；验收结果见 [v0.3.0 发布验证报告](docs/v0.3.0-release-verification.md)。
+Release verification checks `git diff --check`, tests, task formats, P2 freeze/result recomputation, secret/privacy/Replay audits, training safety gates, version consistency, front-end build, P1 scenario audit, UI bundle budgets, real-browser end-to-end tests, demo hashes, and clean-room Replay. It never commits, tags, pushes, or creates a GitHub Release.
 
-单项复现：
+See the [evidence index](docs/portfolio-evidence.md), [v0.3.0 checklist](docs/release-checklist.md), and [release verification report](docs/v0.3.0-release-verification.md).
 
-```bash
-python eval/run_eval.py --dry-run
-python tools/check_release_consistency.py
-python tools/audit_release_data.py
-python tools/check_demo_assets.py
-python tools/privacy_audit.py
-python tools/audit_a7_expansion.py
-python tools/audit_p2_hard_set.py
-python tools/audit_p2_results.py
-```
+## Demo and interview kit
 
-真实 Baseline / Closed-loop 基准需要 Rhino Listener、有效模型配置和本地 `RHINOCODER_EVAL_TOKEN`：
+- [2:35 storyboard, bilingual narration, recording command, and privacy checklist](docs/demo/README.md)
+- [Chinese subtitles](docs/demo/rhinocoder-demo.zh-CN.srt) · [English subtitles](docs/demo/rhinocoder-demo.en.srt)
+- [Real Rhino single-window evidence clip](docs/assets/rhinocoder-real-rhino-demo.mov) · [result frame](docs/assets/rhinocoder-real-rhino-result.png)
+- [One-page bilingual résumé description and interview outline](docs/career-one-pager.md)
 
-```bash
-./scripts/benchmark.sh
-```
+The repository GIF is an English automated synthetic Replay. The real-Rhino clip is separately labeled as a sanitized single-window before/after frame sequence and was reviewed before publication.
 
-不要仅为发布重复消耗已验收的 A/B 阶段或读取 holdout。
+## Safety boundaries
 
-## 演示与求职材料
+- The live UI and Listener bind to `127.0.0.1`; model credentials are read from environment variables.
+- Privacy checks run before routing, model initialization, and MCP. High-risk requests are forced local with no cloud fallback.
+- Outbound requests use allowlisted fields and a second privacy scan. Traces, logs, SQLite, Replay, and request records share the audit boundary.
+- Mutation tools use idempotency keys and do not use ordinary automatic network retries.
+- `reset_environment` requires a local evaluation token and is absent from the ordinary UI.
+- Credential-shaped values appeared in repository history. Provider-side rotation is required; deleting a working-tree file does not revoke a credential.
 
-- [2:35 镜头表、双语旁白、录制命令与逐帧隐私检查](docs/demo/README.md)
-- [中文字幕](docs/demo/rhinocoder-demo.zh-CN.srt) · [英文字幕](docs/demo/rhinocoder-demo.en.srt)
-- [真实 Rhino 单窗口证据短片](docs/assets/rhinocoder-real-rhino-demo.mov) · [结果帧](docs/assets/rhinocoder-real-rhino-result.png)
-- [自动化合成 Replay GIF](docs/assets/replay-demo.gif) · [资产哈希清单](docs/demo/demo-assets-manifest.json)
-- [一页中英文简历项目描述与面试深挖提纲](docs/career-one-pager.md)
+## Known limitations
 
-真实 Rhino 短片来自空白、可丢弃文档，使用单窗口帧序列隔离桌面信息；发布前已检查执行前、转场和执行后时间点。合成 Replay GIF 仍明确标为 synthetic，不冒充真实 Rhino 画面。
+- Primary real-world validation is macOS 15.6 arm64 + Rhino 8. Windows, Intel Mac, multi-user concurrency, and a second physical Mac are not release-validated.
+- The fixed 30-task suite is saturated. Its 100% Pass@1 establishes stability under that contract, not open-world, hard-set, or user-workflow success.
+- `local-mock` does not perform local inference. First-round A5 both0/45 and C4 NO-GO remain unchanged. Independent C5 has an audited offline structured gain; the later [phased field report](docs/c5-reuse-phased-research-report-20261024.md) preserves C5 NO-GO. Product integration and default-route switching remain unauthorized.
+- The first model experiment runs one preregistered QLoRA configuration and permits `GO / MORE-DATA / NO-GO`. Windows/macOS Agent and Rhino compatibility does not imply cross-platform local-model support; local inference is claimed only on platforms actually validated.
+- P2a external-task automated evaluation is complete at 18/30 valid baseline passes; five resumed provider interruptions remain recorded. Supplemental real-Rhino topology evidence for 002/014 is complete but does not change the frozen failures or score. P2b real-user UI operation is postponed.
+- The full live benchmark needs interactive Rhino and a model API; CI is offline.
 
-## 安全边界
-
-- UI 与 Listener 只绑定 `127.0.0.1`；模型密钥只从环境变量读取。
-- 隐私门先于普通路由、模型和 MCP；高风险任务强制本地且不能云 fallback。
-- 出站云请求只保留白名单字段，并在发送前二次扫描；Trace、日志、SQLite、Replay 与请求台账共用审计。
-- 变更工具不做普通网络自动重试，并通过幂等键阻止重复 Rhino 对象。
-- `reset_environment` 只接受本地评测令牌，普通 UI 不暴露清场入口。
-- 仓库历史中曾出现密钥格式值；必须在提供方控制台轮换，删除工作区文件不能使旧密钥失效。
-
-## 已知限制
-
-- 主要真实验收环境为 macOS 15.6 arm64 + Rhino 8；Windows、Intel Mac、多人并发与另一台物理 Mac 尚未完成发布验收。
-- 固定 30 题已经饱和；100% Pass@1 证明该契约下的稳定性，不证明开放世界、困难集或真实用户工作流成功率。
-- `local-mock` 不执行真实本地推理；第一轮A5两路0/45和C4 NO-GO不变。独立C5已产生冻结契约下80家族离线结构化改善，后续真实Rhino追加研究的阶段证据见[分阶段报告](docs/c5-reuse-phased-research-report-20261024.md)，原NO-GO保持，产品集成和默认切换仍未授权。
-- 首轮模型实验只运行一个预注册 QLoRA 主配置，并允许 `GO / MORE-DATA / NO-GO`；Agent/Rhino 的 Windows/macOS 兼容不等于本地模型跨平台，本地推理只声明实际验证过的平台。
-- P2a 外部用户出题的自动化困难集已完成，18/30 有效基线通过；5 次已续跑的连接中断完整保留。002/014 的补充真实 Rhino 拓扑证据已完成，但不改变冻结失败与总体分数；P2b 真人操作 UI 验证延期。
-- 完整 30 题真实基准需要交互式 Rhino 和模型 API；CI 只运行离线检查。
-
-## 文档入口
-
-- [Architecture](docs/architecture.md) · [Troubleshooting](docs/troubleshooting.md)
-- [Portfolio evidence](docs/portfolio-evidence.md) · [Release checklist](docs/release-checklist.md)
-- [A4 privacy](docs/privacy-red-team-report.md) · [A6 baseline](docs/a6-no-finetune-baseline.md) · [A7 golden set](docs/a7-500-marginal-value.md)
-- [P2a external hard set](docs/p2-external-hard-set.md) · [P2 machine-readable results](docs/p2-hard-set-results.json)
-- [Training data pipeline](docs/training-data-pipeline.md) · [Training readiness](docs/training-readiness.md) · [C0 formal preregistration](docs/training-preregistration.md) · [Template](docs/training-preregistration-template.md)
-- [PROJECT_OPTIMIZATION_PLAN.md](PROJECT_OPTIMIZATION_PLAN.md) · [CHANGELOG.md](CHANGELOG.md)
+More: [Architecture](docs/architecture.md) · [Training readiness](docs/training-readiness.md) · [C0 formal preregistration](docs/training-preregistration.md) · [Template](docs/training-preregistration-template.md) · [Troubleshooting](docs/troubleshooting.md) · [Roadmap](PROJECT_OPTIMIZATION_PLAN.md) · [Changelog](CHANGELOG.md)

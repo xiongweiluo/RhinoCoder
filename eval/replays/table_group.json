@@ -6,9 +6,9 @@
   "privacy": {"reviewed":true,"contains_real_trace_data":false,"coordinates":"synthetic","object_ids":"synthetic","layers":"generic"},
   "scene_before": {"total":0,"capped":false,"objects":[]},
   "events": [
-    {"type":"run.started","run_id":"replay-table","seq":1,"timestamp":"2026-08-24T00:00:00Z","payload":{"prompt":"将 <EMAIL_REDACTED> 从云请求中移除，然后搭建桌面和四条桌腿并分组","closed_loop":true}},
-    {"type":"privacy.assessed","run_id":"replay-table","seq":2,"timestamp":"2026-08-24T00:00:01Z","payload":{"decision_id":"privacy-replay-table","risk":"medium","action":"minimize_cloud","reason_codes":["email_address"],"reasons":["合成邮箱信号已在模型调用前最小化"],"cloud_allowed":true,"requires_minimization":true}},
-    {"type":"route.selected","run_id":"replay-table","seq":3,"timestamp":"2026-08-24T00:00:02Z","payload":{"route_id":"route-replay-table","selected_backend":"cloud-main","selected_model":"synthetic-demo-model","privacy_level":"medium","task_difficulty":4,"tool_complexity":4,"reason":"最小化后的多对象分组任务使用可靠主后端","degraded":false}},
+    {"type":"run.started","run_id":"replay-table","seq":1,"timestamp":"2026-08-24T00:00:00Z","payload":{"prompt":"Remove <EMAIL_REDACTED> from cloud requests, then build and group a tabletop and four legs","closed_loop":true}},
+    {"type":"privacy.assessed","run_id":"replay-table","seq":2,"timestamp":"2026-08-24T00:00:01Z","payload":{"decision_id":"privacy-replay-table","risk":"medium","action":"minimize_cloud","reason_codes":["email_address"],"reasons":["The synthetic email signal was minimized before the model call"],"cloud_allowed":true,"requires_minimization":true}},
+    {"type":"route.selected","run_id":"replay-table","seq":3,"timestamp":"2026-08-24T00:00:02Z","payload":{"route_id":"route-replay-table","selected_backend":"cloud-main","selected_model":"synthetic-demo-model","privacy_level":"medium","task_difficulty":4,"tool_complexity":4,"reason":"The minimized multi-object grouping task uses the main backend","degraded":false}},
     {"type":"planning.started","run_id":"replay-table","seq":4,"timestamp":"2026-08-24T00:00:03Z","payload":{"round":1}},
     {"type":"tool.completed","run_id":"replay-table","seq":5,"timestamp":"2026-08-24T00:00:04Z","payload":{"name":"create_box","success":true,"duration_ms":130}},
     {"type":"tool.completed","run_id":"replay-table","seq":6,"timestamp":"2026-08-24T00:00:05Z","payload":{"name":"group_objects","success":true,"duration_ms":70}},

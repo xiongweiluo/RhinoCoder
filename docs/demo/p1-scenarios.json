@@ -8,18 +8,18 @@
   "scenarios": [
     {
       "id": "normal-loop",
-      "title": "正常闭环",
+      "title": "Normal execution",
       "kicker": "EXECUTE → OBSERVE → ASSERT",
-      "goal": "验证 Agent 能在 Rhino 中创建基座与球体，并以真实场景读回和几何断言结束任务。",
-      "input": "在原点创建一个 20x20x2 的基座，再在顶面居中放一个半径 8 的红色球体。",
+      "goal": "Inspect a synthetic base-and-sphere workflow with scene readback and geometry assertions.",
+      "input": "Create a 20x20x2 base at the origin, then center a red sphere of radius 8 on its top face.",
       "expected": [
-        "场景中存在一个 20×20×2 基座",
-        "红色球体尺寸为 16×16×16",
-        "球体与基座顶面居中贴合"
+        "The scene contains a 20×20×2 base",
+        "The red sphere measures 16×16×16",
+        "The sphere is centered on and touches the top of the base"
       ],
       "replay": "basic_stack.json",
       "evidence": {
-        "label": "A6 固定真实 Rhino 基线",
+        "label": "A6 fixed real-Rhino baseline",
         "path": "a6-no-finetune-baseline.md"
       },
       "asserts": [
@@ -27,28 +27,28 @@
           "kind": "count",
           "selector": {},
           "n": 2,
-          "label": "场景对象数量",
-          "expected_text": "2 个对象"
+          "label": "Scene object count",
+          "expected_text": "2 objects"
         },
         {
           "kind": "property",
           "selector": {"name": "Base"},
           "props": {"size": [20, 20, 2]},
-          "label": "基座尺寸",
+          "label": "Base dimensions",
           "expected_text": "20×20×2"
         },
         {
           "kind": "property",
           "selector": {"name": "Sphere"},
           "props": {"size": [16, 16, 16]},
-          "label": "球体半径与包围盒",
-          "expected_text": "半径 8；包围盒 16×16×16"
+          "label": "Sphere radius and bounds",
+          "expected_text": "Radius 8; bounds 16×16×16"
         },
         {
           "kind": "property",
           "selector": {"name": "Sphere"},
           "props": {"color": [255, 0, 0]},
-          "label": "球体颜色",
+          "label": "Sphere color",
           "expected_text": "RGB 255/0/0"
         },
         {
@@ -56,25 +56,25 @@
           "a": {"name": "Sphere"},
           "b": {"name": "Base"},
           "relation": "on_top_of",
-          "label": "球体位置",
-          "expected_text": "中心 [0,0,10]；底面贴合基座顶面且 XY 对齐"
+          "label": "Sphere position",
+          "expected_text": "Center [0,0,10]; bottom touches the base top with XY alignment"
         }
       ]
     },
     {
       "id": "self-correction",
-      "title": "错误恢复",
+      "title": "Self-correction",
       "kicker": "MISMATCH → CORRECT → RECHECK",
-      "goal": "展示第一次场景断言不匹配后，Agent 修改尺寸和颜色，再次读取 Rhino 并分别通过几何与颜色断言。",
-      "input": "创建一个蓝色球体；读取场景，如尺寸或颜色不符则修正到半径 12、RGB 0/0/255 后再次验证。",
+      "goal": "Inspect a synthetic mismatch, targeted size and color correction, scene re-read, and independent checks.",
+      "input": "Create a blue sphere, read the scene, and correct any mismatch to radius 12 and RGB 0/0/255 before verifying again.",
       "expected": [
-        "第一次断言明确显示尺寸与颜色不匹配",
-        "纠错调用不会重复创建球体",
-        "复检后尺寸 24×24×24 且颜色为蓝色"
+        "The first assertions show size and color mismatches",
+        "Correction updates the sphere without creating a duplicate",
+        "The final checks confirm 24×24×24 bounds and blue color"
       ],
       "replay": "self_correction.json",
       "evidence": {
-        "label": "P0 合成纠错链与证据说明",
+        "label": "P0 synthetic correction chain and evidence",
         "path": "portfolio-evidence.md"
       },
       "asserts": [
@@ -82,32 +82,32 @@
           "kind": "count",
           "selector": {"type": "Surface", "size": [24, 24, 24]},
           "n": 1,
-          "label": "纠错后的球体半径",
-          "expected_text": "半径 12；包围盒 24×24×24"
+          "label": "Corrected sphere radius",
+          "expected_text": "Radius 12; bounds 24×24×24"
         },
         {
           "kind": "property",
           "selector": {"type": "Surface", "size": [24, 24, 24]},
           "props": {"color": [0, 0, 255]},
-          "label": "纠错后的球体颜色",
+          "label": "Corrected sphere color",
           "expected_text": "RGB 0/0/255"
         }
       ]
     },
     {
       "id": "privacy-route",
-      "title": "隐私与路由",
+      "title": "Privacy and routing",
       "kicker": "MINIMIZE → ROUTE → AUDIT",
-      "goal": "展示合成邮箱信号在模型调用前被最小化，再由规则路由选择后端，并保留可审计决策。",
-      "input": "将联系人邮箱 contact@example.invalid 从云请求中移除，然后搭建 60x40x4 桌面和四条 4x4x30 桌腿并分组。",
+      "goal": "Inspect synthetic email minimization before model routing, with an auditable decision trail.",
+      "input": "Remove the contact email contact@example.invalid from cloud requests, then create a 60x40x4 tabletop and four 4x4x30 legs and group them.",
       "expected": [
-        "隐私风险为 medium，动作是 minimize_cloud",
-        "浏览器与模型载荷只显示 <EMAIL_REDACTED>",
-        "路由、工具、断言与指标共享 replay-table run_id"
+        "Privacy risk is medium and the action is minimize_cloud",
+        "Browser and model payloads show only <EMAIL_REDACTED>",
+        "Routing, tools, assertions, and metrics share the replay-table run_id"
       ],
       "replay": "table_group.json",
       "evidence": {
-        "label": "A4 隐私红队与零泄漏报告",
+        "label": "A4 privacy red-team audit",
         "path": "privacy-red-team-report.md"
       },
       "asserts": [
@@ -115,22 +115,22 @@
           "kind": "count",
           "selector": {"type": ["Polysurface", "Extrusion"]},
           "n": 5,
-          "label": "桌子成员数量",
-          "expected_text": "空白演示文档中共 5 个桌子构件"
+          "label": "Table member count",
+          "expected_text": "Five table components in the empty demo document"
         },
         {
           "kind": "property",
           "selector": {"name": "TableTop"},
           "props": {"size": [60, 40, 4]},
-          "label": "桌面尺寸",
+          "label": "Tabletop dimensions",
           "expected_text": "60×40×4"
         },
         {
           "kind": "count",
           "selector": {"in_group": "demo-table"},
           "n": 5,
-          "label": "分组完整性",
-          "expected_text": "5 个构件属于同一组合成群组"
+          "label": "Group completeness",
+          "expected_text": "All five components belong to one synthetic group"
         }
       ]
     }

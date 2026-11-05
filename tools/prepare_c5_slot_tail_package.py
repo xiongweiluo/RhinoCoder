@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Preparation only. No approval writer, ledger activation or field actor."""
+"""Verify the executed R4 package without regenerating its historical bytes."""
 import argparse, copy, hashlib, json, subprocess, sys
 from pathlib import Path
 
@@ -309,19 +309,39 @@ def assemble():
     return docs
 
 
+def verify_historical_package():
+    """Bind historical Python to its recorded revision, not today's runtime."""
+    spec, freeze = read(SPEC), read(RUNTIME)
+    require(
+        digest(spec) == 'd80a20ea0e4f6460640f84d7e64cf548b93ce84c8215ea8ca13a076b3bf0d086'
+        and digest(freeze) == '73dcad00f96c3830e46a520122f383b751cd04e6be675f84e65a5966e65c583c',
+        'slot_tail_historical_approved_pair_changed',
+    )
+    for name, sha in freeze['source_files'].items():
+        if name.endswith('.py'):
+            result = subprocess.run(
+                ['git', 'show', freeze['source_revision'] + ':' + name],
+                cwd=ROOT, capture_output=True,
+            )
+            require(result.returncode == 0, 'slot_tail_historical_commit_missing')
+            raw = result.stdout
+        else:
+            raw = (ROOT / (LAYOUT if name == LAYOUT_FILE else name)).read_bytes()
+        require(hashlib.sha256(raw).hexdigest() == sha, 'slot_tail_historical_source_bytes:' + name)
+    return {
+        'status': 'original_executed_r4_verified_without_regeneration',
+        'spec_sha256': digest(spec), 'runtime_sha256': digest(freeze),
+        'historical_source_revision': freeze['source_revision'],
+        'field_execution_authority': False,
+    }
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--check", action="store_true")
     a = p.parse_args()
-    docs = assemble()
-    for name, v in docs.items():
-        path = ROOT / (LAYOUT if name == LAYOUT_FILE else name)
-        raw = encoded(v)
-        if a.check:
-            require(path.read_bytes() == raw, "slot_saved_candidate_drift:" + name)
-        else:
-            path.write_bytes(raw)
-    print(json.dumps(docs[REVIEW], sort_keys=True))
+    require(a.check, 'slot_tail_executed_r4_regeneration_forbidden')
+    print(json.dumps(verify_historical_package(), sort_keys=True))
 
 
 if __name__ == "__main__":
