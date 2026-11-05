@@ -6,9 +6,9 @@
   "privacy": {"reviewed":true,"contains_real_trace_data":false,"coordinates":"synthetic","object_ids":"synthetic","layers":"generic"},
   "scene_before": {"total":0,"capped":false,"objects":[]},
   "events": [
-    {"type":"run.started","run_id":"replay-basic","seq":1,"timestamp":"2026-08-24T00:00:00Z","payload":{"prompt":"创建基座并在顶面放置红色球体","closed_loop":true}},
-    {"type":"privacy.assessed","run_id":"replay-basic","seq":2,"timestamp":"2026-08-24T00:00:01Z","payload":{"decision_id":"privacy-replay-basic","risk":"low","action":"allow","reason_codes":["geometry_only"],"reasons":["合成样例仅包含几何参数"],"cloud_allowed":true,"requires_minimization":false}},
-    {"type":"route.selected","run_id":"replay-basic","seq":3,"timestamp":"2026-08-24T00:00:02Z","payload":{"selected_backend":"cloud-main","selected_model":"synthetic-demo-model","privacy_level":"low","task_difficulty":3,"tool_complexity":3,"reason":"多对象空间关系使用可靠主后端","degraded":false}},
+    {"type":"run.started","run_id":"replay-basic","seq":1,"timestamp":"2026-08-24T00:00:00Z","payload":{"prompt":"Create a base and place a red sphere on top","closed_loop":true}},
+    {"type":"privacy.assessed","run_id":"replay-basic","seq":2,"timestamp":"2026-08-24T00:00:01Z","payload":{"decision_id":"privacy-replay-basic","risk":"low","action":"allow","reason_codes":["geometry_only"],"reasons":["The synthetic example contains only geometry parameters"],"cloud_allowed":true,"requires_minimization":false}},
+    {"type":"route.selected","run_id":"replay-basic","seq":3,"timestamp":"2026-08-24T00:00:02Z","payload":{"selected_backend":"cloud-main","selected_model":"synthetic-demo-model","privacy_level":"low","task_difficulty":3,"tool_complexity":3,"reason":"Multi-object spatial relationships use the main backend","degraded":false}},
     {"type":"planning.started","run_id":"replay-basic","seq":4,"timestamp":"2026-08-24T00:00:03Z","payload":{"round":1}},
     {"type":"tool.started","run_id":"replay-basic","seq":5,"timestamp":"2026-08-24T00:00:04Z","payload":{"name":"create_box","arguments":{"width":20,"depth":20,"height":2}}},
     {"type":"tool.completed","run_id":"replay-basic","seq":6,"timestamp":"2026-08-24T00:00:05Z","payload":{"name":"create_box","success":true,"duration_ms":120}},

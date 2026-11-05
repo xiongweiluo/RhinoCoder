@@ -112,16 +112,16 @@ def check_release_consistency(root: Path = ROOT) -> list[str]:
     readme = (root / "README.md").read_text(encoding="utf-8")
     readme_en = (root / "README.en.md").read_text(encoding="utf-8")
     if status == "released":
-        if f"当前正式版本：[`v{__version__}`]" not in readme:
+        if f"Current release: [`v{__version__}`]" not in readme:
             findings.append("README 未声明当前正式版本")
         if f"Current release: [`v{__version__}`]" not in readme_en:
             findings.append("README.en 未声明当前正式版本")
     else:
-        if f"当前候选版本：`{__version__}`" not in readme:
+        if f"Current candidate version: `{__version__}`" not in readme:
             findings.append("README 未声明当前候选版本")
         if f"Current candidate version: `{__version__}`" not in readme_en:
             findings.append("README.en 未声明当前候选版本")
-    for phrase in ("500/500", "46 个标签", "270/270", "local-mock"):
+    for phrase in ("500/500", "46 tags", "270/270", "local-mock"):
         if phrase not in readme:
             findings.append(f"README 缺少公开口径: {phrase}")
     for phrase in ("500/500", "46 tags", "270/270", "local-mock"):

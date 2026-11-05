@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test";
 
 const scenarios = [
-  {id: "normal-loop", title: "正常闭环", events: "6/14 events", assertions: "5 / 5"},
-  {id: "self-correction", title: "错误恢复", events: "10/14 events", assertions: "2 / 2"},
-  {id: "privacy-route", title: "隐私与路由", events: "6/11 events", assertions: "3 / 3"},
+  {id: "normal-loop", title: "Normal execution", events: "6/14 events", assertions: "5 / 5"},
+  {id: "self-correction", title: "Self-correction", events: "10/14 events", assertions: "2 / 2"},
+  {id: "privacy-route", title: "Privacy and routing", events: "6/11 events", assertions: "3 / 3"},
 ];
 
 test("three public Replay scenarios expose the complete evidence chain without writes", async ({page}) => {
@@ -18,15 +18,21 @@ test("three public Replay scenarios expose the complete evidence chain without w
     await page.goto(`/?demo=${scenario.id}&mode=replay`);
     await expect(page.getByRole("status").filter({hasText: "Read-only demo"})).toBeVisible();
     await expect(page.locator(".replay-origin")).toContainText("Synthetic Replay");
-    await expect(page.getByRole("button", {name: "关键", exact: true})).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("button", {name: "Key events", exact: true})).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByText(scenario.events)).toBeVisible();
-    await expect(page.getByRole("heading", {name: "Rhino 空间结果"})).toBeVisible();
-    await expect(page.getByRole("heading", {name: "为什么通过"})).toBeVisible();
+    await expect(page.getByRole("heading", {name: "Rhino scene result"})).toBeVisible();
+    await expect(page.getByRole("heading", {name: "Why it passed"})).toBeVisible();
     await expect(page.locator(".proof-verdict").getByText(scenario.assertions, {exact: true})).toBeVisible();
-    await expect(page.getByRole("heading", {name: "脱敏审计摘要"})).toBeVisible();
-    await expect(page.getByText("未暴露", {exact: true})).toBeVisible();
+    await expect(page.getByRole("heading", {name: "Privacy audit summary"})).toBeVisible();
+    await expect(page.getByText("Not exposed", {exact: true})).toBeVisible();
     await expect(page.locator(".controls")).toHaveCount(0);
     await expect(page.getByRole("heading", {name: "Recent Runs"})).toHaveCount(0);
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await page.getByRole("button", {name: "All", exact: true}).click();
+    await page.locator("details").evaluateAll((nodes) => nodes.forEach((node) => { node.open = true; }));
+    expect(await page.locator("body").innerText()).not.toMatch(/\p{Script=Han}/u);
+    const accessibleText = await page.locator("[aria-label], [title], [placeholder], svg title, svg desc").evaluateAll((nodes) => nodes.map((node) => [node.getAttribute("aria-label"), node.getAttribute("title"), node.getAttribute("placeholder"), node.textContent].join(" ")).join("\n"));
+    expect(accessibleText).not.toMatch(/\p{Script=Han}/u);
   }
 
   expect(writes).toEqual([]);
@@ -40,15 +46,15 @@ test("privacy route Replay is minimized, traceable, and filterable", async ({pag
   await expect(page.locator(".dashboard").getByText("replay-table", {exact: true})).toBeVisible();
   await expect(page.getByText("contact@example.invalid", {exact: false})).toHaveCount(0);
   await expect(page.locator(".timeline").getByText("<EMAIL_REDACTED>", {exact: false})).toBeVisible();
-  await expect(page.locator(".privacy-causality")).toContainText("敏感字段在出站模型请求前完成最小化。");
+  await expect(page.locator(".privacy-causality")).toContainText("Sensitive fields are minimized before the outbound model request.");
   await expect(page.locator(".scene-object-index").getByText("Legs ×4", {exact: true})).toBeVisible();
   await expect(page.locator(".scene-inspector").getByText("Legs × 4", {exact: true})).toBeVisible();
   await expect(page.locator(".scene-inspector").getByText("View individual objects", {exact: true})).toBeVisible();
 
-  await page.getByRole("button", {name: "验证", exact: true}).click();
+  await page.getByRole("button", {name: "Verification", exact: true}).click();
   await expect(page.getByText("4/11 events", {exact: true})).toBeVisible();
-  await expect(page.locator(".event-kind").filter({hasText: "场景读回"})).toBeVisible();
-  await expect(page.locator(".event-kind").filter({hasText: "几何断言"}).first()).toBeVisible();
+  await expect(page.locator(".event-kind").filter({hasText: "Scene readback"})).toBeVisible();
+  await expect(page.locator(".event-kind").filter({hasText: "Geometry assertion"}).first()).toBeVisible();
 
 });
 
@@ -107,10 +113,10 @@ test("public demo remains usable at a 390px viewport and has keyboard focus targ
   await expect(page.locator(".dashboard").getByText("replay-correction", {exact: true})).toBeVisible();
   const horizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(horizontalOverflow).toBeLessThanOrEqual(1);
-  const selectedTab = page.getByRole("tab", {name: /错误恢复/});
+  const selectedTab = page.getByRole("tab", {name: /Self-correction/});
   await selectedTab.focus();
   await expect(selectedTab).toBeFocused();
-  await expect(page.getByRole("link", {name: "跳到运行证据"})).toHaveAttribute("href", "#evidence-chain");
+  await expect(page.getByRole("link", {name: "Skip to run evidence"})).toHaveAttribute("href", "#evidence-chain");
   const readingOrder = await page.locator("main").evaluate(() => {
     const selectors = [".public-dashboard", ".proof-verdict", ".scene-stage", ".spatial-trace", ".scene-inspector", ".audit-panel"];
     return selectors.map((selector) => document.querySelector(selector)?.getBoundingClientRect().top ?? -1);

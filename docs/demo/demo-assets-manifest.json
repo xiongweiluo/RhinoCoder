@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
-  "reviewed_at": "2026-09-17",
+  "reviewed_at": "2026-11-05",
   "source": {
     "path": "eval/replays/self_correction.json",
     "classification": "synthetic_replay",
-    "sha256": "9aa1bf417cac7e2982a7bb2755ac0e3451bb76fa7adfb9b79eb477f662df3097"
+    "sha256": "1e0943c00c410b0e775fd2dff48bd76c8d8ae6d223500b46f995cec2b35b66ad"
   },
   "artifacts": [
     {
       "path": "docs/assets/replay-demo.gif",
       "classification": "generated_synthetic_replay_preview",
-      "sha256": "1e13c61dc07190f2ac41c24577b416014a2937cc0c4cd11431a15092ed12eee6",
+      "sha256": "00f923fadb673c5196f77ee36e7139cbbea28799d8ce17e26ed1ccc8202e6f85",
       "width": 960,
       "height": 540,
       "frames": 9

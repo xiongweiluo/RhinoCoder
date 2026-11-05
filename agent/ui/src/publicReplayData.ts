@@ -49,7 +49,7 @@ function sceneFromEvents(events: AgentEvent[]): SceneSnapshot {
 export function getStaticReplay(scenario: DemoScenario): ReplayPayload {
   const source = replaySources[scenario.replay];
   if (!source || source.demo_scenario !== scenario.id) {
-    throw new Error("Replay 与公开场景清单不一致");
+    throw new Error("Replay does not match the public scenario catalog");
   }
   const events = source.events.map((event) => ({...event, replay: true}));
   return {

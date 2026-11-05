@@ -1,8 +1,8 @@
 # RhinoCoder
 
-> **An AI agent that executes, observes, verifies, and recovers inside Rhino 8—not just one that writes scripts.**
+> **A verifiable spatial-design agent that executes, observes, checks, and recovers inside Rhino 8.**
 
-[Live read-only demo](https://rhinocoder-demo.xiongweiluo1.chatgpt.site) · [Real Rhino evidence clip](docs/assets/rhinocoder-real-rhino-demo.mov) · [中文](README.md) · [5-minute Replay](#quickstart-a-no-rhino-required) · [Real Rhino quickstart](#quickstart-b-real-rhino-8) · [Evidence index](docs/portfolio-evidence.md) · [Architecture](docs/architecture.md)
+[Live read-only demo](https://rhinocoder-demo.xiongweiluo1.chatgpt.site) · [Real Rhino evidence clip](docs/assets/rhinocoder-real-rhino-demo.mov) · [5-minute Replay](#quickstart-a-no-rhino-required) · [Real Rhino quickstart](#quickstart-b-real-rhino-8) · [Evidence index](docs/portfolio-evidence.md) · [Architecture](docs/architecture.md)
 
 RhinoCoder is a verifiable, recoverable, privacy-aware spatial-design agent for Rhino 8. It translates natural-language tasks into 23 versioned MCP tool calls, executes geometry on Rhino's main thread, reads the resulting scene back, and checks it with programmatic assertions. Privacy decisions, model routing, tool calls, corrections, cost, and evidence share one auditable `run_id`. A sanitized synthetic Replay lets reviewers inspect the loop without Rhino or a model key.
 
@@ -19,30 +19,27 @@ RhinoCoder is a verifiable, recoverable, privacy-aware spatial-design agent for 
 | **Zero sensitive findings in the A4 audit** | 12 red-team cases, 1,609 traces, 7,016 SQLite rows, three Replays, and simulated log/request surfaces; [A4 report](docs/privacy-red-team-report.md) |
 | **One-time C3 A5 evaluation completed; GO threshold missed** | Base and LoRA both scored 0/45 on all four structured holdout metrics: 0.0pp difference and zero net wins; a second run is forbidden; [C3 report](docs/c3-a5-holdout-report.md) |
 | **C4 decision: NO-GO** | Descriptive real-Rhino P2 pairing scored base 4/30 vs LoRA 5/30: +3.3pp, one net win, exact McNemar `p=1.0`; below the +10pp / three-net-win gate. A post-hoc audit found excess LoRA infrastructure fills under the frozen retry rule; see [diagnosis and limitation](docs/c4-posthoc-failure-diagnosis.md) and the [original C4 report](docs/c4-model-decision.md). |
-| **Independent C5 offline and strict-controller gates passed** | One-time paired evaluation on 80 new families: sequence exact base20/80 vs LoRA77/80, +71.25pp and57 net wins. Frozen gates and hash-only row statistics independently audited; the original C5 decision remains NO-GO; later field evidence is reported separately. [C5 report](docs/c5-final-evaluation-report.md). |
+| **Independent C5 offline and strict-controller gates passed** | One-time paired evaluation on 80 new families: sequence exact base 20/80 vs LoRA 77/80, +71.25pp and 57 net wins. Frozen gates and hash-only row statistics independently audited; the original C5 decision remains NO-GO; later field evidence is reported separately. [C5 report](docs/c5-final-evaluation-report.md). |
 
 Current release: [`v0.3.0`](https://github.com/xiongweiluo/RhinoCoder/releases/tag/v0.3.0). Recruiters can open the [live read-only demo](https://rhinocoder-demo.xiongweiluo1.chatgpt.site) without Rhino, a model key, or installation. Unreleased evidence now includes a [real-Rhino single-window clip](docs/assets/rhinocoder-real-rhino-demo.mov) and [result frame](docs/assets/rhinocoder-real-rhino-result.png). The clip is an explicitly labeled, privacy-reviewed before/after frame sequence—not continuous desktop footage—and contains no audio or real project data.
 
-**Post-merge status (2026-10-25):** The C5 research stack and public reports are in `main@2581581`; [all five CI jobs passed](https://github.com/xiongweiluo/RhinoCoder/actions/runs/40196177986) on that exact commit. PRs #2–#6 and #8–#28 are merged; independent R PR #7 remains Draft. C5 NO-GO and the default hybrid route remain unchanged; LoRA has not entered product integration. The release remains v0.3.0, and the research updates did not redeploy the demo. See the [closeout record](docs/c5-post-merge-closeout-20261025.md).
+## Project status — November 5, 2026
 
-**Additional descriptive scores (2026-10-25):** The supplied redacted export covers 40 slots across three interrupted phases. With a fixed 20-task denominator per model, the base model scored **2/20 (10%)** and LoRA **13/20 (65%)**, retaining 2 and 3 engineering failures respectively. Exposed tasks, intervening repairs and retained audit rejections prevent treating this as a new blind test or overturning C5 NO-GO. See [per-task differences and failure distributions](docs/c5-descriptive-score-analysis-20261025.md) and the [PR #8–#26 merge review](docs/c5-pr-8-26-merge-review-20261025.md). These materials are merged into the main commit above; this status closeout adds no execution or default-route change.
+The latest verified main commit is [`e42a89e`](https://github.com/xiongweiluo/RhinoCoder/commit/e42a89e11e7526e1744b076b033713b2c1776604), with [all five CI jobs passing](https://github.com/xiongweiluo/RhinoCoder/actions/runs/40220673195). The C5 research stack, results, and documentation closeout are merged through PR #29. Independent R [PR #7](https://github.com/xiongweiluo/RhinoCoder/pull/7) remains a draft. The formal release is still **v0.3.0**. **C4 and the original C5 decision remain NO-GO; the hybrid route remains the product default.** See the [merged closeout evidence](docs/c5-post-merge-closeout-20261025.md).
 
-**C5 reuse study update (2026-10-24):** The initial r2 run attempted 7/40 slots; six raw chains were verified, but public quality scores were not reported. The r3 continuation attempted 11 slots: its audited ten-slot prefix scored 5 successes / 5 failures; the last failure and the original whole-phase audit rejection remain. The r4 continuation completed 22 slots with **8 successes / 14 failures** and verified that phase's raw joint audit, cleanup and residency settlement. All 40 original indices have now been attempted across interrupted phases; this is neither a successful uninterrupted first evaluation nor a new blind test. **The original C5 NO-GO and default hybrid route remain unchanged.** See the [phased report](docs/c5-reuse-phased-research-report-20261024.md) and [portfolio evidence](docs/portfolio-evidence.md). These research materials are merged; the release and website deployment are unchanged.
+New research is under review in [PR #30](https://github.com/xiongweiluo/RhinoCoder/pull/30) and [PR #31](https://github.com/xiongweiluo/RhinoCoder/pull/31), outside `main`. Phase-one diagnosis and research selection are complete. The owner sealed a new **40-family / 80-slot** comparison set on November 1; its public receipt is validated and PR #31's [exact-head CI passed](https://github.com/xiongweiluo/RhinoCoder/actions/runs/41333383369). The set remains **unconsumed and execution is not authorized**. Target-Linux CPU verification, a current resource window, and explicit approval of the final execution plan remain prerequisites. Full historical overlap is owner-reported, not a completed automated inventory check. No new training or product promotion is claimed; the proposed comparison retains the base model and checkpoint132. See the [sealed handoff](https://github.com/xiongweiluo/RhinoCoder/blob/a1c305c752aae0811aee78d5908796f57a681121/docs/lora-final-sealed-handoff-20261101.md).
+
+The public website is an English, browser-only **synthetic Replay** of three workflows. Its scene geometry and assertions are illustrative fixtures, independent of the research scores below.
+
+**Additional descriptive scores (2026-10-25):** The supplied redacted export covers 40 slots across three interrupted phases. With a fixed 20-task denominator per model, the base model scored **2/20 (10%)** and LoRA **13/20 (65%)**, retaining 2 and 3 engineering failures respectively. Exposed tasks, intervening repairs and retained audit rejections prevent treating this as a new blind test or overturning C5 NO-GO. See [per-task differences and failure distributions](docs/c5-descriptive-score-analysis-20261025.md) and the [PR #8–#26 merge review](docs/c5-pr-8-26-merge-review-20261025.md). These materials are merged into main; this presentation update adds no research execution or route change.
+
+**C5 reuse study update (2026-10-24):** The initial r2 run attempted 7/40 slots; six raw chains were verified, but public quality scores were not reported. The r3 continuation attempted 11 slots: its audited ten-slot prefix scored 5 successes / 5 failures; the last failure and the original whole-phase audit rejection remain. The r4 continuation completed 22 slots with **8 successes / 14 failures** and verified that phase's raw joint audit, cleanup and residency settlement. All 40 original indices have now been attempted across interrupted phases; this is neither a successful uninterrupted first evaluation nor a new blind test. **The original C5 NO-GO and default hybrid route remain unchanged.** See the [phased report](docs/c5-reuse-phased-research-report-20261024.md) and [portfolio evidence](docs/portfolio-evidence.md). These research materials are merged; they do not change the formal release or turn Replay into a live model demonstration.
 
 `local-mock` remains an interface/safety test double. The offline 80-family structured gain is not evidence of open-world or product quality. First-round C4, the original October 9 C5 failure, and all later failures remain recorded.
 
-<details>
-<summary>October 9 research decision and handoff (historical text retained)</summary>
+The [original C5-7 NO-GO decision](docs/c5-research-evidence-and-decision-report.md) followed an incomplete formal field run, whose failure and consumption remain recorded. It does not mean LoRA scored 0/20. Later repairs and interrupted continuations do not retrospectively convert that run into a pass. Full research history remains in the [roadmap](PROJECT_OPTIMIZATION_PLAN.md) and linked reports.
 
-The pending work and permissions below describe that historical snapshot. Later explicitly approved execution is reported separately above; it does not rewrite the original outcome.
-
-> **Honest boundary:** `local-mock` is an interface/safety test double, not real local inference. P2a is externally authored and automatically executed, not human UI usability; P2b is postponed. First-round C4 remains NO-GO: A5 both0/45, descriptive P2 base4/30 vs LoRA5/30. Independent C5 demonstrates structured improvement on its frozen contract and80-family offline set, not real-Rhino geometry or open-world quality. Its [single formal20 run](docs/c5-formal20-v4-incomplete-result.md) crossed consumption, then stopped before the first route with BrokenPipeError/SSH exit255; paired quality is unavailable, replay is forbidden, and failure/safety audit remains pending. It does not rewrite C4; the verified hybrid route remains the default.
-
-The [final C5-7 decision is NO-GO](docs/c5-research-evidence-and-decision-report.md) because formal field evidence is incomplete, not because LoRA scored 0/20 or lacks geometric capability. Custodian checks verified consumption/case/plan bindings; the 40 slots, full joint audit and historical host cleanup remain unverified and paired quality is unavailable. Training/offline gains and failure assets are retained; no product promotion or default-route switch. The owner normally quit research Rhino; [independent process-absence checks](eval/c5/formal20-v4-owner-host-exit-observation-20261009.json) end the current session handoff without retroactively certifying cleanup or memory erasure. PR/main closeout and the overall Goal remain incomplete.
-
-</details>
-
-## Why this is more than an “LLM + tools” demo
+## Engineering approach
 
 - Success requires geometry evidence: RhinoCoder reads Rhino back and checks count, dimensions, color, and spatial relations.
 - An enforceable privacy gate runs before routing, model initialization, and MCP. Critical input is blocked; high-risk input is forced local; medium-risk input is minimized.
@@ -121,6 +118,8 @@ python tools/verify_clean_install.py --local-rhino
 
 ![RhinoCoder runtime architecture](docs/assets/architecture.svg)
 
+![RhinoCoder runtime and training data flow](docs/assets/data-flow.svg)
+
 The representative `self_correction.json` chain is:
 
 ```text
@@ -131,7 +130,7 @@ instruction → privacy decision → route decision → Rhino tool
 
 The JSON, GIF, diagrams, and hashes are public and synthetic: [Replay](eval/replays/self_correction.json) · [GIF](docs/assets/replay-demo.gif) · [asset manifest](docs/demo/demo-assets-manifest.json). Full real traces, SQLite databases, screenshots, user identities, and project files stay in Git-ignored local storage.
 
-Training data is grouped by task template and numeric variants before deterministic 70/15/15 splitting and view extraction. The A5 holdout and the frozen P2 hard set never enter training or iterative tuning; this run records `holdout_read=0`. Only the final locked candidate may consume A5 once through a separate audited entry point while training loaders continue to reject holdout. P2 is reported separately as a pre-training-frozen external hard regression set that has already informed earlier system-failure analysis, not as a pristine blind test.
+The original training data is grouped by task template and numeric variants before deterministic 70/15/15 splitting and view extraction. Training loaders reject holdout data. The original A5 holdout and C5 80-family final set have each been consumed once through audited evaluation and cannot be reused as fresh blind tests. The previously analyzed P2 hard set is reported separately. The new 40-family comparison remains sealed and unconsumed in PR #31; private cases and answers are not part of the public repository.
 
 ## Verification
 
@@ -153,7 +152,16 @@ See the [evidence index](docs/portfolio-evidence.md), [v0.3.0 checklist](docs/re
 - [Real Rhino single-window evidence clip](docs/assets/rhinocoder-real-rhino-demo.mov) · [result frame](docs/assets/rhinocoder-real-rhino-result.png)
 - [One-page bilingual résumé description and interview outline](docs/career-one-pager.md)
 
-The repository GIF remains an automated synthetic Replay. The real-Rhino clip is separately labeled as a sanitized single-window before/after frame sequence and was reviewed before publication.
+The repository GIF is an English automated synthetic Replay. The real-Rhino clip is separately labeled as a sanitized single-window before/after frame sequence and was reviewed before publication.
+
+## Safety boundaries
+
+- The live UI and Listener bind to `127.0.0.1`; model credentials are read from environment variables.
+- Privacy checks run before routing, model initialization, and MCP. High-risk requests are forced local with no cloud fallback.
+- Outbound requests use allowlisted fields and a second privacy scan. Traces, logs, SQLite, Replay, and request records share the audit boundary.
+- Mutation tools use idempotency keys and do not use ordinary automatic network retries.
+- `reset_environment` requires a local evaluation token and is absent from the ordinary UI.
+- Credential-shaped values appeared in repository history. Provider-side rotation is required; deleting a working-tree file does not revoke a credential.
 
 ## Known limitations
 
