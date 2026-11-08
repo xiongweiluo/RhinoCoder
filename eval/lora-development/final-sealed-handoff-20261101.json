@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-01",
+  "status": "owner_seal_receipt_validated_target_linux_and_exact_execution_review_pending",
+  "receipt_path": "eval/lora-development/final-owner-receipt-20261101.json",
+  "receipt_sha256": "9ba514352e05bf30bac3f9429734a9d27394047c8bd3fe9e04d80a8ecf7fb0f9",
+  "spec_sha256": "6032755347746a1f7e34988edcba064d0ff3721c875e632f0d97ff23cbf46c19",
+  "runtime_package_sha256": "7d4a7d017f84bb3bd4ba011c813e71fe68802c0fae585f96ad96df0aa6c3036d",
+  "choices_sha256": "807fe4847d2077c888012d106bfbd2cc341d6a18214cc75389af5ad3dd138377",
+  "validation": {
+    "existing_receipt_validator": "passed",
+    "current_public_build_matches_sealed_spec": true,
+    "actual_mac_319_file_source_guard": "passed",
+    "private_runtime_contents_independently_read": false
+  },
+  "owner_reported_seal_success": true,
+  "agent_private_files_read": false,
+  "earlier_private_output_state": "unknown_preserved",
+  "target_linux_public_cpu_check": "pending_ssh_control_socket_absent",
+  "ci_at_receipt_intake": {
+    "commit": "eda8cc97ade9777c2196667894ee4eb9dbe4f39b",
+    "run_id": 41331596204,
+    "status": "in_progress"
+  },
+  "complete_final_freeze": false,
+  "final_execution_approval": null,
+  "execution_authorized": false,
+  "model_calls": 0,
+  "gpu_calls": 0,
+  "rhino_calls": 0,
+  "training_calls": 0,
+  "formal_slots_consumed": 0
+}

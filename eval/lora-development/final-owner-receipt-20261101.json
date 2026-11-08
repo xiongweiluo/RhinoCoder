@@ -1,0 +1,53 @@
+{
+  "agent_private_access": false,
+  "automated_checks": {
+    "full_private_historical_inventory": "not_performed",
+    "new_set_numeric_and_near_duplicates": "passed",
+    "published_historical_fingerprints": "passed"
+  },
+  "automated_overlap_count": null,
+  "cases_sha256": "9a155d359263c5bfbc6d4b4de3d2cfd5998e2535516c37c2c031518087062f2f",
+  "choices_sha256": "807fe4847d2077c888012d106bfbd2cc341d6a18214cc75389af5ad3dd138377",
+  "compiled_sha256": "a58c4dfda8ef114f807bbb9d2542bfa627c3f8e41a887f63b2f794e268412c1e",
+  "custodian_attestation": {
+    "actor": "repository_owner",
+    "current_cases_match_owner_review": true,
+    "encryption_roundtrip_verified": true,
+    "keys_and_plaintext_not_shared_with_agent": true,
+    "not_consumed_by_model_or_formal_runner": true,
+    "owner_confirmation": {
+      "actor": "repository_owner",
+      "date": "2026-11-01",
+      "historical_overlap_review": "owner_reported_complete",
+      "review_record": "owner_reported_complete",
+      "source": "direct_user_message",
+      "statement": "防止新题与旧题重复、记录你确认过什么，这两个我已经确认过了，帮我修改一下规范，不需要再准备这两份文件了"
+    },
+    "sealed_at_utc": "2026-11-01T17:42:15.109292Z"
+  },
+  "encrypted_artifact": {
+    "bytes": 127479,
+    "format": "age-x25519",
+    "sha256": "7942be0ece25354495ef7b190bf63822dbc612c33a2292ab1e93161660efe335"
+  },
+  "exclusions": null,
+  "execution_authorized": false,
+  "family_count": 40,
+  "historical_inventory_machine_checked": false,
+  "model_calls": 0,
+  "rhino_calls": 0,
+  "runtime_package_sha256": "7d4a7d017f84bb3bd4ba011c813e71fe68802c0fae585f96ad96df0aa6c3036d",
+  "schedule_sha256": "5ae51002af82003594fec4c9f8e2d1b23dd52fb0034a50ed96b39357219d9acc",
+  "schema_version": 2,
+  "slot_count": 80,
+  "spec_sha256": "6032755347746a1f7e34988edcba064d0ff3721c875e632f0d97ff23cbf46c19",
+  "status": "owner_sealed_unconsumed_not_execution_authority",
+  "strata": {
+    "clarification": 6,
+    "core_tool": 12,
+    "error_recovery": 8,
+    "multistep": 8,
+    "refusal": 6
+  },
+  "study_id": "lora-common-final-comparison-v1"
+}

@@ -1,0 +1,93 @@
+{
+  "actual_paid_lease_amount": null,
+  "additional_resource_actions": 0,
+  "ci_run_id": 40442746428,
+  "date": "2026-10-27",
+  "elapsed_seconds": 18.426965791964903,
+  "evidence_bytes": 612011,
+  "evidence_files": 444,
+  "evidence_inventory_sha256": "f4434c93df35197d565931eb67aafad3a9050829f93aeb06e40712a546f66776",
+  "executed_ci_commit": "056978e5a209f96987e7c0d76436aa999e95f3e6",
+  "final_test_created_or_executed": false,
+  "fixture_seed_operations": 14,
+  "gpu_calls": 0,
+  "historical_development_loads_retained": 5,
+  "hmac_reverified_after_key_deletion": false,
+  "host_callback_removed": true,
+  "host_messages": 63,
+  "host_secret_absence_verified": true,
+  "host_settlement": {
+    "all_other_host_handlers_absent_claimed": false,
+    "close": null,
+    "error_type": null,
+    "exact_delegate_remove_returned": true,
+    "failures": [],
+    "reason": "controller_shutdown",
+    "runtime_sha256": "85ba112e4aa98073760f0a73e0d10c35d1e94015bc0c57c70326ccf5382f5ebb",
+    "status": "host_stopped"
+  },
+  "limitations": [
+    "scripted public mechanism only; no weight comparison or historical attribution",
+    "only move/layer/color plus two reads exercised; other tools rely on prior component/CPU evidence",
+    "placeholder token counts do not validate real model context or latency",
+    "HMAC verified live; deleted secret not recreated for post-run verification"
+  ],
+  "model_loads": 0,
+  "model_quality_evidence": false,
+  "native_reads": 1,
+  "native_writes": 3,
+  "original_and_backup_unchanged": true,
+  "package_sha256": "85ba112e4aa98073760f0a73e0d10c35d1e94015bc0c57c70326ccf5382f5ebb",
+  "phase_one_complete": false,
+  "retained_backup_copies": 1,
+  "rows": [
+    {
+      "actual_scene_and_successor_input_verified": true,
+      "cleanup_verified": true,
+      "continuity_failure": null,
+      "evidence_sha256": "4bee079b34c226fa215f03231e47dce97086881a1327b30403fb29fb2cd6dc1b",
+      "family_id": "COMMON-P02",
+      "original_score_recomputed": true,
+      "outcome": "success",
+      "permission_and_native_sqlite_verified": true,
+      "reads": 1,
+      "seconds_including_cleanup": 7.630634416826069,
+      "slot_id": "common-000",
+      "steps": 3,
+      "writes": 2
+    },
+    {
+      "actual_scene_and_successor_input_verified": false,
+      "cleanup_verified": true,
+      "continuity_failure": {
+        "changed_binding_fields": [
+          "revision",
+          "scene_sha256"
+        ],
+        "failed_before_next_scripted_request": true,
+        "message": "noncontiguous native execution",
+        "next_capture_revision": 2,
+        "receipt_revision": 1,
+        "same_document": true,
+        "same_semantic_and_native_readback": true,
+        "stage": "step_preflight",
+        "unknown_native_effect_not_relabelled_as_success": true,
+        "which_full_digest_component_changed": "unknown; old package records only aggregate digest"
+      },
+      "evidence_sha256": "8708fd911f5b9f2fbc960afff13dca05b7b6f28f6687eba0647ed14e19bb172b",
+      "family_id": "COMMON-P01",
+      "original_score_recomputed": false,
+      "outcome": "engineering_failure",
+      "permission_and_native_sqlite_verified": true,
+      "reads": 0,
+      "seconds_including_cleanup": 2.9672129589598626,
+      "slot_id": "common-001",
+      "steps": 1,
+      "writes": 1
+    }
+  ],
+  "source_inventory_sha256": "559fa17e50458583c419fe3ac04014825fb1753fa129e1bdc2fb63112eb9cb87",
+  "source_verified": true,
+  "training": false,
+  "whole_host_byte_closure_proven": false
+}

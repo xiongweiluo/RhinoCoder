@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "source": "repository_owner_reply_20261030",
+  "lease_end_iso": "2026-11-04T20:00:00+01:00",
+  "timezone": "Europe/Zurich",
+  "extension_cost": null,
+  "agent_purchase_or_renewal": false,
+  "hardware_or_environment_change_authorized": false,
+  "execution_authorized": false,
+  "deployment_roots": {
+    "mac": "/Users/xiongweiluo/.rhinocoder-final/comparison-20261030",
+    "gpu": "/data/lora-final-comparison-20261030"
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-30",
+  "study_id": "lora-common-final-comparison-v1",
+  "status": "owner_formatting_and_updated_public_spec_ready_target_linux_and_private_seal_pending",
+  "supersedes_public_preparation": "eval/lora-development/final-public-freeze-20261027.json",
+  "spec_path": "eval/lora-development/final-public-spec-20261030.json",
+  "spec_sha256": "60b0139aa3521c7f5ab60ad768efa46cd287d8d0b61aa8abd232c73fe9069d97",
+  "source_inventory_sha256": "00b6e5c1fe93c57590898644128c50524e2c00ed51ed274ace2d4b214270fc40",
+  "source_files": 318,
+  "choices_sha256": "807fe4847d2077c888012d106bfbd2cc341d6a18214cc75389af5ad3dd138377",
+  "fixed_research_choices_and_scoring_unchanged": true,
+  "owner_reported_new40_status": "question_text_or_table_prepared_not_machine_cases_or_sealed",
+  "owner_unconsumed_attestation": null,
+  "private_commitment": null,
+  "final_runtime_package_sha256": null,
+  "complete_final_freeze": false,
+  "final_approval": null,
+  "execution_authorized": false,
+  "agent_private_cases_or_answers_read": false,
+  "agent_final_cases_generated": false,
+  "blank_template_contains_question_or_answer": false,
+  "model_loads": 0,
+  "gpu_calls": 0,
+  "rhino_calls": 0,
+  "training_calls": 0,
+  "final_slots_consumed": 0,
+  "historical_development_loads_preserved": 5,
+  "resource_binding": "eval/lora-development/final-resource-binding-20261030.json",
+  "resource_actions": {
+    "agent_purchase": 0,
+    "agent_renewal": 0,
+    "billing_resource_change": 0,
+    "extension_cost": null
+  },
+  "initial_pr31_ci": {
+    "commit": "1e7221a8dc53eeee6d25df5dacd5d7982ad4fd54",
+    "run_id": 40539639547,
+    "jobs": {
+      "impact": "success",
+      "release": "success",
+      "python": "success",
+      "ui": "success",
+      "validate": "success"
+    },
+    "merged": false
+  },
+  "new_commit_ci": "verify_actual_new_head_independently_not_inherited",
+  "cpu_checks": {
+    "owner": {
+      "status": "passed",
+      "spec_sha256": "60b0139aa3521c7f5ab60ad768efa46cd287d8d0b61aa8abd232c73fe9069d97",
+      "private_inputs_read": false,
+      "model_calls": 0,
+      "rhino_calls": 0,
+      "execution_authorized": false
+    },
+    "mac": {
+      "actual_entry_preparation_used": true,
+      "configuration": {
+        "cleanup_export_seconds": 900,
+        "evidence_cleanup_reserve_bytes": 268435456,
+        "evidence_files_max": 18944,
+        "evidence_total_bytes_max": 1073741824,
+        "evidence_work_bytes_max": 268435456,
+        "export_bytes_max": 538968064,
+        "export_files_max": 1216,
+        "export_seconds": 180,
+        "gpu_archive_reserve_bytes": 536870912,
+        "gpu_evidence_total_bytes_max": 536870912,
+        "gpu_evidence_work_bytes_max": 402653184,
+        "gpu_ready_seconds": 600,
+        "gpu_residency_seconds": 35280,
+        "gpu_stop_seconds": 180,
+        "host_cleanup_seconds": 30,
+        "host_messages_max": 2416,
+        "host_ready_seconds": 180,
+        "load_seconds": 600,
+        "max_infrastructure_recoveries": 0,
+        "max_load_attempts": 1,
+        "max_steps": 3,
+        "minimum_free_bytes": 4294967296,
+        "protocol_reply_seconds": 10,
+        "slot_seconds": 420,
+        "transport_exit_seconds": 40
+      },
+      "endpoint": "mac",
+      "execution_authorized": false,
+      "grant_or_live_state_created": false,
+      "model_calls": 0,
+      "model_or_native_readiness_proven": false,
+      "private_inputs_read": false,
+      "rhino_calls": 0,
+      "source_inventory_sha256": "00b6e5c1fe93c57590898644128c50524e2c00ed51ed274ace2d4b214270fc40",
+      "spec_sha256": "60b0139aa3521c7f5ab60ad768efa46cd287d8d0b61aa8abd232c73fe9069d97",
+      "status": "passed"
+    },
+    "mac_import": {
+      "status": "passed",
+      "source_files": 318,
+      "source_inventory_sha256": "00b6e5c1fe93c57590898644128c50524e2c00ed51ed274ace2d4b214270fc40",
+      "report_sha256": "2da2b520fef12aba1a12378a3b9a07acb00fb59b4478486be924b48f7ac80b1d",
+      "backend_imports": 0,
+      "runtime_entries_called": 0,
+      "private_data_read": false
+    },
+    "related_regression": {
+      "passed": 30,
+      "failed": 0,
+      "synthetic_development_only": true,
+      "case_check_does_not_create_files_or_execution_grant": true
+    },
+    "target_linux": {
+      "status": "pending_control_socket_absent_no_remote_deployment_this_turn",
+      "old_oct27_evidence_not_claimed_for_new_package": true
+    }
+  },
+  "remaining": [
+    "owner_private_case_structuring_and_independence_geometry_checks",
+    "owner_original_four_input_sealing_and_sanitized_receipt",
+    "new_target_linux_public_CPU_check_and_current_CI",
+    "exact_complete_final_execution_review_and_explicit_approval"
+  ],
+  "readiness_limits": [
+    "schema_check_not_geometric_or_independence_proof",
+    "original_host_byte_closure_unknown",
+    "external_modify_restore_outside_B_contract",
+    "full_common_chain_real_model_write_not_prevalidated"
+  ]
+}

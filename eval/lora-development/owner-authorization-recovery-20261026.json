@@ -1,0 +1,71 @@
+{
+  "authorization_basis": "direct_repository_owner_reply_to_recovery_scope_proposal",
+  "automatic_purchase_renewal_or_resource_change": false,
+  "consumed_slots_preserved": 1,
+  "cumulative_load_limit": 5,
+  "executed_at_record_creation": false,
+  "final_test_authorized": false,
+  "historical_replay_authorized": false,
+  "initial_package_sha256": "3ddd03265f0485f1d6947cb47c5c95c60325ee6acb492b737820de04c5093ab6",
+  "initial_revision_checks": {
+    "ci": {
+      "impact": "success",
+      "python": "success",
+      "release": "success",
+      "ui": "success",
+      "validate": "success"
+    },
+    "ci_run_id": 40406546105,
+    "commit": "82e3dee514fbb15c4f537f97100b2f61e3cb2621",
+    "cpu_evidence_sha256": [
+      "1789b659158486d483370692802202390e1bc84f1e917688281f310e4e2e3282"
+    ],
+    "failed_load": 4,
+    "failure_evidence_sha256": "28beec1e73c7fe9a50a5c41c89ffc72709d3e568512d972d32864316b17724ab",
+    "prior_mac_settlement": {
+      "cleanup_verified": true,
+      "elapsed_seconds": 64.27380691701546,
+      "gpu_settlement_sha256": "28beec1e73c7fe9a50a5c41c89ffc72709d3e568512d972d32864316b17724ab",
+      "package_sha256": "e22ec832dd8c8c9bb23065e74648e7fcecdacd5d4ebb554f7bc3c1590e6c16be",
+      "result_sha256": "369cff5a8045909cf49c32c1679a4c67e174ea765bf8f8f56dd5636e2b1455ce",
+      "revision_id": 1,
+      "slot_claims": 1
+    },
+    "reason": "Owner-approved lifecycle consolidation after reviewed load 4: shared actual entry preparation, passive environment audit, separate outcome/cleanup/recovery, preserve slot 00 and resume only 01-31; incomplete selection retains original.",
+    "repair_category": "lifecycle_refactor",
+    "semantic_change_review": "approved_recovery_no_model_task_feedback_score_change"
+  },
+  "merge_authorized": false,
+  "owner_approval": {
+    "actor": "repository_owner",
+    "approval_basis": "repository_owner_approved_development_recovery_scope",
+    "approved": true,
+    "campaign_id": "lora-development-startup-repair-20261026-v1",
+    "policy_sha256": "2bd86fe5961fff5472833878935dde459b776675bc9ba1488601e985426a1072"
+  },
+  "owner_reply": "批准完整方案，技术门全部通过后执行",
+  "pending_slots": 31,
+  "policy_sha256": "2bd86fe5961fff5472833878935dde459b776675bc9ba1488601e985426a1072",
+  "prior_loads_consumed": 4,
+  "recorded_at_utc": "2026-10-26T22:05:32.336298+00:00",
+  "registration": {
+    "gpu": {
+      "endpoint": "gpu",
+      "loading_started": false,
+      "owner_record_sha256": "f9813a430e9bedbde1ce2f21bae2244abc6bff1c8008443abf918a7474dc3237",
+      "package_sha256": "3ddd03265f0485f1d6947cb47c5c95c60325ee6acb492b737820de04c5093ab6",
+      "revision_registered": 2,
+      "slots_started": false
+    },
+    "mac": {
+      "endpoint": "mac",
+      "loading_started": false,
+      "owner_record_sha256": "f9813a430e9bedbde1ce2f21bae2244abc6bff1c8008443abf918a7474dc3237",
+      "package_sha256": "3ddd03265f0485f1d6947cb47c5c95c60325ee6acb492b737820de04c5093ab6",
+      "revision_registered": 2,
+      "slots_started": false
+    }
+  },
+  "schema_version": 1,
+  "training_authorized": false
+}

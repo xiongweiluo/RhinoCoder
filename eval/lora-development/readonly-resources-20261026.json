@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "observed_date": "2026-10-26",
+  "timezone": "Europe/Zurich",
+  "status": "readonly_metadata_and_asset_identity_verified_not_execution_approval",
+  "method": "Authenticated owner-opened SSH control connection; stdin stdlib probes with -I -S -B; fixed public asset paths, pinned manifest, bounded streamed hashes and stable-file checks; no model-package import or remote project file writes.",
+  "environment": {
+    "candidate_exists": true,
+    "disk": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda2       197G   54G  135G  29% /\n/dev/sdb         98G   29G   65G  32% /data",
+    "gpu": "NVIDIA GeForce RTX 3090, 24576 MiB, 24243 MiB, 550.107.02",
+    "remote_files_written": 0,
+    "runtime_metadata": {
+      "executable": "/data/conda-envs/rhinocoder/bin/python3.11",
+      "model_packages_imported": false,
+      "packages": {
+        "accelerate": "1.12.0",
+        "bitsandbytes": "0.49.2",
+        "numpy": "2.4.6",
+        "peft": "0.18.1",
+        "safetensors": "0.7.0",
+        "tokenizers": "0.22.2",
+        "torch": "2.10.0+cu126",
+        "transformers": "5.2.0"
+      },
+      "prefix": "/data/conda-envs/rhinocoder",
+      "python": "3.11.16"
+    },
+    "scope": "read_only_environment_metadata_not_runtime_or_execution_approval",
+    "shell_python": "3.10.12"
+  },
+  "model_assets": {
+    "adapter_file_map_sha256": "305d72703270d16e93233d1d34ae27cdaddd777e4530afead88c7edb8dc22cae",
+    "adapter_files": {
+      "adapter_config.json": "8a776a47b085b787b7c7f3c9b068aed8c0f018278de2b94bf66130f5542d6d4f",
+      "adapter_model.safetensors": "da8acdcde2671aa397534b35369fe4a84b9d150f80f7b7026a4366a770be2883"
+    },
+    "base_files": {
+      ".gitattributes": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361",
+      "LICENSE": "832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e",
+      "README.md": "3c090be37f829adc1e4cdb78733667437732541470430ab2cd785d7f0d460077",
+      "config.json": "c0242402ad6a13b331ea320feea8c7e3776ffb7a4eff0757b9cd667e116d9a28",
+      "generation_config.json": "1a628a5775bc69cde01c6749a531150ca4d3189652c618a174f7077923acf3b1",
+      "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+      "model-00001-of-00004.safetensors": "0b6f069918b07c064cbba8ae4f00f529aa9bbf84b7cdfcb7fc2694a40f6aa8ef",
+      "model-00002-of-00004.safetensors": "c3d46733e7aa054ea7b063fbccd0a5a08446e7bd1814bef26936c5aa1331da62",
+      "model-00003-of-00004.safetensors": "9fe45dacee087385b3d2d6dd27a7413a8a56d95f145772facc148fa86fc73446",
+      "model-00004-of-00004.safetensors": "5aa6e5cbe642377fd441fb4e60e83cca96b2bcd9820e245b9ea06d94653f17f2",
+      "model.safetensors.index.json": "998a078123ffc97763690de7f2a677eb89168af5eaf8a5e12e6bc24d18e25bdb",
+      "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+      "tokenizer_config.json": "959e7f1d9a1b7641a6d6ce05ca97b75c7894fcb66cbe5a040406458fb1128ee4",
+      "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+    },
+    "base_revision": "c03e6d358207e414f1eca0bb1891e29f1db0e242",
+    "bytes_hashed": 15404341725,
+    "cuda_initialized": false,
+    "file_count": 16,
+    "manifest_sha256": "5b9ad4c8257ed072cfdee022e4b92303ffc849f53014dbf76d0986b3d1428cdd",
+    "model_loaded": false,
+    "model_packages_imported": false,
+    "private_task_answer_log_reads": 0,
+    "probe_remote_file_writes": 0,
+    "probe_wall_seconds": 11.411,
+    "scope": "read_only_pinned_model_asset_hashes_only"
+  },
+  "lease": {
+    "end": "2026-10-30T20:00:00+01:00",
+    "source": "owner_statement",
+    "cost_ceiling": null
+  },
+  "runtime_behavior_verified": false,
+  "rhino_scope_confirmed": false,
+  "actual_execution_authorized": false,
+  "phase_one_complete": false
+}

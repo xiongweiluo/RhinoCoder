@@ -1,0 +1,37 @@
+{
+  "actual_deployed_entry_check": "passed",
+  "candidate_scoped_hash_changes_require_separate_approval": true,
+  "cpu_preparation_failures_retained": [
+    "first shared-controller test rejected new study missing from wire allowlist; plan and wire now share STUDIES; 85 others passed",
+    "unused initial deployment 127f1ed593183173fd5d78956796a4b1a876a0b1e18dc18adc05b41558c2aaf8 superseded before any state/approval/native execution to detach document callbacks before disposal"
+  ],
+  "cpu_regressions_after_audit_extension": 34,
+  "cpu_regressions_after_close_order_refinement": 38,
+  "cpu_regressions_before_close_order_refinement": 135,
+  "date": "2026-10-27",
+  "final_data_created_or_consumed": false,
+  "isolated_import": {
+    "backend_imports": 0,
+    "explicit_new_lazy_modules_included": true,
+    "loaded_public_modules": 74,
+    "runtime_entries_called": 0,
+    "status": "passed"
+  },
+  "model_loads": 0,
+  "old_diagnostic_reexecuted": false,
+  "old_hash_algorithm_default_preserved": true,
+  "package_sha256": "25296784f4305a1045249774f0305c0c98a2f294b2e1b2f891c3137371135583",
+  "prior_pr_head_ci": {
+    "all_five_success": true,
+    "commit": "c371a9ba5c152a11b53a4c361b6cba93ef96fcd5",
+    "not_candidate_execution_ci": true,
+    "run_id": 40494198162
+  },
+  "rhino_calls": 0,
+  "rhino_python39_syntax": "passed",
+  "source_files": 305,
+  "source_inventory_sha256": "986a54a44bc6efeee125e593672d2110137f5488f0cc34f5bf521c49924b9fde",
+  "state_exists": false,
+  "status": "prepared_not_approved_not_executed",
+  "training": false
+}

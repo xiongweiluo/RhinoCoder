@@ -1,0 +1,31 @@
+{
+  "authorization_basis": "direct_repository_owner_message_in_this_task_20261026",
+  "ci_checks": {
+    "impact": "success",
+    "python": "success",
+    "release": "success",
+    "ui": "success",
+    "validate": "success"
+  },
+  "ci_run_id": 40266206245,
+  "final_test_authorized": false,
+  "initial_model_calls": 0,
+  "initial_rhino_calls": 0,
+  "merge_authorized": false,
+  "new_cost_ceiling": 0,
+  "owner_approval": {
+    "actor": "repository_owner",
+    "approval_basis": "repository_owner_explicit_approval_of_this_complete_development_package",
+    "approved": true,
+    "package_sha256": "c1cfb2f13d0c56fb58e65481cc413189016ed8589428a6af869e27f76febf249",
+    "scope": "one_bounded_public_development_no_training_no_final_test",
+    "study_id": "lora-optimization-development-v1"
+  },
+  "owner_approval_sha256": "a2628e6b6f7e5f1adfb4c838b4d74783cdd38f6ffb0be59da8fe3a370f325480",
+  "package_sha256": "c1cfb2f13d0c56fb58e65481cc413189016ed8589428a6af869e27f76febf249",
+  "schema_version": 1,
+  "scope_is_development_only": true,
+  "source_bytes_verified_at_both_endpoints": true,
+  "source_commit": "4978fd0ed6679d31f212c5f070a341496fd63e5b",
+  "training_authorized": false
+}

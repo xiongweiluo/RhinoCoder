@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "source": "owner_resource_confirmation_in_conversation",
+  "confirmed_date": "2026-10-26",
+  "timezone": "Europe/Zurich",
+  "lease_paid": true,
+  "lease_end": "2026-10-30T20:00:00+01:00",
+  "existing_lease_amount": null,
+  "additional_cost_ceiling": 0,
+  "renewal_or_new_paid_service_authorized": false,
+  "rhino_scope": "only_new_local_isolated_documents_closed_after_use",
+  "existing_user_project_access_authorized": false,
+  "model_gpu_rhino_training_execution_authorized": false,
+  "final_test_creation_or_consumption_authorized": false,
+  "phase_one_complete": false
+}

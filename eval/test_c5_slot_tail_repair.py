@@ -228,6 +228,39 @@ def test_inert_new_package_keeps_18_consumed_and_22_fixed_unattempted(monkeypatc
     assert docs[prep.REVIEW]['actual_execution_authorized'] is False
 
 
+def test_executed_tail_check_verifies_recorded_revision_without_assembly(monkeypatch):
+    from tools import prepare_c5_slot_tail_package as prep
+    monkeypatch.setattr(prep, 'assemble', lambda: pytest.fail('historical package must not regenerate'))
+    result = prep.verify_historical_package()
+    assert result['status'] == 'original_executed_r4_verified_without_regeneration'
+    assert result['historical_source_revision'] == 'd7dc1671d1eaa6f65ad72092ddd19ba60c16c7b9'
+    assert result['field_execution_authority'] is False
+
+
+@pytest.mark.parametrize('artifact', ['spec', 'runtime', 'source'])
+def test_executed_tail_check_still_rejects_historical_tampering(monkeypatch, artifact):
+    from tools import prepare_c5_slot_tail_package as prep
+    original = prep.read
+    def read(name):
+        value = original(name)
+        if name == {'spec': prep.SPEC, 'runtime': prep.RUNTIME}.get(artifact):
+            value['synthetic_tamper'] = True
+        return value
+    monkeypatch.setattr(prep, 'read', read)
+    if artifact == 'source':
+        monkeypatch.setattr(prep.subprocess, 'run', lambda *a, **k: SimpleNamespace(returncode=0, stdout=b'tampered'))
+    with pytest.raises(NativeError, match='slot_tail_historical_'):
+        prep.verify_historical_package()
+
+
+def test_executed_tail_cli_refuses_regeneration(monkeypatch):
+    from tools import prepare_c5_slot_tail_package as prep
+    monkeypatch.setattr(prep.sys, 'argv', ['prepare_c5_slot_tail_package.py'])
+    monkeypatch.setattr(prep, 'assemble', lambda: pytest.fail('must refuse before assembly'))
+    with pytest.raises(NativeError, match='regeneration_forbidden'):
+        prep.main()
+
+
 @pytest.mark.parametrize('exception',[KeyboardInterrupt,PermissionError])
 def test_backup_interrupt_or_permission_error_retains_actual_stop_and_original_error(tmp_path,exception):
     value={'status':'stopped','had_failure':True,'hook_removed_in_same_callback':True}

@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-01",
+  "status": "two_file_owner_custody_ready_no_actual_seal",
+  "spec_path": "eval/lora-development/final-public-spec-20261101.json",
+  "spec_sha256": "56fe08b0552270ee469286d3945067c1b1069f3ee3bfe519573a7c55391d532b",
+  "source_inventory_sha256": "a6c511d6db6f01bd29047891b515b6eecae353c97a2d677b7aadaf65d6d4a2ce",
+  "source_files": 319,
+  "choices_sha256": "807fe4847d2077c888012d106bfbd2cc341d6a18214cc75389af5ad3dd138377",
+  "research_choices_and_scoring_unchanged": true,
+  "custody_policy_changed_by_direct_owner_instruction": true,
+  "custody_policy": "eval/lora-development/final-custody-policy-20261101.json",
+  "owner_reported_case_structure": {
+    "status": "case_structure_passed_not_sealed",
+    "family_count": 40,
+    "slot_count": 80,
+    "cases_sha256": null,
+    "agent_rechecked_private_cases": false
+  },
+  "required_private_input_files": [
+    "cases.json",
+    "encrypted_cases_copy"
+  ],
+  "removed_input_file_requirements": [
+    "exclusions.json",
+    "attestation.json"
+  ],
+  "full_historical_inventory_machine_scan_performed": false,
+  "individual_legacy_attestation_flags_inferred": false,
+  "cpu_checks": {
+    "related_regression_passed": 57,
+    "failed": 0,
+    "synthetic_development_only": true,
+    "deployed_owner_public_check": "passed",
+    "deployed_mac_public_check": "passed",
+    "isolated_import": "passed",
+    "isolated_import_report_sha256": "29735a964d4b2c3f4eb692ded899ea48a8e97f9d3ab080d722e068bf919f1a51",
+    "rhino39_syntax": "passed",
+    "target_linux": "pending_no_remote_execution"
+  },
+  "new_commit_ci": "verify_new_head_separately",
+  "actual_sealed_receipt": null,
+  "complete_final_freeze": false,
+  "private_inputs_read": false,
+  "model_calls": 0,
+  "gpu_calls": 0,
+  "rhino_calls": 0,
+  "training_calls": 0,
+  "formal_slots_consumed": 0,
+  "execution_authorized": false,
+  "remaining": [
+    "owner_two_file_seal_and_sanitized_receipt",
+    "target_linux_new_public_CPU_check_and_current_CI",
+    "exact_final_execution_approval"
+  ]
+}

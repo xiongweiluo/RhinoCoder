@@ -1,0 +1,47 @@
+{
+  "actor": "repository_owner",
+  "approval_received": true,
+  "approved_source_commit": "7a9a7c11942a99ce23168d2eed5adbc9b201f341",
+  "cleanup_and_new_evidence_review_authorized": true,
+  "conditional_phase_one_choice_confirmation": {
+    "choices_fields": [
+      "plan",
+      "models",
+      "selected_system",
+      "primary_comparison",
+      "interval_method",
+      "fixed_weights",
+      "product_validation_recommendation_thresholds",
+      "runtime_configuration",
+      "training_decision",
+      "scope_of_final_inference",
+      "custodian"
+    ],
+    "choices_sha256": "807fe4847d2077c888012d106bfbd2cc341d6a18214cc75389af5ad3dd138377",
+    "condition": "native seam and full evidence audit pass",
+    "no_final_execution_authority": true
+  },
+  "conditions": [
+    "approved source all five CI successful",
+    "unchanged package and source",
+    "environment/disk/lease gates pass"
+  ],
+  "direct_reply": "批准完整方案，技术门通过后执行",
+  "execution_started_at_this_record": false,
+  "external_aba_detection": false,
+  "final_test_creation_or_execution": false,
+  "fixed_protection_operations_max": 0,
+  "gpu_calls": 0,
+  "model_loads": 0,
+  "new_isolated_documents_max": 1,
+  "original_fixture_seed_operations_max": 7,
+  "package_sha256": "703f407082b25b94131bde6e0c541dc5a825babae4367eeadfe14e89b6d9ce50",
+  "reads_max": 1,
+  "recorded_epoch": 1793109525.752631,
+  "retries_authorized": 0,
+  "scope": "one_controlled_move_read_only_probe_reuse_fixed_check_zero_models_no_final_test",
+  "signed_writes_max": 1,
+  "source_inventory_sha256": "e1fbb5fd84e006be4f2c15849b4dd2b52583e3230553dafd8e181ea1e1fcf34f",
+  "training": false,
+  "window_seconds": 1260
+}
